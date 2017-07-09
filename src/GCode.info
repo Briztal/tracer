@@ -1,0 +1,35 @@
+COMMAND LETTERS :
+
+Gi      G commands
+Mi      M commands
+
+PARAMETER LETTERS :
+
+Ci mm	i axis coordinate
+Di mm    i coordinate in advanced moves
+N : Carriage Return
+
+Amm 	X-offset in elliptic arc move
+Bmm	    Y-offset in elliptic arc move
+Rrad    Rotation angle
+Urad    Begin Angle
+Vrad    End angle
+Sb      Boolean parameter
+Li  	Line Number
+
+
+F       Moving theorical_regulation_speed
+
+[] non mandatory parameters
+{} multiple parameters
+
+
+A word about power regulation in continuous actions.
+2 modesare elements :
+    - absolute power, M?//TODO
+    - linear power, M?//TODO
+
+When absolute mode is triggered for a specific action, the power will be maintained constant until you stop it, or until
+linear mode is triggered.
+When linear mode is triggered, the power delivered will be proportional to the global speed, according to the power ratio
+you set. In linear mode, power will be enables as soon as motion starts

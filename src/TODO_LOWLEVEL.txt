@@ -1,0 +1,22 @@
+//TODO TESTER L'EEPROM STORAGE
+
+//TODO ENLEVER LES INDICES DANS LES PIDS
+
+//TODO : Ajouter un canal d'echo
+
+
+Structure d'un mouvement :
+
+Initialisation en calculant les données requises
+
+Stockage des données dans une file appropriés.
+
+Initialisation du mouvement :
+
+Calcul des premieres coordonnées
+
+Determination du temps d'attente
+
+premier tic / Appel d'un fonction elementaire
+
+Mise d'un interrupt pour le temps d'attente restant
