@@ -162,16 +162,16 @@ SERVO(2, servo3, 4, 0, 1)
 #define NB_STEPPERS 4
 
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
-#ifdef STEPPER //STEPPER(id, char, signature, size, steps, speed, acceleration, dir+, pinStep, pinDir, pinPower, pinEndMin, OnEndMinValue, pinEndMax, OnEndMaxValue)
-//STEPPER(i, j, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
-//#define STEPPER(i, j, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
+#ifdef STEPPER //STEPPER(id, char, signature, relative, pinStep, pinDir, dir+, pinPower, enableValue, pinEndMin, OnEndMinValue, pinEndMax, OnEndMaxValue)
+//STEPPER(i, j, sig, r, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
+//#define STEPPER(i, j, r, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
 
 //TODO CLARIFIER LES VALEURS DES ENDSTOPS, DE LA SIGNATURE
-//      id, sig,    pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
-STEPPER(0,  1,      54,     55,     LOW,    38,     LOW,    3,      HIGH,   2,      HIGH);
-STEPPER(1,  2,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH);
-STEPPER(2,  4,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(3,  8,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+//      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
+STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH,   2,      HIGH);
+STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH);
+STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(3,  8,      0,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 
 #endif
 

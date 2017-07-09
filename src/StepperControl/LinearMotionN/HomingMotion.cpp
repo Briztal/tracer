@@ -40,12 +40,14 @@ void HomingMotion::move() {
     //First step is to generate the signature for all axis;
     unsigned char signature = 0;
 
-    //TODO DIRECTIONS : 0 quand C'est en i,crement... Ca va pas !!
+    //TODO DIRECTIONS : 0 quand C'est en increment... Ca va pas !!
 
-#define STEPPER(i, sig, ...) \
-        signature|=sig;\
-        StepperController::setDir##i(true);\
-        StepperController::setDir##i(false);
+#define STEPPER(i, sig, rel, ...) \
+        if (!rel) {\
+            signature|=sig;\
+            StepperController::setDir##i(true);\
+            StepperController::setDir##i(false);\
+        }
 
 
 #include "../../config.h"
@@ -113,10 +115,12 @@ unsigned char HomingMotion::readEndStops() {
     unsigned char signature = 0;
     unsigned char bit = 1;
 
-#define STEPPER(i, sig, ps, pd, dp,  pp, ve, pinEndMin, minValue, pma, va)\
-    if ((bool)digitalReadFast(pinEndMin) == minValue) {\
-        signature|=sig;\
-    }\
+#define STEPPER(i, sig, rel, ps, pd, dp,  pp, ve, pinEndMin, minValue, pma, va)\
+    if (!rel) {\
+        if ((bool)digitalReadFast(pinEndMin) == minValue) {\
+            signature|=sig;\
+        }\
+    }
 
 #include "../../config.h"
 #undef STEPPER

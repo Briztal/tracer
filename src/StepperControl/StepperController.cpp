@@ -34,7 +34,7 @@
 #define PINS_REQUIRED
 #define PARAMS_REQUIRED
 
-#define STEPPER(i, sig, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
+#define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
 unsigned int pinPort##i = *__digitalPinToPortReg(pinStep);\
 unsigned int pinBit##i = __digitalPinToBit(pinStep);\
 bool StepperController::isAtMax##i ()  {return (digitalReadFast(pinEndMax )==HIGH);}\
@@ -47,7 +47,7 @@ bool StepperController::isAtMin##i() { return (digitalReadFast(pinEndMin)==HIGH)
 
 
 void StepperController::enable(unsigned char signature) {
-#define STEPPER(i, sig, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
     if (signature&sig) {\
         digitalWriteFast(pinPower, LOW);\
     } else {\
@@ -64,7 +64,7 @@ void StepperController::enable(unsigned char signature) {
 void StepperController::set_directions(unsigned char negative_signatures) {
     bool sig_dir;
 #ifdef position_log
-#define STEPPER(i, sig, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
     if ((!sig_dir) && !dir##i) {\
         dir##i = true;\
@@ -79,7 +79,7 @@ void StepperController::set_directions(unsigned char negative_signatures) {
 
 #else
 
-#define STEPPER(i, sig, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
     if ((!sig_dir) && !dir##i) {\
         dir##i = true;\
@@ -98,7 +98,7 @@ void StepperController::set_directions(unsigned char negative_signatures) {
 }
 
 #ifdef position_log
-#define STEPPER(i, sig, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
 void StepperController::setDir##i(bool sens) {\
     CI::echo(String(i)+" "+String(sens));\
     if (!(sens ^ dir##i )) return;\
@@ -118,7 +118,7 @@ void StepperController::setDir##i(bool sens) {\
 
 #undef STEPPER;
 #else
-#define STEPPER(i, sig, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
 void StepperController::setDir##i(bool sens) {\
     if (!(sens ^ dir##i )) return;\
         dir##i = sens;\
@@ -140,7 +140,7 @@ void StepperController::begin() {
 
     set_dimensions();
 
-#define STEPPER(i, sig, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
+#define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
     pinMode(pinPower, OUTPUT);pinMode(pinDir, OUTPUT);pinMode(pinStep, OUTPUT);\
     digitalWriteFast(pinPower, HIGH);setDir##i(true);
 
@@ -154,7 +154,7 @@ void StepperController::fastStep(unsigned char id) {
 //CI::echo("S");
 #ifdef position_log
 
-#define STEPPER(i, sig, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
+#define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
         /*if (id&(unsigned char)1) {*/\
         if (id&sig) {\
             pos##i += incr##i;\
@@ -168,7 +168,7 @@ void StepperController::fastStep(unsigned char id) {
 #undef STEPPER
 
 #else
-#define STEPPER(i, sig, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
+#define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
         /*if (id&(unsigned char)1) {*/\
         if (id&sig) {\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -189,7 +189,7 @@ unsigned int StepperController::fastStepDelay(unsigned char id) {
     unsigned int delay = 0;
 #ifdef position_log
 
-    #define STEPPER(i, sig, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
+    #define STEPPER(i, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
         if (id&(unsigned char)1) {\
             pos##i += incr##i;\
             delay+=delays[i];\
@@ -202,7 +202,7 @@ unsigned int StepperController::fastStepDelay(unsigned char id) {
 #undef STEPPER
 
 #else
-#define STEPPER(i, sig, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
         if (id&(unsigned char)1) {\
             delay+=delays[i];\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
