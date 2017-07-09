@@ -34,10 +34,10 @@ void CI::begin() {
     *data_out_0 = BEGIN_CHAR;
 }
 
-
 /*
  * The function to initialise the command aliases
  */
+
 void CI::initialise_aliases() {
 
     char t[MAX_DEPTH + 1];
@@ -66,7 +66,7 @@ void CI::initialise_aliases() {
  *
  * The command id is the following : 0 (system canal) - 6 (echo canal);
  */
-void CI::echo(String msg) {
+void CI::echo(const String msg) {
 
     prepare_data_out("\0\6",2);
     add_string_out(msg.c_str());

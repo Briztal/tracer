@@ -4,10 +4,6 @@
 
 //REBOOT
 
-//TODO PROPERLY DISABLE MODULES
-
-//TODO REFACTOR hardware_language_abstraction
-
 //TODO MULTIPLE_MOVES
 
 //TODO MICRO_MOVES

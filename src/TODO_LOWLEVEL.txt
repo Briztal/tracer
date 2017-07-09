@@ -1,9 +1,6 @@
-//TODO TESTER L'EEPROM STORAGE
 
-//TODO ENLEVER LES INDICES DANS LES PIDS
 
-//TODO : Ajouter un canal d'echo
-
+//TODO METTRE DES PARENTHESES DANS LES MACROS
 
 Structure d'un mouvement :
 

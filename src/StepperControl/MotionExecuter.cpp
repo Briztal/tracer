@@ -39,7 +39,7 @@
  */
 
 void MotionExecuter::start() {
-    en_timer_int_us(wait_for_movement, 30000);
+    setup_stepper_interrupt(wait_for_movement, 30000);
 }
 
 void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char nsig, unsigned char processing_steps) {
@@ -49,7 +49,7 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
         motion_data_to_fill.processing_steps = processing_steps;
     }
 
-    disable_stepper_interrupt
+    disable_stepper_interrupt()
 
 #define STEPPER(i, sig, ...)\
     if (nsig&sig) MotionExecuter::end_distances[i] += elementary_dists[i];\
@@ -59,7 +59,7 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
 
 #undef STEPPER
 
-    enable_stepper_interrupt
+    enable_stepper_interrupt()
 
     //unsigned char local_array_end = 0;
     unsigned char motion_depth = 0;
@@ -135,7 +135,7 @@ void MotionExecuter::enqueue_movement_data() {
  *  - if not, returns, and will re-check later (interrupt)
  */
 void MotionExecuter::wait_for_movement() {
-    disable_stepper_interrupt;
+    disable_stepper_interrupt();
 
 
     if (motion_data_queue.available_elements()) {
@@ -191,7 +191,7 @@ void MotionExecuter::wait_for_movement() {
         set_stepper_int_function(prepare_next_sub_motion);
     }
 
-    enable_stepper_interrupt;
+    enable_stepper_interrupt();
 
 }
 
@@ -213,7 +213,7 @@ void MotionExecuter::set_last_sub_motion() {
 
 void MotionExecuter::prepare_next_sub_motion() {
 
-    disable_stepper_interrupt;
+    disable_stepper_interrupt();
 
     saved_trajectory_indice = trajectory_indice;
     unsigned char *elementary_signatures;
@@ -330,14 +330,14 @@ void MotionExecuter::prepare_next_sub_motion() {
 
     set_stepper_int_function(finish_sub_movement);
 
-    enable_stepper_interrupt;
+    enable_stepper_interrupt();
 
 }
 
 //----------------------------------------------SPEED_MANAGEMENT--------------------------------------------------------
 int i = 10;
 void MotionExecuter::finish_sub_movement() {
-    disable_stepper_interrupt;
+    disable_stepper_interrupt();
 
 
     unsigned char s_w_signature;
@@ -371,7 +371,7 @@ void MotionExecuter::finish_sub_movement() {
             }
         }
     }
-    enable_stepper_interrupt;
+    enable_stepper_interrupt();
 }
 
 

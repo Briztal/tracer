@@ -19,8 +19,8 @@
 */
 
 #include "../Core/hardware_language_abstraction.h"
-#if !defined(HL_SERIAL) || !defined(HL_STRING)
-#error CommandInterface requires String and Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
+#if !defined(HL_SERIAL)
+#error CommandInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
 #endif
 
 #ifndef LOGGER

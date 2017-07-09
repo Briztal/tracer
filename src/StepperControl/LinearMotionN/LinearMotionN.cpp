@@ -126,11 +126,11 @@ unsigned char LinearMotionN::setup_movement_data(float *destinations_t, unsigned
             while (MotionExecuter::distances_lock);
             //Update destination
 
-            disable_stepper_interrupt
+            disable_stepper_interrupt()
 
             MotionExecuter::end_distances[axis] += distance;
 
-            enable_stepper_interrupt
+            enable_stepper_interrupt()
             /*
              * Direction : builds the direction signature :
              * binary where the nth msb is 0 if axis n is positive, 1 if direction is negative

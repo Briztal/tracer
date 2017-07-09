@@ -46,14 +46,14 @@ void set_stepper_int_function(void (*f)()) {
 
 }
 
-void en_timer_int_us(void (*function)(void), unsigned int period_us){
+void setup_stepper_interrupt(void (*function)(void), unsigned int period_us){
     cli();
     /*
      * Provides a microseconds counter, with a resolution of 0.5 us.
      * -> period must not be greater than 32767; Maximum period of 32.7 ms;
      */
 
-    enable_stepper_timer
+    enable_stepper_timer();
 
     //CLEAN
     TCCR5A = 0;
@@ -67,7 +67,7 @@ void en_timer_int_us(void (*function)(void), unsigned int period_us){
 
     us_function = function;
 
-    enable_stepper_interrupt;
+    enable_stepper_interrupt();
 
     sei();
 }
@@ -77,7 +77,7 @@ ISR(TIMER5_COMPA_vect) {
 }
 
 
-//--------------------------------------Milliseconds_Timer_Interrupt----------------------------------------------------
+//--------------------------------Control_loops_Milliseconds_Timer_Interrupt--------------------------------------------
 
 void (*t0_function)(void);
 void (*t1_function)(void);
@@ -87,7 +87,7 @@ void (*t1_function)(void);
  * void en_timer_int_i(void (*function)(void), int period_ms);
  */
 
-void en_timer_int_0(void (*function)(void), unsigned int period_ms){
+void enable_loop_interrupt_0(void (*function)(void), unsigned int period_ms){
     cli();
 
     //CLEAN

@@ -48,11 +48,11 @@ float Asserv::get_pid_##i(float error) {\
 
 #define LOOP_FUNCTION(indice, name, period_ms) \
     void Asserv::enable_##indice(){\
-        en_timer_int_##indice(trigger_##indice, period_ms);\
+        enable_loop_interrupt_##indice(trigger_##indice, period_ms);\
         active_##indice=true;\
     }\
     void Asserv::disable_##indice(){\
-        dis_timer_int_##indice();\
+        disable_loop_interrupt_##indice();\
         active_##indice=false;\
     };\
     bool Asserv::is_active_##indice() {\

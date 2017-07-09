@@ -68,6 +68,11 @@ void MachineController::system_canal_function(char *data, unsigned char size) {
 
 void MachineController::parameters_system_canal(char *data, unsigned char size) {
 
+#ifdef ENABLE_ASSERV
+
+    delay(50);
+
+
     if (!size) return;
     char sub_canal = *data;
 
@@ -90,10 +95,16 @@ void MachineController::parameters_system_canal(char *data, unsigned char size) 
         default:
             break;
     }
+
+#endif
+
 }
 
 
 void MachineController::pid_system_canal(char *data, unsigned char size) {
+
+#ifdef ENABLE_ASSERV
+
     if (!size--) return;
     char sub_canal = *data;
     int pi;
@@ -118,10 +129,15 @@ void MachineController::pid_system_canal(char *data, unsigned char size) {
         default:
             break;
     }
+
+#endif
 }
 
 
 void MachineController::loop_system_canal(char *data, unsigned char size) {
+
+#ifdef ENABLE_ASSERV
+
     if (!size) return;
     char sub_canal = *data;
 
@@ -144,6 +160,9 @@ void MachineController::loop_system_canal(char *data, unsigned char size) {
         default:
             break;
     }
+
+#endif
+
 }
 
 
@@ -178,6 +197,7 @@ void MachineController::steppers_system_canal(char *data, unsigned char size) {
 
 
 void MachineController::actions_system_canal(char *data, unsigned char size) {
+
     if (!size) return;
     char sub_canal = *data;
 
@@ -206,6 +226,8 @@ void MachineController::actions_system_canal(char *data, unsigned char size) {
         default:
             break;
     }
+
+
 }
 
 

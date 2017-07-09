@@ -13,7 +13,7 @@
 #define ENABLE_LOGGER
 
 //Uncomment this line to enable regulation loops.
-#define ENABLE_ASSERV
+//#define ENABLE_ASSERV
 
 //Uncomment this line to enable regulation loops.
 #define ENABLE_STEPPER_CONTROL

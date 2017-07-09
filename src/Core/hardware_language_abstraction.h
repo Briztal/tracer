@@ -30,7 +30,7 @@
  *
  * Those will depend on the processor and the toolchain you use
  *
- * If you must implement functionalities over the base hardware functions, use an inline static function.
+ * If you must implement functions over the base hardware functions, use a function.
  *
  * If you only must alias a function, use a macro, it's faster.
  */
@@ -45,94 +45,83 @@
 #include <setjmp.h>
 
 
-//----------------------------------------------------String------------------------------------------------------------
-//Uncomment this line to provide String support across LowLevel
-#define HL_STRING
-
-/* The string class name
- * It can vary from a board to another, as minimalist boards like Arduino do not have access to standard library
- */
-#define str String
-
-/* The string conversion function name
- * It can vary from a board to another for the same reasons than upper
- */
-#define to_str String
-
 //----------------------------------------------------Delay-------------------------------------------------------------
 
 //Uncomment this line to provide delay support across LowLevel
 #define HL_DELAY
 
-/* The function to call wait for a specified number of milliseconds
- *  void delay_ms(void);
+
+#ifdef HL_DELAY
+/* The function to call to wait for a specified number of milliseconds
+ *  void delay_ms(unsigned int time_ms);
  *//*
-inline static void delay_ms(){
+inline static void delay_ms(unsigned int time_ms){
 
 }*/
-#define delay_ms delay
+#define delay_ms(ms) delay(ms)
 
 
 /* The function to call wait for a specified number of microseconds
- * void delay_us(void);
+ * void delay_us(unsigned int time_us);
  */
-/*inline static void delay_us(){
+/*inline static void delay_us(unsigned int time_us){
 
 }*/
-#define delay_us delayMicroseconds
+#define delay_us(us) delayMicroseconds(us)
 
+#endif
 
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
 //Uncomment this line to provide a microseconds resolution timer.
-#define HL_TIMER_INTERRUPT_US
+#define HL_STEPPER_TIMER
 
+#ifdef HL_STEPPER_TIMER
 
 #define set_stepper_int_period(period_us) OCR5A = period_us<<1;
 
-#define enable_stepper_interrupt TIMSK5 = (1 << OCIE5A);  // enable timer compare interrupt
+#define enable_stepper_interrupt() TIMSK5 = (1 << OCIE5A);  // enable timer compare interrupt
 
-#define disable_stepper_interrupt TIMSK5 = 0;
+#define disable_stepper_interrupt() TIMSK5 = 0;
 
-#define enable_stepper_timer PRR1 &= B11011111;
+#define enable_stepper_timer() PRR1 &= B11011111;
 
-#define disable_stepper_timer PRR1 |= B00100000;
+#define disable_stepper_timer() PRR1 |= B00100000;
 
 void set_stepper_int_function(void (*f)());
 
-void en_timer_int_us(void (*function)(void), unsigned int period_us);
+void setup_stepper_interrupt(void (*function)(void), unsigned int period_us);
 
-//--------------------------------------Milliseconds_Timer_Interrupt----------------------------------------------------
+#endif
+
+//-----------------------------------Control_loops_Milliseconds_Timer_Interrupt-----------------------------------------
 
 
-//Uncomment one of those lines to provide the concerned timer
-#define HL_TIMER_INTERRUPT_0
-#define HL_TIMER_INTERRUPT_1
+//Uncomment this line to provide Milliseconds timers for control loops
+#define HL_CONTROL_LOOP_TIMERS
 
+
+#ifdef HL_STEPPER_TIMER
 
 /* The function to enable a timer interrupt, calling the given function every given period
  * void en_timer_int_i(void (*function)(void), int period_ms);
  */
 
-//TODO CALCULER LES LIMITES D'ATTENTES DES TIMERS
+void enable_loop_interrupt_0(void (*function)(void), unsigned int period_ms);
 
-void en_timer_int_0(void (*function)(void), unsigned int period_ms);
-
-void en_timer_int_1(void (*function)(void), unsigned int period_ms);
-
+void enable_loop_interrupt_1(void (*function)(void), unsigned int period_ms);
 
 
 /* The function to disable a timer interrupt
  * void dis_timer_int_i();
  */
-inline static void dis_timer_int_0() {
-    cli();TIMSK3 = 0;sei();
 
-}
+#define disable_loop_interrupt_0() TIMSK3 = 0;
 
-inline static void dis_timer_int_1(){
-    cli();TIMSK4 = 0;sei();
-}
+
+#define disable_loop_interrupt_1() TIMSK4 = 0;
+
+#endif
 
 
 
@@ -141,13 +130,16 @@ inline static void dis_timer_int_1(){
 //Uncomment this line to provide Serial communication across the code
 #define HL_SERIAL
 
+
+#ifdef HL_SERIAL
+
 /* The function to call to initialise the serial at a given baudrate
  * void serial_begin(baudrate b);
  */
 /*inline static void serial_begin(baudrate b){
 
 }*/
-#define serial_begin Serial.begin
+#define serial_begin(b) Serial.begin(b)
 
 /* The function to call to send_packet a byte on the serial
  * void serial_send_byte(char c);
@@ -155,7 +147,7 @@ inline static void dis_timer_int_1(){
 /*inline static void serial_echo_byte(char c){
 
 }*/
-#define serial_echo_byte Serial.print
+#define serial_echo_byte(c) Serial.print(c)
 
 /* The function to call to send_packet a zero terminated (char *) on the serial
  * void serial_echo_str(char *s);
@@ -172,7 +164,7 @@ inline static void dis_timer_int_1(){
 /*inline static bool serial_available(void){
 
 }*/
-#define serial_available Serial.available
+#define serial_available() Serial.available()
 
 
 /* The function to call to read a byte from serial buffer
@@ -181,7 +173,8 @@ inline static void dis_timer_int_1(){
 /*inline static char serial_read(){
 
 }*/
-#define serial_read Serial.read
+#define serial_read() Serial.read()
 
+#endif
 
 #endif //HDWGGABSTRACTION_H
