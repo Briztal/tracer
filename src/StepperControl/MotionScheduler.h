@@ -18,6 +18,11 @@
 
 */
 
+
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef CODE_MOTION_H
 #define CODE_MOTION_H
 
@@ -26,7 +31,6 @@ class MotionScheduler {
 
 public:
     static void begin();
-
 
 
     //----------------------------------------------IMPLEMENTED METHODS-------------------------------------------------
@@ -63,9 +67,10 @@ protected :
 
     static void (**linear_set_functions)(float);
 
-
 };
 
 
-
 #endif //CODE_MOTION_H
+
+
+#endif

@@ -25,21 +25,9 @@
 
 class MachineController {
 
-
 public:
-    //-----------------------------------------------INIT METHOD--------------------------------------------------------
-
-//POWER AND SPEED
-static float linearPower;
-public:
-
-    static void begin();
-
-
-    //---------------------------------------------INTERFACE METHODS------------------------------------------------------
 
     static void system_canal_function(char *dptr, unsigned char size);
-
 
 #define GO_UPPER
 
@@ -59,57 +47,7 @@ public:
 #undef CREATE_CALLABLE_LEAF
 
 
-    //--------------------------------------------ACTION METHODS--------------------------------------------------------
-
-public:
-
-    static void adjustLinearPower();
-
-    static void adjustSpeedPower();
-
-    //----------------------------------------------TRACER METHODS-------------------------------------------------------
-
-public:
-
-    static float *parameters;
-
-    static bool *v_parameters;
-
-
-    static void setLinearPower(float power);
-
-    static void setSpeed(float speed);
-
-    static void absoluteMove();
-
-
-    //primary drawers (actually calling Steppers);
-    static void homeMachine();
-
-    static void ellipticMove();
-
-
-    //Secondary drawers (calling primary drawers;
-
-    static void relativeMove(float x, float y, float z);
-
-    static void drawPolygon();
-
-    //TODO UNSAFE
-
-    static void bezierMove();
-
-
-    //---------------------------------------------------Fields---------------------------------------------------------
-
 private:
-
-    //Watt per Millimeter per second (W/(mm/s))
-    static float power; //power ratio;
-    static float speed; //mm per second
-
-    //---------------------------------------------------Methods--------------------------------------------------------
-
 
     static void parameters_system_canal(char *dptr, unsigned char size);
 
@@ -120,6 +58,7 @@ private:
     static void steppers_system_canal(char *dptr, unsigned char size);
 
     static void actions_system_canal(char *dptr, unsigned char size);
+
 };
 
 

@@ -18,6 +18,10 @@
 
 */
 
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #include "MotionExecuter.h"
 #include "SpeedManager.h"
 #include "../Interfaces/CommandInterface.h"
@@ -424,3 +428,6 @@ void (*m::speed_processor)();
 
 bool m::ultimate_movement = true, m::penultimate_movement = true;
 #undef m
+
+
+#endif

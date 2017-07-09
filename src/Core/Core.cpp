@@ -23,14 +23,15 @@
 #include "MachineControllerSystem.h"
 #include "../config.h"
 #include "EEPROMStorage.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
 #include "../StepperControl/StepperController.h"
 #include "../StepperControl/MotionScheduler.h"
 #include "../StepperControl/MotionExecuter.h"
+#endif
 
 
 void Core::begin() {
-
-    MachineController::begin();
 
 
 #ifdef ENABLE_LOGGER

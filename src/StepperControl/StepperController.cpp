@@ -18,11 +18,18 @@
 
 */
 
-#include <Arduino.h>
+
+
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+
 #include "StepperController.h"
 
 #include "../External/digitalWriteFast.h"
 #include "../Interfaces/CommandInterface.h"
+#include "../Core/EEPROMStorage.h"
 
 #define PINS_REQUIRED
 #define PARAMS_REQUIRED
@@ -284,4 +291,4 @@ unsigned int td[NB_STEPPERS];
 unsigned int *const m::delays = td;
 
 
-
+#endif

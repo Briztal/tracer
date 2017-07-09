@@ -18,9 +18,12 @@
 
 */
 
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef TRACER_SPEEDMANAGER_H
 #define TRACER_SPEEDMANAGER_H
-
 
 class SpeedManager {
 
@@ -63,5 +66,6 @@ private :
 
 };
 
-
 #endif //TRACER_SPEEDMANAGER_H
+
+#endif

@@ -18,6 +18,11 @@
 
 */
 
+
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #include <math.h>
 #include <WString.h>
 #include "SpeedManager.h"
@@ -256,3 +261,6 @@ bool m::speed_processing_required;
 unsigned char m::processing_steps;
 
 float m::delay_numerator;
+
+
+#endif

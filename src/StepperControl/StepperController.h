@@ -18,11 +18,13 @@
 
 */
 
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef CODE_STEPPERCONTROLLER_H
 #define CODE_STEPPERCONTROLLER_H
 
-#include <Arduino.h>
-#include "../Core/EEPROMStorage.h"
 #include "../config.h"
 
 class StepperController {
@@ -81,5 +83,6 @@ private:
     static void echo_positions();
 };
 
-
 #endif //CODE_MOTIONCONTROLLER_H
+
+#endif

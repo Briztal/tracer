@@ -17,6 +17,12 @@
   along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+
 #include "LinearMotionN.h"
 #include "../../Interfaces/CommandInterface.h"
 #include "../../Actions/ContinuousActions.h"
@@ -428,3 +434,5 @@ void LinearMotionN::multiple_moves(unsigned char dimension, unsigned long *dists
 
 }
  */
+
+#endif

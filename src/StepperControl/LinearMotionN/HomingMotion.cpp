@@ -19,6 +19,11 @@
 */
 
 #include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+#include "../../config.h"
+#include "../../Core/EEPROMStorage.h"
 #include "HomingMotion.h"
 #include "../../StepperControl/StepperController.h"
 #include "../../External/digitalWriteFast.h"
@@ -121,3 +126,4 @@ unsigned char HomingMotion::readEndStops() {
 }
 
 
+#endif

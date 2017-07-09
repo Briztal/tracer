@@ -20,11 +20,10 @@
 
 #include "EEPROMStorage.h"
 #include "../External/EEPROM.h"
-#include <Arduino.h>
 #include "../Interfaces/CommandInterface.h"
+#include "../config.h"
 
 //TODO Y A UN BUG, LE PROFIL N'EST PAS ECRIT EN MEMOIRE!
-//AXIS_TREATMENT(id, letter, size, steps, speed, acceleration, dir+, pinStep, pinDir, pinPower, pinEndMin, pinEndMax)
 
 void EEPROMStorage::begin() {
     setDefaultProfile();
@@ -178,6 +177,8 @@ void EEPROMStorage::saveProfile() {
 
 void EEPROMStorage::setDefaultProfile() {
 
+#ifdef ENABLE_STEPPER_CONTROL
+
 #define STEPPER_DATA(i, j, size, v_steps, speed, acceleration)\
     sizes[i] = size;\
     steps[i] = v_steps;\
@@ -185,8 +186,13 @@ void EEPROMStorage::setDefaultProfile() {
     accelerations[i] = acceleration;
 
 #include "../config.h"
+
 #undef STEPPER_DATA
 
+#endif
+
+
+#ifdef ENABLE_ASSERV
 
 #define PID(i, name, kp, ki, kd)\
     kps[i] = kp;\
@@ -194,7 +200,10 @@ void EEPROMStorage::setDefaultProfile() {
     kds[i] = kd;
 
 #include "../config.h"
+
 #undef PID
+
+#endif
 
 #define EEPROM_BOOL(name, default_val) name = default_val;
 
@@ -304,6 +313,12 @@ void EEPROMStorage::write_float(int *indice, float value) {
 
 #define m EEPROMStorage
 
+
+
+
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 //Steppers definitions :
 float ts[NB_STEPPERS];
 float tstt[NB_STEPPERS];
@@ -325,6 +340,10 @@ float *const m::defaultSteps = dstt;
 float *const m::default_max_speeds = dms;
 float *const m::default_acceleration = da;
 
+#endif
+
+#ifdef ENABLE_ASSERV
+
 //PIDs definitions :
 float tkps[NB_PIDS];
 float tkis[NB_PIDS];
@@ -341,6 +360,8 @@ float tdkds[NB_PIDS];
 float *const m::default_kps = tdkps;
 float *const m::default_kis = tdkis;
 float *const m::default_kds = tdkds;
+
+#endif
 
 //Custom Parameters Definition
 #define EEPROM_BOOL(name, default_value) bool m::name; bool m::default_##name;

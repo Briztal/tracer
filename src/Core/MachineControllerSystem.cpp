@@ -20,7 +20,6 @@
 
 #include "MachineControllerSystem.h"
 #include "../Interfaces/CommandInterface.h"
-#include "../StepperControl/MotionScheduler.h"
 #include "EEPROMStorage.h"
 
 #define PARAMETER_SUBCANAL 1
@@ -28,15 +27,6 @@
 #define LOOP_SUBCANAL 3
 #define ACTION_SUBCANAL 4
 #define STEPPER_SUBCANAL 5
-
-void MachineController::begin() {
-    //TODO SET SPEED
-    speed = 0;
-    setLinearPower(0);
-    MotionScheduler::setSpeed(speed);
-}
-
-//TODO MAKE RESPONSE
 
 #ifdef MONITOR_CANAL
 
@@ -158,7 +148,11 @@ void MachineController::loop_system_canal(char *data, unsigned char size) {
 
 
 void MachineController::steppers_system_canal(char *data, unsigned char size) {
+
+#ifdef ENABLE_STEPPER_CONTROL
+
     if (!size) return;
+
     char sub_canal = *data;
 
     switch(sub_canal) {
@@ -177,6 +171,9 @@ void MachineController::steppers_system_canal(char *data, unsigned char size) {
         default:
             break;
     }
+
+#endif
+
 }
 
 

@@ -17,13 +17,19 @@
   along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
+
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #include "MotionScheduler.h"
 #include "StepperController.h"
 #include "MotionExecuter.h"
 
 #include "../Interfaces/CommandInterface.h"
 #include "../Actions/ContinuousActions.h"
-
+#include "../Core/EEPROMStorage.h"
 
 
 void MotionScheduler::begin() {
@@ -134,26 +140,6 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
 #undef LOCAL_STEP_AND_WAIT
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #define m MotionScheduler
 
 
@@ -219,3 +205,5 @@ if (m_axis != 0) {
     acceleration0 = accelerations[axis_t[0]];
 }
  */
+
+#endif

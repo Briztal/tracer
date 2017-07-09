@@ -18,6 +18,10 @@
 
 */
 
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef TRACER_HOMINGMOTION_H
 #define TRACER_HOMINGMOTION_H
 
@@ -38,3 +42,5 @@ private:
 };
 
 #endif //TRACER_HOMINGMOTION_H
+
+#endif

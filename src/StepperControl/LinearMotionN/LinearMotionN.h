@@ -18,6 +18,9 @@
 
 */
 
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef CODE_MOTIONND_H
 #define CODE_MOTIONND_H
@@ -31,7 +34,6 @@ class LinearMotionN {
 public :
 
     static void prepare_motion(float *destinations_t);
-
 
 private :
 
@@ -71,3 +73,4 @@ private :
 
 #endif //CODE_MOTION3D_H
 
+#endif

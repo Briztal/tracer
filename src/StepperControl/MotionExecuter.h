@@ -18,6 +18,11 @@
 
 */
 
+
+#include "../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef TRACER_MOTIONEXECUTER_H
 #define TRACER_MOTIONEXECUTER_H
 
@@ -25,12 +30,10 @@
 #include "motion_data.h"
 #include "../DataStructures/Queue.h"
 
-
 #define WAIT\
     while(!TIFR5) {}\
         TIFR5 = 255;
 
-#define ME MotionExecuter
 #define ME MotionExecuter
 
 #define STEP_AND_WAIT \
@@ -158,3 +161,6 @@ private:
 
 
 #endif //TRACER_MOTIONEXECUTER_H
+
+
+#endif
