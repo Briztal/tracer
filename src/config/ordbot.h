@@ -166,12 +166,12 @@ SERVO(2, servo3, 4, 0, 1)
 //STEPPER(i, j, sig, r, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
 //#define STEPPER(i, j, r, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
 
-//TODO CLARIFIER LES VALEURS DES ENDSTOPS, DE LA SIGNATURE
+//TODO DOC
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
 STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH,   2,      HIGH);
 STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH);
 STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(3,  8,      0,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 
 #endif
 
@@ -184,6 +184,17 @@ STEPPER_DATA(   0,  '0',    170,    80.16,  500,    1350);
 STEPPER_DATA(   1,  '1',    170.,   80.16,  500,    1200);
 STEPPER_DATA(   2,  '2',    150.,   2540,   3,      20);
 STEPPER_DATA(   3,  '3',    150.,   80.16,  500,    1200);
+
+#endif
+
+#define NB_SPEED_GROUPS 2
+
+#ifdef CARTESIAN_GROUP
+
+//              id,     s0      s1      s2      maxSpeed
+CARTESIAN_GROUP(0,      0,      1,      -1,     500     )
+CARTESIAN_GROUP(1,      2,      -1,      -1,    3       )
+CARTESIAN_GROUP(2,      3,      -1,      -1,    500     )
 
 #endif
 

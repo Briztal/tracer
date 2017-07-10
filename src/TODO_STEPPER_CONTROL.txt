@@ -1,33 +1,30 @@
 //TODO REBUILD THE MOTION PROCEDURE
 
+BEFORE BRANCHING FOR TEENSY :
 
-
-//REBOOT
+//TODO TROUVER UN MOYEN D'EMPILER LES HOMING_MOTIONS (TYPE DE MOUVEMENT FOURNI DANS LA STRUCT)
 
 //TODO MULTIPLE_MOVES
 
 //TODO MICRO_MOVES
 
-//TODO RELATIVE_AXIS
-
 //TODO REMETRE LES ACTIONS CONTINUES
+
+//TODO SPEED REGULATION BY AXIS GROUP
 
 //TODO CHECK BEFORE A MOTION PARSE THAT A SPACE IS AVAILABLE IN MOTION_DATA_QUEUE
 
 //TODO WHEN PROCESSING STEP IS TOO HIGH, THE MACHINE GETS LOST
 
+//TODO REBUILD NONLINEARMotons
+
 //AUXS  :
-
-//TODO : PROBLEME DANS LE CALCUL DE LA DISTANCE A LA DESTINNATION, RESULTATS SURPRENNANTS SUR LES AXES IMMOBILES
-
-//TODO : GARDER LES FLOTTANTS DE DESTINATION EN MEMOIRE POUR LE CALCUL PLUS RAPIDE DE LA VITESSE
 
 //TODO : LA MACHINE SE PERD SUR LES ELLIPSES ROTATIONNEES
 
 //TODO : determiner dynamiquement processing_steps
 
 //TODO : TABLEAU DES processing_steps idéaux (Un+1 = 2 * Un +1) et selection automatique.
-
 
 //OPTIMISATIONS :
 
@@ -43,4 +40,29 @@
 
 //TODO N'appeler l'heuristique que quand l'axe limitant a été diminué
 
-//TODO avec tests optimiser l'Heuristique
+
+
+REGULATION DE VITESSE QUELCONQUE :
+
+Donee : fontion de vitesse, calculant les delays de consigne pour tous les axes, etant donnée une position.
+(cas des machines outils cartesiennes par groupe : ne depend pas de la position -> proportonnalité entre les axes, si
+la vitesse de regulation est constante.
+
+TOUS LES AXES POSSEDENT LEUR DELAY consigne, directement issus de la fonction de vitesse
+
+Methode de convergence des delays : deux methodes.
+    - Chaque axe a sa distance de vitesse :
+
+pendant chaque mouvement elementaire : somme des delays concernés par le sous mouvement, et modif de la duree d'interruption
+
+
+
+
+
+
+
+
+
+
+
+

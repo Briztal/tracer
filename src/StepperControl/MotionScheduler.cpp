@@ -34,10 +34,19 @@
 
 void MotionScheduler::begin() {
 
-    theorical_regulation_speed = 400;
-    for (unsigned char axis = 0; axis<NB_STEPPERS; axis++) {
+#define CARTESIAN_GROUP(i, s0, s1, s2, ms)\
+    theorical_regulation_speeds[i]= ms;\
+    speed_groups_signatures[i] = ((s0!=-1) ? 1<<s0 : 0)|((s1!=-1) ? 1<<s1: 0)|((s2!=-1) ? 1<<s2 : 0);
+
+
+#include "../config.h"
+
+#undef CARTESIAN_GROUP
+
+    for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
         axis_signatures[axis] = (unsigned char) (1 << axis);
     }
+
 
 }
 
@@ -58,9 +67,14 @@ void MotionScheduler::send_position() {
 
 }
 
+void MotionScheduler::set_speed_group(unsigned char speed_group) {
+    MotionScheduler::speed_group = speed_group;
+}
+
+
 //TODO CHECK MAX_SPEED
-void MotionScheduler::setSpeed(float speed) {
-    theorical_regulation_speed = speed;
+void MotionScheduler::set_speed_for_group(unsigned char group_id, float speed) {
+    theorical_regulation_speeds[group_id] = speed;
 }
 
 
@@ -73,16 +87,68 @@ void MotionScheduler::setSpeed(float speed) {
  *
  *  It applies the maximum ratio.
  */
-float MotionScheduler::get_regulation_speed(float *const distsmm, const float inv_sqrt_square_dist_sum) {
 
-    float scoeff = theorical_regulation_speed * inv_sqrt_square_dist_sum;
+//TODO PROCESS INV_SQUARE_DIST_SUM HERE, WHERE SPEED_GROUPS SIGNATURES ARE KNOWN
+float MotionScheduler::get_regulation_speed(float *const distsmm, const float sqrt_square_dist_sum) {
+
+    //Determination of the regulation speed
+    unsigned char group_signature = speed_groups_signatures[speed_group];
+    float group_coeff = 0;
+    float group_speed = theorical_regulation_speeds[speed_group];
+
+#define STEPPER(i, sig, ...)\
+    if (group_signature&sig) {\
+        group_coeff+=distsmm[i]*distsmm[i];\
+    }
+
+#include "../config.h"
+
+#undef STEPPER
+
+    float theorical_regulation_speed;
+
+    if (group_coeff == 0) {//If no axis in the speed group has to move : find the first speed group with a moving axis.
+        CI::echo("ERROR : THE SELECTED SPEED_GROUP DOESN'T COVER YOUR MOVEMENT : SELECTING ANOTHER");
+        for (int group = 0; group < NB_SPEED_GROUPS; group++) {
+            if (group == speed_group) continue;
+            group_signature = speed_groups_signatures[group];
+            group_coeff = 0;
+
+#define STEPPER(i, sig, ...)\
+            if (group_signature&sig) {\
+                group_coeff+=distsmm[i]*distsmm[i];\
+            }
+
+#include "../config.h"
+
+#undef STEPPER
+
+            if (group_coeff != 0) {
+                group_speed = theorical_regulation_speeds[group];
+                CI::echo("SELECTED GROUP"+String(group));
+                break;
+            }
+        }
+    }
+
+    if (group_coeff == 0) {
+        CI::echo("ERROR : THERE IS NO SPEED GROUP CONTAINING ANY AXIS MOVING DURING YOUR MOVEMENT");
+        //TODO ERROR
+        return 0;
+    }
+
+    CI::echo("ssd-sgc "+String(sqrt_square_dist_sum)+" "+String(sqrt(group_coeff)));
+
+    theorical_regulation_speed = group_speed* sqrt_square_dist_sum / sqrt(group_coeff);
+
+    float scoeff = theorical_regulation_speed / sqrt_square_dist_sum;
 
     float r = 0;
     bool init = true;
     float speed, tms;
 
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
-        //Maximum steps step
+        //Maximum speed checking
         if ((speed = (*(distsmm + axis)) * scoeff) > (tms = EEPROMStorage::maximum_speeds[axis])) {//TODO RESTORE AXIS_t
             r = (init) ? tms / speed : min(r, tms / speed);
             init = false;
@@ -91,13 +157,13 @@ float MotionScheduler::get_regulation_speed(float *const distsmm, const float in
 
     float regulation_speed = theorical_regulation_speed;
 
-    CI::echo("theorical : "+String(theorical_regulation_speed));
+    CI::echo("theorical : " + String(theorical_regulation_speed));
 
     if (r != 0) {
         regulation_speed *= r;
     }
 
-    CI::echo("real : "+String(regulation_speed));
+    CI::echo("real : " + String(regulation_speed));
 
 
     return regulation_speed;
@@ -107,6 +173,10 @@ float MotionScheduler::get_regulation_speed(float *const distsmm, const float in
 
 /*
  * pre_set_speed_axis : this function is called during the scheduling of a movement.
+ *
+ *  new_axis is the axis that will be used for delay regulation.
+ *
+ *  distance_coefficient is the ratio (axis_dist)/sqrt(sum(distances²)), used to project speed on a particular axis
  *
  *  It prepares the speed change, before the currently planned movement is really executes.
  *
@@ -122,13 +192,11 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
     float acceleration = EEPROMStorage::accelerations[new_axis];
     float steps = EEPROMStorage::steps[new_axis];
 
-    CI::echo("s-a-c-r : "+String(steps)+" "+String(acceleration)+" "+String(distance_coefficient)+" "+String(regulation_speed));
-
     float ratio = steps / distance_coefficient;
     unsigned int tmp_delay_numerator = (unsigned int) (1000000 / sqrt(2 * steps * acceleration));
     unsigned int tmp_regulation_delay = (unsigned int) (1000000 / (steps * distance_coefficient * regulation_speed));
 
-    CI::echo("REGULATION_DELAY : "+String(tmp_regulation_delay));
+    CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 
     MotionExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, ratio);
 
@@ -144,9 +212,14 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
 
 
 //POWER AND SPEED
-float m::theorical_regulation_speed; //mm per second
 
+unsigned char m::speed_group = 0;
 
+float ttrs[NB_SPEED_GROUPS];
+float *const m::theorical_regulation_speeds = ttrs;
+
+unsigned char ttgs[NB_SPEED_GROUPS];
+unsigned char *const m::speed_groups_signatures = ttgs;
 
 long pos[NB_STEPPERS];
 long *const m::positions = pos;

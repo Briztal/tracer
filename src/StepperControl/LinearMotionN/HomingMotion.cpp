@@ -49,40 +49,40 @@ void HomingMotion::move() {
             StepperController::setDir##i(false);\
         }
 
-
 #include "../../config.h"
+
 #undef STEPPER
 
 
     unsigned long delay = 100;//TODO AJUSTER LE DELAY EN FONCTION DE LA VITESSE DES AXES RESTANTS
-    unsigned long timeline=micros();
+    unsigned long timeline = micros();
 
     unsigned long delays[NB_STEPPERS];
     float speed;
     unsigned long d;
-    for (int axis = 0; axis<NB_STEPPERS; axis++) {
-        speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis]*0.05);
-        d = (unsigned long) (1000000/(speed*EEPROMStorage::steps[axis]));
+    for (int axis = 0; axis < NB_STEPPERS; axis++) {
+        speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * 0.05);
+        d = (unsigned long) (1000000 / (speed * EEPROMStorage::steps[axis]));
         delays[axis] = delay;
         delay = max(delay, d);
     }
 
     while (signature) {
-        for (int s = 0; s<step-1; s++) {
+        for (int s = 0; s < step - 1; s++) {
             StepperController::fastStep(signature);
-            timeline+=delay;
-            while(micros()<timeline) {}
+            timeline += delay;
+            while (micros() < timeline) {}
         }
 
         StepperController::fastStep(signature);
 
         signature = readEndStops();
         delay = getMaxDelay(signature, delays);
-        timeline+=delay;
-        while(micros()<timeline) {}
+        timeline += delay;
+        while (micros() < timeline) {}
     }
 
-    for (int axis = 0; axis<NB_STEPPERS; axis++) {
+    for (int axis = 0; axis < NB_STEPPERS; axis++) {
         MotionScheduler::positions[axis] = 0;
     }
 
@@ -93,17 +93,17 @@ void HomingMotion::move() {
 unsigned long HomingMotion::getMaxDelay(unsigned char signature, unsigned long *delays) {
     unsigned long delay = 0;
     int axis = 0;
-    for (; axis<NB_STEPPERS; axis++) {
-        if (signature&(unsigned long)1) {
+    for (; axis < NB_STEPPERS; axis++) {
+        if (signature & (unsigned long) 1) {
             delay = delays[axis];
-            signature>>=1;
+            signature >>= 1;
             axis++;
             break;
         }
-        signature>>=1;
+        signature >>= 1;
     }
-    for (;axis<NB_STEPPERS; axis++) {
-        if (signature&(unsigned long)1) {
+    for (; axis < NB_STEPPERS; axis++) {
+        if (signature & (unsigned long) 1) {
             delay = max(delay, delays[axis]);
         }
         signature >>= 1;
@@ -115,7 +115,7 @@ unsigned char HomingMotion::readEndStops() {
     unsigned char signature = 0;
     unsigned char bit = 1;
 
-#define STEPPER(i, sig, rel, ps, pd, dp,  pp, ve, pinEndMin, minValue, pma, va)\
+#define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
     if (!rel) {\
         if ((bool)digitalReadFast(pinEndMin) == minValue) {\
             signature|=sig;\
@@ -123,6 +123,7 @@ unsigned char HomingMotion::readEndStops() {
     }
 
 #include "../../config.h"
+
 #undef STEPPER
 
     return signature;

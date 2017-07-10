@@ -42,8 +42,13 @@ void MachineController::action(char * dptr, unsigned char size) {
     coords[0] = 160;
     coords[1] = 100;
     coords[2] = 10;
-    coords[3] = 40;
-    MotionScheduler::setSpeed(300);
+    coords[3] = 0;//40;
+    //MotionScheduler::set_speed_for_group(0, 300);
+    MotionScheduler::set_speed_for_group(1, 3);
+    MotionScheduler::set_speed_group(1);
+
+    //TODO TESTER AVEC LES Z
+
     LinearMotionN::prepare_motion(coords);
     delay(1000);
 

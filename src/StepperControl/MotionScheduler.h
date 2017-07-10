@@ -30,42 +30,38 @@ class MotionScheduler {
 
 
 public:
-    static void begin();
 
-
-    //----------------------------------------------IMPLEMENTED METHODS-------------------------------------------------
-
-public :
-
-    static void setSpeed(float speed);
-
-protected:
-
-    //StepperControl functions assingment according to axis_t
-
-
-    //-----------------------------------------------FIELDS-------------------------------------------------------------
 
 public :
 
     static long *const positions;
 
-    static unsigned char *const axis_signatures;
+    static unsigned char *const axis_signatures;//Not used in optimised functions
+
+    static void begin();
+
+    static void set_speed_group(unsigned char speed_group);
+
+    static void set_speed_for_group(unsigned char group_id, float speed);
 
     static void send_position();
 
-    static float get_regulation_speed(float *const distsmm, const float inv_sqrt_square_dist_sum);
+    static float get_regulation_speed(float *const distsmm, const float sqrt_square_dist_sum);
 
     static void pre_set_speed_axis(unsigned char new_axis, float distance_coefficient, float regulation_speed);
 
 
 protected :
 
-    static float theorical_regulation_speed; //mm per second
+    static unsigned char speed_group;
 
     static unsigned char linear_tools_nb;
 
     static void (**linear_set_functions)(float);
+
+    static float *const theorical_regulation_speeds;
+
+    static unsigned char *const speed_groups_signatures;
 
 };
 

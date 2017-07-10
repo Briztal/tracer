@@ -164,11 +164,11 @@ unsigned char LinearMotionN::setup_movement_data(float *destinations_t, unsigned
     data_to_fill.max_axis = max_axis;
 
     //Local variable for speed datacomputation
-    float inv_sqrt_sq_dist_sum = 1 / sqrt(sq_dist_sum);
-    float distance_coefficient = distsmm[max_axis] * inv_sqrt_sq_dist_sum;
+    float sqrt_sq_dist_sum = sqrt(sq_dist_sum);
+    float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
     //Get the adjusted regulation speed;
-    float regulation_speed = MotionScheduler::get_regulation_speed(distsmm, inv_sqrt_sq_dist_sum);
+    float regulation_speed = MotionScheduler::get_regulation_speed(distsmm, sqrt_sq_dist_sum);
 
     //Calculate and fill the speed data
     MotionScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed);
