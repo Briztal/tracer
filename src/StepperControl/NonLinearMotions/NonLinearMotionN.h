@@ -33,6 +33,9 @@ class NonLinearMotionN {
 
     //-----------------------------------------virtual_methods----------------------------------------------------------
 
+
+    /*
+
 protected:
 
     //Method for motion parameters init :
@@ -44,6 +47,7 @@ protected:
     //One time processing for position
     virtual void get_position(float a, long *c) = 0;
 
+     */
 
     //-----------------------------------------protected_fields---------------------------------------------------------
 
@@ -64,12 +68,6 @@ protected:
 
     //Relative position array
     static long *const pos_t;
-
-    //First and last relative positions
-    static long *const first_pos_t, *const last_pos_t;
-
-    //First ans last absolutes positions
-    static long *const first_positions, *const last_positions;
 
     //Position process fields
     static float *const steps;
@@ -132,13 +130,14 @@ private :
     //------------------------------------------non_static
 
     //method to set increment, count, alpha, and pos_t
-    void initialise_motion_vars();
+    void set_motion_data();
 
     //method to compute the increment if it is not provided.
-    float extract_increment(float point, float end, float increment, unsigned int processing_steps);
+    float extract_increment(float point, const float end, float increment, const unsigned int processing_steps,
+                            const void (*get_position)(float, long *));
 
     //method to adjust the increment for step in the increment extraction process
-    float adjust_increment(float step, float point);
+    float adjust_increment(const float point, float increment, const void (*get_position)(float, long *));
 
 
 private :
@@ -146,8 +145,6 @@ private :
     //------------------------------------------implemented methods from StepperControl
 
     //Set the last elementary distances, for the last elementary move during motion
-    void set_end_distances();
-
 
     //Speed processing method for N Axis non linear motions.
     void process_speed();
@@ -155,8 +152,12 @@ private :
     //Method to step and delay the correct time
     void step_and_delay(unsigned char sig);
 
+    void set_initial_positions(const float *initial_positions);
 
-    void pre_process(unsigned char *move_axis_t, const float *dests, const unsigned char size);
+    void pre_process(unsigned char *move_axis_t, const unsigned char size);
+
+    void set_final_positions(const long *final_positions);
+
 };
 
 #endif //CODE_NONTRIVIALMOTION_H

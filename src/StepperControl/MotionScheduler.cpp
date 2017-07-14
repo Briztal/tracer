@@ -185,7 +185,7 @@ float MotionScheduler::get_regulation_speed(float *const distsmm, const float sq
  *      - tmp_delay_numerator : the delay numerator that will be used during the movement we now plan;
  *      - tmp_regulation_delay : the regulation delay that will be used during the movement we now plan.
  */
-void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_coefficient, float regulation_speed) {
+void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_coefficient, float regulation_speed, unsigned char processing_steps) {
 
 
     //the acceleration considered is the new axis acceleration
@@ -198,7 +198,7 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
 
     CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 
-    MotionExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, ratio);
+    MotionExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, ratio, processing_steps);
 
 }
 

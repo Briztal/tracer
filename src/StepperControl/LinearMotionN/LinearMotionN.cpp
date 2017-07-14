@@ -173,7 +173,7 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
     float regulation_speed = MotionScheduler::get_regulation_speed(distsmm, sqrt_sq_dist_sum);
 
     //Calculate and fill the speed data
-    MotionScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed);
+    MotionScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed, PROCESSING_STEPS);
 
     MotionExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
     return max_axis;
@@ -291,7 +291,7 @@ void LinearMotionN::set_motion_data(unsigned int *motion_dists) {
     }
 
     //Fill beginning signatures
-    MotionExecuter::fill_movement_data(true, elementary_dists, count, nsig, PROCESSING_STEPS);
+    MotionExecuter::fill_movement_data(true, elementary_dists, count, nsig);
 
     unsigned int last_pos_max = count*PROCESSING_STEPS;
 
@@ -306,7 +306,7 @@ void LinearMotionN::set_motion_data(unsigned int *motion_dists) {
     }
 
     //Fill ending signatures
-    MotionExecuter::fill_movement_data(false, elementary_dists, count, nsig, PROCESSING_STEPS);
+    MotionExecuter::fill_movement_data(false, elementary_dists, count, nsig);
 }
 
 

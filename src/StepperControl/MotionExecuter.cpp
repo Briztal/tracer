@@ -30,6 +30,17 @@
 #include "LinearMotionN/LinearMotionN.h"
 #include "MotionScheduler.h"
 
+/*
+ * TODOs for a correct motion setup :
+ *      set end distances
+ *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
+ *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
+ *      set speed data, calling MotionScheduler::pre_set_speed_axis(...);
+ *      set processing functions, calling MotionExecuter::fill_processors(...);
+ *      call MotionExecuter::enqueue_movement_data
+ *
+ */
+
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -42,11 +53,10 @@ void MotionExecuter::start() {
     setup_stepper_interrupt(wait_for_movement, 30000);
 }
 
-void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char nsig, unsigned char processing_steps) {
+void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char nsig) {
 
     if (first) {
         motion_data_to_fill.count = count;
-        motion_data_to_fill.processing_steps = processing_steps;
     }
 
     disable_stepper_interrupt()
@@ -111,19 +121,11 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
 
 }
 
-/*
- * TODOs for a correct motion setup :
- *      set end distances
- *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
- *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
- *      set speed data, calling MotionScheduler::pre_set_speed_axis(...);
- *      set processing functions, calling MotionExecuter::fill_processors(...);
- *      call MotionExecuter::enqueue_movement_data
- *
- */
 
 
-void MotionExecuter::fill_speed_data(unsigned int delay_numerator, unsigned int regulation_delay, float ratio) {
+
+void MotionExecuter::fill_speed_data(unsigned int delay_numerator, unsigned int regulation_delay, float ratio, unsigned char processing_steps) {
+    motion_data_to_fill.processing_steps = processing_steps;
     motion_data_to_fill.delay_numerator = delay_numerator;
     motion_data_to_fill.regulation_delay = regulation_delay;
     motion_data_to_fill.ratio = ratio;
