@@ -47,6 +47,8 @@ private :
     //Other fields
     static Queue<linear_data> data_queue;
     static linear_data data_to_fill;
+    static unsigned char negative_signatures;
+
 
     //Preparators
 

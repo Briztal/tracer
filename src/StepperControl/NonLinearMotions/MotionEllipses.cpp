@@ -19,7 +19,9 @@
 */
 
 
-/*
+
+#include <math.h>
+#include <USBAPI.h>
 #include "MotionEllipses.h"
 #include "NonLinearMotionN.h"
 #include "../MotionScheduler.h"
@@ -148,77 +150,28 @@ float st[361] =
 float *const MotionEllipses::sinTable = st;
 
 
-void MotionEllipses::move() {
-    NonLinearMotionN::move();
-}
+bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, float A, float B, float begin_angle_r, float V, float rotation_angle_r, float count_angle_r) {
 
-bool MotionEllipses::prepare_motion() {
 
-    movement_size = 2;
 
-    NonLinearMotionN::initialise_motion();
+    NonLinearMotionN::initialise(axis_t, 2);
 
-    if (!v_parameters_t[Cid] || !v_parameters_t[Aid] || !v_parameters_t[Bid])
-        return false;
-    if (!v_parameters_t[Uid])
-        parameters_t[Uid] = 0;
-    if (!v_parameters_t[Rid])
-        parameters_t[Rid] = 0;
+    float steps0 = NonLinearMotionN::steps[0], steps1 = NonLinearMotionN::steps[1];
 
-    rotation_angle_r = parameters_t[Rid];
+    center_0 = (long) (destinations[0]*steps0);
+    center_1 = (long) (destinations[1]*steps1);
 
-    begin_angle_d = (int) (parameters_t[Uid] * 180.0 / M_PI * RESOLUTION);
-    count_angle_d = (int) (parameters_t[Cid] * 180.0 / M_PI * RESOLUTION);
+    begin_angle_d = (int) (begin_angle_r * 180.0 / M_PI * RESOLUTION);
+    count_angle_d = (int) (count_angle_r * 180.0 / M_PI * RESOLUTION);
 
     end_angle_r = (float) (begin_angle_d + count_angle_d) * M_PI / (180.0 * RESOLUTION);
 
-    float begin_angle_r = (float) (begin_angle_d) * M_PI / (180.0 * RESOLUTION);
-
-
-    this->A = parameters_t[Aid];//mm
-    this->B = parameters_t[Bid];//mm
+    MotionEllipses::A = A;//mm
+    MotionEllipses::B = B;//mm
 
     //cosines and sines
     float cTheta = cos(rotation_angle_r);
     float sTheta = sin(rotation_angle_r);
-
-    center_0 = destinations[0];
-    center_1 = destinations[1];
-
-    //Unrotated first positions
-    float temp0 = cos(begin_angle_r) * A, temp1 = sin(begin_angle_r) * B;//mm
-
-    float begin0mm = cTheta * temp0 + sTheta * temp1, begin1mm = -sTheta * temp0 + cTheta * temp1;
-
-    first_positions[0] = destinations[0] + (first_pos_t[0] = (long) (steps[0] * begin0mm));
-    first_positions[1] = destinations[1] + (first_pos_t[1] = (long) (steps[1] * begin1mm));
-
-    setup_engagement_move();
-
-    return true;
-
-}
-
-void MotionEllipses::init_position_parameters() {
-
-    //----------------------------------------Switching to tics system--------------------------------------------------
-
-    //rotation_angle_r cos and sines
-    float cTheta = cos(rotation_angle_r), sTheta = sin(rotation_angle_r);
-
-    min = 0;
-
-    //Angles and end_distances
-    if (count_angle_d < 0)
-        provide_increment(-1);
-    else
-        provide_increment(1);
-
-    max = begin_angle_d + count_angle_d;
-    min = begin_angle_d;
-
-
-    float steps0 = steps[0], steps1 = steps[1];
 
     //SETTINGS
     //Rotation parameters
@@ -227,14 +180,56 @@ void MotionEllipses::init_position_parameters() {
     cb = steps1 * cTheta * B;
     sb = steps0 * sTheta * B;
 
-    //Last Position
-    float temp0 = cos(end_angle_r), temp1 = sin(end_angle_r);
-    last_pos_t[0] = (long) (ca * temp0 + sb * temp1), last_pos_t[1] = (long) (sa * temp0 + cb * temp1);
+    //First positions :
 
-    last_positions[0] = center_0 + last_pos_t[0];
-    last_positions[1] = center_1 + last_pos_t[1];
+    float first_relative_positions_mm[2];
+    float temp0 = cos(begin_angle_r) * A, temp1 = sin(begin_angle_r) * B;//mm
+    first_relative_positions_mm[0] = cTheta * temp0 + sTheta * temp1, first_relative_positions_mm[1] = -sTheta * temp0 + cTheta * temp1;
 
-    set_last_position();
+    float first_absolute_positions_mm[2];
+    first_absolute_positions_mm[0] = destinations[0] + first_relative_positions_mm[0];
+    first_absolute_positions_mm[1] = destinations[1] + first_relative_positions_mm[1];
+
+    NonLinearMotionN::set_initial_positions(first_absolute_positions_mm);
+
+    float min = 0;
+
+    /*
+        //TODO
+
+    //Angles and end_distances
+    if (count_angle_d < 0)
+        provide_increment(-1);
+    else
+        provide_increment(1);
+
+    */
+
+    float max = begin_angle_d + count_angle_d;
+    min = begin_angle_d;
+
+
+    //Last Positions
+    long last_relative_positions_s[2];
+    temp0 = cos(end_angle_r), temp1 = sin(end_angle_r);
+    last_relative_positions_s[0] = (long) (ca * temp0 + sb * temp1), last_relative_positions_s[1] = (long) (sa * temp0 + cb * temp1);
+
+
+    /*
+    float last_absolute_positions_s[2];
+    last_absolute_positions_s[0] = center_0 + last_absolute_positions_s[0];
+    last_absolute_positions_s[1] = center_1 + last_absolute_positions_s[1];
+
+    */
+
+    //set_last_position();
+
+}
+
+void MotionEllipses::init_position_parameters() {
+
+    //----------------------------------------Switching to tics system--------------------------------------------------
+
 
 }
 
@@ -250,6 +245,7 @@ long t0;
 
 //TODO TRIER LES END_DISTANCES ICI AUSSI
 
+/*
 bool MotionEllipses::process_position(pos_data *p) {
     if (p->started) {
         goto
@@ -306,6 +302,8 @@ bool MotionEllipses::process_position(pos_data *p) {
 
 }
 
+
+
 void MotionEllipses::trigProcess(int x, float &cos, float &sin) {
     if (x >= T_360) {
         x -= T_360;
@@ -332,11 +330,4 @@ void MotionEllipses::trigProcess(int x, float &cos, float &sin) {
 }
 
 
- */
-
-
-
-
-
-
-
+*/

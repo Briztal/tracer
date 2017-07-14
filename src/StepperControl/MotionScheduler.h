@@ -46,7 +46,7 @@ public :
 
     static void send_position();
 
-    static float get_regulation_speed(float *const distsmm, const float sqrt_square_dist_sum);
+    static float get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum);
 
     static void pre_set_speed_axis(unsigned char new_axis, float distance_coefficient, float regulation_speed, unsigned char processing_steps);
 

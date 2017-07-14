@@ -161,7 +161,7 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
         return 255;
 
     //Direction memorising :
-    data_to_fill.direction_signature = direction_signature;
+    negative_signatures = direction_signature;
 
     data_to_fill.max_axis = max_axis;
 
@@ -170,7 +170,7 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
     //Get the adjusted regulation speed;
-    float regulation_speed = MotionScheduler::get_regulation_speed(distsmm, sqrt_sq_dist_sum);
+    float regulation_speed = MotionScheduler::get_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
 
     //Calculate and fill the speed data
     MotionScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed, PROCESSING_STEPS);
@@ -276,7 +276,7 @@ void LinearMotionN::set_motion_data(unsigned int *motion_dists) {
 
     unsigned int count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
 
-    unsigned char nsig = data_to_fill.direction_signature;
+    unsigned char nsig = negative_signatures;
 
     const unsigned char shift_nb = data_to_fill.shift_nb;
     const unsigned char max_axis = data_to_fill.max_axis;
@@ -314,9 +314,7 @@ void LinearMotionN::initialise_motion() {
 //TODO COPIED... BETTER TAKE DIRECTLY POINTER
 
     linear_data data = data_queue.pull();
-
-    StepperController::set_directions(MR_negative_signatures = data.direction_signature);
-
+    
     MR_shift_nb = data.shift_nb;
     MR_max_axis = data.max_axis;
 
@@ -375,6 +373,7 @@ unsigned int *const m::MR_slopes = new unsigned int[NB_STEPPERS];
 int m::MR_shift_nb;
 unsigned char m::MR_max_axis;
 unsigned char m::MR_negative_signatures;
+unsigned char m::negative_signatures;
 
 #undef m;
 

@@ -79,7 +79,7 @@ void MotionScheduler::set_speed_for_group(unsigned char group_id, float speed) {
 
 
 /*
- * get_regulation_speed : this function calculates the real regulation speed, from the theoretical one.
+ * get_regulation_speed_linear : this function calculates the real regulation speed, from the theoretical one.
  *
  *  It verifies that the speed on each axis does not overpasses the maximum speed on this axis.
  *
@@ -89,7 +89,7 @@ void MotionScheduler::set_speed_for_group(unsigned char group_id, float speed) {
  */
 
 //TODO PROCESS INV_SQUARE_DIST_SUM HERE, WHERE SPEED_GROUPS SIGNATURES ARE KNOWN
-float MotionScheduler::get_regulation_speed(float *const distsmm, const float sqrt_square_dist_sum) {
+float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
 
     //Determination of the regulation speed
     unsigned char group_signature = speed_groups_signatures[speed_group];

@@ -25,37 +25,40 @@
 
 #define ANGLE_FRACTION_1
 
-class MotionEllipses : public NonLinearMotionN {
+class MotionEllipses {
 
 //TODO LES ELLIPSES DANS LE SENS NEGATIF NE SE TRACENT PAS
 
 public:
 
-    bool prepare_motion();
+    static bool prepare_motion();
 
-    void move();
+    static void move();
 
 protected:
 
     static float *const sinTable;
 
-    bool process_position();
+    static bool process_position();
 
-    void get_position(float alpha, long *pos);
+    static void get_position(float alpha, long *pos);
 
-    void init_position_parameters();
+    static void init_position_parameters();
 
-    long center_0, center_1;
+    static long center_0, center_1;
 
-    int begin_angle_d, count_angle_d;//rad
+    static int begin_angle_d, count_angle_d;//rad
 
-    float rotation_angle_r, end_angle_r;
+    static float rotation_angle_r, end_angle_r;
 
-    float A, B;//mm
+    static float A, B;//mm
 
-    float ca, sa, cb, sb;
+    static float ca, sa, cb, sb;
 
-    void trigProcess(int x, float &cos, float &sin);
+    static void trigProcess(int x, float &cos, float &sin);
+
+    bool prepare_motion(unsigned char *axis_t, float *destinations, float A, float B, float begin_angle_r, float V,
+                        float rotation_angle_r, float count_angle_r);
 };
 
 

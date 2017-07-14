@@ -24,51 +24,46 @@
 #include "../config.h"
 
 typedef struct{
-
-        //First_sub_movement
-    unsigned char first_signatures[8];//8
-    unsigned char last_signatures[8];//8
+        //First_last_sub_movement
+    unsigned char initial_signatures[8];//8
+    unsigned char final_signatures[8];//8
     //-------------2*4--------------8
-    unsigned char beginning_indice;//1
-    unsigned char ending_indice;//1
-
+    unsigned char initial_indice;//1
+    unsigned char final_indice;//1
+    unsigned char initial_dir_signature;//1
+    unsigned char final_dir_signature;//1
+    //-------------4--------------12
                //Count
     unsigned int count;//2
-    // --------------4---------------12
-
              //processors
     void (*init_processor)();//2
-    unsigned char (*position_processor)(unsigned char *);//2
     //--------------4---------------16
+    unsigned char (*position_processor)(unsigned char *);//2
     void (*speed_processor)(void);//2
-    void (*step)(unsigned char);//2
     //--------------4---------------20
+    void (*step)(unsigned char);//2
     void (*sub_move_init)(unsigned char);//2
-
-               //Speed
-    unsigned int delay_numerator;//2
     //-------------4----------------24
+               //Speed
+    float ratio;//4
+    //-------------4----------------28
+    unsigned int delay_numerator;//2
     unsigned int regulation_delay;//2
+    //-------------4----------------32
     unsigned char processing_steps;//1
     unsigned char padding;//1
-    //-------------4----------------28
-    float ratio;//4
-    //-------------4----------------32
+    //-------------2----------------34
 
-} motion_data;//28 bytes
-
-
-
+} motion_data;//36 bytes
 
 typedef struct{
     unsigned char shift_nb;
-    unsigned char direction_signature;
     unsigned char max_axis;
-    unsigned char padding;
-    //---------------4-----------------
-    unsigned char first_pos[NB_STEPPERS];
+    //---------------2-----------------
     unsigned int last_pos[NB_STEPPERS];
     unsigned int slopes[NB_STEPPERS];
+    unsigned char first_pos[NB_STEPPERS];
+
     //-----------3*NB_STEPPERS-----------
 } linear_data;
 

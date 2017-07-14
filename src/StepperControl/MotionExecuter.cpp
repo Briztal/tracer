@@ -54,10 +54,14 @@ void MotionExecuter::start() {
 }
 
 void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char nsig) {
-
     if (first) {
         motion_data_to_fill.count = count;
+        motion_data_to_fill.initial_dir_signature = nsig;
+    } else {
+        motion_data_to_fill.final_dir_signature = nsig;
     }
+
+
 
     disable_stepper_interrupt()
 
@@ -99,10 +103,11 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
 #undef STEPPER
 
         if (end_move) {//if next_move is null
-            if (first)
-                motion_data_to_fill.beginning_indice = trajectory_indices[motion_depth - 1];
-            else
-                motion_data_to_fill.ending_indice = trajectory_indices[motion_depth - 1];
+            if (first) {
+                motion_data_to_fill.initial_indice = trajectory_indices[motion_depth - 1];
+            } else {
+                motion_data_to_fill.final_indice = trajectory_indices[motion_depth - 1];
+            }
             break;
         }
     }
@@ -111,14 +116,13 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
     int i = 0;
     if (first) {
         for (; motion_depth--;) {
-            motion_data_to_fill.first_signatures[i++] = pre_signatures[motion_depth];
+            motion_data_to_fill.initial_signatures[i++] = pre_signatures[motion_depth];
         }
     } else {
         for (; motion_depth--;) {
-            motion_data_to_fill.last_signatures[i++] = pre_signatures[motion_depth];
+            motion_data_to_fill.final_signatures[i++] = pre_signatures[motion_depth];
         }
     }
-
 }
 
 
@@ -160,7 +164,7 @@ void MotionExecuter::wait_for_movement() {
          *      Motion data :
          * - count : number of sub_movements;
          * - axis_signatures = the first elementary movement axis_signatures (pre_processed);
-         * - position_processor, speed_processor, functions used during movement pre_process (depend on calling class);
+         * - position_processor, speed_processor, functions used during movement initialise (depend on calling class);
          * - step : the function used to step (depends on the calling class;
          *
          *      Speed data :
@@ -182,19 +186,21 @@ void MotionExecuter::wait_for_movement() {
 
 
         //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
-        es0[0] = popped_data.first_signatures[0];
-        es0[1] = popped_data.first_signatures[1];
-        es0[2] = popped_data.first_signatures[2];
-        es0[3] = popped_data.first_signatures[3];
-        es0[4] = popped_data.first_signatures[4];
-        es0[5] = popped_data.first_signatures[5];
-        es0[6] = popped_data.first_signatures[6];
-        es0[7] = popped_data.first_signatures[7];
+        es0[0] = popped_data.initial_signatures[0];
+        es0[1] = popped_data.initial_signatures[1];
+        es0[2] = popped_data.initial_signatures[2];
+        es0[3] = popped_data.initial_signatures[3];
+        es0[4] = popped_data.initial_signatures[4];
+        es0[5] = popped_data.initial_signatures[5];
+        es0[6] = popped_data.initial_signatures[6];
+        es0[7] = popped_data.initial_signatures[7];
         is_es_0 = false;
 
         StepperController::enable(255);
+        StepperController::set_directions(popped_data.initial_dir_signature);
 
-        trajectory_indice = popped_data.beginning_indice;
+
+        trajectory_indice = popped_data.initial_indice;
 
         //Speed update according to pre_processed_parameters
         SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data. delay_numerator, popped_data.ratio, popped_data.processing_steps);
@@ -208,19 +214,21 @@ void MotionExecuter::wait_for_movement() {
 
 }
 
-void MotionExecuter::set_last_sub_motion() {
+void MotionExecuter::set_last_sub_motion() {//TODO END POSITION
     //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
-    es0[0] = popped_data.last_signatures[0];
-    es0[1] = popped_data.last_signatures[1];
-    es0[2] = popped_data.last_signatures[2];
-    es0[3] = popped_data.last_signatures[3];
-    es0[4] = popped_data.last_signatures[4];
-    es0[5] = popped_data.last_signatures[5];
-    es0[6] = popped_data.last_signatures[6];
-    es0[7] = popped_data.last_signatures[7];
+    es0[0] = popped_data.final_signatures[0];
+    es0[1] = popped_data.final_signatures[1];
+    es0[2] = popped_data.final_signatures[2];
+    es0[3] = popped_data.final_signatures[3];
+    es0[4] = popped_data.final_signatures[4];
+    es0[5] = popped_data.final_signatures[5];
+    es0[6] = popped_data.final_signatures[6];
+    es0[7] = popped_data.final_signatures[7];
     is_es_0 = false;
 
-    saved_trajectory_indice = popped_data.beginning_indice;
+    StepperController::set_directions(popped_data.final_dir_signature);
+
+    saved_trajectory_indice = popped_data.final_indice;
     saved_elementary_signatures = es0;
 }
 

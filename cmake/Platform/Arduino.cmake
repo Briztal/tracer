@@ -1399,7 +1399,7 @@ function(setup_arduino_programmer_args BOARD_ID PROGRAMMER TARGET_NAME PORT AVRD
     endif()
 
     if(${PROGRAMMER}.step_and_delay)
-        list(APPEND AVRDUDE_ARGS "-i${${PROGRAMMER}.step_and_delay}") # Set step_and_delay
+        list(APPEND AVRDUDE_ARGS "-i${${PROGRAMMER}.step_and_delay}") # Set step
     endif()
 
     list(APPEND AVRDUDE_ARGS "-p${${BOARD_ID}${ARDUINO_CPUMENU}.build.mcu}")  # MCU Type
