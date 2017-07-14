@@ -22,7 +22,6 @@
 #ifndef CODE_NONLINEARMOTIONN_H
 #define CODE_NONLINEARMOTIONN_H
 
-#include "../MotionScheduler.h"
 
 /**
  * A more evolved Class for non trivial plannar motions, ie :
@@ -50,10 +49,12 @@ protected:
 
 protected:
 
-    static unsigned char *const axis_copy_t;
+    static unsigned char *const axis_t;
 
     //Number of axis in the motion
-    static unsigned char motion_size;
+    static unsigned char movement_size;
+
+    static unsigned char processing_steps;
 
     //Curve variable parameters : beginning, last
     static float min, max;
@@ -87,15 +88,6 @@ protected:
     //Method to provide the increment
     static void provide_increment(float i);
 
-    //Method to setup the linear move, going to the first position of the curve
-    void setup_engagement_move();
-
-    //Method to set the curve ending position, fur speed regulation
-    void set_last_position();
-
-    //Methods to update axis parameters (steps, accelerations etc...)
-    void initialise_motion();
-
     //Method to begin the motion
     void move();
 
@@ -127,9 +119,6 @@ private:
 private :
 
     //------------------------------------------static
-
-    //Signatures setting
-    static void set_signatures();
 
     //distance computing for N size vectors
     static unsigned char get_distance(long *dest, long *pos);
@@ -166,7 +155,8 @@ private :
     //Method to step and delay the correct time
     void step_and_delay(unsigned char sig);
 
-    void draw();
+
+    void pre_process(unsigned char *move_axis_t, const float *dests, const unsigned char size);
 };
 
 #endif //CODE_NONTRIVIALMOTION_H

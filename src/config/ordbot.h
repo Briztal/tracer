@@ -13,7 +13,7 @@
 #define ENABLE_LOGGER
 
 //Uncomment this line to enable regulation loops.
-//#define ENABLE_ASSERV
+#define ENABLE_ASSERV
 
 //Uncomment this line to enable regulation loops.
 #define ENABLE_STEPPER_CONTROL
@@ -86,6 +86,8 @@ PID(4, name5, 1, 0, 0)
  * For each loop function, put one line like behind and provide the two required parameter
  * LOOP_FUNCTION(indice, name, period_ms)
  */
+
+#define NB_LOOPS 2
 
 #ifdef LOOP_FUNCTION
 

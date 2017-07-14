@@ -46,14 +46,9 @@ public :
     static float *const steps;
     static float *const maximum_speeds;
     static float *const accelerations;
+    static float *const group_maximum_speeds;
 
 private:
-
-    //Stepper motors data
-    static float *const default_sizes;
-    static float *const defaultSteps;
-    static float *const default_max_speeds;
-    static float *const default_acceleration;
 
     static void read_stepper(int *indice, unsigned char axis_nb, float *size, float *steps, float *mspeed,
                              float *acceleration);
@@ -71,12 +66,10 @@ public :
     static float *const kis;
     static float *const kds;
 
-private :
+    //Control loops data
+    static unsigned int *const loop_periods;
 
-    //PID default data
-    static float *const default_kps;
-    static float *const default_kis;
-    static float *const default_kds;
+private :
 
     static void write_pid(int *indice, float kp, float ki, float kd);
 
@@ -125,6 +118,8 @@ public :
     static void begin();
 
     static void print_stored_data();
+
+    static void send_structure();
 
 private :
 

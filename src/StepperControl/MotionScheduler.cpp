@@ -125,7 +125,7 @@ float MotionScheduler::get_regulation_speed(float *const distsmm, const float sq
 
             if (group_coeff != 0) {
                 group_speed = theorical_regulation_speeds[group];
-                CI::echo("SELECTED GROUP"+String(group));
+                CI::echo("SELECTED GROUP" + String(group));
                 break;
             }
         }
@@ -137,9 +137,9 @@ float MotionScheduler::get_regulation_speed(float *const distsmm, const float sq
         return 0;
     }
 
-    CI::echo("ssd-sgc "+String(sqrt_square_dist_sum)+" "+String(sqrt(group_coeff)));
+    CI::echo("ssd-sgc " + String(sqrt_square_dist_sum) + " " + String(sqrt(group_coeff)));
 
-    theorical_regulation_speed = group_speed* sqrt_square_dist_sum / sqrt(group_coeff);
+    theorical_regulation_speed = group_speed * sqrt_square_dist_sum / sqrt(group_coeff);
 
     float scoeff = theorical_regulation_speed / sqrt_square_dist_sum;
 

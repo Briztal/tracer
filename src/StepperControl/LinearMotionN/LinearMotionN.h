@@ -33,7 +33,7 @@ class LinearMotionN {
 
 public :
 
-    static void prepare_motion(float *destinations_t);
+    static void prepare_motion(const float *destinations_t);
 
 private :
 
@@ -47,7 +47,6 @@ private :
     //Other fields
     static Queue<linear_data> data_queue;
     static linear_data data_to_fill;
-
 
     //Preparators
 
@@ -63,7 +62,7 @@ private :
 
     static unsigned char process_position(unsigned char *elementary_dists);
 
-    static unsigned char setup_movement_data(float *destinations_t, unsigned long *absolute_distances);
+    static unsigned char setup_movement_data(const float *destinations_t, unsigned long *absolute_distances);
 
     static void set_position_data(unsigned int *dists);
 

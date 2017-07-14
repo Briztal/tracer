@@ -55,9 +55,11 @@ private:
 
     static void loop_system_canal(char *dptr, unsigned char size);
 
+    static void actions_system_canal(char *dptr, unsigned char size);
+
     static void steppers_system_canal(char *dptr, unsigned char size);
 
-    static void actions_system_canal(char *dptr, unsigned char size);
+    static void EEPROM_system_canal(char *dptr, unsigned char size);
 
 };
 

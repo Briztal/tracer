@@ -111,6 +111,17 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
 
 }
 
+/*
+ * TODOs for a correct motion setup :
+ *      set end distances
+ *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
+ *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
+ *      set speed data, calling MotionScheduler::pre_set_speed_axis(...);
+ *      set processing functions, calling MotionExecuter::fill_processors(...);
+ *      call MotionExecuter::enqueue_movement_data
+ *
+ */
+
 
 void MotionExecuter::fill_speed_data(unsigned int delay_numerator, unsigned int regulation_delay, float ratio) {
     motion_data_to_fill.delay_numerator = delay_numerator;

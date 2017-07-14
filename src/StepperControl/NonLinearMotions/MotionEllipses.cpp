@@ -154,7 +154,7 @@ void MotionEllipses::move() {
 
 bool MotionEllipses::prepare_motion() {
 
-    motion_size = 2;
+    movement_size = 2;
 
     NonLinearMotionN::initialise_motion();
 

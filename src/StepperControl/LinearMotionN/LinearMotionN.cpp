@@ -40,14 +40,16 @@
 #define PROCESSING_STEPS 31
 
 /*
- * StepperControl Procedure
+ * Prepare_motion : takes a float[NB_STEPPERS] in argument.
+ *
+ *      It goes to the specified coordinates.
  *
  */
 
-
-void LinearMotionN::prepare_motion(float *destinations_t) { //GO TO (xmm,ymm)
+void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
 
     //TODO LINEAR_TOOLS
+
     /*
     //Set number of tools in continuous modes, and set action functions related
     if (ContinuousActions::linear_modes_enabled()) {
@@ -94,7 +96,7 @@ void LinearMotionN::prepare_motion(float *destinations_t) { //GO TO (xmm,ymm)
  * - set speed according to the movement (movement dimensions and greater axis)
  */
 
-unsigned char LinearMotionN::setup_movement_data(float *destinations_t, unsigned long *absolute_distances) {
+unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, unsigned long *absolute_distances) {
 
     //As distance on one axis can be null, an axis axis variable must be introduced. incremented after axis processed
 

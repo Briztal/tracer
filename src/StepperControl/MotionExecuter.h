@@ -65,7 +65,6 @@ public:
 
     static void fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char negative_signatures, unsigned char processing_steps);
 
-
     static void fill_speed_data(unsigned int delay_numerator, unsigned int regulation_delay, float ratio);
 
     static void fill_processors(void (*init_f)(), void (*step_f)(unsigned char), unsigned char (*position_f)(unsigned char *), void (*speed_f)());

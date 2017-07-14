@@ -54,6 +54,9 @@ void MachineController::system_canal_function(char *data, unsigned char size) {
         case 5 :
             steppers_system_canal(data, size);
             break;
+        case 6 :
+            EEPROM_system_canal(data, size);
+            break;
 
         default:break;
     }
@@ -165,37 +168,6 @@ void MachineController::loop_system_canal(char *data, unsigned char size) {
 
 }
 
-
-void MachineController::steppers_system_canal(char *data, unsigned char size) {
-
-#ifdef ENABLE_STEPPER_CONTROL
-
-    if (!size) return;
-
-    char sub_canal = *data;
-
-    switch(sub_canal) {
-        case 0 ://The initialisation case : send_packet a packet for each stepper
-#define STEPPER_DATA(i, j, ...)\
-            CI::prepare_system_packet();CI::add_char_out(STEPPER_SUBCANAL);CI::add_char_out(0);\
-            CI::add_char_out(i);CI::add_char_out(j);CI::send_packet();
-
-#include "../config.h"
-
-#undef STEPPER_DATA
-            break;
-        case 1 :
-            //TODO SEND POSITION
-            break;
-        default:
-            break;
-    }
-
-#endif
-
-}
-
-
 void MachineController::actions_system_canal(char *data, unsigned char size) {
 
     if (!size) return;
@@ -223,6 +195,76 @@ void MachineController::actions_system_canal(char *data, unsigned char size) {
 #undef CONTINUOUS
 #undef SERVO
             break;
+        default:
+            break;
+    }
+
+
+}
+
+
+
+
+
+void MachineController::steppers_system_canal(char *data, unsigned char size) {
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+    if (!size) return;
+
+    char sub_canal = *data;
+
+    int group_size;
+
+    switch(sub_canal) {
+        case 0 ://The initialisation case : send_packet a packet for each stepper
+
+#define STEPPER_DATA(i, j, ...)\
+            CI::prepare_system_packet();CI::add_char_out(STEPPER_SUBCANAL);CI::add_char_out(0);CI::add_char_out(0);\
+            CI::add_char_out(i);CI::add_char_out(j);CI::send_packet();
+
+#include "../config.h"
+
+#undef STEPPER_DATA
+
+
+#define CARTESIAN_GROUP(i, s0, s1, s2, s)\
+            group_size = (s0!=-1)+(s1!=-1)+(s2!=-1);\
+            CI::prepare_system_packet();CI::add_char_out(STEPPER_SUBCANAL);CI::add_char_out(0);CI::add_char_out(1);\
+            CI::add_char_out(i);CI::add_char_out(group_size);if (s0!=-1) CI::add_char_out(s0);\
+            if (s1!=-1) CI::add_char_out(s1);if (s2!=-1) CI::add_char_out(s2);CI::send_packet();
+
+
+#include "../config.h"
+
+#undef CARTESIAN_GROUP
+
+
+        case 1 :
+            break;
+
+        default:
+            break;
+    }
+
+#endif
+
+}
+
+
+
+void MachineController::EEPROM_system_canal(char *data, unsigned char size) {
+
+    if (!size) return;
+    char sub_canal = *data;
+
+    switch(sub_canal) {
+        case 0 : //The initialisation case : send the EEPROM_structure
+            EEPROMStorage::send_structure();
+            break;
+        case 1 : //Read case
+            break;
+        case 2 : //Write case
         default:
             break;
     }

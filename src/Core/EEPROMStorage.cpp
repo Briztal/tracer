@@ -23,7 +23,24 @@
 #include "../Interfaces/CommandInterface.h"
 #include "../config.h"
 
-//TODO Y A UN BUG, LE PROFIL N'EST PAS ECRIT EN MEMOIRE!
+/*
+ * Structure sub_canals :
+ *      0 : PIDs
+ *          0 : kp
+ *          1 : ki
+ *          2 : kd
+ *      1 : Loops (period_ms)
+ *      2 : Actions TODO
+ *      3 : steppers
+ *          0 : size
+ *          1 : steps
+ *          2 : max_speeds
+ *          3 : acceleration
+ *          4 : speed_groups (speed)
+ *      4 : custom_parameters;
+ *          i : parameter i;
+ */
+
 
 void EEPROMStorage::begin() {
     setDefaultProfile();
@@ -34,6 +51,13 @@ void EEPROMStorage::begin() {
     }
 
 }
+
+void EEPROMStorage::send_structure() {
+
+
+}
+
+
 
 bool EEPROMStorage::extractProfile() {
     //SAVE MARK CHECK
@@ -48,11 +72,22 @@ bool EEPROMStorage::extractProfile() {
 #ifdef ENABLE_STEPPER_CONTROL
     for (unsigned char id = 0; id<NB_STEPPERS; id++)
         read_stepper(indice, id, sizes, steps, maximum_speeds, accelerations);
+
+    for (unsigned char id = 0; id<NB_SPEED_GROUPS; id++)
+        group_maximum_speeds[id] = read_float(indice);
+
 #endif
 
+
 #ifdef ENABLE_ASSERV
+    //Read PIDs
     for (unsigned char id = 0; id<NB_PIDS; id++)
         read_pid(indice, id, kps, kis, kds);
+
+    //Read Control Loops
+    for (unsigned char id = 0; id<NB_LOOPS; id++)
+        loop_periods[id] = (unsigned int) read_int(indice);
+
 #endif
 
 #define EEPROM_BOOL(name, default_val) name = (bool) read_char(indice);
@@ -73,9 +108,6 @@ bool EEPROMStorage::extractProfile() {
 #undef EEPROM_LONG
 #undef EEPROM_FLOAT
 
-
-//TODO CUSTOM DATA
-
     return true;
 }
 
@@ -93,6 +125,12 @@ void EEPROMStorage::print_stored_data() {
         CI::echo("acceleration : "+String(accelerations[stepper])+"\n");
     }
 
+    CI::echo("Speed Groups : ");
+    for (int group = 0; group < NB_SPEED_GROUPS; group++) {
+        CI::echo("Group "+String(group));
+        CI::echo("max speed : "+String(group_maximum_speeds[group])+"\n");
+    }
+
 #endif
 
 #ifdef ENABLE_ASSERV
@@ -104,6 +142,13 @@ void EEPROMStorage::print_stored_data() {
         CI::echo("kp : "+String(kps[pid]));
         CI::echo("ki : "+String(kis[pid]));
         CI::echo("kd : "+String(kds[pid])+"\n");
+    }
+
+    //Control Loops
+    CI::echo("Control Loops : ");
+    for (int loop = 0; loop < NB_LOOPS; loop++) {
+        CI::echo("Loop "+String(loop));
+        CI::echo("period (ms) : "+String(loop_periods[loop])+"\n");
     }
 
 #endif
@@ -137,15 +182,28 @@ void EEPROMStorage::saveProfile() {
     int *indice = &vi;
 
 #ifdef ENABLE_STEPPER_CONTROL
+    //Write axis
     for (int axis = 0;axis<NB_STEPPERS;axis++) {
         write_stepper(indice, sizes[axis], steps[axis], maximum_speeds[axis], accelerations[axis]);
+    }
+
+    //Write speed groups
+    for (int group = 0;group<NB_SPEED_GROUPS;group++) {
+        write_float(indice, group_maximum_speeds[group]);
     }
 #endif
 
 #ifdef ENABLE_ASSERV
-    for (int axis = 0;axis<NB_STEPPERS;axis++) {
-        write_pid(indice, kps[axis], kis[axis], kds[axis]);
+    //Write PIDs
+    for (int pid = 0;pid<NB_PIDS;pid++) {
+        write_pid(indice, kps[pid], kis[pid], kds[pid]);
     }
+
+    //Write Periods
+    for (int loop = 0;loop<NB_LOOPS;loop++) {
+        write_int(indice, (int) loop_periods[loop]);
+    }
+
 #endif
 
 
@@ -179,6 +237,7 @@ void EEPROMStorage::setDefaultProfile() {
 
 #ifdef ENABLE_STEPPER_CONTROL
 
+    //Set default steppers data
 #define STEPPER_DATA(i, j, size, v_steps, speed, acceleration)\
     sizes[i] = size;\
     steps[i] = v_steps;\
@@ -188,6 +247,14 @@ void EEPROMStorage::setDefaultProfile() {
 #include "../config.h"
 
 #undef STEPPER_DATA
+
+    //Set default speeds
+#define CARTESIAN_GROUP(i, m0, m1, m2, s)\
+    group_maximum_speeds[i] = s;
+
+#include "../config.h"
+
+#undef CARTESIAN_GROUP
 
 #endif
 
@@ -202,6 +269,14 @@ void EEPROMStorage::setDefaultProfile() {
 #include "../config.h"
 
 #undef PID
+
+#define  LOOP_FUNCTION(indice, name, period_ms)\
+    loop_periods[indice] = period_ms;
+
+#include "../config.h"
+
+#undef LOOP_FUNCTION
+
 
 #endif
 
@@ -311,11 +386,8 @@ void EEPROMStorage::write_float(int *indice, float value) {
         EEPROM.write((*indice)++, t[i]);
 }
 
+
 #define m EEPROMStorage
-
-
-
-
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -325,20 +397,14 @@ float tstt[NB_STEPPERS];
 float ms[NB_STEPPERS];
 float ta[NB_STEPPERS];
 
+
 float *const m::sizes = ts;
 float *const m::steps = tstt;
 float *const m::maximum_speeds = ms;
 float *const m::accelerations = ta;
 
-float ds[NB_STEPPERS];
-float dstt[NB_STEPPERS];
-float dms[NB_STEPPERS];
-float da[NB_STEPPERS];
-
-float *const m::default_sizes = ds;
-float *const m::defaultSteps = dstt;
-float *const m::default_max_speeds = dms;
-float *const m::default_acceleration = da;
+float gms[NB_SPEED_GROUPS];
+float *const m::group_maximum_speeds = gms;
 
 #endif
 
@@ -353,13 +419,9 @@ float *const m::kps = tkps;
 float *const m::kis = tkis;
 float *const m::kds = tkds;
 
-float tdkps[NB_PIDS];
-float tdkis[NB_PIDS];
-float tdkds[NB_PIDS];
+unsigned int tlp[NB_LOOPS];
+unsigned int *const m::loop_periods = tlp;
 
-float *const m::default_kps = tdkps;
-float *const m::default_kis = tdkis;
-float *const m::default_kds = tdkds;
 
 #endif
 
