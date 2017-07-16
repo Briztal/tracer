@@ -26,7 +26,7 @@
 #ifndef TRACER_MOTIONEXECUTER_H
 #define TRACER_MOTIONEXECUTER_H
 
-#include "../Core/hardware_language_abstraction.h"
+#include "../hardware_language_abstraction.h"
 #include "motion_data.h"
 #include "../DataStructures/Queue.h"
 

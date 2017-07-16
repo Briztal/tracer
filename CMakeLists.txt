@@ -12,13 +12,14 @@ set(mega.upload.regulation_speed 115200)
 
 #--------------------------------------------LOW LEVEL LIBS-------------------------------------------------------------
 set(CP "src/Core")
+set(HP src/hardware_language_abstraction)
 
 generate_arduino_library(core
 
-        SRCS ${CP}/Core.cpp ${CP}/MachineControllerSystem.cpp ${CP}/MachineControllerCustom.cpp
-        ${CP}/hardware_language_abstraction.cpp ${CP}/EEPROMStorage.cpp
+        SRCS ${CP}/Core.cpp ${CP}/MachineControllerSystem.cpp ${CP}/MachineControllerCustom.cpp ${HP}/hardware_language_abstraction_atmega2560.cpp
+        ${CP}/EEPROMStorage.cpp
 
-        HDRS ${CP}/Core.h ${CP}/MachineControllerSystem.h ${CP}/hardware_language_abstraction.h ${CP}/EEPROMStorage.h
+        HDRS ${CP}/Core.h ${CP}/MachineControllerSystem.h ${CP}/EEPROMStorage.h  ${HP}/hardware_language_abstraction_atmega2560.cpp
 
         BOARD ${BOARD}
 

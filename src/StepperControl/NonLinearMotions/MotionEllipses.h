@@ -18,6 +18,11 @@
 
 */
 
+
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef CODE_MOTIONE_H
 #define CODE_MOTIONE_H
 
@@ -64,3 +69,5 @@ protected:
 
 
 #endif //CODE_MOTIONBEZIER_H
+
+#endif

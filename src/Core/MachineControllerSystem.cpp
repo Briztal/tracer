@@ -21,19 +21,20 @@
 #include "MachineControllerSystem.h"
 #include "../Interfaces/CommandInterface.h"
 #include "EEPROMStorage.h"
-
 #define EEPROM_SUBCANAL 1
 #define PID_SUBCANAL 2
 #define LOOP_SUBCANAL 3
 #define ACTION_SUBCANAL 4
 #define STEPPER_SUBCANAL 5
-#define PARAMETER_SUBCANAL 6
+#define PARAMETER_SUBCANAL 7
 
 
 #ifdef MONITOR_CANAL
 
 
 void MachineController::system_canal_function(char *data, unsigned char size) {
+
+
 
     if (!(size--)) return;
     char sub_canal = *(data++);
@@ -261,19 +262,43 @@ void MachineController::steppers_system_canal(char *data, unsigned char size) {
 
 void MachineController::EEPROM_system_canal(char *data, unsigned char size) {
 
-    if (!size) return;
-    char sub_canal = *data;
-
+    if (!size--) return;
+    char sub_canal = *(data++);
     switch(sub_canal) {
         case 0 : //The initialisation case : send the EEPROM_structure
             EEPROMStorage::send_structure();
-            break;
+            return;
+
         case 1 : //Read case
-            EEPROMStorage::read(data, size);
-            break;
+            CI::prepare_EEPROM_packet();
+            CI::add_char_out(1);
+            CI::add_float_out(EEPROMStorage::read(data, size));
+            CI::send_packet();
+            return;
+
         case 2 : //Write case
+            CI::prepare_EEPROM_packet();
+            CI::add_char_out(2);
+            CI::add_float_out(EEPROMStorage::write(data, size));
+            CI::send_packet();
+            return;
+
+        case 3 : //Save profile
+            EEPROMStorage::saveProfile();
+            CI::prepare_EEPROM_packet();
+            CI::add_char_out(3);
+            CI::add_float_out(0);
+            CI::send_packet();
+            return;
+
+        case 4 : //Restore default profile;
+            EEPROMStorage::setDefaultProfile();
+            CI::prepare_EEPROM_packet();
+            CI::add_char_out(4);
+            CI::add_float_out(0);
+            CI::send_packet();
         default:
-            break;
+            return;
     }
 
 

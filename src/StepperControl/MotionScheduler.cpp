@@ -109,7 +109,7 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
 
     if (group_coeff == 0) {//If no axis in the speed group has to move : find the first speed group with a moving axis.
         CI::echo("ERROR : THE SELECTED SPEED_GROUP DOESN'T COVER YOUR MOVEMENT : SELECTING ANOTHER");
-        for (int group = 0; group < NB_SPEED_GROUPS; group++) {
+        for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
             if (group == speed_group) continue;
             group_signature = speed_groups_signatures[group];
             group_coeff = 0;
@@ -215,10 +215,10 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
 
 unsigned char m::speed_group = 0;
 
-float ttrs[NB_SPEED_GROUPS];
+float ttrs[NB_CARTESIAN_GROUPS];
 float *const m::theorical_regulation_speeds = ttrs;
 
-unsigned char ttgs[NB_SPEED_GROUPS];
+unsigned char ttgs[NB_CARTESIAN_GROUPS];
 unsigned char *const m::speed_groups_signatures = ttgs;
 
 long pos[NB_STEPPERS];

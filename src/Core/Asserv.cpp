@@ -60,7 +60,7 @@ float Asserv::get_pid_##i(float error) {\
     }
 
 
-#include "hardware_language_abstraction.h"
+#include "../hardware_language_abstraction.h"
 #include "../config.h"
 
 #undef LOOP_FUNCTION;

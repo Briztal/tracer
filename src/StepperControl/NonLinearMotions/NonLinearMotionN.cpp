@@ -18,6 +18,9 @@
 
 */
 
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
 
 #include "NonLinearMotionN.h"
 #include "../../Interfaces/CommandInterface.h"
@@ -372,3 +375,5 @@ void NonLinearMotionN::checkPosition(float *offsets, unsigned int d) {
     }
 }
  */
+
+#endif

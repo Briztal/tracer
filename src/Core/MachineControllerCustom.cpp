@@ -27,13 +27,11 @@
 
 #include "../config.h"
 
-#ifdef ENABLE_STEPPER_CONTROL
 
 #include "../StepperControl/MotionScheduler.h"
 #include "../StepperControl/LinearMotionN/LinearMotionN.h"
 #include "../StepperControl/LinearMotionN/HomingMotion.h"
 
-#endif
 
 void MachineController::action(char * dptr, unsigned char size) {
 

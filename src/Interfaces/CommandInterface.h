@@ -18,7 +18,7 @@
 
 */
 
-#include "../Core/hardware_language_abstraction.h"
+#include "../hardware_language_abstraction.h"
 #if !defined(HL_SERIAL)
 #error CommandInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
 #endif

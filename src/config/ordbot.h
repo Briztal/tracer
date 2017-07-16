@@ -120,7 +120,7 @@ BINARY(1, binary2, 9, 1)
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
 #ifdef CONTINUOUS
-#define NB_CONTINUOUS 1
+#define NB_CONTINUOUS 2
 
 CONTINUOUS(0, continuous, 8, 80)
 CONTINUOUS(1, continuous2, 8, 80)
@@ -134,6 +134,7 @@ CONTINUOUS(1, continuous2, 8, 80)
 
 #ifdef SERVO
 
+#define NB_SERVOS 2
 SERVO(0, servo, 4, 0, 1)
 SERVO(1, servo2, 4, 0, 1)
 SERVO(2, servo3, 4, 0, 1)
@@ -189,7 +190,7 @@ STEPPER_DATA(   3,  '3',    150.,   80.16,  500,    1200);
 
 #endif
 
-#define NB_SPEED_GROUPS 2
+#define NB_CARTESIAN_GROUPS 2
 
 #ifdef CARTESIAN_GROUP
 

@@ -30,12 +30,30 @@
  * This class manges the storage in EEPROM of all data required by the program to work.
  *
  * It stores data for :
- *      - control loops (kp, ki, kd);
- *      - Stepper Motors (steps/mm, speed, acceleration ...)
- *      - Custom data you may have specified in EEPROM_profile.h
+ *
+ *      - PIDs (kp, ki, kd);
+ *      - Control Loops (period_ms)
+ *      - Continuous Actions (max)
+ *      - Servo Actions(min and max)
+ *      - Stepper Motors (sizes, steps/unit, speed, acceleration)
+ *      - Cartesian Speed Groups (steps/mm, speed, acceleration ...)
+ *      - Custom data you may have specified in your config.h
  */
 
 class EEPROMStorage {
+
+
+public :
+
+    static float read(char *data, unsigned char size);
+
+    static float write(char *data, unsigned char size);
+
+    static void setDefaultProfile();
+
+    static void saveProfile();
+
+
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -47,6 +65,7 @@ public :
     static float *const maximum_speeds;
     static float *const accelerations;
     static float *const group_maximum_speeds;
+
 
 private:
 
@@ -77,6 +96,13 @@ private :
 
 #endif
 
+//Actions
+
+public :
+    static float *const continuous_max;
+    static float *const servos_min;
+    static float *const servos_max;
+
 public :
 
     //Custom data
@@ -85,24 +111,6 @@ public :
 #define EEPROM_INT(name, default_value) static int name;
 #define EEPROM_LONG(name, default_value) static long name;
 #define EEPROM_FLOAT(name, default_value) static float name;
-
-#include "../config.h"
-
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-private :
-
-    //Custom default data
-#define EEPROM_BOOL(name, default_value) static bool default_##name;
-#define EEPROM_CHAR(name, default_value) static char default_##name;
-#define EEPROM_INT(name, default_value) static int default_##name;
-#define EEPROM_LONG(name, default_value) static long default_##name;
-#define EEPROM_FLOAT(name, default_value) static float default_##name;
 
 #include "../config.h"
 
@@ -125,10 +133,6 @@ private :
 
     static bool extractProfile();
 
-    static void saveProfile();
-
-    static void setDefaultProfile();
-
     //Primitive data methods
 
     static void write_char(int *indice, char value);
@@ -141,8 +145,7 @@ private :
     static long read_long(int *indice);
     static float read_float(int *indice);
 
-    float read(unsigned char *data, unsigned char size);
 };
 
 
-#endif //CODE_SETTINGSPROFILE_H
+#endif

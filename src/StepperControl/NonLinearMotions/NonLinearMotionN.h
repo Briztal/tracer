@@ -19,6 +19,10 @@
 */
 
 
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #ifndef CODE_NONLINEARMOTIONN_H
 #define CODE_NONLINEARMOTIONN_H
 
@@ -122,3 +126,6 @@ public:
 };
 
 #endif //CODE_NONTRIVIALMOTION_H
+
+
+#endif

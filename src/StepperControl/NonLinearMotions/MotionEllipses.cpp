@@ -19,6 +19,9 @@
 */
 
 
+#include "../../config.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
 
 #include <math.h>
 #include <USBAPI.h>
@@ -331,3 +334,5 @@ void MotionEllipses::trigProcess(int x, float &cos, float &sin) {
 
 
 */
+
+#endif
