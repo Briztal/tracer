@@ -184,7 +184,6 @@ void MotionExecuter::wait_for_movement() {
         speed_processor = popped_data.speed_processor;
         step = popped_data.step;
 
-
         //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
         es0[0] = popped_data.initial_signatures[0];
         es0[1] = popped_data.initial_signatures[1];
@@ -198,7 +197,6 @@ void MotionExecuter::wait_for_movement() {
 
         StepperController::enable(255);
         StepperController::set_directions(popped_data.initial_dir_signature);
-
 
         trajectory_indice = popped_data.initial_indice;
 
@@ -250,7 +248,6 @@ void MotionExecuter::prepare_next_sub_motion() {
 
     unsigned char elementary_dists[NB_STEPPERS];
     unsigned char negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
-
 
     //Distances Processing
 
@@ -386,6 +383,11 @@ void MotionExecuter::finish_sub_movement() {
                 set_last_sub_motion();
                 ultimate_movement = false;
             } else {
+
+                StepperController::echo_positions();
+                for (int i = 0; i<NB_STEPPERS; i++) {
+                    CI::echo("dist "+String(i)+" "+String(end_distances[i]));
+                }
                 MotionScheduler::send_position();
                 set_stepper_int_function(wait_for_movement);
                 ultimate_movement = penultimate_movement = true;

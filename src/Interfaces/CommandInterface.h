@@ -148,6 +148,7 @@ private:
 #include "interface_config.h"
 
 
+    static void prepare_EEPROM_packet();
 };
 
 #endif

@@ -1,12 +1,6 @@
 
 BEFORE BRANCHING FOR TEENSY :
 
-//TODO MMMMMMMMMMMMMMMMMMMMMMEEEEEEEEEEEEGGGGGGGGGGGAAAAAAAAAA IMPROTANT :
-
-
-            PASSER LES DISTANCES EN ABSOLUES
-            VIRER LES first dans fill_movement_data
-
 
 
 //TODO TROUVER UN MOYEN D'EMPILER LES HOMING_MOTIONS (TYPE DE MOUVEMENT FOURNI DANS LA STRUCT)
@@ -21,7 +15,6 @@ BEFORE BRANCHING FOR TEENSY :
 
 //TODO WHEN PROCESSING STEP IS TOO HIGH, THE MACHINE GETS LOST
 
-//TODO REBUILD NONLINEARMotons
 
 //AUXS  :
 
@@ -44,30 +37,4 @@ BEFORE BRANCHING FOR TEENSY :
 //TODO TESTER LA REGULATION EN VITESSE : OBSERVER LA VITESSE EN TEMPS REEL
 
 //TODO N'appeler l'heuristique que quand l'axe limitant a été diminué
-
-
-
-REGULATION DE VITESSE QUELCONQUE :
-
-Donee : fontion de vitesse, calculant les delays de consigne pour tous les axes, etant donnée une position.
-(cas des machines outils cartesiennes par groupe : ne depend pas de la position -> proportonnalité entre les axes, si
-la vitesse de regulation est constante.
-
-TOUS LES AXES POSSEDENT LEUR DELAY consigne, directement issus de la fonction de vitesse
-
-Methode de convergence des delays : deux methodes.
-    - Chaque axe a sa distance de vitesse :
-
-pendant chaque mouvement elementaire : somme des delays concernés par le sous mouvement, et modif de la duree d'interruption
-
-
-
-
-
-
-
-
-
-
-
 

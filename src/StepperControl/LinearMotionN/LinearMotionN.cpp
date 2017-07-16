@@ -314,7 +314,7 @@ void LinearMotionN::initialise_motion() {
 //TODO COPIED... BETTER TAKE DIRECTLY POINTER
 
     linear_data data = data_queue.pull();
-    
+
     MR_shift_nb = data.shift_nb;
     MR_max_axis = data.max_axis;
 

@@ -140,6 +140,8 @@ private :
     static int read_int(int *indice);
     static long read_long(int *indice);
     static float read_float(int *indice);
+
+    float read(unsigned char *data, unsigned char size);
 };
 
 

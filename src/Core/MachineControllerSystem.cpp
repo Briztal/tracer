@@ -22,13 +22,16 @@
 #include "../Interfaces/CommandInterface.h"
 #include "EEPROMStorage.h"
 
-#define PARAMETER_SUBCANAL 1
+#define EEPROM_SUBCANAL 1
 #define PID_SUBCANAL 2
 #define LOOP_SUBCANAL 3
 #define ACTION_SUBCANAL 4
 #define STEPPER_SUBCANAL 5
+#define PARAMETER_SUBCANAL 6
+
 
 #ifdef MONITOR_CANAL
+
 
 void MachineController::system_canal_function(char *data, unsigned char size) {
 
@@ -40,7 +43,7 @@ void MachineController::system_canal_function(char *data, unsigned char size) {
             CI::send_tree_structure();
             break;
         case 1 :
-            parameters_system_canal(data, size);
+            EEPROM_system_canal(data, size);
             break;
         case 2 :
             pid_system_canal(data, size);
@@ -54,8 +57,11 @@ void MachineController::system_canal_function(char *data, unsigned char size) {
         case 5 :
             steppers_system_canal(data, size);
             break;
-        case 6 :
-            EEPROM_system_canal(data, size);
+        case 6 ://ECHO. DO NOTHING
+            //echo_system_canal(data, size);
+            break;
+        case 7 :
+            parameters_system_canal(data, size);
             break;
 
         default:break;
@@ -263,6 +269,7 @@ void MachineController::EEPROM_system_canal(char *data, unsigned char size) {
             EEPROMStorage::send_structure();
             break;
         case 1 : //Read case
+            EEPROMStorage::read(data, size);
             break;
         case 2 : //Write case
         default:

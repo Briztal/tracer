@@ -62,7 +62,7 @@ void CI::initialise_aliases() {
 
 
 /*
- * echo : this is a public shortcut allorwing to send_packet echo data all along the code.
+ * echo : this is a public shortcut allowing to send_packet echo data all along the code.
  *
  * The command id is the following : 0 (system canal) - 6 (echo canal);
  */
@@ -98,6 +98,10 @@ void CI::prepare_structure_packet() {
 
 void CI::prepare_system_packet() {
     prepare_data_out("\0", 1);
+}
+
+void CI::prepare_EEPROM_packet() {
+    prepare_data_out("\0\1", 2);
 }
 
 //--------------------------------------------------Packet Emission-----------------------------------------------------
@@ -354,7 +358,6 @@ void CI::send_tree_structure() {
      * create_leaf(i, name) :           4, i, name
      * require_arg(i, name) :           5, i, name
      * allow_multiplicity(i name)       6, i, name
-
      */
 
     prepare_structure_packet();
