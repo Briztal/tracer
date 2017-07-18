@@ -350,6 +350,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 
     char t[4];
 
+    /*for (int i = 0; i<4; i++)CI::echo(String((unsigned char)data[i]));return 0;*/
 #define WRITE_RETURN(var, type)  for (int i = 0; i<4; i++)t[i] = data[i];return (var = (type)(*(float*)t));
 
     if (!(size--)) return 0;
