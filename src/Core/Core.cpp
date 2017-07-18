@@ -145,13 +145,15 @@ bool Core::process_internal_task() {
 }
 
 Queue<void(*)(char *, unsigned char)> Core::external_tasks(MAX_TASKS);
+
 Queue<void(*)()> Core::internal_tasks(MAX_TASKS);
 char args_tab[MAX_TASKS][PACKET_SIZE+1];
 char *Core::external_args = (char *) args_tab;
 
 
-
-
-
-
+template class Queue<motion_data>;
+template class Queue<linear_data>;
+template class Queue<int>;
+template class Queue<void(*)(char *args, unsigned char args_size)>;
+template class Queue<void(*)()>;
 

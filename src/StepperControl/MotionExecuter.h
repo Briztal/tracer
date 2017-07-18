@@ -31,8 +31,8 @@
 #include "../DataStructures/Queue.h"
 
 #define WAIT\
-    while(!TIFR5) {}\
-        TIFR5 = 255;
+    while(!stepper_int_flag) {}\
+        stepper_int_flag_clear();
 
 #define ME MotionExecuter
 

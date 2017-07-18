@@ -25,20 +25,64 @@
 
 template <typename T> class Queue {
 
+
+#define SAFE_DECR(i)\
+    if (i) {\
+        i--;\
+    } else {\
+        i = max_indice;\
+    }\
+
+
 public:
-    Queue(unsigned char size);
+    Queue(unsigned char size)  :
+            size(size), content(new T[size]), max_indice((const unsigned char) (size - 1)),
+            spaces(size){
 
-    T pull();
+    }
 
-    void push(T);
 
-    unsigned char available_spaces();
+    T pull() {
 
-    unsigned char available_elements();
+        T element = content[pull_index];
 
-    const unsigned char pull_indice();
+        SAFE_DECR(pull_index);
 
-    const unsigned char push_indice();
+        elements--;
+        spaces++;
+
+        return element;
+    }
+
+    void push(T element) {
+
+        if (!spaces)
+            return;
+
+        content[push_index] = element;
+
+        SAFE_DECR(push_index);
+
+        elements++;
+        spaces--;
+
+    }
+
+    unsigned char available_spaces() {
+        return spaces;
+    }
+
+    unsigned char available_elements() {
+        return elements;
+    }
+
+    const unsigned char pull_indice() {
+        return pull_index;
+    }
+
+    const unsigned char push_indice() {
+        return push_index;
+    }
 
 private:
 
@@ -55,10 +99,5 @@ private:
 
 };
 
-template class Queue<motion_data>;
-template class Queue<linear_data>;
-template class Queue<int>;
-template class Queue<void(*)(char *args, unsigned char args_size)>;
-template class Queue<void(*)()>;
 
 #endif //TRACER_QUEUE_H

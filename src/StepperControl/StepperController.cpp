@@ -26,8 +26,6 @@
 
 
 #include "StepperController.h"
-
-#include "../External/digitalWriteFast.h"
 #include "../Interfaces/CommandInterface.h"
 #include "../Core/EEPROMStorage.h"
 
@@ -35,10 +33,8 @@
 #define PARAMS_REQUIRED
 
 #define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
-unsigned int pinPort##i = *__digitalPinToPortReg(pinStep);\
-unsigned int pinBit##i = __digitalPinToBit(pinStep);\
-bool StepperController::isAtMax##i ()  {return (digitalReadFast(pinEndMax )==HIGH);}\
-bool StepperController::isAtMin##i() { return (digitalReadFast(pinEndMin)==HIGH);}\
+bool StepperController::isAtMax##i ()  {return (digital_read(pinEndMax )==HIGH);}\
+bool StepperController::isAtMin##i() { return (digital_read(pinEndMin)==HIGH);}\
 
 
 #include "../config.h"
@@ -49,9 +45,9 @@ bool StepperController::isAtMin##i() { return (digitalReadFast(pinEndMin)==HIGH)
 void StepperController::enable(unsigned char signature) {
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
     if (signature&sig) {\
-        digitalWriteFast(pinPower, LOW);\
+        digital_write(pinPower, LOW);\
     } else {\
-        digitalWriteFast(pinPower, HIGH);\
+        digital_write(pinPower, HIGH);\
     }
 
 #include "../config.h"
@@ -68,11 +64,11 @@ void StepperController::set_directions(unsigned char negative_signatures) {
     sig_dir = negative_signatures&sig;\
     if ((!sig_dir) && !dir##i) {\
         dir##i = true;\
-        digitalWriteFast(pinDir, dirp);\
+        digital_write(pinDir, dirp);\
         incr##i=1;\
     } else if (sig_dir && (dir##i)) {\
         dir##i = false;\
-        digitalWriteFast(pinDir, !dirp);\
+        digital_write(pinDir, !dirp);\
         incr##i=-1;\
     }\
 
@@ -83,10 +79,10 @@ void StepperController::set_directions(unsigned char negative_signatures) {
     sig_dir = negative_signatures&sig;\
     if ((!sig_dir) && !dir##i) {\
         dir##i = true;\
-        digitalWriteFast(pinDir, dirp);\
+        digital_write(pinDir, dirp);\
     } else if (sig_dir && (dir##i)) {\
         dir##i = false;\
-        digitalWriteFast(pinDir, !dirp);\
+        digital_write(pinDir, !dirp);\
     }\
 
 #endif
@@ -104,11 +100,11 @@ void StepperController::setDir##i(bool sens) {\
     if (!(sens ^ dir##i )) return;\
         dir##i = sens;\
         if (sens) {\
-            digitalWriteFast(pinDir, dirp);\
+            digital_write(pinDir, dirp);\
             lim##i = max##i ;\
             incr##i=1;\
         } else {\
-            digitalWriteFast(pinDir, !dirp);\
+            digital_write(pinDir, !dirp);\
             lim##i = 0;\
             incr##i=-1;\
     }\
@@ -123,10 +119,10 @@ void StepperController::setDir##i(bool sens) {\
     if (!(sens ^ dir##i )) return;\
         dir##i = sens;\
         if (sens) {\
-            digitalWriteFast(pinDir, dirp);\
+            digital_write(pinDir, dirp);\
             lim##i = max##i ;\
         } else {\
-            digitalWriteFast(pinDir, !dirp);\
+            digital_write(pinDir, !dirp);\
             lim##i = 0;\
     }\
 }
@@ -142,7 +138,7 @@ void StepperController::begin() {
 
 #define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
     pinMode(pinPower, OUTPUT);pinMode(pinDir, OUTPUT);pinMode(pinStep, OUTPUT);\
-    digitalWriteFast(pinPower, HIGH);setDir##i(true);
+    digital_write(pinPower, HIGH);setDir##i(true);
 
 #include "../config.h"
 
@@ -158,8 +154,8 @@ void StepperController::fastStep(unsigned char id) {
         /*if (id&(unsigned char)1) {*/\
         if (id&sig) {\
             pos##i += incr##i;\
-            BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-            BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
+            digital_write(pinStep, HIGH);\
+            digital_write(pinStep, LOW);\
         }\
         //if (!(id>>=1)) return;
 

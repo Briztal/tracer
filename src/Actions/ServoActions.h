@@ -20,6 +20,8 @@
 
 #ifndef CODE_SERVOACTIONS_H
 #define CODE_SERVOACTIONS_H
+
+/*
 #include "../External/Servo.h"
 
 class ServoActions {
@@ -43,5 +45,5 @@ private:
     void begin();
 };
 
-
+*/
 #endif //CODE_SERVOACTIONS_H

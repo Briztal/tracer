@@ -236,8 +236,6 @@ void SpeedManager::set_delay_parameters(unsigned int tmp_regulation_delay, unsig
     regulation_unreached = true;
     SpeedManager::processing_steps = procesing_steps;
 
-    CommandInterface::echo(String(delay0)+" "+String(OCR5A));
-
 }
 
 

@@ -53,13 +53,13 @@
  */
 
 
-#define PID_CAT 0
-#define LOOP_CAT 1
-#define CONTINUOUS_CAT 2
-#define SERVO_CAT 3
-#define STEPPER_CAT 4
-#define CARTESIAN_GROUP_CAT 5
-#define CUSTOM_CAT 6
+#define PID_CAT (unsigned char) 0
+#define LOOP_CAT (unsigned char) 1
+#define CONTINUOUS_CAT (unsigned char) 2
+#define SERVO_CAT (unsigned char) 3
+#define STEPPER_CAT (unsigned char) 4
+#define CARTESIAN_GROUP_CAT (unsigned char) 5
+#define CUSTOM_CAT (unsigned char) 6
 
 
 void EEPROMStorage::begin() {
@@ -230,7 +230,7 @@ void EEPROMStorage::send_structure() {
 
 float EEPROMStorage::read(char *data, unsigned char size) {
     if (!(size--)) return 0;
-    char c = *(data++), id;
+    unsigned char c = (unsigned char)*(data++), id;
 
     switch (c) {
 
@@ -238,7 +238,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 
         case PID_CAT :
             if (size < 2) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_PIDS) return 0;
             switch (*(data)) {
                 case 0 ://kp
@@ -253,7 +253,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 
         case LOOP_CAT :
             if (size < 2) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_LOOPS) return 0;
             switch (*(data)) {
                 case 0 ://period
@@ -266,7 +266,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 
         case CONTINUOUS_CAT :
             if (size < 2) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_CONTINUOUS) return 0;
             switch (*(data)) {
                 case 0 ://size
@@ -277,7 +277,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 
         case SERVO_CAT :
             if (size < 2) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_SERVOS) return 0;
             switch (*(data)) {
                 case 0 ://size
@@ -291,7 +291,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 #ifdef ENABLE_STEPPER_CONTROL
         case STEPPER_CAT :
             if (size < 2) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_STEPPERS) return 0;
             switch (*(data)) {
                 case 0 ://size
@@ -308,7 +308,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 
         case CARTESIAN_GROUP_CAT :
             if (size < 2) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_CARTESIAN_GROUPS) return 0;
             switch (*(data)) {
                 case 0 ://size
@@ -319,7 +319,7 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 #endif
 
         case CUSTOM_CAT :
-            id  = *(data++);
+            id  = (unsigned char)*(data++);
 
 
 #define EEPROM_FLOAT(name, default_val) if (!(id--)) return (float)name;
@@ -348,19 +348,28 @@ float EEPROMStorage::read(char *data, unsigned char size) {
 
 float EEPROMStorage::write(char *data, unsigned char size) {
 
-#define WRITE_RETURN(var, type) return (var = (type)(*(float*)data));
+    char t[4];
+
+#define WRITE_RETURN(var, type)  for (int i = 0; i<4; i++)t[i] = data[i];return (var = (type)(*(float*)t));
 
     if (!(size--)) return 0;
-    char c = *(data++), id;
+    unsigned char c = (unsigned char)*(data++), id;
+
+    CI::echo("2");
 
     switch (c) {
 
 #ifdef ENABLE_ASSERV
 
         case PID_CAT :
+            CI::echo("3");
+
+
             if (size < 6) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_PIDS) return 0;
+            CI::echo("4");
+
             switch (*(data++)) {
                 case 0 ://kp
                     WRITE_RETURN(kps[id], float);
@@ -374,7 +383,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 
         case LOOP_CAT :
             if (size < 6) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_LOOPS) return 0;
             switch (*(data)) {
                 case 0 ://period
@@ -387,7 +396,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 
         case CONTINUOUS_CAT :
             if (size < 6) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_CONTINUOUS) return 0;
             switch (*(data)) {
                 case 0 ://max
@@ -398,7 +407,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 
         case SERVO_CAT :
             if (size < 6) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_SERVOS) return 0;
             switch (*(data)) {
                 case 0 ://min
@@ -413,7 +422,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 
         case STEPPER_CAT :
             if (size < 6) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_STEPPERS) return 0;
             switch (*(data)) {
                 case 0 ://size
@@ -430,7 +439,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 
         case CARTESIAN_GROUP_CAT :
             if (size < 6) return 0;
-            id = *(data++);
+            id = (unsigned char)*(data++);
             if (id>=NB_CARTESIAN_GROUPS) return 0;
             switch (*(data)) {
                 case 0 ://size
@@ -442,7 +451,7 @@ float EEPROMStorage::write(char *data, unsigned char size) {
 #endif
 
         case CUSTOM_CAT :
-            id  = *(data++);
+            id  = (unsigned char)*(data++);
 
 
 #define EEPROM_FLOAT(name, default_val) if (!(id--)) WRITE_RETURN(name, float);
@@ -736,7 +745,7 @@ void EEPROMStorage::setDefaultProfile() {
 #define CONTINUOUS(i, name, powerPin, maxValue)\
     continuous_max[i] = maxValue;
 
-#include "../config.h";
+#include "../config.h"
 
 #undef CONTINUOUS
 
@@ -744,7 +753,7 @@ void EEPROMStorage::setDefaultProfile() {
 #define SERVO(i, name, dataPin, minValue, maxValue)\
     servos_min[i] = minValue; servos_max[i] = maxValue;
 
-#include "../config.h";
+#include "../config.h"
 
 #undef SERVO
 

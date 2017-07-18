@@ -79,7 +79,6 @@
 #define PROJECT_SYSTEM_H
 
 
-#include <USBAPI.h>
 #include "../DataStructures/Queue.h"
 
 class Core {

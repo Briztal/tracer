@@ -24,14 +24,19 @@
 #include "../config.h"
 #include "../Core/Core.h"
 
-#define BEGIN_BYTE 255
-#define BEGIN_CHAR -1
+#define BEGIN_BYTE (unsigned char)255
+#define BEGIN_CHAR (char)-1
 
 void CI::begin() {
     serial_begin(BAUDRATE);
     initialise_aliases();
     delay_ms(100);
     *data_out_0 = BEGIN_CHAR;
+
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH);
+
+
 }
 
 /*
@@ -254,16 +259,20 @@ void CI::send_packet() {
     unsigned char size = data_out_size;
 
     *size_ptr = (char)(size-1);
-
+    //serial_echo_byte((char)(size));
     char *ptr = data_out_0;
-    for (size+=1;size--;) {
-        serial_echo_byte(*(ptr++));
+        for (size+=1;size--;) {
+        serial_echo_byte(*ptr++);
     }
     serial_echo_byte((char)0);
+
+    digitalWrite(13, (uint8_t)!digitalRead(13));
 
 }
 
 void CI::enqueue(char *command, unsigned char size) {
+
+
 
     char b = *command;
 
@@ -309,6 +318,7 @@ void CI::read_serial() {
 
     char r;
     while (serial_available()) {
+
         r = (char) serial_read();
         if (first_detected) {
             if (r == BEGIN_CHAR) {//Second time begin byte is detected : not a begin symbol.
@@ -323,6 +333,8 @@ void CI::read_serial() {
                 return;
             }
         } else if (r == BEGIN_CHAR) {
+            Serial.print("\1\3");
+
             first_detected = true;
             return;
         }
@@ -399,6 +411,7 @@ void CI::send_tree_structure() {
     send_packet();
 
 #include "interface_config.h"
+
 
     prepare_structure_packet();
     add_char_out(1);

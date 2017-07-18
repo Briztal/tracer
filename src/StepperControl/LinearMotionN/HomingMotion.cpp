@@ -26,7 +26,6 @@
 #include "../../Core/EEPROMStorage.h"
 #include "HomingMotion.h"
 #include "../../StepperControl/StepperController.h"
-#include "../../External/digitalWriteFast.h"
 #include "../MotionScheduler.h"
 #include "../MotionExecuter.h"
 
@@ -117,7 +116,7 @@ unsigned char HomingMotion::readEndStops() {
 
 #define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
     if (!rel) {\
-        if ((bool)digitalReadFast(pinEndMin) == minValue) {\
+        if ((bool)digital_read(pinEndMin) == minValue) {\
             signature|=sig;\
         }\
     }

@@ -19,12 +19,13 @@
 */
 
 #include "ContinuousActions.h"
-#include "Arduino.h"
+#include "../hardware_language_abstraction.h"
+
 
 void ContinuousActions::begin() {
     //INIT : PWM à 0;
 #define CONTINUOUS(i, name, pin, max) \
-    analogWrite(pin, 0);
+    analog_write(pin, 0);
 
 #include "../config.h"
 
@@ -56,9 +57,9 @@ void ContinuousActions::setPower##i (float f) {\
     }\
     enabled##i=true;\
     if (f<=max)\
-        analogWrite(pin,  f * (255.0 / (float)max));\
+        analog_write(pin,  f * (255.0 / (float)max));\
     else \
-        analogWrite(pin, 255);\
+        analog_write(pin, 255);\
 }\
 void ContinuousActions::setLinearPower##i (float f) {\
     if (!enabled##i){\
@@ -74,9 +75,9 @@ void ContinuousActions::set_power_for_speed_##i (float speed) {\
     float power = speed*linearPower##i;\
     enabled##i=true;\
     if (power<=max) {\
-        analogWrite(pin,  power * (255.0 / (float)max));\
+        analog_write(pin,  power * (255.0 / (float)max));\
     } else \
-        analogWrite(pin,  255);\
+        analog_write(pin,  255);\
 }\
 void ContinuousActions::disable##i() {\
     enabled##i = false;\

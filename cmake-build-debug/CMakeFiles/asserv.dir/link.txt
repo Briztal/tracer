@@ -1,0 +1,2 @@
+/usr/bin/ar qc libasserv.a  CMakeFiles/asserv.dir/src/Core/Asserv.cpp.o
+/usr/bin/ranlib libasserv.a

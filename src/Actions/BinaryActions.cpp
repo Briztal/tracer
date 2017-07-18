@@ -20,8 +20,8 @@
 
 #include "BinaryActions.h"
 
-#include <avr/io.h>
-#include "../External/digitalWriteFast.h"
+
+#include "../hardware_language_abstraction.h"
 
 
 #define BINARY(i, name, pin, ev) \

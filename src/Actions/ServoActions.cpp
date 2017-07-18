@@ -18,6 +18,7 @@
 
 */
 
+/*
 #include "ServoActions.h"
 
 void ServoActions::begin() {
@@ -45,3 +46,4 @@ Servo *ServoActions::servo##i = new Servo();\
 
 #undef SERVO
 
+*/

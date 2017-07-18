@@ -149,7 +149,7 @@ SERVO(2, servo3, 4, 0, 1)
 //#################################################LOG_SETTINGS#########################################################
 
 //Log settings. Uncomment those lines to output (resp) position and overflow marker in Monitor
-#define position_log;
+#define position_log
 
 
 //distance btw two position logs

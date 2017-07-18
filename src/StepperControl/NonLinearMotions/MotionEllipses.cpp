@@ -23,8 +23,6 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include <math.h>
-#include <USBAPI.h>
 #include "MotionEllipses.h"
 #include "NonLinearMotionN.h"
 #include "../MotionScheduler.h"
@@ -152,6 +150,7 @@ float st[361] =
 
 float *const MotionEllipses::sinTable = st;
 
+/*
 
 bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, float A, float B, float begin_angle_r, float V, float rotation_angle_r, float count_angle_r) {
 
@@ -208,6 +207,7 @@ bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, 
 
     */
 
+/*
     float max = begin_angle_d + count_angle_d;
     min = begin_angle_d;
 
@@ -223,11 +223,11 @@ bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, 
     last_absolute_positions_s[0] = center_0 + last_absolute_positions_s[0];
     last_absolute_positions_s[1] = center_1 + last_absolute_positions_s[1];
 
-    */
+
 
     //set_last_position();
 
-}
+}*/
 
 void MotionEllipses::init_position_parameters() {
 

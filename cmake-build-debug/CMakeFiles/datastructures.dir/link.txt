@@ -1,0 +1,2 @@
+/usr/bin/ar qc libdatastructures.a  CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o
+/usr/bin/ranlib libdatastructures.a

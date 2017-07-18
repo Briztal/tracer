@@ -18,6 +18,8 @@
 
 */
 
+/*
+
 #include "Queue.h"
 
 #define SAFE_DECR(i)\
@@ -76,4 +78,4 @@ template <typename T> unsigned char Queue<T>::available_elements() {
     return elements;
 }
 
-
+*/

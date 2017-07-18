@@ -1,115 +1,146 @@
-cmake_minimum_required(VERSION 2.8.4)
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/ArduinoToolchain.cmake)
+cmake_minimum_required(VERSION 3.2)
+project(TRACER)
 
-project(TRACER C CXX)
 
-set(BOARD mega)
-set(PORT /dev/ttyACM0)
+include(CMakeListsPrivate.txt)
 
-set(mega.build.mcu atmega2560)
-set(mega.upload.protocol wiring)
-set(mega.upload.regulation_speed 115200)
+add_custom_target(
+    PLATFORMIO_BUILD ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion run
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_UPLOAD ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion run --target upload
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_CLEAN ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion run --target clean
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_TEST ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion test
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_PROGRAM ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion run --target program
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_UPLOADFS ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion run --target uploadfs
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_UPDATE_ALL ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion update
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(
+    PLATFORMIO_REBUILD_PROJECT_INDEX ALL
+    COMMAND ${PLATFORMIO_CMD} -f -c clion init --ide clion
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 
 #--------------------------------------------LOW LEVEL LIBS-------------------------------------------------------------
 set(CP "src/Core")
 set(HP src/hardware_language_abstraction)
 
-generate_arduino_library(core
+add_library(core
 
-        SRCS ${CP}/Core.cpp ${CP}/MachineControllerSystem.cpp ${CP}/MachineControllerCustom.cpp ${HP}/hardware_language_abstraction_atmega2560.cpp
+         ${CP}/Core.cpp ${CP}/MachineControllerSystem.cpp ${CP}/MachineControllerCustom.cpp ${HP}/hardware_language_abstraction_teensy3.cpp
         ${CP}/EEPROMStorage.cpp
 
-        HDRS ${CP}/Core.h ${CP}/MachineControllerSystem.h ${CP}/EEPROMStorage.h  ${HP}/hardware_language_abstraction_atmega2560.cpp
+         ${CP}/Core.h ${CP}/MachineControllerSystem.h ${CP}/EEPROMStorage.h  ${HP}/hardware_language_abstraction_teensy3.cpp
 
-        BOARD ${BOARD}
+       
 
         )
 
 set(IP "src/Interfaces")
 
-generate_arduino_library(interface
+add_library(interface
 
-        SRCS ${IP}/CommandInterface.cpp
+         ${IP}/CommandInterface.cpp
 
-        HDRS ${IP}/CommandInterface.h ${IP}/interface_config.h
+         ${IP}/CommandInterface.h ${IP}/interface_config.h
 
-        BOARD ${BOARD}
+       
 
         )
 
 set(AP "src/Actions")
 
-generate_arduino_library(actions
+add_library(actions
 
-        SRCS ${AP}/ServoActions.cpp ${AP}/BinaryActions.cpp ${AP}/ContinuousActions.cpp
+         ${AP}/ServoActions.cpp ${AP}/BinaryActions.cpp ${AP}/ContinuousActions.cpp
 
-        HDRS ${AP}/ServoActions.h ${AP}/BinaryActions.h  ${AP}/ContinuousActions.h
+         ${AP}/ServoActions.h ${AP}/BinaryActions.h  ${AP}/ContinuousActions.h
 
-        BOARD ${BOARD}
+       
 
         )
 
 set(AsP "src/Core")
 
-generate_arduino_library(asserv
+add_library(asserv
 
-        SRCS ${AsP}/Asserv.cpp
+         ${AsP}/Asserv.cpp
 
-        HDRS ${AsP}/Asserv.h
+         ${AsP}/Asserv.h
 
-        BOARD ${BOARD}
+       
 
         )
 
 
 set(DP "src/DataStructures")
 
-generate_arduino_library(datastructures
+add_library(datastructures
 
-        SRCS ${DP}/ArgQueue.cpp  ${DP}/Queue.cpp
+         ${DP}/ArgQueue.cpp  ${DP}/Queue.cpp
 
-        HDRS  ${DP}/ArgQueue.h  ${DP}/Queue.h
+          ${DP}/ArgQueue.h  ${DP}/Queue.h
 
-        BOARD ${BOARD}
-
-        )
-
-
-set(EP "src/External")
-
-generate_arduino_library(external
-
-        SRCS ${EP}/digitalWriteFast.h ${EP}/Servo.cpp
-
-        HDRS ${EP}/Servo.h ${EP}/ServoTimers.h
-
-        BOARD ${BOARD}
+       
 
         )
+
+
 
 
 set(MP "src/StepperControl")
 set(MNP "src/StepperControl/LinearMotionN")
 set(MTP "src/StepperControl/NonLinearMotions")
-generate_arduino_library(motion
+add_library(motion
 
-        SRCS ${MP}/StepperController.cpp ${MP}/MotionExecuter.cpp ${MP}/SpeedManager.cpp ${MP}/MotionScheduler.cpp ${MNP}/LinearMotionN.cpp
+         ${MP}/StepperController.cpp ${MP}/MotionExecuter.cpp ${MP}/SpeedManager.cpp ${MP}/MotionScheduler.cpp ${MNP}/LinearMotionN.cpp
 
         ${MNP}/HomingMotion.cpp ${MTP}/NonLinearMotionN.cpp ${MTP}/NonLinearMotionNTemplate.cpp ${MTP}/MotionBezier.cpp
         ${MTP}/MotionEllipses.cpp ${MP}/mathProcess.cpp ${MP}/swap.cpp
 
-        HDRS  ${MP}/StepperController.h ${MP}/MotionExecuter.h ${MP}/SpeedManager.h ${MP}/MotionScheduler.h  ${MNP}/LinearMotionN.h
+          ${MP}/StepperController.h ${MP}/MotionExecuter.h ${MP}/SpeedManager.h ${MP}/MotionScheduler.h  ${MNP}/LinearMotionN.h
         ${MNP}/HomingMotion.h ${MTP}/NonLinearMotionN.h ${MTP}/NonLinearMotionNTemplate.h ${MTP}/MotionBezier.h
         ${MTP}/MotionEllipses.h ${MP}/mathProcess.hpp ${MP}/swap.hpp ${MP}/motion_data.h
 
-        BOARD ${BOARD}
+       
 
         )
 
 #--------------------------------------------------LINK----------------------------------------------------------------
 
 target_link_libraries(core actions)
-target_link_libraries(core external)
 target_link_libraries(core interface)
 target_link_libraries(actions external)
 target_link_libraries(core asserv)
@@ -124,10 +155,5 @@ target_link_libraries(motion datastructures)
 
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
-#TODO ADD YOUR LIBS
-generate_arduino_firmware(${CMAKE_PROJECT_NAME}
-        SKETCH TRACER.ino
-        LIBS core external actions asserv interface
-        BOARD ${BOARD}
-        PORT ${PORT}
-        )
+add_executable(TRACER src/main.cpp)
+

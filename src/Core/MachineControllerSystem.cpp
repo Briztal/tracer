@@ -264,22 +264,25 @@ void MachineController::EEPROM_system_canal(char *data, unsigned char size) {
 
     if (!size--) return;
     char sub_canal = *(data++);
+    float f;
     switch(sub_canal) {
         case 0 : //The initialisation case : send the EEPROM_structure
             EEPROMStorage::send_structure();
             return;
 
         case 1 : //Read case
+            f = EEPROMStorage::read(data, size);
             CI::prepare_EEPROM_packet();
             CI::add_char_out(1);
-            CI::add_float_out(EEPROMStorage::read(data, size));
+            CI::add_float_out(f);
             CI::send_packet();
             return;
 
         case 2 : //Write case
+            f = EEPROMStorage::write(data, size);
             CI::prepare_EEPROM_packet();
             CI::add_char_out(2);
-            CI::add_float_out(EEPROMStorage::write(data, size));
+            CI::add_float_out(f);
             CI::send_packet();
             return;
 
