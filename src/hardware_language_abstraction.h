@@ -1,1 +1,1 @@
-#include "hardware_language_abstraction/hardware_language_abstraction_teensy3.h"
+#include "hardware_language_abstraction/hardware_language_abstraction_teensy35.h"

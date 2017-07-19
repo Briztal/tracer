@@ -34,7 +34,7 @@
 
 
 void MachineController::action(char * dptr, unsigned char size) {
-    CI::echo("SUUS");
+    /*CI::echo("SUUS");
 
     float f = 250;
 
@@ -56,7 +56,7 @@ void MachineController::action(char * dptr, unsigned char size) {
     CI::echo("new "+String(*(float*)t));
 
 
-    /*
+    */
     CI::echo("400");
     float coords[NB_STEPPERS];
     coords[0] = 160;
@@ -73,7 +73,7 @@ void MachineController::action(char * dptr, unsigned char size) {
     delay(1000);
 
     CI::echo("EXIT");
-    */
+
 
 }
 

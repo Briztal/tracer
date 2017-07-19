@@ -37,6 +37,7 @@ void CI::begin() {
     digitalWrite(13, HIGH);
 
 
+
 }
 
 /*
@@ -318,8 +319,9 @@ void CI::read_serial() {
 
     char r;
     while (serial_available()) {
-
+        Serial.print("\1");
         r = (char) serial_read();
+        Serial.print(r);
         if (first_detected) {
             if (r == BEGIN_CHAR) {//Second time begin byte is detected : not a begin symbol.
                 first_detected = false;
@@ -333,7 +335,7 @@ void CI::read_serial() {
                 return;
             }
         } else if (r == BEGIN_CHAR) {
-            Serial.print("\1\3");
+
 
             first_detected = true;
             return;

@@ -95,23 +95,34 @@ inline static void delay_ms(unsigned int time_ms){
 
 #ifdef HL_STEPPER_TIMER
 
-#define set_stepper_int_period(period_us) ;
+#define TICS_PER_MS (F_BUS / 1000000)
 
-#define enable_stepper_interrupt() ;
+#define US_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / TICS_PER_MS)
 
-#define disable_stepper_interrupt() ;
+#define set_stepper_int_period(period_us)\
+     {PIT_LDVAL0 = (period_us > US_TIMER_MAX_PERIOD) ?\
+        US_TIMER_MAX_PERIOD :  (TICS_PER_MS) * period_us - 1;};
 
-#define enable_stepper_timer() ;
 
-#define stepper_int_flag 1
 
-#define stepper_int_flag_clear() ;
+#define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
 
-#define disable_stepper_timer() ;
+#define disable_stepper_interrupt() PIT_TCTRL0 &= !(uint32_t)PIT_TCTRL_TIE;
+
+#define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
+
+#define disable_stepper_timer() PIT_TCTRL0 &= !(uint32_t)PIT_TCTRL_TEN;
+
+#define stepper_int_flag PIT_TFLG0
+
+#define stepper_int_flag_clear() PIT_TFLG0 = PIT_TFLG_TIF;
 
 void set_stepper_int_function(void (*f)());
 
 void setup_stepper_interrupt(void (*function)(void), unsigned int period_us);
+
+#define clean_stepper_interrupt() {disable_stepper_interrupt();disable_stepper_timer();}
+
 
 #endif
 

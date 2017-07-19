@@ -17,12 +17,14 @@
   along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "hardware_language_abstraction_teensy3.h"
+
+#include "kinetis.h"
+#include "hardware_language_abstraction_teensy35.h"
 
 /*
  * The Board Abstraction file.
  *
- * This file is made for : atmega2560 (Arduino mega)
+ * This file is made for : teensy35
  *
  * Here are defined all function related to the hardware (serial, I2C, delay etc...)
  *
@@ -33,8 +35,7 @@
  * If you only must alias a function, use a macro, it's faster.
  */
 
-//--------------------------------------Microseconds_Steppers_Timer_Interrupt----------------------------------------------------
-
+//--------------------------------------Microseconds_Steppers_Timer_Interrupt-------------------------------------------
 void (*us_function)(void);
 
 void set_stepper_int_function(void (*f)()) {
@@ -42,8 +43,29 @@ void set_stepper_int_function(void (*f)()) {
 
 }
 
-void setup_stepper_interrupt(void (*function)(void), unsigned int period_us){
 
+
+void setup_stepper_interrupt(void (*function)(void), unsigned int period_us) {
+
+    cli();
+
+    set_stepper_int_period(period_us);
+
+    set_stepper_int_function(function);
+
+    SIM_SCGC6 |= SIM_SCGC6_PIT;
+    __asm__ volatile("nop"); // solves timing problem on Teensy 3.5
+    PIT_MCR = 1;
+
+    enable_stepper_interrupt();
+
+    sei();
+
+}
+
+void pit0_isr() {
+    PIT_TFLG0 = 1;
+    us_function();
 }
 
 /*
@@ -56,6 +78,7 @@ ISR(TIMER5_COMPA_vect) {
 //--------------------------------Control_loops_Milliseconds_Timer_Interrupt--------------------------------------------
 
 void (*t0_function)(void);
+
 void (*t1_function)(void);
 
 
@@ -63,10 +86,10 @@ void (*t1_function)(void);
  * void en_timer_int_i(void (*function)(void), int period_ms);
  */
 
-void enable_loop_interrupt_0(void (*function)(void), unsigned int period_ms){
+void enable_loop_interrupt_0(void (*function)(void), unsigned int period_ms) {
 
 }
 
-void en_timer_int_1(void (*function)(void), unsigned int period_ms){
+void en_timer_int_1(void (*function)(void), unsigned int period_ms) {
 
 }
