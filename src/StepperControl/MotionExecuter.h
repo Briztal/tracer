@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -38,7 +38,7 @@
 
 #define STEP_AND_WAIT \
     {\
-        unsigned char s_w_signature;\
+        uint8_t s_w_signature;\
         if (!(s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]]))\
         s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
         (*ME::step)(s_w_signature);\
@@ -63,11 +63,11 @@ private:
      */
 public:
 
-    static void fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char negative_signatures);
+    static void fill_movement_data(bool first, uint8_t *elementary_dists, uint16_t count, uint8_t negative_signatures);
 
-    static void fill_speed_data(unsigned int delay_numerator, unsigned int regulation_delay, float ratio, unsigned char processing_steps);
+    static void fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float ratio, uint8_t processing_steps);
 
-    static void fill_processors(void (*init_f)(), void (*step_f)(unsigned char), unsigned char (*position_f)(unsigned char *), void (*speed_f)());
+    static void fill_processors(void (*init_f)(), void (*step_f)(uint8_t), uint8_t (*position_f)(uint8_t *), void (*speed_f)());
 
     //The function to copy the current motion_data to the queue.
     static void enqueue_movement_data();
@@ -79,20 +79,20 @@ public:
 public :
 
     static volatile bool distances_lock;
-    static long *const end_distances;
-    static unsigned char *saved_elementary_signatures;
-    static unsigned char saved_trajectory_indice;
-    static void (*step)(unsigned char);
-    static unsigned char *const trajectory_array;
+    static int32_t *const end_distances;
+    static uint8_t *saved_elementary_signatures;
+    static uint8_t saved_trajectory_indice;
+    static void (*step)(uint8_t);
+    static uint8_t *const trajectory_array;
 
 private :
 
-    static unsigned int count;
+    static uint16_t count;
     static bool ultimate_movement, penultimate_movement;
-    static unsigned char *const es0, *const es1;
+    static uint8_t *const es0, *const es1;
     static bool is_es_0;
-    static unsigned char trajectory_indice;
-    static const unsigned char *const trajectory_indices;
+    static uint8_t trajectory_indice;
+    static const uint8_t *const trajectory_indices;
 
 
     /*  End Distances Conventions :
@@ -118,7 +118,7 @@ private :
     //-------------------------------------------Real_Time_Movement_Processors-------------------------------------------
 
 private:
-    static unsigned char (*position_processor)(unsigned char *);
+    static uint8_t (*position_processor)(uint8_t *);
 
     static void (*speed_processor)();
 

@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -22,14 +22,14 @@
 
 //TODO ON ENLEVE LES REFERENCES
 
-void swap(long &a, long &b) {
-    long  tl = a;
+void swap(int32_t &a, int32_t &b) {
+    int32_t  tl = a;
     a = b;
     b = tl;
 }
 
-void swap(unsigned char &a, unsigned char &b) {
-    unsigned char ti = a;
+void swap(uint8_t &a, uint8_t &b) {
+    uint8_t ti = a;
     a = b;
     b = ti;
 }
@@ -49,20 +49,20 @@ void swap(bool &a, bool &b) {
 
 
 
-void swap(long *a, long *b) {
-    long  tl = *a;
+void swap(int32_t *a, int32_t *b) {
+    int32_t  tl = *a;
     *a = *b;
     *b = tl;
 }
 
-void swap(unsigned char *a, unsigned char  *b) {
-    unsigned char  ti = *a;
+void swap(uint8_t *a, uint8_t  *b) {
+    uint8_t  ti = *a;
     *a = *b;
     *b = ti;
 }
 
-void swap(unsigned long *a, unsigned long *b) {
-    unsigned long tui = *a;
+void swap(uint32_t *a, uint32_t *b) {
+    uint32_t tui = *a;
     *a = *b;
     *b = tui;
 }
@@ -79,14 +79,14 @@ void swap(bool *a, bool *b) {
     *b = tb;
 }
 
-void swap(unsigned char *axa, bool *dira, unsigned long *dista, unsigned char *axb, bool *dirb, unsigned long *distb) {
+void swap(uint8_t *axa, bool *dira, uint32_t *dista, uint8_t *axb, bool *dirb, uint32_t *distb) {
     swap(axa, axb);
     swap(dira, dirb);
     swap(dista, distb);
 }
 
-void swap(float &va, float &stepa, float &acca, bool &dira, long &dista, long &desta,
-          float &vb, float &stepb, float &accb, bool &dirb, long &distb, long &destb) {
+void swap(float &va, float &stepa, float &acca, bool &dira, int32_t &dista, int32_t &desta,
+          float &vb, float &stepb, float &accb, bool &dirb, int32_t &distb, int32_t &destb) {
     swap(va, vb);
     swap(stepa, stepb);
     swap(acca, accb);

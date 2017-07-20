@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -37,7 +37,7 @@ void HomingMotion::move() {
     StepperController::enable(255);
 
     //First step is to generate the signature for all axis;
-    unsigned char signature = 0;
+    uint8_t signature = 0;
 
     //TODO DIRECTIONS : 0 quand C'est en increment... Ca va pas !!
 
@@ -53,15 +53,15 @@ void HomingMotion::move() {
 #undef STEPPER
 
 
-    unsigned long delay = 100;//TODO AJUSTER LE DELAY EN FONCTION DE LA VITESSE DES AXES RESTANTS
-    unsigned long timeline = micros();
+    uint32_t delay = 100;//TODO AJUSTER LE DELAY EN FONCTION DE LA VITESSE DES AXES RESTANTS
+    uint32_t timeline = micros();
 
-    unsigned long delays[NB_STEPPERS];
+    uint32_t delays[NB_STEPPERS];
     float speed;
-    unsigned long d;
+    uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
         speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * 0.05);
-        d = (unsigned long) (1000000 / (speed * EEPROMStorage::steps[axis]));
+        d = (uint32_t) (1000000 / (speed * EEPROMStorage::steps[axis]));
         delays[axis] = delay;
         delay = max(delay, d);
     }
@@ -89,11 +89,11 @@ void HomingMotion::move() {
 
 }
 
-unsigned long HomingMotion::getMaxDelay(unsigned char signature, unsigned long *delays) {
-    unsigned long delay = 0;
+uint32_t HomingMotion::getMaxDelay(uint8_t signature, uint32_t *delays) {
+    uint32_t delay = 0;
     int axis = 0;
     for (; axis < NB_STEPPERS; axis++) {
-        if (signature & (unsigned long) 1) {
+        if (signature & (uint32_t) 1) {
             delay = delays[axis];
             signature >>= 1;
             axis++;
@@ -102,7 +102,7 @@ unsigned long HomingMotion::getMaxDelay(unsigned char signature, unsigned long *
         signature >>= 1;
     }
     for (; axis < NB_STEPPERS; axis++) {
-        if (signature & (unsigned long) 1) {
+        if (signature & (uint32_t) 1) {
             delay = max(delay, delays[axis]);
         }
         signature >>= 1;
@@ -110,9 +110,9 @@ unsigned long HomingMotion::getMaxDelay(unsigned char signature, unsigned long *
     return delay;
 }
 
-unsigned char HomingMotion::readEndStops() {
-    unsigned char signature = 0;
-    unsigned char bit = 1;
+uint8_t HomingMotion::readEndStops() {
+    uint8_t signature = 0;
+    uint8_t bit = 1;
 
 #define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
     if (!rel) {\

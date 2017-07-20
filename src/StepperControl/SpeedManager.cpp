@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -37,13 +37,13 @@
  */
 void SpeedManager::heuristic_distance() {
 
-    long td;
-    unsigned long distance = 0;
-    unsigned long dist = 0;
+    int32_t td;
+    uint32_t distance = 0;
+    uint32_t dist = 0;
 
 #define STEPPER(i, ...) \
     td = MotionExecuter::end_distances[i];\
-    distance=((unsigned long) (td<0) ? -td : td );\
+    distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 
 #include "../config.h"
@@ -65,9 +65,7 @@ void SpeedManager::heuristic_distance() {
  */
 
 void SpeedManager::regulate_speed() {
-    CI::echo("DTE : "+String(distance_to_end)+" "+String(speed_distance)+" "+String(delay0)+" "+String(regulation_delay)+" "+String(regulation_stop_enabled)+" "+String(processing_steps));
     if (distance_to_end < speed_distance) {
-        CI::echo("rng");
 
         //If we entered in the deceleration range :
         go_to_speed_distance(distance_to_end);
@@ -76,7 +74,6 @@ void SpeedManager::regulate_speed() {
         return;
     } else if (regulation_unreached) {
         //If speed still has to be modified :
-        CI::echo("rur");
 
         if (delay0 > regulation_delay) {
             //if speed is too low :
@@ -87,7 +84,6 @@ void SpeedManager::regulate_speed() {
                 regulation_unreached = false;
                 return;
             }
-            CI::echo("acceleration");
             //if not, acceleration
             set_speed_distance_fast(true, processing_steps);
             speed_incr = true;
@@ -120,10 +116,10 @@ void SpeedManager::regulate_speed() {
  *
  * It also sets correct variables for the fast algorithm.
  */
-void SpeedManager::set_speed_distance(unsigned long distance_to_end) {
+void SpeedManager::set_speed_distance(uint32_t distance_to_end) {
     speed_distance = distance_to_end;
-    distance_square_root = (unsigned int) sqrt(distance_to_end);
-    square_sup = square_increments = ((unsigned int) 2 * distance_square_root + 1);
+    distance_square_root = (uint16_t) sqrt(distance_to_end);
+    square_sup = square_increments = (uint16_t) (2 * distance_square_root + 1);
     square_inf = 1;
     speed_processing_required = true;
 }
@@ -142,7 +138,7 @@ void SpeedManager::set_speed_distance(unsigned long distance_to_end) {
  * The delay is set according to  : delay = delay_numerator/sqrt(speed_distance)
  *
  */
-void SpeedManager::set_speed_distance_fast(bool positive_incr, unsigned int incr) {
+void SpeedManager::set_speed_distance_fast(bool positive_incr, uint16_t incr) {
 
 #define switch_up square_inf = 1, square_increments+=2, square_sup = square_increments, distance_square_root++, speed_processing_required = true;
 #define switch_down if(distance_square_root) { square_increments-=2, square_inf=square_increments, square_sup=1, distance_square_root--;speed_processing_required = true;}
@@ -199,14 +195,14 @@ void SpeedManager::set_speed_distance_fast(bool positive_incr, unsigned int incr
  * It calls set_speed_distance_fast in relative mode.
  */
 
-void SpeedManager::go_to_speed_distance(unsigned long distance_to_end) {
+void SpeedManager::go_to_speed_distance(uint32_t distance_to_end) {
 
-    long d = distance_to_end - speed_distance;
+    int32_t d = distance_to_end - speed_distance;
 
     bool positive_incr;
     if (!(positive_incr = d > 0)) d = -d;
 
-    set_speed_distance_fast(positive_incr, (unsigned int) d);
+    set_speed_distance_fast(positive_incr, (uint16_t) d);
 
 }
 
@@ -220,13 +216,13 @@ float last_ratio;
  *      - tmp_delay_numerator : the new delay numerator;
  *      - tmp_regulation_delay : the new regulation delay;
  */
-void SpeedManager::set_delay_parameters(unsigned int tmp_regulation_delay, unsigned int tmp_delay_numerator, float ratio, unsigned char procesing_steps) {
+void SpeedManager::set_delay_parameters(uint16_t tmp_regulation_delay, uint16_t tmp_delay_numerator, float ratio, uint8_t procesing_steps) {
     //Set speed_distance and delay0
 
-    unsigned int tmp_delay_0;
+    uint16_t tmp_delay_0;
     if (speed_distance != 0) {
-        tmp_delay_0 = (unsigned int) ((float) delay0 * ratio / last_ratio);
-        unsigned long sqrt_new_speed_distance = (unsigned long) ((float) tmp_delay_numerator / (float) tmp_delay_0);//TODO FLOAT NECESSAIRE
+        tmp_delay_0 = (uint16_t) ((float) delay0 * ratio / last_ratio);
+        uint32_t sqrt_new_speed_distance = (uint32_t) ((float) tmp_delay_numerator / (float) tmp_delay_0);//TODO FLOAT NECESSAIRE
         //TODO DIRECTLY SET SPEED_DISTANCE, SQRT AND OTHER_PARAMETERS
         go_to_speed_distance(sqrt_new_speed_distance*sqrt_new_speed_distance);
     } else {
@@ -238,7 +234,6 @@ void SpeedManager::set_delay_parameters(unsigned int tmp_regulation_delay, unsig
 
     CI::echo("delay "+String(delay0));
     set_stepper_int_period(tmp_delay_0);
-    CI::echo("delay value : "+String(PIT_LDVAL0));
     delay_numerator = tmp_delay_numerator;
     regulation_delay = tmp_regulation_delay;
     regulation_unreached = true;
@@ -251,11 +246,11 @@ void SpeedManager::set_delay_parameters(unsigned int tmp_regulation_delay, unsig
 
 //ACCELERATION DELAY
 
-unsigned long m::speed_distance = 0, m::distance_to_end;
-unsigned int m::square_inf = 1, m::square_sup = 1, m::distance_square_root = 0, m::square_increments = 1;
+uint32_t m::speed_distance = 0, m::distance_to_end;
+uint16_t m::square_inf = 1, m::square_sup = 1, m::distance_square_root = 0, m::square_increments = 1;
 
-unsigned int m::regulation_delay;
-unsigned int m::delay0;
+uint16_t m::regulation_delay;
+uint16_t m::delay0;
 
 bool m::regulation_unreached = false;
 
@@ -264,7 +259,7 @@ bool m::regulation_stop_enabled = false;
 
 bool m::speed_processing_required;
 
-unsigned char m::processing_steps;
+uint8_t m::processing_steps;
 
 float m::delay_numerator;
 

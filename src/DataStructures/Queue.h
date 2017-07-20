@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -35,8 +35,8 @@ template <typename T> class Queue {
 
 
 public:
-    Queue(unsigned char size)  :
-            size(size), content(new T[size]), max_indice((const unsigned char) (size - 1)),
+    Queue(uint8_t size)  :
+            size(size), content(new T[size]), max_indice((const uint8_t) (size - 1)),
             spaces(size){
 
     }
@@ -68,34 +68,34 @@ public:
 
     }
 
-    unsigned char available_spaces() {
+    uint8_t available_spaces() {
         return spaces;
     }
 
-    unsigned char available_elements() {
+    uint8_t available_elements() {
         return elements;
     }
 
-    const unsigned char pull_indice() {
+    const uint8_t pull_indice() {
         return pull_index;
     }
 
-    const unsigned char push_indice() {
+    const uint8_t push_indice() {
         return push_index;
     }
 
 private:
 
-    const unsigned char size;
-    const unsigned char max_indice;
+    const uint8_t size;
+    const uint8_t max_indice;
 
     T *const content;
 
-    unsigned char pull_index = 0;
-    unsigned char push_index = 0;
+    uint8_t pull_index = 0;
+    uint8_t push_index = 0;
 
-    unsigned char elements = 0;
-    unsigned char spaces;
+    uint8_t elements = 0;
+    uint8_t spaces;
 
 };
 

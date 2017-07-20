@@ -14,11 +14,12 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
 
+#include <stdint.h>
 #include "../../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -38,10 +39,10 @@ class NonLinearMotionN {
 
 private :
 
-    static unsigned char *const axis_t;
+    static uint8_t *const axis_t;
 
     //Number of axis in the motion
-    static unsigned char movement_size;
+    static uint8_t movement_size;
 
     //StepperControl Functions : direction setting, motion, and endstop reading
     //static void (**dir_set_functions)(bool dir);
@@ -51,13 +52,13 @@ protected:
      * Method to verify your implementation of process_position : it will calculate position iteratively and send_packet the position.
      * Requires min, max and increment to be correctly set up, and takes steps/mm for 2 axis in argument
      */
-    static void checkPositionByStep(float *offsets, unsigned int d);
+    static void checkPositionByStep(float *offsets, uint16_t d);
 
     /*
      * Method to verify your implementation of getPositions  : it will calculate position iteratively and send_packet the position.
      * takes steps/mm for 2 axis in argument
      */
-    static  void checkPosition(float *offsets, unsigned int d);
+    static  void checkPosition(float *offsets, uint16_t d);
 
 
 
@@ -70,7 +71,7 @@ private :
 
 
     //distance computing for N size vectors
-    static unsigned char get_distance(long *dest, long *pos);
+    static uint8_t get_distance(int32_t *dest, int32_t *pos);
 
     //Speed coefficients setting
     static void set_speed_coefficients();
@@ -81,12 +82,12 @@ private :
 
 
     //method to compute the increment if it is not provided.
-    static float extract_increment(float point, const float end, float increment, const unsigned char processing_steps,
-                            const void (*get_position)(float, long *));
+    static float extract_increment(float point, const float end, float increment, const uint8_t processing_steps,
+                            const void (*get_position)(float, int32_t *));
 
     //method to adjust the increment for step in the increment extraction process
-    static float adjust_increment(const float point, float increment, const unsigned char processing_steps,
-                                  const void (*get_position)(float, long *));
+    static float adjust_increment(const float point, float increment, const uint8_t processing_steps,
+                                  const void (*get_position)(float, int32_t *));
 
 
 private :
@@ -98,31 +99,31 @@ private :
     static void process_speed();
 
     //Method to step and delay the correct time
-    static void step(unsigned char sig);
+    static void step(uint8_t sig);
 
-    static void set_final_positions(const long *final_positions);
+    static void set_final_positions(const int32_t *final_positions);
 
 
-    static void fill_processors(void (*init_f)(), unsigned char (*position_f)(unsigned char *));
+    static void fill_processors(void (*init_f)(), uint8_t (*position_f)(uint8_t *));
 
     static void set_speed_parameters_enqueue();
 
 public:
 
-    static void initialise(unsigned char *move_axis_t, const unsigned char size);
+    static void initialise(uint8_t *move_axis_t, const uint8_t size);
 
 //Position process fields
     static float *const steps;
 
     static void set_initial_positions(const float *initial_positions);
 
-    unsigned char
-    get_movement_distances(float point_0, float point_1, void (*get_relative_position)(float, long *),
-                           unsigned char *distances);
+    uint8_t
+    get_movement_distances(float point_0, float point_1, void (*get_relative_position)(float, int32_t *),
+                           uint8_t *distances);
 
-    void set_motion_data(const float min, const float max, const float step, void (*get_relative_position)(float, long *));
+    void set_motion_data(const float min, const float max, const float step, void (*get_relative_position)(float, int32_t *));
 
-    void set_speed_parameters_enqueue(unsigned char processing_steps);
+    void set_speed_parameters_enqueue(uint8_t processing_steps);
 };
 
 #endif //CODE_NONTRIVIALMOTION_H

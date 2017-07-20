@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -45,7 +45,7 @@ void set_stepper_int_function(void (*f)()) {
 
 }
 
-void setup_stepper_interrupt(void (*function)(void), unsigned int period_us) {
+void setup_stepper_interrupt(void (*function)(void), uint16_t period_us) {
 
     cli();
 
@@ -79,10 +79,10 @@ void (*t1_function)(void);
  * void en_timer_int_i(void (*function)(void), int period_ms);
  */
 
-void enable_loop_interrupt_0(void (*function)(void), unsigned int period_ms) {
+void enable_loop_interrupt_0(void (*function)(void), uint16_t period_ms) {
 
 }
 
-void en_timer_int_1(void (*function)(void), unsigned int period_ms) {
+void en_timer_int_1(void (*function)(void), uint16_t period_ms) {
 
 }

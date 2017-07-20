@@ -14,25 +14,25 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 #include "ArgQueue.h"
 
-ArgQueue::ArgQueue(unsigned char size) :
+ArgQueue::ArgQueue(uint8_t size) :
         data(new char[size]), size(size) {
     available = size;
     spaces = 0;
-    read_indice = write_indice = size - (unsigned char) 1;
+    read_indice = write_indice = size - (uint8_t) 1;
     data_pointer = data;
 }
 
-void ArgQueue::add_data(char *data_in, unsigned char size) {
+void ArgQueue::add_data(char *data_in, uint8_t size) {
 
 }
 
 
-unsigned char ArgQueue::get() {
+uint8_t ArgQueue::get() {
     return 0;
 }
 
@@ -40,7 +40,7 @@ char *ArgQueue::get_data_pointer() {
 
 }
 
-unsigned char ArgQueue::available_space() {
+uint8_t ArgQueue::available_space() {
     return spaces;
 }
 

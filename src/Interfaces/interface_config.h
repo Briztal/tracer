@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 /*
@@ -105,7 +105,7 @@
  *      - 0 : bool;
  *      - 1 : char;
  *      - 2 : int;
- *      - 3 : long;
+ *      - 3 : int32_t;
  *      - 4 : float;
  *
  *      Remark : when you send a string, you must send_packet its size at its beginning;

@@ -14,10 +14,11 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <stdint.h>
 #include "../../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -38,35 +39,34 @@ public :
 private :
 
     //Fields required during the movement :
-    static unsigned int *const MR_positions;
-    static unsigned int *const MR_slopes;
-    static int MR_shift_nb;
-    static unsigned char MR_max_axis;
-    static unsigned char MR_negative_signatures;
+    static uint16_t *const MR_positions;
+    static uint16_t *const MR_slopes;
+    static uint8_t MR_max_axis;
+    static uint8_t MR_negative_signatures;
 
     //Other fields
     static Queue<linear_data> data_queue;
     static linear_data data_to_fill;
-    static unsigned char negative_signatures;
+    static uint8_t negative_signatures;
 
 
     //Preparators
 
-    static void micro_move(unsigned long *dists);
+    static void micro_move(uint32_t *dists);
 
-    static void set_motion_data(unsigned int *final_dists);
+    static void set_motion_data(uint32_t *final_dists);
 
-    static void step_and_delay(unsigned char sig);
+    static void step_and_delay(uint8_t sig);
 
     static void process_speed();
 
-    static void simple_move(unsigned long *dists);
+    static void simple_move(uint32_t *dists);
 
-    static unsigned char process_position(unsigned char *elementary_dists);
+    static uint8_t process_position(uint8_t *elementary_dists);
 
-    static unsigned char setup_movement_data(const float *destinations_t, unsigned long *absolute_distances);
+    static uint8_t setup_movement_data(const float *destinations_t, uint32_t *absolute_distances);
 
-    static void set_position_data(unsigned int *dists);
+    static void set_position_data(uint32_t *dists);
 
     static void initialise_motion();
 

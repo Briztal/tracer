@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -68,8 +68,8 @@
 
 /*
 void NonLinearMotionN::initialise_motion() {
-    unsigned char a;
-    for (unsigned char axis = 0; axis < movement_size; axis++) {
+    uint8_t a;
+    for (uint8_t axis = 0; axis < movement_size; axis++) {
         a = axis_copy_t[axis] = axis_t[axis];
         steps[axis] = EEPROMStorage::steps[a];
         assignFunction(a, dir_set_functions + axis);
@@ -87,9 +87,9 @@ void NonLinearMotionN::set_last_position() {
  *
  *  After doing this, it selects the correct axis,
  */
-void NonLinearMotionN::initialise(unsigned char *move_axis_t, const unsigned char size) {
-    for (unsigned char indice = 0; indice < size; indice++) {
-        unsigned char axis = axis_t[indice];
+void NonLinearMotionN::initialise(uint8_t *move_axis_t, const uint8_t size) {
+    for (uint8_t indice = 0; indice < size; indice++) {
+        uint8_t axis = axis_t[indice];
         axis_t[indice] = axis;
         steps[indice] = EEPROMStorage::steps[axis];
         //assignFunction(axis, dir_set_functions + indice);
@@ -104,8 +104,8 @@ void NonLinearMotionN::set_initial_positions(const float *initial_positions) {
     float first_move_destinations[NB_STEPPERS];
     memcpy(first_move_destinations, MotionScheduler::positions, 4 * NB_STEPPERS);
 
-    for (unsigned char indice = 0; indice < movement_size; indice++) {
-        unsigned char axis = axis_t[indice];
+    for (uint8_t indice = 0; indice < movement_size; indice++) {
+        uint8_t axis = axis_t[indice];
         first_move_destinations[axis] = initial_positions[axis];
     }
 
@@ -113,23 +113,23 @@ void NonLinearMotionN::set_initial_positions(const float *initial_positions) {
 
 }
 
-void NonLinearMotionN::set_final_positions(const long *final_positions) {
-    for (unsigned char indice = 0; indice < movement_size; indice++) {
-        unsigned char axis = axis_t[indice];
-        long pos = MotionScheduler::positions[axis], npos = final_positions[axis];
+void NonLinearMotionN::set_final_positions(const int32_t *final_positions) {
+    for (uint8_t indice = 0; indice < movement_size; indice++) {
+        uint8_t axis = axis_t[indice];
+        int32_t pos = MotionScheduler::positions[axis], npos = final_positions[axis];
         MotionScheduler::positions[axis] = npos;
         MotionExecuter::end_distances[axis] += npos - pos;
     }
 }
 
-void NonLinearMotionN::fill_processors(void (*init_f)(), unsigned char (*position_f)(unsigned char *)) {
+void NonLinearMotionN::fill_processors(void (*init_f)(), uint8_t (*position_f)(uint8_t *)) {
     MotionExecuter::fill_processors(init_f, step, position_f, process_speed);
 }
 
-void NonLinearMotionN::set_speed_parameters_enqueue(unsigned char processing_steps) {
+void NonLinearMotionN::set_speed_parameters_enqueue(uint8_t processing_steps) {
     set_speed_coefficients();
     float dists_array[NB_STEPPERS]{0};
-    for (unsigned char indice = 0; indice<movement_size; indice++) {
+    for (uint8_t indice = 0; indice<movement_size; indice++) {
         dists_array[axis_t[indice]] = 1;
     }
     float regulation_speed = MotionScheduler::get_regulation_speed_linear(dists_array, 1);
@@ -139,8 +139,8 @@ void NonLinearMotionN::set_speed_parameters_enqueue(unsigned char processing_ste
 }
 
 void NonLinearMotionN::set_speed_coefficients() {
-    float invsteps0 = 1.0 / *steps;
-    for (unsigned char indice = 1; indice < movement_size; indice++) {
+    float invsteps0 = (float) (1.0 / *steps);
+    for (uint8_t indice = 1; indice < movement_size; indice++) {
         speed_coeffs[indice] = steps[indice] * invsteps0;
     }
 }
@@ -150,15 +150,15 @@ void NonLinearMotionN::set_speed_coefficients() {
  *      (initial/final) (movement/dir) signatures, and number of sub movements.
  */
 void NonLinearMotionN::set_motion_data(const float min, const float max, const float step,
-                                       void (*get_relative_position)(float, long *)) {
+                                       void (*get_relative_position)(float, int32_t *)) {
 
-    unsigned char elementary_dists[movement_size];
+    uint8_t elementary_dists[movement_size];
 
     //Number of sub_movements
-    unsigned int count = (unsigned int) ((max - min) / step);
+    uint16_t count = (uint16_t) ((max - min) / step);
 
     //Get initial data (dists and dir signature)
-    unsigned char nsig = get_movement_distances(min, min + step, get_relative_position, elementary_dists);
+    uint8_t nsig = get_movement_distances(min, min + step, get_relative_position, elementary_dists);
 
     //Fill initial signatures (movement and dir)
     MotionExecuter::fill_movement_data(true, elementary_dists, count, nsig);
@@ -176,24 +176,24 @@ void NonLinearMotionN::set_motion_data(const float min, const float max, const f
  *      for a curve given by the get_relative_position function.
  *      Returns the direction signature for this movement.
  */
-unsigned char NonLinearMotionN::get_movement_distances(float point_0, float point_1,
-                                                       void (*get_relative_position)(float, long *),
-                                                       unsigned char *distances) {
+uint8_t NonLinearMotionN::get_movement_distances(float point_0, float point_1,
+                                                       void (*get_relative_position)(float, int32_t *),
+                                                       uint8_t *distances) {
 
     //Arrays to contain position;
-    long td0[movement_size], td1[movement_size];
+    int32_t td0[movement_size], td1[movement_size];
 
     //Get relative positions for both points
     get_relative_position(point_0, td0), get_relative_position(point_1, td1);
 
     //Direction signature
-    unsigned char nsig = 0;
+    uint8_t nsig = 0;
 
     //Pointers to position arrays;
-    const long *dptr0 = td0, *dptr1 = td1;
+    const int32_t *dptr0 = td0, *dptr1 = td1;
 
     //Get effective distances and signature.
-    for (unsigned char indice = 0; indice < movement_size; indice++) {
+    for (uint8_t indice = 0; indice < movement_size; indice++) {
 
         //Get relative distance and increment pointers
         int d = (int) (*(dptr1++) - *(dptr0++));
@@ -205,7 +205,7 @@ unsigned char NonLinearMotionN::get_movement_distances(float point_0, float poin
         }
 
         //Save distance
-        *(distances++) = (unsigned char) (d);
+        *(distances++) = (uint8_t) (d);
     }
 
     return nsig;
@@ -215,12 +215,12 @@ unsigned char NonLinearMotionN::get_movement_distances(float point_0, float poin
 
 
 float
-NonLinearMotionN::extract_increment(float point, const float end, float increment, const unsigned char processing_steps,
-                                    const void(*get_position)(float, long *)) {
-    const unsigned char ms = movement_size;
+NonLinearMotionN::extract_increment(float point, const float end, float increment, const uint8_t processing_steps,
+                                    const void(*get_position)(float, int32_t *)) {
+    const uint8_t ms = movement_size;
 
-    long pos[ms], dest[ms];
-    unsigned int dist;
+    int32_t pos[ms], dest[ms];
+    uint16_t dist;
     float tmp;
 
     increment = adjust_increment(point, increment, processing_steps, get_position);
@@ -233,7 +233,7 @@ NonLinearMotionN::extract_increment(float point, const float end, float incremen
         dist = get_distance(dest, pos);
 
         if (dist < processing_steps) {
-            tmp = increment / 3.;
+            tmp = (float) (increment / 3.);
             while (dist < processing_steps) {
                 increment += tmp;
                 get_position(point + increment, dest);
@@ -250,17 +250,17 @@ NonLinearMotionN::extract_increment(float point, const float end, float incremen
 }
 
 
-float NonLinearMotionN::adjust_increment(const float point, float increment, const unsigned char processing_steps, const void(*get_position)(float, long *)) {
+float NonLinearMotionN::adjust_increment(const float point, float increment, const uint8_t processing_steps, const void(*get_position)(float, int32_t *)) {
 
-    unsigned char dist;
+    uint8_t dist;
 
-    long pos[movement_size], dest[movement_size];
+    int32_t pos[movement_size], dest[movement_size];
     get_position(point, pos);
     get_position(point + increment, dest);
     dist = get_distance(dest, pos);
 
     bool lastSign = ((dist) > processing_steps);
-    float incr = increment / 5.;
+    float incr = (float) (increment / 5.);
 
     //if dist>processing steps, incr must be opposed to increment
     if (lastSign)
@@ -283,16 +283,16 @@ float NonLinearMotionN::adjust_increment(const float point, float increment, con
 
 }
 
-unsigned char NonLinearMotionN::get_distance(long *dest, long *pos) {
+uint8_t NonLinearMotionN::get_distance(int32_t *dest, int32_t *pos) {
     int d;
-    unsigned char dist;
-    unsigned char maxi = 0;
+    uint8_t dist;
+    uint8_t maxi = 0;
 
 #define maximum(a, b) ((a<b) ? b : a)
 
-    for (unsigned char axis = 0; axis < movement_size; axis++) {
+    for (uint8_t axis = 0; axis < movement_size; axis++) {
         d = (int) (dest[axis] - pos[axis]);
-        dist = (unsigned char) ((d < 0) ? -d : d);
+        dist = (uint8_t) ((d < 0) ? -d : d);
         if (maxi < dist) {
             maxi = dist;
         }
@@ -302,8 +302,8 @@ unsigned char NonLinearMotionN::get_distance(long *dest, long *pos) {
 }
 
 
-void NonLinearMotionN::step(unsigned char sig) {
-    unsigned int delay = StepperController::fastStepDelay(sig);
+void NonLinearMotionN::step(uint8_t sig) {
+    uint16_t delay = StepperController::fastStepDelay(sig);
     set_stepper_int_period(delay);
 }
 
@@ -314,12 +314,12 @@ void NonLinearMotionN::process_speed() {
     float inverse = invert(SpeedManager::distance_square_root);
     STEP_AND_WAIT;
 
-    unsigned int tmpdelay = SpeedManager::delay0 = (unsigned int) (SpeedManager::delay_numerator * inverse);
+    uint16_t tmpdelay = SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
     SpeedManager::delay0 = StepperController::delays[*axis_t] = tmpdelay;
 
-    for (unsigned char i = movement_size; i--;) {
+    for (uint8_t i = movement_size; i--;) {
         STEP_AND_WAIT;
-        StepperController::delays[axis_t[i]] = (unsigned int) (speed_coeffs[i] * (float) tmpdelay);
+        StepperController::delays[axis_t[i]] = (uint16_t) (speed_coeffs[i] * (float) tmpdelay);
     }
 
     STEP_AND_WAIT;
@@ -330,7 +330,7 @@ void NonLinearMotionN::process_speed() {
 
 #define m NonLinearMotionN
 
-unsigned char m::movement_size;
+uint8_t m::movement_size;
 
 float tstps[NB_STEPPERS];
 float *const m::steps = tstps;
@@ -344,10 +344,10 @@ void (*t_fdirs[NB_STEPPERS])(bool dir);
 
 
 /*
-void NonLinearMotionN::checkPositionByStep(float *offsets, unsigned int delay, unsigned int count,
+void NonLinearMotionN::checkPositionByStep(float *offsets, uint16_t delay, uint16_t count,
                                            void (*process_position)()) {
     //reset_data_pointers();
-    for (unsigned int i = 0; i < count; i++, alpha += increment) {
+    for (uint16_t i = 0; i < count; i++, alpha += increment) {
         process_position();
 
         float t[movement_size];
@@ -361,8 +361,8 @@ void NonLinearMotionN::checkPositionByStep(float *offsets, unsigned int delay, u
 }
 
 
-void NonLinearMotionN::checkPosition(float *offsets, unsigned int d) {
-    long c[NB_STEPPERS];
+void NonLinearMotionN::checkPosition(float *offsets, uint16_t d) {
+    int32_t c[NB_STEPPERS];
 
     for (alpha = min; alpha < max; alpha += increment) {
         get_position(alpha, c);

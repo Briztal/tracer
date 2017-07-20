@@ -14,23 +14,25 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
 #ifndef CODE_SWAP_H
 #define CODE_SWAP_H
 
-void swap(long &a, long &b);
+#include <stdint.h>
+
+void swap(int32_t &a, int32_t &b);
 
 void swap(float &a, float &b);
 
 void swap(bool &a, bool &b);
 
-void swap(float &va, float &stepa, float &acca, bool &dira, long &dista, long &desta,
-          float &vb, float &stepb, float &accb, bool &dirb, long &distb, long &destb);
+void swap(float &va, float &stepa, float &acca, bool &dira, int32_t &dista, int32_t &desta,
+          float &vb, float &stepb, float &accb, bool &dirb, int32_t &distb, int32_t &destb);
 
-void swap(unsigned char *axa, bool *dira, unsigned long *dista,
-          unsigned char *axb, bool *dirb, unsigned long *distb);
+void swap(uint8_t *axa, bool *dira, uint32_t *dista,
+          uint8_t *axb, bool *dirb, uint32_t *distb);
 
 #endif //CODE_SWAP_H

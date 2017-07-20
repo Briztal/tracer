@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -34,7 +34,7 @@ public:
 protected:
 
     //Curve Points Fields
-    long polynomPoints[MAX_CURVE_POINTS][2];
+    int32_t polynomPoints[MAX_CURVE_POINTS][2];
     float polynomCoefficients[MAX_CURVE_POINTS][2];
     int nbPoints;
 
@@ -44,7 +44,7 @@ protected:
 
     bool process_position();
 
-    void get_position(float alpha, long *pos);
+    void get_position(float alpha, int32_t *pos);
 
     void init_position_parameters();
 

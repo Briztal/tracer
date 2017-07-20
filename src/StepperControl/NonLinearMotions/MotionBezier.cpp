@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -42,8 +42,8 @@ void MotionBezier::prepareMotion() {
 
     for (int i = 0; i <= nbPoints; i++) {
 
-        polynomPoints[i][0] = (long) (*(curve_t + NB_STEPPERS * i) * steps0);
-        polynomPoints[i][1] = (long) (*(curve_t + NB_STEPPERS * i + 1) * steps1);
+        polynomPoints[i][0] = (int32_t) (*(curve_t + NB_STEPPERS * i) * steps0);
+        polynomPoints[i][1] = (int32_t) (*(curve_t + NB_STEPPERS * i + 1) * steps1);
     }
 
     //TODO NUANCER SELON SI IL Y A ACCELERTION OU PAS.
@@ -81,15 +81,15 @@ void MotionBezier::init_position_parameters() {
 
 }
 
-void MotionBezier::get_position(float alpha, long *pos) {
+void MotionBezier::get_position(float alpha, int32_t *pos) {
     float pow;
-    long tx, ty;
-    tx = (long) polynomCoefficients[0][0];
-    ty = (long) polynomCoefficients[0][1];
+    int32_t tx, ty;
+    tx = (int32_t) polynomCoefficients[0][0];
+    ty = (int32_t) polynomCoefficients[0][1];
     pow = alpha;
     for (int j = 1; j <= nbPoints; j++) {
-        tx += (long) (polynomCoefficients[j][0] * pow);
-        ty += (long) (polynomCoefficients[j][1] * pow);
+        tx += (int32_t) (polynomCoefficients[j][0] * pow);
+        ty += (int32_t) (polynomCoefficients[j][1] * pow);
         pow *= alpha;
     }
     pos[0] = tx;
@@ -101,14 +101,14 @@ bool MotionBezier::process_position(pos_data *p) {
     switch (position_processing_step) {
         case 0 :
             pow = alpha;
-            next0 = (long) polynomCoefficients[0][0];
-            next1 = (long) polynomCoefficients[0][1];
+            next0 = (int32_t) polynomCoefficients[0][0];
+            next1 = (int32_t) polynomCoefficients[0][1];
             processIndice = 1;
             position_processing_step = 1;
             break;
         case 1 :
-            next0 += (long) (polynomCoefficients[processIndice][0] * pow);
-            next1 += (long) (polynomCoefficients[processIndice][1] * pow);
+            next0 += (int32_t) (polynomCoefficients[processIndice][0] * pow);
+            next1 += (int32_t) (polynomCoefficients[processIndice][1] * pow);
 
             /*TODO REFORM
             if (processIndice == nbPoints) {

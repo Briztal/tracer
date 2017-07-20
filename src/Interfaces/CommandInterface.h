@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -73,7 +73,7 @@ private :
     //-------------------------------------------------Emission methods-------------------------------------------------
 public :
     //Outgoing data reseet;
-    static void prepare_data_out(const char *command_id, unsigned char command_id_size);
+    static void prepare_data_out(const char *command_id, uint8_t command_id_size);
 
 
     //Methods to add data to the current outgoing message
@@ -82,7 +82,7 @@ public :
 
     static void add_int_out(int data);
 
-    static void add_long_out(long data);
+    static void add_int32_t_out(int32_t data);
 
     static void add_float_out(float data);
 
@@ -112,7 +112,7 @@ private:
     static char *data_out;
     static char *const data_out_0;
     static char *const size_ptr;
-    static unsigned char data_out_size;
+    static uint8_t data_out_size;
 
 
     //Reception data : pointer to the end of the message, message origin, and size
@@ -122,15 +122,15 @@ private:
 
     static bool packet_began;
     static bool first_detected;
-    static unsigned char in_data_remaining;
-    static unsigned char in_data_size;
+    static uint8_t in_data_remaining;
+    static uint8_t in_data_size;
 
 
     //Reset incomming data, to receive new packets properly
     static void flush();
 
     //Incomming message processing
-    static void enqueue(char *command, unsigned char size);
+    static void enqueue(char *command, uint8_t size);
 
 
     //Command aliases
@@ -139,7 +139,7 @@ private:
 #define GO_LOWER(i, name)
 #define CREATE_LEAF(i, name)\
     private :\
-    static unsigned char name##_size;\
+    static uint8_t name##_size;\
     static char *const name##_id;\
     public :\
     static void send_##name();

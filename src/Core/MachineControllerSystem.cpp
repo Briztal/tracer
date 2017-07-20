@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -32,7 +32,7 @@
 #ifdef MONITOR_CANAL
 
 
-void MachineController::system_canal_function(char *data, unsigned char size) {
+void MachineController::system_canal_function(char *data, uint8_t size) {
 
 
 
@@ -76,7 +76,7 @@ void MachineController::system_canal_function(char *data, unsigned char size) {
 //------------------------------------------------CANAL PROCESS FUNCTIONS-----------------------------------------------
 
 
-void MachineController::parameters_system_canal(char *data, unsigned char size) {
+void MachineController::parameters_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
 
@@ -111,7 +111,7 @@ void MachineController::parameters_system_canal(char *data, unsigned char size) 
 }
 
 
-void MachineController::pid_system_canal(char *data, unsigned char size) {
+void MachineController::pid_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
 
@@ -144,7 +144,7 @@ void MachineController::pid_system_canal(char *data, unsigned char size) {
 }
 
 
-void MachineController::loop_system_canal(char *data, unsigned char size) {
+void MachineController::loop_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
 
@@ -175,7 +175,7 @@ void MachineController::loop_system_canal(char *data, unsigned char size) {
 
 }
 
-void MachineController::actions_system_canal(char *data, unsigned char size) {
+void MachineController::actions_system_canal(char *data, uint8_t size) {
 
     if (!size) return;
     char sub_canal = *data;
@@ -213,7 +213,7 @@ void MachineController::actions_system_canal(char *data, unsigned char size) {
 
 
 
-void MachineController::steppers_system_canal(char *data, unsigned char size) {
+void MachineController::steppers_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -260,7 +260,7 @@ void MachineController::steppers_system_canal(char *data, unsigned char size) {
 
 
 
-void MachineController::EEPROM_system_canal(char *data, unsigned char size) {
+void MachineController::EEPROM_system_canal(char *data, uint8_t size) {
 
     if (!size--) return;
     char sub_canal = *(data++);

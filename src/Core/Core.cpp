@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -67,13 +67,13 @@ void Core::run() {
 
 
 
-bool Core::add_external_task(void (*f)(char *, unsigned char), char *args, unsigned char size) {
+bool Core::add_external_task(void (*f)(char *, uint8_t), char *args, uint8_t size) {
     if (!external_tasks.available_spaces()) {
         return false;
     }
 
     //Get the push indice for args
-    const unsigned char push_indice = external_tasks.push_indice();
+    const uint8_t push_indice = external_tasks.push_indice();
 
 
     //Push the task
@@ -100,17 +100,17 @@ bool Core::process_external_task() {
     }
 
     //Get the pull indice for args
-    const unsigned char pull_indice = external_tasks.pull_indice();
+    const uint8_t pull_indice = external_tasks.pull_indice();
 
     //Get the task
-    void (*f)(char *, unsigned char) = external_tasks.pull();
+    void (*f)(char *, uint8_t) = external_tasks.pull();
 
 
     //Get the args pointer
     char *ptr = external_args+pull_indice*(PACKET_SIZE+1);
 
     //Get the args size
-    unsigned char size = (unsigned char) *(ptr++);
+    uint8_t size = (uint8_t) *(ptr++);
 
     //Executing the task;
     (*f)(ptr, size);
@@ -143,7 +143,7 @@ bool Core::process_internal_task() {
 
 }
 
-Queue<void(*)(char *, unsigned char)> Core::external_tasks(MAX_TASKS);
+Queue<void(*)(char *, uint8_t)> Core::external_tasks(MAX_TASKS);
 
 Queue<void(*)()> Core::internal_tasks(MAX_TASKS);
 char args_tab[MAX_TASKS][PACKET_SIZE+1];
@@ -153,6 +153,6 @@ char *Core::external_args = (char *) args_tab;
 template class Queue<motion_data>;
 template class Queue<linear_data>;
 template class Queue<int>;
-template class Queue<void(*)(char *args, unsigned char args_size)>;
+template class Queue<void(*)(char *args, uint8_t args_size)>;
 template class Queue<void(*)()>;
 

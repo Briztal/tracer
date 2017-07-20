@@ -134,7 +134,7 @@ CONTINUOUS(1, continuous2, 8, 80)
 
 #ifdef SERVO
 
-#define NB_SERVOS 2
+#define NB_SERVOS 3
 SERVO(0, servo, 4, 0, 1)
 SERVO(1, servo2, 4, 0, 1)
 SERVO(2, servo3, 4, 0, 1)
@@ -183,14 +183,14 @@ STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH
 //STEPPER_DATA(i, j, si, st, sp, a)
 
 //              id, letter, size,   steps,  speed,  acceleration)
-STEPPER_DATA(   0,  '0',    170,    80.16,  500,    1350);
-STEPPER_DATA(   1,  '1',    170.,   80.16,  500,    1200);
-STEPPER_DATA(   2,  '2',    150.,   2540,   3,      20);
-STEPPER_DATA(   3,  '3',    150.,   80.16,  500,    1200);
+STEPPER_DATA(   0,  '0',    170,    80.16,  500.,    1350.);
+STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,    1200.);
+STEPPER_DATA(   2,  '2',    150.,   2540.,   3.,      20.);
+STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,    1200.);
 
 #endif
 
-#define NB_CARTESIAN_GROUPS 2
+#define NB_CARTESIAN_GROUPS 3
 
 #ifdef CARTESIAN_GROUP
 

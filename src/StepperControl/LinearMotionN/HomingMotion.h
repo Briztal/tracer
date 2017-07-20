@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -34,11 +34,11 @@ public:
 
     static void move();
 
-    static unsigned char readEndStops();
+    static uint8_t readEndStops();
 
 private:
 
-    static unsigned long getMaxDelay(unsigned char signature, unsigned long *delays);
+    static uint32_t getMaxDelay(uint8_t signature, uint32_t *delays);
 };
 
 #endif //TRACER_HOMINGMOTION_H

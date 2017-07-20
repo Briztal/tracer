@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -54,7 +54,7 @@ void MotionExecuter::start() {
     setup_stepper_interrupt(wait_for_movement, 30000);
 }
 
-void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_dists, unsigned int count, unsigned char nsig) {
+void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint16_t count, uint8_t nsig) {
     if (first) {
         motion_data_to_fill.count = count;
         motion_data_to_fill.initial_dir_signature = nsig;
@@ -74,15 +74,15 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
 
     enable_stepper_interrupt()
 
-    //unsigned char local_array_end = 0;
-    unsigned char motion_depth = 0;
-    unsigned char pre_signatures[8];
+    //uint8_t local_array_end = 0;
+    uint8_t motion_depth = 0;
+    uint8_t pre_signatures[8];
     while (true) {
-        unsigned char sig = 0;
+        uint8_t sig = 0;
 
         //Step 1 : get signature for current move
 
-#define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (unsigned char) 1) { sig |= signature; }
+#define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
 #include "../config.h"
 
@@ -127,14 +127,14 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
 
 
 
-void MotionExecuter::fill_speed_data(unsigned int delay_numerator, unsigned int regulation_delay, float ratio, unsigned char processing_steps) {
+void MotionExecuter::fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float ratio, uint8_t processing_steps) {
     motion_data_to_fill.processing_steps = processing_steps;
     motion_data_to_fill.delay_numerator = delay_numerator;
     motion_data_to_fill.regulation_delay = regulation_delay;
     motion_data_to_fill.ratio = ratio;
 }
 
-void MotionExecuter::fill_processors(void (*init_f)(), void (*step_f)(unsigned char), unsigned char (*position_f)(unsigned char*), void (*speed_f)()) {
+void MotionExecuter::fill_processors(void (*init_f)(), void (*step_f)(uint8_t), uint8_t (*position_f)(uint8_t*), void (*speed_f)()) {
     motion_data_to_fill.init_processor = init_f;
     motion_data_to_fill.step = step_f;
     motion_data_to_fill.position_processor = position_f;
@@ -177,7 +177,7 @@ void MotionExecuter::wait_for_movement() {
          * - ratio : the ratio speed_axis_dist(sqrt(sum(axis_dists^2)). Used.
          */
 
-        count = popped_data.count-2;
+        count = (uint16_t) (popped_data.count - 2);
 
         /*
          * Count doesn't take its maximum value,
@@ -241,7 +241,7 @@ void MotionExecuter::prepare_next_sub_motion() {
 
 
     saved_trajectory_indice = trajectory_indice;
-    unsigned char *elementary_signatures;
+    uint8_t *elementary_signatures;
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -253,8 +253,8 @@ void MotionExecuter::prepare_next_sub_motion() {
     STEP_AND_WAIT;
 
 
-    unsigned char elementary_dists[NB_STEPPERS];
-    unsigned char negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
+    uint8_t elementary_dists[NB_STEPPERS];
+    uint8_t negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
 
     //Distances Processing
 
@@ -283,15 +283,15 @@ void MotionExecuter::prepare_next_sub_motion() {
     //next move Processing
 
     {
-        //unsigned char local_array_end = 0;
-        unsigned char motion_depth = 0;
-        unsigned char pre_signatures[8];
+        //uint8_t local_array_end = 0;
+        uint8_t motion_depth = 0;
+        uint8_t pre_signatures[8];
         while (true) {
-            unsigned char sig = 0;
+            uint8_t sig = 0;
 
             //Step 1 : get signature for current move
 
-#define STEPPER(i, signature,...) if (*(elementary_dists+i) & (unsigned char) 1) { sig |= signature; }
+#define STEPPER(i, signature,...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
 #include "../config.h"
 
@@ -345,7 +345,7 @@ void MotionExecuter::prepare_next_sub_motion() {
         {
             float temp_speed = plus noir e qu'une arabesav_c_speed + speed_numerator * distance_square_root;//TODO FRACTIONNER
             MOTION_STEP_AND_WAIT;
-            for (unsigned char action_index = linear_tools_nb; action_index--;) {
+            for (uint8_t action_index = linear_tools_nb; action_index--;) {
                 linear_set_functions[action_index](temp_speed);
                 MOTION_STEP_AND_WAIT;
             }
@@ -365,7 +365,7 @@ void MotionExecuter::finish_sub_movement() {
     disable_stepper_interrupt();
 
 
-    unsigned char s_w_signature;
+    uint8_t s_w_signature;
     if (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]]))
         s_w_signature = saved_elementary_signatures[trajectory_array[--saved_trajectory_indice]];
 
@@ -377,7 +377,7 @@ void MotionExecuter::finish_sub_movement() {
 #ifdef position_log
             if (!(i--)) {
                 MotionScheduler::send_position();
-                i=10;
+                i=1;
             }
 #endif
             set_stepper_int_function(prepare_next_sub_motion);
@@ -407,7 +407,7 @@ void MotionExecuter::finish_sub_movement() {
 #define m MotionExecuter
 
 //Acceleration Fields
-unsigned int m::count;
+uint16_t m::count;
 
 Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;
@@ -419,15 +419,15 @@ bool *const m::axis_directions_negative = tdir;
 
 
 //End distances
-long ted[NB_STEPPERS];
-long *const m::end_distances = ted;
+int32_t ted[NB_STEPPERS];
+int32_t *const m::end_distances = ted;
 volatile bool m::distances_lock;
 
 
-unsigned char *saved_elementary_signatures;
-unsigned char saved_trajectory_indice;
+uint8_t *saved_elementary_signatures;
+uint8_t saved_trajectory_indice;
 
-unsigned char traj[255] = {
+uint8_t traj[255] = {
         0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,5,
         0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,6,
         0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,5,
@@ -437,22 +437,22 @@ unsigned char traj[255] = {
         0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,5,
         0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0};
 
-unsigned char *const m::trajectory_array = traj;
+uint8_t *const m::trajectory_array = traj;
 
-unsigned char tes0[8], tes1[8];
-unsigned char *const m::es0 = tes0, *const m::es1 = tes1;
+uint8_t tes0[8], tes1[8];
+uint8_t *const m::es0 = tes0, *const m::es1 = tes1;
 bool m::is_es_0;
 
-const unsigned char tti[8] {0, 2, 6, 14, 30, 62, 126, 254};
-const unsigned char *const m::trajectory_indices =  tti;
+const uint8_t tti[8] {0, 2, 6, 14, 30, 62, 126, 254};
+const uint8_t *const m::trajectory_indices =  tti;
 
-unsigned char *m::saved_elementary_signatures = tes0;
-unsigned char m::saved_trajectory_indice;
-unsigned char m::trajectory_indice;
+uint8_t *m::saved_elementary_signatures = tes0;
+uint8_t m::saved_trajectory_indice;
+uint8_t m::trajectory_indice;
 
 //Processors;
-void (*m::step)(unsigned char);
-unsigned char (*m::position_processor)(unsigned char *);
+void (*m::step)(uint8_t);
+uint8_t (*m::position_processor)(uint8_t *);
 void (*m::speed_processor)();
 
 bool m::ultimate_movement = true, m::penultimate_movement = true;

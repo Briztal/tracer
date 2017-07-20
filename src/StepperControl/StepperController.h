@@ -14,10 +14,11 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <stdint.h>
 #include "../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -47,34 +48,34 @@ static void send_position();
 
 #endif
 
-    static void set_directions(unsigned char negative_signatures);
+    static void set_directions(uint8_t negative_signatures);
 
     static void set_dimensions();
 
     static void begin();
 
-    static void enable(unsigned char signature);
+    static void enable(uint8_t signature);
 
-    static void fastStep(unsigned char id);
+    static void fastStep(uint8_t id);
 
-    static unsigned int fastStepDelay(unsigned char id);
+    static uint16_t fastStepDelay(uint8_t id);
 
-    static unsigned int *const delays;
+    static uint16_t *const delays;
 private:
 
-    static unsigned char *step_path;
+    static uint8_t *step_path;
 
 #define STEPPER(i, ...) \
-    static long lim##i;\
-    static long max##i;\
+    static int32_t lim##i;\
+    static int32_t max##i;\
     static bool dir##i;
 #include  "../config.h"
 #undef STEPPER
 
 #ifdef position_log
 #define STEPPER(i, ...) \
-    static long incr##i;\
-    public:static long pos##i;\
+    static int32_t incr##i;\
+    public:static int32_t pos##i;\
 
 #include  "../config.h"
 #undef STEPPER

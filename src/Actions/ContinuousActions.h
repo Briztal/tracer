@@ -14,12 +14,14 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
 #ifndef CODE_CONTINUOUSACTIONS_H
 #define CODE_CONTINUOUSACTIONS_H
+
+#include <stdint.h>
 
 class ContinuousActions {
 
@@ -29,7 +31,7 @@ public:
 
     static bool linear_modes_enabled();
 
-    static unsigned char getSetFunctions(void (**f)(float));
+    static uint8_t getSetFunctions(void (**f)(float));
 
 #define CONTINUOUS(i, name, pin, max) \
     static void setPower##i(float f);\
@@ -43,7 +45,7 @@ public:
 
 private:
 
-    static unsigned char linear_id;
+    static uint8_t linear_id;
 
 #define CONTINUOUS(i, name, pin, max) \
     static float linearPower##i;\

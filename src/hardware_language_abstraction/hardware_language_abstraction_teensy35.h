@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -70,18 +70,18 @@
 
 #ifdef HL_DELAY
 /* The function to call to wait for a specified number of milliseconds
- *  void delay_ms(unsigned int time_ms);
+ *  void delay_ms(uint16_t time_ms);
  *//*
-inline static void delay_ms(unsigned int time_ms){
+inline static void delay_ms(uint16_t time_ms){
 
 }*/
 #define delay_ms(ms) delay(ms)
 
 
 /* The function to call wait for a specified number of microseconds
- * void delay_us(unsigned int time_us);
+ * void delay_us(uint16_t time_us);
  */
-/*inline static void delay_us(unsigned int time_us){
+/*inline static void delay_us(uint16_t time_us){
 
 }*/
 #define delay_us(us) delayMicroseconds(us)
@@ -103,8 +103,8 @@ inline static void delay_ms(unsigned int time_ms){
 #define US_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / TICS_PER_MS)
 
 #define set_stepper_int_period(period_us)\
-     {PIT_LDVAL0 = ((unsigned long)period_us > US_TIMER_MAX_PERIOD) ?\
-        US_TIMER_MAX_PERIOD :  (unsigned long) ((TICS_PER_MS) * (unsigned long)period_us - 1);};
+     {PIT_LDVAL0 = ((uint32_t)period_us > US_TIMER_MAX_PERIOD) ?\
+        US_TIMER_MAX_PERIOD :  (uint32_t) ((TICS_PER_MS) * (uint32_t)period_us - 1);};
 
 #define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
 
@@ -120,7 +120,7 @@ inline static void delay_ms(unsigned int time_ms){
 
 void set_stepper_int_function(void (*f)());
 
-void setup_stepper_interrupt(void (*function)(void), unsigned int period_us);
+void setup_stepper_interrupt(void (*function)(void), uint16_t period_us);
 
 #define clean_stepper_interrupt() {disable_stepper_interrupt();disable_stepper_timer();}
 
@@ -139,9 +139,9 @@ void setup_stepper_interrupt(void (*function)(void), unsigned int period_us);
  * void en_timer_int_i(void (*function)(void), int period_ms);
  */
 
-void enable_loop_interrupt_0(void (*function)(void), unsigned int period_ms);
+void enable_loop_interrupt_0(void (*function)(void), uint16_t period_ms);
 
-void enable_loop_interrupt_1(void (*function)(void), unsigned int period_ms);
+void enable_loop_interrupt_1(void (*function)(void), uint16_t period_ms);
 
 
 /* The function to disable a timer interrupt

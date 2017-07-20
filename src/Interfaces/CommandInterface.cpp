@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -24,7 +24,7 @@
 #include "../config.h"
 #include "../Core/Core.h"
 
-#define BEGIN_BYTE (unsigned char)255
+#define BEGIN_BYTE (uint8_t)255
 #define BEGIN_CHAR (char)-1
 
 void CI::begin() {
@@ -47,7 +47,7 @@ void CI::begin() {
 void CI::initialise_aliases() {
 
     char t[MAX_DEPTH + 1];
-    unsigned char indice = 0;
+    uint8_t indice = 0;
 
 #define GO_UPPER indice--;
 
@@ -55,12 +55,12 @@ void CI::initialise_aliases() {
     t[indice++] = i;
 
 #define CREATE_LEAF(i, name)\
-    for (unsigned char c = 0; c<indice; c++){\
+    for (uint8_t c = 0; c<indice; c++){\
         name##_id[c] = t[c];\
     }\
     name##_id[indice] = i;\
     name##_id[indice+1] = 0;\
-    name##_size = indice+(unsigned char)1;
+    name##_size = indice+(uint8_t)1;
 
 #include "interface_config.h"
 
@@ -68,7 +68,7 @@ void CI::initialise_aliases() {
 
 
 /*
- * echo : this is a public shortcut allowing to send_packet echo data all along the code.
+ * echo : this is a public shortcut allowing to send_packet echo data all aint32_t the code.
  *
  * The command id is the following : 0 (system canal) - 6 (echo canal);
  */
@@ -81,14 +81,14 @@ void CI::echo(const String msg) {
 
 
 /*
- * send_position : this is a public shortcut allowing to send_packet steppers position all along the code
+ * send_position : this is a public shortcut allowing to send_packet steppers position all aint32_t the code
  *      (t must be a float *, of size [NB_STEPPERS])
  *
  * The command id is the following : 0 (system canal) - 5 (steppers canal) - 0 (position canal);
  */
 void CI::send_position(float *t) {
     prepare_data_out("\0\5\1", 3);
-    for (unsigned char i = 0; i<NB_STEPPERS; i++) {
+    for (uint8_t i = 0; i<NB_STEPPERS; i++) {
         add_float_out(t[i]);
     }
     send_packet();
@@ -117,9 +117,9 @@ void CI::prepare_EEPROM_packet() {
  *
  * It sets the command id bytes, and initialises the data_out size.
  */
-void CI::prepare_data_out(const char *command_id, unsigned char command_id_size) {
+void CI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
     data_out = data_out_0+2;
-    data_out_size = command_id_size + (unsigned char) 1;
+    data_out_size = command_id_size + (uint8_t) 1;
 
     //Write the command id
     for (;command_id_size--;) {
@@ -129,7 +129,7 @@ void CI::prepare_data_out(const char *command_id, unsigned char command_id_size)
 }
 
 /*
- * add_X_out : the function to add a X data (X : char, int, long, float, const char *) to the current packet
+ * add_X_out : the function to add a X data (X : char, int, int32_t, float, const char *) to the current packet
  *
  * They duplicate eventual 255,  updates the data_out_size, and copy the provided data to the current packet.
  *
@@ -138,7 +138,7 @@ void CI::prepare_data_out(const char *command_id, unsigned char command_id_size)
 
 void CI::add_char_out(char data) {
 
-    unsigned char space_count = 0;
+    uint8_t space_count = 0;
     if (data_out_size  >= PACKET_SIZE) return;
 
     //Checking
@@ -152,7 +152,7 @@ void CI::add_char_out(char data) {
 void CI::add_int_out(int data) {
 
     char *t = (char *) &data;
-    unsigned char space_count = 0;
+    uint8_t space_count = 0;
     if (data_out_size + 2 >= PACKET_SIZE) return;
 
     //Checking on 2 bytes
@@ -171,7 +171,7 @@ void CI::add_int_out(int data) {
 
 void CI::add_float_out(float data) {
     char *t = (char *) &data;
-    unsigned char space_count = 0;
+    uint8_t space_count = 0;
     if (data_out_size + 4 >= PACKET_SIZE) return;
 
     //Checking on 4 bytes
@@ -199,9 +199,9 @@ void CI::add_float_out(float data) {
 
 }
 
-void CI::add_long_out(long data) {
+void CI::add_int32_t_out(int32_t data) {
     char *t = (char *) &data;
-    unsigned char space_count = 0;
+    uint8_t space_count = 0;
     if (data_out_size + 4 >= PACKET_SIZE) return;
 
     
@@ -234,10 +234,10 @@ void CI::add_string_out(const char *data) {
     //WARNING : NO CHECK FOR STRINGS
 
     char c;
-    unsigned char space_count = 0;
+    uint8_t space_count = 0;
     char *size_ptr = data_out++;
     data_out_size++;
-    unsigned char data_out_space = (unsigned char) (PACKET_SIZE) - data_out_size;
+    uint8_t data_out_space = (uint8_t) (PACKET_SIZE) - data_out_size;
     for (; data_out_space; data_out_space--, space_count++) {
         if (!(c = *data++))
             break;
@@ -257,7 +257,7 @@ void CI::add_string_out(const char *data) {
  */
 void CI::send_packet() {
 
-    unsigned char size = data_out_size;
+    uint8_t size = data_out_size;
 
     *size_ptr = (char)(size-1);
     //serial_echo_byte((char)(size));
@@ -271,7 +271,7 @@ void CI::send_packet() {
 
 }
 
-void CI::enqueue(char *command, unsigned char size) {
+void CI::enqueue(char *command, uint8_t size) {
 
 
 
@@ -328,7 +328,7 @@ void CI::read_serial() {
                 flush();
                 if (r<PACKET_SIZE) {
                     packet_began = true;
-                    in_data_size = in_data_remaining = (unsigned char) r;
+                    in_data_size = in_data_remaining = (uint8_t) r;
                 }
                 return;
             }
@@ -422,7 +422,7 @@ void CI::send_tree_structure() {
 #define GO_UPPER
 #define GO_LOWER(i, name)
 #define CREATE_LEAF(i, name)\
-    unsigned char CI::name##_size;\
+    uint8_t CI::name##_size;\
     char tmp##name[MAX_DEPTH+1];\
     char *const CI::name##_id = tmp##name;\
 
@@ -432,8 +432,8 @@ void CI::send_tree_structure() {
 
 bool CI::packet_began = false;
 bool CI::first_detected = false;
-unsigned char CI::in_data_remaining = 0;
-unsigned char CI::in_data_size = 0;
+uint8_t CI::in_data_remaining = 0;
+uint8_t CI::in_data_size = 0;
 
 
 char t_data_in[PACKET_SIZE];
@@ -443,5 +443,5 @@ char *const CI::data_in_0 = t_data_in;
 char dout[PACKET_SIZE+2];
 char *CI::data_out = dout;
 char *const CI::data_out_0 = dout;
-unsigned char CI::data_out_size;
+uint8_t CI::data_out_size;
 char *const CI::size_ptr = dout+1;

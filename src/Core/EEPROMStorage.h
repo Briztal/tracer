@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -45,9 +45,9 @@ class EEPROMStorage {
 
 public :
 
-    static float read(char *data, unsigned char size);
+    static float read(char *data, uint8_t size);
 
-    static float write(char *data, unsigned char size);
+    static float write(char *data, uint8_t size);
 
     static void setDefaultProfile();
 
@@ -62,14 +62,14 @@ public :
     //Stepper motors data
     static float *const sizes;
     static float *const steps;
-    static float *const maximum_speeds;
+    static volatile float *const maximum_speeds;
     static float *const accelerations;
     static float *const group_maximum_speeds;
 
 
 private:
 
-    static void read_stepper(int *indice, unsigned char axis_nb, float *size, float *steps, float *mspeed,
+    static void read_stepper(int *indice, uint8_t axis_nb, float *size, float *steps, float *mspeed,
                              float *acceleration);
 
     static void write_stepper(int *indice, float size, float steps, float mspeed, float accceleration);
@@ -86,13 +86,13 @@ public :
     static float *const kds;
 
     //Control loops data
-    static unsigned int *const loop_periods;
+    static uint16_t *const loop_periods;
 
 private :
 
     static void write_pid(int *indice, float kp, float ki, float kd);
 
-    static void read_pid(int *indice, unsigned char pid_nb, float *kps, float *kis, float *kds);
+    static void read_pid(int *indice, uint8_t pid_nb, float *kps, float *kis, float *kds);
 
 #endif
 
@@ -109,7 +109,7 @@ public :
 #define EEPROM_BOOL(name, default_value) static bool name;
 #define EEPROM_CHAR(name, default_value) static char name;
 #define EEPROM_INT(name, default_value) static int name;
-#define EEPROM_LONG(name, default_value) static long name;
+#define EEPROM_LONG(name, default_value) static int32_t name;
 #define EEPROM_FLOAT(name, default_value) static float name;
 
 #include "../config.h"
@@ -137,12 +137,12 @@ private :
 
     static void write_char(int *indice, char value);
     static void write_int(int *indice, int value);
-    static void write_long(int *indice, long value);
+    static void write_int32_t(int *indice, int32_t value);
     static void write_float(int *indice, float value);
 
     static char read_char(int *indice);
     static int read_int(int *indice);
-    static long read_long(int *indice);
+    static int32_t read_int32_t(int *indice);
     static float read_float(int *indice);
 
 };

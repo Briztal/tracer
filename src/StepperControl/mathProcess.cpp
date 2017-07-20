@@ -14,10 +14,11 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <stdint.h>
 #include "mathProcess.hpp"
 
 /*const float invTable[400] = {1,1.00000, 0.5000000, 0.3333333, 0.2500000, 0.2000000, 0.1666667, 0.1428571, 0.1250000, 0.1111111, 0.1000000, 0.0909091,
@@ -83,7 +84,7 @@ float invert(int i) {
     return invTable[i];
 }
 
-long fact(int n, int j) {
+int32_t fact(int n, int j) {
     if ((n<j)||(j==0)) return 1;
     else if (n == j)
         return j;

@@ -14,56 +14,55 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 #ifndef TRACER_MOTION_DATA_H
 #define TRACER_MOTION_DATA_H
 
-
+#include <stdint.h>
 #include "../config.h"
 
 typedef struct{
         //First_last_sub_movement
-    unsigned char initial_signatures[8];//8
-    unsigned char final_signatures[8];//8
+    uint8_t initial_signatures[8];//8
+    uint8_t final_signatures[8];//8
     //-------------2*4--------------8
-    unsigned char initial_indice;//1
-    unsigned char final_indice;//1
-    unsigned char initial_dir_signature;//1
-    unsigned char final_dir_signature;//1
+    uint8_t initial_indice;//1
+    uint8_t final_indice;//1
+    uint8_t initial_dir_signature;//1
+    uint8_t final_dir_signature;//1
     //-------------4--------------12
                //Count
-    unsigned int count;//2
+    uint16_t count;//2
              //processors
     void (*init_processor)();//2
     //--------------4---------------16
-    unsigned char (*position_processor)(unsigned char *);//2
+    uint8_t (*position_processor)(uint8_t *);//2
     void (*speed_processor)(void);//2
     //--------------4---------------20
-    void (*step)(unsigned char);//2
-    void (*sub_move_init)(unsigned char);//2
+    void (*step)(uint8_t);//2
+    void (*sub_move_init)(uint8_t);//2
     //-------------4----------------24
                //Speed
     float ratio;//4
     //-------------4----------------28
-    unsigned int delay_numerator;//2
-    unsigned int regulation_delay;//2
+    uint16_t delay_numerator;//2
+    uint16_t regulation_delay;//2
     //-------------4----------------32
-    unsigned char processing_steps;//1
-    unsigned char padding;//1
+    uint8_t processing_steps;//1
+    uint8_t padding;//1
     //-------------2----------------34
 
 } motion_data;//36 bytes
 
 typedef struct{
-    unsigned char shift_nb;
-    unsigned char max_axis;
+    float slopes[NB_STEPPERS];
+    //--------4*NB_STEPPERS------------
+    uint8_t max_axis;
+    uint8_t first_pos[NB_STEPPERS];
     //---------------2-----------------
-    unsigned int last_pos[NB_STEPPERS];
-    unsigned int slopes[NB_STEPPERS];
-    unsigned char first_pos[NB_STEPPERS];
-
+    uint32_t last_pos[NB_STEPPERS];
     //-----------3*NB_STEPPERS-----------
 } linear_data;
 

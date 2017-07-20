@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -152,7 +152,7 @@ float *const MotionEllipses::sinTable = st;
 
 /*
 
-bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, float A, float B, float begin_angle_r, float V, float rotation_angle_r, float count_angle_r) {
+bool MotionEllipses::prepare_motion(uint8_t *axis_t, float *destinations, float A, float B, float begin_angle_r, float V, float rotation_angle_r, float count_angle_r) {
 
 
 
@@ -160,8 +160,8 @@ bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, 
 
     float steps0 = NonLinearMotionN::steps[0], steps1 = NonLinearMotionN::steps[1];
 
-    center_0 = (long) (destinations[0]*steps0);
-    center_1 = (long) (destinations[1]*steps1);
+    center_0 = (int32_t) (destinations[0]*steps0);
+    center_1 = (int32_t) (destinations[1]*steps1);
 
     begin_angle_d = (int) (begin_angle_r * 180.0 / M_PI * RESOLUTION);
     count_angle_d = (int) (count_angle_r * 180.0 / M_PI * RESOLUTION);
@@ -213,9 +213,9 @@ bool MotionEllipses::prepare_motion(unsigned char *axis_t, float *destinations, 
 
 
     //Last Positions
-    long last_relative_positions_s[2];
+    int32_t last_relative_positions_s[2];
     temp0 = cos(end_angle_r), temp1 = sin(end_angle_r);
-    last_relative_positions_s[0] = (long) (ca * temp0 + sb * temp1), last_relative_positions_s[1] = (long) (sa * temp0 + cb * temp1);
+    last_relative_positions_s[0] = (int32_t) (ca * temp0 + sb * temp1), last_relative_positions_s[1] = (int32_t) (sa * temp0 + cb * temp1);
 
 
     /*
@@ -236,15 +236,15 @@ void MotionEllipses::init_position_parameters() {
 
 }
 
-void MotionEllipses::get_position(float alpha, long *pos) {
+void MotionEllipses::get_position(float alpha, int32_t *pos) {
     float tmpCos, tmpSin;
     trigProcess((int) alpha, tmpCos, tmpSin);
-    pos[0] = (long) (ca * tmpCos + sb * tmpSin);
-    pos[1] = (long) (sa * tmpCos + cb * tmpSin);
+    pos[0] = (int32_t) (ca * tmpCos + sb * tmpSin);
+    pos[1] = (int32_t) (sa * tmpCos + cb * tmpSin);
 }
 
 float tmpCos, tmpSin;
-long t0;
+int32_t t0;
 
 //TODO TRIER LES END_DISTANCES ICI AUSSI
 
@@ -261,18 +261,18 @@ bool MotionEllipses::process_position(pos_data *p) {
 
     return false;
     c2 :
-    t0 = (long) (ca * tmpCos);
+    t0 = (int32_t) (ca * tmpCos);
     (*p).step = &&c3;
     return false;
     c3 :
-    t0 += (long) (sb * tmpSin);
+    t0 += (int32_t) (sb * tmpSin);
     (*p).step = &&c4;
     return false;
     c4 :
 
     int i = (int) (t0 - *pos_t);
     bool b = (i > 0);
-    elementary_dists[0] = b ? (unsigned char) (i) : (unsigned char) (-i);
+    elementary_dists[0] = b ? (uint8_t) (i) : (uint8_t) (-i);
     if (b ^ dirs[0]) {
         (**dir_set_functions)(b);
         *dirs = b;
@@ -282,18 +282,18 @@ bool MotionEllipses::process_position(pos_data *p) {
 
     return false;
     c5 :
-    t0 = (long) (sa * tmpCos);
+    t0 = (int32_t) (sa * tmpCos);
     (*p).step = &&c6;
     return false;
     c6:
-    t0 += (long) (cb * tmpSin);
+    t0 += (int32_t) (cb * tmpSin);
     (*p).step = &&c7;
     return false;
     c7 :
     i = (int) (t0 - pos_t[1]);
     bool b1 = (i > 0);
 
-    elementary_dists[1] = b1 ? (unsigned char) (i) : (unsigned char) (-i);
+    elementary_dists[1] = b1 ? (uint8_t) (i) : (uint8_t) (-i);
     if (b1 ^ dirs[1]) {
         (*(dir_set_functions[1]))(b1);
         dirs[1] = b1;

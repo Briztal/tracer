@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -25,7 +25,7 @@
 
 float invert(int);
 
-long fact(int n, int j);
+int32_t fact(int n, int j);
 
 int angleFormat(int degrees);
 

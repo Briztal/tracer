@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -39,10 +39,10 @@ bool StepperController::isAtMin##i() { return (digital_read(pinEndMin)==HIGH);}\
 
 #include "../config.h"
 
-#undef STEPPER;
+#undef STEPPER
 
 
-void StepperController::enable(unsigned char signature) {
+void StepperController::enable(uint8_t signature) {
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
     if (signature&sig) {\
         digital_write(pinPower, LOW);\
@@ -52,12 +52,12 @@ void StepperController::enable(unsigned char signature) {
 
 #include "../config.h"
 
-#undef STEPPER;
+#undef STEPPER
 
 }
 
 //TODO PASSER EN SIGNATURES PLUTOT QU'EN ATTRIBUTS
-void StepperController::set_directions(unsigned char negative_signatures) {
+void StepperController::set_directions(uint8_t negative_signatures) {
     bool sig_dir;
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
@@ -112,7 +112,7 @@ void StepperController::setDir##i(bool sens) {\
 
 #include "../config.h"
 
-#undef STEPPER;
+#undef STEPPER
 #else
 #define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
 void StepperController::setDir##i(bool sens) {\
@@ -146,12 +146,12 @@ void StepperController::begin() {
 
 }
 
-void StepperController::fastStep(unsigned char id) {
+void StepperController::fastStep(uint8_t id) {
 //CI::echo("S");
 #ifdef position_log
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
-        /*if (id&(unsigned char)1) {*/\
+        /*if (id&(uint8_t)1) {*/\
         if (id&sig) {\
             pos##i += incr##i;\
             digital_write(pinStep, HIGH);\
@@ -165,7 +165,7 @@ void StepperController::fastStep(unsigned char id) {
 
 #else
 #define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
-        /*if (id&(unsigned char)1) {*/\
+        /*if (id&(uint8_t)1) {*/\
         if (id&sig) {\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
             BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -181,12 +181,12 @@ void StepperController::fastStep(unsigned char id) {
 }
 
 /*
-unsigned int StepperController::fastStepDelay(unsigned char id) {
-    unsigned int delay = 0;
+uint16_t StepperController::fastStepDelay(uint8_t id) {
+    uint16_t delay = 0;
 #ifdef position_log
 
     #define STEPPER(i, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-        if (id&(unsigned char)1) {\
+        if (id&(uint8_t)1) {\
             pos##i += incr##i;\
             delay+=delays[i];\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -199,7 +199,7 @@ unsigned int StepperController::fastStepDelay(unsigned char id) {
 
 #else
 #define STEPPER(i, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-        if (id&(unsigned char)1) {\
+        if (id&(uint8_t)1) {\
             delay+=delays[i];\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
             BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -226,7 +226,7 @@ void StepperController::echo_positions() {
 #define STEPPER(i, ...)\
     CI::echo(String(StepperController::pos##i));
 
-#include "../config.h";
+#include "../config.h"
 
 #undef STEPPER
 #endif
@@ -240,7 +240,7 @@ void StepperController::set_dimensions() {
 #define STEPPER(i, ...)\
      max##i = (*(sizes + i))* (*(steps + i));
 
-#include "../config.h";
+#include "../config.h"
 
 #undef STEPPER
 }
@@ -253,7 +253,7 @@ void StepperController::send_position() {
 #define STEPPER(i, ...) \
     t[i] = ((float)pos##i/(float)EEPROMStorage::steps[i]);
 
-#include "../config.h";
+#include "../config.h"
 
 #undef STEPPER
 
@@ -265,8 +265,8 @@ void StepperController::send_position() {
 #define m StepperController
 
 #define STEPPER(i, ...) \
-    long m::lim##i;\
-    long m::max##i;\
+    int32_t m::lim##i;\
+    int32_t m::max##i;\
     bool m::dir##i = false;
 
 #include "../config.h"
@@ -275,16 +275,16 @@ void StepperController::send_position() {
 
 #ifdef position_log
 #define STEPPER(i, ...) \
-    long m::incr##i = 1;\
-    long m::pos##i = 0;
+    int32_t m::incr##i = 1;\
+    int32_t m::pos##i = 0;
 
 #include "../config.h"
 
 #undef STEPPER
 #endif
 
-unsigned int td[NB_STEPPERS];
-unsigned int *const m::delays = td;
+uint16_t td[NB_STEPPERS];
+uint16_t *const m::delays = td;
 
 
 #endif

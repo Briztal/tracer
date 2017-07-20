@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -46,11 +46,11 @@ protected:
 
     static bool process_position();
 
-    static void get_position(float alpha, long *pos);
+    static void get_position(float alpha, int32_t *pos);
 
     static void init_position_parameters();
 
-    static long center_0, center_1;
+    static int32_t center_0, center_1;
 
     static int begin_angle_d, count_angle_d;//rad
 
@@ -62,7 +62,7 @@ protected:
 
     static void trigProcess(int x, float &cos, float &sin);
 
-    bool prepare_motion(unsigned char *axis_t, float *destinations, float A, float B, float begin_angle_r, float V,
+    bool prepare_motion(uint8_t *axis_t, float *destinations, float A, float B, float begin_angle_r, float V,
                         float rotation_angle_r, float count_angle_r);
 };
 

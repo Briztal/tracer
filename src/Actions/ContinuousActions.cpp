@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -91,8 +91,8 @@ bool ContinuousActions::in_linear_mode_##i = false;
 
 #undef CONTINUOUS
 
-unsigned char ContinuousActions::getSetFunctions(void (**f)(float)) {
-    unsigned char id = 0;
+uint8_t ContinuousActions::getSetFunctions(void (**f)(float)) {
+    uint8_t id = 0;
 #define CONTINUOUS(i, name, pin, max) \
     if (in_linear_mode_##i) {\
         f[id] = set_power_for_speed_##i;\

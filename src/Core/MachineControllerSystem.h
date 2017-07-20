@@ -14,27 +14,28 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
 #ifndef CODE_GCODEPARSER_H
 #define CODE_GCODEPARSER_H
 
+#include <stdint.h>
 #include "../Interfaces/interface_config.h"
 
 class MachineController {
 
 public:
 
-    static void system_canal_function(char *dptr, unsigned char size);
+    static void system_canal_function(char *dptr, uint8_t size);
 
 #define GO_UPPER
 
 #define GO_LOWER(i, name)
 
 #define CREATE_LEAF(i, name)\
-    static void name(char * dptr, unsigned char size);
+    static void name(char * dptr, uint8_t size);
 
 #define CREATE_CALLABLE_LEAF(i, name)\
     CREATE_LEAF(i, name)
@@ -49,17 +50,17 @@ public:
 
 private:
 
-    static void parameters_system_canal(char *dptr, unsigned char size);
+    static void parameters_system_canal(char *dptr, uint8_t size);
 
-    static void pid_system_canal(char *dptr, unsigned char size);
+    static void pid_system_canal(char *dptr, uint8_t size);
 
-    static void loop_system_canal(char *dptr, unsigned char size);
+    static void loop_system_canal(char *dptr, uint8_t size);
 
-    static void actions_system_canal(char *dptr, unsigned char size);
+    static void actions_system_canal(char *dptr, uint8_t size);
 
-    static void steppers_system_canal(char *dptr, unsigned char size);
+    static void steppers_system_canal(char *dptr, uint8_t size);
 
-    static void EEPROM_system_canal(char *dptr, unsigned char size);
+    static void EEPROM_system_canal(char *dptr, uint8_t size);
 
 };
 

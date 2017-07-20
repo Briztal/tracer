@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -29,40 +29,40 @@ class SpeedManager {
 
 public :
 
-    //static long *const end_distances;
+    //static int32_t *const end_distances;
 
     static void heuristic_distance();
 
     static void regulate_speed();
 
-    static void set_speed_distance(unsigned long distance_to_end);
+    static void set_speed_distance(uint32_t distance_to_end);
 
-    static void go_to_speed_distance(unsigned long distance_to_end);
+    static void go_to_speed_distance(uint32_t distance_to_end);
 
-    static void set_speed_distance_fast(bool dir, unsigned int increment);
+    static void set_speed_distance_fast(bool dir, uint16_t increment);
 
 
-    static void set_delay_parameters(unsigned int tmp_delay_0, unsigned int tmp_delay_numerator, float ratio, unsigned char processing_steps);
+    static void set_delay_parameters(uint16_t tmp_delay_0, uint16_t tmp_delay_numerator, float ratio, uint8_t processing_steps);
 
-    static unsigned int distance_square_root;
-    static unsigned int delay0;
+    static uint16_t distance_square_root;
+    static uint16_t delay0;
     static float delay_numerator;
 
     static bool speed_processing_required;
 
 private :
 
-    static unsigned char processing_steps;
+    static uint8_t processing_steps;
 
-    static unsigned long distance_to_end;
-    static unsigned int regulation_delay;
+    static uint32_t distance_to_end;
+    static uint16_t regulation_delay;
     static bool speed_incr;
     static bool regulation_stop_enabled;
 
 
     static bool regulation_unreached;
-    static unsigned long speed_distance;
-    static unsigned int square_inf, square_sup, square_increments;
+    static uint32_t speed_distance;
+    static uint16_t square_inf, square_sup, square_increments;
 
 };
 

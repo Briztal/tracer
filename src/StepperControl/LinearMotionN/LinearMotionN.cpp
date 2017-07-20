@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -36,7 +36,7 @@
 
 
 
-#define PROCESSING_STEPS (unsigned char)31
+#define PROCESSING_STEPS (uint8_t)31
 
 /*
  * Prepare_motion : takes a float[NB_STEPPERS] in argument.
@@ -59,10 +59,10 @@ void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
 
     //Distances array
 
-    unsigned long absolute_distances[NB_STEPPERS]{0};
+    uint32_t absolute_distances[NB_STEPPERS]{0};
 
     //Extract motion distances, and set greater axis to 0.
-    unsigned char max_axis = setup_movement_data(destinations_t, absolute_distances);
+    uint8_t max_axis = setup_movement_data(destinations_t, absolute_distances);
 
     //null move, nothing to do.
     if (max_axis == 255)
@@ -95,7 +95,7 @@ void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
  * - set speed according to the movement (movement dimensions and greater axis)
  */
 
-unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, unsigned long *absolute_distances) {
+uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t *absolute_distances) {
 
     //As distance on one axis can be null, an axis axis variable must be introduced. incremented after axis processed
 
@@ -104,17 +104,17 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
     //TODO USE MOTION_SIZE PROVIDED BY THE PARSER
 
     float sq_dist_sum = 0;
-    unsigned char direction_signature = 0;
-    unsigned char max_axis = 255;
-    unsigned long max_dist = 0;
+    uint8_t direction_signature = 0;
+    uint8_t max_axis = 255;
+    uint32_t max_dist = 0;
 
     //Order determination : Using an insertion sort on end_distances, and extract axis_data at the same time
-    for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         float steps;
-        long steps_destination, distance;
+        int32_t steps_destination, distance;
 
         steps = EEPROMStorage::steps[axis];
-        steps_destination = (long) (destinations_t[axis] * steps);
+        steps_destination = (int32_t) (destinations_t[axis] * steps);
         distance = steps_destination - MotionScheduler::positions[axis];
 
         //If distance is not null :
@@ -142,7 +142,7 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
             }
 
             //Take the absolute distance, and compare if it is the greatest distance. If true, memorise the max axis.
-            unsigned long absolute_distance = (unsigned long) distance;
+            uint32_t absolute_distance = (uint32_t) distance;
             if (absolute_distance > max_dist) {
                 max_dist = absolute_distance;
                 max_axis = axis;
@@ -180,7 +180,7 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
 }
 
 
-void LinearMotionN::step_and_delay(unsigned char sig) {
+void LinearMotionN::step_and_delay(uint8_t sig) {
     //simple_delay(delay0);
     StepperController::fastStep(sig);
 }
@@ -189,24 +189,24 @@ void LinearMotionN::step_and_delay(unsigned char sig) {
 ---------------------------------------------------MOVES----------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------*/
 
-void LinearMotionN::micro_move(unsigned long *dists) {//TODO FOX PASSER EN ELEMENTARY_DISTS
+void LinearMotionN::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTARY_DISTS
     /*
     //Setting destination
-    for (unsigned char axis = 0; axis < dimension; axis++)
-        next_t[axis] = (unsigned int) dists[axis];
+    for (uint8_t axis = 0; axis < dimension; axis++)
+        next_t[axis] = (uint16_t) dists[axis];
 
     //Effective StepperControl.
     elementary_motion(0);
      */
 }
 
-void LinearMotionN::simple_move(unsigned long *dists) {
+void LinearMotionN::simple_move(uint32_t *dists) {
 
 
     //No need to divide the motion -> copy of dist in motion_dists
-    unsigned int motion_dists[NB_STEPPERS];
+    uint16_t motion_dists[NB_STEPPERS];
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        motion_dists[axis] = (unsigned int) dists[axis];
+        motion_dists[axis] = (uint16_t) dists[axis];
     }
 
 
@@ -231,42 +231,25 @@ void LinearMotionN::simple_move(unsigned long *dists) {
  *  - slopes
  *  - shift_nb
  */
-void LinearMotionN::set_position_data(unsigned int *dists) {
+void LinearMotionN::set_position_data(uint32_t *dists) {
 
     //max_axis must have been defined previously
 
-    unsigned char max_axis = data_to_fill.max_axis;
+    uint8_t max_axis = data_to_fill.max_axis;
 
-    unsigned int *slopes = data_to_fill.slopes;
+    float *slopes = data_to_fill.slopes;
 
     slopes[max_axis] = 1;
 
-    //Determining shift_nb
-    unsigned int count = dists[max_axis];
-    unsigned long pow = 1;//unsigned long because it needs to be greater than an unsigned int, which can equal 65535...
-    unsigned char shift_nb = 0;
-    while (pow < count) {
-        pow <<= 1;
-        shift_nb++;
-    }
-
-
-    data_to_fill.shift_nb = shift_nb;
+    float max_dist = dists[max_axis];
 
     //Determine all slopes
-    unsigned long temp_slope;
-    for (unsigned int axis = 0; axis < NB_STEPPERS; axis++) {
+    uint32_t temp_slope;
+    for (uint16_t axis = 0; axis < NB_STEPPERS; axis++) {
         if (axis != max_axis) {
-            temp_slope = pow * dists[axis];
-            temp_slope /= count;
-            slopes[axis] = (unsigned int) temp_slope;
+            slopes[axis] = (float)dists[axis]/max_dist;
         }
     }
-
-    for (unsigned int axis = 0; axis < NB_STEPPERS; axis++) {
-        CI::echo("slope "+String(axis)+" "+String(data_to_fill.slopes[axis]));
-    }
-
 }
 
 /*
@@ -276,36 +259,36 @@ void LinearMotionN::set_position_data(unsigned int *dists) {
  *
  * Afterwards, it calls MotionExecuter::fill_movement_data, that hashes the first sub_movement, and fills data.
  */
-void LinearMotionN::set_motion_data(unsigned int *motion_dists) {
+void LinearMotionN::set_motion_data(uint16_t *motion_dists) {
 
-    unsigned int count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
+    uint16_t count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
 
-    unsigned char nsig = negative_signatures;
+    uint8_t nsig = negative_signatures;
 
-    const unsigned char shift_nb = data_to_fill.shift_nb;
-    const unsigned char max_axis = data_to_fill.max_axis;
-    const unsigned int *slopes = data_to_fill.slopes;
-    unsigned char *const f_pos = data_to_fill.first_pos;
+    const uint8_t shift_nb = data_to_fill.shift_nb;
+    const uint8_t max_axis = data_to_fill.max_axis;
+    const uint16_t *slopes = data_to_fill.slopes;
+    uint8_t *const f_pos = data_to_fill.first_pos;
 
     //Initial elementary distances
-    unsigned char elementary_dists[NB_STEPPERS];
-    for (unsigned int axis = 0; axis < NB_STEPPERS; axis++) {
-        f_pos[axis] = elementary_dists[axis] = (axis == max_axis) ? (unsigned char) PROCESSING_STEPS : (unsigned char) (
-                ((unsigned long) slopes[axis] * PROCESSING_STEPS) >> shift_nb);
+    uint8_t elementary_dists[NB_STEPPERS];
+    for (uint16_t axis = 0; axis < NB_STEPPERS; axis++) {
+        f_pos[axis] = elementary_dists[axis] = (axis == max_axis) ? (uint8_t) PROCESSING_STEPS : (uint8_t) (
+                ((uint32_t) slopes[axis] * PROCESSING_STEPS) >> shift_nb);
     }
 
     //Fill beginning signatures
     MotionExecuter::fill_movement_data(true, elementary_dists, count, nsig);
 
-    unsigned int last_pos_max = count*PROCESSING_STEPS;
+    uint16_t last_pos_max = count*PROCESSING_STEPS;
 
     //Initial elementary distances
-    for (unsigned int axis = 0; axis < NB_STEPPERS; axis++) {
+    for (uint16_t axis = 0; axis < NB_STEPPERS; axis++) {
         if (axis!=max_axis) {
-            elementary_dists[axis] = (unsigned char) (motion_dists[axis] -
-                                                      (((unsigned long) slopes[axis] * last_pos_max) >> shift_nb));
+            elementary_dists[axis] = (uint8_t) (motion_dists[axis] -
+                                                      (((uint32_t) slopes[axis] * last_pos_max) >> shift_nb));
         } else {
-            elementary_dists[axis] = (unsigned char) (motion_dists[axis] - last_pos_max);
+            elementary_dists[axis] = (uint8_t) (motion_dists[axis] - last_pos_max);
         }
     }
 
@@ -322,9 +305,9 @@ void LinearMotionN::initialise_motion() {
     MR_max_axis = data.max_axis;
 
     for (int axis = 0; axis<NB_STEPPERS; axis++) {
-        MR_positions[axis] = (unsigned int) data.first_pos[axis];
+        MR_positions[axis] = (uint16_t) data.first_pos[axis];
     }
-    memcpy(MR_slopes, data.slopes, 4 * NB_STEPPERS);
+    memcpy(MR_slopes, data.slopes, 2 * NB_STEPPERS);
 
 }
 
@@ -332,15 +315,15 @@ void LinearMotionN::initialise_motion() {
  * Position processing function.
  * It takes 2*dimension-1 processing windows to determine all positions
  */
-unsigned char LinearMotionN::process_position(unsigned char *elementary_dists) {//2n-2
+uint8_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
 
     int i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
     int i2;
 #define STEPPER(i, ...) \
-    if ((unsigned char)i!=MR_max_axis){\
-        i2 = (unsigned int) (((unsigned long) MR_slopes[i] * i1) >> MR_shift_nb);\
+    if ((uint8_t)i!=MR_max_axis){\
+        i2 = (uint16_t) (((uint32_t) MR_slopes[i] * i1) >> MR_shift_nb);\
         STEP_AND_WAIT\
-        MR_positions[i] += (elementary_dists[i] = (unsigned char) ((i2 - MR_positions[i])));\
+        MR_positions[i] += (elementary_dists[i] = (uint8_t) ((i2 - MR_positions[i])));\
         STEP_AND_WAIT\
     }\
 
@@ -355,14 +338,11 @@ unsigned char LinearMotionN::process_position(unsigned char *elementary_dists) {
  * The Speed processing function
  * It takes 2 tics to compute delay0;
  */
-long l;
 void LinearMotionN::process_speed() {//2
 
     float inverse = invert(SpeedManager::distance_square_root);
     STEP_AND_WAIT
-    SpeedManager::delay0 = (unsigned long) (SpeedManager::delay_numerator * inverse);
-    CI::echo("delay "+String(SpeedManager::delay0));
-
+    SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
     set_stepper_int_period(SpeedManager::delay0);
     STEP_AND_WAIT
 }
@@ -373,23 +353,23 @@ void LinearMotionN::process_speed() {//2
 Queue<linear_data> m::data_queue(MOTION_DATA_QUEUE_SIZE);
 linear_data m::data_to_fill;
 
-unsigned int *const m::MR_positions = new unsigned int[NB_STEPPERS];
-unsigned int *const m::MR_slopes = new unsigned int[NB_STEPPERS];
+uint16_t *const m::MR_positions = new uint16_t[NB_STEPPERS];
+uint16_t *const m::MR_slopes = new uint16_t[NB_STEPPERS];
 int m::MR_shift_nb;
-unsigned char m::MR_max_axis;
-unsigned char m::MR_negative_signatures;
-unsigned char m::negative_signatures;
+uint8_t m::MR_max_axis;
+uint8_t m::MR_negative_signatures;
+uint8_t m::negative_signatures;
 
 #undef m;
 
 /*
 
-void LinearMotionN::multiple_moves(unsigned char dimension, unsigned long *dists) {
-    unsigned int motion_dists[dimension];
+void LinearMotionN::multiple_moves(uint8_t dimension, uint32_t *dists) {
+    uint16_t motion_dists[dimension];
 
     //Division of the motion in 2^dec_count sub_moves
     //calculation of dec_count
-    unsigned long dist_0 = dists[0];
+    uint32_t dist_0 = dists[0];
     int dec_count = 0;
     while (dist_0 > INT_OVF) {
         dist_0 >>= 1;
@@ -397,9 +377,9 @@ void LinearMotionN::multiple_moves(unsigned char dimension, unsigned long *dists
     }
 
     //set motion_dists for the [motion_nb]-1 sub-moves
-    *motion_dists = (unsigned int) dist_0;
+    *motion_dists = (uint16_t) dist_0;
     for (int axis = 1; axis < dimension; axis++)
-        motion_dists[axis] = (unsigned int) (dists[axis] >> dec_count);
+        motion_dists[axis] = (uint16_t) (dists[axis] >> dec_count);
 
     int motion_nb = (1 << dec_count) - 1;
 
@@ -424,7 +404,7 @@ void LinearMotionN::multiple_moves(unsigned char dimension, unsigned long *dists
 
     //Calculation of remaining end_distances
     for (int axis = 0; axis < dimension; axis++)
-        motion_dists[axis] = (unsigned int) (dists[axis] - motion_nb * motion_dists[axis]);
+        motion_dists[axis] = (uint16_t) (dists[axis] - motion_nb * motion_dists[axis]);
 
     //StepperControl Preparation : setting slopes and draw parameters
     set_position_data(motion_dists);

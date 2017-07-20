@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -89,7 +89,7 @@ public:
 
     static void begin();
 
-    static bool add_external_task(void (*f)(char *, unsigned char), char *args, unsigned char size);
+    static bool add_external_task(void (*f)(char *, uint8_t), char *args, uint8_t size);
 
     static bool add_internal_task(void (*f)());
 
@@ -97,7 +97,7 @@ private:
 
     static bool process_external_task();
 
-    static Queue<void(*)(char *, unsigned char)> external_tasks;
+    static Queue<void(*)(char *, uint8_t)> external_tasks;
 
     static char *external_args;
 

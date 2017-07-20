@@ -14,11 +14,12 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
 
+#include <stdint.h>
 #include "../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -34,34 +35,34 @@ public:
 
 public :
 
-    static long *const positions;
+    static int32_t *const positions;
 
-    static unsigned char *const axis_signatures;//Not used in optimised functions
+    static uint8_t *const axis_signatures;//Not used in optimised functions
 
     static void begin();
 
-    static void set_speed_group(unsigned char speed_group);
+    static void set_speed_group(uint8_t speed_group);
 
-    static void set_speed_for_group(unsigned char group_id, float speed);
+    static void set_speed_for_group(uint8_t group_id, float speed);
 
     static void send_position();
 
     static float get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum);
 
-    static void pre_set_speed_axis(unsigned char new_axis, float distance_coefficient, float regulation_speed, unsigned char processing_steps);
+    static void pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps);
 
 
 protected :
 
-    static unsigned char speed_group;
+    static uint8_t speed_group;
 
-    static unsigned char linear_tools_nb;
+    static uint8_t linear_tools_nb;
 
     static void (**linear_set_functions)(float);
 
     static float *const theorical_regulation_speeds;
 
-    static unsigned char *const speed_groups_signatures;
+    static uint8_t *const speed_groups_signatures;
 
 };
 

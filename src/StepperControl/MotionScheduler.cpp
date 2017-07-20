@@ -14,7 +14,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -43,8 +43,8 @@ void MotionScheduler::begin() {
 
 #undef CARTESIAN_GROUP
 
-    for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
-        axis_signatures[axis] = (unsigned char) (1 << axis);
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
+        axis_signatures[axis] = (uint8_t) (1 << axis);
     }
 
 
@@ -67,13 +67,13 @@ void MotionScheduler::send_position() {
 
 }
 
-void MotionScheduler::set_speed_group(unsigned char speed_group) {
+void MotionScheduler::set_speed_group(uint8_t speed_group) {
     MotionScheduler::speed_group = speed_group;
 }
 
 
 //TODO CHECK MAX_SPEED
-void MotionScheduler::set_speed_for_group(unsigned char group_id, float speed) {
+void MotionScheduler::set_speed_for_group(uint8_t group_id, float speed) {
     theorical_regulation_speeds[group_id] = speed;
 }
 
@@ -92,7 +92,7 @@ void MotionScheduler::set_speed_for_group(unsigned char group_id, float speed) {
 float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
 
     //Determination of the regulation speed
-    unsigned char group_signature = speed_groups_signatures[speed_group];
+    uint8_t group_signature = speed_groups_signatures[speed_group];
     float group_coeff = 0;
     float group_speed = theorical_regulation_speeds[speed_group];
 
@@ -139,7 +139,7 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
 
     CI::echo("ssd-sgc " + String(sqrt_square_dist_sum) + " " + String(sqrt(group_coeff)));
 
-    theorical_regulation_speed = group_speed * sqrt_square_dist_sum / sqrt(group_coeff);
+    theorical_regulation_speed = (float) (group_speed * sqrt_square_dist_sum / sqrt(group_coeff));
 
     float scoeff = theorical_regulation_speed / sqrt_square_dist_sum;
 
@@ -147,7 +147,10 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
     bool init = true;
     float speed, tms;
 
-    for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
+    for (uint8_t axis = 0; axis<NB_STEPPERS; axis++) {
+    }
+
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         //Maximum speed checking
         if ((speed = (*(distsmm + axis)) * scoeff) > (tms = EEPROMStorage::maximum_speeds[axis])) {//TODO RESTORE AXIS_t
             r = (init) ? tms / speed : min(r, tms / speed);
@@ -185,7 +188,7 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
  *      - tmp_delay_numerator : the delay numerator that will be used during the movement we now plan;
  *      - tmp_regulation_delay : the regulation delay that will be used during the movement we now plan.
  */
-void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_coefficient, float regulation_speed, unsigned char processing_steps) {
+void MotionScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps) {
 
 
     //the acceleration considered is the new axis acceleration
@@ -193,8 +196,8 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
     float steps = EEPROMStorage::steps[new_axis];
 
     float ratio = steps / distance_coefficient;
-    unsigned int tmp_delay_numerator = (unsigned int) (1000000 / sqrt(2 * steps * acceleration));
-    unsigned int tmp_regulation_delay = (unsigned int) (1000000 / (steps * distance_coefficient * regulation_speed));
+    uint16_t tmp_delay_numerator = (uint16_t) (1000000 / sqrt(2 * steps * acceleration));
+    uint16_t tmp_regulation_delay = (uint16_t) (1000000 / (steps * distance_coefficient * regulation_speed));
 
     CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 
@@ -213,26 +216,26 @@ void MotionScheduler::pre_set_speed_axis(unsigned char new_axis, float distance_
 
 //POWER AND SPEED
 
-unsigned char m::speed_group = 0;
+uint8_t m::speed_group = 0;
 
 float ttrs[NB_CARTESIAN_GROUPS];
 float *const m::theorical_regulation_speeds = ttrs;
 
-unsigned char ttgs[NB_CARTESIAN_GROUPS];
-unsigned char *const m::speed_groups_signatures = ttgs;
+uint8_t ttgs[NB_CARTESIAN_GROUPS];
+uint8_t *const m::speed_groups_signatures = ttgs;
 
-long pos[NB_STEPPERS];
-long *const m::positions = pos;
+int32_t pos[NB_STEPPERS];
+int32_t *const m::positions = pos;
 
 
 #define STEPPER(i, j, si, st, sp, ac, dp, ps, pd, pinPower, pmi, vi, pma, va) 1<<i,
 
-unsigned char tmp_signature[NB_STEPPERS];
-unsigned char *const m::axis_signatures = tmp_signature;
+uint8_t tmp_signature[NB_STEPPERS];
+uint8_t *const m::axis_signatures = tmp_signature;
 
 //Fields for theorical_regulation_speed processing :
 
-unsigned char m::linear_tools_nb;
+uint8_t m::linear_tools_nb;
 
 void (*function_array[NB_CONTINUOUS])(float);
 
@@ -243,13 +246,13 @@ void (**m::linear_set_functions)(float) = function_array;
 
 /*
 
-long d0[NB_STEPPERS], d1[NB_STEPPERS];
-long *m::d_0 = d0, *m::d_1 = d1;
-long *m::end_distances = d0, *m::next_end_distances = d1;
+int32_t d0[NB_STEPPERS], d1[NB_STEPPERS];
+int32_t *m::d_0 = d0, *m::d_1 = d1;
+int32_t *m::end_distances = d0, *m::next_end_distances = d1;
 
-unsigned char do0[NB_STEPPERS], do1[NB_STEPPERS];
-unsigned char *m::d_o_0 = do0, *m::d_o_1 = do1;
-unsigned char *m::distances_order = do0, *m::next_distances_order = do1;
+uint8_t do0[NB_STEPPERS], do1[NB_STEPPERS];
+uint8_t *m::d_o_0 = do0, *m::d_o_1 = do1;
+uint8_t *m::distances_order = do0, *m::next_distances_order = do1;
 
 bool m::is_d_0 = true;
  */
@@ -261,9 +264,9 @@ bool m::is_d_0 = true;
 
 float *accelerations = EEPROMStorage::accelerations;
 float maxValue = 0;
-unsigned char m_axis = 0;
+uint8_t m_axis = 0;
 float temp_time;
-for (unsigned char axis = 0; axis < dimension; axis++) {
+for (uint8_t axis = 0; axis < dimension; axis++) {
     //Maximum acceleration step
     //Dists are in correct order, not accelerations so axis_t must be used
     if ((temp_time = distsmm[axis] / accelerations[axis_t[axis]]) > maxValue) {
