@@ -52,9 +52,9 @@
 
 //-----------------------------------------------------IO--------------------------------------------------------------
 
-#define digital_write(i, v) digitalWrite(i, v)
+#define digital_write(i, v) digitalWriteFast(i, v)
 
-#define digital_read(i) digitalRead(i)
+#define digital_read(i) digitalReadFast(i)
 
 #define analog_read(i) analoglRead(i)
 

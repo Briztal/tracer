@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include "../config.h"
 
-typedef struct{
+typedef struct{//TODO REORG
         //First_last_sub_movement
     uint8_t initial_signatures[8];//8
     uint8_t final_signatures[8];//8
@@ -34,7 +34,7 @@ typedef struct{
     uint8_t final_dir_signature;//1
     //-------------4--------------12
                //Count
-    uint16_t count;//2
+    uint32_t count;//2
              //processors
     void (*init_processor)();//2
     //--------------4---------------16

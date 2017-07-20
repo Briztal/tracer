@@ -185,7 +185,7 @@ STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH
 //              id, letter, size,   steps,  speed,  acceleration)
 STEPPER_DATA(   0,  '0',    170,    80.16,  500.,    1350.);
 STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,    1200.);
-STEPPER_DATA(   2,  '2',    150.,   2540.,   3.,      20.);
+STEPPER_DATA(   2,  '2',    150.,   2540.,   20.,      20.);
 STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,    1200.);
 
 #endif

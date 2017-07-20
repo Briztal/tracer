@@ -54,7 +54,7 @@ void MotionExecuter::start() {
     setup_stepper_interrupt(wait_for_movement, 30000);
 }
 
-void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint16_t count, uint8_t nsig) {
+void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, uint8_t nsig) {
     if (first) {
         motion_data_to_fill.count = count;
         motion_data_to_fill.initial_dir_signature = nsig;
@@ -250,7 +250,9 @@ void MotionExecuter::prepare_next_sub_motion() {
         saved_elementary_signatures = es0, elementary_signatures = es1, is_es_0 = true;
     }
 
+
     STEP_AND_WAIT;
+
 
 
     uint8_t elementary_dists[NB_STEPPERS];
@@ -332,6 +334,7 @@ void MotionExecuter::prepare_next_sub_motion() {
         STEP_AND_WAIT;
     }
 
+
     SpeedManager::regulate_speed();
     STEP_AND_WAIT;
     if (SpeedManager::speed_processing_required) {
@@ -354,16 +357,14 @@ void MotionExecuter::prepare_next_sub_motion() {
     }
 
     set_stepper_int_function(finish_sub_movement);
-
     enable_stepper_interrupt();
 
 }
 
 //----------------------------------------------SPEED_MANAGEMENT--------------------------------------------------------
-int i = 10;
+int i = 4;
 void MotionExecuter::finish_sub_movement() {
     disable_stepper_interrupt();
-
 
     uint8_t s_w_signature;
     if (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]]))
@@ -377,7 +378,7 @@ void MotionExecuter::finish_sub_movement() {
 #ifdef position_log
             if (!(i--)) {
                 MotionScheduler::send_position();
-                i=1;
+                i=20;
             }
 #endif
             set_stepper_int_function(prepare_next_sub_motion);
@@ -407,7 +408,7 @@ void MotionExecuter::finish_sub_movement() {
 #define m MotionExecuter
 
 //Acceleration Fields
-uint16_t m::count;
+uint32_t m::count;
 
 Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;

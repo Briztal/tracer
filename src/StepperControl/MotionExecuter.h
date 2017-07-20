@@ -63,7 +63,7 @@ private:
      */
 public:
 
-    static void fill_movement_data(bool first, uint8_t *elementary_dists, uint16_t count, uint8_t negative_signatures);
+    static void fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, uint8_t negative_signatures);
 
     static void fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float ratio, uint8_t processing_steps);
 
@@ -73,8 +73,6 @@ public:
     static void enqueue_movement_data();
 
     //---------------------------------------------Real_Time_Movement_data----------------------------------------------
-
-
 
 public :
 
@@ -87,7 +85,7 @@ public :
 
 private :
 
-    static uint16_t count;
+    static uint32_t count;
     static bool ultimate_movement, penultimate_movement;
     static uint8_t *const es0, *const es1;
     static bool is_es_0;

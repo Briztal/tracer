@@ -39,7 +39,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     float coords[NB_STEPPERS];
     coords[0] = 100;
     coords[1] = 160;
-    coords[2] = 0;
+    coords[2] = 100;
     coords[3] = 40;
     //MotionScheduler::set_speed_for_group(0, 300);
     MotionScheduler::set_speed_for_group(0, 500);

@@ -39,8 +39,8 @@ public :
 private :
 
     //Fields required during the movement :
-    static uint16_t *const MR_positions;
-    static uint16_t *const MR_slopes;
+    static uint32_t *const MR_positions;
+    static float *const MR_slopes;
     static uint8_t MR_max_axis;
     static uint8_t MR_negative_signatures;
 
@@ -60,7 +60,7 @@ private :
 
     static void process_speed();
 
-    static void simple_move(uint32_t *dists);
+    static void move(uint32_t *dists);
 
     static uint8_t process_position(uint8_t *elementary_dists);
 
