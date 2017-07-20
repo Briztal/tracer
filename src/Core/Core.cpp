@@ -33,7 +33,6 @@
 
 void Core::begin() {
 
-
 #ifdef ENABLE_LOGGER
     CommandInterface::begin();
 #endif

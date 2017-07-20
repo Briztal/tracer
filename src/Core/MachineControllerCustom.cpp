@@ -34,6 +34,31 @@
 
 
 void MachineController::action(char * dptr, unsigned char size) {
+
+
+    /*
+     SIM_SCGC6 |= SIM_SCGC6_PIT;
+    __asm__ volatile("nop"); // solves timing problem on Teensy 3.5
+    PIT_MCR = 1;
+
+    CI::echo(String(TICS_PER_MS));
+    CI::echo(String(US_TIMER_MAX_PERIOD));
+    unsigned long period_us = 30000;
+    CI::echo(String((period_us > US_TIMER_MAX_PERIOD) ?\
+        US_TIMER_MAX_PERIOD :  (TICS_PER_MS) * period_us - 1));
+
+    unsigned long l = (unsigned long)PIT_LDVAL0;
+
+    CI::echo(String(l));
+
+    while(true) {
+        digitalWrite(13, !digitalRead(13));
+        delay(1000);
+    }
+
+     */
+    //set_stepper_int_period(30000);
+    //CI::echo(String(PIT_LDVAL0));
     /*CI::echo("SUUS");
 
     float f = 250;
@@ -57,11 +82,12 @@ void MachineController::action(char * dptr, unsigned char size) {
 
 
     */
+
     CI::echo("400");
     float coords[NB_STEPPERS];
     coords[0] = 160;
     coords[1] = 100;
-    coords[2] = 10;
+    coords[2] = 0;
     coords[3] = 0;//40;
     //MotionScheduler::set_speed_for_group(0, 300);
     MotionScheduler::set_speed_for_group(1, 3);
@@ -70,10 +96,8 @@ void MachineController::action(char * dptr, unsigned char size) {
     //TODO TESTER AVEC LES Z
 
     LinearMotionN::prepare_motion(coords);
-    delay(1000);
 
     CI::echo("EXIT");
-
 
 }
 

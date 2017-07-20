@@ -319,9 +319,7 @@ void CI::read_serial() {
 
     char r;
     while (serial_available()) {
-        Serial.print("\1");
         r = (char) serial_read();
-        Serial.print(r);
         if (first_detected) {
             if (r == BEGIN_CHAR) {//Second time begin byte is detected : not a begin symbol.
                 first_detected = false;

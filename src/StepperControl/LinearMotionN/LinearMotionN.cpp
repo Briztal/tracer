@@ -35,9 +35,8 @@
 #include "../motion_data.h"
 
 
-#define INT_OVF 65535
 
-#define PROCESSING_STEPS 31
+#define PROCESSING_STEPS (unsigned char)31
 
 /*
  * Prepare_motion : takes a float[NB_STEPPERS] in argument.
@@ -73,7 +72,7 @@ void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
     if (absolute_distances[max_axis] < PROCESSING_STEPS) {
         //max distance < steps per elementary-move -> only one micro move
         //TODO micro_move(absolute_distances);
-    } else if (absolute_distances[max_axis] < INT_OVF) {
+    } else if (absolute_distances[max_axis] < UINT16_MAX) {
         //A move is indexed on an int value -> max distance must not be > INT_OVF
         //max distance < max value for int : only one move
         simple_move(absolute_distances);
@@ -166,7 +165,7 @@ unsigned char LinearMotionN::setup_movement_data(const float *destinations_t, un
     data_to_fill.max_axis = max_axis;
 
     //Local variable for speed datacomputation
-    float sqrt_sq_dist_sum = sqrt(sq_dist_sum);
+    float sqrt_sq_dist_sum = (float) sqrt(sq_dist_sum);
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
     //Get the adjusted regulation speed;
@@ -263,6 +262,11 @@ void LinearMotionN::set_position_data(unsigned int *dists) {
             slopes[axis] = (unsigned int) temp_slope;
         }
     }
+
+    for (unsigned int axis = 0; axis < NB_STEPPERS; axis++) {
+        CI::echo("slope "+String(axis)+" "+String(data_to_fill.slopes[axis]));
+    }
+
 }
 
 /*
@@ -309,7 +313,6 @@ void LinearMotionN::set_motion_data(unsigned int *motion_dists) {
     MotionExecuter::fill_movement_data(false, elementary_dists, count, nsig);
 }
 
-
 void LinearMotionN::initialise_motion() {
 //TODO COPIED... BETTER TAKE DIRECTLY POINTER
 
@@ -321,7 +324,7 @@ void LinearMotionN::initialise_motion() {
     for (int axis = 0; axis<NB_STEPPERS; axis++) {
         MR_positions[axis] = (unsigned int) data.first_pos[axis];
     }
-    memcpy(MR_slopes, data.slopes, 2 * NB_STEPPERS);
+    memcpy(MR_slopes, data.slopes, 4 * NB_STEPPERS);
 
 }
 
@@ -334,7 +337,7 @@ unsigned char LinearMotionN::process_position(unsigned char *elementary_dists) {
     int i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
     int i2;
 #define STEPPER(i, ...) \
-    if (i!=MR_max_axis){\
+    if ((unsigned char)i!=MR_max_axis){\
         i2 = (unsigned int) (((unsigned long) MR_slopes[i] * i1) >> MR_shift_nb);\
         STEP_AND_WAIT\
         MR_positions[i] += (elementary_dists[i] = (unsigned char) ((i2 - MR_positions[i])));\
@@ -357,7 +360,9 @@ void LinearMotionN::process_speed() {//2
 
     float inverse = invert(SpeedManager::distance_square_root);
     STEP_AND_WAIT
-    SpeedManager::delay0 = (unsigned int) (SpeedManager::delay_numerator * inverse);
+    SpeedManager::delay0 = (unsigned long) (SpeedManager::delay_numerator * inverse);
+    CI::echo("delay "+String(SpeedManager::delay0));
+
     set_stepper_int_period(SpeedManager::delay0);
     STEP_AND_WAIT
 }

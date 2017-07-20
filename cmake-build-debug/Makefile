@@ -926,32 +926,32 @@ src/StepperControl/swap.cpp.s:
 	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/swap.cpp.s
 .PHONY : src/StepperControl/swap.cpp.s
 
-src/hardware_language_abstraction/hardware_language_abstraction_teensy3.o: src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.o
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.o: src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
 
-.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy3.o
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.o
 
 # target to build an object file
-src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.o:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.o
-.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.o
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o:
+	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
 
-src/hardware_language_abstraction/hardware_language_abstraction_teensy3.i: src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.i
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.i: src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i
 
-.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy3.i
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.i
 
 # target to preprocess a source file
-src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.i:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.i
-.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.i
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i:
+	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i
 
-src/hardware_language_abstraction/hardware_language_abstraction_teensy3.s: src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.s
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.s: src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s
 
-.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy3.s
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.s
 
 # target to generate assembly for a file
-src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.s:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.s
-.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy3.cpp.s
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s:
+	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s
 
 src/main.o: src/main.cpp.o
 
@@ -1072,9 +1072,9 @@ help:
 	@echo "... src/StepperControl/swap.o"
 	@echo "... src/StepperControl/swap.i"
 	@echo "... src/StepperControl/swap.s"
-	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy3.o"
-	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy3.i"
-	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy3.s"
+	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy35.o"
+	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy35.i"
+	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy35.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

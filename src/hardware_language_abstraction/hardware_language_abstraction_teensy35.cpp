@@ -36,14 +36,14 @@
  */
 
 //--------------------------------------Microseconds_Steppers_Timer_Interrupt-------------------------------------------
-void (*us_function)(void);
+void nop() {}
+
+void (*us_function)(void) = nop;
 
 void set_stepper_int_function(void (*f)()) {
     us_function = f;
 
 }
-
-
 
 void setup_stepper_interrupt(void (*function)(void), unsigned int period_us) {
 
@@ -53,26 +53,19 @@ void setup_stepper_interrupt(void (*function)(void), unsigned int period_us) {
 
     set_stepper_int_function(function);
 
-    SIM_SCGC6 |= SIM_SCGC6_PIT;
-    __asm__ volatile("nop"); // solves timing problem on Teensy 3.5
-    PIT_MCR = 1;
-
     enable_stepper_interrupt();
 
-    sei();
+    enable_stepper_timer();
 
+    sei();
 }
+
 
 void pit0_isr() {
     PIT_TFLG0 = 1;
-    us_function();
+    (*us_function)();
 }
 
-/*
-ISR(TIMER5_COMPA_vect) {
-        (*us_function)();
-}
- */
 
 
 //--------------------------------Control_loops_Milliseconds_Timer_Interrupt--------------------------------------------

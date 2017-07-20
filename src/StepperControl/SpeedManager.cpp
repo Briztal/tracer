@@ -65,7 +65,10 @@ void SpeedManager::heuristic_distance() {
  */
 
 void SpeedManager::regulate_speed() {
+    CI::echo("DTE : "+String(distance_to_end)+" "+String(speed_distance)+" "+String(delay0)+" "+String(regulation_delay)+" "+String(regulation_stop_enabled)+" "+String(processing_steps));
     if (distance_to_end < speed_distance) {
+        CI::echo("rng");
+
         //If we entered in the deceleration range :
         go_to_speed_distance(distance_to_end);
         regulation_unreached = true;
@@ -73,6 +76,7 @@ void SpeedManager::regulate_speed() {
         return;
     } else if (regulation_unreached) {
         //If speed still has to be modified :
+        CI::echo("rur");
 
         if (delay0 > regulation_delay) {
             //if speed is too low :
@@ -83,6 +87,7 @@ void SpeedManager::regulate_speed() {
                 regulation_unreached = false;
                 return;
             }
+            CI::echo("acceleration");
             //if not, acceleration
             set_speed_distance_fast(true, processing_steps);
             speed_incr = true;
@@ -230,7 +235,10 @@ void SpeedManager::set_delay_parameters(unsigned int tmp_regulation_delay, unsig
 
     last_ratio = ratio;
     delay0 = tmp_delay_0;
+
+    CI::echo("delay "+String(delay0));
     set_stepper_int_period(tmp_delay_0);
+    CI::echo("delay value : "+String(PIT_LDVAL0));
     delay_numerator = tmp_delay_numerator;
     regulation_delay = tmp_regulation_delay;
     regulation_unreached = true;

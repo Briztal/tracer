@@ -95,23 +95,24 @@ inline static void delay_ms(unsigned int time_ms){
 
 #ifdef HL_STEPPER_TIMER
 
-#define TICS_PER_MS (F_BUS / 1000000)
+#define init_stepper_interrupt() {SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\
+    NVIC_SET_PRIORITY(IRQ_PIT_CH0, 128);NVIC_ENABLE_IRQ(IRQ_PIT_CH0);}
+
+#define TICS_PER_MS (uint32_t) (F_BUS / 1000000)
 
 #define US_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / TICS_PER_MS)
 
 #define set_stepper_int_period(period_us)\
-     {PIT_LDVAL0 = (period_us > US_TIMER_MAX_PERIOD) ?\
-        US_TIMER_MAX_PERIOD :  (TICS_PER_MS) * period_us - 1;};
-
-
+     {PIT_LDVAL0 = ((unsigned long)period_us > US_TIMER_MAX_PERIOD) ?\
+        US_TIMER_MAX_PERIOD :  (unsigned long) ((TICS_PER_MS) * (unsigned long)period_us - 1);};
 
 #define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
 
-#define disable_stepper_interrupt() PIT_TCTRL0 &= !(uint32_t)PIT_TCTRL_TIE;
+#define disable_stepper_interrupt() PIT_TCTRL0 &= 5;
 
 #define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
 
-#define disable_stepper_timer() PIT_TCTRL0 &= !(uint32_t)PIT_TCTRL_TEN;
+#define disable_stepper_timer() PIT_TCTRL0 &= 6;
 
 #define stepper_int_flag PIT_TFLG0
 
@@ -122,7 +123,6 @@ void set_stepper_int_function(void (*f)());
 void setup_stepper_interrupt(void (*function)(void), unsigned int period_us);
 
 #define clean_stepper_interrupt() {disable_stepper_interrupt();disable_stepper_timer();}
-
 
 #endif
 

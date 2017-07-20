@@ -50,6 +50,7 @@
  */
 
 void MotionExecuter::start() {
+    init_stepper_interrupt();
     setup_stepper_interrupt(wait_for_movement, 30000);
 }
 
@@ -60,8 +61,6 @@ void MotionExecuter::fill_movement_data(bool first, unsigned char *elementary_di
     } else {
         motion_data_to_fill.final_dir_signature = nsig;
     }
-
-
 
     disable_stepper_interrupt()
 
@@ -152,10 +151,15 @@ void MotionExecuter::enqueue_movement_data() {
  *  - if not, returns, and will re-check later (interrupt)
  */
 void MotionExecuter::wait_for_movement() {
+
     disable_stepper_interrupt();
+
+    //digitalWrite(13, !digitalRead(13));
 
 
     if (motion_data_queue.available_elements()) {
+
+
         popped_data = motion_data_queue.pull();
 
         /*
@@ -234,6 +238,8 @@ void MotionExecuter::prepare_next_sub_motion() {
 
     disable_stepper_interrupt();
 
+
+
     saved_trajectory_indice = trajectory_indice;
     unsigned char *elementary_signatures;
 
@@ -245,6 +251,7 @@ void MotionExecuter::prepare_next_sub_motion() {
     }
 
     STEP_AND_WAIT;
+
 
     unsigned char elementary_dists[NB_STEPPERS];
     unsigned char negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
@@ -261,15 +268,16 @@ void MotionExecuter::prepare_next_sub_motion() {
         else end_distances[i] -= elementary_dists[i];\
         STEP_AND_WAIT;
 
+#include "../config.h"
+
+
+#undef STEPPER
+
         SpeedManager::heuristic_distance();
         distances_lock = false;
-
         STEP_AND_WAIT;
 
 
-#include "../config.h"
-
-#undef STEPPER
 
     }
     //next move Processing
@@ -345,7 +353,6 @@ void MotionExecuter::prepare_next_sub_motion() {
          */
     }
 
-
     set_stepper_int_function(finish_sub_movement);
 
     enable_stepper_interrupt();
@@ -386,7 +393,6 @@ void MotionExecuter::finish_sub_movement() {
 
                 StepperController::echo_positions();
                 for (int i = 0; i<NB_STEPPERS; i++) {
-                    CI::echo("dist "+String(i)+" "+String(end_distances[i]));
                 }
                 MotionScheduler::send_position();
                 set_stepper_int_function(wait_for_movement);
