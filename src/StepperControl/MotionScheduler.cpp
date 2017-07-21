@@ -44,7 +44,7 @@ void MotionScheduler::begin() {
 #undef CARTESIAN_GROUP
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        axis_signatures[axis] = (uint16_t) (1 << axis);
+        axis_signatures[axis] = (sig_t) (1 << axis);
     }
 
 
@@ -92,7 +92,7 @@ void MotionScheduler::set_speed_for_group(uint8_t group_id, float speed) {
 float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
 
     //Determination of the regulation speed
-    uint16_t group_signature = speed_groups_signatures[speed_group];
+    sig_t group_signature = speed_groups_signatures[speed_group];
     float group_coeff = 0;
     float group_speed = theorical_regulation_speeds[speed_group];
 
@@ -221,8 +221,8 @@ uint8_t m::speed_group = 0;
 float ttrs[NB_CARTESIAN_GROUPS];
 float *const m::theorical_regulation_speeds = ttrs;
 
-uint16_t ttgs[NB_CARTESIAN_GROUPS];
-uint16_t *const m::speed_groups_signatures = ttgs;
+sig_t ttgs[NB_CARTESIAN_GROUPS];
+sig_t *const m::speed_groups_signatures = ttgs;
 
 int32_t pos[NB_STEPPERS];
 int32_t *const m::positions = pos;
@@ -230,8 +230,8 @@ int32_t *const m::positions = pos;
 
 #define STEPPER(i, j, si, st, sp, ac, dp, ps, pd, pinPower, pmi, vi, pma, va) 1<<i,
 
-uint16_t tmp_signature[NB_STEPPERS];
-uint16_t *const m::axis_signatures = tmp_signature;
+sig_t tmp_signature[NB_STEPPERS];
+sig_t *const m::axis_signatures = tmp_signature;
 
 //Fields for theorical_regulation_speed processing :
 

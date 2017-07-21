@@ -162,7 +162,9 @@ SERVO(2, servo3, 4, 0, 1)
 #define MOTION_DATA_QUEUE_SIZE 20
 
 //Number of stepper motors, must be set accordingly to the next lines
-#define NB_STEPPERS 13
+#define NB_STEPPERS 17
+
+#define sig_t uint32_t
 
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
 #ifdef STEPPER //STEPPER(id, char, signature, relative, pinStep, pinDir, dir+, pinPower, enableValue, pinEndMin, OnEndMinValue, pinEndMax, OnEndMaxValue)
@@ -184,6 +186,10 @@ STEPPER(9,  512,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH
 STEPPER(10,  1024,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(11,  2048,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(12,  4096,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 
 #endif
 
@@ -205,10 +211,14 @@ STEPPER_DATA(   9,  '3',    150.,   80.16,  500.,    1200.);
 STEPPER_DATA(   10,  '3',    150.,   80.16,  500.,    1200.);
 STEPPER_DATA(   11,  '3',    150.,   80.16,  500.,    1200.);
 STEPPER_DATA(   12,  '3',    150.,   80.16,  500.,    1200.);
+STEPPER_DATA(   13,  '3',    150.,   80.16,  500.,    1200.);
+STEPPER_DATA(   14,  '3',    150.,   80.16,  500.,    1200.);
+STEPPER_DATA(   15,  '3',    150.,   80.16,  500.,    1200.);
+STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,    1200.);
 
 #endif
 
-#define NB_CARTESIAN_GROUPS 3
+#define NB_CARTESIAN_GROUPS 6
 
 #ifdef CARTESIAN_GROUP
 
@@ -217,7 +227,8 @@ CARTESIAN_GROUP(0,      0,      1,      2,     500     )
 CARTESIAN_GROUP(1,      3,      4,      5,     500     )
 CARTESIAN_GROUP(2,      6,      7,      8,     500     )
 CARTESIAN_GROUP(3,      9,      10,     11,     500     )
-CARTESIAN_GROUP(4,      12,     -1,     -1,     500     )
+CARTESIAN_GROUP(4,      12,     13,     14,     500     )
+CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
 
 #endif
 

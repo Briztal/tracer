@@ -34,11 +34,11 @@ public:
 
     static void move();
 
-    static uint8_t readEndStops();
+    static sig_t readEndStops();
 
 private:
 
-    static uint32_t getMaxDelay(uint8_t signature, uint32_t *delays);
+    static uint32_t getMaxDelay(sig_t signature, uint32_t *delays);
 };
 
 #endif //TRACER_HOMINGMOTION_H

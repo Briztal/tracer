@@ -100,7 +100,7 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
     //TODO USE MOTION_SIZE PROVIDED BY THE PARSER
 
     float sq_dist_sum = 0;
-    uint16_t direction_signature = 0;
+    sig_t direction_signature = 0;
     uint8_t max_axis = 255;
     uint32_t max_dist = 0;
 
@@ -255,7 +255,7 @@ void LinearMotionN::set_motion_data(uint32_t *motion_dists) {
 
     uint32_t count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
 
-    uint16_t nsig = negative_signatures;
+    sig_t nsig = negative_signatures;
 
     const uint8_t max_axis = data_to_fill.max_axis;
     const float *slopes = data_to_fill.slopes;
@@ -311,7 +311,7 @@ void LinearMotionN::initialise_motion() {
  * Position processing function.
  * It takes 2*dimension-1 processing windows to determine all positions
  */
-uint16_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
+sig_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
 
     uint32_t i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
     uint32_t i2;
@@ -351,8 +351,8 @@ linear_data m::data_to_fill;
 uint32_t *const m::MR_positions = new uint32_t[NB_STEPPERS];
 float *const m::MR_slopes = new float[NB_STEPPERS];
 uint8_t m::MR_max_axis;
-uint16_t m::MR_negative_signatures;
-uint16_t m::negative_signatures;
+sig_t m::MR_negative_signatures;
+sig_t m::negative_signatures;
 
 #undef m;
 

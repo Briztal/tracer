@@ -48,17 +48,17 @@ static void send_position();
 
 #endif
 
-    static void set_directions(uint16_t negative_signatures);
+    static void set_directions(sig_t negative_signatures);
 
     static void set_dimensions();
 
     static void begin();
 
-    static void enable(uint16_t signature);
+    static void enable(sig_t signature);
 
-    static void fastStep(uint16_t id);
+    static void fastStep(sig_t id);
 
-    static uint16_t fastStepDelay(uint16_t id);
+    static uint16_t fastStepDelay(sig_t id);
 
     static uint16_t *const delays;
 private:

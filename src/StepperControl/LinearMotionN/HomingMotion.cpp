@@ -37,7 +37,7 @@ void HomingMotion::move() {
     StepperController::enable(255);
 
     //First step is to generate the signature for all axis;
-    uint8_t signature = 0;
+    sig_t signature = 0;
 
     //TODO DIRECTIONS : 0 quand C'est en increment... Ca va pas !!
 
@@ -89,7 +89,7 @@ void HomingMotion::move() {
 
 }
 
-uint32_t HomingMotion::getMaxDelay(uint8_t signature, uint32_t *delays) {
+uint32_t HomingMotion::getMaxDelay(sig_t signature, uint32_t *delays) {
     uint32_t delay = 0;
     int axis = 0;
     for (; axis < NB_STEPPERS; axis++) {
@@ -110,9 +110,9 @@ uint32_t HomingMotion::getMaxDelay(uint8_t signature, uint32_t *delays) {
     return delay;
 }
 
-uint8_t HomingMotion::readEndStops() {
-    uint8_t signature = 0;
-    uint8_t bit = 1;
+sig_t HomingMotion::readEndStops() {
+    sig_t signature = 0;
+    sig_t bit = 1;
 
 #define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
     if (!rel) {\

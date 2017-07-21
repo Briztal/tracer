@@ -52,7 +52,7 @@ protected:
      * Method to verify your implementation of process_position : it will calculate position iteratively and send_packet the position.
      * Requires min, max and increment to be correctly set up, and takes steps/mm for 2 axis in argument
      */
-    static void checkPositionByStep(float *offsets, uint16_t d);
+    static void checkPositionByStep(float *offsets, sig_t d);
 
     /*
      * Method to verify your implementation of getPositions  : it will calculate position iteratively and send_packet the position.
@@ -99,12 +99,12 @@ private :
     static void process_speed();
 
     //Method to step and delay the correct time
-    static void step(uint16_t sig);
+    static void step(sig_t sig);
 
     static void set_final_positions(const int32_t *final_positions);
 
 
-    static void fill_processors(void (*init_f)(), uint16_t (*position_f)(uint8_t *));
+    static void fill_processors(void (*init_f)(), sig_t (*position_f)(uint8_t *));
 
     static void set_speed_parameters_enqueue();
 

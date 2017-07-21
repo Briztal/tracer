@@ -122,7 +122,7 @@ void NonLinearMotionN::set_final_positions(const int32_t *final_positions) {
     }
 }
 
-void NonLinearMotionN::fill_processors(void (*init_f)(), uint16_t (*position_f)(uint8_t *)) {
+void NonLinearMotionN::fill_processors(void (*init_f)(), sig_t (*position_f)(uint8_t *)) {
     MotionExecuter::fill_processors(init_f, step, position_f, process_speed);
 }
 
@@ -302,7 +302,7 @@ uint8_t NonLinearMotionN::get_distance(int32_t *dest, int32_t *pos) {
 }
 
 
-void NonLinearMotionN::step(uint16_t sig) {
+void NonLinearMotionN::step(sig_t sig) {
     uint16_t delay = StepperController::fastStepDelay(sig);
     set_stepper_int_period(delay);
 }

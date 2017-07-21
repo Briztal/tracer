@@ -38,7 +38,7 @@
 
 #define STEP_AND_WAIT \
     {\
-        uint16_t s_w_signature;\
+        sig_t s_w_signature;\
         if (!(s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]]))\
         s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
         (*ME::step)(s_w_signature);\
@@ -63,11 +63,11 @@ private:
      */
 public:
 
-    static void fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, uint16_t negative_signatures);
+    static void fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, sig_t negative_signatures);
 
     static void fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float ratio, uint8_t processing_steps);
 
-    static void fill_processors(void (*init_f)(), void (*step_f)(uint16_t), uint16_t (*position_f)(uint8_t *), void (*speed_f)());
+    static void fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t *), void (*speed_f)());
 
     //The function to copy the current motion_data to the queue.
     static void enqueue_movement_data();
@@ -78,16 +78,16 @@ public :
 
     static volatile bool distances_lock;
     static int32_t *const end_distances;
-    static uint16_t *saved_elementary_signatures;
+    static sig_t *saved_elementary_signatures;
     static uint8_t saved_trajectory_indice;
-    static void (*step)(uint16_t);
+    static void (*step)(sig_t);
     static uint8_t *const trajectory_array;
 
 private :
 
     static uint32_t count;
     static bool ultimate_movement, penultimate_movement;
-    static uint16_t *const es0, *const es1;
+    static sig_t *const es0, *const es1;
     static bool is_es_0;
     static uint8_t trajectory_indice;
     static const uint8_t *const trajectory_indices;
@@ -116,7 +116,7 @@ private :
     //-------------------------------------------Real_Time_Movement_Processors-------------------------------------------
 
 private:
-    static uint16_t (*position_processor)(uint8_t *);
+    static sig_t (*position_processor)(uint8_t *);
 
     static void (*speed_processor)();
 
