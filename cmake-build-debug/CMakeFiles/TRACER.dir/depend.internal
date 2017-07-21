@@ -6,7 +6,7 @@ CMakeFiles/TRACER.dir/src/main.cpp.o
  /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/Queue.h
  /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/motion_data.h
  /media/raph/Data2/Projets/Robotique/TRACER/src/config.h
- /media/raph/Data2/Projets/Robotique/TRACER/src/config/ordbot.h
+ /media/raph/Data2/Projets/Robotique/TRACER/src/config/large_config.h
  /media/raph/Data2/Projets/Robotique/TRACER/src/main.cpp
  /root/.platformio/packages/framework-arduinoteensy/cores/teensy3/Arduino.h
  /root/.platformio/packages/framework-arduinoteensy/cores/teensy3/AudioStream.h

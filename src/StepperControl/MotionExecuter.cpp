@@ -54,7 +54,7 @@ void MotionExecuter::start() {
     setup_stepper_interrupt(wait_for_movement, 30000);
 }
 
-void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, uint8_t nsig) {
+void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, uint16_t nsig) {
     if (first) {
         motion_data_to_fill.count = count;
         motion_data_to_fill.initial_dir_signature = nsig;
@@ -76,9 +76,9 @@ void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, u
 
     //uint8_t local_array_end = 0;
     uint8_t motion_depth = 0;
-    uint8_t pre_signatures[8];
+    uint16_t pre_signatures[8];
     while (true) {
-        uint8_t sig = 0;
+        uint16_t sig = 0;
 
         //Step 1 : get signature for current move
 
@@ -134,7 +134,7 @@ void MotionExecuter::fill_speed_data(uint16_t delay_numerator, uint16_t regulati
     motion_data_to_fill.ratio = ratio;
 }
 
-void MotionExecuter::fill_processors(void (*init_f)(), void (*step_f)(uint8_t), uint8_t (*position_f)(uint8_t*), void (*speed_f)()) {
+void MotionExecuter::fill_processors(void (*init_f)(), void (*step_f)(uint16_t), uint16_t (*position_f)(uint8_t*), void (*speed_f)()) {
     motion_data_to_fill.init_processor = init_f;
     motion_data_to_fill.step = step_f;
     motion_data_to_fill.position_processor = position_f;
@@ -153,6 +153,7 @@ void MotionExecuter::enqueue_movement_data() {
 void MotionExecuter::wait_for_movement() {
 
     disable_stepper_interrupt();
+
 
     //digitalWrite(13, !digitalRead(13));
 
@@ -199,7 +200,7 @@ void MotionExecuter::wait_for_movement() {
         es0[7] = popped_data.initial_signatures[7];
         is_es_0 = false;
 
-        StepperController::enable(255);
+        StepperController::enable(65535);
         StepperController::set_directions(popped_data.initial_dir_signature);
 
         trajectory_indice = popped_data.initial_indice;
@@ -208,6 +209,8 @@ void MotionExecuter::wait_for_movement() {
         SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data. delay_numerator, popped_data.ratio, popped_data.processing_steps);
 
         (*popped_data.init_processor)();
+
+
 
         set_stepper_int_function(prepare_next_sub_motion);
     }
@@ -241,7 +244,7 @@ void MotionExecuter::prepare_next_sub_motion() {
 
 
     saved_trajectory_indice = trajectory_indice;
-    uint8_t *elementary_signatures;
+    uint16_t *elementary_signatures;
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -251,14 +254,20 @@ void MotionExecuter::prepare_next_sub_motion() {
     }
 
 
-    STEP_AND_WAIT;
-
-
 
     uint8_t elementary_dists[NB_STEPPERS];
-    uint8_t negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
+    uint16_t negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
+
 
     //Distances Processing
+
+
+    STEP_AND_WAIT
+
+
+
+
+
 
     {
         //TODO TESTER AVEC LE SHIFT SUR LA SIGNATURE DE DISTANCE ET VOIR SI C'EST PLUS EFFICACE
@@ -268,28 +277,29 @@ void MotionExecuter::prepare_next_sub_motion() {
 #define STEPPER(i, sig, ...)\
         if (negative_signatures&sig) end_distances[i] += elementary_dists[i];\
         else end_distances[i] -= elementary_dists[i];\
-        STEP_AND_WAIT;
 
 #include "../config.h"
 
 
 #undef STEPPER
 
+
         SpeedManager::heuristic_distance();
         distances_lock = false;
-        STEP_AND_WAIT;
-
 
 
     }
+    STEP_AND_WAIT;
+
     //next move Processing
 
+
+
     {
-        //uint8_t local_array_end = 0;
         uint8_t motion_depth = 0;
-        uint8_t pre_signatures[8];
+        uint16_t pre_signatures[8];
         while (true) {
-            uint8_t sig = 0;
+            uint16_t sig = 0;
 
             //Step 1 : get signature for current move
 
@@ -303,7 +313,6 @@ void MotionExecuter::prepare_next_sub_motion() {
             pre_signatures[motion_depth] = sig;
             motion_depth++;
 
-            STEP_AND_WAIT;
 
             bool end_move = true;
 
@@ -321,7 +330,6 @@ void MotionExecuter::prepare_next_sub_motion() {
                 break;
             }
 
-            STEP_AND_WAIT;
 
         }
 
@@ -331,22 +339,28 @@ void MotionExecuter::prepare_next_sub_motion() {
             elementary_signatures[i++] = pre_signatures[motion_depth];
         }
 
-        STEP_AND_WAIT;
+
+
     }
+    STEP_AND_WAIT;
+
 
 
     SpeedManager::regulate_speed();
-    STEP_AND_WAIT;
-    if (SpeedManager::speed_processing_required) {
-        //TODO PROCESS_SPEED
-        SpeedManager::speed_processing_required = false;
 
+    STEP_AND_WAIT;
+
+
+
+
+    if (SpeedManager::speed_processing_required) {
+        SpeedManager::speed_processing_required = false;
         (*speed_processor)();
 
         /*
         //Actions settings
         {
-            float temp_speed = plus noir e qu'une arabesav_c_speed + speed_numerator * distance_square_root;//TODO FRACTIONNER
+            float temp_speed = plus noir e qu'une arabesav_c_speed + speed_numerator * distance_square_root;
             MOTION_STEP_AND_WAIT;
             for (uint8_t action_index = linear_tools_nb; action_index--;) {
                 linear_set_functions[action_index](temp_speed);
@@ -355,6 +369,7 @@ void MotionExecuter::prepare_next_sub_motion() {
         }
          */
     }
+
 
     set_stepper_int_function(finish_sub_movement);
     enable_stepper_interrupt();
@@ -366,7 +381,7 @@ int i = 4;
 void MotionExecuter::finish_sub_movement() {
     disable_stepper_interrupt();
 
-    uint8_t s_w_signature;
+    uint16_t s_w_signature;
     if (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]]))
         s_w_signature = saved_elementary_signatures[trajectory_array[--saved_trajectory_indice]];
 
@@ -425,7 +440,7 @@ int32_t *const m::end_distances = ted;
 volatile bool m::distances_lock;
 
 
-uint8_t *saved_elementary_signatures;
+uint16_t *saved_elementary_signatures;
 uint8_t saved_trajectory_indice;
 
 uint8_t traj[255] = {
@@ -440,20 +455,20 @@ uint8_t traj[255] = {
 
 uint8_t *const m::trajectory_array = traj;
 
-uint8_t tes0[8], tes1[8];
-uint8_t *const m::es0 = tes0, *const m::es1 = tes1;
+uint16_t tes0[8], tes1[8];
+uint16_t *const m::es0 = tes0, *const m::es1 = tes1;
 bool m::is_es_0;
 
 const uint8_t tti[8] {0, 2, 6, 14, 30, 62, 126, 254};
 const uint8_t *const m::trajectory_indices =  tti;
 
-uint8_t *m::saved_elementary_signatures = tes0;
+uint16_t *m::saved_elementary_signatures = tes0;
 uint8_t m::saved_trajectory_indice;
 uint8_t m::trajectory_indice;
 
 //Processors;
-void (*m::step)(uint8_t);
-uint8_t (*m::position_processor)(uint8_t *);
+void (*m::step)(uint16_t);
+uint16_t (*m::position_processor)(uint8_t *);
 void (*m::speed_processor)();
 
 bool m::ultimate_movement = true, m::penultimate_movement = true;

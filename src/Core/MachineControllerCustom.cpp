@@ -32,15 +32,27 @@
 #include "../StepperControl/LinearMotionN/LinearMotionN.h"
 #include "../StepperControl/LinearMotionN/HomingMotion.h"
 #include "EEPROMStorage.h"
+#include "../StepperControl/SpeedManager.h"
 
 
 void MachineController::action(char * dptr, uint8_t size) {
+
     CI::echo("400");
+    SpeedManager::print_speed_distance();
     float coords[NB_STEPPERS];
     coords[0] = 100;
     coords[1] = 160;
     coords[2] = 100;
     coords[3] = 40;
+    coords[4] = 50;
+    coords[5] = 138;
+    coords[6] = 82;
+    coords[7] = 43;
+    coords[8] = 120;
+    coords[9] = 12;
+    coords[10] = 152;
+    coords[11] = 90;
+    coords[12] = 14;
     //MotionScheduler::set_speed_for_group(0, 300);
     MotionScheduler::set_speed_for_group(0, 500);
     MotionScheduler::set_speed_group(0);

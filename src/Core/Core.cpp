@@ -28,6 +28,7 @@
 #include "../StepperControl/StepperController.h"
 #include "../StepperControl/MotionScheduler.h"
 #include "../StepperControl/MotionExecuter.h"
+#include "../StepperControl/SpeedManager.h"
 #endif
 
 
@@ -41,6 +42,7 @@ void Core::begin() {
     EEPROMStorage::begin();
     StepperController::begin();
     MotionScheduler::begin();
+    SpeedManager::begin();
     MotionExecuter::start();
 #endif
 

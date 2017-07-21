@@ -99,12 +99,12 @@ private :
     static void process_speed();
 
     //Method to step and delay the correct time
-    static void step(uint8_t sig);
+    static void step(uint16_t sig);
 
     static void set_final_positions(const int32_t *final_positions);
 
 
-    static void fill_processors(void (*init_f)(), uint8_t (*position_f)(uint8_t *));
+    static void fill_processors(void (*init_f)(), uint16_t (*position_f)(uint8_t *));
 
     static void set_speed_parameters_enqueue();
 

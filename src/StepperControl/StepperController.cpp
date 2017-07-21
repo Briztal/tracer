@@ -42,7 +42,7 @@ bool StepperController::isAtMin##i() { return (digital_read(pinEndMin)==HIGH);}\
 #undef STEPPER
 
 
-void StepperController::enable(uint8_t signature) {
+void StepperController::enable(uint16_t signature) {
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
     if (signature&sig) {\
         digital_write(pinPower, LOW);\
@@ -57,7 +57,7 @@ void StepperController::enable(uint8_t signature) {
 }
 
 //TODO PASSER EN SIGNATURES PLUTOT QU'EN ATTRIBUTS
-void StepperController::set_directions(uint8_t negative_signatures) {
+void StepperController::set_directions(uint16_t negative_signatures) {
     bool sig_dir;
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
@@ -101,11 +101,9 @@ void StepperController::setDir##i(bool sens) {\
         dir##i = sens;\
         if (sens) {\
             digital_write(pinDir, dirp);\
-            lim##i = max##i ;\
             incr##i=1;\
         } else {\
             digital_write(pinDir, !dirp);\
-            lim##i = 0;\
             incr##i=-1;\
     }\
 }
@@ -146,12 +144,12 @@ void StepperController::begin() {
 
 }
 
-void StepperController::fastStep(uint8_t id) {
+void StepperController::fastStep(uint16_t id) {
 //CI::echo("S");
 #ifdef position_log
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
-        /*if (id&(uint8_t)1) {*/\
+        /*if (id&(uint16_t)1) {*/\
         if (id&sig) {\
             pos##i += incr##i;\
             digital_write(pinStep, HIGH);\
@@ -165,7 +163,7 @@ void StepperController::fastStep(uint8_t id) {
 
 #else
 #define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
-        /*if (id&(uint8_t)1) {*/\
+        /*if (id&(uint16_t)1) {*/\
         if (id&sig) {\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
             BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -181,12 +179,12 @@ void StepperController::fastStep(uint8_t id) {
 }
 
 /*
-uint16_t StepperController::fastStepDelay(uint8_t id) {
+uint16_t StepperController::fastStepDelay(uint16_t id) {
     uint16_t delay = 0;
 #ifdef position_log
 
     #define STEPPER(i, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-        if (id&(uint8_t)1) {\
+        if (id&(uint16_t)1) {\
             pos##i += incr##i;\
             delay+=delays[i];\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -199,7 +197,7 @@ uint16_t StepperController::fastStepDelay(uint8_t id) {
 
 #else
 #define STEPPER(i, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-        if (id&(uint8_t)1) {\
+        if (id&(uint16_t)1) {\
             delay+=delays[i];\
             BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
             BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
@@ -237,12 +235,10 @@ void StepperController::set_dimensions() {
     float *sizes = EEPROMStorage::sizes;
     float *steps = EEPROMStorage::steps;
 
-#define STEPPER(i, ...)\
-     max##i = (*(sizes + i))* (*(steps + i));
-
 #include "../config.h"
 
 #undef STEPPER
+
 }
 
 
@@ -265,8 +261,6 @@ void StepperController::send_position() {
 #define m StepperController
 
 #define STEPPER(i, ...) \
-    int32_t m::lim##i;\
-    int32_t m::max##i;\
     bool m::dir##i = false;
 
 #include "../config.h"

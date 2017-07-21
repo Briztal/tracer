@@ -42,12 +42,12 @@ private :
     static uint32_t *const MR_positions;
     static float *const MR_slopes;
     static uint8_t MR_max_axis;
-    static uint8_t MR_negative_signatures;
+    static uint16_t MR_negative_signatures;
 
     //Other fields
     static Queue<linear_data> data_queue;
     static linear_data data_to_fill;
-    static uint8_t negative_signatures;
+    static uint16_t negative_signatures;
 
 
     //Preparators
@@ -62,7 +62,7 @@ private :
 
     static void move(uint32_t *dists);
 
-    static uint8_t process_position(uint8_t *elementary_dists);
+    static uint16_t process_position(uint8_t *elementary_dists);
 
     static uint8_t setup_movement_data(const float *destinations_t, uint32_t *absolute_distances);
 

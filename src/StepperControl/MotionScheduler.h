@@ -37,7 +37,7 @@ public :
 
     static int32_t *const positions;
 
-    static uint8_t *const axis_signatures;//Not used in optimised functions
+    static uint16_t *const axis_signatures;//Not used in optimised functions
 
     static void begin();
 
@@ -62,7 +62,7 @@ protected :
 
     static float *const theorical_regulation_speeds;
 
-    static uint8_t *const speed_groups_signatures;
+    static uint16_t *const speed_groups_signatures;
 
 };
 

@@ -5,7 +5,7 @@ CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/Core/Core.h
 CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/DataStructures/Queue.h
 CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/StepperControl/motion_data.h
 CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/config.h
-CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/config/ordbot.h
+CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/config/large_config.h
 CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/main.cpp
 CMakeFiles/TRACER.dir/src/main.cpp.o: /root/.platformio/packages/framework-arduinoteensy/cores/teensy3/Arduino.h
 CMakeFiles/TRACER.dir/src/main.cpp.o: /root/.platformio/packages/framework-arduinoteensy/cores/teensy3/AudioStream.h

@@ -30,6 +30,10 @@
 #include "../Core/EEPROMStorage.h"
 #include "../Interfaces/CommandInterface.h"
 
+void SpeedManager::begin() {
+    set_speed_distance(0);
+}
+
 /*
  * Heuristic distance : this function calculates the heuristic distance between the actual position and the end position
  *
@@ -206,6 +210,11 @@ void SpeedManager::go_to_speed_distance(uint32_t distance_to_end) {
 
 }
 
+void SpeedManager::print_speed_distance() {
+    CI::echo("sd : "+String(speed_distance));
+    CI::echo("de : "+String(distance_square_root));
+}
+
 
 float last_ratio;
 /*
@@ -220,13 +229,17 @@ void SpeedManager::set_delay_parameters(uint16_t tmp_regulation_delay, uint16_t 
     //Set speed_distance and delay0
 
     uint16_t tmp_delay_0;
+    CI::echo("sd : "+String(speed_distance));
     if (speed_distance != 0) {
         tmp_delay_0 = (uint16_t) ((float) delay0 * ratio / last_ratio);
         uint32_t sqrt_new_speed_distance = (uint32_t) ((float) tmp_delay_numerator / (float) tmp_delay_0);//TODO FLOAT NECESSAIRE
         //TODO DIRECTLY SET SPEED_DISTANCE, SQRT AND OTHER_PARAMETERS
         go_to_speed_distance(sqrt_new_speed_distance*sqrt_new_speed_distance);
+        CI::echo("tmp_delay_un0 "+String(tmp_delay_0));
     } else {
         tmp_delay_0 = tmp_delay_numerator;//TODO DN -> uint16_t
+        CI::echo("tmp_delay_0 "+String(tmp_delay_0));
+
     }
 
     last_ratio = ratio;
@@ -246,7 +259,11 @@ void SpeedManager::set_delay_parameters(uint16_t tmp_regulation_delay, uint16_t 
 
 //ACCELERATION DELAY
 
-uint32_t m::speed_distance = 0, m::distance_to_end;
+uint32_t pad[5];
+
+
+uint32_t m::speed_distance = (uint32_t)0;
+uint32_t m::distance_to_end = 0;
 uint16_t m::square_inf = 1, m::square_sup = 1, m::distance_square_root = 0, m::square_increments = 1;
 
 uint16_t m::regulation_delay;

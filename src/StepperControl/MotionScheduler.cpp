@@ -44,7 +44,7 @@ void MotionScheduler::begin() {
 #undef CARTESIAN_GROUP
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        axis_signatures[axis] = (uint8_t) (1 << axis);
+        axis_signatures[axis] = (uint16_t) (1 << axis);
     }
 
 
@@ -92,7 +92,7 @@ void MotionScheduler::set_speed_for_group(uint8_t group_id, float speed) {
 float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
 
     //Determination of the regulation speed
-    uint8_t group_signature = speed_groups_signatures[speed_group];
+    uint16_t group_signature = speed_groups_signatures[speed_group];
     float group_coeff = 0;
     float group_speed = theorical_regulation_speeds[speed_group];
 
@@ -109,7 +109,7 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
 
     if (group_coeff == 0) {//If no axis in the speed group has to move : find the first speed group with a moving axis.
         CI::echo("ERROR : THE SELECTED SPEED_GROUP DOESN'T COVER YOUR MOVEMENT : SELECTING ANOTHER");
-        for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
+        for (uint8_t group = 0; group < NB_CARTESIAN_GROUPS; group++) {
             if (group == speed_group) continue;
             group_signature = speed_groups_signatures[group];
             group_coeff = 0;
@@ -221,8 +221,8 @@ uint8_t m::speed_group = 0;
 float ttrs[NB_CARTESIAN_GROUPS];
 float *const m::theorical_regulation_speeds = ttrs;
 
-uint8_t ttgs[NB_CARTESIAN_GROUPS];
-uint8_t *const m::speed_groups_signatures = ttgs;
+uint16_t ttgs[NB_CARTESIAN_GROUPS];
+uint16_t *const m::speed_groups_signatures = ttgs;
 
 int32_t pos[NB_STEPPERS];
 int32_t *const m::positions = pos;
@@ -230,8 +230,8 @@ int32_t *const m::positions = pos;
 
 #define STEPPER(i, j, si, st, sp, ac, dp, ps, pd, pinPower, pmi, vi, pma, va) 1<<i,
 
-uint8_t tmp_signature[NB_STEPPERS];
-uint8_t *const m::axis_signatures = tmp_signature;
+uint16_t tmp_signature[NB_STEPPERS];
+uint16_t *const m::axis_signatures = tmp_signature;
 
 //Fields for theorical_regulation_speed processing :
 

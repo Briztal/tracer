@@ -100,7 +100,7 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
     //TODO USE MOTION_SIZE PROVIDED BY THE PARSER
 
     float sq_dist_sum = 0;
-    uint8_t direction_signature = 0;
+    uint16_t direction_signature = 0;
     uint8_t max_axis = 255;
     uint32_t max_dist = 0;
 
@@ -150,6 +150,12 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
             sq_dist_sum += distmm * distmm;
         }
     }
+
+    for (int axis = 0; axis<NB_STEPPERS; axis++) {
+        CI::echo("dist "+String(axis)+" "+String(absolute_distances[axis]));
+    }
+
+
 
     //If null move : fail with error value;
     if (max_axis == 255)
@@ -249,7 +255,7 @@ void LinearMotionN::set_motion_data(uint32_t *motion_dists) {
 
     uint32_t count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
 
-    uint8_t nsig = negative_signatures;
+    uint16_t nsig = negative_signatures;
 
     const uint8_t max_axis = data_to_fill.max_axis;
     const float *slopes = data_to_fill.slopes;
@@ -305,21 +311,23 @@ void LinearMotionN::initialise_motion() {
  * Position processing function.
  * It takes 2*dimension-1 processing windows to determine all positions
  */
-uint8_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
+uint16_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
 
     uint32_t i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
     uint32_t i2;
+
 #define STEPPER(i, ...) \
     if ((uint8_t)i!=MR_max_axis){\
         i2 = (uint32_t) (MR_slopes[i] * i1);\
-        STEP_AND_WAIT\
         MR_positions[i] += (elementary_dists[i] = (uint8_t) ((i2 - MR_positions[i])));\
-        STEP_AND_WAIT\
     }\
 
 #include "../../config.h"
 
 #undef STEPPER
+
+
+
 
     return MR_negative_signatures;
 }
@@ -330,11 +338,8 @@ uint8_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
  */
 void LinearMotionN::process_speed() {//2
 
-    float inverse = invert(SpeedManager::distance_square_root);
-    STEP_AND_WAIT
-    SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
+    SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * invert(SpeedManager::distance_square_root));
     set_stepper_int_period(SpeedManager::delay0);
-    STEP_AND_WAIT
 }
 
 
@@ -346,68 +351,9 @@ linear_data m::data_to_fill;
 uint32_t *const m::MR_positions = new uint32_t[NB_STEPPERS];
 float *const m::MR_slopes = new float[NB_STEPPERS];
 uint8_t m::MR_max_axis;
-uint8_t m::MR_negative_signatures;
-uint8_t m::negative_signatures;
+uint16_t m::MR_negative_signatures;
+uint16_t m::negative_signatures;
 
 #undef m;
-
-/*
-
-void LinearMotionN::multiple_moves(uint8_t dimension, uint32_t *dists) {
-    uint16_t motion_dists[dimension];
-
-    //Division of the motion in 2^dec_count sub_moves
-    //calculation of dec_count
-    uint32_t dist_0 = dists[0];
-    int dec_count = 0;
-    while (dist_0 > INT_OVF) {
-        dist_0 >>= 1;
-        dec_count++;
-    }
-
-    //set motion_dists for the [motion_nb]-1 sub-moves
-    *motion_dists = (uint16_t) dist_0;
-    for (int axis = 1; axis < dimension; axis++)
-        motion_dists[axis] = (uint16_t) (dists[axis] >> dec_count);
-
-    int motion_nb = (1 << dec_count) - 1;
-
-    set_position_data(motion_dists);
-    memset(pos_t, 0, NB_STEPPERS);
-
-    //first n_1 submoves
-    set_initial_dists();
-
-    for (int sub_motion = 0; sub_motion < motion_nb; sub_motion++) {
-
-        //StepperControl preparation : set initial destinations, and draw parameters
-
-        //Effective motion
-
-        setup_motion(motion_dists);
-
-        draw();
-
-    }
-    //Last sub-move
-
-    //Calculation of remaining end_distances
-    for (int axis = 0; axis < dimension; axis++)
-        motion_dists[axis] = (uint16_t) (dists[axis] - motion_nb * motion_dists[axis]);
-
-    //StepperControl Preparation : setting slopes and draw parameters
-    set_position_data(motion_dists);
-
-    //Elementary dists setting
-    set_initial_dists();
-
-    //Effective StepperControl
-    set_motion_data(motion_dists);
-    draw();
-
-    regulate_speed();
-
-}
- */
 
 #endif

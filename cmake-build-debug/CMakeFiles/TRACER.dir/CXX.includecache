@@ -21,10 +21,10 @@ stdint.h
 /media/raph/Data2/Projets/Robotique/TRACER/src/config.h
 
 /media/raph/Data2/Projets/Robotique/TRACER/src/config.h
-config/ordbot.h
-/media/raph/Data2/Projets/Robotique/TRACER/src/config/ordbot.h
+config/large_config.h
+/media/raph/Data2/Projets/Robotique/TRACER/src/config/large_config.h
 
-/media/raph/Data2/Projets/Robotique/TRACER/src/config/ordbot.h
+/media/raph/Data2/Projets/Robotique/TRACER/src/config/large_config.h
 
 /media/raph/Data2/Projets/Robotique/TRACER/src/main.cpp
 Arduino.h

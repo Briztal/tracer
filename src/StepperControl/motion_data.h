@@ -25,23 +25,23 @@
 
 typedef struct{//TODO REORG
         //First_last_sub_movement
-    uint8_t initial_signatures[8];//8
-    uint8_t final_signatures[8];//8
+    uint16_t initial_signatures[8];//8
+    uint16_t final_signatures[8];//8
     //-------------2*4--------------8
     uint8_t initial_indice;//1
     uint8_t final_indice;//1
-    uint8_t initial_dir_signature;//1
-    uint8_t final_dir_signature;//1
+    uint16_t initial_dir_signature;//1
+    uint16_t final_dir_signature;//1
     //-------------4--------------12
                //Count
     uint32_t count;//2
              //processors
     void (*init_processor)();//2
     //--------------4---------------16
-    uint8_t (*position_processor)(uint8_t *);//2
+    uint16_t (*position_processor)(uint8_t *);//2
     void (*speed_processor)(void);//2
     //--------------4---------------20
-    void (*step)(uint8_t);//2
+    void (*step)(uint16_t);//2
     void (*sub_move_init)(uint8_t);//2
     //-------------4----------------24
                //Speed

@@ -50,6 +50,10 @@ public :
 
     static bool speed_processing_required;
 
+    static void print_speed_distance();
+
+    static void begin();
+
 private :
 
     static uint8_t processing_steps;

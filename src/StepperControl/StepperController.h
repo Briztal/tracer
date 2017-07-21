@@ -48,17 +48,17 @@ static void send_position();
 
 #endif
 
-    static void set_directions(uint8_t negative_signatures);
+    static void set_directions(uint16_t negative_signatures);
 
     static void set_dimensions();
 
     static void begin();
 
-    static void enable(uint8_t signature);
+    static void enable(uint16_t signature);
 
-    static void fastStep(uint8_t id);
+    static void fastStep(uint16_t id);
 
-    static uint16_t fastStepDelay(uint8_t id);
+    static uint16_t fastStepDelay(uint16_t id);
 
     static uint16_t *const delays;
 private:
@@ -66,8 +66,6 @@ private:
     static uint8_t *step_path;
 
 #define STEPPER(i, ...) \
-    static int32_t lim##i;\
-    static int32_t max##i;\
     static bool dir##i;
 #include  "../config.h"
 #undef STEPPER
