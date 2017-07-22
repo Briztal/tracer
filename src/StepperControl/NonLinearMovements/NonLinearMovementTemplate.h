@@ -1,5 +1,5 @@
 /*
-  NonLinearMotionNTemplate.h - Part of TRACER
+  NonLinearMovementTemplate.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -24,7 +24,7 @@
 
 #include "NonLinearMovement.h"
 
-class NonLinearMotionNTemplate : public NonLinearMotionN {
+class NonLinearMovementTemplate : public NonLinearMovement {
 
     //-------------------inherited methods
 

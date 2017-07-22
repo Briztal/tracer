@@ -23,7 +23,7 @@
 
 #include "NonLinearMovement.h"
 
-class MotionBezier : public NonLinearMotionN {
+class MotionBezier : public NonLinearMovement {
 
 public:
 

@@ -25,12 +25,12 @@
 #include "../swap.hpp"
 
 void MotionBezier::move() {
-    NonLinearMotionN::move();
+    NonLinearMovement::move();
 }
 
 void MotionBezier::prepareMotion() {
 
-    NonLinearMotionN::initialise_motion();
+    NonLinearMovement::initialise_motion();
 
     increment_provided = false;
 

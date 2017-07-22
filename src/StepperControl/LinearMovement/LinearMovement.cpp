@@ -1,5 +1,5 @@
 /*
-  LinearMotionN.cpp - Part of TRACER
+  LinearMovement.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 

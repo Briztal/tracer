@@ -1,5 +1,5 @@
 /*
-  NonLinearMotionN.h - Part of TRACER
+  NonLinearMovement.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -34,7 +34,7 @@
  * - comprised in a plan containing two axis;
  */
 
-class NonLinearMotionN {
+class NonLinearMovement {
 
 
 private :

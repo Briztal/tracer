@@ -1,5 +1,5 @@
 /*
-  LinearMotionN.h - Part of TRACER
+  LinearMovement.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 

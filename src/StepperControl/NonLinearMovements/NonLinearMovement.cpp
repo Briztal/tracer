@@ -1,5 +1,5 @@
 /*
-  NonLinearMotionN.cpp - Part of TRACER
+  NonLinearMovement.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -67,7 +67,7 @@
  */
 
 /*
-void NonLinearMotionN::initialise_motion() {
+void NonLinearMovement::initialise_motion() {
     uint8_t a;
     for (uint8_t axis = 0; axis < movement_size; axis++) {
         a = axis_copy_t[axis] = axis_t[axis];
@@ -77,7 +77,7 @@ void NonLinearMotionN::initialise_motion() {
 }
 */
 /*
-void NonLinearMotionN::set_last_position() {
+void NonLinearMovement::set_last_position() {
     Motion::set_end_position(last_positions, axis_t, movement_size);
 }
 */
@@ -87,7 +87,7 @@ void NonLinearMotionN::set_last_position() {
  *
  *  After doing this, it selects the correct axis,
  */
-void NonLinearMotionN::initialise(uint8_t *move_axis_t, const uint8_t size) {
+void NonLinearMovement::initialise(uint8_t *move_axis_t, const uint8_t size) {
     for (uint8_t indice = 0; indice < size; indice++) {
         uint8_t axis = axis_t[indice];
         axis_t[indice] = axis;
@@ -99,7 +99,7 @@ void NonLinearMotionN::initialise(uint8_t *move_axis_t, const uint8_t size) {
 
 }
 
-void NonLinearMotionN::set_initial_positions(const float *initial_positions) {
+void NonLinearMovement::set_initial_positions(const float *initial_positions) {
 
     float first_move_destinations[NB_STEPPERS];
     memcpy(first_move_destinations, MovementScheduler::positions, 4 * NB_STEPPERS);
@@ -113,7 +113,7 @@ void NonLinearMotionN::set_initial_positions(const float *initial_positions) {
 
 }
 
-void NonLinearMotionN::set_final_positions(const int32_t *final_positions) {
+void NonLinearMovement::set_final_positions(const int32_t *final_positions) {
     for (uint8_t indice = 0; indice < movement_size; indice++) {
         uint8_t axis = axis_t[indice];
         int32_t pos = MovementScheduler::positions[axis], npos = final_positions[axis];
@@ -122,11 +122,11 @@ void NonLinearMotionN::set_final_positions(const int32_t *final_positions) {
     }
 }
 
-void NonLinearMotionN::fill_processors(void (*init_f)(), sig_t (*position_f)(uint8_t *)) {
+void NonLinearMovement::fill_processors(void (*init_f)(), sig_t (*position_f)(uint8_t *)) {
     MotionExecuter::fill_processors(init_f, step, position_f, process_speed);
 }
 
-void NonLinearMotionN::set_speed_parameters_enqueue(uint8_t processing_steps) {
+void NonLinearMovement::set_speed_parameters_enqueue(uint8_t processing_steps) {
     set_speed_coefficients();
     float dists_array[NB_STEPPERS]{0};
     for (uint8_t indice = 0; indice<movement_size; indice++) {
@@ -138,7 +138,7 @@ void NonLinearMotionN::set_speed_parameters_enqueue(uint8_t processing_steps) {
 
 }
 
-void NonLinearMotionN::set_speed_coefficients() {
+void NonLinearMovement::set_speed_coefficients() {
     float invsteps0 = (float) (1.0 / *steps);
     for (uint8_t indice = 1; indice < movement_size; indice++) {
         speed_coeffs[indice] = steps[indice] * invsteps0;
@@ -149,7 +149,7 @@ void NonLinearMotionN::set_speed_coefficients() {
  * set_motion_data : extracts and fills the movement data required to enqueue the data :
  *      (initial/final) (movement/dir) signatures, and number of sub movements.
  */
-void NonLinearMotionN::set_motion_data(const float min, const float max, const float step,
+void NonLinearMovement::set_motion_data(const float min, const float max, const float step,
                                        void (*get_relative_position)(float, int32_t *)) {
 
     uint8_t elementary_dists[movement_size];
@@ -176,7 +176,7 @@ void NonLinearMotionN::set_motion_data(const float min, const float max, const f
  *      for a curve given by the get_relative_position function.
  *      Returns the direction signature for this movement.
  */
-uint8_t NonLinearMotionN::get_movement_distances(float point_0, float point_1,
+uint8_t NonLinearMovement::get_movement_distances(float point_0, float point_1,
                                                        void (*get_relative_position)(float, int32_t *),
                                                        uint8_t *distances) {
 
@@ -215,7 +215,7 @@ uint8_t NonLinearMotionN::get_movement_distances(float point_0, float point_1,
 
 
 float
-NonLinearMotionN::extract_increment(float point, const float end, float increment, const uint8_t processing_steps,
+NonLinearMovement::extract_increment(float point, const float end, float increment, const uint8_t processing_steps,
                                     const void(*get_position)(float, int32_t *)) {
     const uint8_t ms = movement_size;
 
@@ -250,7 +250,7 @@ NonLinearMotionN::extract_increment(float point, const float end, float incremen
 }
 
 
-float NonLinearMotionN::adjust_increment(const float point, float increment, const uint8_t processing_steps, const void(*get_position)(float, int32_t *)) {
+float NonLinearMovement::adjust_increment(const float point, float increment, const uint8_t processing_steps, const void(*get_position)(float, int32_t *)) {
 
     uint8_t dist;
 
@@ -283,7 +283,7 @@ float NonLinearMotionN::adjust_increment(const float point, float increment, con
 
 }
 
-uint8_t NonLinearMotionN::get_distance(int32_t *dest, int32_t *pos) {
+uint8_t NonLinearMovement::get_distance(int32_t *dest, int32_t *pos) {
     int d;
     uint8_t dist;
     uint8_t maxi = 0;
@@ -300,13 +300,13 @@ uint8_t NonLinearMotionN::get_distance(int32_t *dest, int32_t *pos) {
 }
 
 
-void NonLinearMotionN::step(sig_t sig) {
+void NonLinearMovement::step(sig_t sig) {
     uint16_t delay = StepperController::fastStepDelay(sig);
     set_stepper_int_period(delay);
 }
 
 
-void NonLinearMotionN::process_speed() {
+void NonLinearMovement::process_speed() {
 
     //speed_processing_1 :
     float inverse = invert(SpeedManager::distance_square_root);
@@ -329,7 +329,7 @@ void NonLinearMotionN::process_speed() {
 }
 
 
-#define m NonLinearMotionN
+#define m NonLinearMovement
 
 uint8_t m::movement_size;
 
@@ -345,7 +345,7 @@ void (*t_fdirs[NB_STEPPERS])(bool dir);
 
 
 /*
-void NonLinearMotionN::checkPositionByStep(float *offsets, uint16_t delay, uint16_t count,
+void NonLinearMovement::checkPositionByStep(float *offsets, uint16_t delay, uint16_t count,
                                            void (*process_position)()) {
     //reset_data_pointers();
     for (uint16_t i = 0; i < count; i++, alpha += increment) {
@@ -362,7 +362,7 @@ void NonLinearMotionN::checkPositionByStep(float *offsets, uint16_t delay, uint1
 }
 
 
-void NonLinearMotionN::checkPosition(float *offsets, uint16_t d) {
+void NonLinearMovement::checkPosition(float *offsets, uint16_t d) {
     int32_t c[NB_STEPPERS];
 
     for (alpha = min; alpha < max; alpha += increment) {
