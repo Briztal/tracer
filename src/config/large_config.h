@@ -165,6 +165,7 @@ SERVO(2, servo3, 4, 0, 1)
 #define NB_STEPPERS 17
 
 #define sig_t uint32_t
+#define delay_t uint32_t
 
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
 #ifdef STEPPER //STEPPER(id, char, signature, relative, pinStep, pinDir, dir+, pinPower, enableValue, pinEndMin, OnEndMinValue, pinEndMax, OnEndMaxValue)

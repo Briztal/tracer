@@ -65,7 +65,7 @@ public:
 
     static void fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, sig_t negative_signatures);
 
-    static void fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps);
+    static void fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps);
 
     static void fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t *), void (*speed_f)());
 

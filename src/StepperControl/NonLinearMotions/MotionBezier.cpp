@@ -110,7 +110,7 @@ bool MotionBezier::process_position(pos_data *p) {
             next0 += (int32_t) (polynomCoefficients[processIndice][0] * pow);
             next1 += (int32_t) (polynomCoefficients[processIndice][1] * pow);
 
-            /*TODO REFORM
+            TODO REFORM
             if (processIndice == nbPoints) {
                 position_processor = false;
                 return;

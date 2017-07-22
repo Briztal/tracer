@@ -128,7 +128,7 @@ void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, u
 
 
 
-void MotionExecuter::fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps) {
+void MotionExecuter::fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps) {
 
     motion_data_to_fill.processing_steps = processing_steps;
     motion_data_to_fill.delay_numerator = delay_numerator;

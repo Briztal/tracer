@@ -50,8 +50,6 @@ static void send_position();
 
     static void set_directions(sig_t negative_signatures);
 
-    static void set_dimensions();
-
     static void begin();
 
     static void enable(sig_t signature);

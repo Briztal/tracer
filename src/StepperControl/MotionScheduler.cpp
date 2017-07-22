@@ -192,10 +192,11 @@ void MotionScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coeffi
     float steps = EEPROMStorage::steps[new_axis];
 
     float ratio = steps / distance_coefficient;
-    uint16_t tmp_delay_numerator = (uint16_t) (1000000 / sqrt(2 * steps * acceleration));//TODO DELAY
 
     float tmp_speed_factor = (float) (sqrt(2.0 * acceleration / steps) / distance_coefficient);
-    uint16_t tmp_regulation_delay = (uint16_t) (1000000 / (steps * distance_coefficient * regulation_speed));
+
+    delay_t tmp_delay_numerator = (delay_t) (1000000 / sqrt(2 * steps * acceleration));//TODO DELAY
+    delay_t tmp_regulation_delay = (delay_t) (1000000 / (steps * distance_coefficient * regulation_speed));
 
     CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 

@@ -47,8 +47,8 @@ typedef struct{//TODO REORG
                //Speed
     float ratio;//4
     //-------------4----------------28
-    uint16_t delay_numerator;//2
-    uint16_t regulation_delay;//2
+    delay_t delay_numerator;//2
+    delay_t regulation_delay;//2
     //-------------4----------------
     float speed_factor;//2
     //-------------4----------------32

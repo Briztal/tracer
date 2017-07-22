@@ -235,12 +235,12 @@ float last_ratio;
  *      - tmp_delay_numerator : the new delay numerator;
  *      - tmp_regulation_delay : the new regulation delay;
  */
-void SpeedManager::set_delay_parameters(uint16_t tmp_regulation_delay, uint16_t tmp_delay_numerator, float tmp_speed_factor, float ratio, uint8_t procesing_steps) {
+void SpeedManager::set_delay_parameters(delay_t tmp_regulation_delay, delay_t tmp_delay_numerator, float tmp_speed_factor, float ratio, uint8_t procesing_steps) {
     //Set speed_distance and delay0
 
-    uint16_t tmp_delay_0;
+    delay_t tmp_delay_0;
     if (speed_distance != 0) {
-        tmp_delay_0 = (uint16_t) ((float) delay0 * ratio / last_ratio);
+        tmp_delay_0 = (delay_t) ((float) delay0 * ratio / last_ratio);
         uint32_t sqrt_new_speed_distance = (uint32_t) ((float) tmp_delay_numerator / (float) tmp_delay_0);
         go_to_speed_distance(sqrt_new_speed_distance*sqrt_new_speed_distance);
     } else {
@@ -275,7 +275,7 @@ void SpeedManager::setActionsSpeeds() {
 
 
 void SpeedManager::update_delay_0() {
-    delay0 = (uint16_t) (delay_numerator * invert(distance_square_root));
+    delay0 = (delay_t) (delay_numerator * invert(distance_square_root));
     delay0_update_required = false;
 
 }
@@ -283,31 +283,25 @@ void SpeedManager::update_delay_0() {
 
 #define m SpeedManager
 
-//ACCELERATION DELAY
-
-uint32_t pad[5];
-
-
 uint32_t m::speed_distance = (uint32_t)0;
 uint32_t m::distance_to_end = 0;
 uint16_t m::square_inf = 1, m::square_sup = 1, m::distance_square_root = 0, m::square_increments = 1;
 
-uint16_t m::regulation_delay;
-uint16_t m::delay0;
-
-bool m::regulation_unreached = false;
-
 bool m::speed_incr = true;
 bool m::regulation_stop_enabled = false;
+bool m::regulation_unreached = false;
 
 
+
+delay_t m::regulation_delay;
+delay_t m::delay0;
+delay_t m::delay_numerator;
+float m::speed_factor;
 
 bool m::delay0_update_required;
 
 uint8_t m::processing_steps;
 
-uint16_t m::delay_numerator;
-float m::speed_factor;
 
 
 uint8_t m::linear_tools_nb;

@@ -29,7 +29,7 @@ class SpeedManager {
 
 public :
 
-    static uint16_t delay0;
+    static delay_t delay0;
 
 
 public :
@@ -49,7 +49,7 @@ public :
     static void set_speed_distance_fast(bool dir, uint16_t increment);
 
 
-    static void set_delay_parameters(uint16_t tmp_delay_0, uint16_t tmp_delay_numerator, float speed_factor, float ratio, uint8_t processing_steps);
+    static void set_delay_parameters(delay_t tmp_delay_0, delay_t tmp_delay_numerator, float speed_factor, float ratio, uint8_t processing_steps);
 
     static uint16_t distance_square_root;
 
@@ -72,7 +72,7 @@ private :
     static uint8_t processing_steps;
 
     static uint32_t distance_to_end;
-    static uint16_t regulation_delay;
+    static delay_t regulation_delay;
     static bool speed_incr;
     static bool regulation_stop_enabled;
 
@@ -81,7 +81,7 @@ private :
     static uint32_t speed_distance;
     static uint16_t square_inf, square_sup;
 
-    static uint16_t delay_numerator;
+    static delay_t delay_numerator;
     static float speed_factor;
 
 

@@ -132,8 +132,6 @@ void StepperController::setDir##i(bool sens) {\
 
 void StepperController::begin() {
 
-    set_dimensions();
-
 #define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
     pinMode(pinPower, OUTPUT);pinMode(pinDir, OUTPUT);pinMode(pinStep, OUTPUT);\
     digital_write(pinPower, HIGH);setDir##i(true);
@@ -230,17 +228,6 @@ void StepperController::echo_positions() {
 #endif
 
 }
-
-void StepperController::set_dimensions() {
-    float *sizes = EEPROMStorage::sizes;
-    float *steps = EEPROMStorage::steps;
-
-#include "../config.h"
-
-#undef STEPPER
-
-}
-
 
 #ifdef position_log
 
