@@ -29,11 +29,18 @@ class SpeedManager {
 
 public :
 
+    static uint16_t delay0;
+
+
+public :
+
     //static int32_t *const end_distances;
 
     static void heuristic_distance();
 
     static void regulate_speed();
+
+    static void update_delay_0();
 
     static void set_speed_distance(uint32_t distance_to_end);
 
@@ -42,17 +49,23 @@ public :
     static void set_speed_distance_fast(bool dir, uint16_t increment);
 
 
-    static void set_delay_parameters(uint16_t tmp_delay_0, uint16_t tmp_delay_numerator, float ratio, uint8_t processing_steps);
+    static void set_delay_parameters(uint16_t tmp_delay_0, uint16_t tmp_delay_numerator, float speed_factor, float ratio, uint8_t processing_steps);
 
     static uint16_t distance_square_root;
-    static uint16_t delay0;
-    static float delay_numerator;
 
-    static bool speed_processing_required;
+    static bool delay0_update_required;
 
     static void print_speed_distance();
 
     static void begin();
+
+    static void setActionsSpeeds();
+
+    static uint16_t square_increments;
+
+    static void updateActions();
+
+
 
 private :
 
@@ -66,7 +79,15 @@ private :
 
     static bool regulation_unreached;
     static uint32_t speed_distance;
-    static uint16_t square_inf, square_sup, square_increments;
+    static uint16_t square_inf, square_sup;
+
+    static uint16_t delay_numerator;
+    static float speed_factor;
+
+
+    static uint8_t linear_tools_nb;
+
+    static void (**linear_set_functions)(float);
 
 };
 

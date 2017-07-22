@@ -29,9 +29,19 @@
 #include "MotionExecuter.h"
 #include "../Core/EEPROMStorage.h"
 #include "../Interfaces/CommandInterface.h"
+#include "../Actions/ContinuousActions.h"
+#include "mathProcess.hpp"
 
 void SpeedManager::begin() {
     set_speed_distance(0);
+}
+
+void SpeedManager::updateActions() {
+    if (ContinuousActions::linear_modes_enabled()) {
+        linear_tools_nb = ContinuousActions::getSetFunctions(linear_set_functions);
+    } else {
+        linear_tools_nb = 0;
+    }
 }
 
 /*
@@ -125,7 +135,7 @@ void SpeedManager::set_speed_distance(uint32_t distance_to_end) {
     distance_square_root = (uint16_t) sqrt(distance_to_end);
     square_sup = square_increments = (uint16_t) (2 * distance_square_root + 1);
     square_inf = 1;
-    speed_processing_required = true;
+    delay0_update_required = true;
 }
 
 
@@ -137,15 +147,15 @@ void SpeedManager::set_speed_distance(uint32_t distance_to_end) {
  *
  * This algorithm is based on the formula n*n = 1 + 3 + 5 + ... + (2.n-1)
  *
- * When the square root is modfied, it sets speed_processing_required, so that delay (speed) will be modified aferwards.
+ * When the square root is modfied, it sets delay0_update_required, so that delay (speed) will be modified aferwards.
  *
  * The delay is set according to  : delay = delay_numerator/sqrt(speed_distance)
  *
  */
 void SpeedManager::set_speed_distance_fast(bool positive_incr, uint16_t incr) {
 
-#define switch_up square_inf = 1, square_increments+=2, square_sup = square_increments, distance_square_root++, speed_processing_required = true;
-#define switch_down if(distance_square_root) { square_increments-=2, square_inf=square_increments, square_sup=1, distance_square_root--;speed_processing_required = true;}
+#define switch_up square_inf = 1, square_increments+=2, square_sup = square_increments, distance_square_root++, delay0_update_required = true;
+#define switch_down if(distance_square_root) { square_increments-=2, square_inf=square_increments, square_sup=1, distance_square_root--;delay0_update_required = true;}
 
     if (positive_incr) {
         //An increment is required :
@@ -225,32 +235,48 @@ float last_ratio;
  *      - tmp_delay_numerator : the new delay numerator;
  *      - tmp_regulation_delay : the new regulation delay;
  */
-void SpeedManager::set_delay_parameters(uint16_t tmp_regulation_delay, uint16_t tmp_delay_numerator, float ratio, uint8_t procesing_steps) {
+void SpeedManager::set_delay_parameters(uint16_t tmp_regulation_delay, uint16_t tmp_delay_numerator, float tmp_speed_factor, float ratio, uint8_t procesing_steps) {
     //Set speed_distance and delay0
 
     uint16_t tmp_delay_0;
-    CI::echo("sd : "+String(speed_distance));
     if (speed_distance != 0) {
         tmp_delay_0 = (uint16_t) ((float) delay0 * ratio / last_ratio);
-        uint32_t sqrt_new_speed_distance = (uint32_t) ((float) tmp_delay_numerator / (float) tmp_delay_0);//TODO FLOAT NECESSAIRE
-        //TODO DIRECTLY SET SPEED_DISTANCE, SQRT AND OTHER_PARAMETERS
+        uint32_t sqrt_new_speed_distance = (uint32_t) ((float) tmp_delay_numerator / (float) tmp_delay_0);
         go_to_speed_distance(sqrt_new_speed_distance*sqrt_new_speed_distance);
-        CI::echo("tmp_delay_un0 "+String(tmp_delay_0));
     } else {
-        tmp_delay_0 = tmp_delay_numerator;//TODO DN -> uint16_t
-        CI::echo("tmp_delay_0 "+String(tmp_delay_0));
+        tmp_delay_0 = tmp_delay_numerator;
 
     }
 
     last_ratio = ratio;
     delay0 = tmp_delay_0;
 
-    CI::echo("delay "+String(delay0));
     set_stepper_int_period(tmp_delay_0);
     delay_numerator = tmp_delay_numerator;
     regulation_delay = tmp_regulation_delay;
+    speed_factor = tmp_speed_factor;
+
+
     regulation_unreached = true;
     SpeedManager::processing_steps = procesing_steps;
+
+}
+
+
+
+void SpeedManager::setActionsSpeeds() {
+
+    float temp_speed = speed_factor * distance_square_root;
+
+    for (uint8_t action_index = linear_tools_nb; action_index--;) {
+        linear_set_functions[action_index](temp_speed);
+    }
+}
+
+
+void SpeedManager::update_delay_0() {
+    delay0 = (uint16_t) (delay_numerator * invert(distance_square_root));
+    delay0_update_required = false;
 
 }
 
@@ -274,11 +300,22 @@ bool m::regulation_unreached = false;
 bool m::speed_incr = true;
 bool m::regulation_stop_enabled = false;
 
-bool m::speed_processing_required;
+
+
+bool m::delay0_update_required;
 
 uint8_t m::processing_steps;
 
-float m::delay_numerator;
+uint16_t m::delay_numerator;
+float m::speed_factor;
+
+
+uint8_t m::linear_tools_nb;
+
+void (*tf[NB_CONTINUOUS]);
+void (**m::linear_set_functions)(float) = (void (**)(float)) tf;
+
+#undef m
 
 
 #endif

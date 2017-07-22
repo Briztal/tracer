@@ -288,8 +288,6 @@ uint8_t NonLinearMotionN::get_distance(int32_t *dest, int32_t *pos) {
     uint8_t dist;
     uint8_t maxi = 0;
 
-#define maximum(a, b) ((a<b) ? b : a)
-
     for (uint8_t axis = 0; axis < movement_size; axis++) {
         d = (int) (dest[axis] - pos[axis]);
         dist = (uint8_t) ((d < 0) ? -d : d);
@@ -314,13 +312,16 @@ void NonLinearMotionN::process_speed() {
     float inverse = invert(SpeedManager::distance_square_root);
     STEP_AND_WAIT;
 
-    uint16_t tmpdelay = SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
-    SpeedManager::delay0 = StepperController::delays[*axis_t] = tmpdelay;
+    //TODO uint16_t tmpdelay = SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
+
+    /*SpeedManager::delay0 = StepperController::delays[*axis_t] = tmpdelay;
 
     for (uint8_t i = movement_size; i--;) {
         STEP_AND_WAIT;
         StepperController::delays[axis_t[i]] = (uint16_t) (speed_coeffs[i] * (float) tmpdelay);
     }
+
+     */
 
     STEP_AND_WAIT;
     return;

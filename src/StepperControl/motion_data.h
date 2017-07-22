@@ -49,6 +49,8 @@ typedef struct{//TODO REORG
     //-------------4----------------28
     uint16_t delay_numerator;//2
     uint16_t regulation_delay;//2
+    //-------------4----------------
+    float speed_factor;//2
     //-------------4----------------32
     uint8_t processing_steps;//1
     uint8_t padding;//1
@@ -59,6 +61,7 @@ typedef struct{//TODO REORG
 typedef struct{
     float slopes[NB_STEPPERS];
     //--------4*NB_STEPPERS------------
+    sig_t negative_signatures;
     uint8_t max_axis;
     uint8_t first_pos[NB_STEPPERS];
     //---------------2-----------------

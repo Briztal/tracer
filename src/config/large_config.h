@@ -122,7 +122,7 @@ BINARY(1, binary2, 9, 1)
 #ifdef CONTINUOUS
 #define NB_CONTINUOUS 2
 
-CONTINUOUS(0, continuous, 8, 80)
+CONTINUOUS(0, continuous, 8, 600)
 CONTINUOUS(1, continuous2, 8, 80)
 
 #endif

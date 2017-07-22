@@ -899,7 +899,7 @@ float ta[NB_STEPPERS];
 
 float *const m::sizes = ts;
 float *const m::steps = tstt;
-volatile float *const m::maximum_speeds = ms;
+float *const m::maximum_speeds = ms;
 float *const m::accelerations = ta;
 
 float gms[NB_CARTESIAN_GROUPS];

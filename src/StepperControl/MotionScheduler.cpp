@@ -137,8 +137,6 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
         return 0;
     }
 
-    CI::echo("ssd-sgc " + String(sqrt_square_dist_sum) + " " + String(sqrt(group_coeff)));
-
     theorical_regulation_speed = (float) (group_speed * sqrt_square_dist_sum / sqrt(group_coeff));
 
     float scoeff = theorical_regulation_speed / sqrt_square_dist_sum;
@@ -146,9 +144,6 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
     float r = 0;
     bool init = true;
     float speed, tms;
-
-    for (uint8_t axis = 0; axis<NB_STEPPERS; axis++) {
-    }
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         //Maximum speed checking
@@ -159,8 +154,6 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
     }
 
     float regulation_speed = theorical_regulation_speed;
-
-    CI::echo("theorical : " + String(theorical_regulation_speed));
 
     if (r != 0) {
         regulation_speed *= r;
@@ -185,7 +178,10 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
  *
  *  It sets three parameters :
  *      - ratio : the distance ratio, used to adapt the speed management to one axis, in linear moves (1 for others);
- *      - tmp_delay_numerator : the delay numerator that will be used during the movement we now plan;
+ *      - tmp_delay_numerator : the numerator used during the delay computing : given d the speed distance square
+ *              root, the current delay is given by tmp_delay_numerator / d;
+ *      - tmp_speed_numerator : the speed factor : given  d the speed distance square root, the current speed in mm/s
+ *              is given by d * tmp_speed_numerator
  *      - tmp_regulation_delay : the regulation delay that will be used during the movement we now plan.
  */
 void MotionScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps) {
@@ -196,12 +192,15 @@ void MotionScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coeffi
     float steps = EEPROMStorage::steps[new_axis];
 
     float ratio = steps / distance_coefficient;
-    uint16_t tmp_delay_numerator = (uint16_t) (1000000 / sqrt(2 * steps * acceleration));
+    uint16_t tmp_delay_numerator = (uint16_t) (1000000 / sqrt(2 * steps * acceleration));//TODO DELAY
+
+    float tmp_speed_factor = (float) (sqrt(2.0 * acceleration / steps) / distance_coefficient);
     uint16_t tmp_regulation_delay = (uint16_t) (1000000 / (steps * distance_coefficient * regulation_speed));
 
     CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 
-    MotionExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, ratio, processing_steps);
+
+    MotionExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, tmp_speed_factor, ratio, processing_steps);
 
 }
 

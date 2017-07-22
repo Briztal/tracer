@@ -62,7 +62,7 @@ public :
     //Stepper motors data
     static float *const sizes;
     static float *const steps;
-    static volatile float *const maximum_speeds;
+    static float *const maximum_speeds;
     static float *const accelerations;
     static float *const group_maximum_speeds;
 

@@ -36,7 +36,7 @@
 
 
 
-#define PROCESSING_STEPS (uint8_t)31
+#define PROCESSING_STEPS (uint8_t)7
 
 /*
  * Prepare_motion : takes a float[NB_STEPPERS] in argument.
@@ -46,16 +46,6 @@
  */
 
 void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
-
-    //TODO LINEAR_TOOLS
-
-    /*
-    //Set number of tools in continuous modes, and set action functions related
-    if (ContinuousActions::linear_modes_enabled()) {
-        linear_tools_nb = ContinuousActions::getSetFunctions(linear_set_functions);
-    } else
-        linear_tools_nb = 0;
-        */
 
     //Distances array
 
@@ -151,18 +141,12 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
         }
     }
 
-    for (int axis = 0; axis<NB_STEPPERS; axis++) {
-        CI::echo("dist "+String(axis)+" "+String(absolute_distances[axis]));
-    }
-
-
-
     //If null move : fail with error value;
     if (max_axis == 255)
         return 255;
 
     //Direction memorising :
-    negative_signatures = direction_signature;
+    data_to_fill.negative_signatures = direction_signature;
 
     data_to_fill.max_axis = max_axis;
 
@@ -255,7 +239,7 @@ void LinearMotionN::set_motion_data(uint32_t *motion_dists) {
 
     uint32_t count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
 
-    sig_t nsig = negative_signatures;
+    sig_t nsig = data_to_fill.negative_signatures;
 
     const uint8_t max_axis = data_to_fill.max_axis;
     const float *slopes = data_to_fill.slopes;
@@ -299,6 +283,8 @@ void LinearMotionN::initialise_motion() {
 
     MR_max_axis = data.max_axis;
 
+    MR_negative_signatures = data.negative_signatures;
+
     for (int axis = 0; axis<NB_STEPPERS; axis++) {
         MR_positions[axis] = (uint32_t) data.first_pos[axis];
     }
@@ -326,19 +312,13 @@ sig_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
 
 #undef STEPPER
 
-
-
-
     return MR_negative_signatures;
 }
 
 /*
- * The Speed processing function
- * It takes 2 tics to compute delay0;
+ * The Speed processing function : it sets the period of the stepper interrupt
  */
-void LinearMotionN::process_speed() {//2
-
-    SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * invert(SpeedManager::distance_square_root));
+void LinearMotionN::process_speed() {
     set_stepper_int_period(SpeedManager::delay0);
 }
 
@@ -352,7 +332,6 @@ uint32_t *const m::MR_positions = new uint32_t[NB_STEPPERS];
 float *const m::MR_slopes = new float[NB_STEPPERS];
 uint8_t m::MR_max_axis;
 sig_t m::MR_negative_signatures;
-sig_t m::negative_signatures;
 
 #undef m;
 

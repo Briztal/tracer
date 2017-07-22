@@ -29,6 +29,7 @@
 #include "StepperController.h"
 #include "LinearMotionN/LinearMotionN.h"
 #include "MotionScheduler.h"
+#include "../Actions/ContinuousActions.h"
 
 /*
  * TODOs for a correct motion setup :
@@ -127,9 +128,11 @@ void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, u
 
 
 
-void MotionExecuter::fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float ratio, uint8_t processing_steps) {
+void MotionExecuter::fill_speed_data(uint16_t delay_numerator, uint16_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps) {
+
     motion_data_to_fill.processing_steps = processing_steps;
     motion_data_to_fill.delay_numerator = delay_numerator;
+    motion_data_to_fill.speed_factor = speed_factor;
     motion_data_to_fill.regulation_delay = regulation_delay;
     motion_data_to_fill.ratio = ratio;
 }
@@ -183,7 +186,9 @@ void MotionExecuter::wait_for_movement() {
         /*
          * Count doesn't take its maximum value,
          *    because the pre_computation doesn't need to happen during the penultimate and the ultimate sub_movements.
-         */
+         */  //TODO LINEAR_TOOLS
+
+
 
         position_processor = popped_data.position_processor;
         speed_processor = popped_data.speed_processor;
@@ -206,11 +211,14 @@ void MotionExecuter::wait_for_movement() {
         trajectory_indice = popped_data.initial_indice;
 
         //Speed update according to pre_processed_parameters
-        SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data. delay_numerator, popped_data.ratio, popped_data.processing_steps);
+
+
+        SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data. delay_numerator, popped_data.speed_factor, popped_data.ratio,  popped_data.processing_steps);
 
         (*popped_data.init_processor)();
 
-
+        //Set number of tools in continuous modes, and set action functions related
+        SpeedManager::updateActions();
 
         set_stepper_int_function(prepare_next_sub_motion);
     }
@@ -241,8 +249,6 @@ void MotionExecuter::prepare_next_sub_motion() {
 
     disable_stepper_interrupt();
 
-
-
     saved_trajectory_indice = trajectory_indice;
     sig_t *elementary_signatures;
 
@@ -253,21 +259,12 @@ void MotionExecuter::prepare_next_sub_motion() {
         saved_elementary_signatures = es0, elementary_signatures = es1, is_es_0 = true;
     }
 
-
-
     uint8_t elementary_dists[NB_STEPPERS];
     sig_t negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
 
-
     //Distances Processing
 
-
     STEP_AND_WAIT
-
-
-
-
-
 
     {
         //TODO TESTER AVEC LE SHIFT SUR LA SIGNATURE DE DISTANCE ET VOIR SI C'EST PLUS EFFICACE
@@ -280,20 +277,15 @@ void MotionExecuter::prepare_next_sub_motion() {
 
 #include "../config.h"
 
-
 #undef STEPPER
-
 
         SpeedManager::heuristic_distance();
         distances_lock = false;
-
 
     }
     STEP_AND_WAIT;
 
     //next move Processing
-
-
 
     {
         uint8_t motion_depth = 0;
@@ -313,7 +305,6 @@ void MotionExecuter::prepare_next_sub_motion() {
             pre_signatures[motion_depth] = sig;
             motion_depth++;
 
-
             bool end_move = true;
 
             //Step 2 : shift right and check if last move is reached
@@ -323,14 +314,10 @@ void MotionExecuter::prepare_next_sub_motion() {
 
 #undef STEPPER
 
-
-
             if (end_move) {//if next_move is null
                 trajectory_indice = trajectory_indices[motion_depth-1];
                 break;
             }
-
-
         }
 
         //Writing axis_signatures in the correct order
@@ -338,36 +325,26 @@ void MotionExecuter::prepare_next_sub_motion() {
         for (;motion_depth--;) {
             elementary_signatures[i++] = pre_signatures[motion_depth];
         }
-
-
-
     }
+
     STEP_AND_WAIT;
-
-
 
     SpeedManager::regulate_speed();
 
     STEP_AND_WAIT;
 
+    if (SpeedManager::delay0_update_required) {
 
+        SpeedManager::update_delay_0();
 
-
-    if (SpeedManager::speed_processing_required) {
-        SpeedManager::speed_processing_required = false;
+        //Speed Setting
         (*speed_processor)();
 
-        /*
-        //Actions settings
-        {
-            float temp_speed = plus noir e qu'une arabesav_c_speed + speed_numerator * distance_square_root;
-            MOTION_STEP_AND_WAIT;
-            for (uint8_t action_index = linear_tools_nb; action_index--;) {
-                linear_set_functions[action_index](temp_speed);
-                MOTION_STEP_AND_WAIT;
-            }
-        }
-         */
+        STEP_AND_WAIT;
+
+        //Actions setting
+        SpeedManager::setActionsSpeeds();
+
     }
 
 
@@ -407,9 +384,6 @@ void MotionExecuter::finish_sub_movement() {
                 ultimate_movement = false;
             } else {
 
-                StepperController::echo_positions();
-                for (int i = 0; i<NB_STEPPERS; i++) {
-                }
                 MotionScheduler::send_position();
                 set_stepper_int_function(wait_for_movement);
                 ultimate_movement = penultimate_movement = true;
@@ -428,10 +402,6 @@ uint32_t m::count;
 Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;
 motion_data m::popped_data;
-
-//Directions
-bool tdir[NB_STEPPERS];
-bool *const m::axis_directions_negative = tdir;
 
 
 //End distances
@@ -472,7 +442,6 @@ sig_t (*m::position_processor)(uint8_t *);
 void (*m::speed_processor)();
 
 bool m::ultimate_movement = true, m::penultimate_movement = true;
+
 #undef m
-
-
 #endif
