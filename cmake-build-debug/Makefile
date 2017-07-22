@@ -602,221 +602,221 @@ src/Interfaces/CommandInterface.cpp.s:
 	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.s
 .PHONY : src/Interfaces/CommandInterface.cpp.s
 
-src/StepperControl/LinearMotionN/HomingMotion.o: src/StepperControl/LinearMotionN/HomingMotion.cpp.o
+src/StepperControl/LinearMovement/HomingMovement.o: src/StepperControl/LinearMovement/HomingMovement.cpp.o
 
-.PHONY : src/StepperControl/LinearMotionN/HomingMotion.o
-
-# target to build an object file
-src/StepperControl/LinearMotionN/HomingMotion.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMotionN/HomingMotion.cpp.o
-.PHONY : src/StepperControl/LinearMotionN/HomingMotion.cpp.o
-
-src/StepperControl/LinearMotionN/HomingMotion.i: src/StepperControl/LinearMotionN/HomingMotion.cpp.i
-
-.PHONY : src/StepperControl/LinearMotionN/HomingMotion.i
-
-# target to preprocess a source file
-src/StepperControl/LinearMotionN/HomingMotion.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMotionN/HomingMotion.cpp.i
-.PHONY : src/StepperControl/LinearMotionN/HomingMotion.cpp.i
-
-src/StepperControl/LinearMotionN/HomingMotion.s: src/StepperControl/LinearMotionN/HomingMotion.cpp.s
-
-.PHONY : src/StepperControl/LinearMotionN/HomingMotion.s
-
-# target to generate assembly for a file
-src/StepperControl/LinearMotionN/HomingMotion.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMotionN/HomingMotion.cpp.s
-.PHONY : src/StepperControl/LinearMotionN/HomingMotion.cpp.s
-
-src/StepperControl/LinearMotionN/LinearMotionN.o: src/StepperControl/LinearMotionN/LinearMotionN.cpp.o
-
-.PHONY : src/StepperControl/LinearMotionN/LinearMotionN.o
+.PHONY : src/StepperControl/LinearMovement/HomingMovement.o
 
 # target to build an object file
-src/StepperControl/LinearMotionN/LinearMotionN.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMotionN/LinearMotionN.cpp.o
-.PHONY : src/StepperControl/LinearMotionN/LinearMotionN.cpp.o
+src/StepperControl/LinearMovement/HomingMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o
+.PHONY : src/StepperControl/LinearMovement/HomingMovement.cpp.o
 
-src/StepperControl/LinearMotionN/LinearMotionN.i: src/StepperControl/LinearMotionN/LinearMotionN.cpp.i
+src/StepperControl/LinearMovement/HomingMovement.i: src/StepperControl/LinearMovement/HomingMovement.cpp.i
 
-.PHONY : src/StepperControl/LinearMotionN/LinearMotionN.i
+.PHONY : src/StepperControl/LinearMovement/HomingMovement.i
 
 # target to preprocess a source file
-src/StepperControl/LinearMotionN/LinearMotionN.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMotionN/LinearMotionN.cpp.i
-.PHONY : src/StepperControl/LinearMotionN/LinearMotionN.cpp.i
+src/StepperControl/LinearMovement/HomingMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.i
+.PHONY : src/StepperControl/LinearMovement/HomingMovement.cpp.i
 
-src/StepperControl/LinearMotionN/LinearMotionN.s: src/StepperControl/LinearMotionN/LinearMotionN.cpp.s
+src/StepperControl/LinearMovement/HomingMovement.s: src/StepperControl/LinearMovement/HomingMovement.cpp.s
 
-.PHONY : src/StepperControl/LinearMotionN/LinearMotionN.s
+.PHONY : src/StepperControl/LinearMovement/HomingMovement.s
 
 # target to generate assembly for a file
-src/StepperControl/LinearMotionN/LinearMotionN.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMotionN/LinearMotionN.cpp.s
-.PHONY : src/StepperControl/LinearMotionN/LinearMotionN.cpp.s
+src/StepperControl/LinearMovement/HomingMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.s
+.PHONY : src/StepperControl/LinearMovement/HomingMovement.cpp.s
 
-src/StepperControl/MotionExecuter.o: src/StepperControl/MotionExecuter.cpp.o
+src/StepperControl/LinearMovement/LinearMovement.o: src/StepperControl/LinearMovement/LinearMovement.cpp.o
 
-.PHONY : src/StepperControl/MotionExecuter.o
+.PHONY : src/StepperControl/LinearMovement/LinearMovement.o
 
 # target to build an object file
-src/StepperControl/MotionExecuter.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MotionExecuter.cpp.o
-.PHONY : src/StepperControl/MotionExecuter.cpp.o
+src/StepperControl/LinearMovement/LinearMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o
+.PHONY : src/StepperControl/LinearMovement/LinearMovement.cpp.o
 
-src/StepperControl/MotionExecuter.i: src/StepperControl/MotionExecuter.cpp.i
+src/StepperControl/LinearMovement/LinearMovement.i: src/StepperControl/LinearMovement/LinearMovement.cpp.i
 
-.PHONY : src/StepperControl/MotionExecuter.i
+.PHONY : src/StepperControl/LinearMovement/LinearMovement.i
 
 # target to preprocess a source file
-src/StepperControl/MotionExecuter.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MotionExecuter.cpp.i
-.PHONY : src/StepperControl/MotionExecuter.cpp.i
+src/StepperControl/LinearMovement/LinearMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.i
+.PHONY : src/StepperControl/LinearMovement/LinearMovement.cpp.i
 
-src/StepperControl/MotionExecuter.s: src/StepperControl/MotionExecuter.cpp.s
+src/StepperControl/LinearMovement/LinearMovement.s: src/StepperControl/LinearMovement/LinearMovement.cpp.s
 
-.PHONY : src/StepperControl/MotionExecuter.s
+.PHONY : src/StepperControl/LinearMovement/LinearMovement.s
 
 # target to generate assembly for a file
-src/StepperControl/MotionExecuter.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MotionExecuter.cpp.s
-.PHONY : src/StepperControl/MotionExecuter.cpp.s
+src/StepperControl/LinearMovement/LinearMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.s
+.PHONY : src/StepperControl/LinearMovement/LinearMovement.cpp.s
 
-src/StepperControl/MotionScheduler.o: src/StepperControl/MotionScheduler.cpp.o
+src/StepperControl/MovementExecuter.o: src/StepperControl/MovementExecuter.cpp.o
 
-.PHONY : src/StepperControl/MotionScheduler.o
+.PHONY : src/StepperControl/MovementExecuter.o
 
 # target to build an object file
-src/StepperControl/MotionScheduler.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MotionScheduler.cpp.o
-.PHONY : src/StepperControl/MotionScheduler.cpp.o
+src/StepperControl/MovementExecuter.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o
+.PHONY : src/StepperControl/MovementExecuter.cpp.o
 
-src/StepperControl/MotionScheduler.i: src/StepperControl/MotionScheduler.cpp.i
+src/StepperControl/MovementExecuter.i: src/StepperControl/MovementExecuter.cpp.i
 
-.PHONY : src/StepperControl/MotionScheduler.i
+.PHONY : src/StepperControl/MovementExecuter.i
 
 # target to preprocess a source file
-src/StepperControl/MotionScheduler.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MotionScheduler.cpp.i
-.PHONY : src/StepperControl/MotionScheduler.cpp.i
+src/StepperControl/MovementExecuter.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.i
+.PHONY : src/StepperControl/MovementExecuter.cpp.i
 
-src/StepperControl/MotionScheduler.s: src/StepperControl/MotionScheduler.cpp.s
+src/StepperControl/MovementExecuter.s: src/StepperControl/MovementExecuter.cpp.s
 
-.PHONY : src/StepperControl/MotionScheduler.s
+.PHONY : src/StepperControl/MovementExecuter.s
 
 # target to generate assembly for a file
-src/StepperControl/MotionScheduler.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MotionScheduler.cpp.s
-.PHONY : src/StepperControl/MotionScheduler.cpp.s
+src/StepperControl/MovementExecuter.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.s
+.PHONY : src/StepperControl/MovementExecuter.cpp.s
 
-src/StepperControl/NonLinearMotions/MotionBezier.o: src/StepperControl/NonLinearMotions/MotionBezier.cpp.o
+src/StepperControl/MovementScheduler.o: src/StepperControl/MovementScheduler.cpp.o
 
-.PHONY : src/StepperControl/NonLinearMotions/MotionBezier.o
+.PHONY : src/StepperControl/MovementScheduler.o
 
 # target to build an object file
-src/StepperControl/NonLinearMotions/MotionBezier.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/MotionBezier.cpp.o
-.PHONY : src/StepperControl/NonLinearMotions/MotionBezier.cpp.o
+src/StepperControl/MovementScheduler.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o
+.PHONY : src/StepperControl/MovementScheduler.cpp.o
 
-src/StepperControl/NonLinearMotions/MotionBezier.i: src/StepperControl/NonLinearMotions/MotionBezier.cpp.i
+src/StepperControl/MovementScheduler.i: src/StepperControl/MovementScheduler.cpp.i
 
-.PHONY : src/StepperControl/NonLinearMotions/MotionBezier.i
+.PHONY : src/StepperControl/MovementScheduler.i
 
 # target to preprocess a source file
-src/StepperControl/NonLinearMotions/MotionBezier.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/MotionBezier.cpp.i
-.PHONY : src/StepperControl/NonLinearMotions/MotionBezier.cpp.i
+src/StepperControl/MovementScheduler.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.i
+.PHONY : src/StepperControl/MovementScheduler.cpp.i
 
-src/StepperControl/NonLinearMotions/MotionBezier.s: src/StepperControl/NonLinearMotions/MotionBezier.cpp.s
+src/StepperControl/MovementScheduler.s: src/StepperControl/MovementScheduler.cpp.s
 
-.PHONY : src/StepperControl/NonLinearMotions/MotionBezier.s
+.PHONY : src/StepperControl/MovementScheduler.s
 
 # target to generate assembly for a file
-src/StepperControl/NonLinearMotions/MotionBezier.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/MotionBezier.cpp.s
-.PHONY : src/StepperControl/NonLinearMotions/MotionBezier.cpp.s
+src/StepperControl/MovementScheduler.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.s
+.PHONY : src/StepperControl/MovementScheduler.cpp.s
 
-src/StepperControl/NonLinearMotions/MotionEllipses.o: src/StepperControl/NonLinearMotions/MotionEllipses.cpp.o
+src/StepperControl/NonLinearMovements/MotionBezier.o: src/StepperControl/NonLinearMovements/MotionBezier.cpp.o
 
-.PHONY : src/StepperControl/NonLinearMotions/MotionEllipses.o
+.PHONY : src/StepperControl/NonLinearMovements/MotionBezier.o
 
 # target to build an object file
-src/StepperControl/NonLinearMotions/MotionEllipses.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/MotionEllipses.cpp.o
-.PHONY : src/StepperControl/NonLinearMotions/MotionEllipses.cpp.o
+src/StepperControl/NonLinearMovements/MotionBezier.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o
+.PHONY : src/StepperControl/NonLinearMovements/MotionBezier.cpp.o
 
-src/StepperControl/NonLinearMotions/MotionEllipses.i: src/StepperControl/NonLinearMotions/MotionEllipses.cpp.i
+src/StepperControl/NonLinearMovements/MotionBezier.i: src/StepperControl/NonLinearMovements/MotionBezier.cpp.i
 
-.PHONY : src/StepperControl/NonLinearMotions/MotionEllipses.i
+.PHONY : src/StepperControl/NonLinearMovements/MotionBezier.i
 
 # target to preprocess a source file
-src/StepperControl/NonLinearMotions/MotionEllipses.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/MotionEllipses.cpp.i
-.PHONY : src/StepperControl/NonLinearMotions/MotionEllipses.cpp.i
+src/StepperControl/NonLinearMovements/MotionBezier.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.i
+.PHONY : src/StepperControl/NonLinearMovements/MotionBezier.cpp.i
 
-src/StepperControl/NonLinearMotions/MotionEllipses.s: src/StepperControl/NonLinearMotions/MotionEllipses.cpp.s
+src/StepperControl/NonLinearMovements/MotionBezier.s: src/StepperControl/NonLinearMovements/MotionBezier.cpp.s
 
-.PHONY : src/StepperControl/NonLinearMotions/MotionEllipses.s
+.PHONY : src/StepperControl/NonLinearMovements/MotionBezier.s
 
 # target to generate assembly for a file
-src/StepperControl/NonLinearMotions/MotionEllipses.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/MotionEllipses.cpp.s
-.PHONY : src/StepperControl/NonLinearMotions/MotionEllipses.cpp.s
+src/StepperControl/NonLinearMovements/MotionBezier.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.s
+.PHONY : src/StepperControl/NonLinearMovements/MotionBezier.cpp.s
 
-src/StepperControl/NonLinearMotions/NonLinearMotionN.o: src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.o
+src/StepperControl/NonLinearMovements/MotionEllipses.o: src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o
 
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionN.o
+.PHONY : src/StepperControl/NonLinearMovements/MotionEllipses.o
 
 # target to build an object file
-src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.o
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.o
+src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o
+.PHONY : src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o
 
-src/StepperControl/NonLinearMotions/NonLinearMotionN.i: src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.i
+src/StepperControl/NonLinearMovements/MotionEllipses.i: src/StepperControl/NonLinearMovements/MotionEllipses.cpp.i
 
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionN.i
+.PHONY : src/StepperControl/NonLinearMovements/MotionEllipses.i
 
 # target to preprocess a source file
-src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.i
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.i
+src/StepperControl/NonLinearMovements/MotionEllipses.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.i
+.PHONY : src/StepperControl/NonLinearMovements/MotionEllipses.cpp.i
 
-src/StepperControl/NonLinearMotions/NonLinearMotionN.s: src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.s
+src/StepperControl/NonLinearMovements/MotionEllipses.s: src/StepperControl/NonLinearMovements/MotionEllipses.cpp.s
 
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionN.s
+.PHONY : src/StepperControl/NonLinearMovements/MotionEllipses.s
 
 # target to generate assembly for a file
-src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.s
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp.s
+src/StepperControl/NonLinearMovements/MotionEllipses.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.s
+.PHONY : src/StepperControl/NonLinearMovements/MotionEllipses.cpp.s
 
-src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.o: src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.o
+src/StepperControl/NonLinearMovements/NonLinearMovement.o: src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o
 
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.o
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovement.o
 
 # target to build an object file
-src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.o
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.o
+src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o
 
-src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.i: src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.i
+src/StepperControl/NonLinearMovements/NonLinearMovement.i: src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.i
 
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.i
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovement.i
 
 # target to preprocess a source file
-src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.i
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.i
+src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.i
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.i
 
-src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.s: src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.s
+src/StepperControl/NonLinearMovements/NonLinearMovement.s: src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.s
 
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.s
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovement.s
 
 # target to generate assembly for a file
-src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.s
-.PHONY : src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp.s
+src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.s
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.s
+
+src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.o: src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o
+
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.o
+
+# target to build an object file
+src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o
+
+src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.i: src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.i
+
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.i
+
+# target to preprocess a source file
+src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.i
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.i
+
+src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.s: src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.s
+
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.s
+
+# target to generate assembly for a file
+src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.s
+.PHONY : src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.s
 
 src/StepperControl/SpeedManager.o: src/StepperControl/SpeedManager.cpp.o
 
@@ -1036,30 +1036,30 @@ help:
 	@echo "... src/Interfaces/CommandInterface.o"
 	@echo "... src/Interfaces/CommandInterface.i"
 	@echo "... src/Interfaces/CommandInterface.s"
-	@echo "... src/StepperControl/LinearMotionN/HomingMotion.o"
-	@echo "... src/StepperControl/LinearMotionN/HomingMotion.i"
-	@echo "... src/StepperControl/LinearMotionN/HomingMotion.s"
-	@echo "... src/StepperControl/LinearMotionN/LinearMotionN.o"
-	@echo "... src/StepperControl/LinearMotionN/LinearMotionN.i"
-	@echo "... src/StepperControl/LinearMotionN/LinearMotionN.s"
-	@echo "... src/StepperControl/MotionExecuter.o"
-	@echo "... src/StepperControl/MotionExecuter.i"
-	@echo "... src/StepperControl/MotionExecuter.s"
-	@echo "... src/StepperControl/MotionScheduler.o"
-	@echo "... src/StepperControl/MotionScheduler.i"
-	@echo "... src/StepperControl/MotionScheduler.s"
-	@echo "... src/StepperControl/NonLinearMotions/MotionBezier.o"
-	@echo "... src/StepperControl/NonLinearMotions/MotionBezier.i"
-	@echo "... src/StepperControl/NonLinearMotions/MotionBezier.s"
-	@echo "... src/StepperControl/NonLinearMotions/MotionEllipses.o"
-	@echo "... src/StepperControl/NonLinearMotions/MotionEllipses.i"
-	@echo "... src/StepperControl/NonLinearMotions/MotionEllipses.s"
-	@echo "... src/StepperControl/NonLinearMotions/NonLinearMotionN.o"
-	@echo "... src/StepperControl/NonLinearMotions/NonLinearMotionN.i"
-	@echo "... src/StepperControl/NonLinearMotions/NonLinearMotionN.s"
-	@echo "... src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.o"
-	@echo "... src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.i"
-	@echo "... src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.s"
+	@echo "... src/StepperControl/LinearMovement/HomingMovement.o"
+	@echo "... src/StepperControl/LinearMovement/HomingMovement.i"
+	@echo "... src/StepperControl/LinearMovement/HomingMovement.s"
+	@echo "... src/StepperControl/LinearMovement/LinearMovement.o"
+	@echo "... src/StepperControl/LinearMovement/LinearMovement.i"
+	@echo "... src/StepperControl/LinearMovement/LinearMovement.s"
+	@echo "... src/StepperControl/MovementExecuter.o"
+	@echo "... src/StepperControl/MovementExecuter.i"
+	@echo "... src/StepperControl/MovementExecuter.s"
+	@echo "... src/StepperControl/MovementScheduler.o"
+	@echo "... src/StepperControl/MovementScheduler.i"
+	@echo "... src/StepperControl/MovementScheduler.s"
+	@echo "... src/StepperControl/NonLinearMovements/MotionBezier.o"
+	@echo "... src/StepperControl/NonLinearMovements/MotionBezier.i"
+	@echo "... src/StepperControl/NonLinearMovements/MotionBezier.s"
+	@echo "... src/StepperControl/NonLinearMovements/MotionEllipses.o"
+	@echo "... src/StepperControl/NonLinearMovements/MotionEllipses.i"
+	@echo "... src/StepperControl/NonLinearMovements/MotionEllipses.s"
+	@echo "... src/StepperControl/NonLinearMovements/NonLinearMovement.o"
+	@echo "... src/StepperControl/NonLinearMovements/NonLinearMovement.i"
+	@echo "... src/StepperControl/NonLinearMovements/NonLinearMovement.s"
+	@echo "... src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.o"
+	@echo "... src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.i"
+	@echo "... src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.s"
 	@echo "... src/StepperControl/SpeedManager.o"
 	@echo "... src/StepperControl/SpeedManager.i"
 	@echo "... src/StepperControl/SpeedManager.s"

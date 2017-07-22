@@ -22,7 +22,7 @@
 #define TRACER_NONLINEARMOTIONNTEMPLATE_H
 
 
-#include "NonLinearMotionN.h"
+#include "NonLinearMovement.h"
 
 class NonLinearMotionNTemplate : public NonLinearMotionN {
 

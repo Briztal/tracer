@@ -26,7 +26,7 @@
 #include <math.h>
 #include <WString.h>
 #include "SpeedManager.h"
-#include "MotionExecuter.h"
+#include "MovementExecuter.h"
 #include "../Core/EEPROMStorage.h"
 #include "../Interfaces/CommandInterface.h"
 #include "../Actions/ContinuousActions.h"
@@ -230,7 +230,7 @@ float last_ratio;
 /*
  * set_delay_parameters : this function is called before a movement is actually executed.
  *
- *  It uses the 3 parameters pre-computed during the motion scheduling by MotionScheduler::pre_set_speed_axis :
+ *  It uses the 3 parameters pre-computed during the motion scheduling by MovementScheduler::pre_set_speed_axis :
  *      - ratio : the distance ratio, used to adapt the speed management to one axis, in linear moves (1 for others);
  *      - tmp_delay_numerator : the new delay numerator;
  *      - tmp_regulation_delay : the new regulation delay;

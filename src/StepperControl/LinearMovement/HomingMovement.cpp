@@ -24,14 +24,14 @@
 
 #include "../../config.h"
 #include "../../Core/EEPROMStorage.h"
-#include "HomingMotion.h"
+#include "HomingMovement.h"
 #include "../../StepperControl/StepperController.h"
-#include "../MotionScheduler.h"
-#include "../MotionExecuter.h"
+#include "../MovementScheduler.h"
+#include "../MovementExecuter.h"
 
 #define step 10
 
-void HomingMotion::move() {
+void HomingMovement::move() {
 
     //Enable all steppers
     StepperController::enable(255);
@@ -82,14 +82,14 @@ void HomingMotion::move() {
     }
 
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        MotionScheduler::positions[axis] = 0;
+        MovementScheduler::positions[axis] = 0;
     }
 
-    MotionScheduler::send_position();
+    MovementScheduler::send_position();
 
 }
 
-uint32_t HomingMotion::getMaxDelay(sig_t signature, uint32_t *delays) {
+uint32_t HomingMovement::getMaxDelay(sig_t signature, uint32_t *delays) {
     uint32_t delay = 0;
     int axis = 0;
     for (; axis < NB_STEPPERS; axis++) {
@@ -110,7 +110,7 @@ uint32_t HomingMotion::getMaxDelay(sig_t signature, uint32_t *delays) {
     return delay;
 }
 
-sig_t HomingMotion::readEndStops() {
+sig_t HomingMovement::readEndStops() {
     sig_t signature = 0;
     sig_t bit = 1;
 

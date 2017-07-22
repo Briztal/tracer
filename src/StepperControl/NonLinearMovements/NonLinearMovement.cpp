@@ -22,22 +22,22 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "NonLinearMotionN.h"
+#include "NonLinearMovement.h"
 #include "../../Interfaces/CommandInterface.h"
-#include "../LinearMotionN/LinearMotionN.h"
 #include "../../Core/EEPROMStorage.h"
 #include "../SpeedManager.h"
 #include "../mathProcess.hpp"
-#include "../MotionExecuter.h"
+#include "../MovementExecuter.h"
 #include "../StepperController.h"
-#include "../MotionScheduler.h"
+#include "../MovementScheduler.h"
+#include "../LinearMovement/LinearMovement.h"
 
 /*
  * TODOs for a correct motion setup :
  *      set end distances
  *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
  *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
- *      set speed data, calling MotionScheduler::pre_set_speed_axis(...);
+ *      set speed data, calling MovementScheduler::pre_set_speed_axis(...);
  *      set processing functions, calling MotionExecuter::fill_processors(...);
  *      call MotionExecuter::enqueue_movement_data
  *
@@ -102,22 +102,22 @@ void NonLinearMotionN::initialise(uint8_t *move_axis_t, const uint8_t size) {
 void NonLinearMotionN::set_initial_positions(const float *initial_positions) {
 
     float first_move_destinations[NB_STEPPERS];
-    memcpy(first_move_destinations, MotionScheduler::positions, 4 * NB_STEPPERS);
+    memcpy(first_move_destinations, MovementScheduler::positions, 4 * NB_STEPPERS);
 
     for (uint8_t indice = 0; indice < movement_size; indice++) {
         uint8_t axis = axis_t[indice];
         first_move_destinations[axis] = initial_positions[axis];
     }
 
-    LinearMotionN::prepare_motion(first_move_destinations);
+    LinearMovement::prepare_motion(first_move_destinations);
 
 }
 
 void NonLinearMotionN::set_final_positions(const int32_t *final_positions) {
     for (uint8_t indice = 0; indice < movement_size; indice++) {
         uint8_t axis = axis_t[indice];
-        int32_t pos = MotionScheduler::positions[axis], npos = final_positions[axis];
-        MotionScheduler::positions[axis] = npos;
+        int32_t pos = MovementScheduler::positions[axis], npos = final_positions[axis];
+        MovementScheduler::positions[axis] = npos;
         MotionExecuter::end_distances[axis] += npos - pos;
     }
 }
@@ -132,8 +132,8 @@ void NonLinearMotionN::set_speed_parameters_enqueue(uint8_t processing_steps) {
     for (uint8_t indice = 0; indice<movement_size; indice++) {
         dists_array[axis_t[indice]] = 1;
     }
-    float regulation_speed = MotionScheduler::get_regulation_speed_linear(dists_array, 1);
-    MotionScheduler::pre_set_speed_axis(*axis_t, 1, regulation_speed, processing_steps);
+    float regulation_speed = MovementScheduler::get_regulation_speed_linear(dists_array, 1);
+    MovementScheduler::pre_set_speed_axis(*axis_t, 1, regulation_speed, processing_steps);
     MotionExecuter::enqueue_movement_data();
 
 }
@@ -200,7 +200,7 @@ uint8_t NonLinearMotionN::get_movement_distances(float point_0, float point_1,
 
         //Convert to absolute distance, and set bit in signature if dist is negative
         if (d < 0) {
-            nsig |= MotionScheduler::axis_signatures[axis_t[indice]];
+            nsig |= MovementScheduler::axis_signatures[axis_t[indice]];
             d = -d;
         }
 

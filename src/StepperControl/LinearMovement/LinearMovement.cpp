@@ -23,12 +23,12 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 
-#include "LinearMotionN.h"
+#include "LinearMovement.h"
 #include "../../Interfaces/CommandInterface.h"
 #include "../../Actions/ContinuousActions.h"
-#include "../MotionExecuter.h"
+#include "../MovementExecuter.h"
 #include "../SpeedManager.h"
-#include "../MotionScheduler.h"
+#include "../MovementScheduler.h"
 #include "../../Core/EEPROMStorage.h"
 #include "../StepperController.h"
 #include "../mathProcess.hpp"
@@ -45,7 +45,7 @@
  *
  */
 
-void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
+void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     //Distances array
 
@@ -81,7 +81,7 @@ void LinearMotionN::prepare_motion(const float *destinations_t) { //GO TO
  * - set speed according to the movement (movement dimensions and greater axis)
  */
 
-uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t *absolute_distances) {
+uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_t *absolute_distances) {
 
     //As distance on one axis can be null, an axis axis variable must be introduced. incremented after axis processed
 
@@ -101,13 +101,13 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
 
         steps = EEPROMStorage::steps[axis];
         steps_destination = (int32_t) (destinations_t[axis] * steps);
-        distance = steps_destination - MotionScheduler::positions[axis];
+        distance = steps_destination - MovementScheduler::positions[axis];
 
         //If distance is not null :
         if (distance) {
 
             //Update position
-            MotionScheduler::positions[axis] = steps_destination;
+            MovementScheduler::positions[axis] = steps_destination;
 
             //Wait for distances to be unlocked
             while (MotionExecuter::distances_lock);
@@ -124,7 +124,7 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
              */
             if (distance < 0) {
                 distance = -distance;
-                direction_signature |= MotionScheduler::axis_signatures[axis];
+                direction_signature |= MovementScheduler::axis_signatures[axis];
             }
 
             //Take the absolute distance, and compare if it is the greatest distance. If true, memorise the max axis.
@@ -155,10 +155,10 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
     //Get the adjusted regulation speed;
-    float regulation_speed = MotionScheduler::get_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
+    float regulation_speed = MovementScheduler::get_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
 
     //Calculate and fill the speed data
-    MotionScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed, PROCESSING_STEPS);
+    MovementScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed, PROCESSING_STEPS);
 
     MotionExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
     return max_axis;
@@ -166,7 +166,7 @@ uint8_t LinearMotionN::setup_movement_data(const float *destinations_t, uint32_t
 }
 
 
-void LinearMotionN::step_and_delay(uint8_t sig) {
+void LinearMovement::step_and_delay(uint8_t sig) {
     //simple_delay(delay0);
     StepperController::fastStep(sig);
 }
@@ -175,7 +175,7 @@ void LinearMotionN::step_and_delay(uint8_t sig) {
 ---------------------------------------------------MOVES----------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------*/
 
-void LinearMotionN::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTARY_DISTS
+void LinearMovement::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTARY_DISTS
     /*
     //Setting destination
     for (uint8_t axis = 0; axis < dimension; axis++)
@@ -186,7 +186,7 @@ void LinearMotionN::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTARY
      */
 }
 
-void LinearMotionN::move(uint32_t *dists) {
+void LinearMovement::move(uint32_t *dists) {
 
     //Position process preparation : set slopes and shift_nb
     set_position_data(dists);
@@ -208,7 +208,7 @@ void LinearMotionN::move(uint32_t *dists) {
  *  - slopes
  *  - shift_nb
  */
-void LinearMotionN::set_position_data(uint32_t *dists) {
+void LinearMovement::set_position_data(uint32_t *dists) {
 
     //max_axis must have been defined previously
 
@@ -235,7 +235,7 @@ void LinearMotionN::set_position_data(uint32_t *dists) {
  *
  * Afterwards, it calls MotionExecuter::fill_movement_data, that hashes the first sub_movement, and fills data.
  */
-void LinearMotionN::set_motion_data(uint32_t *motion_dists) {
+void LinearMovement::set_motion_data(uint32_t *motion_dists) {
 
     uint32_t count = motion_dists[data_to_fill.max_axis] / PROCESSING_STEPS;
 
@@ -276,7 +276,7 @@ void LinearMotionN::set_motion_data(uint32_t *motion_dists) {
     MotionExecuter::fill_movement_data(false, elementary_dists, count, nsig);
 }
 
-void LinearMotionN::initialise_motion() {
+void LinearMovement::initialise_motion() {
 //TODO COPIED... BETTER TAKE DIRECTLY POINTER
 
     linear_data data = data_queue.pull();
@@ -297,7 +297,7 @@ void LinearMotionN::initialise_motion() {
  * Position processing function.
  * It takes 2*dimension-1 processing windows to determine all positions
  */
-sig_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
+sig_t LinearMovement::process_position(uint8_t *elementary_dists) {//2n-2
 
     uint32_t i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
     uint32_t i2;
@@ -318,12 +318,12 @@ sig_t LinearMotionN::process_position(uint8_t *elementary_dists) {//2n-2
 /*
  * The Speed processing function : it sets the period of the stepper interrupt
  */
-void LinearMotionN::process_speed() {
+void LinearMovement::process_speed() {
     set_stepper_int_period(SpeedManager::delay0);
 }
 
 
-#define m LinearMotionN
+#define m LinearMovement
 
 Queue<linear_data> m::data_queue(MOTION_DATA_QUEUE_SIZE);
 linear_data m::data_to_fill;

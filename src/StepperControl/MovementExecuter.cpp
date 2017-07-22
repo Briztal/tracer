@@ -22,13 +22,13 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "MotionExecuter.h"
+#include "MovementExecuter.h"
 #include "SpeedManager.h"
 #include "../Interfaces/CommandInterface.h"
 #include "motion_data.h"
 #include "StepperController.h"
-#include "LinearMotionN/LinearMotionN.h"
-#include "MotionScheduler.h"
+#include "LinearMovement/LinearMovement.h"
+#include "MovementScheduler.h"
 #include "../Actions/ContinuousActions.h"
 
 /*
@@ -36,7 +36,7 @@
  *      set end distances
  *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
  *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
- *      set speed data, calling MotionScheduler::pre_set_speed_axis(...);
+ *      set speed data, calling MovementScheduler::pre_set_speed_axis(...);
  *      set processing functions, calling MotionExecuter::fill_processors(...);
  *      call MotionExecuter::enqueue_movement_data
  *
@@ -52,7 +52,7 @@
 
 void MotionExecuter::start() {
     init_stepper_interrupt();
-    setup_stepper_interrupt(wait_for_movement, 30000);
+    setup_stepper_interrupt(process_next_move, 30000);
 }
 
 void MotionExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, sig_t nsig) {
@@ -153,7 +153,7 @@ void MotionExecuter::enqueue_movement_data() {
  *  - if possible, starts a movement;
  *  - if not, returns, and will re-check later (interrupt)
  */
-void MotionExecuter::wait_for_movement() {
+void MotionExecuter::process_next_move() {
 
     disable_stepper_interrupt();
 
@@ -186,9 +186,7 @@ void MotionExecuter::wait_for_movement() {
         /*
          * Count doesn't take its maximum value,
          *    because the pre_computation doesn't need to happen during the penultimate and the ultimate sub_movements.
-         */  //TODO LINEAR_TOOLS
-
-
+         */
 
         position_processor = popped_data.position_processor;
         speed_processor = popped_data.speed_processor;
@@ -369,7 +367,7 @@ void MotionExecuter::finish_sub_movement() {
 
 #ifdef position_log
             if (!(i--)) {
-                MotionScheduler::send_position();
+                MovementScheduler::send_position();
                 i=20;
             }
 #endif
@@ -384,8 +382,8 @@ void MotionExecuter::finish_sub_movement() {
                 ultimate_movement = false;
             } else {
 
-                MotionScheduler::send_position();
-                set_stepper_int_function(wait_for_movement);
+                MovementScheduler::send_position();
+                set_stepper_int_function(process_next_move);
                 ultimate_movement = penultimate_movement = true;
             }
         }

@@ -2102,52 +2102,52 @@
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/interface_config.h">
 			<Option target="interface"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMotionN/HomingMotion.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/HomingMovement.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMotionN/HomingMotion.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/HomingMovement.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMotionN/LinearMotionN.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/LinearMovement.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMotionN/LinearMotionN.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/LinearMovement.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MotionExecuter.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementExecuter.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MotionExecuter.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementExecuter.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MotionScheduler.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MotionScheduler.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/MotionBezier.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionBezier.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/MotionBezier.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionBezier.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/MotionEllipses.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionEllipses.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/MotionEllipses.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionEllipses.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/NonLinearMotionN.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/NonLinearMotionN.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/NonLinearMovement.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.cpp">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMotions/NonLinearMotionNTemplate.h">
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.h">
 			<Option target="motion"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedManager.cpp">

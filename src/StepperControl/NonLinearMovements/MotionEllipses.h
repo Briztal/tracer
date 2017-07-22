@@ -26,7 +26,7 @@
 #ifndef CODE_MOTIONE_H
 #define CODE_MOTIONE_H
 
-#include "NonLinearMotionN.h"
+#include "NonLinearMovement.h"
 
 #define ANGLE_FRACTION_1
 

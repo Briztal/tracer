@@ -1,5 +1,5 @@
 /*
-  HomingMotion.h - Part of TRACER
+  MotionBezier.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,29 +18,38 @@
 
 */
 
-#include "../../config.h"
+#ifndef CODE_MOTIONBEZIER_H
+#define CODE_MOTIONBEZIER_H
 
-#ifdef ENABLE_STEPPER_CONTROL
+#include "NonLinearMovement.h"
 
-#ifndef TRACER_HOMINGMOTION_H
-#define TRACER_HOMINGMOTION_H
+class MotionBezier : public NonLinearMotionN {
 
-
-#include <stdbool.h>
-#include "../MotionScheduler.h"
-
-class HomingMotion {
 public:
 
-    static void move();
+    void prepareMotion();
 
-    static sig_t readEndStops();
+    void move();
 
-private:
+protected:
 
-    static uint32_t getMaxDelay(sig_t signature, uint32_t *delays);
+    //Curve Points Fields
+    int32_t polynomPoints[MAX_CURVE_POINTS][2];
+    float polynomCoefficients[MAX_CURVE_POINTS][2];
+    int nbPoints;
+
+    //Coords Processing variables
+    float pow;
+    int processIndice;
+
+    bool process_position();
+
+    void get_position(float alpha, int32_t *pos);
+
+    void init_position_parameters();
+
 };
 
-#endif //TRACER_HOMINGMOTION_H
 
-#endif
+
+#endif //CODE_MOTIONBEZIER_H

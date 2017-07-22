@@ -30,7 +30,7 @@
 #include "../motion_data.h"
 #include "../../DataStructures/Queue.h"
 
-class LinearMotionN {
+class LinearMovement {
 
 public :
 

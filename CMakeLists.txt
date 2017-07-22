@@ -121,17 +121,17 @@ add_library(datastructures
 
 
 set(MP "src/StepperControl")
-set(MNP "src/StepperControl/LinearMotionN")
-set(MTP "src/StepperControl/NonLinearMotions")
+set(MNP "src/StepperControl/LinearMovement")
+set(MTP "src/StepperControl/NonLinearMovements")
 add_library(motion
 
-         ${MP}/StepperController.cpp ${MP}/MotionExecuter.cpp ${MP}/SpeedManager.cpp ${MP}/MotionScheduler.cpp ${MNP}/LinearMotionN.cpp
+         ${MP}/StepperController.cpp ${MP}/MovementExecuter.cpp ${MP}/SpeedManager.cpp ${MP}/MovementScheduler.cpp ${MNP}/LinearMovement.cpp
 
-        ${MNP}/HomingMotion.cpp ${MTP}/NonLinearMotionN.cpp ${MTP}/NonLinearMotionNTemplate.cpp ${MTP}/MotionBezier.cpp
+        ${MNP}/HomingMovement.cpp ${MTP}/NonLinearMovement.cpp ${MTP}/NonLinearMovementTemplate.cpp ${MTP}/MotionBezier.cpp
         ${MTP}/MotionEllipses.cpp ${MP}/mathProcess.cpp ${MP}/swap.cpp
 
-          ${MP}/StepperController.h ${MP}/MotionExecuter.h ${MP}/SpeedManager.h ${MP}/MotionScheduler.h  ${MNP}/LinearMotionN.h
-        ${MNP}/HomingMotion.h ${MTP}/NonLinearMotionN.h ${MTP}/NonLinearMotionNTemplate.h ${MTP}/MotionBezier.h
+          ${MP}/StepperController.h ${MP}/MovementExecuter.h ${MP}/SpeedManager.h ${MP}/MovementScheduler.h  ${MNP}/LinearMovement.h
+        ${MNP}/HomingMovement.h ${MTP}/NonLinearMovement.h ${MTP}/NonLinearMovementTemplate.h ${MTP}/MotionBezier.h
         ${MTP}/MotionEllipses.h ${MP}/mathProcess.hpp ${MP}/swap.hpp ${MP}/motion_data.h
 
        

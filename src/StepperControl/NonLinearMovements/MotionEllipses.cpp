@@ -24,8 +24,8 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "MotionEllipses.h"
-#include "NonLinearMotionN.h"
-#include "../MotionScheduler.h"
+#include "NonLinearMovement.h"
+#include "../MovementScheduler.h"
 
 
 #ifdef ANGLE_FRACTION_1

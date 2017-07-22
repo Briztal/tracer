@@ -23,16 +23,16 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "MotionScheduler.h"
+#include "MovementScheduler.h"
 #include "StepperController.h"
-#include "MotionExecuter.h"
+#include "MovementExecuter.h"
 
 #include "../Interfaces/CommandInterface.h"
 #include "../Actions/ContinuousActions.h"
 #include "../Core/EEPROMStorage.h"
 
 
-void MotionScheduler::begin() {
+void MovementScheduler::begin() {
 
 #define CARTESIAN_GROUP(i, s0, s1, s2, ms)\
     theorical_regulation_speeds[i]= ms;\
@@ -51,7 +51,7 @@ void MotionScheduler::begin() {
 }
 
 
-void MotionScheduler::send_position() {
+void MovementScheduler::send_position() {
 
 #ifdef position_log
     StepperController::send_position();
@@ -60,20 +60,20 @@ void MotionScheduler::send_position() {
     CI::echo("POSITION");
     float t[NB_STEPPERS];
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        t[axis] = (MotionScheduler::positions[axis] / EEPROMStorage::steps[axis]);
+        t[axis] = (MovementScheduler::positions[axis] / EEPROMStorage::steps[axis]);
     }
     CI::send_position(t);
 #endif
 
 }
 
-void MotionScheduler::set_speed_group(uint8_t speed_group) {
-    MotionScheduler::speed_group = speed_group;
+void MovementScheduler::set_speed_group(uint8_t speed_group) {
+    MovementScheduler::speed_group = speed_group;
 }
 
 
 //TODO CHECK MAX_SPEED
-void MotionScheduler::set_speed_for_group(uint8_t group_id, float speed) {
+void MovementScheduler::set_speed_for_group(uint8_t group_id, float speed) {
     theorical_regulation_speeds[group_id] = speed;
 }
 
@@ -89,7 +89,7 @@ void MotionScheduler::set_speed_for_group(uint8_t group_id, float speed) {
  */
 
 //TODO PROCESS INV_SQUARE_DIST_SUM HERE, WHERE SPEED_GROUPS SIGNATURES ARE KNOWN
-float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
+float MovementScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
 
     //Determination of the regulation speed
     sig_t group_signature = speed_groups_signatures[speed_group];
@@ -184,7 +184,7 @@ float MotionScheduler::get_regulation_speed_linear(float *const distsmm, const f
  *              is given by d * tmp_speed_numerator
  *      - tmp_regulation_delay : the regulation delay that will be used during the movement we now plan.
  */
-void MotionScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps) {
+void MovementScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps) {
 
 
     //the acceleration considered is the new axis acceleration
@@ -211,7 +211,7 @@ void MotionScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coeffi
 #undef LOCAL_STEP_AND_WAIT
 
 
-#define m MotionScheduler
+#define m MovementScheduler
 
 
 //POWER AND SPEED

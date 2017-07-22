@@ -28,9 +28,9 @@
 #include "../config.h"
 
 
-#include "../StepperControl/MotionScheduler.h"
-#include "../StepperControl/LinearMotionN/LinearMotionN.h"
-#include "../StepperControl/LinearMotionN/HomingMotion.h"
+#include "../StepperControl/MovementScheduler.h"
+#include "../StepperControl/LinearMovement/LinearMovement.h"
+#include "../StepperControl/LinearMovement/HomingMovement.h"
 #include "../StepperControl/SpeedManager.h"
 
 
@@ -57,12 +57,12 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[15] = 35;
     coords[16] = 100;
     ContinuousActions::setLinearPower0(1);
-    MotionScheduler::set_speed_for_group(0, 100);
-    MotionScheduler::set_speed_group(0);
+    MovementScheduler::set_speed_for_group(0, 100);
+    MovementScheduler::set_speed_group(0);
 
     //TODO TESTER AVEC LES Z
 
-    LinearMotionN::prepare_motion(coords);
+    LinearMovement::prepare_motion(coords);
 
 
     /*
@@ -86,7 +86,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[14] = 40;
     coords[15] = 110;
     coords[16] = 40;
-    LinearMotionN::prepare_motion(coords);
+    LinearMovement::prepare_motion(coords);
 
     delay(100);
 
@@ -107,7 +107,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[14] = 75;
     coords[15] = 75;
     coords[16] = 75;
-    LinearMotionN::prepare_motion(coords);
+    LinearMovement::prepare_motion(coords);
 */
 
     CI::echo("EXIT");
@@ -116,7 +116,7 @@ void MachineController::action(char * dptr, uint8_t size) {
 
 void MachineController::home(char * dptr, uint8_t size) {
 
-    HomingMotion::move();
+    HomingMovement::move();
 
 }
 

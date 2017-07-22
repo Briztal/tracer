@@ -137,7 +137,7 @@ public :
     *  - trace plans the current sub_movement, while periodically stepping and waiting,
     *      and then set finish_sub_movement as interrupt routine;
     *  - finish_sub_movement makes all remaining tics and then sets prepare_next_sub_motion as interrupt routine,
-    *      or wait_for_movement is the current movement is done.
+    *      or process_next_move is the current movement is done.
     */
 
 
@@ -146,7 +146,7 @@ private:
 
     static void prepare_next_sub_motion();
 
-    static void wait_for_movement();
+    static void process_next_move();
 
     static void finish_sub_movement();
 

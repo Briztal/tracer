@@ -26,8 +26,8 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 #include "../StepperControl/StepperController.h"
-#include "../StepperControl/MotionScheduler.h"
-#include "../StepperControl/MotionExecuter.h"
+#include "../StepperControl/MovementScheduler.h"
+#include "../StepperControl/MovementExecuter.h"
 #include "../StepperControl/SpeedManager.h"
 #endif
 
@@ -41,7 +41,7 @@ void Core::begin() {
 #ifdef ENABLE_STEPPER_CONTROL
     EEPROMStorage::begin();
     StepperController::begin();
-    MotionScheduler::begin();
+    MovementScheduler::begin();
     SpeedManager::begin();
     MotionExecuter::start();
 #endif

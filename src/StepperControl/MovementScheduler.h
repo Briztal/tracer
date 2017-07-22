@@ -27,7 +27,7 @@
 #ifndef CODE_MOTION_H
 #define CODE_MOTION_H
 
-class MotionScheduler {
+class MovementScheduler {
 
 
 public:
