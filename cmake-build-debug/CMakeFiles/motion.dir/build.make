@@ -105,9 +105,33 @@ CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o.provides: CMakeF
 CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o.provides.build: CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o
 
 
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o: CMakeFiles/motion.dir/flags.make
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o: ../src/StepperControl/TrajectoryExecuter.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/TrajectoryExecuter.cpp
+
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.i"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/TrajectoryExecuter.cpp > CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.i
+
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.s"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/TrajectoryExecuter.cpp -o CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.s
+
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.requires:
+
+.PHONY : CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.requires
+
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.provides: CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.requires
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.provides.build
+.PHONY : CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.provides
+
+CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.provides.build: CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o
+
+
 CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o: ../src/StepperControl/SpeedManager.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedManager.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.i: cmake_force
@@ -131,7 +155,7 @@ CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o.provides.build: CMak
 
 CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o: ../src/StepperControl/MovementScheduler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.i: cmake_force
@@ -155,7 +179,7 @@ CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.provides.build:
 
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o: ../src/StepperControl/LinearMovement/LinearMovement.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/LinearMovement.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.i: cmake_force
@@ -179,7 +203,7 @@ CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o.pro
 
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o: ../src/StepperControl/LinearMovement/HomingMovement.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/HomingMovement.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.i: cmake_force
@@ -203,7 +227,7 @@ CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o.pro
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o: ../src/StepperControl/NonLinearMovements/NonLinearMovement.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.i: cmake_force
@@ -227,7 +251,7 @@ CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cp
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o: ../src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTemplate.cpp.i: cmake_force
@@ -251,7 +275,7 @@ CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovementTem
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o: ../src/StepperControl/NonLinearMovements/MotionBezier.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionBezier.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.i: cmake_force
@@ -275,7 +299,7 @@ CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionBezier.cpp.o.p
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o: ../src/StepperControl/NonLinearMovements/MotionEllipses.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionEllipses.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.i: cmake_force
@@ -299,7 +323,7 @@ CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o
 
 CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o: ../src/StepperControl/mathProcess.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/mathProcess.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.i: cmake_force
@@ -323,7 +347,7 @@ CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o.provides.build: CMake
 
 CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o: CMakeFiles/motion.dir/flags.make
 CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o: ../src/StepperControl/swap.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/swap.cpp
 
 CMakeFiles/motion.dir/src/StepperControl/swap.cpp.i: cmake_force
@@ -349,6 +373,7 @@ CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o.provides.build: CMakeFiles/m
 motion_OBJECTS = \
 "CMakeFiles/motion.dir/src/StepperControl/StepperController.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o" \
+"CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o" \
@@ -365,6 +390,7 @@ motion_EXTERNAL_OBJECTS =
 
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/StepperController.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o
+libmotion.a: CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o
@@ -377,7 +403,7 @@ libmotion.a: CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o
 libmotion.a: CMakeFiles/motion.dir/build.make
 libmotion.a: CMakeFiles/motion.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX static library libmotion.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library libmotion.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/motion.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/motion.dir/link.txt --verbose=$(VERBOSE)
 
@@ -388,6 +414,7 @@ CMakeFiles/motion.dir/build: libmotion.a
 
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/StepperController.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o.requires
+CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o.requires

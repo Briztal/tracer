@@ -2162,6 +2162,12 @@
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/StepperController.h">
 			<Option target="motion"/>
 		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/TrajectoryExecuter.cpp">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/TrajectoryExecuter.h">
+			<Option target="motion"/>
+		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/mathProcess.cpp">
 			<Option target="motion"/>
 		</Unit>

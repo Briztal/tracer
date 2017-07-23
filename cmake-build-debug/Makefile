@@ -872,6 +872,33 @@ src/StepperControl/StepperController.cpp.s:
 	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/StepperController.cpp.s
 .PHONY : src/StepperControl/StepperController.cpp.s
 
+src/StepperControl/TrajectoryExecuter.o: src/StepperControl/TrajectoryExecuter.cpp.o
+
+.PHONY : src/StepperControl/TrajectoryExecuter.o
+
+# target to build an object file
+src/StepperControl/TrajectoryExecuter.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o
+.PHONY : src/StepperControl/TrajectoryExecuter.cpp.o
+
+src/StepperControl/TrajectoryExecuter.i: src/StepperControl/TrajectoryExecuter.cpp.i
+
+.PHONY : src/StepperControl/TrajectoryExecuter.i
+
+# target to preprocess a source file
+src/StepperControl/TrajectoryExecuter.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.i
+.PHONY : src/StepperControl/TrajectoryExecuter.cpp.i
+
+src/StepperControl/TrajectoryExecuter.s: src/StepperControl/TrajectoryExecuter.cpp.s
+
+.PHONY : src/StepperControl/TrajectoryExecuter.s
+
+# target to generate assembly for a file
+src/StepperControl/TrajectoryExecuter.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.s
+.PHONY : src/StepperControl/TrajectoryExecuter.cpp.s
+
 src/StepperControl/mathProcess.o: src/StepperControl/mathProcess.cpp.o
 
 .PHONY : src/StepperControl/mathProcess.o
@@ -1066,6 +1093,9 @@ help:
 	@echo "... src/StepperControl/StepperController.o"
 	@echo "... src/StepperControl/StepperController.i"
 	@echo "... src/StepperControl/StepperController.s"
+	@echo "... src/StepperControl/TrajectoryExecuter.o"
+	@echo "... src/StepperControl/TrajectoryExecuter.i"
+	@echo "... src/StepperControl/TrajectoryExecuter.s"
 	@echo "... src/StepperControl/mathProcess.o"
 	@echo "... src/StepperControl/mathProcess.i"
 	@echo "... src/StepperControl/mathProcess.s"
