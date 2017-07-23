@@ -33,7 +33,7 @@
 #include "../StepperController.h"
 #include "../mathProcess.hpp"
 #include "../motion_data.h"
-
+#include "../TrajectoryExecuter.h"
 
 
 #define PROCESSING_STEPS (uint8_t)7
@@ -109,13 +109,11 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             //Update position
             MovementScheduler::positions[axis] = steps_destination;
 
-            //Wait for distances to be unlocked
-            while (MotionExecuter::distances_lock);
-            //Update destination
 
+            //Update end distances
             disable_stepper_interrupt()
 
-            MotionExecuter::end_distances[axis] += distance;
+            TrajectoryExecuter::end_distances[axis] += distance;
 
             enable_stepper_interrupt()
             /*
@@ -160,7 +158,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     //Calculate and fill the speed data
     MovementScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed, PROCESSING_STEPS);
 
-    MotionExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
+    TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
     return max_axis;
 
 }
@@ -198,7 +196,7 @@ void LinearMovement::move(uint32_t *dists) {
     data_queue.push(data_to_fill);
 
     //Enqueue motion_data
-    MotionExecuter::enqueue_movement_data();
+    TrajectoryExecuter::enqueue_movement_data();
 
 
 }
@@ -259,7 +257,7 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
     }
 
     //Fill beginning signatures
-    MotionExecuter::fill_movement_data(true, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(true, elementary_dists, count, nsig);
 
     uint32_t last_pos_max = count*PROCESSING_STEPS;
 
@@ -273,7 +271,7 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
     }
 
     //Fill ending signatures
-    MotionExecuter::fill_movement_data(false, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(false, elementary_dists, count, nsig);
 }
 
 void LinearMovement::initialise_motion() {

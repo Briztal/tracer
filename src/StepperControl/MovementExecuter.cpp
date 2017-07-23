@@ -23,14 +23,9 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "MovementExecuter.h"
-#include "SpeedManager.h"
-#include "../Interfaces/CommandInterface.h"
-#include "motion_data.h"
-#include "StepperController.h"
-#include "LinearMovement/LinearMovement.h"
-#include "MovementScheduler.h"
-#include "../Actions/ContinuousActions.h"
 #include "TrajectoryExecuter.h"
+#include "LinearMovement/HomingMovement.h"
+#include "../Interfaces/CommandInterface.h"
 
 /*
  * TODOs for a correct motion setup :
@@ -56,6 +51,14 @@ void MovementExecuter::start() {
     setup_stepper_interrupt(process_next_move, 30000);
 }
 
+void MovementExecuter::enqueue_trajectory_movement() {
+    movement_queue.push(0);
+}
+
+void MovementExecuter::enqueue_homing_movement() {
+    movement_queue.push(1);
+}
+
 /*
  * The movement initialisation function :
  *  - if possible, starts a movement;
@@ -64,21 +67,31 @@ void MovementExecuter::start() {
 void MovementExecuter::process_next_move() {
 
     disable_stepper_interrupt();
-    
+
 
     if (movement_queue.available_elements()) {
         unsigned char c = movement_queue.pull();
 
-        switch(c) {
+        switch (c) {
             /*
-             * First case : a trajectory.
+             * First case : following a trajectory.
              *  All parameters have been enqueued in the trajectory executer queue.
              *  All we need to do is to start the tracing procedure
              */
             case 0 :
-            TrajectoryExecuter::start();
+                TrajectoryExecuter::start();
+                return;
+            /*
+             * Second case : a homing movement.
+             *  The movement does not require any pre-computed parameter.
+             *  All we need to do is to start the homing procedure
+             */
+            case 1 :
+                //HomingMovement::start();
+            default:
                 break;
         }
+    }
 
 
 //TODO NECESSARY ?
@@ -88,3 +101,5 @@ void MovementExecuter::process_next_move() {
 
 
 Queue<unsigned char> MovementExecuter::movement_queue(MOTION_DATA_QUEUE_SIZE);
+
+#endif

@@ -30,6 +30,7 @@
 #include "../Interfaces/CommandInterface.h"
 #include "../Actions/ContinuousActions.h"
 #include "../Core/EEPROMStorage.h"
+#include "TrajectoryExecuter.h"
 
 
 void MovementScheduler::begin() {
@@ -201,7 +202,7 @@ void MovementScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coef
     CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 
 
-    MotionExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, tmp_speed_factor, ratio, processing_steps);
+    TrajectoryExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, tmp_speed_factor, ratio, processing_steps);
 
 }
 

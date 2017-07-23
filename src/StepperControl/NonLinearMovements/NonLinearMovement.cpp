@@ -31,6 +31,7 @@
 #include "../StepperController.h"
 #include "../MovementScheduler.h"
 #include "../LinearMovement/LinearMovement.h"
+#include "../TrajectoryExecuter.h"
 
 /*
  * TODOs for a correct motion setup :
@@ -118,12 +119,12 @@ void NonLinearMovement::set_final_positions(const int32_t *final_positions) {
         uint8_t axis = axis_t[indice];
         int32_t pos = MovementScheduler::positions[axis], npos = final_positions[axis];
         MovementScheduler::positions[axis] = npos;
-        MotionExecuter::end_distances[axis] += npos - pos;
+        TrajectoryExecuter::end_distances[axis] += npos - pos;
     }
 }
 
 void NonLinearMovement::fill_processors(void (*init_f)(), sig_t (*position_f)(uint8_t *)) {
-    MotionExecuter::fill_processors(init_f, step, position_f, process_speed);
+    TrajectoryExecuter::fill_processors(init_f, step, position_f, process_speed);
 }
 
 void NonLinearMovement::set_speed_parameters_enqueue(uint8_t processing_steps) {
@@ -134,7 +135,7 @@ void NonLinearMovement::set_speed_parameters_enqueue(uint8_t processing_steps) {
     }
     float regulation_speed = MovementScheduler::get_regulation_speed_linear(dists_array, 1);
     MovementScheduler::pre_set_speed_axis(*axis_t, 1, regulation_speed, processing_steps);
-    MotionExecuter::enqueue_movement_data();
+    TrajectoryExecuter::enqueue_movement_data();
 
 }
 
@@ -161,13 +162,13 @@ void NonLinearMovement::set_motion_data(const float min, const float max, const 
     uint8_t nsig = get_movement_distances(min, min + step, get_relative_position, elementary_dists);
 
     //Fill initial signatures (movement and dir)
-    MotionExecuter::fill_movement_data(true, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(true, elementary_dists, count, nsig);
 
     //Get final data (dists and dir signature)
     nsig = get_movement_distances(count * step, max, get_relative_position, elementary_dists);
 
     //Fill final signatures (movement and dir)
-    MotionExecuter::fill_movement_data(false, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(false, elementary_dists, count, nsig);
 
 }
 

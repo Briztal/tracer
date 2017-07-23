@@ -23,8 +23,8 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef TRACER_MOTIONEXECUTER_H
-#define TRACER_MOTIONEXECUTER_H
+#ifndef TRACER_TRAJECTORYEXECUTER_H
+#define TRACER_TRAJECTORYEXECUTER_H
 
 #include "../hardware_language_abstraction.h"
 #include "motion_data.h"

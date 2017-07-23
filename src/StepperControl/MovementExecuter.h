@@ -23,8 +23,8 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef TRACER_MOTIONEXECUTER_H
-#define TRACER_MOTIONEXECUTER_H
+#ifndef TRACER_MOVEMENTEXECUTER_H
+#define TRACER_MOVEMENTEXECUTER_H
 
 #include "../hardware_language_abstraction.h"
 #include "motion_data.h"
@@ -56,11 +56,12 @@ public :
 
 
 
-private:
-    
     static void process_next_move();
 
 
+    static void enqueue_trajectory_movement();
+
+    static void enqueue_homing_movement();
 };
 
 

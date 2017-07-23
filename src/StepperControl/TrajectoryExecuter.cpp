@@ -30,6 +30,7 @@
 #include "LinearMovement/LinearMovement.h"
 #include "MovementScheduler.h"
 #include "../Actions/ContinuousActions.h"
+#include "MovementExecuter.h"
 
 /*
  * TODOs for a correct motion setup :
@@ -142,6 +143,7 @@ void TrajectoryExecuter::fill_processors(void (*init_f)(), void (*step_f)(sig_t)
 
 void TrajectoryExecuter::enqueue_movement_data() {
     motion_data_queue.push(motion_data_to_fill);
+    MovementExecuter::enqueue_trajectory_movement();
 }
 
 /*
@@ -149,73 +151,64 @@ void TrajectoryExecuter::enqueue_movement_data() {
  *  - if possible, starts a movement;
  *  - if not, returns, and will re-check later (interrupt)
  */
-void TrajectoryExecuter::process_next_move() {
+void TrajectoryExecuter::start() {
 
-    disable_stepper_interrupt();
+    popped_data = motion_data_queue.pull();
 
+    /*
+     * Motion initialisation - according to the pulled motion data, set :
+     *
+     *      Motion data :
+     * - count : number of sub_movements;
+     * - axis_signatures = the first elementary movement axis_signatures (pre_processed);
+     * - position_processor, speed_processor, functions used during movement initialise (depend on calling class);
+     * - step : the function used to step (depends on the calling class;
+     *
+     *      Speed data :
+     * - delay_numerator : the fraction numerator in delay processing;
+     * - regulation_delay : the delay to reach, in speed regulation process
+     * - ratio : the ratio speed_axis_dist(sqrt(sum(axis_dists^2)). Used.
+     */
 
-    //digitalWrite(13, !digitalRead(13));
+    count = (uint16_t) (popped_data.count - 2);
 
+    /*
+     * Count doesn't take its maximum value,
+     *    because the pre_computation doesn't need to happen during the penultimate and the ultimate sub_movements.
+     */
 
-    if (motion_data_queue.available_elements()) {
+    position_processor = popped_data.position_processor;
+    speed_processor = popped_data.speed_processor;
+    step = popped_data.step;
 
+    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
+    es0[0] = popped_data.initial_signatures[0];
+    es0[1] = popped_data.initial_signatures[1];
+    es0[2] = popped_data.initial_signatures[2];
+    es0[3] = popped_data.initial_signatures[3];
+    es0[4] = popped_data.initial_signatures[4];
+    es0[5] = popped_data.initial_signatures[5];
+    es0[6] = popped_data.initial_signatures[6];
+    es0[7] = popped_data.initial_signatures[7];
+    is_es_0 = false;
 
-        popped_data = motion_data_queue.pull();
+    StepperController::enable(65535);
+    StepperController::set_directions(popped_data.initial_dir_signature);
 
-        /*
-         * Motion initialisation - according to the pulled motion data, set :
-         *
-         *      Motion data :
-         * - count : number of sub_movements;
-         * - axis_signatures = the first elementary movement axis_signatures (pre_processed);
-         * - position_processor, speed_processor, functions used during movement initialise (depend on calling class);
-         * - step : the function used to step (depends on the calling class;
-         *
-         *      Speed data :
-         * - delay_numerator : the fraction numerator in delay processing;
-         * - regulation_delay : the delay to reach, in speed regulation process
-         * - ratio : the ratio speed_axis_dist(sqrt(sum(axis_dists^2)). Used.
-         */
+    trajectory_indice = popped_data.initial_indice;
 
-        count = (uint16_t) (popped_data.count - 2);
-
-        /*
-         * Count doesn't take its maximum value,
-         *    because the pre_computation doesn't need to happen during the penultimate and the ultimate sub_movements.
-         */
-
-        position_processor = popped_data.position_processor;
-        speed_processor = popped_data.speed_processor;
-        step = popped_data.step;
-
-        //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
-        es0[0] = popped_data.initial_signatures[0];
-        es0[1] = popped_data.initial_signatures[1];
-        es0[2] = popped_data.initial_signatures[2];
-        es0[3] = popped_data.initial_signatures[3];
-        es0[4] = popped_data.initial_signatures[4];
-        es0[5] = popped_data.initial_signatures[5];
-        es0[6] = popped_data.initial_signatures[6];
-        es0[7] = popped_data.initial_signatures[7];
-        is_es_0 = false;
-
-        StepperController::enable(65535);
-        StepperController::set_directions(popped_data.initial_dir_signature);
-
-        trajectory_indice = popped_data.initial_indice;
-
-        //Speed update according to pre_processed_parameters
+    //Speed update according to pre_processed_parameters
 
 
-        SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data. delay_numerator, popped_data.speed_factor, popped_data.ratio,  popped_data.processing_steps);
+    SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data.delay_numerator,
+                                       popped_data.speed_factor, popped_data.ratio, popped_data.processing_steps);
 
-        (*popped_data.init_processor)();
+    (*popped_data.init_processor)();
 
-        //Set number of tools in continuous modes, and set action functions related
-        SpeedManager::updateActions();
+    //Set number of tools in continuous modes, and set action functions related
+    SpeedManager::updateActions();
 
-        set_stepper_int_function(prepare_next_sub_motion);
-    }
+    set_stepper_int_function(prepare_next_sub_motion);
 
     enable_stepper_interrupt();
 
@@ -379,7 +372,7 @@ void TrajectoryExecuter::finish_sub_movement() {
             } else {
 
                 MovementScheduler::send_position();
-                set_stepper_int_function(process_next_move);
+                set_stepper_int_function(MovementExecuter::process_next_move);
                 ultimate_movement = penultimate_movement = true;
             }
         }

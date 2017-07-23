@@ -26,6 +26,7 @@
 #include <math.h>
 #include <WString.h>
 #include "SpeedManager.h"
+#include "TrajectoryExecuter.h"
 #include "MovementExecuter.h"
 #include "../Core/EEPROMStorage.h"
 #include "../Interfaces/CommandInterface.h"
@@ -56,7 +57,7 @@ void SpeedManager::heuristic_distance() {
     uint32_t dist = 0;
 
 #define STEPPER(i, ...) \
-    td = MotionExecuter::end_distances[i];\
+    td = TrajectoryExecuter::end_distances[i];\
     distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 

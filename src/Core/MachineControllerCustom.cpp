@@ -32,6 +32,7 @@
 #include "../StepperControl/LinearMovement/LinearMovement.h"
 #include "../StepperControl/LinearMovement/HomingMovement.h"
 #include "../StepperControl/SpeedManager.h"
+#include "../StepperControl/MovementExecuter.h"
 
 
 void MachineController::action(char * dptr, uint8_t size) {
@@ -57,7 +58,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[15] = 35;
     coords[16] = 100;
     ContinuousActions::setLinearPower0(1);
-    MovementScheduler::set_speed_for_group(0, 100);
+    MovementScheduler::set_speed_for_group(0, 500);
     MovementScheduler::set_speed_group(0);
 
     //TODO TESTER AVEC LES Z
@@ -65,9 +66,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     LinearMovement::prepare_motion(coords);
 
 
-    /*
-    
-    delay(100);
+    delay(20);
 
     coords[0] = 40;
     coords[1] = 110;
@@ -88,7 +87,11 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[16] = 40;
     LinearMovement::prepare_motion(coords);
 
-    delay(100);
+    delay(20);
+
+    MovementExecuter::enqueue_homing_movement();
+
+    delay(20);
 
     coords[0] = 75;
     coords[1] = 75;
@@ -108,7 +111,6 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[15] = 75;
     coords[16] = 75;
     LinearMovement::prepare_motion(coords);
-*/
 
     CI::echo("EXIT");
 

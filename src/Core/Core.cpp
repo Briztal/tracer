@@ -43,7 +43,7 @@ void Core::begin() {
     StepperController::begin();
     MovementScheduler::begin();
     SpeedManager::begin();
-    MotionExecuter::start();
+    MovementExecuter::start();
 #endif
 
 }
