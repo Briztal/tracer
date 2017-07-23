@@ -120,10 +120,11 @@ BINARY(1, binary2, 9, 1)
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
 #ifdef CONTINUOUS
-#define NB_CONTINUOUS 2
+#define NB_CONTINUOUS 3
 
-CONTINUOUS(0, continuous, 8, 600)
-CONTINUOUS(1, continuous2, 8, 80)
+CONTINUOUS(0, continuous1, 8, 600)
+CONTINUOUS(1, continuous2, 8, 600)
+CONTINUOUS(2, continuous3, 8, 600)
 
 #endif
 

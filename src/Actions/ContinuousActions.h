@@ -48,9 +48,10 @@ private:
     static uint8_t linear_id;
 
 #define CONTINUOUS(i, name, pin, max) \
-    static float linearPower##i;\
-    static bool enabled##i;\
-    static bool in_linear_mode_##i;
+    static float linearPower##i;
+
+    static sig_t linear_modes;
+    static sig_t enabled_actions;
 
 #include "../config.h"
 #undef CONTINUOUS

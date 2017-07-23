@@ -43,7 +43,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[0] = 100;
     coords[1] = 160;
     coords[2] = 100;
-    coords[3] = 40;
+    /*coords[3] = 40;
     coords[4] = 50;
     coords[5] = 138;
     coords[6] = 82;
@@ -56,7 +56,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[13] = 142;
     coords[14] = 160;
     coords[15] = 35;
-    coords[16] = 100;
+    coords[16] = 100;*/
     ContinuousActions::setLinearPower0(1);
     MovementScheduler::set_speed_for_group(0, 500);
     MovementScheduler::set_speed_group(0);
@@ -64,7 +64,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     //TODO TESTER AVEC LES Z
 
     LinearMovement::prepare_motion(coords);
-
+    /*
 
     delay(20);
 
@@ -111,6 +111,7 @@ void MachineController::action(char * dptr, uint8_t size) {
     coords[15] = 75;
     coords[16] = 75;
     LinearMovement::prepare_motion(coords);
+     */
 
     CI::echo("EXIT");
 

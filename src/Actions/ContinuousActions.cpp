@@ -36,35 +36,29 @@ void ContinuousActions::begin() {
 //TODO PASSER PAR UN CONST FLOAT ET VOIR SI CA ACCELERE
 
 bool ContinuousActions::linear_modes_enabled() {
-
-#define CONTINUOUS(i, name, pin, max) a= a||in_linear_mode_##i;
-
-    bool a = false;
-
-#include "../config.h"
-#undef CONTINUOUS
-    return a;
+    return linear_modes != 0;
 }
 
+#define POW_2(i) ((sig_t)(1<<i))
 
 
 #define CONTINUOUS(i, name, pin, max) \
 void ContinuousActions::setPower##i (float f) {\
-    in_linear_mode_##i = false;\
+    linear_modes &= (!POW_2(i));\
     if (f<=0){\
         disable##i();\
         return;\
     }\
-    enabled##i=true;\
+    enabled_actions|=POW_2(i);\
     if (f<=max)\
         analog_write(pin,  f * (255.0 / (float)max));\
     else \
         analog_write(pin, 255);\
 }\
 void ContinuousActions::setLinearPower##i (float f) {\
-    if (!enabled##i){\
+    if (!(enabled_actions&POW_2(i))){\
         linearPower##i = f;\
-        in_linear_mode_##i = true;\
+        linear_modes |= POW_2(i);\
     }\
 }\
 void ContinuousActions::set_power_for_speed_##i (float speed) {\
@@ -73,19 +67,17 @@ void ContinuousActions::set_power_for_speed_##i (float speed) {\
         return;\
     }\
     float power = speed*linearPower##i;\
-    enabled##i=true;\
+    enabled_actions|=POW_2(i);\
     if (power<=max) {\
         analog_write(pin,  power * (255.0 / (float)max));\
     } else \
         analog_write(pin,  255);\
 }\
 void ContinuousActions::disable##i() {\
-    enabled##i = false;\
+    enabled_actions&=(!POW_2(i));\
     analogWrite(pin, 0);\
 }\
 float ContinuousActions::linearPower##i = 0;\
-bool ContinuousActions::enabled##i = false;\
-bool ContinuousActions::in_linear_mode_##i = false;
 
 #include "../config.h"
 
@@ -94,7 +86,7 @@ bool ContinuousActions::in_linear_mode_##i = false;
 uint8_t ContinuousActions::getSetFunctions(void (**f)(float)) {
     uint8_t id = 0;
 #define CONTINUOUS(i, name, pin, max) \
-    if (in_linear_mode_##i) {\
+    if (linear_modes&POW_2(i)) {\
         f[id] = set_power_for_speed_##i;\
         id++;\
     }
@@ -102,3 +94,7 @@ uint8_t ContinuousActions::getSetFunctions(void (**f)(float)) {
 #undef CONTINUOUS
     return id;
 }
+
+sig_t ContinuousActions::enabled_actions = 0;
+sig_t ContinuousActions::linear_modes = 0;
+
