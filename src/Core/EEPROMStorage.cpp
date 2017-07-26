@@ -19,8 +19,11 @@
 */
 
 #include "EEPROMStorage.h"
-#include "../Interfaces/CommandInterface.h"
 #include "../config.h"
+#include "../Interfaces/CommandInterface/CommandInterface.h"
+#include "../config.h"
+#include "../hardware_language_abstraction.h"
+#include "../Actions/ContinuousActions.h"
 
 /*
  * Structure sub_canals :
@@ -74,161 +77,6 @@ void EEPROMStorage::begin() {
 
 }
 
-void EEPROMStorage::send_structure() {
-    /*
-     * Syntax :
-     * reset_tree (beginning) :         0;
-     * confirm_tree (end) :             1;
-     * go_upper :                       2;
-     * go_lower(i, name) :              3, i, name
-     * create_leaf(i, name) :           4, i, name
-     */
-
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(0);\
-    CI::send_packet();
-
-#define EEPROM_UPPER\
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(2);\
-    CI::send_packet();
-
-#define EEPROM_LOWER(i, name)\
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(3);\
-    CI::add_char_out(i);\
-    CI::add_string_out(#name);\
-    CI::send_packet();
-
-#define EEPROM_LEAF(i, name)\
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(4);\
-    CI::add_char_out(i);\
-    CI::add_string_out(#name);\
-    CI::send_packet();
-
-
-#ifdef ENABLE_ASSERV
-
-    //---------------------------------------------PIDs---------------------------------------------
-
-    EEPROM_LOWER(PID_CAT, pids);
-
-    //For each PID, mark a case for kp, ki, and kd.
-#define PID(i, ...)\
-    EEPROM_LOWER(i, i);EEPROM_LEAF(0, kp);EEPROM_LEAF(1, ki);EEPROM_LEAF(2, kd);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef PID
-
-    EEPROM_UPPER;
-
-    //---------------------------------------------Control loops---------------------------------------------
-
-    EEPROM_LOWER(LOOP_CAT, loops);
-    //For each Control loop, mark a case for the period.
-#define LOOP_FUNCTION(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, period);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef LOOP_FUNCTION
-
-    EEPROM_UPPER;
-
-#endif
-
-    //---------------------------------------------Continuous Actions---------------------------------------------
-
-    EEPROM_LOWER(CONTINUOUS_CAT, binaries);
-    //For each Continuous Action, mark a case for the maximum value.
-#define CONTINUOUS(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, max_value);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef CONTINUOUS
-
-
-    EEPROM_UPPER;
-
-    //---------------------------------------------Servo Actions---------------------------------------------
-    EEPROM_LOWER(SERVO_CAT, continuous);
-    //For each Servo Action, mark a case for the minimum and maximum values.
-#define SERVO(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, min_value);EEPROM_LEAF(1, max_value);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef SERVO
-
-    EEPROM_UPPER;
-
-
-#ifdef ENABLE_STEPPER_CONTROL
-
-    //---------------------------------------------Steppers---------------------------------------------
-
-    EEPROM_LOWER(STEPPER_CAT, steppers);
-    //For each Stepper, mark a case for the size, the number of steps per unit, and maximum speed and acceleration.
-#define STEPPER_DATA(indice, ...) EEPROM_LOWER(indice, indice);\
-    EEPROM_LEAF(0, size);EEPROM_LEAF(1, steps);EEPROM_LEAF(2, max_speed);EEPROM_LEAF(3, max_acceleration);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef STEPPER_DATA
-
-    EEPROM_UPPER;
-
-    //---------------------------------------------Cartesian Groups---------------------------------------------
-
-    EEPROM_LOWER(CARTESIAN_GROUP_CAT, speed_groups);
-    //For each group, mark a case for its maximum speed
-#define CARTESIAN_GROUP(indice, ...) EEPROM_LOWER(indice, indice);\
-    EEPROM_LEAF(0, max_speed);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef CARTESIAN_GROUP
-
-    EEPROM_UPPER;
-
-#endif
-
-    //---------------------------------------------Custom parameters---------------------------------------------
-    EEPROM_LOWER(CUSTOM_CAT, custom);
-
-    int custom_indice = 0;
-    //Mark a case for each custom parameter
-#define EEPROM_FLOAT(name, v) EEPROM_LEAF(custom_indice, name);custom_indice++;
-#define EEPROM_BOOL(n, v) EEPROM_FLOAT(n,v)
-#define EEPROM_CHAR(n, v) EEPROM_FLOAT(n,v)
-#define EEPROM_INT(n, v) EEPROM_FLOAT(n,v)
-#define EEPROM_LONG(n, v) EEPROM_FLOAT(n,v)
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-    EEPROM_UPPER;
-
-#undef EEPROM_UPPER
-#undef EEPROM_LOWER
-#undef EEPROM_LEAF
-
-    //Confirm and fetch the transmitted tree
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(1);\
-    CI::send_packet();
-
-}
 
 float EEPROMStorage::read(char *data, uint8_t size) {
     if (!(size--)) return 0;
@@ -358,20 +206,15 @@ float EEPROMStorage::write(char *data, uint8_t size) {
     if (!(size--)) return 0;
     uint8_t c = (uint8_t)*(data++), id;
 
-    CI::echo("2");
-
     switch (c) {
 
 #ifdef ENABLE_ASSERV
 
         case PID_CAT :
-            CI::echo("3");
-
 
             if (size < 6) return 0;
             id = (uint8_t)*(data++);
             if (id>=NB_PIDS) return 0;
-            CI::echo("4");
 
             switch (*(data++)) {
                 case 0 ://kp
@@ -543,83 +386,6 @@ bool EEPROMStorage::extractProfile() {
     return true;
 }
 
-void EEPROMStorage::print_stored_data() {
-
-    //Stepper motors
-#ifdef ENABLE_STEPPER_CONTROL
-    CI::echo("Stepper Motors : ");
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        CI::echo("Stepper " + String(stepper));
-        CI::echo("size : " + String(sizes[stepper]));
-        CI::echo("steps : " + String(steps[stepper]));
-        CI::echo("max speed : " + String(maximum_speeds[stepper]));
-        CI::echo("acceleration : " + String(accelerations[stepper]) + "\n");
-    }
-
-    CI::echo("Speed Groups : ");
-    for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
-        CI::echo("Group " + String(group));
-        CI::echo("max speed : " + String(group_maximum_speeds[group]) + "\n");
-    }
-
-#endif
-
-#ifdef ENABLE_ASSERV
-
-    //PIDs
-    CI::echo("PIDS : ");
-    for (int pid = 0; pid < NB_PIDS; pid++) {
-        CI::echo("PID " + String(pid));
-        CI::echo("kp : " + String(kps[pid]));
-        CI::echo("ki : " + String(kis[pid]));
-        CI::echo("kd : " + String(kds[pid]) + "\n");
-    }
-
-    //Control Loops
-    CI::echo("Control Loops : ");
-    for (int loop = 0; loop < NB_LOOPS; loop++) {
-        CI::echo("Loop " + String(loop));
-        CI::echo("period (ms) : " + String(loop_periods[loop]) + "\n");
-    }
-
-#endif
-
-    //Continuous Actions
-    CI::echo("Continuous Actions : ");
-    for (int continuous = 0; continuous < NB_CONTINUOUS; continuous++) {
-        CI::echo("Continuous " + String(continuous));
-        CI::echo("maximum : " + String(continuous_max[continuous]) + "\n");
-    }
-
-    //Servo Actions
-    CI::echo("Servo Actions : ");
-    for (int servo = 0; servo < NB_SERVOS; servo++) {
-        CI::echo("Loop " + String(servo));
-        CI::echo("minimum : " + String(servos_min[servo]));
-        CI::echo("maximum : " + String(servos_max[servo]) + "\n");
-    }
-
-    //Custom Data
-    CI::echo("Custom Data : ");
-    //Custom data
-#define EEPROM_BOOL(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_CHAR(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_INT(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_LONG(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_FLOAT(name, default_value) CI::echo(String(#name)+" : "+String(name));
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-    CI::echo(" ");
-
-}
-
 void EEPROMStorage::saveProfile() {
     //SAVE MARK (two symetrical primes happy numbers)
     EEPROM_write(0, 79);
@@ -707,8 +473,6 @@ void EEPROMStorage::setDefaultProfile() {
 
 #undef STEPPER_DATA
 
-    CI::echo(String(maximum_speeds[0]));
-
     //Set default group speeds
 #define CARTESIAN_GROUP(i, m0, m1, m2, s)\
     group_maximum_speeds[i] = s;
@@ -720,8 +484,6 @@ void EEPROMStorage::setDefaultProfile() {
 #endif
 
     //---------------------------------------------Asserv---------------------------------------------
-    CI::echo("1 "+String(maximum_speeds[0]));
-
 
 #ifdef ENABLE_ASSERV
 
@@ -745,8 +507,6 @@ void EEPROMStorage::setDefaultProfile() {
 
 #endif
 
-    CI::echo("2 "+String(maximum_speeds[0]));
-
 
     //---------------------------------------------Actions---------------------------------------------
 
@@ -758,8 +518,6 @@ void EEPROMStorage::setDefaultProfile() {
 
 #undef CONTINUOUS
 
-    CI::echo("3 "+String(maximum_speeds[0]));
-
     //Servo min and max
 #define SERVO(i, name, dataPin, minValue, maxValue)\
     servos_min[i] = minValue; servos_max[i] = maxValue;
@@ -767,9 +525,6 @@ void EEPROMStorage::setDefaultProfile() {
 #include "../config.h"
 
 #undef SERVO
-
-    CI::echo("4 "+String(maximum_speeds[0]));
-
 
 
     //---------------------------------------------Custom---------------------------------------------
@@ -792,7 +547,6 @@ void EEPROMStorage::setDefaultProfile() {
 #undef EEPROM_LONG
 #undef EEPROM_FLOAT
 
-    CI::echo("end "+String(maximum_speeds[0]));
 
 }
 
@@ -885,6 +639,246 @@ void EEPROMStorage::write_float(int *indice, float value) {
         EEPROM_write((*indice)++, t[i]);
 }
 
+
+#ifdef ENABLE_COMMAND_INTERFACE
+
+void EEPROMStorage::send_structure() {
+    /*
+     * Syntax :
+     * reset_tree (beginning) :         0;
+     * confirm_tree (end) :             1;
+     * go_upper :                       2;
+     * go_lower(i, name) :              3, i, name
+     * create_leaf(i, name) :           4, i, name
+     */
+
+    CI::prepare_EEPROM_packet();\
+    CI::add_char_out(0);\
+    CI::add_char_out(0);\
+    CI::send_packet();
+
+#define EEPROM_UPPER\
+    CI::prepare_EEPROM_packet();\
+    CI::add_char_out(0);\
+    CI::add_char_out(2);\
+    CI::send_packet();
+
+#define EEPROM_LOWER(i, name)\
+    CI::prepare_EEPROM_packet();\
+    CI::add_char_out(0);\
+    CI::add_char_out(3);\
+    CI::add_char_out(i);\
+    CI::add_string_out(#name);\
+    CI::send_packet();
+
+#define EEPROM_LEAF(i, name)\
+    CI::prepare_EEPROM_packet();\
+    CI::add_char_out(0);\
+    CI::add_char_out(4);\
+    CI::add_char_out(i);\
+    CI::add_string_out(#name);\
+    CI::send_packet();
+
+
+#ifdef ENABLE_ASSERV
+
+    //---------------------------------------------PIDs---------------------------------------------
+
+    EEPROM_LOWER(PID_CAT, pids);
+
+    //For each PID, mark a case for kp, ki, and kd.
+#define PID(i, ...)\
+    EEPROM_LOWER(i, i);EEPROM_LEAF(0, kp);EEPROM_LEAF(1, ki);EEPROM_LEAF(2, kd);EEPROM_UPPER;
+
+#include "../config.h"
+
+#undef PID
+
+    EEPROM_UPPER;
+
+    //---------------------------------------------Control loops---------------------------------------------
+
+    EEPROM_LOWER(LOOP_CAT, loops);
+    //For each Control loop, mark a case for the period.
+#define LOOP_FUNCTION(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, period);EEPROM_UPPER;
+
+#include "../config.h"
+
+#undef LOOP_FUNCTION
+
+    EEPROM_UPPER;
+
+#endif
+
+    //---------------------------------------------Continuous Actions---------------------------------------------
+
+    EEPROM_LOWER(CONTINUOUS_CAT, binaries);
+    //For each Continuous Action, mark a case for the maximum value.
+#define CONTINUOUS(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, max_value);EEPROM_UPPER;
+
+#include "../config.h"
+
+#undef CONTINUOUS
+
+
+    EEPROM_UPPER;
+
+    //---------------------------------------------Servo Actions---------------------------------------------
+    EEPROM_LOWER(SERVO_CAT, continuous);
+    //For each Servo Action, mark a case for the minimum and maximum values.
+#define SERVO(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, min_value);EEPROM_LEAF(1, max_value);EEPROM_UPPER;
+
+#include "../config.h"
+
+#undef SERVO
+
+    EEPROM_UPPER;
+
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+    //---------------------------------------------Steppers---------------------------------------------
+
+    EEPROM_LOWER(STEPPER_CAT, steppers);
+    //For each Stepper, mark a case for the size, the number of steps per unit, and maximum speed and acceleration.
+#define STEPPER_DATA(indice, ...) EEPROM_LOWER(indice, indice);\
+    EEPROM_LEAF(0, size);EEPROM_LEAF(1, steps);EEPROM_LEAF(2, max_speed);EEPROM_LEAF(3, max_acceleration);EEPROM_UPPER;
+
+#include "../config.h"
+
+#undef STEPPER_DATA
+
+    EEPROM_UPPER;
+
+    //---------------------------------------------Cartesian Groups---------------------------------------------
+
+    EEPROM_LOWER(CARTESIAN_GROUP_CAT, speed_groups);
+    //For each group, mark a case for its maximum speed
+#define CARTESIAN_GROUP(indice, ...) EEPROM_LOWER(indice, indice);\
+    EEPROM_LEAF(0, max_speed);EEPROM_UPPER;
+
+#include "../config.h"
+
+#undef CARTESIAN_GROUP
+
+    EEPROM_UPPER;
+
+#endif
+
+    //---------------------------------------------Custom parameters---------------------------------------------
+    EEPROM_LOWER(CUSTOM_CAT, custom);
+
+    int custom_indice = 0;
+    //Mark a case for each custom parameter
+#define EEPROM_FLOAT(name, v) EEPROM_LEAF(custom_indice, name);custom_indice++;
+#define EEPROM_BOOL(n, v) EEPROM_FLOAT(n,v)
+#define EEPROM_CHAR(n, v) EEPROM_FLOAT(n,v)
+#define EEPROM_INT(n, v) EEPROM_FLOAT(n,v)
+#define EEPROM_LONG(n, v) EEPROM_FLOAT(n,v)
+
+#include "../config.h"
+
+#undef EEPROM_BOOL
+#undef EEPROM_CHAR
+#undef EEPROM_INT
+#undef EEPROM_LONG
+#undef EEPROM_FLOAT
+
+    EEPROM_UPPER;
+
+#undef EEPROM_UPPER
+#undef EEPROM_LOWER
+#undef EEPROM_LEAF
+
+    //Confirm and fetch the transmitted tree
+    CI::prepare_EEPROM_packet();\
+    CI::add_char_out(0);\
+    CI::add_char_out(1);\
+    CI::send_packet();
+
+}
+
+
+
+void EEPROMStorage::print_stored_data() {
+
+    //Stepper motors
+#ifdef ENABLE_STEPPER_CONTROL
+    CI::echo("Stepper Motors : ");
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+        CI::echo("Stepper " + String(stepper));
+        CI::echo("size : " + String(sizes[stepper]));
+        CI::echo("steps : " + String(steps[stepper]));
+        CI::echo("max speed : " + String(maximum_speeds[stepper]));
+        CI::echo("acceleration : " + String(accelerations[stepper]) + "\n");
+    }
+
+    CI::echo("Speed Groups : ");
+    for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
+        CI::echo("Group " + String(group));
+        CI::echo("max speed : " + String(group_maximum_speeds[group]) + "\n");
+    }
+
+#endif
+
+#ifdef ENABLE_ASSERV
+
+    //PIDs
+    CI::echo("PIDS : ");
+    for (int pid = 0; pid < NB_PIDS; pid++) {
+        CI::echo("PID " + String(pid));
+        CI::echo("kp : " + String(kps[pid]));
+        CI::echo("ki : " + String(kis[pid]));
+        CI::echo("kd : " + String(kds[pid]) + "\n");
+    }
+
+    //Control Loops
+    CI::echo("Control Loops : ");
+    for (int loop = 0; loop < NB_LOOPS; loop++) {
+        CI::echo("Loop " + String(loop));
+        CI::echo("period (ms) : " + String(loop_periods[loop]) + "\n");
+    }
+
+#endif
+
+    //Continuous Actions
+    CI::echo("Continuous Actions : ");
+    for (int continuous = 0; continuous < NB_CONTINUOUS; continuous++) {
+        CI::echo("Continuous " + String(continuous));
+        CI::echo("maximum : " + String(continuous_max[continuous]) + "\n");
+    }
+
+    //Servo Actions
+    CI::echo("Servo Actions : ");
+    for (int servo = 0; servo < NB_SERVOS; servo++) {
+        CI::echo("Loop " + String(servo));
+        CI::echo("minimum : " + String(servos_min[servo]));
+        CI::echo("maximum : " + String(servos_max[servo]) + "\n");
+    }
+
+    //Custom Data
+    CI::echo("Custom Data : ");
+    //Custom data
+#define EEPROM_BOOL(name, default_value) CI::echo(String(#name)+" : "+String(name));
+#define EEPROM_CHAR(name, default_value) CI::echo(String(#name)+" : "+String(name));
+#define EEPROM_INT(name, default_value) CI::echo(String(#name)+" : "+String(name));
+#define EEPROM_LONG(name, default_value) CI::echo(String(#name)+" : "+String(name));
+#define EEPROM_FLOAT(name, default_value) CI::echo(String(#name)+" : "+String(name));
+
+#include "../config.h"
+
+#undef EEPROM_BOOL
+#undef EEPROM_CHAR
+#undef EEPROM_INT
+#undef EEPROM_LONG
+#undef EEPROM_FLOAT
+
+    CI::echo(" ");
+
+}
+
+
+#endif
 
 #define m EEPROMStorage
 

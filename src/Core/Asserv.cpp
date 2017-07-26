@@ -63,7 +63,7 @@ float Asserv::get_pid_##i(float error) {\
 #include "../hardware_language_abstraction.h"
 #include "../config.h"
 
-#undef LOOP_FUNCTION;
+#undef LOOP_FUNCTION
 
 //TODO Implement all loop functions
 
@@ -77,6 +77,6 @@ void Asserv::trigger_0() {
 bool Asserv::active_##indice = false;
 #include "../config.h"
 
-#undef LOOP_FUNCTION;
+#undef LOOP_FUNCTION
 
 

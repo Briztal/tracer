@@ -1,2 +1,2 @@
-/usr/bin/ar qc libinterface.a  CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o
+/usr/bin/ar qc libinterface.a  CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
 /usr/bin/ranlib libinterface.a

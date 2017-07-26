@@ -1,0 +1,7 @@
+
+//TODO Interface GCode
+//TODO External Interrupts in hlabstraction
+//TODO Setup des PIDs
+//TODO gestion des distances de fin avec points d’arret
+//TODO Interface controleur avec config
+//TODO Mode absolu / relatif

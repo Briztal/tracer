@@ -18,8 +18,10 @@
 
 */
 
+#ifdef ENABLE_COMMAND_INTERFACE
+
 #include "MachineControllerSystem.h"
-#include "../Interfaces/CommandInterface.h"
+#include "../Interfaces/CommandInterface/CommandInterface.h"
 #include "EEPROMStorage.h"
 #define EEPROM_SUBCANAL 1
 #define PID_SUBCANAL 2
@@ -307,4 +309,5 @@ void MachineController::EEPROM_system_canal(char *data, uint8_t size) {
 
 }
 
+#endif
 

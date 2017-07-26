@@ -18,17 +18,20 @@
 
 */
 
-#include "../hardware_language_abstraction.h"
+#include "../../config.h"
+#ifdef ENABLE_COMMAND_INTERFACE
+
+#include "../../hardware_language_abstraction.h"
 #if !defined(HL_SERIAL)
 #error CommandInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
 #endif
 
-#ifndef LOGGER
-#define LOGGER
+#ifndef CINTERFACE
+#define CINTERFACE
 
 #define CI CommandInterface
 
-#include "interface_config.h"
+#include "command_interface_config.h"
 
 
 
@@ -145,7 +148,7 @@ private:
     static void send_##name();
 
 
-#include "interface_config.h"
+#include "command_interface_config.h"
 
 
     static void prepare_EEPROM_packet();
@@ -153,3 +156,4 @@ private:
 
 #endif
 
+#endif

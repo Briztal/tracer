@@ -17,12 +17,12 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
+#include "../../config.h"
+#ifdef ENABLE_COMMAND_INTERFACE
 
 #include "CommandInterface.h"
-#include "../Core/MachineControllerSystem.h"
-#include "../config.h"
-#include "../Core/Core.h"
+#include "../../Core/MachineControllerSystem.h"
+#include "../../Core/Core.h"
 
 #define BEGIN_BYTE (uint8_t)255
 #define BEGIN_CHAR (char)-1
@@ -30,9 +30,7 @@
 void CI::begin() {
     serial_begin(BAUDRATE);
     initialise_aliases();
-    delay_ms(100);
     *data_out_0 = BEGIN_CHAR;
-
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
 
@@ -62,7 +60,7 @@ void CI::initialise_aliases() {
     name##_id[indice+1] = 0;\
     name##_size = indice+(uint8_t)1;
 
-#include "interface_config.h"
+#include "command_interface_config.h"
 
 }
 
@@ -301,10 +299,11 @@ void CI::enqueue(char *command, uint8_t size) {
     switch (b) {
         case 0 : 
             command++;
+
             MachineController::system_canal_function(command, size);
             return;
 
-#include "interface_config.h"
+#include "command_interface_config.h"
 
         default:
             return;
@@ -410,7 +409,7 @@ void CI::send_tree_structure() {
     add_string_out(#name);\
     send_packet();
 
-#include "interface_config.h"
+#include "command_interface_config.h"
 
 
     prepare_structure_packet();
@@ -427,7 +426,7 @@ void CI::send_tree_structure() {
     char *const CI::name##_id = tmp##name;\
 
 
-#include "interface_config.h"
+#include "command_interface_config.h"
 
 
 bool CI::packet_began = false;
@@ -445,3 +444,6 @@ char *CI::data_out = dout;
 char *const CI::data_out_0 = dout;
 uint8_t CI::data_out_size;
 char *const CI::size_ptr = dout+1;
+
+
+#endif

@@ -22,9 +22,12 @@
 #define CODE_GCODEPARSER_H
 
 #include <stdint.h>
-#include "../Interfaces/interface_config.h"
+#include "../config.h"
 
 class MachineController {
+
+
+#ifdef ENABLE_COMMAND_INTERFACE
 
 public:
 
@@ -40,7 +43,7 @@ public:
 #define CREATE_CALLABLE_LEAF(i, name)\
     CREATE_LEAF(i, name)
 
-#include "../Interfaces/interface_config.h"
+#include "../Interfaces/CommandInterface/command_interface_config.h"
 
 #undef GO_UPPER
 #undef GO_LOWER
@@ -61,6 +64,32 @@ private:
     static void steppers_system_canal(char *dptr, uint8_t size);
 
     static void EEPROM_system_canal(char *dptr, uint8_t size);
+
+#endif
+
+
+#ifdef ENABLE_GCODE_INTERFACE
+
+public :
+
+#define GO_UPPER()
+
+#define GO_LOWER(i)
+
+#define COMMAND(i, name)\
+    static void name();
+
+#define GO_LOWER_COMMAND(i, fname) COMMAND(i, fname)
+
+
+#include "../Interfaces/GCodeInterface/gcode_interface_config.h"
+
+#undef GO_UPPER
+#undef GO_LOWER
+#undef GO_LOWER_COMMAND
+#undef COMMAND
+
+#endif
 
 };
 

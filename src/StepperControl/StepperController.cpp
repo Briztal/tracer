@@ -26,7 +26,7 @@
 
 
 #include "StepperController.h"
-#include "../Interfaces/CommandInterface.h"
+#include "../interface.h"
 #include "../Core/EEPROMStorage.h"
 
 #define PINS_REQUIRED

@@ -20,7 +20,7 @@
 
 #include "ContinuousActions.h"
 #include "../hardware_language_abstraction.h"
-#include "../Interfaces/CommandInterface.h"
+#include "../Interfaces/CommandInterface/CommandInterface.h"
 
 void ContinuousActions::begin() {
     //INIT : PWM à 0;

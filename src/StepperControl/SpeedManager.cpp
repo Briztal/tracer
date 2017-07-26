@@ -29,7 +29,7 @@
 #include "TrajectoryExecuter.h"
 #include "MovementExecuter.h"
 #include "../Core/EEPROMStorage.h"
-#include "../Interfaces/CommandInterface.h"
+#include "../interface.h"
 #include "../Actions/ContinuousActions.h"
 #include "mathProcess.hpp"
 

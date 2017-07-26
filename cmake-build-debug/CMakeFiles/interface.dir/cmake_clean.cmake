@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o"
+  "CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o"
+  "CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o"
   "libinterface.pdb"
   "libinterface.a"
 )

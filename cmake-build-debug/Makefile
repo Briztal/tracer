@@ -575,32 +575,59 @@ src/DataStructures/Queue.cpp.s:
 	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s
 .PHONY : src/DataStructures/Queue.cpp.s
 
-src/Interfaces/CommandInterface.o: src/Interfaces/CommandInterface.cpp.o
+src/Interfaces/CommandInterface/CommandInterface.o: src/Interfaces/CommandInterface/CommandInterface.cpp.o
 
-.PHONY : src/Interfaces/CommandInterface.o
+.PHONY : src/Interfaces/CommandInterface/CommandInterface.o
 
 # target to build an object file
-src/Interfaces/CommandInterface.cpp.o:
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o
-.PHONY : src/Interfaces/CommandInterface.cpp.o
+src/Interfaces/CommandInterface/CommandInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o
+.PHONY : src/Interfaces/CommandInterface/CommandInterface.cpp.o
 
-src/Interfaces/CommandInterface.i: src/Interfaces/CommandInterface.cpp.i
+src/Interfaces/CommandInterface/CommandInterface.i: src/Interfaces/CommandInterface/CommandInterface.cpp.i
 
-.PHONY : src/Interfaces/CommandInterface.i
+.PHONY : src/Interfaces/CommandInterface/CommandInterface.i
 
 # target to preprocess a source file
-src/Interfaces/CommandInterface.cpp.i:
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.i
-.PHONY : src/Interfaces/CommandInterface.cpp.i
+src/Interfaces/CommandInterface/CommandInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.i
+.PHONY : src/Interfaces/CommandInterface/CommandInterface.cpp.i
 
-src/Interfaces/CommandInterface.s: src/Interfaces/CommandInterface.cpp.s
+src/Interfaces/CommandInterface/CommandInterface.s: src/Interfaces/CommandInterface/CommandInterface.cpp.s
 
-.PHONY : src/Interfaces/CommandInterface.s
+.PHONY : src/Interfaces/CommandInterface/CommandInterface.s
 
 # target to generate assembly for a file
-src/Interfaces/CommandInterface.cpp.s:
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.s
-.PHONY : src/Interfaces/CommandInterface.cpp.s
+src/Interfaces/CommandInterface/CommandInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.s
+.PHONY : src/Interfaces/CommandInterface/CommandInterface.cpp.s
+
+src/Interfaces/GCodeInterface/GCodeInterface.o: src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.o
+
+# target to build an object file
+src/Interfaces/GCodeInterface/GCodeInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+
+src/Interfaces/GCodeInterface/GCodeInterface.i: src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.i
+
+# target to preprocess a source file
+src/Interfaces/GCodeInterface/GCodeInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+
+src/Interfaces/GCodeInterface/GCodeInterface.s: src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.s
+
+# target to generate assembly for a file
+src/Interfaces/GCodeInterface/GCodeInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
 
 src/StepperControl/LinearMovement/HomingMovement.o: src/StepperControl/LinearMovement/HomingMovement.cpp.o
 
@@ -1060,9 +1087,12 @@ help:
 	@echo "... src/DataStructures/Queue.o"
 	@echo "... src/DataStructures/Queue.i"
 	@echo "... src/DataStructures/Queue.s"
-	@echo "... src/Interfaces/CommandInterface.o"
-	@echo "... src/Interfaces/CommandInterface.i"
-	@echo "... src/Interfaces/CommandInterface.s"
+	@echo "... src/Interfaces/CommandInterface/CommandInterface.o"
+	@echo "... src/Interfaces/CommandInterface/CommandInterface.i"
+	@echo "... src/Interfaces/CommandInterface/CommandInterface.s"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.o"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.i"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.s"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.o"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.i"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.s"

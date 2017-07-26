@@ -1,6 +1,6 @@
 //TODO METTRE DES UNDEFS
 
-///######################################################PARTS###########################################################
+///######################################################PARTS##########################################################
 
 /*
  * This section defines which parts of LowLevel will be enabled in your project.
@@ -9,16 +9,30 @@
  * (Serial Port, or Strings for example).
  */
 
-//Uncomment this line to enable the logger interface.
-#define ENABLE_LOGGER
-
 //Uncomment this line to enable regulation loops.
 #define ENABLE_ASSERV
 
 //Uncomment this line to enable regulation loops.
 #define ENABLE_STEPPER_CONTROL
 
-//######################################################Core###########################################################
+
+
+//####################################################Interface#########################################################
+
+//You must select one (and only one) interface below.
+
+//Uncomment this line to enable the command interface.
+//#define ENABLE_COMMAND_INTERFACE
+
+//Uncomment this line to enable the gcode interface.
+#define ENABLE_GCODE_INTERFACE
+
+//The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
+#define BAUDRATE 115200
+
+//The maximum size of a data in one message
+#define PACKET_SIZE 200
+//######################################################Core############################################################
 
 /*
  * This section defines how many tasks can be memorised by the core.
@@ -32,7 +46,13 @@
 
 #ifdef ADD_PERMANENT_TASK
 
-ADD_PERMANENT_TASK(CommandInterface::read_serial) //TODO MODIFIER CE NOM DE MERDE
+#ifdef ENABLE_COMMAND_INTERFACE
+ADD_PERMANENT_TASK(CommandInterface::read_serial)
+#endif
+
+#ifdef ENABLE_GCODE_INTERFACE
+ADD_PERMANENT_TASK(GCodeInterface::read_serial)
+#endif
 
 #endif
 
@@ -119,8 +139,9 @@ BINARY(1, binary2, 9, 1)
  * For each actuator you want to control in linear, put one line like behind and provide the three required parameter
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
-#ifdef CONTINUOUS
 #define NB_CONTINUOUS 3
+
+#ifdef CONTINUOUS
 
 CONTINUOUS(0, continuous1, 8, 600)
 CONTINUOUS(1, continuous2, 8, 600)
@@ -133,9 +154,9 @@ CONTINUOUS(2, continuous3, 8, 600)
  * SERVO(i, name, dataPin, minValue, maxValue)
  */
 
+#define NB_SERVOS 3
 #ifdef SERVO
 
-#define NB_SERVOS 3
 SERVO(0, servo, 4, 0, 1)
 SERVO(1, servo2, 4, 0, 1)
 SERVO(2, servo3, 4, 0, 1)

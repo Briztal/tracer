@@ -24,7 +24,7 @@
 
 #include "TrajectoryExecuter.h"
 #include "SpeedManager.h"
-#include "../Interfaces/CommandInterface.h"
+#include "../Interfaces/CommandInterface/CommandInterface.h"
 #include "motion_data.h"
 #include "StepperController.h"
 #include "LinearMovement/LinearMovement.h"

@@ -21,19 +21,51 @@
 
 
 #include "MachineControllerSystem.h"
-#include "../Interfaces/CommandInterface.h"
-#include "../Actions/ContinuousActions.h"
+
+
+#include "../interface.h"
+
+#ifdef ENABLE_GCODE_INTERFACE
+
+void MachineController::g0() {
+    CI::echo("SUUSg0");
+}
+
+void MachineController::g1() {
+    CI::echo("SUUSg1");
+}
+void MachineController::g10() {
+    CI::echo("SUUSg10");
+}
+void MachineController::g5d0() {
+    CI::echo("SUUSg5d0");
+}
+void MachineController::m1() {
+    CI::echo("SUUSm1");
+}
+void MachineController::m2() {
+    CI::echo("SUUSm2");
+}
+void MachineController::m225() {
+    CI::echo("SUUSm225");
+}
+
+
+
+#endif
+
+#ifdef ENABLE_COMMAND_INTERFACE
 
 
 #include "../config.h"
 
 
+#include "../Actions/ContinuousActions.h"
 #include "../StepperControl/MovementScheduler.h"
 #include "../StepperControl/LinearMovement/LinearMovement.h"
 #include "../StepperControl/LinearMovement/HomingMovement.h"
 #include "../StepperControl/SpeedManager.h"
 #include "../StepperControl/MovementExecuter.h"
-
 
 void MachineController::action(char * dptr, uint8_t size) {
 
@@ -122,6 +154,8 @@ void MachineController::home(char * dptr, uint8_t size) {
     HomingMovement::move();
 
 }
+
+#endif
 
 
 

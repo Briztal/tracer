@@ -54,6 +54,7 @@ add_custom_target(
 
 
 #--------------------------------------------LOW LEVEL LIBS-------------------------------------------------------------
+
 set(CP "src/Core")
 set(HP src/hardware_language_abstraction)
 
@@ -72,11 +73,10 @@ set(IP "src/Interfaces")
 
 add_library(interface
 
-         ${IP}/CommandInterface.cpp
+         ${IP}/CommandInterface/CommandInterface.cpp ${IP}/GCodeInterface/GCodeInterface.cpp
 
-         ${IP}/CommandInterface.h ${IP}/interface_config.h
-
-       
+         ${IP}/CommandInterface/CommandInterface.h ${IP}/CommandInterface/command_interface_config.h
+         ${IP}/GCodeInterface/GCodeInterface.h ${IP}/GCodeInterface/gcode_interface_config.h
 
         )
 

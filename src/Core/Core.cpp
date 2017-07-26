@@ -18,8 +18,11 @@
 
 */
 
+#include "../config.h"
+#include "../sanity_check.h"
+
 #include "Core.h"
-#include "../Interfaces/CommandInterface.h"
+#include "../interface.h"
 #include "MachineControllerSystem.h"
 #include "../config.h"
 #include "EEPROMStorage.h"
@@ -34,8 +37,8 @@
 
 void Core::begin() {
 
-#ifdef ENABLE_LOGGER
-    CommandInterface::begin();
+#if defined(ENABLE_GCODE_INTERFACE) || defined(ENABLE_COMMAND_INTERFACE)
+    CI::begin();
 #endif
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -45,6 +48,7 @@ void Core::begin() {
     SpeedManager::begin();
     MovementExecuter::start();
 #endif
+
 
 }
 

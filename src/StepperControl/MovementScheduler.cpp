@@ -27,7 +27,7 @@
 #include "StepperController.h"
 #include "MovementExecuter.h"
 
-#include "../Interfaces/CommandInterface.h"
+#include "../interface.h"
 #include "../Actions/ContinuousActions.h"
 #include "../Core/EEPROMStorage.h"
 #include "TrajectoryExecuter.h"

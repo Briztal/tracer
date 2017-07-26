@@ -152,9 +152,4 @@ GO_UPPER
 
 #endif
 
-//The baudrate of the serial link
-#define BAUDRATE 115200
-
-//The maximum size of a data in one message
-#define PACKET_SIZE 200
 

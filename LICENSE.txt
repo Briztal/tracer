@@ -19,57 +19,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with TRACER. If not, see <http://www.gnu.org/licenses/>.
 
-
-------------------------------------------------------------------------------
-COPYRIGHT NOTICES, AND MENTIONS FOR CODE I USED BUT NOT CREATED :
-------------------------------------------------------------------------------
-
-  EEPROM.h - EEPROM library
-  Original Copyright (c) 2006 David A. Mellis.  All right reserved.
-  New version by Christopher Andrews 2015.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-------------------------------------------------------------------------------
-
-  Servo.h / Servo.cpp - Interrupt driven Servo library for Arduino using 16 bit timers- Version 2
-  Copyright (c) 2009 Michael Margolis.  All right reserved.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-------------------------------------------------------------------------------
-
-digitalWriteFast.h 
-  
-  Optimized digital functions for AVR microcontrollers
-  by Watterott electronic (www.watterott.com)
-  based on http://code.google.com/p/digitalwritefast
-
-
 ------------------------------------------------------------------------------
 GNU GPLv3 TERMS AND CONDITIONS REPRODUCED HERE FOR CLARITY:
 ------------------------------------------------------------------------------
@@ -359,7 +308,7 @@ in one of these ways:
     that supports equivalent copying facilities, provided you maintain
     clear directions next to the object code saying where to find the
     Corresponding Source.  Regardless of what server hosts the
-    Corresponding Source, you remain obligated to ensure that it is
+    Corresponding Source, you remaining_chars obligated to ensure that it is
     elements for as long as needed to satisfy these requirements.
 
     e) Convey the object code using peer-to-peer transmission, provided

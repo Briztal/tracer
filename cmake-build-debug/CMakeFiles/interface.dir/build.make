@@ -57,41 +57,67 @@ include CMakeFiles/interface.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/interface.dir/flags.make
 
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o: CMakeFiles/interface.dir/flags.make
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o: ../src/Interfaces/CommandInterface.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface.cpp
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o: CMakeFiles/interface.dir/flags.make
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o: ../src/Interfaces/CommandInterface/CommandInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface/CommandInterface.cpp
 
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.i"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface.cpp > CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.i
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.i"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface/CommandInterface.cpp > CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.i
 
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.s"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface.cpp -o CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.s
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.s"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface/CommandInterface.cpp -o CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.s
 
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.requires:
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.requires:
 
-.PHONY : CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.requires
+.PHONY : CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.requires
 
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.provides: CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.requires
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.provides.build
-.PHONY : CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.provides
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.provides: CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.requires
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.provides.build
+.PHONY : CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.provides
 
-CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.provides.build: CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o
+CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.provides.build: CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o
+
+
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o: CMakeFiles/interface.dir/flags.make
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o: ../src/Interfaces/GCodeInterface/GCodeInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterface.cpp
+
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.i"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterface.cpp > CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.s"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterface.cpp -o CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.requires:
+
+.PHONY : CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.requires
+
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.provides: CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.requires
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.provides.build
+.PHONY : CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.provides
+
+CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.provides.build: CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
 
 
 # Object files for target interface
 interface_OBJECTS = \
-"CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o"
+"CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o" \
+"CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o"
 
 # External object files for target interface
 interface_EXTERNAL_OBJECTS =
 
-libinterface.a: CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o
+libinterface.a: CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o
+libinterface.a: CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
 libinterface.a: CMakeFiles/interface.dir/build.make
 libinterface.a: CMakeFiles/interface.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libinterface.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libinterface.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/interface.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/interface.dir/link.txt --verbose=$(VERBOSE)
 
@@ -100,7 +126,8 @@ CMakeFiles/interface.dir/build: libinterface.a
 
 .PHONY : CMakeFiles/interface.dir/build
 
-CMakeFiles/interface.dir/requires: CMakeFiles/interface.dir/src/Interfaces/CommandInterface.cpp.o.requires
+CMakeFiles/interface.dir/requires: CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o.requires
+CMakeFiles/interface.dir/requires: CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o.requires
 
 .PHONY : CMakeFiles/interface.dir/requires
 

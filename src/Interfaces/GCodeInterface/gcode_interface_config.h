@@ -83,7 +83,7 @@
  */
 
 //The maximum command depth : in our example, the two largest commands are G5D0 and M225 -> GCODE_MAX_DEPTH of 4
-#define GCODE_MAX_DEPTH 4
+#define GCODE_MAX_DEPTH 5
 
 #if defined(GO_LOWER) && defined(GO_LOWER_COMMAND) && defined(COMMAND) && defined(GO_UPPER)
 
@@ -95,21 +95,24 @@ COMMAND('0', g10)
 GO_UPPER()
 GO_LOWER('5')
 GO_LOWER('D')
-GO_LOWER_COMMAND('0', g520)
+COMMAND('0', g5d0)
 GO_UPPER()
 GO_UPPER()
 GO_UPPER()
 GO_LOWER('M')
-GO_LOWER('1', m1)
+COMMAND('1', m1)
 GO_LOWER_COMMAND('2', m2)
 GO_LOWER('2')
-COMMAND('5', m255)
+COMMAND('5', m225)
+GO_UPPER()
+GO_UPPER()
+GO_UPPER()
 
 #endif
 
 
-#ifndef PARAMETERS_NB
-#define PARAMETERS_NB 9
+#ifndef NB_PARAMETERS
+#define NB_PARAMETERS 9
 #endif
 
 #ifdef GCODE_PARAMETER
