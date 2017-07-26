@@ -62,6 +62,16 @@
 
 #define pin_mode(i, mode) pinMode(i, mode)
 
+
+//-----------------------------------------------------IO--------------------------------------------------------------
+
+/*
+ * An alias for external interrupt attachment and detachment
+ */
+#define attach_interrupt(pin, port, mode) attachInterrupt(pin, port, mode)
+
+#define detach_interrupt(pin) detachInterrupt(pin);
+
 //----------------------------------------------------Delay-------------------------------------------------------------
 
 //Uncomment this line to provide delay support across LowLevel

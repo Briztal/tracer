@@ -575,33 +575,6 @@ src/DataStructures/Queue.cpp.s:
 	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s
 .PHONY : src/DataStructures/Queue.cpp.s
 
-src/Interfaces/CommandInterface/CommandInterface.o: src/Interfaces/CommandInterface/CommandInterface.cpp.o
-
-.PHONY : src/Interfaces/CommandInterface/CommandInterface.o
-
-# target to build an object file
-src/Interfaces/CommandInterface/CommandInterface.cpp.o:
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.o
-.PHONY : src/Interfaces/CommandInterface/CommandInterface.cpp.o
-
-src/Interfaces/CommandInterface/CommandInterface.i: src/Interfaces/CommandInterface/CommandInterface.cpp.i
-
-.PHONY : src/Interfaces/CommandInterface/CommandInterface.i
-
-# target to preprocess a source file
-src/Interfaces/CommandInterface/CommandInterface.cpp.i:
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.i
-.PHONY : src/Interfaces/CommandInterface/CommandInterface.cpp.i
-
-src/Interfaces/CommandInterface/CommandInterface.s: src/Interfaces/CommandInterface/CommandInterface.cpp.s
-
-.PHONY : src/Interfaces/CommandInterface/CommandInterface.s
-
-# target to generate assembly for a file
-src/Interfaces/CommandInterface/CommandInterface.cpp.s:
-	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/CommandInterface/CommandInterface.cpp.s
-.PHONY : src/Interfaces/CommandInterface/CommandInterface.cpp.s
-
 src/Interfaces/GCodeInterface/GCodeInterface.o: src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
 
 .PHONY : src/Interfaces/GCodeInterface/GCodeInterface.o
@@ -628,6 +601,87 @@ src/Interfaces/GCodeInterface/GCodeInterface.s: src/Interfaces/GCodeInterface/GC
 src/Interfaces/GCodeInterface/GCodeInterface.cpp.s:
 	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
 .PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+
+src/Interfaces/GCodeInterface/GCodeInterfaceCommands.o: src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.o
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterfaceCommands.o
+
+# target to build an object file
+src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.o
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.o
+
+src/Interfaces/GCodeInterface/GCodeInterfaceCommands.i: src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.i
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterfaceCommands.i
+
+# target to preprocess a source file
+src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.i
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.i
+
+src/Interfaces/GCodeInterface/GCodeInterfaceCommands.s: src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.s
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterfaceCommands.s
+
+# target to generate assembly for a file
+src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.s
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp.s
+
+src/Interfaces/TreeInterface/TreeInterface.o: src/Interfaces/TreeInterface/TreeInterface.cpp.o
+
+.PHONY : src/Interfaces/TreeInterface/TreeInterface.o
+
+# target to build an object file
+src/Interfaces/TreeInterface/TreeInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterface.cpp.o
+.PHONY : src/Interfaces/TreeInterface/TreeInterface.cpp.o
+
+src/Interfaces/TreeInterface/TreeInterface.i: src/Interfaces/TreeInterface/TreeInterface.cpp.i
+
+.PHONY : src/Interfaces/TreeInterface/TreeInterface.i
+
+# target to preprocess a source file
+src/Interfaces/TreeInterface/TreeInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterface.cpp.i
+.PHONY : src/Interfaces/TreeInterface/TreeInterface.cpp.i
+
+src/Interfaces/TreeInterface/TreeInterface.s: src/Interfaces/TreeInterface/TreeInterface.cpp.s
+
+.PHONY : src/Interfaces/TreeInterface/TreeInterface.s
+
+# target to generate assembly for a file
+src/Interfaces/TreeInterface/TreeInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterface.cpp.s
+.PHONY : src/Interfaces/TreeInterface/TreeInterface.cpp.s
+
+src/Interfaces/TreeInterface/TreeInterfaceCommands.o: src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.o
+
+.PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.o
+
+# target to build an object file
+src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.o
+.PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.o
+
+src/Interfaces/TreeInterface/TreeInterfaceCommands.i: src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.i
+
+.PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.i
+
+# target to preprocess a source file
+src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.i
+.PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.i
+
+src/Interfaces/TreeInterface/TreeInterfaceCommands.s: src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s
+
+.PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.s
+
+# target to generate assembly for a file
+src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s
+.PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s
 
 src/StepperControl/LinearMovement/HomingMovement.o: src/StepperControl/LinearMovement/HomingMovement.cpp.o
 
@@ -1087,12 +1141,18 @@ help:
 	@echo "... src/DataStructures/Queue.o"
 	@echo "... src/DataStructures/Queue.i"
 	@echo "... src/DataStructures/Queue.s"
-	@echo "... src/Interfaces/CommandInterface/CommandInterface.o"
-	@echo "... src/Interfaces/CommandInterface/CommandInterface.i"
-	@echo "... src/Interfaces/CommandInterface/CommandInterface.s"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.o"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.i"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.s"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterfaceCommands.o"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterfaceCommands.i"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterfaceCommands.s"
+	@echo "... src/Interfaces/TreeInterface/TreeInterface.o"
+	@echo "... src/Interfaces/TreeInterface/TreeInterface.i"
+	@echo "... src/Interfaces/TreeInterface/TreeInterface.s"
+	@echo "... src/Interfaces/TreeInterface/TreeInterfaceCommands.o"
+	@echo "... src/Interfaces/TreeInterface/TreeInterfaceCommands.i"
+	@echo "... src/Interfaces/TreeInterface/TreeInterfaceCommands.s"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.o"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.i"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.s"

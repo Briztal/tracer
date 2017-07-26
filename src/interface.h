@@ -20,10 +20,13 @@
 
 #include "config.h"
 
-#ifdef ENABLE_GCODE_INTERFACE
-#include "Interfaces/GCodeInterface/GCodeInterface.h"
+#ifdef MAIN_CI_GCODE
+#define CI GI
 #endif
 
-#ifdef ENABLE_COMMAND_INTERFACE
-#include "Interface/CommandInterface/CommandInterface.h"
+#ifdef MAIN_CI_TREE
+#define CI TI
 #endif
+
+#include "Interfaces/GCodeInterface/GCodeInterface.h"
+#include "Interfaces/TreeInterface/TreeInterface.h"

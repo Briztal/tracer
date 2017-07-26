@@ -2093,22 +2093,34 @@
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/Queue.h">
 			<Option target="datastructures"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface/CommandInterface.cpp">
-			<Option target="interface"/>
-		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface/CommandInterface.h">
-			<Option target="interface"/>
-		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/CommandInterface/command_interface_config.h">
-			<Option target="interface"/>
-		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterface.cpp">
 			<Option target="interface"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterface.h">
 			<Option target="interface"/>
 		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterfaceCommands.cpp">
+			<Option target="interface"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/GCodeInterfaceCommands.h">
+			<Option target="interface"/>
+		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/GCodeInterface/gcode_interface_config.h">
+			<Option target="interface"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/TreeInterface/TreeInterface.cpp">
+			<Option target="interface"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/TreeInterface/TreeInterface.h">
+			<Option target="interface"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp">
+			<Option target="interface"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/TreeInterface/TreeInterfaceCommands.h">
+			<Option target="interface"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Interfaces/TreeInterface/tree_interface_config.h">
 			<Option target="interface"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/HomingMovement.cpp">

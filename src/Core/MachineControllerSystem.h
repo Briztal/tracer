@@ -27,69 +27,7 @@
 class MachineController {
 
 
-#ifdef ENABLE_COMMAND_INTERFACE
 
-public:
-
-    static void system_canal_function(char *dptr, uint8_t size);
-
-#define GO_UPPER
-
-#define GO_LOWER(i, name)
-
-#define CREATE_LEAF(i, name)\
-    static void name(char * dptr, uint8_t size);
-
-#define CREATE_CALLABLE_LEAF(i, name)\
-    CREATE_LEAF(i, name)
-
-#include "../Interfaces/CommandInterface/command_interface_config.h"
-
-#undef GO_UPPER
-#undef GO_LOWER
-#undef CREATE_LEAF
-#undef CREATE_CALLABLE_LEAF
-
-
-private:
-
-    static void parameters_system_canal(char *dptr, uint8_t size);
-
-    static void pid_system_canal(char *dptr, uint8_t size);
-
-    static void loop_system_canal(char *dptr, uint8_t size);
-
-    static void actions_system_canal(char *dptr, uint8_t size);
-
-    static void steppers_system_canal(char *dptr, uint8_t size);
-
-    static void EEPROM_system_canal(char *dptr, uint8_t size);
-
-#endif
-
-
-#ifdef ENABLE_GCODE_INTERFACE
-
-public :
-
-#define GO_UPPER()
-
-#define GO_LOWER(i)
-
-#define COMMAND(i, name)\
-    static void name();
-
-#define GO_LOWER_COMMAND(i, fname) COMMAND(i, fname)
-
-
-#include "../Interfaces/GCodeInterface/gcode_interface_config.h"
-
-#undef GO_UPPER
-#undef GO_LOWER
-#undef GO_LOWER_COMMAND
-#undef COMMAND
-
-#endif
 
 };
 

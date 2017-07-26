@@ -24,7 +24,7 @@
 
 
 #include "LinearMovement.h"
-#include "../../Interfaces/CommandInterface/CommandInterface.h"
+#include "../../Interfaces/TreeInterface/TreeInterface.h"
 #include "../../Actions/ContinuousActions.h"
 #include "../MovementExecuter.h"
 #include "../SpeedManager.h"

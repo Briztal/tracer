@@ -18,6 +18,8 @@
 
 */
 
-#if defined(ENABLE_GCODE_INTERFACE) && defined(ENABLE_COMMAND_INTERFACE)
-#error : "Both GCode and Command Interfaces cannot be both enabled. Please enable only one."
+
+
+#if defined(MAIN_CI_TREE) && defined(MAIN_CI_GCODE)
+#error : "There can be only one main interface. Please enable only one."
 #endif

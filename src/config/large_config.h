@@ -19,13 +19,15 @@
 
 //####################################################Interface#########################################################
 
-//You must select one (and only one) interface below.
-
 //Uncomment this line to enable the command interface.
-//#define ENABLE_COMMAND_INTERFACE
+#define ENABLE_TREE_INTERFACE
 
 //Uncomment this line to enable the gcode interface.
 #define ENABLE_GCODE_INTERFACE
+
+//You must define the main command Interface. You must uncomment only one of lines below
+//#define MAIN_CI_TREE
+#define MAIN_CI_GCODE
 
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
@@ -46,12 +48,12 @@
 
 #ifdef ADD_PERMANENT_TASK
 
-#ifdef ENABLE_COMMAND_INTERFACE
-ADD_PERMANENT_TASK(CommandInterface::read_serial)
+#ifdef ENABLE_TREE_INTERFACE
+ADD_PERMANENT_TASK(TI::read_serial)
 #endif
 
 #ifdef ENABLE_GCODE_INTERFACE
-ADD_PERMANENT_TASK(GCodeInterface::read_serial)
+ADD_PERMANENT_TASK(GI::read_serial)
 #endif
 
 #endif

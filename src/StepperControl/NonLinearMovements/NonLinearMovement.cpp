@@ -23,7 +23,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "NonLinearMovement.h"
-#include "../../Interfaces/CommandInterface/CommandInterface.h"
+#include "../../Interfaces/TreeInterface/TreeInterface.h"
 #include "../../Core/EEPROMStorage.h"
 #include "../SpeedManager.h"
 #include "../mathProcess.hpp"

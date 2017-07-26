@@ -65,18 +65,19 @@ add_library(core
 
          ${CP}/Core.h ${CP}/MachineControllerSystem.h ${CP}/EEPROMStorage.h  ${HP}/hardware_language_abstraction_teensy35.cpp
 
-       
-
         )
 
 set(IP "src/Interfaces")
 
 add_library(interface
 
-         ${IP}/CommandInterface/CommandInterface.cpp ${IP}/GCodeInterface/GCodeInterface.cpp
+        ${IP}/TreeInterface/TreeInterface.h ${IP}/TreeInterface/TreeInterface.cpp
+        ${IP}/TreeInterface/TreeInterfaceCommands.h ${IP}/TreeInterface/TreeInterfaceCommands.cpp
+        ${IP}/TreeInterface/tree_interface_config.h
 
-         ${IP}/CommandInterface/CommandInterface.h ${IP}/CommandInterface/command_interface_config.h
-         ${IP}/GCodeInterface/GCodeInterface.h ${IP}/GCodeInterface/gcode_interface_config.h
+        ${IP}/GCodeInterface/GCodeInterface.h ${IP}/GCodeInterface/GCodeInterface.cpp
+        ${IP}/GCodeInterface/GCodeInterfaceCommands.h ${IP}/GCodeInterface/GCodeInterfaceCommands.cpp
+        ${IP}/GCodeInterface/gcode_interface_config.h
 
         )
 
@@ -87,8 +88,6 @@ add_library(actions
          ${AP}/ServoActions.cpp ${AP}/BinaryActions.cpp ${AP}/ContinuousActions.cpp
 
          ${AP}/ServoActions.h ${AP}/BinaryActions.h  ${AP}/ContinuousActions.h
-
-       
 
         )
 

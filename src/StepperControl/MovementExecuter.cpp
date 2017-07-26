@@ -25,7 +25,7 @@
 #include "MovementExecuter.h"
 #include "TrajectoryExecuter.h"
 #include "LinearMovement/HomingMovement.h"
-#include "../Interfaces/CommandInterface/CommandInterface.h"
+#include "../Interfaces/TreeInterface/TreeInterface.h"
 
 /*
  * TODOs for a correct motion setup :

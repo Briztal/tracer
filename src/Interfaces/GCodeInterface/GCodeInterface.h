@@ -35,7 +35,7 @@
 #include "gcode_interface_config.h"
 
 
-#define CI GCodeInterface
+#define GI GCodeInterface
 
 class GCodeInterface {
 

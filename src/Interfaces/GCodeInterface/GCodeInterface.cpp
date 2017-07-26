@@ -21,11 +21,12 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterface.h"
+#include "GCodeInterfaceCommands.h"
 #include "../../hardware_language_abstraction.h"
 #include "../../Core/MachineControllerSystem.h"
 
 
-void CI::begin() {
+void GI::begin() {
     serial_begin(BAUDRATE);
 
     delay_ms(100);
@@ -249,7 +250,7 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
 
 #define COMMAND(i, fname) \
     case i : \
-        MachineController::fname();\
+        GCodeInterfaceCommands::fname();\
         return;
 
 #define GO_LOWER(i) \
@@ -260,7 +261,7 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
 
 #define GO_LOWER_COMMAND(i, fname) \
     case i : \
-        if (!(command_size--)) {MachineController::fname();return;}\
+        if (!(command_size--)) {GCodeInterfaceCommands::fname();return;}\
         c = *(command++);\
         switch(c) {\
 

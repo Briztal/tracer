@@ -37,8 +37,12 @@
 
 void Core::begin() {
 
-#if defined(ENABLE_GCODE_INTERFACE) || defined(ENABLE_COMMAND_INTERFACE)
-    CI::begin();
+#ifdef ENABLE_GCODE_INTERFACE
+    GI::begin();
+#endif
+
+#ifdef ENABLE_TREE_INTERFACE
+    TI::begin();
 #endif
 
 #ifdef ENABLE_STEPPER_CONTROL

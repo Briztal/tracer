@@ -20,7 +20,7 @@
 
 #include "EEPROMStorage.h"
 #include "../config.h"
-#include "../Interfaces/CommandInterface/CommandInterface.h"
+#include "../interface.h"
 #include "../config.h"
 #include "../hardware_language_abstraction.h"
 #include "../Actions/ContinuousActions.h"
@@ -640,7 +640,7 @@ void EEPROMStorage::write_float(int *indice, float value) {
 }
 
 
-#ifdef ENABLE_COMMAND_INTERFACE
+#ifdef ENABLE_TREE_INTERFACE
 
 void EEPROMStorage::send_structure() {
     /*
@@ -652,32 +652,32 @@ void EEPROMStorage::send_structure() {
      * create_leaf(i, name) :           4, i, name
      */
 
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(0);\
-    CI::send_packet();
+    TI::prepare_EEPROM_packet();\
+    TI::add_char_out(0);\
+    TI::add_char_out(0);\
+    TI::send_packet();
 
 #define EEPROM_UPPER\
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(2);\
-    CI::send_packet();
+    TI::prepare_EEPROM_packet();\
+    TI::add_char_out(0);\
+    TI::add_char_out(2);\
+    TI::send_packet();
 
 #define EEPROM_LOWER(i, name)\
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(3);\
-    CI::add_char_out(i);\
-    CI::add_string_out(#name);\
-    CI::send_packet();
+    TI::prepare_EEPROM_packet();\
+    TI::add_char_out(0);\
+    TI::add_char_out(3);\
+    TI::add_char_out(i);\
+    TI::add_string_out(#name);\
+    TI::send_packet();
 
 #define EEPROM_LEAF(i, name)\
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(4);\
-    CI::add_char_out(i);\
-    CI::add_string_out(#name);\
-    CI::send_packet();
+    TI::prepare_EEPROM_packet();\
+    TI::add_char_out(0);\
+    TI::add_char_out(4);\
+    TI::add_char_out(i);\
+    TI::add_string_out(#name);\
+    TI::send_packet();
 
 
 #ifdef ENABLE_ASSERV
@@ -791,10 +791,10 @@ void EEPROMStorage::send_structure() {
 #undef EEPROM_LEAF
 
     //Confirm and fetch the transmitted tree
-    CI::prepare_EEPROM_packet();\
-    CI::add_char_out(0);\
-    CI::add_char_out(1);\
-    CI::send_packet();
+    TI::prepare_EEPROM_packet();\
+    TI::add_char_out(0);\
+    TI::add_char_out(1);\
+    TI::send_packet();
 
 }
 
