@@ -81,57 +81,9 @@ CMakeFiles/core.dir/src/Core/Core.cpp.o.provides: CMakeFiles/core.dir/src/Core/C
 CMakeFiles/core.dir/src/Core/Core.cpp.o.provides.build: CMakeFiles/core.dir/src/Core/Core.cpp.o
 
 
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o: CMakeFiles/core.dir/flags.make
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o: ../src/Core/MachineControllerSystem.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerSystem.cpp
-
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.i"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerSystem.cpp > CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.i
-
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.s"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerSystem.cpp -o CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.s
-
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.requires:
-
-.PHONY : CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.requires
-
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.provides: CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.requires
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.provides.build
-.PHONY : CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.provides
-
-CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.provides.build: CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o
-
-
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o: CMakeFiles/core.dir/flags.make
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o: ../src/Core/MachineControllerCustom.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerCustom.cpp
-
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.i"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerCustom.cpp > CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.i
-
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.s"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerCustom.cpp -o CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.s
-
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.requires:
-
-.PHONY : CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.requires
-
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.provides: CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.requires
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.provides.build
-.PHONY : CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.provides
-
-CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.provides.build: CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o
-
-
 CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o: CMakeFiles/core.dir/flags.make
 CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o: ../src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp
 
 CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i: cmake_force
@@ -155,7 +107,7 @@ CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstract
 
 CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o: CMakeFiles/core.dir/flags.make
 CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o: ../src/Core/EEPROMStorage.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o"
 	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/Core/EEPROMStorage.cpp
 
 CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.i: cmake_force
@@ -180,8 +132,6 @@ CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o.provides.build: CMakeFiles/core
 # Object files for target core
 core_OBJECTS = \
 "CMakeFiles/core.dir/src/Core/Core.cpp.o" \
-"CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o" \
-"CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o" \
 "CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o" \
 "CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o"
 
@@ -189,13 +139,11 @@ core_OBJECTS = \
 core_EXTERNAL_OBJECTS =
 
 libcore.a: CMakeFiles/core.dir/src/Core/Core.cpp.o
-libcore.a: CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o
-libcore.a: CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o
 libcore.a: CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
 libcore.a: CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o
 libcore.a: CMakeFiles/core.dir/build.make
 libcore.a: CMakeFiles/core.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library libcore.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libcore.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/core.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/core.dir/link.txt --verbose=$(VERBOSE)
 
@@ -205,8 +153,6 @@ CMakeFiles/core.dir/build: libcore.a
 .PHONY : CMakeFiles/core.dir/build
 
 CMakeFiles/core.dir/requires: CMakeFiles/core.dir/src/Core/Core.cpp.o.requires
-CMakeFiles/core.dir/requires: CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o.requires
-CMakeFiles/core.dir/requires: CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o.requires
 CMakeFiles/core.dir/requires: CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o.requires
 CMakeFiles/core.dir/requires: CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o.requires
 

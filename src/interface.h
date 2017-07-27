@@ -20,12 +20,21 @@
 
 #include "config.h"
 
+
 #ifdef MAIN_CI_GCODE
+#ifdef ENABLE_GCODE_INTERFACE
 #define CI GI
+#else
+#error "Your main interface (the GCodeInterface) is not enabled."
+#endif
 #endif
 
 #ifdef MAIN_CI_TREE
+#ifdef ENABLE_TREE_INTERFACE
 #define CI TI
+#else
+#error "Your main interface (the TreeInterface) is not enabled."
+#endif
 #endif
 
 #include "Interfaces/GCodeInterface/GCodeInterface.h"

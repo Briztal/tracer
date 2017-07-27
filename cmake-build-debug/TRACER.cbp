@@ -2072,15 +2072,6 @@
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Core/EEPROMStorage.h">
 			<Option target="core"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerCustom.cpp">
-			<Option target="core"/>
-		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerSystem.cpp">
-			<Option target="core"/>
-		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Core/MachineControllerSystem.h">
-			<Option target="core"/>
-		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/ArgQueue.cpp">
 			<Option target="datastructures"/>
 		</Unit>

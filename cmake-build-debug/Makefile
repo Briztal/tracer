@@ -467,60 +467,6 @@ src/Core/EEPROMStorage.cpp.s:
 	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.s
 .PHONY : src/Core/EEPROMStorage.cpp.s
 
-src/Core/MachineControllerCustom.o: src/Core/MachineControllerCustom.cpp.o
-
-.PHONY : src/Core/MachineControllerCustom.o
-
-# target to build an object file
-src/Core/MachineControllerCustom.cpp.o:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o
-.PHONY : src/Core/MachineControllerCustom.cpp.o
-
-src/Core/MachineControllerCustom.i: src/Core/MachineControllerCustom.cpp.i
-
-.PHONY : src/Core/MachineControllerCustom.i
-
-# target to preprocess a source file
-src/Core/MachineControllerCustom.cpp.i:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.i
-.PHONY : src/Core/MachineControllerCustom.cpp.i
-
-src/Core/MachineControllerCustom.s: src/Core/MachineControllerCustom.cpp.s
-
-.PHONY : src/Core/MachineControllerCustom.s
-
-# target to generate assembly for a file
-src/Core/MachineControllerCustom.cpp.s:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.s
-.PHONY : src/Core/MachineControllerCustom.cpp.s
-
-src/Core/MachineControllerSystem.o: src/Core/MachineControllerSystem.cpp.o
-
-.PHONY : src/Core/MachineControllerSystem.o
-
-# target to build an object file
-src/Core/MachineControllerSystem.cpp.o:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o
-.PHONY : src/Core/MachineControllerSystem.cpp.o
-
-src/Core/MachineControllerSystem.i: src/Core/MachineControllerSystem.cpp.i
-
-.PHONY : src/Core/MachineControllerSystem.i
-
-# target to preprocess a source file
-src/Core/MachineControllerSystem.cpp.i:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.i
-.PHONY : src/Core/MachineControllerSystem.cpp.i
-
-src/Core/MachineControllerSystem.s: src/Core/MachineControllerSystem.cpp.s
-
-.PHONY : src/Core/MachineControllerSystem.s
-
-# target to generate assembly for a file
-src/Core/MachineControllerSystem.cpp.s:
-	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.s
-.PHONY : src/Core/MachineControllerSystem.cpp.s
-
 src/DataStructures/ArgQueue.o: src/DataStructures/ArgQueue.cpp.o
 
 .PHONY : src/DataStructures/ArgQueue.o
@@ -1129,12 +1075,6 @@ help:
 	@echo "... src/Core/EEPROMStorage.o"
 	@echo "... src/Core/EEPROMStorage.i"
 	@echo "... src/Core/EEPROMStorage.s"
-	@echo "... src/Core/MachineControllerCustom.o"
-	@echo "... src/Core/MachineControllerCustom.i"
-	@echo "... src/Core/MachineControllerCustom.s"
-	@echo "... src/Core/MachineControllerSystem.o"
-	@echo "... src/Core/MachineControllerSystem.i"
-	@echo "... src/Core/MachineControllerSystem.s"
 	@echo "... src/DataStructures/ArgQueue.o"
 	@echo "... src/DataStructures/ArgQueue.i"
 	@echo "... src/DataStructures/ArgQueue.s"

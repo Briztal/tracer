@@ -1,7 +1,5 @@
 file(REMOVE_RECURSE
   "CMakeFiles/core.dir/src/Core/Core.cpp.o"
-  "CMakeFiles/core.dir/src/Core/MachineControllerSystem.cpp.o"
-  "CMakeFiles/core.dir/src/Core/MachineControllerCustom.cpp.o"
   "CMakeFiles/core.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o"
   "CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.o"
   "libcore.pdb"

@@ -17,14 +17,11 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
-#include "../config.h"
 #include "../sanity_check.h"
+#include "../config.h"
 
 #include "Core.h"
 #include "../interface.h"
-#include "MachineControllerSystem.h"
-#include "../config.h"
 #include "EEPROMStorage.h"
 
 #ifdef ENABLE_STEPPER_CONTROL

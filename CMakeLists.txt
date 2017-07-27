@@ -60,10 +60,10 @@ set(HP src/hardware_language_abstraction)
 
 add_library(core
 
-         ${CP}/Core.cpp ${CP}/MachineControllerSystem.cpp ${CP}/MachineControllerCustom.cpp ${HP}/hardware_language_abstraction_teensy35.cpp
+         ${CP}/Core.cpp ${HP}/hardware_language_abstraction_teensy35.cpp
         ${CP}/EEPROMStorage.cpp
 
-         ${CP}/Core.h ${CP}/MachineControllerSystem.h ${CP}/EEPROMStorage.h  ${HP}/hardware_language_abstraction_teensy35.cpp
+         ${CP}/Core.h  ${CP}/EEPROMStorage.h  ${HP}/hardware_language_abstraction_teensy35.cpp
 
         )
 
