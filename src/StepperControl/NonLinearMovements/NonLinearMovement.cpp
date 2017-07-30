@@ -133,7 +133,7 @@ void NonLinearMovement::set_speed_parameters_enqueue(uint8_t processing_steps) {
     for (uint8_t indice = 0; indice<movement_size; indice++) {
         dists_array[axis_t[indice]] = 1;
     }
-    float regulation_speed = MovementScheduler::get_regulation_speed_linear(dists_array, 1);
+    float regulation_speed = MovementScheduler::get_adjusted_regulation_speed_linear(dists_array, 1);
     MovementScheduler::pre_set_speed_axis(*axis_t, 1, regulation_speed, processing_steps);
     TrajectoryExecuter::enqueue_movement_data();
 

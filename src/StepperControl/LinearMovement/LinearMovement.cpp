@@ -153,10 +153,10 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
     //Get the adjusted regulation speed;
-    float regulation_speed = MovementScheduler::get_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
+    float regulation_speed = MovementScheduler::get_adjusted_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
 
     //Calculate and fill the speed data
-    MovementScheduler::pre_set_speed_axis(max_axis, distance_coefficient, regulation_speed, PROCESSING_STEPS);
+    MovementScheduler::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, regulation_speed, PROCESSING_STEPS);
 
     TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
     return max_axis;

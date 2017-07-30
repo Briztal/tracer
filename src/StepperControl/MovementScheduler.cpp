@@ -80,7 +80,7 @@ void MovementScheduler::set_speed_for_group(uint8_t group_id, float speed) {
 
 
 /*
- * get_regulation_speed_linear : this function calculates the real regulation speed, from the theoretical one.
+ * get_adjusted_regulation_speed_linear : this function calculates the real regulation speed, from the theoretical one.
  *
  *  It verifies that the speed on each axis does not overpasses the maximum speed on this axis.
  *
@@ -90,8 +90,21 @@ void MovementScheduler::set_speed_for_group(uint8_t group_id, float speed) {
  */
 
 //TODO PROCESS INV_SQUARE_DIST_SUM HERE, WHERE SPEED_GROUPS SIGNATURES ARE KNOWN
-float MovementScheduler::get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
+float MovementScheduler::get_adjusted_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum) {
 
+    float regulation_speed = get_regulation_speed(distsmm, sqrt_square_dist_sum);
+
+
+    regulation_speed = verifiy_speed_limits(distsmm, sqrt_square_dist_sum, regulation_speed);
+    CI::echo("real : " + String(regulation_speed));
+
+    regulation_speed = verify_acceleration_limits(regulation_speed);//distsmm, sqrt_square_dist_sum, regulation_speed);
+
+    return regulation_speed;
+
+}
+
+float MovementScheduler::get_regulation_speed(float *const distsmm, const float sqrt_square_dist_sum) {
     //Determination of the regulation speed
     sig_t group_signature = speed_groups_signatures[speed_group];
     float group_coeff = 0;
@@ -138,9 +151,20 @@ float MovementScheduler::get_regulation_speed_linear(float *const distsmm, const
         return 0;
     }
 
-    theorical_regulation_speed = (float) (group_speed * sqrt_square_dist_sum / sqrt(group_coeff));
+    return (float) (group_speed * sqrt_square_dist_sum / sqrt(group_coeff));
+}
 
-    float scoeff = theorical_regulation_speed / sqrt_square_dist_sum;
+
+float MovementScheduler::verifiy_speed_limits(float *const distsmm, const float sqrt_square_dist_sum, float regulation_speed) {
+
+    /*
+     * Formula :
+     *
+     * The speed projected on a particular axis, which will move of [di] mm, is given by
+     *      Vi = theorical_regulation_speed*di/sqrt_square_dist_sum;
+     */
+
+    float scoeff = regulation_speed / sqrt_square_dist_sum;
 
     float r = 0;
     bool init = true;
@@ -154,17 +178,40 @@ float MovementScheduler::get_regulation_speed_linear(float *const distsmm, const
         }
     }
 
-    float regulation_speed = theorical_regulation_speed;
 
     if (r != 0) {
-        regulation_speed *= r;
+        return regulation_speed * r;
+    } else {
+        return regulation_speed;
     }
 
-    CI::echo("real : " + String(regulation_speed));
+}
 
+float MovementScheduler::verify_acceleration_limits(float regulation_speed) {//TODO
+
+
+    /*
+    float *accelerations = EEPROMStorage::accelerations;
+    float maxValue = 0;
+    uint8_t m_axis = 0;
+    float temp_time;
+    for (uint8_t axis = 0; axis < dimension; axis++) {
+        //Maximum acceleration step
+        //Dists are in correct order, not accelerations so axis_t must be used
+        if ((temp_time = distsmm[axis] / accelerations[axis_t[axis]]) > maxValue) {
+            m_axis = axis;
+            maxValue = temp_time;
+        }
+    }
+
+    if (m_axis != 0) {
+        acceleration0 = *distsmm / maxValue;
+    } else {
+        acceleration0 = accelerations[axis_t[0]];
+    }
+    */
 
     return regulation_speed;
-
 }
 
 
@@ -173,9 +220,15 @@ float MovementScheduler::get_regulation_speed_linear(float *const distsmm, const
  *
  *  new_axis is the axis that will be used for delay regulation.
  *
- *  distance_coefficient is the ratio (axis_dist)/sqrt(sum(distances²)), used to project speed on a particular axis
+ *  distsmm contains distances each axis will move.
  *
- *  It prepares the speed change, before the currently planned movement is really executes.
+ *  sqrt_square_dist_sum is the square root of the sum of square distances.
+ *
+ *  It prepares the speed change, before the currently planned movement is really executed.
+ *
+ *
+ *  It first starts by checking the jerk limits on each axis. If the jerk of one axis exceeds its limit,
+ *      then it plans a deceleration point.
  *
  *  It sets three parameters :
  *      - ratio : the distance ratio, used to adapt the speed management to one axis, in linear moves (1 for others);
@@ -185,8 +238,9 @@ float MovementScheduler::get_regulation_speed_linear(float *const distsmm, const
  *              is given by d * tmp_speed_numerator
  *      - tmp_regulation_delay : the regulation delay that will be used during the movement we now plan.
  */
-void MovementScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps) {
+void MovementScheduler::pre_set_speed_axis(uint8_t new_axis, float *distsmm, float sqrt_square_dist_sum, float regulation_speed, uint8_t processing_steps) {
 
+    float distance_coefficient = distsmm[new_axis]/sqrt_square_dist_sum;
 
     //the acceleration considered is the new axis acceleration
     float acceleration = EEPROMStorage::accelerations[new_axis];
@@ -201,8 +255,68 @@ void MovementScheduler::pre_set_speed_axis(uint8_t new_axis, float distance_coef
 
     CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
 
-
     TrajectoryExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, tmp_speed_factor, ratio, processing_steps);
+
+}
+
+/*
+ * verify_jerk_limits : this function check if the jerk caused by the new move caracterised by the distances array
+ *      does not exceeds limits on each axis.
+ *
+ * If the jerk on one axis exceeds the limit, it calculates the maximum speed that does not cause jerk excess,
+ *      and plans a deceleration before the planned move.
+ *
+ */
+
+float * dist_ratios;
+void MovementScheduler::verify_jerk_limits(float *distsmm, float sqrt_square_dist_sum, - const float regulation_speed) {
+
+    /*
+     * Formula :
+     *
+     * The maximum (global) speed, to have the jerk on the axis i lesser than J is given by
+     *
+     *      V = J / abs(d1[i]/D1 - d2[i]/D2)
+     *
+     *      we will name the quantity d[i]/D a distance ratio.
+     *
+     * Where :
+     *
+     *      d1[i] is the distance traveled by the axis i during the last move
+     *      d2[i] is the distance that will be traveled by the axis i during the future move
+     *
+     *      D1 = sqrt(sum_k(d1[k]^2)), the euclidian norm of d1
+     *      D2 = sqrt(sum_k(d2[k]^2)), the euclidian norm of d2
+     *
+     */
+
+    float min_speed = regulation_speed;
+    bool corrected = false;
+
+    for (unsigned char axis = 0; axis<NB_STEPPERS; axis++) {
+        //Calculate the jerk ratio
+        float jerk_ratio = distsmm[axis]/sqrt_square_dist_sum;
+
+        //Calculate the maximum speed
+        float v = EEPROMStorage::jerks[axis]/(jerk_ratio-dist_ratios[axis]);
+        v = abs(v);
+
+        //Minimise the speed
+        if (v<min_speed) {
+            min_speed = v;
+            corrected = true;
+        }
+
+        //Update dist_ratios
+        dist_ratios[axis] = jerk_ratio;
+    }
+
+    CI::echo("JERK_MIN_SPEED : "+String(min_speed));
+
+    //If the regulation speed causes jerk excess, then plan a deceleration.
+    if (corrected) {
+        SpeedManager::plan_deceleration(min_speed);
+    }
 
 }
 

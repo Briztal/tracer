@@ -152,6 +152,8 @@ float EEPROMStorage::read(char *data, uint8_t size) {
                     return maximum_speeds[id];
                 case 3 ://acceleration
                     return accelerations[id];
+                case 4 ://acceleration
+                    return jerks[id];
                 default:
                     return 0;
             }
@@ -279,6 +281,8 @@ float EEPROMStorage::write(char *data, uint8_t size) {
                     WRITE_RETURN(maximum_speeds[id], float);
                 case 3 ://acceleration
                     WRITE_RETURN(accelerations[id], float);
+                case 4 ://acceleration
+                    WRITE_RETURN(jerks[id], float);
                 default:
                     return 0;
             }
@@ -335,7 +339,7 @@ bool EEPROMStorage::extractProfile() {
 
 #ifdef ENABLE_STEPPER_CONTROL
     for (uint8_t id = 0; id < NB_STEPPERS; id++)
-        read_stepper(indice, id, sizes, steps, (float *) maximum_speeds, accelerations);
+        read_stepper(indice, id, sizes, steps, maximum_speeds, accelerations, jerks);
 
     for (uint8_t id = 0; id < NB_CARTESIAN_GROUPS; id++)
         group_maximum_speeds[id] = read_float(indice);
@@ -396,7 +400,7 @@ void EEPROMStorage::saveProfile() {
 #ifdef ENABLE_STEPPER_CONTROL
     //Write axis
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        write_stepper(indice, sizes[axis], steps[axis], maximum_speeds[axis], accelerations[axis]);
+        write_stepper(indice, sizes[axis], steps[axis], maximum_speeds[axis], accelerations[axis], jerks[axis]);
     }
 
     //Write speed groups
@@ -463,11 +467,12 @@ void EEPROMStorage::setDefaultProfile() {
 #ifdef ENABLE_STEPPER_CONTROL
 
     //Set default steppers data
-#define STEPPER_DATA(i, j, size, v_steps, speed, acceleration)\
+#define STEPPER_DATA(i, j, size, v_steps, speed, acceleration, jerk)\
     sizes[i] = size;\
     steps[i] = v_steps;\
     maximum_speeds[i] = speed;\
-    accelerations[i] = acceleration;
+    accelerations[i] = acceleration;\
+    jerks[i] = jerk;
 
 #include "../config.h"
 
@@ -555,18 +560,20 @@ void EEPROMStorage::setDefaultProfile() {
 #ifdef ENABLE_STEPPER_CONTROL
 
 void EEPROMStorage::read_stepper(int *indice, uint8_t axis_nb, float *size, float *steps, float *mspeed,
-                                 float *acceleration) {
+                                 float *acceleration, float *jerk) {
     *(size + axis_nb) = read_float(indice);
     *(steps + axis_nb) = read_float(indice);
     *(mspeed + axis_nb) = read_float(indice);
     *(acceleration + axis_nb) = read_float(indice);
+    *(jerk + axis_nb) = read_float(indice);
 }
 
-void EEPROMStorage::write_stepper(int *indice, float size, float steps, float mspeed, float accceleration) {
+void EEPROMStorage::write_stepper(int *indice, float size, float steps, float mspeed, float acceleration, float jerk) {
     write_float(indice, size);
     write_float(indice, steps);
     write_float(indice, mspeed);
-    write_float(indice, accceleration);
+    write_float(indice, acceleration);
+    write_float(indice, jerk);
 }
 
 #endif
@@ -742,7 +749,8 @@ void EEPROMStorage::send_structure() {
     EEPROM_LOWER(STEPPER_CAT, steppers);
     //For each Stepper, mark a case for the size, the number of steps per unit, and maximum speed and acceleration.
 #define STEPPER_DATA(indice, ...) EEPROM_LOWER(indice, indice);\
-    EEPROM_LEAF(0, size);EEPROM_LEAF(1, steps);EEPROM_LEAF(2, max_speed);EEPROM_LEAF(3, max_acceleration);EEPROM_UPPER;
+    EEPROM_LEAF(0, size);EEPROM_LEAF(1, steps);EEPROM_LEAF(2, max_speed);EEPROM_LEAF(3, max_acceleration);EEPROM_LEAF(3, max_jerk);\
+    EEPROM_UPPER;
 
 #include "../config.h"
 
@@ -811,6 +819,7 @@ void EEPROMStorage::print_stored_data() {
         CI::echo("steps : " + String(steps[stepper]));
         CI::echo("max speed : " + String(maximum_speeds[stepper]));
         CI::echo("acceleration : " + String(accelerations[stepper]) + "\n");
+        CI::echo("jerk : " + String(jerks[stepper]) + "\n");
     }
 
     CI::echo("Speed Groups : ");
@@ -889,12 +898,14 @@ float ts[NB_STEPPERS];
 float tstt[NB_STEPPERS];
 float ms[NB_STEPPERS];
 float ta[NB_STEPPERS];
+float tj[NB_STEPPERS];
 
 
 float *const m::sizes = ts;
 float *const m::steps = tstt;
 float *const m::maximum_speeds = ms;
 float *const m::accelerations = ta;
+float *const m::jerks = tj;
 
 float gms[NB_CARTESIAN_GROUPS];
 float *const m::group_maximum_speeds = gms;

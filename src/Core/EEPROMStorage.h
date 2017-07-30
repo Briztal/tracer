@@ -64,15 +64,17 @@ public :
     static float *const steps;
     static float *const maximum_speeds;
     static float *const accelerations;
+    static float *const jerks;
+
     static float *const group_maximum_speeds;
 
 
 private:
 
     static void read_stepper(int *indice, uint8_t axis_nb, float *size, float *steps, float *mspeed,
-                             float *acceleration);
+                             float *acceleration, float *jerk);
 
-    static void write_stepper(int *indice, float size, float steps, float mspeed, float accceleration);
+    static void write_stepper(int *indice, float size, float steps, float mspeed, float accceleration, float jerk);
 
 #endif
 

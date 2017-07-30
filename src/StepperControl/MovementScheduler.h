@@ -47,9 +47,9 @@ public :
 
     static void send_position();
 
-    static float get_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum);
+    static float get_adjusted_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum);
 
-    static void pre_set_speed_axis(uint8_t new_axis, float distance_coefficient, float regulation_speed, uint8_t processing_steps);
+    static void pre_set_speed_axis(uint8_t new_axis, float *distsmm, float sqrt_square_dist_sum, float regulation_speed, uint8_t processing_steps)
 
 
 protected :
@@ -64,6 +64,15 @@ protected :
 
     static sig_t *const speed_groups_signatures;
 
+    static float get_regulation_speed(float *const distsmm, const float sqrt_square_dist_sum);
+
+    static float verifiy_speed_limits(float *const distsmm, const float sqrt_square_dist_sum, float theorical_regulation_speed);
+
+    static float verify_acceleration_limits(float regulation_speed);
+
+    void verify_jerk_limits(float *distsmm, float sqrt_square_dist_sum);
+
+    void verify_jerk_limits(float *distsmm, float sqrt_square_dist_sum, const float regulation_speed);
 };
 
 
