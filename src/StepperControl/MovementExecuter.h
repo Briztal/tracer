@@ -58,7 +58,6 @@ public :
 
     static void process_next_move();
 
-
     static void enqueue_trajectory_movement();
 
     static void enqueue_homing_movement();

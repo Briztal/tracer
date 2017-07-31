@@ -31,12 +31,19 @@ public :
 
     static delay_t delay0;
 
+    static uint32_t speed_offset;
+
+    static int32_t *const end_distances;
+    static int32_t *const jerk_distances;
+
+
+    static void heuristic_jerk_distance();
 
 public :
 
     //static int32_t *const end_distances;
 
-    static void heuristic_distance();
+    static void heuristic_end_distance();
 
     static void regulate_speed();
 
@@ -49,7 +56,8 @@ public :
     static void set_speed_distance_fast(bool dir, uint16_t increment);
 
 
-    static void set_delay_parameters(delay_t tmp_delay_0, delay_t tmp_delay_numerator, float speed_factor, float ratio, uint8_t processing_steps);
+    static void init_speed_management(delay_t tmp_delay_0, delay_t tmp_delay_numerator, float speed_factor, float ratio,
+                                      uint8_t processing_steps, bool jerk_point, uint32_t jerk_distance_offset);
 
     static uint16_t distance_square_root;
 
@@ -69,13 +77,16 @@ public :
 
 private :
 
+    static bool watch_for_jerk_point;
+
     static uint8_t processing_steps;
 
-    static uint32_t distance_to_end;
+    static uint32_t distance_to_end_point;
+    static uint32_t offseted_distance_to_jerk_point;
+
     static delay_t regulation_delay;
     static bool speed_incr;
     static bool regulation_stop_enabled;
-
 
     static bool regulation_unreached;
     static uint32_t speed_distance;

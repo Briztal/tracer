@@ -710,33 +710,6 @@ src/StepperControl/MovementExecuter.cpp.s:
 	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.s
 .PHONY : src/StepperControl/MovementExecuter.cpp.s
 
-src/StepperControl/MovementScheduler.o: src/StepperControl/MovementScheduler.cpp.o
-
-.PHONY : src/StepperControl/MovementScheduler.o
-
-# target to build an object file
-src/StepperControl/MovementScheduler.cpp.o:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o
-.PHONY : src/StepperControl/MovementScheduler.cpp.o
-
-src/StepperControl/MovementScheduler.i: src/StepperControl/MovementScheduler.cpp.i
-
-.PHONY : src/StepperControl/MovementScheduler.i
-
-# target to preprocess a source file
-src/StepperControl/MovementScheduler.cpp.i:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.i
-.PHONY : src/StepperControl/MovementScheduler.cpp.i
-
-src/StepperControl/MovementScheduler.s: src/StepperControl/MovementScheduler.cpp.s
-
-.PHONY : src/StepperControl/MovementScheduler.s
-
-# target to generate assembly for a file
-src/StepperControl/MovementScheduler.cpp.s:
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.s
-.PHONY : src/StepperControl/MovementScheduler.cpp.s
-
 src/StepperControl/NonLinearMovements/MotionBezier.o: src/StepperControl/NonLinearMovements/MotionBezier.cpp.o
 
 .PHONY : src/StepperControl/NonLinearMovements/MotionBezier.o
@@ -871,6 +844,33 @@ src/StepperControl/SpeedManager.s: src/StepperControl/SpeedManager.cpp.s
 src/StepperControl/SpeedManager.cpp.s:
 	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.s
 .PHONY : src/StepperControl/SpeedManager.cpp.s
+
+src/StepperControl/SpeedPlanner.o: src/StepperControl/SpeedPlanner.cpp.o
+
+.PHONY : src/StepperControl/SpeedPlanner.o
+
+# target to build an object file
+src/StepperControl/SpeedPlanner.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o
+.PHONY : src/StepperControl/SpeedPlanner.cpp.o
+
+src/StepperControl/SpeedPlanner.i: src/StepperControl/SpeedPlanner.cpp.i
+
+.PHONY : src/StepperControl/SpeedPlanner.i
+
+# target to preprocess a source file
+src/StepperControl/SpeedPlanner.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.i
+.PHONY : src/StepperControl/SpeedPlanner.cpp.i
+
+src/StepperControl/SpeedPlanner.s: src/StepperControl/SpeedPlanner.cpp.s
+
+.PHONY : src/StepperControl/SpeedPlanner.s
+
+# target to generate assembly for a file
+src/StepperControl/SpeedPlanner.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.s
+.PHONY : src/StepperControl/SpeedPlanner.cpp.s
 
 src/StepperControl/StepperController.o: src/StepperControl/StepperController.cpp.o
 
@@ -1102,9 +1102,6 @@ help:
 	@echo "... src/StepperControl/MovementExecuter.o"
 	@echo "... src/StepperControl/MovementExecuter.i"
 	@echo "... src/StepperControl/MovementExecuter.s"
-	@echo "... src/StepperControl/MovementScheduler.o"
-	@echo "... src/StepperControl/MovementScheduler.i"
-	@echo "... src/StepperControl/MovementScheduler.s"
 	@echo "... src/StepperControl/NonLinearMovements/MotionBezier.o"
 	@echo "... src/StepperControl/NonLinearMovements/MotionBezier.i"
 	@echo "... src/StepperControl/NonLinearMovements/MotionBezier.s"
@@ -1120,6 +1117,9 @@ help:
 	@echo "... src/StepperControl/SpeedManager.o"
 	@echo "... src/StepperControl/SpeedManager.i"
 	@echo "... src/StepperControl/SpeedManager.s"
+	@echo "... src/StepperControl/SpeedPlanner.o"
+	@echo "... src/StepperControl/SpeedPlanner.i"
+	@echo "... src/StepperControl/SpeedPlanner.s"
 	@echo "... src/StepperControl/StepperController.o"
 	@echo "... src/StepperControl/StepperController.i"
 	@echo "... src/StepperControl/StepperController.s"

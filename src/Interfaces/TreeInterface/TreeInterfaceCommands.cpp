@@ -287,7 +287,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
 
 #include "../../Actions/ContinuousActions.h"
-#include "../../StepperControl/MovementScheduler.h"
+#include "../../StepperControl/SpeedPlanner.h"
 #include "../../StepperControl/LinearMovement/LinearMovement.h"
 #include "../../StepperControl/LinearMovement/HomingMovement.h"
 #include "../../StepperControl/SpeedManager.h"
@@ -316,8 +316,8 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[15] = 35;
     coords[16] = 100;
     ContinuousActions::setLinearPower0(1);
-    MovementScheduler::set_speed_for_group(0, 500);
-    MovementScheduler::set_speed_group(0);
+    SpeedPlanner::set_speed_for_group(0, 500);
+    SpeedPlanner::set_speed_group(0);
 
     //TODO TESTER AVEC LES Z
 

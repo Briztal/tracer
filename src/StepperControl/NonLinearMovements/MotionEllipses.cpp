@@ -25,7 +25,7 @@
 
 #include "MotionEllipses.h"
 #include "NonLinearMovement.h"
-#include "../MovementScheduler.h"
+#include "../SpeedPlanner.h"
 
 
 #ifdef ANGLE_FRACTION_1

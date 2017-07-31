@@ -21,16 +21,14 @@
 
 #include <stdint.h>
 #include "../config.h"
+#include "../DataStructures/Queue.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef CODE_MOTION_H
 #define CODE_MOTION_H
 
-class MovementScheduler {
-
-
-public:
+class SpeedPlanner {
 
 
 public :
@@ -49,10 +47,25 @@ public :
 
     static float get_adjusted_regulation_speed_linear(float *const distsmm, const float sqrt_square_dist_sum);
 
-    static void pre_set_speed_axis(uint8_t new_axis, float *distsmm, float sqrt_square_dist_sum, float regulation_speed, uint8_t processing_steps)
+    static void pre_set_speed_axis(uint8_t new_axis, float *distsmm, float sqrt_square_dist_sum, int32_t *movement_distances,
+                            float regulation_speed, uint8_t processing_steps);
 
+    static void pull_jerk_point();
 
-protected :
+    static float last_regulation_speed;
+private :
+
+    //Scheduling fields
+
+    static float jerk_speed;
+
+    static Queue<uint8_t> speed_distances_offsets;
+
+    static int32_t *const enqueued_end_distances;
+
+    static int32_t *const next_jerk_distances;
+
+    //
 
     static uint8_t speed_group;
 
@@ -70,9 +83,11 @@ protected :
 
     static float verify_acceleration_limits(float regulation_speed);
 
-    void verify_jerk_limits(float *distsmm, float sqrt_square_dist_sum);
+    static bool verify_jerk_limits(float *distsmm, float sqrt_square_dist_sum, const float regulation_speed);
 
-    void verify_jerk_limits(float *distsmm, float sqrt_square_dist_sum, const float regulation_speed);
+    static void push_jerk_point();
+
+    static void add_jerk_distances(int32_t *movement_distances);
 };
 
 

@@ -27,7 +27,7 @@
 
 
 #include <stdbool.h>
-#include "../MovementScheduler.h"
+#include "../SpeedPlanner.h"
 
 class HomingMovement {
 public:

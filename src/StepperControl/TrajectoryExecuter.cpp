@@ -28,7 +28,7 @@
 #include "motion_data.h"
 #include "StepperController.h"
 #include "LinearMovement/LinearMovement.h"
-#include "MovementScheduler.h"
+#include "SpeedPlanner.h"
 #include "../Actions/ContinuousActions.h"
 #include "MovementExecuter.h"
 
@@ -37,7 +37,7 @@
  *      set end distances
  *      set first elementary_distances, calling TrajectoryExecuter::fill_movement_data(true,  ... );
  *      set last  elementary_distances, calling TrajectoryExecuter::fill_movement_data(false, ... );w
- *      set speed data, calling MovementScheduler::pre_set_speed_axis(...);
+ *      set speed data, calling SpeedPlanner::pre_set_speed_axis(...);
  *      set processing functions, calling TrajectoryExecuter::fill_processors(...);
  *      call TrajectoryExecuter::enqueue_movement_data
  *
@@ -63,8 +63,8 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
     disable_stepper_interrupt()
 
 #define STEPPER(i, sig, ...)\
-    if (nsig&sig) TrajectoryExecuter::end_distances[i] += elementary_dists[i];\
-    else TrajectoryExecuter::end_distances[i] -= elementary_dists[i];
+    if (nsig&sig) SpeedManager::end_distances[i] += elementary_dists[i];\
+    else SpeedManager::end_distances[i] -= elementary_dists[i];
 
 #include "../config.h"
 
@@ -125,13 +125,15 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
 
 
 
-void TrajectoryExecuter::fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps) {
+void TrajectoryExecuter::fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, uint32_t jerk_distance_offset, float ratio, uint8_t processing_steps, bool jerk_point) {
 
     motion_data_to_fill.processing_steps = processing_steps;
     motion_data_to_fill.delay_numerator = delay_numerator;
     motion_data_to_fill.speed_factor = speed_factor;
     motion_data_to_fill.regulation_delay = regulation_delay;
     motion_data_to_fill.ratio = ratio;
+    motion_data_to_fill.jerk_point = jerk_point;
+    motion_data_to_fill.jerk_distance_offset = jerk_distance_offset;
 }
 
 void TrajectoryExecuter::fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t*), void (*speed_f)()) {
@@ -200,8 +202,9 @@ void TrajectoryExecuter::start() {
     //Speed update according to pre_processed_parameters
 
 
-    SpeedManager::set_delay_parameters(popped_data.regulation_delay, popped_data.delay_numerator,
-                                       popped_data.speed_factor, popped_data.ratio, popped_data.processing_steps);
+    SpeedManager::init_speed_management(popped_data.regulation_delay, popped_data.delay_numerator,
+                                        popped_data.speed_factor, popped_data.ratio, popped_data.processing_steps,
+                                        popped_data.jerk_point, popped_data.jerk_distance_offset);
 
     (*popped_data.init_processor)();
 
@@ -256,18 +259,20 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
     {
         //TODO TESTER AVEC LE SHIFT SUR LA SIGNATURE DE DISTANCE ET VOIR SI C'EST PLUS EFFICACE
 
-        distances_lock = true;
 
 #define STEPPER(i, sig, ...)\
-        if (negative_signatures&sig) end_distances[i] += elementary_dists[i];\
-        else end_distances[i] -= elementary_dists[i];\
+        if (negative_signatures&sig) SpeedManager::end_distances[i] += elementary_dists[i];\
+        else SpeedManager::end_distances[i] -= elementary_dists[i];\
 
 #include "../config.h"
 
 #undef STEPPER
 
-        SpeedManager::heuristic_distance();
-        distances_lock = false;
+        SpeedManager::heuristic_end_distance();
+
+        STEP_AND_WAIT
+
+        SpeedManager::heuristic_jerk_distance();
 
     }
     STEP_AND_WAIT;
@@ -356,7 +361,7 @@ void TrajectoryExecuter::finish_sub_movement() {
 
 #ifdef position_log
             if (!(i--)) {
-                MovementScheduler::send_position();
+                SpeedPlanner::send_position();
                 i=20;
             }
 #endif
@@ -371,7 +376,7 @@ void TrajectoryExecuter::finish_sub_movement() {
                 ultimate_movement = false;
             } else {
 
-                MovementScheduler::send_position();
+                SpeedPlanner::send_position();
                 set_stepper_int_function(MovementExecuter::process_next_move);
                 ultimate_movement = penultimate_movement = true;
             }
@@ -389,13 +394,6 @@ uint32_t m::count;
 Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;
 motion_data m::popped_data;
-
-
-//End distances
-int32_t ted[NB_STEPPERS];
-int32_t *const m::end_distances = ted;
-volatile bool m::distances_lock;
-
 
 sig_t *saved_elementary_signatures;
 uint8_t saved_trajectory_indice;

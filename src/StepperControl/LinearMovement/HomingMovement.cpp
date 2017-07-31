@@ -26,7 +26,7 @@
 #include "../../Core/EEPROMStorage.h"
 #include "HomingMovement.h"
 #include "../../StepperControl/StepperController.h"
-#include "../MovementScheduler.h"
+#include "../SpeedPlanner.h"
 #include "../MovementExecuter.h"
 
 #define step 10
@@ -82,10 +82,10 @@ void HomingMovement::move() {
     }
 
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        MovementScheduler::positions[axis] = 0;
+        SpeedPlanner::positions[axis] = 0;
     }
 
-    MovementScheduler::send_position();
+    SpeedPlanner::send_position();
 
 }
 

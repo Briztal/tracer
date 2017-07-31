@@ -3,7 +3,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o"
-  "CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o"
+  "CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o"

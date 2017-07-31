@@ -28,7 +28,7 @@
 #include "../../Actions/ContinuousActions.h"
 #include "../MovementExecuter.h"
 #include "../SpeedManager.h"
-#include "../MovementScheduler.h"
+#include "../SpeedPlanner.h"
 #include "../../Core/EEPROMStorage.h"
 #include "../StepperController.h"
 #include "../mathProcess.hpp"
@@ -86,6 +86,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     //As distance on one axis can be null, an axis axis variable must be introduced. incremented after axis processed
 
     float distsmm[NB_STEPPERS]{0};
+    int32_t dists[NB_STEPPERS]{0};
 
     //TODO USE MOTION_SIZE PROVIDED BY THE PARSER
 
@@ -101,28 +102,31 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
 
         steps = EEPROMStorage::steps[axis];
         steps_destination = (int32_t) (destinations_t[axis] * steps);
-        distance = steps_destination - MovementScheduler::positions[axis];
+        distance = steps_destination - SpeedPlanner::positions[axis];
 
         //If distance is not null :
         if (distance) {
 
-            //Update position
-            MovementScheduler::positions[axis] = steps_destination;
+            //Set distance
+            dists[axis] = distance;
 
+            //Update position
+            SpeedPlanner::positions[axis] = steps_destination;
 
             //Update end distances
             disable_stepper_interrupt()
 
-            TrajectoryExecuter::end_distances[axis] += distance;
+            SpeedManager::end_distances[axis] += distance;
 
             enable_stepper_interrupt()
             /*
              * Direction : builds the direction signature :
              * binary where the nth msb is 0 if axis n is positive, 1 if direction is negative
              */
+
             if (distance < 0) {
                 distance = -distance;
-                direction_signature |= MovementScheduler::axis_signatures[axis];
+                direction_signature |= SpeedPlanner::axis_signatures[axis];
             }
 
             //Take the absolute distance, and compare if it is the greatest distance. If true, memorise the max axis.
@@ -153,10 +157,10 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
     //Get the adjusted regulation speed;
-    float regulation_speed = MovementScheduler::get_adjusted_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
+    float regulation_speed = SpeedPlanner::get_adjusted_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
 
     //Calculate and fill the speed data
-    MovementScheduler::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, regulation_speed, PROCESSING_STEPS);
+    SpeedPlanner::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, dists, regulation_speed, PROCESSING_STEPS);
 
     TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
     return max_axis;

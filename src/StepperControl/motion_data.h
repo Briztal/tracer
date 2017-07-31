@@ -49,12 +49,12 @@ typedef struct{//TODO REORG
     //-------------4----------------28
     delay_t delay_numerator;//2
     delay_t regulation_delay;//2
+    uint32_t jerk_distance_offset;
+    bool jerk_point;//1
     //-------------4----------------
     float speed_factor;//2
     //-------------4----------------32
     uint8_t processing_steps;//1
-    uint8_t padding;//1
-    //-------------2----------------34
 
 } motion_data;//36 bytes
 

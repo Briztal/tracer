@@ -2132,12 +2132,6 @@
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementExecuter.h">
 			<Option target="motion"/>
 		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.cpp">
-			<Option target="motion"/>
-		</Unit>
-		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.h">
-			<Option target="motion"/>
-		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/NonLinearMovements/MotionBezier.cpp">
 			<Option target="motion"/>
 		</Unit>
@@ -2166,6 +2160,12 @@
 			<Option target="motion"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedManager.h">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedPlanner.cpp">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedPlanner.h">
 			<Option target="motion"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/StepperController.cpp">

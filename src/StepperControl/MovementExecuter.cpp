@@ -81,20 +81,23 @@ void MovementExecuter::process_next_move() {
             case 0 :
                 TrajectoryExecuter::start();
                 return;
-            /*
-             * Second case : a homing movement.
-             *  The movement does not require any pre-computed parameter.
-             *  All we need to do is to start the homing procedure
-             */
+                /*
+                 * Second case : a homing movement.
+                 *  The movement does not require any pre-computed parameter.
+                 *  All we need to do is to start the homing procedure
+                 */
             case 1 :
                 //HomingMovement::start();
             default:
                 break;
+
         }
+    } else {
+
+        //Disable the jerk checking, if the movement queue is empty.
+        SpeedPlanner::last_regulation_speed = 0;
     }
 
-
-//TODO NECESSARY ?
     enable_stepper_interrupt();
 
 }

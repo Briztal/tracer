@@ -29,7 +29,7 @@
 #include "../mathProcess.hpp"
 #include "../MovementExecuter.h"
 #include "../StepperController.h"
-#include "../MovementScheduler.h"
+#include "../SpeedPlanner.h"
 #include "../LinearMovement/LinearMovement.h"
 #include "../TrajectoryExecuter.h"
 
@@ -38,7 +38,7 @@
  *      set end distances
  *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
  *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
- *      set speed data, calling MovementScheduler::pre_set_speed_axis(...);
+ *      set speed data, calling SpeedPlanner::pre_set_speed_axis(...);
  *      set processing functions, calling MotionExecuter::fill_processors(...);
  *      call MotionExecuter::enqueue_movement_data
  *
@@ -103,7 +103,7 @@ void NonLinearMovement::initialise(uint8_t *move_axis_t, const uint8_t size) {
 void NonLinearMovement::set_initial_positions(const float *initial_positions) {
 
     float first_move_destinations[NB_STEPPERS];
-    memcpy(first_move_destinations, MovementScheduler::positions, 4 * NB_STEPPERS);
+    memcpy(first_move_destinations, SpeedPlanner::positions, 4 * NB_STEPPERS);
 
     for (uint8_t indice = 0; indice < movement_size; indice++) {
         uint8_t axis = axis_t[indice];
@@ -117,9 +117,9 @@ void NonLinearMovement::set_initial_positions(const float *initial_positions) {
 void NonLinearMovement::set_final_positions(const int32_t *final_positions) {
     for (uint8_t indice = 0; indice < movement_size; indice++) {
         uint8_t axis = axis_t[indice];
-        int32_t pos = MovementScheduler::positions[axis], npos = final_positions[axis];
-        MovementScheduler::positions[axis] = npos;
-        TrajectoryExecuter::end_distances[axis] += npos - pos;
+        int32_t pos = SpeedPlanner::positions[axis], npos = final_positions[axis];
+        SpeedPlanner::positions[axis] = npos;
+        SpeedManager::end_distances[axis] += npos - pos;
     }
 }
 
@@ -133,8 +133,8 @@ void NonLinearMovement::set_speed_parameters_enqueue(uint8_t processing_steps) {
     for (uint8_t indice = 0; indice<movement_size; indice++) {
         dists_array[axis_t[indice]] = 1;
     }
-    float regulation_speed = MovementScheduler::get_adjusted_regulation_speed_linear(dists_array, 1);
-    MovementScheduler::pre_set_speed_axis(*axis_t, 1, regulation_speed, processing_steps);
+    float regulation_speed = SpeedPlanner::get_adjusted_regulation_speed_linear(dists_array, 1);
+    //TODO SpeedPlanner::pre_set_speed_axis(*axis_t, 1, regulation_speed, processing_steps);
     TrajectoryExecuter::enqueue_movement_data();
 
 }
@@ -201,7 +201,7 @@ uint8_t NonLinearMovement::get_movement_distances(float point_0, float point_1,
 
         //Convert to absolute distance, and set bit in signature if dist is negative
         if (d < 0) {
-            nsig |= MovementScheduler::axis_signatures[axis_t[indice]];
+            nsig |= SpeedPlanner::axis_signatures[axis_t[indice]];
             d = -d;
         }
 

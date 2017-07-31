@@ -153,28 +153,28 @@ CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o.provides: CMakeFiles
 CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o.provides.build: CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o
 
 
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o: CMakeFiles/motion.dir/flags.make
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o: ../src/StepperControl/MovementScheduler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.cpp
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o: CMakeFiles/motion.dir/flags.make
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o: ../src/StepperControl/SpeedPlanner.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedPlanner.cpp
 
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.i"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.cpp > CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.i
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.i"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedPlanner.cpp > CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.i
 
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.s"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/MovementScheduler.cpp -o CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.s
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.s"
+	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedPlanner.cpp -o CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.s
 
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.requires:
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.requires:
 
-.PHONY : CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.requires
+.PHONY : CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.requires
 
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.provides: CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.requires
-	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.provides.build
-.PHONY : CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.provides
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.provides: CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.requires
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.provides.build
+.PHONY : CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.provides
 
-CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.provides.build: CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o
+CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.provides.build: CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o
 
 
 CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o: CMakeFiles/motion.dir/flags.make
@@ -375,7 +375,7 @@ motion_OBJECTS = \
 "CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o" \
-"CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o" \
+"CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o" \
 "CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o" \
@@ -392,7 +392,7 @@ libmotion.a: CMakeFiles/motion.dir/src/StepperControl/StepperController.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o
-libmotion.a: CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o
+libmotion.a: CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o
 libmotion.a: CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o
@@ -416,7 +416,7 @@ CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/Stepper
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/SpeedManager.cpp.o.requires
-CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/MovementScheduler.cpp.o.requires
+CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/LinearMovement/LinearMovement.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/LinearMovement/HomingMovement.cpp.o.requires
 CMakeFiles/motion.dir/requires: CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/NonLinearMovement.cpp.o.requires

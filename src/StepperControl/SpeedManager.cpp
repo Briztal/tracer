@@ -33,6 +33,7 @@
 #include "../interface.h"
 #include "../Actions/ContinuousActions.h"
 #include "mathProcess.hpp"
+#include "SpeedPlanner.h"
 
 void SpeedManager::begin() {
     set_speed_distance(0);
@@ -51,14 +52,14 @@ void SpeedManager::updateActions() {
  *
  * The current heuristic is the sum of all distances.
  */
-void SpeedManager::heuristic_distance() {
+void SpeedManager::heuristic_end_distance() {
 
     int32_t td;
     uint32_t distance = 0;
     uint32_t dist = 0;
 
 #define STEPPER(i, ...) \
-    td = TrajectoryExecuter::end_distances[i];\
+    td = end_distances[i];\
     distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 
@@ -66,7 +67,26 @@ void SpeedManager::heuristic_distance() {
 
 #undef STEPPER
 
-    distance_to_end = dist;
+    distance_to_end_point = dist;
+
+}
+
+void SpeedManager::heuristic_jerk_distance() {
+
+    int32_t td;
+    uint32_t distance = 0;
+    uint32_t dist = 0;
+
+#define STEPPER(i, ...) \
+    td = jerk_distances[i];\
+    distance=((uint32_t) (td<0) ? -td : td );\
+    if (distance>dist) dist = distance;
+
+#include "../config.h"
+
+#undef STEPPER
+
+    offseted_distance_to_jerk_point = dist + speed_offset;
 }
 
 
@@ -81,10 +101,18 @@ void SpeedManager::heuristic_distance() {
  */
 
 void SpeedManager::regulate_speed() {
-    if (distance_to_end < speed_distance) {
+    if (distance_to_end_point < speed_distance) {
 
         //If we entered in the deceleration range :
-        go_to_speed_distance(distance_to_end);
+        go_to_speed_distance(distance_to_end_point);
+        regulation_unreached = true;
+        regulation_stop_enabled = false;
+        return;
+    } else
+    if (offseted_distance_to_jerk_point < speed_distance) {
+
+        //If we entered in the deceleration range :
+        go_to_speed_distance(offseted_distance_to_jerk_point);
         regulation_unreached = true;
         regulation_stop_enabled = false;
         return;
@@ -223,31 +251,34 @@ void SpeedManager::go_to_speed_distance(uint32_t distance_to_end) {
 }
 
 void SpeedManager::print_speed_distance() {
-    CI::echo("sd : "+String(speed_distance));
-    CI::echo("de : "+String(distance_square_root));
+    CI::echo("sd : " + String(speed_distance));
+    CI::echo("de : " + String(distance_square_root));
 }
 
 
 float last_ratio;
+
 /*
- * set_delay_parameters : this function is called before a movement is actually executed.
+ * init_speed_management : this function is called before a movement is actually executed.
  *
- *  It uses the 3 parameters pre-computed during the motion scheduling by MovementScheduler::pre_set_speed_axis :
+ *  It uses the 3 parameters pre-computed during the motion scheduling by SpeedPlanner::pre_set_speed_axis :
  *      - ratio : the distance ratio, used to adapt the speed management to one axis, in linear moves (1 for others);
  *      - tmp_delay_numerator : the new delay numerator;
  *      - tmp_regulation_delay : the new regulation delay;
  */
-void SpeedManager::set_delay_parameters(delay_t tmp_regulation_delay, delay_t tmp_delay_numerator, float tmp_speed_factor, float ratio, uint8_t procesing_steps) {
+//TODO MODIFIER LE JERK_OFFSET A CHAQUE MOUVEMENT
+void SpeedManager::init_speed_management(delay_t tmp_regulation_delay, delay_t tmp_delay_numerator,
+                                         float tmp_speed_factor, float ratio, uint8_t processing_steps, bool jerk_point,
+                                         uint32_t jerk_distance_offset) {
     //Set speed_distance and delay0
 
     delay_t tmp_delay_0;
     if (speed_distance != 0) {
         tmp_delay_0 = (delay_t) ((float) delay0 * ratio / last_ratio);
         uint32_t sqrt_new_speed_distance = (uint32_t) ((float) tmp_delay_numerator / (float) tmp_delay_0);
-        go_to_speed_distance(sqrt_new_speed_distance*sqrt_new_speed_distance);
+        go_to_speed_distance(sqrt_new_speed_distance * sqrt_new_speed_distance);
     } else {
         tmp_delay_0 = tmp_delay_numerator;
-
     }
 
     last_ratio = ratio;
@@ -257,14 +288,16 @@ void SpeedManager::set_delay_parameters(delay_t tmp_regulation_delay, delay_t tm
     delay_numerator = tmp_delay_numerator;
     regulation_delay = tmp_regulation_delay;
     speed_factor = tmp_speed_factor;
-
+    speed_offset = jerk_distance_offset;
 
     regulation_unreached = true;
-    SpeedManager::processing_steps = procesing_steps;
+    SpeedManager::processing_steps = processing_steps;
+
+    if (jerk_point) {
+        SpeedPlanner::pull_jerk_point();
+    }
 
 }
-
-
 
 void SpeedManager::setActionsSpeeds() {
 
@@ -279,21 +312,18 @@ void SpeedManager::setActionsSpeeds() {
 void SpeedManager::update_delay_0() {
     delay0 = (delay_t) (delay_numerator * invert(distance_square_root));
     delay0_update_required = false;
-
 }
-
 
 #define m SpeedManager
 
-uint32_t m::speed_distance = (uint32_t)0;
-uint32_t m::distance_to_end = 0;
+uint32_t m::speed_distance = (uint32_t) 0;
+uint32_t m::offseted_distance_to_jerk_point = 0;
+uint32_t m::distance_to_end_pointr = 0;
 uint16_t m::square_inf = 1, m::square_sup = 1, m::distance_square_root = 0, m::square_increments = 1;
 
 bool m::speed_incr = true;
 bool m::regulation_stop_enabled = false;
 bool m::regulation_unreached = false;
-
-
 
 delay_t m::regulation_delay;
 delay_t m::delay0;
@@ -304,12 +334,22 @@ bool m::delay0_update_required;
 
 uint8_t m::processing_steps;
 
+uint32_t m::speed_offset;
 
+//End distances
+int32_t ted[NB_STEPPERS];
+int32_t *const m::end_distances = ted;
+
+//jerk distances
+int32_t tjd[NB_STEPPERS];
+int32_t *const m::jerk_distances = tjd;
 
 uint8_t m::linear_tools_nb;
 
 void (*tf[NB_CONTINUOUS]);
+
 void (**m::linear_set_functions)(float) = (void (**)(float)) tf;
+
 
 #undef m
 
