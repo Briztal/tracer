@@ -19,6 +19,7 @@
 
 
 #include "../../config.h"
+#include "../../interface.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -54,19 +55,21 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
     //Extract motion distances, and set greater axis to 0.
     uint8_t max_axis = setup_movement_data(destinations_t, absolute_distances);
 
-    //null move, nothing to do.
+    //null enqueue_movement, nothing to do.
     if (max_axis == 255)
         return;
 
     //Move choice : a m
     if (absolute_distances[max_axis] < PROCESSING_STEPS) {
-        //max distance < steps per elementary-move -> only one micro move
+        //max distance < steps per elementary-move -> only one micro enqueue_movement
         //TODO micro_move(absolute_distances);
     } else {
-        //A move is indexed on an int value -> max distance must not be > INT_OVF
-        //max distance < max value for int : only one move
-        move(absolute_distances);
+        //A enqueue_movement is indexed on an int value -> max distance must not be > INT_OVF
+        //max distance < max value for int : only one enqueue_movement
+        enqueue_movement(absolute_distances);
     }
+
+    CI::echo("MOVE ENQUEUED");
 
 }
 
@@ -110,6 +113,8 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             //Set distance
             dists[axis] = distance;
 
+            CI::echo("dist "+String(axis)+" "+String(distance));
+
             //Update position
             SpeedPlanner::positions[axis] = steps_destination;
 
@@ -137,13 +142,13 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             }
             absolute_distances[axis] = absolute_distance;
 
-            //Millimeter distances computation
-            float distmm = distsmm[axis] = (float) absolute_distance / steps;
-            sq_dist_sum += distmm * distmm;
+            //Millimeter relative distances computation
+            float relative_distances_mm = distsmm[axis] = (float) distance / steps;
+            sq_dist_sum += relative_distances_mm * relative_distances_mm;
         }
     }
 
-    //If null move : fail with error value;
+    //If null enqueue_movement : fail with error value;
     if (max_axis == 255)
         return 255;
 
@@ -156,6 +161,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     float sqrt_sq_dist_sum = (float) sqrt(sq_dist_sum);
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
+
     //Get the adjusted regulation speed;
     float regulation_speed = SpeedPlanner::get_adjusted_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
 
@@ -163,6 +169,9 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     SpeedPlanner::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, dists, regulation_speed, PROCESSING_STEPS);
 
     TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
+
+    CI::echo("SUUS");
+
     return max_axis;
 
 }
@@ -188,7 +197,7 @@ void LinearMovement::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTAR
      */
 }
 
-void LinearMovement::move(uint32_t *dists) {
+void LinearMovement::enqueue_movement(uint32_t *dists) {
 
     //Position process preparation : set slopes and shift_nb
     set_position_data(dists);

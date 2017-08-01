@@ -55,6 +55,10 @@ private:
     static motion_data motion_data_to_fill;
     static motion_data popped_data;
 
+public :
+
+    static motion_data * peak_last_motion_data();
+
 
     //---------------------------------------------movement_pre_processing----------------------------------------------
 
@@ -65,7 +69,7 @@ public:
 
     static void fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, sig_t negative_signatures);
 
-    static void fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, uint32_t jerk_distance_offset, float ratio, uint8_t processing_steps, bool jerk_point);
+    static void fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps);
 
     static void fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t *), void (*speed_f)());
 

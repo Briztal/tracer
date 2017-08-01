@@ -24,7 +24,7 @@
  * This file defines the behaviour of the parser. You can personalise the following parameters :
  *      - The commands (G101, M1 commands for example).
  *      - The Parameters you can pass (X, Y, Z, A, B, etc...)
- *      - The function a special command triggers (ex : in Reprap GCode, G1 triggers a linear move function)
+ *      - The function a special command triggers (ex : in Reprap GCode, G1 triggers a linear enqueue_movement function)
  *
  * Command are created with a simple tree. For example, to include next commands :
  *      G0, G1, M1, M2, G10, M225 and G5D0

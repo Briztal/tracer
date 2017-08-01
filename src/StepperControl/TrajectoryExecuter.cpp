@@ -70,6 +70,14 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
 
 #undef STEPPER
 
+#define STEPPER(i, sig, ...)\
+    if (nsig&sig) SpeedManager::jerk_distances[i] += elementary_dists[i];\
+    else SpeedManager::jerk_distances[i] -= elementary_dists[i];
+
+#include "../config.h"
+
+#undef STEPPER
+
     enable_stepper_interrupt()
 
     //uint8_t local_array_end = 0;
@@ -78,7 +86,7 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
     while (true) {
         sig_t sig = 0;
 
-        //Step 1 : get signature for current move
+        //Step 1 : get signature for current enqueue_movement
 
 #define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
@@ -86,13 +94,13 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
 
 #undef STEPPER
 
-        //If a move is required to branch :
+        //If a enqueue_movement is required to branch :
         pre_signatures[motion_depth] = sig;
         motion_depth++;
 
         bool end_move = true;
 
-        //Step 2 : shift right and check if last move is reached
+        //Step 2 : shift right and check if last enqueue_movement is reached
 #define STEPPER(i, sig, ...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
 
 #include "../config.h"
@@ -125,15 +133,15 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
 
 
 
-void TrajectoryExecuter::fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, uint32_t jerk_distance_offset, float ratio, uint8_t processing_steps, bool jerk_point) {
+void TrajectoryExecuter::fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps) {
 
     motion_data_to_fill.processing_steps = processing_steps;
     motion_data_to_fill.delay_numerator = delay_numerator;
     motion_data_to_fill.speed_factor = speed_factor;
     motion_data_to_fill.regulation_delay = regulation_delay;
     motion_data_to_fill.ratio = ratio;
-    motion_data_to_fill.jerk_point = jerk_point;
-    motion_data_to_fill.jerk_distance_offset = jerk_distance_offset;
+    motion_data_to_fill.jerk_point = false;
+    motion_data_to_fill.jerk_distance_offset = 0;
 }
 
 void TrajectoryExecuter::fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t*), void (*speed_f)()) {
@@ -146,6 +154,10 @@ void TrajectoryExecuter::fill_processors(void (*init_f)(), void (*step_f)(sig_t)
 void TrajectoryExecuter::enqueue_movement_data() {
     motion_data_queue.push(motion_data_to_fill);
     MovementExecuter::enqueue_trajectory_movement();
+}
+
+motion_data * TrajectoryExecuter::peak_last_motion_data() {
+    return motion_data_queue.peak_pushed();
 }
 
 /*
@@ -200,7 +212,6 @@ void TrajectoryExecuter::start() {
     trajectory_indice = popped_data.initial_indice;
 
     //Speed update according to pre_processed_parameters
-
 
     SpeedManager::init_speed_management(popped_data.regulation_delay, popped_data.delay_numerator,
                                         popped_data.speed_factor, popped_data.ratio, popped_data.processing_steps,
@@ -261,23 +272,21 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 
 
 #define STEPPER(i, sig, ...)\
-        if (negative_signatures&sig) SpeedManager::end_distances[i] += elementary_dists[i];\
-        else SpeedManager::end_distances[i] -= elementary_dists[i];\
+        if (negative_signatures&sig) {SpeedManager::end_distances[i] += elementary_dists[i];SpeedManager::jerk_distances[i] += elementary_dists[i];}\
+        else {SpeedManager::end_distances[i] -= elementary_dists[i];SpeedManager::jerk_distances[i] -= elementary_dists[i];}\
 
 #include "../config.h"
 
 #undef STEPPER
 
+
         SpeedManager::heuristic_end_distance();
-
-        STEP_AND_WAIT
-
         SpeedManager::heuristic_jerk_distance();
 
     }
     STEP_AND_WAIT;
 
-    //next move Processing
+    //next enqueue_movement Processing
 
     {
         uint8_t motion_depth = 0;
@@ -285,7 +294,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
         while (true) {
             sig_t sig = 0;
 
-            //Step 1 : get signature for current move
+            //Step 1 : get signature for current enqueue_movement
 
 #define STEPPER(i, signature,...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
@@ -293,13 +302,13 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 
 #undef STEPPER
 
-            //If a move is required to branch :
+            //If a enqueue_movement is required to branch :
             pre_signatures[motion_depth] = sig;
             motion_depth++;
 
             bool end_move = true;
 
-            //Step 2 : shift right and check if last move is reached
+            //Step 2 : shift right and check if last enqueue_movement is reached
 #define STEPPER(i, signature,...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
 
 #include "../config.h"
@@ -339,7 +348,6 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 
     }
 
-
     set_stepper_int_function(finish_sub_movement);
     enable_stepper_interrupt();
 
@@ -376,6 +384,15 @@ void TrajectoryExecuter::finish_sub_movement() {
                 ultimate_movement = false;
             } else {
 
+#include "../interface.h"
+                CI::echo("\n\nPROCESSING\n\n");
+                for (int i = 0; i<NB_STEPPERS; i++) {
+                    CI::echo("jd : "+String(i)+" "+String(SpeedManager::jerk_distances[i]));
+                }
+
+                for (int i = 0; i<NB_STEPPERS; i++) {
+                    CI::echo("ed : "+String(i)+" "+String(SpeedManager::end_distances[i]));
+                }
                 SpeedPlanner::send_position();
                 set_stepper_int_function(MovementExecuter::process_next_move);
                 ultimate_movement = penultimate_movement = true;

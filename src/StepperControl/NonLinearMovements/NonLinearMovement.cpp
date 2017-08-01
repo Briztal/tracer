@@ -84,7 +84,7 @@ void NonLinearMovement::set_last_position() {
 */
 
 /*
- * initialise : this function enqueues the first linear move, to go to the first position.
+ * initialise : this function enqueues the first linear enqueue_movement, to go to the first position.
  *
  *  After doing this, it selects the correct axis,
  */

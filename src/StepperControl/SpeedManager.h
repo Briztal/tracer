@@ -39,6 +39,7 @@ public :
 
     static void heuristic_jerk_distance();
 
+    static volatile bool watch_for_jerk_point;
 public :
 
     //static int32_t *const end_distances;
@@ -76,8 +77,6 @@ public :
 
 
 private :
-
-    static bool watch_for_jerk_point;
 
     static uint8_t processing_steps;
 

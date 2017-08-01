@@ -26,7 +26,8 @@
 #include "TrajectoryExecuter.h"
 #include "LinearMovement/HomingMovement.h"
 #include "../Interfaces/TreeInterface/TreeInterface.h"
-
+#include "../interface.h"
+#include "SpeedManager.h"
 /*
  * TODOs for a correct motion setup :
  *      set end distances
@@ -79,6 +80,8 @@ void MovementExecuter::process_next_move() {
              *  All we need to do is to start the tracing procedure
              */
             case 0 :
+                trajectory_move = true;
+
                 TrajectoryExecuter::start();
                 return;
                 /*
@@ -94,8 +97,14 @@ void MovementExecuter::process_next_move() {
         }
     } else {
 
-        //Disable the jerk checking, if the movement queue is empty.
-        SpeedPlanner::last_regulation_speed = 0;
+        if (trajectory_move) {
+            CI::echo("Jerk checking disabled");
+            //Disable the jerk checking, if the movement queue is empty.
+            SpeedPlanner::last_regulation_speed = 0;
+        }
+
+        trajectory_move = false;
+
     }
 
     enable_stepper_interrupt();
@@ -103,6 +112,7 @@ void MovementExecuter::process_next_move() {
 }
 
 
+bool MovementExecuter::trajectory_move = false;
 Queue<unsigned char> MovementExecuter::movement_queue(MOTION_DATA_QUEUE_SIZE);
 
 #endif

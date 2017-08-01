@@ -61,6 +61,10 @@ public :
     static void enqueue_trajectory_movement();
 
     static void enqueue_homing_movement();
+
+private :
+
+        static bool trajectory_move;
 };
 
 

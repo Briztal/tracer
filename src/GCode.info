@@ -10,7 +10,7 @@ Di mm    i coordinate in advanced moves
 N : Carriage Return
 
 Amm 	X-offset in elliptic arc move
-Bmm	    Y-offset in elliptic arc move
+Bmm	    Y-offset in elliptic arc enqueue_movement
 Rrad    Rotation angle
 Urad    Begin Angle
 Vrad    End angle

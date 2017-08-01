@@ -1,5 +1,5 @@
 /*
-  Queue.cpp - Part of TRACER
+  Queue.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -66,6 +66,14 @@ public:
         elements++;
         spaces--;
 
+    }
+
+    T * peak_pushed() {
+        if (push_index != max_indice) {
+            return content+push_index+1;
+        } else {
+            return content;
+        }
     }
 
     uint8_t available_spaces() {

@@ -87,6 +87,11 @@ void SpeedManager::heuristic_jerk_distance() {
 #undef STEPPER
 
     offseted_distance_to_jerk_point = dist + speed_offset;
+
+    //CI::echo("dists : "+String(jerk_distances[0])+" "+String(jerk_distances[1])+" "+String(jerk_distances[2]));
+
+    CI::echo("DISTANCE TO JERK POINT : "+String(watch_for_jerk_point)+" "+String(offseted_distance_to_jerk_point)+" "+String(speed_offset));
+
 }
 
 
@@ -108,14 +113,15 @@ void SpeedManager::regulate_speed() {
         regulation_unreached = true;
         regulation_stop_enabled = false;
         return;
-    } else
-    if (offseted_distance_to_jerk_point < speed_distance) {
+    } else if (false) {
+        if (offseted_distance_to_jerk_point < speed_distance) {
 
-        //If we entered in the deceleration range :
-        go_to_speed_distance(offseted_distance_to_jerk_point);
-        regulation_unreached = true;
-        regulation_stop_enabled = false;
-        return;
+            //If we entered in the deceleration range :
+            go_to_speed_distance(offseted_distance_to_jerk_point);
+            regulation_unreached = true;
+            regulation_stop_enabled = false;
+            return;
+        }
     } else if (regulation_unreached) {
         //If speed still has to be modified :
 
@@ -271,6 +277,8 @@ void SpeedManager::init_speed_management(delay_t tmp_regulation_delay, delay_t t
                                          float tmp_speed_factor, float ratio, uint8_t processing_steps, bool jerk_point,
                                          uint32_t jerk_distance_offset) {
     //Set speed_distance and delay0
+    CI::echo("INIT");
+    CI::echo("POP : "+String(jerk_point)+" "+String(jerk_distance_offset));
 
     delay_t tmp_delay_0;
     if (speed_distance != 0) {
@@ -295,6 +303,10 @@ void SpeedManager::init_speed_management(delay_t tmp_regulation_delay, delay_t t
 
     if (jerk_point) {
         SpeedPlanner::pull_jerk_point();
+    } else {
+        watch_for_jerk_point = SpeedPlanner::must_watch_for_jerk_points();
+        CI::echo("watch_for_jerk_point set to "+String(watch_for_jerk_point));
+
     }
 
 }
@@ -316,9 +328,11 @@ void SpeedManager::update_delay_0() {
 
 #define m SpeedManager
 
+volatile bool m::watch_for_jerk_point = false;
+
 uint32_t m::speed_distance = (uint32_t) 0;
 uint32_t m::offseted_distance_to_jerk_point = 0;
-uint32_t m::distance_to_end_pointr = 0;
+uint32_t m::distance_to_end_point = 0;
 uint16_t m::square_inf = 1, m::square_sup = 1, m::distance_square_root = 0, m::square_increments = 1;
 
 bool m::speed_incr = true;
@@ -337,11 +351,11 @@ uint8_t m::processing_steps;
 uint32_t m::speed_offset;
 
 //End distances
-int32_t ted[NB_STEPPERS];
+int32_t ted[NB_STEPPERS]{0};
 int32_t *const m::end_distances = ted;
 
 //jerk distances
-int32_t tjd[NB_STEPPERS];
+int32_t tjd[NB_STEPPERS]{0};
 int32_t *const m::jerk_distances = tjd;
 
 uint8_t m::linear_tools_nb;

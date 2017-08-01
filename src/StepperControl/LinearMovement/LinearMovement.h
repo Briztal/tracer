@@ -59,7 +59,7 @@ private :
 
     static void process_speed();
 
-    static void move(uint32_t *dists);
+    static void enqueue_movement(uint32_t *dists);
 
     static sig_t process_position(uint8_t *elementary_dists);
 

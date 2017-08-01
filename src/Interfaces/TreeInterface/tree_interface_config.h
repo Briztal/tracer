@@ -111,7 +111,7 @@
  *      Remark : when you send a string, you must send_packet its size at its beginning;
  *
  * ALLOW_MULTIPLICITY(count, name) : tells the high level that last 'count' arguments (declared using REQUIRE_ARGS)
- *      can be sent multiple times (ex : to move on several axis, [AXIS_ID, VALUE] args will be sent for each concerned axis.
+ *      can be sent multiple times (ex : to enqueue_movement on several axis, [AXIS_ID, VALUE] args will be sent for each concerned axis.
  *
  *  -----------------------------------------------------------------------------------------------------------------
  *

@@ -93,7 +93,7 @@ private :
 private :
 
 
-    //Set the last elementary distances, for the last elementary move during motion
+    //Set the last elementary distances, for the last elementary enqueue_movement during motion
 
     //Speed processing method for N Axis non linear motions.
     static void process_speed();

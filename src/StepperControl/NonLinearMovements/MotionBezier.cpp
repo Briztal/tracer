@@ -25,7 +25,7 @@
 #include "../swap.hpp"
 
 void MotionBezier::move() {
-    NonLinearMovement::move();
+    NonLinearMovement::enqueue_movement();
 }
 
 void MotionBezier::prepareMotion() {
