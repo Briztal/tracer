@@ -98,7 +98,6 @@ void MovementExecuter::process_next_move() {
     } else {
 
         if (trajectory_move) {
-            CI::echo("Jerk checking disabled");
             //Disable the jerk checking, if the movement queue is empty.
             SpeedPlanner::last_regulation_speed = 0;
         }

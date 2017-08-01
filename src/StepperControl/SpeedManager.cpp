@@ -27,9 +27,7 @@
 #include <WString.h>
 #include "SpeedManager.h"
 #include "TrajectoryExecuter.h"
-#include "MovementExecuter.h"
 #include "../Core/EEPROMStorage.h"
-#include "../interface.h"
 #include "../interface.h"
 #include "../Actions/ContinuousActions.h"
 #include "mathProcess.hpp"
@@ -88,9 +86,6 @@ void SpeedManager::heuristic_jerk_distance() {
 
     offseted_distance_to_jerk_point = dist + speed_offset;
 
-    //CI::echo("dists : "+String(jerk_distances[0])+" "+String(jerk_distances[1])+" "+String(jerk_distances[2]));
-
-    CI::echo("DISTANCE TO JERK POINT : "+String(watch_for_jerk_point)+" "+String(offseted_distance_to_jerk_point)+" "+String(speed_offset));
 
 }
 
@@ -106,6 +101,8 @@ void SpeedManager::heuristic_jerk_distance() {
  */
 
 void SpeedManager::regulate_speed() {
+    //CI::echo("DISTANCE TO JERK POINT : "+String(speed_distance)+" "+String(distance_to_end_point)+" "+String(offseted_distance_to_jerk_point)+" "+String(speed_offset));
+
     if (distance_to_end_point < speed_distance) {
 
         //If we entered in the deceleration range :
@@ -113,15 +110,14 @@ void SpeedManager::regulate_speed() {
         regulation_unreached = true;
         regulation_stop_enabled = false;
         return;
-    } else if (false) {
-        if (offseted_distance_to_jerk_point < speed_distance) {
+    } else if ((watch_for_jerk_point)&&(offseted_distance_to_jerk_point < speed_distance)) {
 
-            //If we entered in the deceleration range :
-            go_to_speed_distance(offseted_distance_to_jerk_point);
-            regulation_unreached = true;
-            regulation_stop_enabled = false;
-            return;
-        }
+        //If we entered in the deceleration range :
+        go_to_speed_distance(offseted_distance_to_jerk_point);
+        regulation_unreached = true;
+        regulation_stop_enabled = false;
+        return;
+
     } else if (regulation_unreached) {
         //If speed still has to be modified :
 
@@ -277,9 +273,6 @@ void SpeedManager::init_speed_management(delay_t tmp_regulation_delay, delay_t t
                                          float tmp_speed_factor, float ratio, uint8_t processing_steps, bool jerk_point,
                                          uint32_t jerk_distance_offset) {
     //Set speed_distance and delay0
-    CI::echo("INIT");
-    CI::echo("POP : "+String(jerk_point)+" "+String(jerk_distance_offset));
-
     delay_t tmp_delay_0;
     if (speed_distance != 0) {
         tmp_delay_0 = (delay_t) ((float) delay0 * ratio / last_ratio);
@@ -305,8 +298,6 @@ void SpeedManager::init_speed_management(delay_t tmp_regulation_delay, delay_t t
         SpeedPlanner::pull_jerk_point();
     } else {
         watch_for_jerk_point = SpeedPlanner::must_watch_for_jerk_points();
-        CI::echo("watch_for_jerk_point set to "+String(watch_for_jerk_point));
-
     }
 
 }

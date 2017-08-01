@@ -467,60 +467,6 @@ src/Core/EEPROMStorage.cpp.s:
 	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.s
 .PHONY : src/Core/EEPROMStorage.cpp.s
 
-src/DataStructures/ArgQueue.o: src/DataStructures/ArgQueue.cpp.o
-
-.PHONY : src/DataStructures/ArgQueue.o
-
-# target to build an object file
-src/DataStructures/ArgQueue.cpp.o:
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o
-.PHONY : src/DataStructures/ArgQueue.cpp.o
-
-src/DataStructures/ArgQueue.i: src/DataStructures/ArgQueue.cpp.i
-
-.PHONY : src/DataStructures/ArgQueue.i
-
-# target to preprocess a source file
-src/DataStructures/ArgQueue.cpp.i:
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.i
-.PHONY : src/DataStructures/ArgQueue.cpp.i
-
-src/DataStructures/ArgQueue.s: src/DataStructures/ArgQueue.cpp.s
-
-.PHONY : src/DataStructures/ArgQueue.s
-
-# target to generate assembly for a file
-src/DataStructures/ArgQueue.cpp.s:
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.s
-.PHONY : src/DataStructures/ArgQueue.cpp.s
-
-src/DataStructures/Queue.o: src/DataStructures/Queue.cpp.o
-
-.PHONY : src/DataStructures/Queue.o
-
-# target to build an object file
-src/DataStructures/Queue.cpp.o:
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o
-.PHONY : src/DataStructures/Queue.cpp.o
-
-src/DataStructures/Queue.i: src/DataStructures/Queue.cpp.i
-
-.PHONY : src/DataStructures/Queue.i
-
-# target to preprocess a source file
-src/DataStructures/Queue.cpp.i:
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.i
-.PHONY : src/DataStructures/Queue.cpp.i
-
-src/DataStructures/Queue.s: src/DataStructures/Queue.cpp.s
-
-.PHONY : src/DataStructures/Queue.s
-
-# target to generate assembly for a file
-src/DataStructures/Queue.cpp.s:
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s
-.PHONY : src/DataStructures/Queue.cpp.s
-
 src/Interfaces/GCodeInterface/GCodeInterface.o: src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
 
 .PHONY : src/Interfaces/GCodeInterface/GCodeInterface.o
@@ -1075,12 +1021,6 @@ help:
 	@echo "... src/Core/EEPROMStorage.o"
 	@echo "... src/Core/EEPROMStorage.i"
 	@echo "... src/Core/EEPROMStorage.s"
-	@echo "... src/DataStructures/ArgQueue.o"
-	@echo "... src/DataStructures/ArgQueue.i"
-	@echo "... src/DataStructures/ArgQueue.s"
-	@echo "... src/DataStructures/Queue.o"
-	@echo "... src/DataStructures/Queue.i"
-	@echo "... src/DataStructures/Queue.s"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.o"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.i"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.s"

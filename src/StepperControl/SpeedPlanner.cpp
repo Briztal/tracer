@@ -95,7 +95,6 @@ float SpeedPlanner::get_adjusted_regulation_speed_linear(float *const relative_d
     float regulation_speed = get_regulation_speed(relative_distsmm, sqrt_square_dist_sum);
 
     regulation_speed = verifiy_speed_limits(relative_distsmm, sqrt_square_dist_sum, regulation_speed);
-    CI::echo("real : " + String(regulation_speed));
 
     regulation_speed = verify_acceleration_limits(regulation_speed);//relative_distsmm, sqrt_square_dist_sum, regulation_speed);
 
@@ -272,8 +271,6 @@ void SpeedPlanner::pre_set_speed_axis(uint8_t new_axis, float *relative_distsmm,
 
     last_steps = steps, last_acceleration = acceleration;
 
-    CI::echo("REGULATION_DELAY : " + String(tmp_regulation_delay));
-
     TrajectoryExecuter::fill_speed_data(tmp_delay_numerator, tmp_regulation_delay, tmp_speed_factor, ratio, processing_steps);
 
 }
@@ -344,10 +341,6 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
             dist_ratios[axis] = jerk_ratio;
         }
 
-        CI::echo("JERK_MIN_SPEED : " + String(jerk_speed));
-
-
-
         //If a jerk bound is reached, add a jerk point.
         if (jerk_speed != regulation_speed) {
 
@@ -356,16 +349,16 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
             //Enqueue the jerk point data
             push_jerk_point();
 
-            CI::echo("watch_for_jerk_point : "+String(SpeedManager::watch_for_jerk_point));
+
+            disable_stepper_interrupt();
 
 
-            if (!SpeedManager::watch_for_jerk_point) {
+
+            if ((TrajectoryExecuter::in_motion)&&(!SpeedManager::watch_for_jerk_point)) {
 
                 //If the current move is made without jerk point : notify SpeedManager to watch for jerk points
                 pull_jerk_point();
                 SpeedManager::speed_offset = tmp_jerk_distance_offset;
-
-                CI::echo("IN_RUNNING_JERK_POINT");
 
             } else {
 
@@ -373,19 +366,11 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
                 motion_data * ptr = TrajectoryExecuter::peak_last_motion_data();
                 ptr->jerk_distance_offset = tmp_jerk_distance_offset;
                 ptr->jerk_point = true;
-                CI::echo("PLANNIFIED_JERK_POINT");
 
             }
 
-            CI::echo("watch_for_jerk_point : "+String(SpeedManager::watch_for_jerk_point));
 
-
-            //TODO LE PROBLEME C'EST QUE watch_for_jerk_point est mis a false quand il n'y a plus de jerk points a suivre, meme quand\
-            //TODO il n'a pas atteint l'actuel. Le probleme se manifeste quand on ajoute un point de jerk, alors que le mouvement n'a pas commence
-            //TODO dans ce cas, des que le premier mouvement est pop, watch_for_jerk_point est mis a false.
-
-
-            //TODO TROUVER UN MOYEN DE SET LE JERK POINT AU DEMARRAGE
+            enable_stepper_interrupt();
 
             return true;
 
@@ -397,7 +382,6 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
 
         //return false;
 
-        CI::echo("initialised jerk");
 
         for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
             //Calculate the jerk ratio
@@ -452,7 +436,6 @@ void SpeedPlanner::pull_jerk_point() {
 
     enable_stepper_interrupt();
 
-    CI::echo("JERK_MOVE_PULLED");
 
 }
 

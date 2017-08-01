@@ -296,13 +296,10 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
     CI::echo("400");
-    SpeedManager::print_speed_distance();
     float coords[NB_STEPPERS]{0};
     coords[0] = 100;
     coords[1] = 40;
     coords[2] = 10;
-
-    /*
     coords[3] = 40;
     coords[4] = 50;
     coords[5] = 138;
@@ -317,8 +314,6 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[14] = 160;
     coords[15] = 35;
     coords[16] = 100;
-
-     */
 
     ContinuousActions::setLinearPower0(1);
     SpeedPlanner::set_speed_for_group(0, 500);
@@ -335,7 +330,6 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[1] = 150;
     coords[2] = 150;
 
-    /*
     coords[3] = 110;
     coords[4] = 40;
     coords[5] = 110;
@@ -350,7 +344,7 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[14] = 40;
     coords[15] = 110;
     coords[16] = 40;
-     */
+
     LinearMovement::prepare_motion(coords);
 
     delay(20);
@@ -365,7 +359,6 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[1] = 0;
     coords[2] = 0;
 
-     /*
     coords[3] = 75;
     coords[4] = 75;
     coords[5] = 75;
@@ -380,7 +373,7 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[14] = 75;
     coords[15] = 75;
     coords[16] = 75;
-      */
+
     LinearMovement::prepare_motion(coords);
 
 

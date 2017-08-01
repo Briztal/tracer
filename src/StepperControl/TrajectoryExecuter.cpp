@@ -166,6 +166,7 @@ motion_data * TrajectoryExecuter::peak_last_motion_data() {
  *  - if not, returns, and will re-check later (interrupt)
  */
 void TrajectoryExecuter::start() {
+    in_motion = true;
 
     popped_data = motion_data_queue.pull();
 
@@ -376,6 +377,7 @@ void TrajectoryExecuter::finish_sub_movement() {
             set_stepper_int_function(prepare_next_sub_motion);
         } else {
             if (penultimate_movement) {
+                in_motion = false;
                 saved_trajectory_indice = trajectory_indice;
                 saved_elementary_signatures = (is_es_0) ? es1 : es0;
                 penultimate_movement = false;
@@ -384,15 +386,6 @@ void TrajectoryExecuter::finish_sub_movement() {
                 ultimate_movement = false;
             } else {
 
-#include "../interface.h"
-                CI::echo("\n\nPROCESSING\n\n");
-                for (int i = 0; i<NB_STEPPERS; i++) {
-                    CI::echo("jd : "+String(i)+" "+String(SpeedManager::jerk_distances[i]));
-                }
-
-                for (int i = 0; i<NB_STEPPERS; i++) {
-                    CI::echo("ed : "+String(i)+" "+String(SpeedManager::end_distances[i]));
-                }
                 SpeedPlanner::send_position();
                 set_stepper_int_function(MovementExecuter::process_next_move);
                 ultimate_movement = penultimate_movement = true;
@@ -407,6 +400,8 @@ void TrajectoryExecuter::finish_sub_movement() {
 
 //Acceleration Fields
 uint32_t m::count;
+
+bool m::in_motion = false;
 
 Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;

@@ -57,77 +57,7 @@ include CMakeFiles/datastructures.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/datastructures.dir/flags.make
 
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o: CMakeFiles/datastructures.dir/flags.make
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o: ../src/DataStructures/ArgQueue.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/ArgQueue.cpp
-
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.i"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/ArgQueue.cpp > CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.i
-
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.s"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/ArgQueue.cpp -o CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.s
-
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.requires:
-
-.PHONY : CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.requires
-
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.provides: CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.requires
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.provides.build
-.PHONY : CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.provides
-
-CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.provides.build: CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o
-
-
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o: CMakeFiles/datastructures.dir/flags.make
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o: ../src/DataStructures/Queue.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o -c /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/Queue.cpp
-
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.i"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/Queue.cpp > CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.i
-
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s"
-	/home/raph/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/Data2/Projets/Robotique/TRACER/src/DataStructures/Queue.cpp -o CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s
-
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.requires:
-
-.PHONY : CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.requires
-
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.provides: CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.requires
-	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.provides.build
-.PHONY : CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.provides
-
-CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.provides.build: CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o
-
-
-# Object files for target datastructures
-datastructures_OBJECTS = \
-"CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o" \
-"CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o"
-
-# External object files for target datastructures
-datastructures_EXTERNAL_OBJECTS =
-
-libdatastructures.a: CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o
-libdatastructures.a: CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o
-libdatastructures.a: CMakeFiles/datastructures.dir/build.make
-libdatastructures.a: CMakeFiles/datastructures.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libdatastructures.a"
-	$(CMAKE_COMMAND) -P CMakeFiles/datastructures.dir/cmake_clean_target.cmake
-	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/datastructures.dir/link.txt --verbose=$(VERBOSE)
-
-# Rule to build all files generated by this target.
-CMakeFiles/datastructures.dir/build: libdatastructures.a
-
-.PHONY : CMakeFiles/datastructures.dir/build
-
-CMakeFiles/datastructures.dir/requires: CMakeFiles/datastructures.dir/src/DataStructures/ArgQueue.cpp.o.requires
-CMakeFiles/datastructures.dir/requires: CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o.requires
+CMakeFiles/datastructures.dir/requires:
 
 .PHONY : CMakeFiles/datastructures.dir/requires
 

@@ -57,6 +57,7 @@ private:
 
 public :
 
+    static bool in_motion;
     static motion_data * peak_last_motion_data();
 
 

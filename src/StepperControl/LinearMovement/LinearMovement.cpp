@@ -69,8 +69,6 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
         enqueue_movement(absolute_distances);
     }
 
-    CI::echo("MOVE ENQUEUED");
-
 }
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -113,8 +111,6 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             //Set distance
             dists[axis] = distance;
 
-            CI::echo("dist "+String(axis)+" "+String(distance));
-
             //Update position
             SpeedPlanner::positions[axis] = steps_destination;
 
@@ -124,6 +120,11 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             SpeedManager::end_distances[axis] += distance;
 
             enable_stepper_interrupt()
+
+            //Millimeter relative distances computation
+            float relative_distances_mm = distsmm[axis] = (float) distance / steps;
+            sq_dist_sum += relative_distances_mm * relative_distances_mm;
+            
             /*
              * Direction : builds the direction signature :
              * binary where the nth msb is 0 if axis n is positive, 1 if direction is negative
@@ -142,9 +143,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             }
             absolute_distances[axis] = absolute_distance;
 
-            //Millimeter relative distances computation
-            float relative_distances_mm = distsmm[axis] = (float) distance / steps;
-            sq_dist_sum += relative_distances_mm * relative_distances_mm;
+
         }
     }
 
@@ -169,8 +168,6 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     SpeedPlanner::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, dists, regulation_speed, PROCESSING_STEPS);
 
     TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
-
-    CI::echo("SUUS");
 
     return max_axis;
 
