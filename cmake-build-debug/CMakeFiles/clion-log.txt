@@ -1,15 +1,4 @@
 /opt/clion-2017.1.1/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /media/raph/Data2/Projets/Robotique/TRACER
 -- Configuring done
-CMake Error at CMakeLists.txt:107 (add_library):
-  Cannot find source file:
-
-    src/DataStructures/Queue.cpp
-
-  Tried extensions .c .C .c++ .cc .cpp .cxx .m .M .mm .h .hh .h++ .hm .hpp
-  .hxx .in .txx
-
-
-CMake Error: Cannot determine link language for target "datastructures".
-CMake Error: CMake can not determine linker language for target: datastructures
 -- Generating done
 -- Build files have been written to: /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug

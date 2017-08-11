@@ -2,6 +2,7 @@
 /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/rebuild_cache.dir
 /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/TRACER.dir
 /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/datastructures.dir
+/media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/sensors.dir
 /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/motion.dir
 /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/asserv.dir
 /media/raph/Data2/Projets/Robotique/TRACER/cmake-build-debug/CMakeFiles/actions.dir

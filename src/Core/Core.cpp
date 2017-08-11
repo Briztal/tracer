@@ -23,7 +23,6 @@
 #include "Core.h"
 #include "../interface.h"
 #include "EEPROMStorage.h"
-
 #ifdef ENABLE_STEPPER_CONTROL
 #include "../StepperControl/StepperController.h"
 #include "../StepperControl/SpeedPlanner.h"
@@ -33,6 +32,8 @@
 
 
 void Core::begin() {
+
+    hl_begin();
 
 #ifdef ENABLE_GCODE_INTERFACE
     GI::begin();

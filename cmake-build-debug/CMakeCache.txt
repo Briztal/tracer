@@ -203,6 +203,9 @@ interface_LIB_DEPENDS:STATIC=
 motion_LIB_DEPENDS:STATIC=general;interface;general;core;general;datastructures;
 
 //Dependencies for target
+sensors_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
 src_LIB_DEPENDS:STATIC=
 
 

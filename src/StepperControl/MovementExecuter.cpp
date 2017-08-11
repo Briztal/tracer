@@ -48,7 +48,6 @@
  */
 
 void MovementExecuter::start() {
-    init_stepper_interrupt();
     setup_stepper_interrupt(process_next_move, 30000);
 }
 
@@ -68,7 +67,6 @@ void MovementExecuter::enqueue_homing_movement() {
 void MovementExecuter::process_next_move() {
 
     disable_stepper_interrupt();
-
 
     if (movement_queue.available_elements()) {
         unsigned char c = movement_queue.pull();

@@ -1,6 +1,12 @@
 
 //TODO External Interrupts in hlabstraction
 //TODO Setup des PIDs
-//TODO gestion des distances de fin avec points d’arret
-//TODO Interface controleur avec config
 //TODO Mode absolu / relatif
+
+//TODO TROUVER UN MOYEN DE PREPRPCESSER LES THERMISTANCES
+
+//TODO ABSTRACTON COORDONNEES COMPATIBLE AVEC LA REGULATION EN VITESSE ?
+
+//TODO CLASSE D'ABSTRACTION DE POINTS CONTRAINTS
+
+//TODO GET MARLIN THERMISTORS

@@ -1,5 +1,5 @@
 /*
-  ArgQueue.h - Part of TRACER
+  Queue.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,37 +18,6 @@
 
 */
 
-#ifndef TRACER_ARGQUEUE_H
-#define TRACER_ARGQUEUE_H
 
 
-#include <stdint.h>
-
-class ArgQueue {
-
-public:
-
-    ArgQueue(uint8_t size);
-
-    uint8_t get();
-
-    char *get_data_pointer();
-
-    void add_data(char *data_in, uint8_t size);
-
-private:
-
-    const uint8_t size;
-    uint8_t available;
-    uint8_t spaces;
-
-    uint8_t read_indice, write_indice;
-
-    char *data_pointer;
-    char *const data;
-
-    uint8_t available_space();
-};
-
-
-#endif
+//LOL

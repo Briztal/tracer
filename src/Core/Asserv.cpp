@@ -25,10 +25,15 @@
 #define PID(i, name, kp, ki, kd)\
 float Asserv::get_pid_##i(float error) {\
     sum_##i+=error;\
-    float ret = kp*error+ki+sum_##i+kp*(error-last_##i);\
+    float ret = kp*error+ki*sum_##i+kp*(error-last_##i);\
     last_##i = error;\
     return ret;\
-}
+}\
+float Asserv::reset_pid_##i() {\
+    sum_##i=0;last_##i = 0;\
+}\
+float Asserv::sum_##i;\
+float Asserv::last_##i;
 
 #include "../config.h"
 
@@ -37,18 +42,15 @@ float Asserv::get_pid_##i(float error) {\
 
 //-----------------------------------------------External Parameters----------------------------------------------------
 
-//TODO Implement all GET_PARAMETER()
 
-//-----------------------------------------------Internal parameters----------------------------------------------------
-
-//TODO Implement all updating functions
 
 //--------------------------------------------------Loop functions------------------------------------------------------
 
 
 #define LOOP_FUNCTION(indice, name, period_ms) \
     void Asserv::enable_##indice(){\
-        enable_loop_interrupt_##indice(trigger_##indice, period_ms);\
+        init_loop_##indice();\
+        setup_loop_interrupt_##indice(trigger_##indice, period_ms);\
         active_##indice=true;\
     }\
     void Asserv::disable_##indice(){\
@@ -65,18 +67,54 @@ float Asserv::get_pid_##i(float error) {\
 
 #undef LOOP_FUNCTION
 
-//TODO Implement all loop functions
-
-
-void Asserv::trigger_0() {
-
-}
-
+//-----------------------------------------------DECLARATIONS-----------------------------------------------------------
 
 #define LOOP_FUNCTION(indice, name, period_ms) \
 bool Asserv::active_##indice = false;
 #include "../config.h"
 
 #undef LOOP_FUNCTION
+
+//---------------------------------------------TRIGGER_FUNCTIONS--------------------------------------------------------
+
+
+
+#include "../interface.h"
+
+void Asserv::init_loop_0() {
+    reset_pid_0();
+}
+
+void Asserv::trigger_0() {
+
+    disable_loop_interrupt_0();
+
+    float error = 0.1;
+
+    float p = get_pid_0(error);
+
+    CI::echo("hotend "+String(p, 1));
+
+    enable_loop_interrupt_0();
+}
+
+void Asserv::init_loop_1() {
+    reset_pid_1();
+}
+
+void Asserv::trigger_1() {
+
+    disable_loop_interrupt_0();
+
+    float error = 0.1;
+
+    float p = get_pid_1(error);
+
+    CI::echo("hotbed "+String(p, 1));
+
+    enable_loop_interrupt_0();
+}
+
+
 
 

@@ -47,6 +47,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/TRACER.dir/DependInfo.cmake"
   "CMakeFiles/datastructures.dir/DependInfo.cmake"
+  "CMakeFiles/sensors.dir/DependInfo.cmake"
   "CMakeFiles/motion.dir/DependInfo.cmake"
   "CMakeFiles/asserv.dir/DependInfo.cmake"
   "CMakeFiles/actions.dir/DependInfo.cmake"

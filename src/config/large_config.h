@@ -61,7 +61,23 @@ ADD_PERMANENT_TASK(GI::read_serial)
 //The number of punctual tasks
 #define MAX_TASKS 10
 
+//######################################################SENSORS#########################################################
 
+
+/* Thermistors :
+ * For each thermistor you may want to include, add a line like the following :
+ *
+ * THERMISTOR(indice, type_table, type_size)
+ *
+ * where indices are strictly consecutive, starting by 0, and type_table and type_size are macros names,
+ *      for your thermistor. Those are defined in thermistor_data.h.
+ */
+
+#ifdef THERMISTOR
+
+THERMISTOR(0, B57540G0104F000_TABLE, B57540G0104F000_SIZE)
+
+#endif
 
 //######################################################ASSERV##########################################################
 
@@ -78,10 +94,8 @@ ADD_PERMANENT_TASK(GI::read_serial)
 
 #ifdef EXTERNAL_PARAMETER
 
-EXTERNAL_PARAMETER(0, pname0, 0, 1, cm)
-EXTERNAL_PARAMETER(1, pname1, 0, 1, cm)
-EXTERNAL_PARAMETER(2, pname2, 0, 1, cm)
-EXTERNAL_PARAMETER(3, pname3, 0, 1, cm)
+EXTERNAL_PARAMETER(0, temp_hotend, 0, 300, degree)
+EXTERNAL_PARAMETER(1, temp_hotbed, 0, 300, degree)
 
 #endif
 
@@ -91,16 +105,12 @@ EXTERNAL_PARAMETER(3, pname3, 0, 1, cm)
  */
 
 //Set the number of PIDs
-#define NB_PIDS 5
+#define NB_PIDS 2
 
 #ifdef PID
 
-PID(0, name1, 1, 0, 0)
-PID(1, name2, 1, 0, 0)
-PID(2, name3, 1, 0, 0)
-PID(3, name4, 1, 0, 0)
-PID(4, name5, 1, 0, 0)
-
+PID(0, hotend, 1, 0, 0)
+PID(1, hotbed, 1, 1, 0)
 #endif
 
 
@@ -113,8 +123,8 @@ PID(4, name5, 1, 0, 0)
 
 #ifdef LOOP_FUNCTION
 
-LOOP_FUNCTION(0, loop, 100);
-LOOP_FUNCTION(1, loop1, 100);
+LOOP_FUNCTION(0, temps, 10);
+LOOP_FUNCTION(1, ts,    105);
 
 #endif
 

@@ -137,6 +137,19 @@ datastructures/fast:
 .PHONY : datastructures/fast
 
 #=============================================================================
+# Target rules for targets named sensors
+
+# Build rule for target.
+sensors: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 sensors
+.PHONY : sensors
+
+# fast build rule for target.
+sensors/fast:
+	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/build
+.PHONY : sensors/fast
+
+#=============================================================================
 # Target rules for targets named motion
 
 # Build rule for target.
@@ -467,6 +480,33 @@ src/Core/EEPROMStorage.cpp.s:
 	$(MAKE) -f CMakeFiles/core.dir/build.make CMakeFiles/core.dir/src/Core/EEPROMStorage.cpp.s
 .PHONY : src/Core/EEPROMStorage.cpp.s
 
+src/DataStructures/Queue.o: src/DataStructures/Queue.cpp.o
+
+.PHONY : src/DataStructures/Queue.o
+
+# target to build an object file
+src/DataStructures/Queue.cpp.o:
+	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.o
+.PHONY : src/DataStructures/Queue.cpp.o
+
+src/DataStructures/Queue.i: src/DataStructures/Queue.cpp.i
+
+.PHONY : src/DataStructures/Queue.i
+
+# target to preprocess a source file
+src/DataStructures/Queue.cpp.i:
+	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.i
+.PHONY : src/DataStructures/Queue.cpp.i
+
+src/DataStructures/Queue.s: src/DataStructures/Queue.cpp.s
+
+.PHONY : src/DataStructures/Queue.s
+
+# target to generate assembly for a file
+src/DataStructures/Queue.cpp.s:
+	$(MAKE) -f CMakeFiles/datastructures.dir/build.make CMakeFiles/datastructures.dir/src/DataStructures/Queue.cpp.s
+.PHONY : src/DataStructures/Queue.cpp.s
+
 src/Interfaces/GCodeInterface/GCodeInterface.o: src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
 
 .PHONY : src/Interfaces/GCodeInterface/GCodeInterface.o
@@ -574,6 +614,33 @@ src/Interfaces/TreeInterface/TreeInterfaceCommands.s: src/Interfaces/TreeInterfa
 src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s:
 	$(MAKE) -f CMakeFiles/interface.dir/build.make CMakeFiles/interface.dir/src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s
 .PHONY : src/Interfaces/TreeInterface/TreeInterfaceCommands.cpp.s
+
+src/Sensors/Thermistors/Thermistors.o: src/Sensors/Thermistors/Thermistors.cpp.o
+
+.PHONY : src/Sensors/Thermistors/Thermistors.o
+
+# target to build an object file
+src/Sensors/Thermistors/Thermistors.cpp.o:
+	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/src/Sensors/Thermistors/Thermistors.cpp.o
+.PHONY : src/Sensors/Thermistors/Thermistors.cpp.o
+
+src/Sensors/Thermistors/Thermistors.i: src/Sensors/Thermistors/Thermistors.cpp.i
+
+.PHONY : src/Sensors/Thermistors/Thermistors.i
+
+# target to preprocess a source file
+src/Sensors/Thermistors/Thermistors.cpp.i:
+	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/src/Sensors/Thermistors/Thermistors.cpp.i
+.PHONY : src/Sensors/Thermistors/Thermistors.cpp.i
+
+src/Sensors/Thermistors/Thermistors.s: src/Sensors/Thermistors/Thermistors.cpp.s
+
+.PHONY : src/Sensors/Thermistors/Thermistors.s
+
+# target to generate assembly for a file
+src/Sensors/Thermistors/Thermistors.cpp.s:
+	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/src/Sensors/Thermistors/Thermistors.cpp.s
+.PHONY : src/Sensors/Thermistors/Thermistors.cpp.s
 
 src/StepperControl/LinearMovement/HomingMovement.o: src/StepperControl/LinearMovement/HomingMovement.cpp.o
 
@@ -990,6 +1057,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... TRACER"
 	@echo "... datastructures"
+	@echo "... sensors"
 	@echo "... motion"
 	@echo "... asserv"
 	@echo "... actions"
@@ -1021,6 +1089,9 @@ help:
 	@echo "... src/Core/EEPROMStorage.o"
 	@echo "... src/Core/EEPROMStorage.i"
 	@echo "... src/Core/EEPROMStorage.s"
+	@echo "... src/DataStructures/Queue.o"
+	@echo "... src/DataStructures/Queue.i"
+	@echo "... src/DataStructures/Queue.s"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.o"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.i"
 	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.s"
@@ -1033,6 +1104,9 @@ help:
 	@echo "... src/Interfaces/TreeInterface/TreeInterfaceCommands.o"
 	@echo "... src/Interfaces/TreeInterface/TreeInterfaceCommands.i"
 	@echo "... src/Interfaces/TreeInterface/TreeInterfaceCommands.s"
+	@echo "... src/Sensors/Thermistors/Thermistors.o"
+	@echo "... src/Sensors/Thermistors/Thermistors.i"
+	@echo "... src/Sensors/Thermistors/Thermistors.s"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.o"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.i"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.s"

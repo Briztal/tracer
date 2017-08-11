@@ -44,6 +44,10 @@
 #include "Arduino.h"
 #include "EEPROM.h"
 
+//------------------------------------------------INITIALISATION--------------------------------------------------------
+
+void hl_begin();
+
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
 #define EEPROM_read(i) EEPROM.read(i)
@@ -105,67 +109,158 @@ inline static void delay_ms(uint16_t time_ms){
 
 #ifdef HL_STEPPER_TIMER
 
-#define init_stepper_interrupt() {SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\
-    NVIC_SET_PRIORITY(IRQ_PIT_CH0, 128);NVIC_ENABLE_IRQ(IRQ_PIT_CH0);}
 
-#define TICS_PER_MS (uint32_t) (F_BUS / 1000000)
+//Period Macros
 
-#define US_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / TICS_PER_MS)
+#define US_TICS_PER_MS (uint32_t) (F_BUS / 1000000)
+
+#define US_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / US_TICS_PER_MS)
+
+
+//Period setting
 
 #define set_stepper_int_period(period_us)\
      {PIT_LDVAL0 = ((uint32_t)period_us > US_TIMER_MAX_PERIOD) ?\
-        US_TIMER_MAX_PERIOD :  (uint32_t) ((TICS_PER_MS) * (uint32_t)period_us - 1);};
+        US_TIMER_MAX_PERIOD :  (uint32_t) ((US_TICS_PER_MS) * (uint32_t)period_us - 1);};
+
+
+//Enabling interrupt
 
 #define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
 
+
+//Disabling interrupt
+
 #define disable_stepper_interrupt() PIT_TCTRL0 &= 5;
+
+
+//Enabling timer
 
 #define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
 
+
+//Disabling timer
+
 #define disable_stepper_timer() PIT_TCTRL0 &= 6;
+
+
+//Flag management
 
 #define stepper_int_flag PIT_TFLG0
 
 #define stepper_int_flag_clear() PIT_TFLG0 = PIT_TFLG_TIF;
 
+
+//Function setting
+
 void set_stepper_int_function(void (*f)());
 
+
+//Complete setup (long)
+
 void setup_stepper_interrupt(void (*function)(void), uint16_t period_us);
+
+
+//Complete clean
 
 #define clean_stepper_interrupt() {disable_stepper_interrupt();disable_stepper_timer();}
 
 #endif
 
-//-----------------------------------Control_loops_Milliseconds_Timer_Interrupt-----------------------------------------
+//---------------------------------------Control_loops_Milliseconds_Timers----------------------------------------------
 
 
 //Uncomment this line to provide Milliseconds timers for control loops
 #define HL_CONTROL_LOOP_TIMERS
 
-
-#ifdef HL_STEPPER_TIMER
-
-/* The function to enable a timer interrupt, calling the given function every given period
- * void en_timer_int_i(void (*function)(void), int period_ms);
- */
-
-void enable_loop_interrupt_0(void (*function)(void), uint16_t period_ms);
-
-void enable_loop_interrupt_1(void (*function)(void), uint16_t period_ms);
+#ifdef HL_CONTROL_LOOP_TIMERS
 
 
-/* The function to disable a timer interrupt
- * void dis_timer_int_i();
- */
+//Period macros
 
-//TODO;
-#define disable_loop_interrupt_0();
+#define MS_TICS_PER_MS (uint32_t) (F_BUS / 1000)
 
-//TODO;
-#define disable_loop_interrupt_1();
+#define MS_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / MS_TICS_PER_MS)
+
+
+//Loops periods settings
+
+#define set_loop_int_period_0(period_ms)\
+     {PIT_LDVAL1 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
+
+#define set_loop_int_period_1(period_ms)\
+     {PIT_LDVAL2 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
+
+#define set_loop_int_period_2(period_ms)\
+     {PIT_LDVAL3 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
+
+
+//Enabling loop interrupts
+
+#define enable_loop_interrupt_0() PIT_TCTRL1 |= PIT_TCTRL_TIE;
+
+#define enable_loop_interrupt_1() PIT_TCTRL2 |= PIT_TCTRL_TIE;
+
+#define enable_loop_interrupt_2() PIT_TCTRL3 |= PIT_TCTRL_TIE;
+
+
+//Disabling loops interrupts
+
+#define disable_loop_interrupt_0() PIT_TCTRL1 &= 5;
+
+#define disable_loop_interrupt_1() PIT_TCTRL2 &= 5;
+
+#define disable_loop_interrupt_2() PIT_TCTRL3 &= 5;
+
+
+//Enabling loop timers
+
+#define enable_loop_timer_0() PIT_TCTRL1 |= PIT_TCTRL_TEN;
+
+#define enable_loop_timer_1() PIT_TCTRL2 |= PIT_TCTRL_TEN;
+
+#define enable_loop_timer_2() PIT_TCTRL3 |= PIT_TCTRL_TEN;
+
+
+//Disabling loop timers
+
+#define disable_loop_timer_0() PIT_TCTRL1 &= 6;
+
+#define disable_loop_timer_1() PIT_TCTRL2 &= 6;
+
+#define disable_loop_timer_2() PIT_TCTRL3 &= 6;
+
+
+//Function setting
+
+void set_loop_function_0(void (*f)());
+
+void set_loop_function_1(void (*f)());
+
+void set_loop_function_2(void (*f)());
+
+
+// Complete setups (long)
+
+void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms);
+
+void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms);
+
+void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
+
+
+//Complete cleans : disables timers and interrupts
+
+#define clean_loop_interrupt_0() {disable_loop_timer_0(); disable_loop_interrupt_0();};
+
+#define clean_loop_interrupt_1() {disable_loop_timer_1(); disable_loop_interrupt_1();};
+
+#define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
 
 #endif
-
 
 
 //----------------------------------------------------Serial------------------------------------------------------------
