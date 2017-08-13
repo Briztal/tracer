@@ -195,15 +195,34 @@ SERVO(2, servo3, 4, 0, 1)
 
 #define MOTION_DATA_QUEUE_SIZE 20
 
-//Number of stepper motors, must be set accordingly to the next lines
-#define NB_STEPPERS 17
 
 #define sig_t uint32_t
 #define delay_t uint32_t
 
+//---------------------------------------------------STEPPER_ABSTRACTION------------------------------------------------
+
+//Number of axis in the high level coordinates system
+#define NB_AXIS 3
+
+
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
-#ifdef STEPPER //STEPPER(id, char, signature, relative, pinStep, pinDir, dir+, pinPower, enableValue, pinEndMin, OnEndMinValue, pinEndMax, OnEndMaxValue)
-//STEPPER(i, j, sig, r, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
+#ifdef AXIS
+//AXIS(i, j, si, st, sp, a)
+
+//      id, letter, size,   steps,  speed,  acceler.,   jerk)
+AXIS(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
+
+#endif
+
+//------------------------------------------------------STEPPER_MOTORS--------------------------------------------------
+
+
+//Number of stepper motors, must be set accordingly to the next lines
+#define NB_STEPPERS 4
+
+//Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters//TODO DOC
+
+#ifdef STEPPER
 //#define STEPPER(i, j, r, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
 
 //TODO DOC
@@ -212,6 +231,8 @@ STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH
 STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH);
 STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+
+/*
 STEPPER(4,  16,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(5,  32,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(6,  64,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
@@ -225,6 +246,7 @@ STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HI
 STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
 STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+*/
 
 #endif
 
@@ -232,38 +254,47 @@ STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     H
 
 //STEPPER_DATA(i, j, si, st, sp, a)
 
+//TODO REMOVE SIZE
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
-STEPPER_DATA(   0,  '0',    170,    80.16,  500.,   1350.,      20.);
-STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   2,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   4,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   5,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   6,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   7,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   8,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   9,  '3',    150.,   80.16,  500.,   1200.,      20.);
-STEPPER_DATA(   10,  '3',    150.,   80.16,  500.,  1200.,      20.);
-STEPPER_DATA(   11,  '3',    150.,   80.16,  500.,  1200.,      20.);
-STEPPER_DATA(   12,  '3',    150.,   80.16,  500.,  1200.,      20.);
-STEPPER_DATA(   13,  '3',    150.,   80.16,  500.,  1200.,      20.);
-STEPPER_DATA(   14,  '3',    150.,   80.16,  500.,  1200.,      20.);
-STEPPER_DATA(   15,  '3',    150.,   80.16,  500.,  1200.,      20.);
-STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,  1200.,      20.);
+STEPPER_DATA(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
+STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   2,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,   1200.,      20.)
+
+/*
+STEPPER_DATA(   4,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   5,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   6,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   7,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   8,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   9,  '3',    150.,   80.16,  500.,   1200.,      20.)
+STEPPER_DATA(   10,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   11,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   12,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   13,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   14,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   15,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,  1200.,      20.)
+*/
 
 #endif
 
-#define NB_CARTESIAN_GROUPS 6
+//-----------------------------------------------------CARTESIAN_GROUPS-------------------------------------------------
+
+//TODO DOC
+#define NB_CARTESIAN_GROUPS 2
 
 #ifdef CARTESIAN_GROUP
 
 //              id,     s0      s1      s2      maxSpeed
 CARTESIAN_GROUP(0,      0,      1,      2,     500     )
-CARTESIAN_GROUP(1,      3,      4,      5,     500     )
+CARTESIAN_GROUP(1,      3,      -1,     -1,    500     )
+/*
 CARTESIAN_GROUP(2,      6,      7,      8,     500     )
 CARTESIAN_GROUP(3,      9,      10,     11,     500     )
 CARTESIAN_GROUP(4,      12,     13,     14,     500     )
 CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
+*/
 
 #endif
 

@@ -50,7 +50,7 @@ public :
     *  - wait_for_movement waits till it can setup a movement, then sets trace as interrupt routine;
     *  - trace plans the current sub_movement, while periodically stepping and waiting,
     *      and then set finish_sub_movement as interrupt routine;
-    *  - finish_sub_movement makes all remaining tics and then sets prepare_next_sub_motion as interrupt routine,
+    *  - finish_sub_movement makes all remaining tics and then sets prepare_next_sub_movement as interrupt routine,
     *      or process_next_move is the current movement is done.
     */
 

@@ -2391,6 +2391,24 @@
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/Sensors/Thermistors/thermistor_data.h">
 			<Option target="sensors"/>
 		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/ComplexMovements/ComplexMovement.cpp">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/ComplexMovements/ComplexMovement.h">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.h">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/ComplexMovements/LinearComplexMovement.cpp">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/ComplexMovements/LinearComplexMovement.h">
+			<Option target="motion"/>
+		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/LinearMovement/HomingMovement.cpp">
 			<Option target="motion"/>
 		</Unit>
@@ -2443,6 +2461,12 @@
 			<Option target="motion"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/SpeedPlanner.h">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/StepperAbstraction.cpp">
+			<Option target="motion"/>
+		</Unit>
+		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/StepperAbstraction.h">
 			<Option target="motion"/>
 		</Unit>
 		<Unit filename="/media/raph/Data2/Projets/Robotique/TRACER/src/StepperControl/StepperController.cpp">

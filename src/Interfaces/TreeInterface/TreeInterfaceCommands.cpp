@@ -313,19 +313,10 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 #include "../../StepperControl/MovementExecuter.h"
 #include "../../Core/Asserv.h"
 #include "../../Sensors/Thermistors/Thermistors.h"
+#include "../../StepperControl/StepperAbstraction.h"
 
 void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
-    long l;
-    int f;
 
-    for (int16_t i = 0; i<1024; i++) {
-        l = micros();
-        f = Thermistors::get_temperature_0(i);
-        l = micros()-l;
-        CI::echo(String(i)+" : "+String(f)+" "+String(l));
-    }
-
-    return;
     Asserv::enable_0();
 
     Asserv::enable_1();

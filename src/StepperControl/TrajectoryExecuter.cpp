@@ -176,7 +176,7 @@ void TrajectoryExecuter::start() {
      *      Motion data :
      * - count : number of sub_movements;
      * - axis_signatures = the first elementary movement axis_signatures (pre_processed);
-     * - position_processor, speed_processor, functions used during movement initialise (depend on calling class);
+     * - get_new_position, update_speed, functions used during movement initialise (depend on calling class);
      * - step : the function used to step (depends on the calling class;
      *
      *      Speed data :
@@ -196,7 +196,7 @@ void TrajectoryExecuter::start() {
     speed_processor = popped_data.speed_processor;
     step = popped_data.step;
 
-    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
+    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_movement"
     es0[0] = popped_data.initial_signatures[0];
     es0[1] = popped_data.initial_signatures[1];
     es0[2] = popped_data.initial_signatures[2];
@@ -230,7 +230,7 @@ void TrajectoryExecuter::start() {
 }
 
 void TrajectoryExecuter::set_last_sub_motion() {//TODO END POSITION
-    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_motion"
+    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_movement"
     es0[0] = popped_data.final_signatures[0];
     es0[1] = popped_data.final_signatures[1];
     es0[2] = popped_data.final_signatures[2];
@@ -262,11 +262,14 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
     }
 
     uint8_t elementary_dists[NB_STEPPERS];
+
+
     sig_t negative_signatures = position_processor(elementary_dists);//2*(NB_STEPPERS - 1) tics
 
     //Distances Processing
 
     STEP_AND_WAIT
+
 
     {
         //TODO TESTER AVEC LE SHIFT SUR LA SIGNATURE DE DISTANCE ET VOIR SI C'EST PLUS EFFICACE
@@ -285,8 +288,9 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
         SpeedManager::heuristic_jerk_distance();
 
     }
-    STEP_AND_WAIT;
 
+
+    STEP_AND_WAIT;
     //next enqueue_movement Processing
 
     {
@@ -329,9 +333,14 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
         }
     }
 
+
+
     STEP_AND_WAIT;
 
+
     SpeedManager::regulate_speed();
+
+
 
     STEP_AND_WAIT;
 
@@ -341,6 +350,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 
         //Speed Setting
         (*speed_processor)();
+
 
         STEP_AND_WAIT;
 

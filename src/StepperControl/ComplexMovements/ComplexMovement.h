@@ -39,13 +39,6 @@ class ComplexMovement {
 
 private :
 
-    static uint8_t *const axis_t;
-
-    //Number of axis in the motion
-    static uint8_t movement_size;
-
-    //StepperControl Functions : direction setting, motion, and endstop reading
-    //static void (**dir_set_functions)(bool dir);
 
 protected:
     /*

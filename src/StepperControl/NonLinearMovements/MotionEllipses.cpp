@@ -156,9 +156,9 @@ bool MotionEllipses::prepare_motion(uint8_t *axis_t, float *destinations, float 
 
 
 
-    NonLinearMovement::initialise(axis_t, 2);
+    ComplexMovement::initialise(axis_t, 2);
 
-    float steps0 = NonLinearMovement::steps[0], steps1 = NonLinearMovement::steps[1];
+    float steps0 = ComplexMovement::steps[0], steps1 = ComplexMovement::steps[1];
 
     center_0 = (int32_t) (destinations[0]*steps0);
     center_1 = (int32_t) (destinations[1]*steps1);
@@ -192,7 +192,7 @@ bool MotionEllipses::prepare_motion(uint8_t *axis_t, float *destinations, float 
     first_absolute_positions_mm[0] = destinations[0] + first_relative_positions_mm[0];
     first_absolute_positions_mm[1] = destinations[1] + first_relative_positions_mm[1];
 
-    NonLinearMovement::set_initial_positions(first_absolute_positions_mm);
+    ComplexMovement::set_initial_positions(first_absolute_positions_mm);
 
     float min = 0;
 

@@ -1,4 +1,7 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexMovement.cpp.o"
+  "CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.o"
+  "CMakeFiles/motion.dir/src/StepperControl/StepperAbstraction.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/StepperController.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/MovementExecuter.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/TrajectoryExecuter.cpp.o"
@@ -12,6 +15,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/motion.dir/src/StepperControl/NonLinearMovements/MotionEllipses.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/mathProcess.cpp.o"
   "CMakeFiles/motion.dir/src/StepperControl/swap.cpp.o"
+  "CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.o"
   "libmotion.pdb"
   "libmotion.a"
 )

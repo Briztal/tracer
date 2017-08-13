@@ -1,5 +1,5 @@
 /*
-  MotionExecuter.h - Part of TRACER
+  ComplexTrajectoryExecuter.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -19,34 +19,38 @@
 */
 
 
-#include "../config.h"
+#include "../../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef TRACER_TRAJECTORYEXECUTER_H
 #define TRACER_TRAJECTORYEXECUTER_H
 
-#include "../hardware_language_abstraction.h"
-#include "motion_data.h"
-#include "../DataStructures/Queue.h"
+#include "../../hardware_language_abstraction.h"
+#include "../motion_data.h"
+#include "../../DataStructures/Queue.h"
 
 #define WAIT\
     while(!stepper_int_flag) {}\
         stepper_int_flag_clear();
 
-#define ME TrajectoryExecuter
+#define ME ComplexTrajectoryExecuter
 
 #define STEP_AND_WAIT \
     {\
         sig_t s_w_signature;\
         if (!(s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]]))\
         s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
-        (*ME::step)(s_w_signature);\
+        ME::step(s_w_signature);\
     }\
     WAIT
 
-class TrajectoryExecuter {
+class ComplexTrajectoryExecuter {
 
+    //--------------------------------------------current_stepper_positions---------------------------------------------
+
+private:
+    static int32_t *const current_stepper_positions;
 
     //--------------------------------------------movement_queue_management---------------------------------------------
 
@@ -55,11 +59,20 @@ private:
     static motion_data motion_data_to_fill;
     static motion_data popped_data;
 
+
+    //-----------------------------------------------sub_movement_queue-------------------------------------------------
+
+private:
+    static Queue<sig_t> sub_movement_queue;
+    static uint8_t * sub_movement_distances;
+
+    //-----------------------------------------------sub_movement_queue-------------------------------------------------
+
 public :
 
     static bool in_motion;
-    static motion_data * peak_last_motion_data();
 
+    static motion_data *peak_last_motion_data();
 
     //---------------------------------------------movement_pre_processing----------------------------------------------
 
@@ -70,9 +83,11 @@ public:
 
     static void fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, sig_t negative_signatures);
 
-    static void fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio, uint8_t processing_steps);
+    static void fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor, float ratio,
+                                uint8_t processing_steps);
 
-    static void fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t *), void (*speed_f)());
+    static void
+    fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t *), void (*speed_f)());
 
     //The function to copy the current motion_data to the queue.
     static void enqueue_movement_data();
@@ -82,18 +97,38 @@ public:
 public :
 
     static sig_t *saved_elementary_signatures;
-    static uint8_t saved_trajectory_indice;
-    static void (*step)(sig_t);
+
+    static uint8_t saved_trajectory_indice, trajectory_indice, *const trajectory_indices;
+
     static uint8_t *const trajectory_array;
+
+    static void step(sig_t);
+
+    //---------------------------------Intermediary_Positions_Pre_Computation-------------------------------------------
 
 private :
 
-    static uint32_t count;
-    static bool ultimate_movement, penultimate_movement;
+    //The movement index and its bounds
+    static float index_min, index_max, index;
+
+    static float increment;
+
+#define MAX_DISTANCE_TARGET 15
+
+#define MINIMUM_DISTANCE_LIMIT 10
+
+#define MAXIMUM_DISTANCE_LIMIT 256
+
+    //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
+
+private :
+
     static sig_t *const es0, *const es1;
     static bool is_es_0;
-    static uint8_t trajectory_indice;
-    static const uint8_t *const trajectory_indices;
+
+    /*
+    static bool ultimate_movement, penultimate_movement;
+     */
 
 
     /*  End Distances Conventions :
@@ -117,9 +152,10 @@ private :
     //-------------------------------------------Real_Time_Movement_Processors-------------------------------------------
 
 private:
-    static sig_t (*position_processor)(uint8_t *);
 
-    static void (*speed_processor)();
+    static sig_t (*get_new_position)(float index, float *positions);
+
+    static void (*update_speed)();
 
 
     //------------------------------------------------Movement_Procedure------------------------------------------------
@@ -134,6 +170,9 @@ public :
 
     static void stop();
 
+
+
+
     /*
     * The three interrupt functions :
     *  - wait_for_movement waits till it can setup a movement, then sets trace as interrupt routine;
@@ -143,11 +182,9 @@ public :
     *      or process_next_move is the current movement is done.
     */
 
-
-
 private:
 
-    static void prepare_next_sub_motion();
+    static void prepare_next_sub_movement();
 
     static void process_next_move();
 
@@ -155,6 +192,23 @@ private:
 
     static void set_last_sub_motion();
 
+
+
+
+    static void update_end_distances(const uint8_t *elementary_dists);
+
+    static void process_signatures(uint8_t *const elementary_dists, sig_t *const elementary_signatures);
+
+    static void update_speed_and_actions();
+
+    static sig_t *get_signatures_array();
+
+    static void push_new_position();
+
+    static uint32_t pop_next_position(uint8_t *elementary_dists);
+
+    static bool get_distances(const int32_t *const pos, const int32_t *const dest, const uint8_t *const dists,
+                              sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
 };
 
 

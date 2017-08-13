@@ -25,12 +25,12 @@
 #include "../swap.hpp"
 
 void MotionBezier::move() {
-    NonLinearMovement::enqueue_movement();
+    ComplexMovement::enqueue_movement();
 }
 
 void MotionBezier::prepareMotion() {
 
-    NonLinearMovement::initialise_motion();
+    ComplexMovement::initialise_motion();
 
     increment_provided = false;
 
@@ -112,7 +112,7 @@ bool MotionBezier::process_position(pos_data *p) {
 
             TODO REFORM
             if (processIndice == nbPoints) {
-                position_processor = false;
+                get_new_position = false;
                 return;
             }
             pow *= alpha;
@@ -120,7 +120,7 @@ bool MotionBezier::process_position(pos_data *p) {
 
             break;
         default :
-            position_processor = false;
+            get_new_position = false;
             break;
 
     }

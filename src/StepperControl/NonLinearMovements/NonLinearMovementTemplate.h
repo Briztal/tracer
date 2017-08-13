@@ -24,7 +24,7 @@
 
 #include "NonLinearMovement.h"
 
-class NonLinearMovementTemplate : public NonLinearMovement {
+class NonLinearMovementTemplate : public ComplexMovement {
 
     //-------------------inherited methods
 

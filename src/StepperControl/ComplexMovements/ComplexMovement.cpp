@@ -1,5 +1,5 @@
 /*
-  NonLinearMovement.cpp - Part of TRACER
+  ComplexMovement.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "NonLinearMovement.h"
+#include "ComplexMovement.h"
 #include "../../Interfaces/TreeInterface/TreeInterface.h"
 #include "../../Core/EEPROMStorage.h"
 #include "../SpeedManager.h"
@@ -34,71 +34,14 @@
 #include "../TrajectoryExecuter.h"
 
 /*
- * TODOs for a correct motion setup :
- *      set end distances
- *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
- *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
- *      set speed data, calling SpeedPlanner::pre_set_speed_axis(...);
- *      set processing functions, calling MotionExecuter::fill_processors(...);
- *      call MotionExecuter::enqueue_movement_data
- *
- */
-
-/*
- * Procedure :
- *
- * Appel de la fonction de mouvement d'une classe implémentée.
- *
- * /Appel N : Initialisation des variables (steps, acceleration, dirs...)
- * Calcul des positions de départ (steps)
- * /Appel N : ENQUEUE DU MOUVEMENT DE DEPART
- *
- * Calcul des positions d'arrivee (steps)
- * Push des positions d'arrivée.
- * /APPEL N : MAJ des distances d'arrivée
- *
- * /APPEL N : extraction increment
- * calcul premier mouvement
- *
- * /APPEL N : Calcul des signatures de départ
- * Appel N : set des processors
- *
- * Appel N : speed - enqueue
- *
- */
-
-/*
-void ComplexMovement::initialise_motion() {
-    uint8_t a;
-    for (uint8_t axis = 0; axis < movement_size; axis++) {
-        a = axis_copy_t[axis] = axis_t[axis];
-        steps[axis] = EEPROMStorage::steps[a];
-        assignFunction(a, dir_set_functions + axis);
-    }
-}
+*      Trajectory tracing :
+*      - Divide the trajectory in consecutive positions, expressed in high level coordinates;
+*      - Translate each position into Stepper coordinates;
+*      - Go to These positions, using the elementary movement algorithm :
+*      - Before beginning each elementary movement, get the greater axis (the axis that moves the most)
+*      - get the delay time, projected on this axis.
+*      - Make the elementary movement with the delay.
 */
-/*
-void ComplexMovement::set_last_position() {
-    Motion::set_end_position(last_positions, axis_t, movement_size);
-}
-*/
-
-/*
- * initialise : this function enqueues the first linear enqueue_movement, to go to the first position.
- *
- *  After doing this, it selects the correct axis,
- */
-void ComplexMovement::initialise(uint8_t *move_axis_t, const uint8_t size) {
-    for (uint8_t indice = 0; indice < size; indice++) {
-        uint8_t axis = axis_t[indice];
-        axis_t[indice] = axis;
-        steps[indice] = EEPROMStorage::steps[axis];
-        //assignFunction(axis, dir_set_functions + indice);
-    }
-
-    movement_size = size;
-
-}
 
 void ComplexMovement::set_initial_positions(const float *initial_positions) {
 
@@ -115,12 +58,14 @@ void ComplexMovement::set_initial_positions(const float *initial_positions) {
 }
 
 void ComplexMovement::set_final_positions(const int32_t *final_positions) {
+
     for (uint8_t indice = 0; indice < movement_size; indice++) {
         uint8_t axis = axis_t[indice];
         int32_t pos = SpeedPlanner::positions[axis], npos = final_positions[axis];
         SpeedPlanner::positions[axis] = npos;
         SpeedManager::end_distances[axis] += npos - pos;
     }
+
 }
 
 void ComplexMovement::fill_processors(void (*init_f)(), sig_t (*position_f)(uint8_t *)) {
@@ -212,8 +157,86 @@ uint8_t ComplexMovement::get_movement_distances(float point_0, float point_1,
     return nsig;
 }
 
-//--------------------------------------------Increment_extraction------------------------------------------------------
+void ComplexMovement::step(sig_t sig) {
+    uint16_t delay = StepperController::fastStepDelay(sig);
+    set_stepper_int_period(delay);
+}
 
+
+void ComplexMovement::process_speed() {
+
+    //speed_processing_1 :
+    float inverse = invert(SpeedManager::distance_square_root);
+    STEP_AND_WAIT;
+
+    //TODO uint16_t tmpdelay = SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
+
+    /*SpeedManager::delay0 = StepperController::delays[*axis_t] = tmpdelay;
+
+    for (uint8_t i = movement_size; i--;) {
+        STEP_AND_WAIT;
+        StepperController::delays[axis_t[i]] = (uint16_t) (speed_coeffs[i] * (float) tmpdelay);
+    }
+
+     */
+
+    STEP_AND_WAIT;
+    return;
+
+}
+
+
+#define m ComplexMovement
+
+
+float tstps[NB_STEPPERS];
+float *const m::steps = tstps;
+
+float tsc[NB_STEPPERS];
+float *const m::speed_coeffs = tsc;
+
+void (*t_fdirs[NB_STEPPERS])(bool dir);
+
+//void (**m::dir_set_functions)(bool dir) = t_fdirs;
+
+
+/*
+void ComplexMovement::checkPositionByStep(float *offsets, uint16_t delay, uint16_t count,
+                                           void (*process_position)()) {
+    //reset_data_pointers();
+    for (uint16_t i = 0; i < count; i++, alpha += increment) {
+        process_position();
+
+        float t[movement_size];
+        for (int axis = 0; axis < movement_size; axis++) {
+            t[axis] = pos_t[axis] / steps[axis] + offsets[axis];
+        }
+
+        CI::send_position(t);
+        delayMicroseconds(delay);
+    }
+}
+
+
+void ComplexMovement::checkPosition(float *offsets, uint16_t d) {
+    int32_t c[NB_STEPPERS];
+
+    for (alpha = min; alpha < max; alpha += increment) {
+        get_position(alpha, c);
+        for (int axis = 0; axis < movement_size; axis++) {
+            CI::add_float_out(c[axis] / steps[axis] + offsets[axis]);
+        }
+
+        CI::send_position();
+        delayMicroseconds(d);
+    }
+}
+ */
+
+
+
+//--------------------------------------------Increment_extraction------------------------------------------------------
+/*
 
 float
 ComplexMovement::extract_increment(float point, const float end, float increment, const uint8_t processing_steps,
@@ -299,83 +322,6 @@ uint8_t ComplexMovement::get_distance(int32_t *dest, int32_t *pos) {
 
     return maxi;
 }
-
-
-void ComplexMovement::step(sig_t sig) {
-    uint16_t delay = StepperController::fastStepDelay(sig);
-    set_stepper_int_period(delay);
-}
-
-
-void ComplexMovement::process_speed() {
-
-    //speed_processing_1 :
-    float inverse = invert(SpeedManager::distance_square_root);
-    STEP_AND_WAIT;
-
-    //TODO uint16_t tmpdelay = SpeedManager::delay0 = (uint16_t) (SpeedManager::delay_numerator * inverse);
-
-    /*SpeedManager::delay0 = StepperController::delays[*axis_t] = tmpdelay;
-
-    for (uint8_t i = movement_size; i--;) {
-        STEP_AND_WAIT;
-        StepperController::delays[axis_t[i]] = (uint16_t) (speed_coeffs[i] * (float) tmpdelay);
-    }
-
-     */
-
-    STEP_AND_WAIT;
-    return;
-
-}
-
-
-#define m ComplexMovement
-
-uint8_t m::movement_size;
-
-float tstps[NB_STEPPERS];
-float *const m::steps = tstps;
-
-float tsc[NB_STEPPERS];
-float *const m::speed_coeffs = tsc;
-
-void (*t_fdirs[NB_STEPPERS])(bool dir);
-
-//void (**m::dir_set_functions)(bool dir) = t_fdirs;
-
-
-/*
-void ComplexMovement::checkPositionByStep(float *offsets, uint16_t delay, uint16_t count,
-                                           void (*process_position)()) {
-    //reset_data_pointers();
-    for (uint16_t i = 0; i < count; i++, alpha += increment) {
-        process_position();
-
-        float t[movement_size];
-        for (int axis = 0; axis < movement_size; axis++) {
-            t[axis] = pos_t[axis] / steps[axis] + offsets[axis];
-        }
-
-        CI::send_position(t);
-        delayMicroseconds(delay);
-    }
-}
-
-
-void ComplexMovement::checkPosition(float *offsets, uint16_t d) {
-    int32_t c[NB_STEPPERS];
-
-    for (alpha = min; alpha < max; alpha += increment) {
-        get_position(alpha, c);
-        for (int axis = 0; axis < movement_size; axis++) {
-            CI::add_float_out(c[axis] / steps[axis] + offsets[axis]);
-        }
-
-        CI::send_position();
-        delayMicroseconds(d);
-    }
-}
- */
+*/
 
 #endif

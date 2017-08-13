@@ -642,6 +642,87 @@ src/Sensors/Thermistors/Thermistors.cpp.s:
 	$(MAKE) -f CMakeFiles/sensors.dir/build.make CMakeFiles/sensors.dir/src/Sensors/Thermistors/Thermistors.cpp.s
 .PHONY : src/Sensors/Thermistors/Thermistors.cpp.s
 
+src/StepperControl/ComplexMovements/ComplexMovement.o: src/StepperControl/ComplexMovements/ComplexMovement.cpp.o
+
+.PHONY : src/StepperControl/ComplexMovements/ComplexMovement.o
+
+# target to build an object file
+src/StepperControl/ComplexMovements/ComplexMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexMovement.cpp.o
+.PHONY : src/StepperControl/ComplexMovements/ComplexMovement.cpp.o
+
+src/StepperControl/ComplexMovements/ComplexMovement.i: src/StepperControl/ComplexMovements/ComplexMovement.cpp.i
+
+.PHONY : src/StepperControl/ComplexMovements/ComplexMovement.i
+
+# target to preprocess a source file
+src/StepperControl/ComplexMovements/ComplexMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexMovement.cpp.i
+.PHONY : src/StepperControl/ComplexMovements/ComplexMovement.cpp.i
+
+src/StepperControl/ComplexMovements/ComplexMovement.s: src/StepperControl/ComplexMovements/ComplexMovement.cpp.s
+
+.PHONY : src/StepperControl/ComplexMovements/ComplexMovement.s
+
+# target to generate assembly for a file
+src/StepperControl/ComplexMovements/ComplexMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexMovement.cpp.s
+.PHONY : src/StepperControl/ComplexMovements/ComplexMovement.cpp.s
+
+src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.o: src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.o
+
+.PHONY : src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.o
+
+# target to build an object file
+src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.o
+.PHONY : src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.o
+
+src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.i: src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.i
+
+.PHONY : src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.i
+
+# target to preprocess a source file
+src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.i
+.PHONY : src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.i
+
+src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.s: src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.s
+
+.PHONY : src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.s
+
+# target to generate assembly for a file
+src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.s
+.PHONY : src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp.s
+
+src/StepperControl/ComplexMovements/LinearComplexMovement.o: src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.o
+
+.PHONY : src/StepperControl/ComplexMovements/LinearComplexMovement.o
+
+# target to build an object file
+src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.o
+.PHONY : src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.o
+
+src/StepperControl/ComplexMovements/LinearComplexMovement.i: src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.i
+
+.PHONY : src/StepperControl/ComplexMovements/LinearComplexMovement.i
+
+# target to preprocess a source file
+src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.i
+.PHONY : src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.i
+
+src/StepperControl/ComplexMovements/LinearComplexMovement.s: src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.s
+
+.PHONY : src/StepperControl/ComplexMovements/LinearComplexMovement.s
+
+# target to generate assembly for a file
+src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.s
+.PHONY : src/StepperControl/ComplexMovements/LinearComplexMovement.cpp.s
+
 src/StepperControl/LinearMovement/HomingMovement.o: src/StepperControl/LinearMovement/HomingMovement.cpp.o
 
 .PHONY : src/StepperControl/LinearMovement/HomingMovement.o
@@ -885,6 +966,33 @@ src/StepperControl/SpeedPlanner.cpp.s:
 	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/SpeedPlanner.cpp.s
 .PHONY : src/StepperControl/SpeedPlanner.cpp.s
 
+src/StepperControl/StepperAbstraction.o: src/StepperControl/StepperAbstraction.cpp.o
+
+.PHONY : src/StepperControl/StepperAbstraction.o
+
+# target to build an object file
+src/StepperControl/StepperAbstraction.cpp.o:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/StepperAbstraction.cpp.o
+.PHONY : src/StepperControl/StepperAbstraction.cpp.o
+
+src/StepperControl/StepperAbstraction.i: src/StepperControl/StepperAbstraction.cpp.i
+
+.PHONY : src/StepperControl/StepperAbstraction.i
+
+# target to preprocess a source file
+src/StepperControl/StepperAbstraction.cpp.i:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/StepperAbstraction.cpp.i
+.PHONY : src/StepperControl/StepperAbstraction.cpp.i
+
+src/StepperControl/StepperAbstraction.s: src/StepperControl/StepperAbstraction.cpp.s
+
+.PHONY : src/StepperControl/StepperAbstraction.s
+
+# target to generate assembly for a file
+src/StepperControl/StepperAbstraction.cpp.s:
+	$(MAKE) -f CMakeFiles/motion.dir/build.make CMakeFiles/motion.dir/src/StepperControl/StepperAbstraction.cpp.s
+.PHONY : src/StepperControl/StepperAbstraction.cpp.s
+
 src/StepperControl/StepperController.o: src/StepperControl/StepperController.cpp.o
 
 .PHONY : src/StepperControl/StepperController.o
@@ -1107,6 +1215,15 @@ help:
 	@echo "... src/Sensors/Thermistors/Thermistors.o"
 	@echo "... src/Sensors/Thermistors/Thermistors.i"
 	@echo "... src/Sensors/Thermistors/Thermistors.s"
+	@echo "... src/StepperControl/ComplexMovements/ComplexMovement.o"
+	@echo "... src/StepperControl/ComplexMovements/ComplexMovement.i"
+	@echo "... src/StepperControl/ComplexMovements/ComplexMovement.s"
+	@echo "... src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.o"
+	@echo "... src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.i"
+	@echo "... src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.s"
+	@echo "... src/StepperControl/ComplexMovements/LinearComplexMovement.o"
+	@echo "... src/StepperControl/ComplexMovements/LinearComplexMovement.i"
+	@echo "... src/StepperControl/ComplexMovements/LinearComplexMovement.s"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.o"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.i"
 	@echo "... src/StepperControl/LinearMovement/HomingMovement.s"
@@ -1134,6 +1251,9 @@ help:
 	@echo "... src/StepperControl/SpeedPlanner.o"
 	@echo "... src/StepperControl/SpeedPlanner.i"
 	@echo "... src/StepperControl/SpeedPlanner.s"
+	@echo "... src/StepperControl/StepperAbstraction.o"
+	@echo "... src/StepperControl/StepperAbstraction.i"
+	@echo "... src/StepperControl/StepperAbstraction.s"
 	@echo "... src/StepperControl/StepperController.o"
 	@echo "... src/StepperControl/StepperController.i"
 	@echo "... src/StepperControl/StepperController.s"

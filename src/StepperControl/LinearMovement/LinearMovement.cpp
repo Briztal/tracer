@@ -307,6 +307,7 @@ void LinearMovement::initialise_motion() {
  */
 sig_t LinearMovement::process_position(uint8_t *elementary_dists) {//2n-2
 
+
     uint32_t i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
     uint32_t i2;
 
@@ -319,6 +320,8 @@ sig_t LinearMovement::process_position(uint8_t *elementary_dists) {//2n-2
 #include "../../config.h"
 
 #undef STEPPER
+
+
 
     return MR_negative_signatures;
 }
