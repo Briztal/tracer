@@ -1,2 +1,0 @@
-/usr/bin/ar qc libactions.a  CMakeFiles/actions.dir/src/Actions/ServoActions.cpp.o CMakeFiles/actions.dir/src/Actions/BinaryActions.cpp.o CMakeFiles/actions.dir/src/Actions/ContinuousActions.cpp.o
-/usr/bin/ranlib libactions.a
