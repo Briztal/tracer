@@ -25,8 +25,10 @@
 
 #include "PreProcessor.h"
 #include "../../Actions/ContinuousActions.h"
-#include "../StepperAbstraction.h"
 #include "../../interface.h"
+#include "../../Core/EEPROMStorage.h"
+#include "complex_motion_data.h"
+#include "../StepperAbstraction.h"
 
 void PreProcessor::updateActions() {
     if (ContinuousActions::linear_modes_enabled()) {
@@ -124,7 +126,7 @@ void PreProcessor::push_new_position() {
 
     sig_t negative_signature;
 
-    //------------------------------------------Distances_computing-----------------------------------------------------
+    //------------------Distances_computing-----------------------------
 
     //Get the new index candidate;
     float index_candidate = index + increment;
@@ -145,7 +147,7 @@ void PreProcessor::push_new_position() {
                                   &negative_signature, &max_axis, &max_distance);
 
 
-    //-----------------------------------------Validity_Verification----------------------------------------------------
+    //-----------------Validity_Verification----------------------------
 
     if (max_distance != DISTANCE_TARGET) {
 
@@ -166,7 +168,7 @@ void PreProcessor::push_new_position() {
     }
 
 
-    //-----------------------------------------Movement_Enqueuing----------------------------------------------------
+    //---------------------Movement_Enqueuing----------------------------
 
     /*
      * Now that validity checks are made, we can enqueue the sub_movement :
@@ -191,8 +193,8 @@ void PreProcessor::push_new_position() {
 
 bool
 PreProcessor::get_distances(const int32_t *const pos, const int32_t *const dest,
-                                         uint8_t *const dists, sig_t *dir_dignature_p,
-                                         uint8_t *max_axis_p, uint8_t *max_distance_p) {
+                            uint8_t *const dists, sig_t *dir_dignature_p,
+                            uint8_t *max_axis_p, uint8_t *max_distance_p) {
 
     //Cache variable, to avoid pointer access.
     uint8_t max_dist = 0;
@@ -241,6 +243,171 @@ PreProcessor::get_distances(const int32_t *const pos, const int32_t *const dest,
 }
 
 
+//-----------------------------------------------Speed_Management-------------------------------------------------------
+
+float PreProcessor::pre_process_speed(float movement_distance, const uint8_t *const stepper_distances) {
+
+
+    if (deceleration_required) {
+        //If the machine must decelerate, because of the proximity of a jerk/end point:
+
+        //temp value for the deceleration axis.
+        uint8_t axis = deceleration_axis;
+
+        //the value sqrt(2*acceleration*stepspmm)
+        float sqrt_2as = (float) sqrt(
+                2 * EEPROMStorage::accelerations[axis] * EEPROMStorage::steps[axis]);//TODO PRE_PROCESS
+
+        //The square root of the deceleration distance
+        float sqrt_dist = (float) sqrt(deceleration_dist); //TODO FASTSQRT
+
+        //The delay time
+        float time = (float) stepper_distances[axis] / (sqrt_2as * sqrt_dist);
+
+        //Update the speed
+        current_speed = movement_distance / time;
+
+        return time;
+
+    } else if (acceleration_required) {
+        //If the regulation speed hasn't been reached yet :
+
+        float min_time = 0;
+
+        /*
+         * We will here determine the minimum time for the current movement.
+         *
+         *  To do this, we will calculate the min time on each axis and determine the minimum of those.
+         *
+         *  After, we update the current speed
+         *
+         */
+
+        for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
+
+            //get the current speed on the stepper [axis]
+            float act_speed = steppers_speeds[axis];
+
+            //calculate the minimum time, according to the acceleration bound :
+            float time = stepper_distances[axis] /
+                         (act_speed + EEPROMStorage::accelerations[axis] * EEPROMStorage::steps[axis]);
+
+            min_time = (time < min_time) ? min_time : time;
+
+        }
+
+        //Update the speed
+        current_speed = movement_distance / min_time;
+
+        return min_time;
+
+
+    } else {
+        //If the machine is at its regulation speed : verify the acceleration/deceleration bounds.
+
+
+        float time = movement_distance / current_speed;
+
+        float inv_time = 1 / time;
+
+        float min_time = 0, max_time = 0;
+
+        bool first_max = true;
+
+        bool max_reached = false, min_reached = false;
+
+        //Get the time bounds for each axis;
+
+        for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
+            //get the current speed on the stepper [axis]
+
+            float act_speed = steppers_speeds[axis];
+
+            float next_speed = (float) stepper_distances[axis] * inv_time;
+
+            float speed_diff = next_speed - act_speed;
+
+            bool in_deceleration = (speed_diff > 0);
+
+            if (in_deceleration) speed_diff = -speed_diff;
+
+            float speed_limit = EEPROMStorage::accelerations[axis] * EEPROMStorage::steps[axis];
+
+            //Acceleration or Deceleration limit reaching :
+            if (speed_diff > speed_limit) {
+
+                if (in_deceleration) {
+
+                    //if we decelerate, the new speed = act_speed - speed limit.
+                    float n_time = stepper_distances[axis] / (act_speed - speed_limit);
+
+                    //update maximum time, as the minimum of the new time and the current max time :
+                    min_time = (first_max) ? n_time : ((n_time < min_time) ? min_time : n_time);
+
+                    first_max = false;
+
+                    max_reached = true;
+
+                } else {
+
+                    //if we accelerate, the new speed = act_speed + speed limit.
+                    float n_time = stepper_distances[axis] / (act_speed + speed_limit);
+
+                    //update minimum time, as the maximum of the new time and the current min time :
+                    max_time = (n_time < max_time) ? n_time : max_time;
+
+                    min_reached = true;
+                }
+
+            }
+
+        }
+
+        float new_time = 0;
+
+        if (max_reached) {
+            //If the deceleration is too high, or if both limits are reached (impossible move) : decelerate.
+
+            new_time = max_time;
+
+        } else if (min_reached) {
+            //If the acceleration is too high : accelerate.
+
+            new_time = min_time;
+
+        } else {
+            //If all is normal, do not change time.
+
+            new_time = time;
+        }
+
+        //Update the speed
+        current_speed = movement_distance / new_time;
+
+        return new_time;
+
+    }
+
+}
+
+
+void PreProcessor::update_speeds(const uint8_t *const stepper_distances, float time) {
+
+    float inv_time = 1 / time;
+
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
+        //set the current speed on the stepper [axis]
+
+        float v = steppers_speeds[axis] = (float) stepper_distances[axis] * inv_time;
+
+        deceleration_distances[axis] = (v*v)/(2*EEPROMStorage::accelerations[axis]);//TODO PRE_PROCESS
+
+    }
+}
+
+
+//----------------------------------------------------pop---------------------------------------------------------------
+
 
 
 /*
@@ -252,17 +419,16 @@ PreProcessor::get_distances(const int32_t *const pos, const int32_t *const dest,
  *
  */
 
-sig_t PreProcessor::pop_next_position(uint8_t *elementary_dists) {
+void PreProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *negative_signature, float *distance) {
 
     uint8_t size = sub_movement_queue.available_elements();
-
 
     if (!size) {
 
         //if the queue is empty : error
         CI::echo("ERROR : IN ComplexTrajectoryExecuter::pop_next_position : THE SUB_MOVEMENT QUEUE IS EMPTY");
 
-        return 0;
+        return;
 
     } else {
 
@@ -277,8 +443,13 @@ sig_t PreProcessor::pop_next_position(uint8_t *elementary_dists) {
         //copy
         memcpy(elementary_dists, ptr, NB_STEPPERS * sizeof(uint8_t));
 
-        //Return the direction signature memorised in the queue.
-        return sub_movement_queue.pull();
+        //update the direction signature and the distance memorised in the queue.
+        pre_processor_data data = sub_movement_queue.pull();
+
+        *negative_signature = data.negative_signature;
+        *distance = data.distance;
+
+        return;
 
     }
 
@@ -287,7 +458,6 @@ sig_t PreProcessor::pop_next_position(uint8_t *elementary_dists) {
 void PreProcessor::reset_vars() {
     PreProcessor::last_sub_move_engaged = PreProcessor::last_position_popped = PreProcessor::last_position_processed = false;
 }
-
 
 
 #define m PreProcessor

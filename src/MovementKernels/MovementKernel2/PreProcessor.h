@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include "../../config.h"
 #include "../../DataStructures/Queue.h"
+#include "complex_motion_data.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -35,13 +36,19 @@ public :
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
+    static void update_speeds(const uint8_t *const stepper_distances, float time);
+
+    static float pre_process_speed(float movement_distance, const uint8_t *const stepper_distances);
+
+    static sig_t (*get_new_position)(float index, float *positions);
+
 private:
     static int32_t *const current_stepper_positions;
 
     //-----------------------------------------------sub_movement_queue-------------------------------------------------
 
 private:
-    static Queue<sig_t> sub_movement_queue;
+    static Queue<pre_processor_data> sub_movement_queue;
     static uint8_t * sub_movement_distances;
 
 
@@ -54,13 +61,11 @@ public :
 
     static void push_new_position();
 
-    static uint32_t pop_next_position(uint8_t *elementary_dists);
+    static void pop_next_position(uint8_t *elementary_dists, sig_t *negative_signature, float *distance);
 
     static void reset_vars();
 
 private :
-
-    static sig_t (*get_new_position)(float index, float *positions);
 
     static bool last_position_processed = false;
 
@@ -110,6 +115,29 @@ private :
     static volatile bool watch_for_jerk_point;
 
 
+    //-------------------------------------------------------Speed Management----------------------------------------------------
+
+private :
+
+    //Deceleration Fields,  computed during the heuristic calls;
+    static bool acceleration_required;
+
+    static bool deceleration_required;
+
+    static float deceleration_dist;
+
+    static uint8_t deceleration_axis;
+
+
+    //Speed fields.
+
+    static float current_speed;
+
+    static float *steppers_speeds;
+
+    static float *deceleration_distances;
+
+
 
 
 
@@ -125,8 +153,6 @@ private:
     static uint8_t linear_tools_nb;
 
     static void (**linear_set_functions)(float);
-
-
 
 };
 

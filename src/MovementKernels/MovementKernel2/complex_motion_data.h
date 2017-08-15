@@ -52,6 +52,8 @@ typedef struct{//TODO REORG
 
 } complex_motion_data;//36 bytes
 
+
+
 typedef struct{
     float slopes[NB_STEPPERS];
     //--------4*NB_STEPPERS------------
@@ -63,5 +65,10 @@ typedef struct{
     //-----------3*NB_STEPPERS-----------
 } complex_linear_data;
 
+
+typedef struct{
+    float distance;
+    sig_t negative_signature;
+} pre_processor_data;
 
 #endif //TRACER_COMPLEX_MOTION_DATA_H

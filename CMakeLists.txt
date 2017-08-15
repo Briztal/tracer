@@ -55,6 +55,8 @@ add_custom_target(
 
 #--------------------------------------------LOW LEVEL LIBS-------------------------------------------------------------
 
+include_directories(src/MovementKernels)
+
 set(CP "src/Core")
 set(HP src/hardware_language_abstraction)
 
@@ -123,33 +125,38 @@ add_library(datastructures
 
         )
 
-
-set(MP "src/StepperControl")
-set(MNP "src/StepperControl/LinearMovement")
-set(MTP "src/StepperControl/NonLinearMovements")
-set(CP "src/StepperControl/ComplexMovements")
+#-------------------------------------------------KERNELS---------------------------------------------------------------
 
 
-add_library(motion
+set(KP "src/MovementKernels")
 
-        ${CP}/ComplexMovement.cpp
-        ${CP}/ComplexMovement.h
-        ${CP}/LinearComplexMovement.cpp
-        ${CP}/LinearComplexMovement.h
+add_library(kernels
 
-        ${MP}/StepperAbstraction.cpp ${MP}/StepperController.cpp ${MP}/MovementExecuter.cpp ${MP}/TrajectoryExecuter.cpp ${MP}/SpeedManager.cpp ${MP}/SpeedPlanner.cpp ${MNP}/LinearMovement.cpp
+        ${KP}/MovementExecuter.h
+        ${KP}/MovementExecuter.cpp
+        ${KP}/StepperAbstraction.h
+        ${KP}/StepperAbstraction.cpp
+        ${KP}/StepperController.h
+        ${KP}/StepperController.cpp
 
-        ${MNP}/HomingMovement.cpp ${MTP}/NonLinearMovement.cpp ${MTP}/NonLinearMovementTemplate.cpp ${MTP}/MotionBezier.cpp
-        ${MTP}/MotionEllipses.cpp ${MP}/mathProcess.cpp ${MP}/swap.cpp
+        )
 
-        ${MP}/StepperAbstraction.h ${MP}/StepperController.h ${MP}/MovementExecuter.h ${MP}/TrajectoryExecuter.h ${MP}/SpeedManager.h ${MP}/SpeedPlanner.h  ${MNP}/LinearMovement.h
-        ${MNP}/HomingMovement.h ${MTP}/NonLinearMovement.h ${MTP}/NonLinearMovementTemplate.h ${MTP}/MotionBezier.h
-        ${MTP}/MotionEllipses.h ${MP}/mathProcess.hpp ${MP}/swap.hpp ${MP}/motion_data.h
+#-------------------------------------------------KERNEL2---------------------------------------------------------------
 
-        src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.h
-        src/StepperControl/ComplexMovements/PreProcessor.cpp src/StepperControl/ComplexMovements/PreProcessor.h
 
-        src/StepperControl/ComplexMovements/SqrtFastComputer.cpp src/StepperControl/ComplexMovements/SqrtFastComputer.h)
+set(K2P "src/MovementKernels/MovementKernel2")
+
+add_library(kernel2
+
+        ${K2P}/complex_motion_data.h
+        ${K2P}/ComplexTrajectoryExecuter.h
+        ${K2P}/ComplexTrajectoryExecuter.cpp
+        ${K2P}/PreProcessor.h
+        ${K2P}/PreProcessor.cpp
+        ${K2P}/SqrtFastComputer.h
+        ${K2P}/SqrtFastComputer.cpp
+
+        )
 
 #--------------------------------------------------LINK----------------------------------------------------------------
 
@@ -159,14 +166,15 @@ target_link_libraries(actions external)
 target_link_libraries(core asserv)
 
 
-target_link_libraries(core motion)
-target_link_libraries(motion interface)
-target_link_libraries(motion core)
+target_link_libraries(core kernels)
+target_link_libraries(kernels interface)
+target_link_libraries(kernels core)
 
 target_link_libraries(core datastructures)
-target_link_libraries(motion datastructures)
+target_link_libraries(kernels datastructures)
 
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
-add_executable(TRACER src/main.cpp)
 
+
+add_executable(TRACER src/main.cpp)

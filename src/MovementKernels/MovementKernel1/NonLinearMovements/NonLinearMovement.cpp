@@ -158,13 +158,13 @@ void ComplexMovement::set_motion_data(const float min, const float max, const fl
     //Number of sub_movements
     uint16_t count = (uint16_t) ((max - min) / step);
 
-    //Get initial data (dists and dir signature)
+    //Get initial data (deceleration_distances and dir signature)
     uint8_t nsig = get_movement_distances(min, min + step, get_relative_position, elementary_dists);
 
     //Fill initial signatures (movement and dir)
     TrajectoryExecuter::fill_movement_data(true, elementary_dists, count, nsig);
 
-    //Get final data (dists and dir signature)
+    //Get final data (deceleration_distances and dir signature)
     nsig = get_movement_distances(count * step, max, get_relative_position, elementary_dists);
 
     //Fill final signatures (movement and dir)

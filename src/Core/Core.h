@@ -37,7 +37,7 @@
  * Main thread: Task manager. Runs basic tasks, like
  * - Communication Interface
  * - Basic interaction
- * - StepperControl Plannification for TRACER
+ * - MovementKernels Plannification for TRACER
  *
  * A task can be added, in the queue. Priorities may be defined in a future commit.
  *

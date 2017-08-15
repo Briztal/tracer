@@ -75,7 +75,7 @@ void MovementExecuter::process_next_move() {
             /*
              * First case : following a trajectory.
              *  All parameters have been enqueued in the trajectory executer queue.
-             *  All we need to do is to start the tracing procedure
+             *  All we need to do is to start_movement the tracing procedure
              */
             case 0 :
                 trajectory_move = true;
@@ -85,10 +85,10 @@ void MovementExecuter::process_next_move() {
                 /*
                  * Second case : a homing movement.
                  *  The movement does not require any pre-computed parameter.
-                 *  All we need to do is to start the homing procedure
+                 *  All we need to do is to start_movement the homing procedure
                  */
             case 1 :
-                //HomingMovement::start();
+                //HomingMovement::start_movement();
             default:
                 break;
 

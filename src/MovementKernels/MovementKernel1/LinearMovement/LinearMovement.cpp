@@ -187,9 +187,9 @@ void LinearMovement::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTAR
     /*
     //Setting destination
     for (uint8_t axis = 0; axis < dimension; axis++)
-        next_t[axis] = (uint16_t) dists[axis];
+        next_t[axis] = (uint16_t) deceleration_distances[axis];
 
-    //Effective StepperControl.
+    //Effective MovementKernels.
     elementary_motion(0);
      */
 }

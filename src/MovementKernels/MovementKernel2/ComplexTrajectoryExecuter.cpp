@@ -19,19 +19,14 @@
 */
 
 #include "../../config.h"
-
 #ifdef ENABLE_STEPPER_CONTROL
 
+#include <stdint.h>
 #include "ComplexTrajectoryExecuter.h"
-#include "../../Interfaces/TreeInterface/TreeInterface.h"
 #include "../StepperController.h"
-#include "../LinearMovement/LinearMovement.h"
 #include "../../Actions/ContinuousActions.h"
 #include "../MovementExecuter.h"
 #include "PreProcessor.h"
-#include "../StepperAbstraction.h"
-#include "../../interface.h"
-#include "../SpeedPlanner.h"
 
 /*
  * TODOs for a correct motion setup :
@@ -64,20 +59,6 @@ void ComplexTrajectoryExecuter::push_first_sub_movement(uint8_t *elementary_dist
 
 }
 
-
-void ComplexTrajectoryExecuter::fill_speed_data(delay_t delay_numerator, delay_t regulation_delay, float speed_factor,
-                                                float ratio, uint8_t processing_steps) {
-
-    motion_data_to_fill.processing_steps = processing_steps;
-    motion_data_to_fill.delay_numerator = delay_numerator;
-    motion_data_to_fill.speed_factor = speed_factor;
-    motion_data_to_fill.regulation_delay = regulation_delay;
-    motion_data_to_fill.ratio = ratio;
-    motion_data_to_fill.jerk_point = false;
-    motion_data_to_fill.jerk_distance_offset = 0;
-
-}
-
 void ComplexTrajectoryExecuter::fill_processors(void (*init_f)(), sig_t (*position_f)(float, float *),
                                                 void (*speed_f)()) {
     motion_data_to_fill.init_processor = init_f;
@@ -94,14 +75,13 @@ complex_motion_data *ComplexTrajectoryExecuter::peak_last_motion_data() {
     return motion_data_queue.peak_pushed();
 }
 
-
 /*
  * The movement initialisation function :
  *  - if possible, starts a movement;
  *  - if not, returns, and will re-check later (interrupt)
  */
 
-void ComplexTrajectoryExecuter::start() {
+void ComplexTrajectoryExecuter::start_movement() {
     in_motion = true;
 
     popped_data = motion_data_queue.pull();
@@ -144,8 +124,6 @@ void ComplexTrajectoryExecuter::start() {
 
     trajectory_indice = popped_data.initial_indice;
 
-    //Speed update according to pre_processed_parameters
-
     (*popped_data.init_processor)();
 
     //Set number of tools in continuous modes, and set action functions related
@@ -168,7 +146,7 @@ void ComplexTrajectoryExecuter::start() {
  *      - Get the next distances > task given to the subclass
  *      - check if obtained distances are long enough
  *      - If true, enqueue the distance array
- *      - if not, discard the distance array and start with a new increment
+ *      - if not, discard the distance array and start_movement with a new increment
  *
  * IMPORTANT : END_DISTANCE PROCESSING
  *
@@ -190,10 +168,14 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     uint8_t elementary_dists[NB_STEPPERS];
 
     //Step 0 : update signatures for the current move;
-    sig_t *elementary_signatures = get_signatures_array();
+    sig_t *elementary_signatures = initialise_sub_movement();
+
+    sig_t negative_signatures = 0;
+    float distance = 0;
 
     //Step 1 : Get a new position to reach
-    sig_t negative_signatures = PreProcessor::pop_next_position(elementary_dists);
+    PreProcessor::pop_next_position(elementary_dists, &negative_signatures, &distance);
+
     StepperController::set_directions(negative_signatures);
 
     STEP_AND_WAIT
@@ -204,22 +186,20 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     STEP_AND_WAIT;
 
     //Step 3 : Update the speed distance with the new heuristic distances
-    PreProcessor::regulate_speed();
+    float time = PreProcessor::pre_process_speed(distance, elementary_dists);
 
     STEP_AND_WAIT;
 
-    //Step 4 : modify the speed of movement and actions, with the new speed distance
-    update_speed_and_actions();
-
-    STEP_AND_WAIT;
-
-    //Step 5 : set the speed data for the next sub_movement
-    set_sub_movement_speed(elementary_dists);
+    //Step 3 : Update the speed distance with the new heuristic distances
+    PreProcessor::update_speeds(elementary_dists, time);
 
     STEP_AND_WAIT;
 
     //Step 5 : Extract signatures from this distances array
     process_signatures(elementary_dists, elementary_signatures, &trajectory_indice);
+
+    //Step 6 : determine the dela time for the next sub_movement :
+    delay = (uint32_t) (time) / (uint32_t) trajectory_indice;
 
     //If no more pre-process is required
     if (PreProcessor::last_position_popped) {
@@ -248,8 +228,14 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
 }
 
-sig_t *ComplexTrajectoryExecuter::get_signatures_array() {
+/*
+ * initialise_sub_movement : sets the delay, the trajectory indice, a
+ *      nd returns the pointer to the elementary signatures processed before
+ */
+sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
     saved_trajectory_indice = trajectory_indice;
+
+    set_stepper_int_period(delay);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -306,7 +292,7 @@ void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dis
     while (true) {
         sig_t sig = 0;
 
-        //Step 1 : get signature for current enqueue_movement
+        //Get signature for current enqueue_movement
 
 #define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
@@ -342,7 +328,7 @@ void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dis
 }
 
 
-//----------------------------------------------SPEED_MANAGEMENT--------------------------------------------------------
+//----------------------------------------------Movement_ending---------------------------------------------------------
 int i = 4;
 
 /*
@@ -354,6 +340,7 @@ int i = 4;
  *  If the current sub_movement is finished, then it programs the processing of the next sub_movement.
  *
  */
+
 void ComplexTrajectoryExecuter::finish_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
@@ -365,7 +352,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
         saved_trajectory_indice--;
     }
 
-    step(s_w_signature);
+    StepperController::fastStep(s_w_signature);
 
     //If the current sub_movement is finished
     if (!saved_trajectory_indice--) {
@@ -373,7 +360,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
         //Position log
 #ifdef position_log
         if (!(i--)) {
-            SpeedPlanner::send_position();
+            send_position();//TODO
             i = 20;
         }
 #endif

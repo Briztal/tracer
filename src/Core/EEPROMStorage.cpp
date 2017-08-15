@@ -478,7 +478,7 @@ void EEPROMStorage::setDefaultProfile() {
 
 #undef STEPPER_DATA
 
-    //Set default group speeds
+    //Set default group steppers_speeds
 #define CARTESIAN_GROUP(i, m0, m1, m2, s)\
     group_maximum_speeds[i] = s;
 
