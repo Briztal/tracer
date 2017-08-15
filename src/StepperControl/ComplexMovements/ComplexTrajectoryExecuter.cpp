@@ -26,108 +26,42 @@
 #include "../../Interfaces/TreeInterface/TreeInterface.h"
 #include "../StepperController.h"
 #include "../LinearMovement/LinearMovement.h"
-#include "../SpeedPlanner.h"
 #include "../../Actions/ContinuousActions.h"
 #include "../MovementExecuter.h"
-#include "../SpeedManager.h"
+#include "PreProcessor.h"
 #include "../StepperAbstraction.h"
+#include "../../interface.h"
+#include "../SpeedPlanner.h"
 
 /*
  * TODOs for a correct motion setup :
  *      set end distances
  *      set first elementary_distances, calling ComplexTrajectoryExecuter::fill_movement_data(true,  ... );
- *      set last  elementary_distances, calling ComplexTrajectoryExecuter::fill_movement_data(false, ... );w
+ *      set last  elementary_distances, calling ComplexTrajectoryExecuter::push_first_sub_movement(false, ... );w
  *      set speed data, calling SpeedPlanner::pre_set_speed_axis(...);
  *      set processing functions, calling ComplexTrajectoryExecuter::fill_processors(...);
  *      call ComplexTrajectoryExecuter::enqueue_movement_data
  *
  */
 
-
 //------------------------------------------------movement_queue_management---------------------------------------------
 
 /*
- * fill_movement_data : this function hashes the first sub_movement of the future motion, and adds the resulting data
+ * push_first_sub_movement : this function hashes the first sub_movement of the future motion, and adds the resulting data
  *      to the future movement data
  */
 
-
-void ComplexTrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dists, uint32_t count, sig_t nsig) {
-    if (first) {
-        motion_data_to_fill.count = count;
-        motion_data_to_fill.initial_dir_signature = nsig;
-    } else {
-        motion_data_to_fill.final_dir_signature = nsig;
-    }
+void ComplexTrajectoryExecuter::push_first_sub_movement(uint8_t *elementary_dists, sig_t nsig) {
+    motion_data_to_fill.initial_dir_signature = nsig;
 
     disable_stepper_interrupt()
 
-#define STEPPER(i, sig, ...)\
-    if (nsig&sig) SpeedManager::end_distances[i] += elementary_dists[i];\
-    else SpeedManager::end_distances[i] -= elementary_dists[i];
-
-#include "../../config.h"
-
-#undef STEPPER
-
-#define STEPPER(i, sig, ...)\
-    if (nsig&sig) SpeedManager::jerk_distances[i] += elementary_dists[i];\
-    else SpeedManager::jerk_distances[i] -= elementary_dists[i];
-
-#include "../../config.h"
-
-#undef STEPPER
-
+    update_end_distances(nsig, elementary_dists);
     enable_stepper_interrupt()
 
-    //uint8_t local_array_end = 0;
-    uint8_t motion_depth = 0;
-    sig_t pre_signatures[8];
-    while (true) {
-        sig_t sig = 0;
+    //TODO CHECK IF THE INDICE IS CORRECTLY WRITTEN
+    process_signatures(elementary_dists, motion_data_to_fill.initial_signatures, &(motion_data_to_fill.initial_indice));
 
-        //Step 1 : get signature for current enqueue_movement
-
-#define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
-
-#include "../../config.h"
-
-#undef STEPPER
-
-        //If a enqueue_movement is required to branch :
-        pre_signatures[motion_depth] = sig;
-        motion_depth++;
-
-        bool end_move = true;
-
-        //Step 2 : shift right and check if last enqueue_movement is reached
-#define STEPPER(i, sig, ...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
-
-#include "../../config.h"
-
-#undef STEPPER
-
-        if (end_move) {//if next_move is null
-            if (first) {
-                motion_data_to_fill.initial_indice = trajectory_indices[motion_depth - 1];
-            } else {
-                motion_data_to_fill.final_indice = trajectory_indices[motion_depth - 1];
-            }
-            break;
-        }
-    }
-
-    //Writing axis_signatures in the correct order
-    int i = 0;
-    if (first) {
-        for (; motion_depth--;) {
-            motion_data_to_fill.initial_signatures[i++] = pre_signatures[motion_depth];
-        }
-    } else {
-        for (; motion_depth--;) {
-            motion_data_to_fill.final_signatures[i++] = pre_signatures[motion_depth];
-        }
-    }
 }
 
 
@@ -141,12 +75,12 @@ void ComplexTrajectoryExecuter::fill_speed_data(delay_t delay_numerator, delay_t
     motion_data_to_fill.ratio = ratio;
     motion_data_to_fill.jerk_point = false;
     motion_data_to_fill.jerk_distance_offset = 0;
+
 }
 
-void ComplexTrajectoryExecuter::fill_processors(void (*init_f)(), void (*step_f)(sig_t), sig_t (*position_f)(uint8_t *),
+void ComplexTrajectoryExecuter::fill_processors(void (*init_f)(), sig_t (*position_f)(float, float *),
                                                 void (*speed_f)()) {
     motion_data_to_fill.init_processor = init_f;
-    motion_data_to_fill.step = step_f;
     motion_data_to_fill.position_processor = position_f;
     motion_data_to_fill.speed_processor = speed_f;
 }
@@ -156,15 +90,17 @@ void ComplexTrajectoryExecuter::enqueue_movement_data() {
     MovementExecuter::enqueue_trajectory_movement();
 }
 
-motion_data *ComplexTrajectoryExecuter::peak_last_motion_data() {
+complex_motion_data *ComplexTrajectoryExecuter::peak_last_motion_data() {
     return motion_data_queue.peak_pushed();
 }
+
 
 /*
  * The movement initialisation function :
  *  - if possible, starts a movement;
  *  - if not, returns, and will re-check later (interrupt)
  */
+
 void ComplexTrajectoryExecuter::start() {
     in_motion = true;
 
@@ -185,16 +121,12 @@ void ComplexTrajectoryExecuter::start() {
      * - ratio : the ratio speed_axis_dist(sqrt(sum(axis_dists^2)). Used.
      */
 
-    count = (uint16_t) (popped_data.count - 2);
-
     /*
      * Count doesn't take its maximum value,
      *    because the pre_computation doesn't need to happen during the penultimate and the ultimate sub_movements.
      */
 
-    get_new_position = popped_data.position_processor;
-    update_speed = popped_data.speed_processor;
-    step = popped_data.step;
+    PreProcessor::get_new_position = popped_data.position_processor;
 
     //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_movement"
     es0[0] = popped_data.initial_signatures[0];
@@ -214,170 +146,15 @@ void ComplexTrajectoryExecuter::start() {
 
     //Speed update according to pre_processed_parameters
 
-    SpeedManager::init_speed_management(popped_data.regulation_delay, popped_data.delay_numerator,
-                                        popped_data.speed_factor, popped_data.ratio, popped_data.processing_steps,
-                                        popped_data.jerk_point, popped_data.jerk_distance_offset);
-
     (*popped_data.init_processor)();
 
     //Set number of tools in continuous modes, and set action functions related
-    SpeedManager::updateActions();
+    PreProcessor::updateActions();
 
     set_stepper_int_function(prepare_next_sub_movement);
 
     enable_stepper_interrupt();
 
-}
-
-void ComplexTrajectoryExecuter::set_last_sub_motion() {//TODO END POSITION
-    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_movement"
-    es0[0] = popped_data.final_signatures[0];
-    es0[1] = popped_data.final_signatures[1];
-    es0[2] = popped_data.final_signatures[2];
-    es0[3] = popped_data.final_signatures[3];
-    es0[4] = popped_data.final_signatures[4];
-    es0[5] = popped_data.final_signatures[5];
-    es0[6] = popped_data.final_signatures[6];
-    es0[7] = popped_data.final_signatures[7];
-    is_es_0 = false;
-
-    StepperController::set_directions(popped_data.final_dir_signature);
-
-    saved_trajectory_indice = popped_data.final_indice;
-    saved_elementary_signatures = es0;
-}
-
-
-//-----------------------------------Intermediary_Positions_Pre_Computation---------------------------------------------
-
-
-void ComplexTrajectoryExecuter::push_new_position() {
-
-
-    //High level positions : the new position in the high level system (will be provided by get_new_positions).
-    float high_level_positions[NB_AXIS];
-
-    //Stepper positions : the new position in the steppers system (translated by StepperAbstraction).
-    int32_t steppers_positions[NB_STEPPERS];
-
-
-    //Stepper distances : As copying requires time, we directly put the temp distances in the final array.
-    uint8_t push_indice = sub_movement_queue.push_indice();
-    uint8_t *elementary_dists = sub_movement_distances + push_indice * NB_STEPPERS;
-
-    //The maximal stepper distance, and the maximum axis
-    uint8_t max_distance, max_axis;
-
-    sig_t negative_signature;
-
-
-    //------------------------------------------Distances_computing-----------------------------------------------------
-
-    //Get the new index candidate;
-    float index_candidate = index + increment;
-
-    //Get the new high level position;
-    get_new_position(index_candidate, high_level_positions);
-
-    //Translate the high level position into steppers position;
-    StepperAbstraction::translate(high_level_positions, steppers_positions);
-
-    //Get the steppers distances, and the maximal axis and distance
-    bool up_check = get_distances(current_stepper_positions, steppers_positions, elementary_dists,
-                                  &negative_signature, &max_axis, &max_distance);
-
-
-    //-----------------------------------------Validity_Verification----------------------------------------------------
-
-    //If the maximal distance is below the lower limit :
-    if (up_check) {
-        increment = increment / 2;
-        return;
-    }
-
-    //If the maximal distance is below the lower limit :
-    if (max_distance <= MINIMUM_DISTANCE_LIMIT) {
-        increment = 2 * increment;
-        return;
-    }
-
-
-    if (max_distance == MAX_DISTANCE_TARGET) {
-        //Increment adjustment according to the target
-        increment = increment * (float) MAX_DISTANCE_TARGET / (float) max_distance;
-
-        //TODO : if the queue is full, discard the current move
-    }
-
-    //-----------------------------------------Movement_Enqueuing----------------------------------------------------
-
-    /*
-     * Now that validity checks are made, we can enqueue the sub_movement :
-     * As the distances are already in the array, all we need to do is to push the direction signature
-     *      and validate the candidate index.
-     */
-
-    sub_movement_queue.push(negative_signature);
-
-    index = index_candidate;
-
-}
-
-
-/*
- * get_distances : this function determines the distance between a position and a target, for all axis.
- *
- * It also computes the direction signature, as distances are positive numbers, and saves the maximum axis
- *      and the maximum distance.
- */
-
-bool
-ComplexTrajectoryExecuter::get_distances(const int32_t *const pos, const int32_t *const dest, const uint8_t *const dists, sig_t *dir_dignature_p,
-                                         uint8_t *max_axis_p, uint8_t *max_distance_p) {
-
-    //Cache variable, to avoid pointer access.
-    uint8_t max_dist = 0;
-    uint8_t max_axis = 0;
-    sig_t dir_signature = 0;
-
-    //We must determine the distance for every axis
-    for (uint8_t axis = 0; axis<NB_STEPPERS; axis++) {
-
-        //get distance on axis
-        int32_t distance = pos[axis]-dest[axis];
-
-        //get absolute distance
-        if (distance < 0) {
-            distance = -distance;
-            dir_signature |= SpeedPlanner::axis_signatures[axis];
-        }
-
-        //if the distance is greater than the limit : fail with true
-        if (distance>=MAXIMUM_DISTANCE_LIMIT) {
-            return true;
-        }
-
-        //cast to small type
-        uint8_t rdist = (uint8_t) distance;
-
-        //Update max dist
-        if (rdist>max_dist) {
-            max_dist = rdist;
-            max_axis = axis;
-        }
-    }
-
-    //Finally update all data
-    *max_axis_p = max_axis;
-    *max_distance_p = max_dist;
-    *dir_dignature_p = dir_signature;
-
-    //No error
-    return false;
-}
-
-
-sig_t ComplexTrajectoryExecuter::pop_next_position(uint8_t *elementary_dists) {
 }
 
 
@@ -416,33 +193,52 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     sig_t *elementary_signatures = get_signatures_array();
 
     //Step 1 : Get a new position to reach
-    sig_t negative_signatures = pop_next_position(elementary_dists);
+    sig_t negative_signatures = PreProcessor::pop_next_position(elementary_dists);
+    StepperController::set_directions(negative_signatures);
 
     STEP_AND_WAIT
 
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    update_end_distances(elementary_dists);
+    update_end_distances(negative_signatures, elementary_dists);
 
     STEP_AND_WAIT;
 
     //Step 3 : Update the speed distance with the new heuristic distances
-    SpeedManager::regulate_speed();
+    PreProcessor::regulate_speed();
 
     STEP_AND_WAIT;
 
-    //Step 4 : Extract signatures from this distances array
-    process_signatures(elementary_dists, elementary_signatures);
-
-    STEP_AND_WAIT;
-
-    //Step 5 : modify the speed of movement and actions, with the new speed distance
+    //Step 4 : modify the speed of movement and actions, with the new speed distance
     update_speed_and_actions();
 
-    //Step 6 : get a new position
-    push_new_position();
+    STEP_AND_WAIT;
 
-    //Step 7 : if the position queue is not full, get a new position;
-    push_new_position();
+    //Step 5 : set the speed data for the next sub_movement
+    set_sub_movement_speed(elementary_dists);
+
+    STEP_AND_WAIT;
+
+    //Step 5 : Extract signatures from this distances array
+    process_signatures(elementary_dists, elementary_signatures, &trajectory_indice);
+
+    //If no more pre-process is required
+    if (PreProcessor::last_position_popped) {
+        goto end;
+    }
+
+    STEP_AND_WAIT;
+
+    //Step 7 : get a new position
+    PreProcessor::push_new_position();
+
+    STEP_AND_WAIT;
+
+    //Step 8 : if the position queue is not full, get a new position;
+    PreProcessor::push_new_position();
+
+
+    //Final steps :
+    end :
 
     //Set the light interrupt function to give time to background processes
     set_stepper_int_function(finish_sub_movement);
@@ -465,8 +261,18 @@ sig_t *ComplexTrajectoryExecuter::get_signatures_array() {
     }
 }
 
+/*
+ * update_end_distances : this function updates distances to end point and jerk point.
+ *
+ *  It takes as arguments the absolute distances on each axis of the next sub_movement, and their negative signature.
+ *
+ *      Reminder : the i_th bit of negative_signature is 1 if the distance on the i_th axis is negative.
+ *
+ *  The global distance is given by the maximum of all distance on each axis.
+ *
+ */
 
-void ComplexTrajectoryExecuter::update_end_distances(const uint8_t *elementary_dists) {
+void ComplexTrajectoryExecuter::update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
 
 #define STEPPER(i, sig, ...)\
     if (negative_signatures&sig) {SpeedManager::end_distances[i] += elementary_dists[i];SpeedManager::jerk_distances[i] += elementary_dists[i];}\
@@ -477,13 +283,23 @@ void ComplexTrajectoryExecuter::update_end_distances(const uint8_t *elementary_d
 
 #undef STEPPER
 
-    SpeedManager::heuristic_end_distance();
-    SpeedManager::heuristic_jerk_distance();
+    PreProcessor::heuristic_end_distance();
+    PreProcessor::heuristic_jerk_distance();
 
 }
 
-void
-ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, sig_t *const elementary_signatures) {
+
+/*
+ * process_signatures : this function pre_processes a move that will be executed later.
+ *
+ *  It determines the signatures of the movement.
+ *
+ *  More details about signatures meaning and the elementary movement algorithm can be found in TRACER's documentation.
+ *
+ */
+
+void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures,
+                                                   uint8_t *trajectory_indice) {
     uint8_t motion_depth = 0;
     sig_t pre_signatures[8];
 
@@ -512,7 +328,7 @@ ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, s
 #undef STEPPER
 
         if (end_move) {//if next_move is null
-            trajectory_indice = trajectory_indices[motion_depth - 1];
+            *trajectory_indice = trajectory_indices[motion_depth - 1];
             break;
         }
     }
@@ -522,61 +338,64 @@ ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, s
     for (; motion_depth--;) {
         elementary_signatures[i++] = pre_signatures[motion_depth];
     }
+
 }
 
-
-void ComplexTrajectoryExecuter::update_speed_and_actions() {
-    if (SpeedManager::delay0_update_required) {
-
-        SpeedManager::update_delay_0();
-
-        //Speed Setting
-        (*update_speed)();
-
-        STEP_AND_WAIT;
-
-        //Actions setting
-        SpeedManager::setActionsSpeeds();
-
-    }
-}
 
 //----------------------------------------------SPEED_MANAGEMENT--------------------------------------------------------
 int i = 4;
 
+/*
+ * finish_sub_movement : this function is called repeatedly when the next sub_movement has been fully planned.
+ *
+ *  The only thing it does is stepping steppers according to the current sub_movement signatures, and end
+ *      to leave time for background tasks.
+ *
+ *  If the current sub_movement is finished, then it programs the processing of the next sub_movement.
+ *
+ */
 void ComplexTrajectoryExecuter::finish_sub_movement() {
+
+    //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
 
+    //Get the correct signature
     sig_t s_w_signature;
-    if (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]]))
-        s_w_signature = saved_elementary_signatures[trajectory_array[--saved_trajectory_indice]];
+    while (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]])) {
+        saved_trajectory_indice--;
+    }
 
-    (*step)(s_w_signature);
+    step(s_w_signature);
+
+    //If the current sub_movement is finished
     if (!saved_trajectory_indice--) {
-        if (count) {
-            count--;
 
+        //Position log
 #ifdef position_log
-            if (!(i--)) {
-                SpeedPlanner::send_position();
-                i = 20;
-            }
+        if (!(i--)) {
+            SpeedPlanner::send_position();
+            i = 20;
+        }
 #endif
-            set_stepper_int_function(prepare_next_sub_movement);
-        } else {
-            if (penultimate_movement) {
-                in_motion = false;
-                saved_trajectory_indice = trajectory_indice;
-                saved_elementary_signatures = (is_es_0) ? es1 : es0;
-                penultimate_movement = false;
-            } else if (ultimate_movement) {
-                set_last_sub_motion();
-                ultimate_movement = false;
-            } else {
+
+        if (PreProcessor::last_position_popped) {
+            //If the no more pre_process is required :
+
+            if (PreProcessor::last_sub_move_engaged) {
+                //if the last movement has already been done : finish
 
                 SpeedPlanner::send_position();
                 set_stepper_int_function(MovementExecuter::process_next_move);
-                ultimate_movement = penultimate_movement = true;
+                PreProcessor::reset_vars();
+
+            } else {
+                //If last move hasn't been engaged : engage last move
+                PreProcessor::last_sub_move_engaged = true;
+
+                in_motion = false;
+                saved_trajectory_indice = trajectory_indice;
+                saved_elementary_signatures = (is_es_0) ? es1 : es0;
+
             }
         }
     }
@@ -584,16 +403,20 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 }
 
 
+
+
+//---------------------------------------------DECLARATIONS_DEFINITIONS-------------------------------------------------
+
+
 #define m ComplexTrajectoryExecuter
 
 //Acceleration Fields
-uint32_t m::count;
 
 bool m::in_motion = false;
 
-Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
-motion_data m::motion_data_to_fill;
-motion_data m::popped_data;
+Queue<complex_motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
+complex_motion_data m::motion_data_to_fill;
+complex_motion_data m::popped_data;
 
 sig_t *saved_elementary_signatures;
 uint8_t saved_trajectory_indice;
@@ -621,14 +444,6 @@ sig_t *m::saved_elementary_signatures = tes0;
 uint8_t m::saved_trajectory_indice;
 uint8_t m::trajectory_indice;
 
-//Processors;
-void (*m::step)(sig_t);
-
-sig_t (*m::get_new_position)(uint8_t *);
-
-void (*m::update_speed)();
-
-bool m::ultimate_movement = true, m::penultimate_movement = true;
 
 #undef m
 #endif

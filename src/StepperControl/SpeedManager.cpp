@@ -91,7 +91,7 @@ void SpeedManager::heuristic_jerk_distance() {
 
 
 /*
- * regulate_speed : this function uses the distance to the end provided by the heuristic, to modify the speed_distance.
+ * regulate_speed : this function uses the distance to the end provided by the heuristic, to modify the primary.
  *
  * It the distance is less than the minimal deceleration distance to respect the acceleration limit,
  *      it decrements the speed distance, and so enables the speed modification.
@@ -101,7 +101,7 @@ void SpeedManager::heuristic_jerk_distance() {
  */
 
 void SpeedManager::regulate_speed() {
-    //CI::echo("DISTANCE TO JERK POINT : "+String(speed_distance)+" "+String(distance_to_end_point)+" "+String(offseted_distance_to_jerk_point)+" "+String(speed_offset));
+    //CI::echo("DISTANCE TO JERK POINT : "+String(primary)+" "+String(distance_to_end_point)+" "+String(offseted_distance_to_jerk_point)+" "+String(speed_offset));
 
     if (distance_to_end_point < speed_distance) {
 
@@ -158,7 +158,7 @@ void SpeedManager::regulate_speed() {
 
 
 /*
- * set_speed_distance : this function updates the speed_distances, and its square root, with a call to sqrt.
+ * sqrt_slow : this function updates the speed_distances, and its square root, with a call to sqrt.
  *
  * It also sets correct variables for the fast algorithm.
  */
@@ -172,16 +172,16 @@ void SpeedManager::set_speed_distance(uint32_t distance_to_end) {
 
 
 /*
- * set_speed_distance_fast : this function updates the speed_distance and its square root,
+ * _sqrt_fast : this function updates the primary and its square root,
  *      with a more efficient algorithm than calling sqrt
  *
- * If positive_incr is true, it increments speed_distance with incr value. If not, it decrements it with incr value.
+ * If positive_incr is true, it increments primary with incr value. If not, it decrements it with incr value.
  *
  * This algorithm is based on the formula n*n = 1 + 3 + 5 + ... + (2.n-1)
  *
  * When the square root is modfied, it sets delay0_update_required, so that delay (speed) will be modified aferwards.
  *
- * The delay is set according to  : delay = delay_numerator/sqrt(speed_distance)
+ * The delay is set according to  : delay = delay_numerator/sqrt(primary)
  *
  */
 void SpeedManager::set_speed_distance_fast(bool positive_incr, uint16_t incr) {
@@ -236,9 +236,9 @@ void SpeedManager::set_speed_distance_fast(bool positive_incr, uint16_t incr) {
 }
 
 /*
- * go_to_speed_distance : this function sets speed distance, in absolute mode.
+ * sqrt_fast : this function sets speed distance, in absolute mode.
  *
- * It calls set_speed_distance_fast in relative mode.
+ * It calls _sqrt_fast in relative mode.
  */
 
 void SpeedManager::go_to_speed_distance(uint32_t distance_to_end) {
@@ -272,7 +272,7 @@ float last_ratio;
 void SpeedManager::init_speed_management(delay_t tmp_regulation_delay, delay_t tmp_delay_numerator,
                                          float tmp_speed_factor, float ratio, uint8_t processing_steps, bool jerk_point,
                                          uint32_t jerk_distance_offset) {
-    //Set speed_distance and delay0
+    //Set primary and delay0
     delay_t tmp_delay_0;
     if (speed_distance != 0) {
         tmp_delay_0 = (delay_t) ((float) delay0 * ratio / last_ratio);

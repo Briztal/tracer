@@ -37,7 +37,7 @@
  * TODOs for a correct motion setup :
  *      set end distances
  *      set first elementary_distances, calling MotionExecuter::fill_movement_data(true,  ... );
- *      set last  elementary_distances, calling MotionExecuter::fill_movement_data(false, ... );w
+ *      set last  elementary_distances, calling MotionExecuter::push_first_sub_movement(false, ... );w
  *      set speed data, calling SpeedPlanner::pre_set_speed_axis(...);
  *      set processing functions, calling MotionExecuter::fill_processors(...);
  *      call MotionExecuter::enqueue_movement_data

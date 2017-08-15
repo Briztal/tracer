@@ -32,7 +32,7 @@
  * TODOs for a correct motion setup :
  *      set end distances
  *      set first elementary_distances, calling MovementExecuter::fill_movement_data(true,  ... );
- *      set last  elementary_distances, calling MovementExecuter::fill_movement_data(false, ... );w
+ *      set last  elementary_distances, calling MovementExecuter::push_first_sub_movement(false, ... );w
  *      set speed data, calling MovementScheduler::pre_set_speed_axis(...);
  *      set processing functions, calling MovementExecuter::fill_processors(...);
  *      call MovementExecuter::enqueue_movement_data
@@ -43,7 +43,7 @@
 //------------------------------------------------movement_queue_management---------------------------------------------
 
 /*
- * fill_movement_data : this function hashes the first sub_movement of the future motion, and adds the resulting data
+ * push_first_sub_movement : this function hashes the first sub_movement of the future motion, and adds the resulting data
  *      to the future movement data
  */
 

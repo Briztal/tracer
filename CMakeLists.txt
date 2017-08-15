@@ -146,7 +146,10 @@ add_library(motion
         ${MNP}/HomingMovement.h ${MTP}/NonLinearMovement.h ${MTP}/NonLinearMovementTemplate.h ${MTP}/MotionBezier.h
         ${MTP}/MotionEllipses.h ${MP}/mathProcess.hpp ${MP}/swap.hpp ${MP}/motion_data.h
 
-        src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.h)
+        src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.cpp src/StepperControl/ComplexMovements/ComplexTrajectoryExecuter.h
+        src/StepperControl/ComplexMovements/PreProcessor.cpp src/StepperControl/ComplexMovements/PreProcessor.h
+
+        src/StepperControl/ComplexMovements/SqrtFastComputer.cpp src/StepperControl/ComplexMovements/SqrtFastComputer.h)
 
 #--------------------------------------------------LINK----------------------------------------------------------------
 

@@ -241,7 +241,7 @@ void LinearMovement::set_position_data(uint32_t *dists) {
  *
  * It computes count, and the first elementary distances.
  *
- * Afterwards, it calls MotionExecuter::fill_movement_data, that hashes the first sub_movement, and fills data.
+ * Afterwards, it calls MotionExecuter::push_first_sub_movement, that hashes the first sub_movement, and fills data.
  */
 void LinearMovement::set_motion_data(uint32_t *motion_dists) {
 
