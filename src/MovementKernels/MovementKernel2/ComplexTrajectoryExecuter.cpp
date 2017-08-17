@@ -514,6 +514,10 @@ uint8_t m::trajectory_indice;
 
 sig_t m::saved_direction_sigature;
 
+void (*m::movement_finalisation)();
+
+uint32_t m::delay = 0;
+
 
 #undef m
 #endif

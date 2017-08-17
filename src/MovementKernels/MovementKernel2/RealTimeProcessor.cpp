@@ -340,6 +340,7 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
 
 
 //-----------------------------------------------Speed_Management-------------------------------------------------------
+//TODO MODIFY THE SPEED ALGORITHM
 
 float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_t *const stepper_distances) {
 
@@ -495,7 +496,7 @@ void RealTimeProcessor::update_speeds(const uint8_t *const stepper_distances, fl
 
         float v = steppers_speeds[stepper] = (float) stepper_distances[stepper] * inv_time;
 
-        deceleration_distances[stepper] = (v * v) / (2 * EEPROMStorage::accelerations[stepper]);//TODO PRE_PROCESS
+        deceleration_distances[stepper] = (uint32_t) ((v * v) / (2 * EEPROMStorage::accelerations[stepper]));//TODO PRE_PROCESS
 
     }
 }
@@ -554,21 +555,73 @@ void RealTimeProcessor::reset_vars() {
 }
 
 
+//Static declarations - definitions;
+
 #define m RealTimeProcessor
 
+//Current stepper position;
+int32_t t_cur_pos[NB_STEPPERS];
+int32_t *const m::current_stepper_positions = t_cur_pos;
+
+//movement data queue;
+Queue<pre_processor_data> m::sub_movement_queue(MOTION_DATA_QUEUE_SIZE);
+
+//the elementary distances data
+uint8_t t_sm_d[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS];
+uint8_t *m::sub_movement_distances = t_sm_d;
+
+
+//Indexation variables
+float m::index_min = 0, m::index_max = 0, m::index = 0, m::increment = 0;
+
+
+//Trajectory function
+void (*m::get_new_position)(float, float *);
+
+//Queue state
 bool m::last_position_processed = false;
 bool m::last_position_popped = false;
 
-
-uint32_t m::speed_offset;
 
 //End distances
 int32_t k2ted[NB_STEPPERS]{0};
 int32_t *const m::end_distances = k2ted;
 
+
 //jerk distances
 int32_t k2tjd[NB_STEPPERS]{0};
 int32_t *const m::jerk_distances = k2tjd;
+
+
+//distances to end and jerk point
+uint32_t m::distance_to_end_point = 0;
+uint32_t m::offseted_distance_to_jerk_point = 0;
+
+
+//Deceleration Fields
+bool m::acceleration_required = false;
+bool m::deceleration_required = false;//TODO SET THOSE VARS ?
+float m::deceleration_dist = false;
+uint8_t m::deceleration_axis = 0;
+
+
+//Global speed
+float m::current_speed;
+
+//Steppers speeds
+float t_st_spd[NB_STEPPERS];
+float *const m::steppers_speeds = t_st_spd;
+
+//Deceleration distances
+uint32_t t_dec_dst[NB_STEPPERS];
+uint32_t *const m::deceleration_distances = t_dec_dst;
+
+//Speed Offset
+uint32_t m::speed_offset;
+
+//Jerk point watch
+volatile bool m::watch_for_jerk_point;
+
 
 uint8_t m::linear_tools_nb;
 
@@ -576,7 +629,6 @@ void (*k2tf[NB_CONTINUOUS]);
 
 void (**m::linear_set_functions)(float) = (void (**)(float)) k2tf;
 
-sig_t (*m::get_new_position)(float, float *);
 
 
 
@@ -591,7 +643,7 @@ sig_t k2t_sig[NB_STEPPERS + 1]{
 
 #undef STEPPER
 
-sig_t *m::axis_signatures = k2t_sig;
+const sig_t *const m::axis_signatures = k2t_sig;
 
 #undef m
 

@@ -221,9 +221,27 @@ void ComplexLinearMovement::get_real_time_position(float indice, float *position
             positions[max_axis] = offsets[axis] + indice * slopes[axis];
         }
     }
+
 }
 
 
 //Static declaration - definition :
+
+#define m ComplexLinearMovement
+
+//the data queue
 Queue<complex_linear_data> ComplexLinearMovement::linear_data_queue(MOTION_DATA_QUEUE_SIZE);
 
+//Pre_processing data
+float t_ppof[NB_AXIS], t_ppsl[NB_AXIS];
+float *m::pre_process_offsets = t_ppof;
+float *m::pre_process_slopes = t_ppsl;
+uint8_t m::pre_process_max_axis = 0;
+
+//Real time data
+float t_rtof[NB_AXIS], t_rtsl[NB_AXIS];
+float *m::real_time_offsets = t_rtof;
+float *m::real_time_slopes = t_rtsl;
+uint8_t m::real_time_max_axis = 0;
+
+#undef m

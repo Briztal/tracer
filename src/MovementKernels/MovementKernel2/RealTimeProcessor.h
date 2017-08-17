@@ -169,11 +169,11 @@ private :
 
     static float current_speed;
 
-    static float *steppers_speeds;
+    static float *const steppers_speeds;
 
-    static float *deceleration_distances;
+    static uint32_t *const deceleration_distances;
 
-    static sig_t *axis_signatures;
+    static const sig_t *const axis_signatures;
 
 
     //-------------------------------------------------------Actions----------------------------------------------------

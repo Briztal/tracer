@@ -229,13 +229,14 @@ add_library(kernel2
         ${K2P}/RealTimeProcessor.cpp
         ${K2P}/SqrtFastComputer.h
         ${K2P}/SqrtFastComputer.cpp
+        ${K2P}/IncrementComputer.h
+        ${K2P}/IncrementComputer.cpp
 
         #movements
         ${K2MP}/ComplexLinearMovement.h
         ${K2MP}/ComplexLinearMovement.cpp
 
-        src/MovementKernels/MovementKernel2/IncrementComputer.cpp src/MovementKernels/MovementKernel2/IncrementComputer.h)
-
+        )
 #--------------------------------------------------LINK----------------------------------------------------------------
 
 target_link_libraries(core actions)

@@ -24,6 +24,7 @@
 
 
 #include <DataStructures/Queue.h>
+#include "../complex_motion_data.h"
 
 class ComplexLinearMovement {
 
@@ -35,10 +36,11 @@ public:
 
 private :
 
-    //offsets for
-    static uint8_t pre_process_max_axis;
+    //offsets, slopes, and max_axis used during increment computation
     static float *pre_process_offsets;
     static float *pre_process_slopes;
+    static uint8_t pre_process_max_axis;
+
 
     //distances computation
     static bool get_distances(float *position, const float *destination, float *distances, uint8_t *maximum_axis,
