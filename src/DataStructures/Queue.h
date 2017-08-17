@@ -21,9 +21,10 @@
 #ifndef TRACER_QUEUE_H
 #define TRACER_QUEUE_H
 
-#include "../StepperControl/motion_data.h"
+#include <stdint.h>
 
-template <typename T> class Queue {
+template<typename T>
+class Queue {
 
 
 #define SAFE_DECR(i)\
@@ -35,26 +36,54 @@ template <typename T> class Queue {
 
 
 public:
-    Queue(uint8_t size)  :
+    Queue(uint8_t size) :
             size(size), content(new T[size]), max_indice((const uint8_t) (size - 1)),
-            spaces(size){
-
+            spaces(size) {
     }
 
 
     T pull() {
 
+
         T element = content[pull_index];
 
-        SAFE_DECR(pull_index);
-
-        elements--;
-        spaces++;
+        discard();
 
         return element;
+
     }
 
-    void push(T element) {
+    T *peak() {
+
+        return content + pull_index;
+    }
+
+    void discard() {
+
+        if (elements) {
+
+            SAFE_DECR(pull_index);
+
+            elements--;
+            spaces++;
+
+        }
+    }
+
+
+    void push() {
+
+        if (!spaces)
+            return;
+
+        SAFE_DECR(push_index);
+
+        elements++;
+        spaces--;
+
+    }
+
+    void push_object(T element) {
 
         if (!spaces)
             return;
@@ -68,9 +97,16 @@ public:
 
     }
 
-    T * peak_pushed() {
+
+    T *get_push_ptr() {
+
+        return content + push_index;
+    }
+
+
+    T *peak_pushed() {
         if (push_index != max_indice) {
-            return content+push_index+1;
+            return content + push_index + 1;
         } else {
             return content;
         }

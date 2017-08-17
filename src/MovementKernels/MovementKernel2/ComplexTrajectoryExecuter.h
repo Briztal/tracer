@@ -31,6 +31,101 @@
 #include "../../DataStructures/Queue.h"
 #include "../StepperController.h"
 
+class ComplexTrajectoryExecuter {
+
+
+    //--------------------------------------------movement_queue_management---------------------------------------------
+
+private:
+
+    static Queue<complex_motion_data> motion_data_queue;
+
+    //-----------------------------------------------sub_movement_queue-------------------------------------------------
+
+public :
+
+    //The state of the movement routine;
+    static bool started;
+
+private :
+
+    static bool stop_programmed;
+    static bool final_sub_movement_started;
+
+    //---------------------------------------------Real_Time_Movement_data----------------------------------------------
+
+public :
+
+    //Sub movement procedure variables :
+
+    //The signatures for the sub_movement that is currently executed
+    static sig_t *saved_elementary_signatures;
+
+    //The trajectory indice (signature indice in the movement) for the current move and the next prepare_movement
+    static uint8_t saved_trajectory_indice, trajectory_indice;
+
+    static sig_t saved_direction_sigature;
+
+    //The trajectory indices. Those are constant in the algorithm.
+    static const uint8_t *const trajectory_indices;
+
+    //the delay for the next movement;
+    static uint32_t delay;
+
+    //the trajectory array : contains the signature order.
+    static const uint8_t *const trajectory_array;
+
+    //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
+
+private :
+
+    //The arrys to store signatures
+    static sig_t *const es0, *const es1;
+    static bool is_es_0;
+
+    //------------------------------------------------Movement_Procedure------------------------------------------------
+
+
+public :
+
+    //movement routing start
+    static void start();
+
+    //movement routine interruption
+    static void stop();
+
+    //new movement enqueueing
+    static void enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
+                                 void (*trajectory_function)(float, float *));
+
+private:
+
+    //The function to finalise the current movement;
+    static void (*movement_finalisation)();
+
+    //new movement processing
+    static void process_next_movement();
+
+    //next sub_movement processing
+    static void prepare_next_sub_movement();
+
+    //sub_movement finishing procedure
+    static void finish_sub_movement();
+
+
+    //----------------------------------------------------Signatures----------------------------------------------------
+
+    //Signatures processing
+    static void process_signatures(uint8_t *const elementary_dists, sig_t * elementary_signatures, uint8_t *trajectory_indice);
+
+    //Method to initialise a sub_movement
+    static sig_t *initialise_sub_movement();
+
+    static void prepare_first_sub_movement();
+};
+
+
+
 #define WAIT\
     while(!stepper_int_flag) {}\
         stepper_int_flag_clear();
@@ -44,106 +139,6 @@
         StepperController::fastStep(s_w_signature);\
     }\
     WAIT
-
-class ComplexTrajectoryExecuter {
-
-
-    //--------------------------------------------movement_queue_management---------------------------------------------
-
-private:
-    static Queue<complex_motion_data> motion_data_queue;
-    static complex_motion_data motion_data_to_fill;
-    static complex_motion_data popped_data;
-
-
-
-    //-----------------------------------------------sub_movement_queue-------------------------------------------------
-
-public :
-
-    static bool in_motion;
-
-    static complex_motion_data *peak_last_motion_data();
-
-    //---------------------------------------------movement_pre_processing----------------------------------------------
-
-    /*
-     * The three functions above are in charge of adding data to motion_data_to_fill.
-     */
-public:
-
-    static void push_first_sub_movement(uint8_t *elementary_dists, sig_t negative_signatures);
-
-
-    static void
-    fill_processors(void (*init_f)(), sig_t (*position_f)(float, float *), void (*speed_f)());
-
-    //The function to copy the current motion_data to the queue.
-    static void enqueue_movement_data();
-
-    //---------------------------------------------Real_Time_Movement_data----------------------------------------------
-
-public :
-
-    static sig_t *saved_elementary_signatures;
-
-    static uint8_t saved_trajectory_indice, trajectory_indice, *const trajectory_indices;
-
-    static uint32_t delay;
-
-    static uint8_t *const trajectory_array;
-
-    //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
-
-private :
-
-    static sig_t *const es0, *const es1;
-    static bool is_es_0;
-
-
-
-    //------------------------------------------------Movement_Procedure------------------------------------------------
-
-
-public :
-
-    static void start_movement();
-
-private:
-
-    static void prepare_next_sub_movement();
-
-    static void finish_sub_movement();
-
-    //---------------------------------------------------End_Distances--------------------------------------------------
-
-    /*  End Distances Conventions :
-    *      pos              end_distance>0        destination   -> +
-    *      destination      end_distance<0        pos           -> +
-    *
-    *  if movement direction is
-    *      positive, (-> +), end distance decreases
-    *      negative, (- <-), end distance increases
-    *
-    *  if new destination is
-    *      greater than the position, (-> +), end distance increases
-    *      lesser  than the position, (- <-), end distance decreases
-    */
-
-    /*  Axis direction conventions :
-     *      true    : negative direction (- <-)
-     *      false   : positive direction (-> +)
-     */
-
-
-    static void update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
-
-    //----------------------------------------------------Signatures----------------------------------------------------
-
-    static void process_signatures(uint8_t *const elementary_dists, sig_t * elementary_signatures, uint8_t *trajectory_indice);
-
-    static sig_t *initialise_sub_movement();
-};
 
 
 #endif //TRACER_MOTIONEXECUTER_H

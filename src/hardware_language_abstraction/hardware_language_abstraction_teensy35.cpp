@@ -78,7 +78,7 @@ void set_stepper_int_function(void (*f)()) {
 
 //Complete setup
 
-void setup_stepper_interrupt(void (*function)(void), uint16_t period_us) {
+void setup_stepper_interrupt(void (*function)(void), uint32_t period_us) {
 
     cli();
 

@@ -19,16 +19,16 @@
 */
 
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef TRACER_TRAJECTORYEXECUTER_H
 #define TRACER_TRAJECTORYEXECUTER_H
 
-#include "../hardware_language_abstraction.h"
+#include <hardware_language_abstraction.h>
 #include "motion_data.h"
-#include "../DataStructures/Queue.h"
+#include <DataStructures/Queue.h>
 
 #define WAIT\
     while(!stepper_int_flag) {}\

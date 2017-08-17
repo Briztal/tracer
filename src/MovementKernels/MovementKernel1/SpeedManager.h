@@ -18,7 +18,7 @@
 
 */
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 

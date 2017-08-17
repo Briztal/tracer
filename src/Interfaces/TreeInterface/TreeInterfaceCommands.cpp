@@ -18,6 +18,7 @@
 
 */
 
+#include <MovementKernels/MovementKernel2/Movements/ComplexLinearMovement.h>
 #include "../../config.h"
 #ifdef ENABLE_TREE_INTERFACE
 
@@ -305,103 +306,18 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
 
 
-#include "../../Actions/ContinuousActions.h"
-#include "../../StepperControl/SpeedPlanner.h"
-#include "../../StepperControl/LinearMovement/LinearMovement.h"
-#include "../../StepperControl/LinearMovement/HomingMovement.h"
-#include "../../StepperControl/SpeedManager.h"
-#include "../../StepperControl/MovementExecuter.h"
-#include "../../Core/Asserv.h"
-#include "../../Sensors/Thermistors/Thermistors.h"
-#include "../../StepperControl/StepperAbstraction.h"
 
 void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
-    Asserv::enable_0();
-
-    Asserv::enable_1();
 
     CI::echo("400");
-    float coords[NB_STEPPERS]{0};
+    float coords[NB_AXIS]{0};
     coords[0] = 100;
     coords[1] = 40;
     coords[2] = 10;
     coords[3] = 40;
-    coords[4] = 50;
-    coords[5] = 138;
-    coords[6] = 82;
-    coords[7] = 43;
-    coords[8] = 120;
-    coords[9] = 12;
-    coords[10] = 152;
-    coords[11] = 90;
-    coords[12] = 14;
-    coords[13] = 142;
-    coords[14] = 160;
-    coords[15] = 35;
-    coords[16] = 100;
 
-    ContinuousActions::setLinearPower0(1);
-    SpeedPlanner::set_speed_for_group(0, 500);
-    SpeedPlanner::set_speed_group(0);
-
-    //TODO TESTER AVEC LES Z
-
-    LinearMovement::prepare_motion(coords);
-
-
-    delay(20);
-
-    coords[0] = 150;
-    coords[1] = 150;
-    coords[2] = 150;
-
-    coords[3] = 110;
-    coords[4] = 40;
-    coords[5] = 110;
-    coords[6] = 40;
-    coords[7] = 110;
-    coords[8] = 40;
-    coords[9] = 110;
-    coords[10] = 40;
-    coords[11] = 110;
-    coords[12] = 40;
-    coords[13] = 110;
-    coords[14] = 40;
-    coords[15] = 110;
-    coords[16] = 40;
-
-    LinearMovement::prepare_motion(coords);
-
-    delay(20);
-
-
-
-    MovementExecuter::enqueue_homing_movement();
-
-    delay(20);
-
-    coords[0] = 0;
-    coords[1] = 0;
-    coords[2] = 0;
-
-    coords[3] = 75;
-    coords[4] = 75;
-    coords[5] = 75;
-    coords[6] = 75;
-    coords[7] = 75;
-    coords[8] = 75;
-    coords[9] = 75;
-    coords[10] = 75;
-    coords[11] = 75;
-    coords[12] = 75;
-    coords[13] = 75;
-    coords[14] = 75;
-    coords[15] = 75;
-    coords[16] = 75;
-
-    LinearMovement::prepare_motion(coords);
-
+    ComplexLinearMovement::prepare_movement(coords);
 
     CI::echo("EXIT");
 
@@ -409,7 +325,7 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
 void TreeInterfaceCommands::home(char * dptr, uint8_t size) {
 
-    HomingMovement::move();
+    //HomingMovement::prepare_movement();
 
 }
 

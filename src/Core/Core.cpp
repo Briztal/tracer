@@ -24,10 +24,7 @@
 #include "../interface.h"
 #include "EEPROMStorage.h"
 #ifdef ENABLE_STEPPER_CONTROL
-#include "../StepperControl/StepperController.h"
-#include "../StepperControl/SpeedPlanner.h"
-#include "../StepperControl/MovementExecuter.h"
-#include "../StepperControl/SpeedManager.h"
+#include "../MovementKernels/StepperController.h"
 #endif
 
 
@@ -46,9 +43,6 @@ void Core::begin() {
 #ifdef ENABLE_STEPPER_CONTROL
     EEPROMStorage::begin();
     StepperController::begin();
-    SpeedPlanner::begin();
-    SpeedManager::begin();
-    MovementExecuter::start();
 #endif
 
 
@@ -84,8 +78,10 @@ bool Core::add_external_task(void (*f)(char *, uint8_t), char *args, uint8_t siz
     const uint8_t push_indice = external_tasks.push_indice();
 
 
-    //Push the task
-    external_tasks.push(f);
+    //Push the task function
+    void (**pf)(char *, uint8_t) = external_tasks.get_push_ptr();
+    *pf = f;
+    external_tasks.push();
 
 
     //Get the args pointer
@@ -133,7 +129,9 @@ bool Core::add_internal_task(void (*f)()) {
         return false;
     }
 
-    internal_tasks.push(f);
+    void (**pf)() = internal_tasks.get_push_ptr();
+    *pf = f;
+    external_tasks.push();
 
     return true;
 }
@@ -157,10 +155,11 @@ Queue<void(*)()> Core::internal_tasks(MAX_TASKS);
 char args_tab[MAX_TASKS][PACKET_SIZE+1];
 char *Core::external_args = (char *) args_tab;
 
-
+/*
 template class Queue<motion_data>;
 template class Queue<linear_data>;
 template class Queue<int>;
 template class Queue<void(*)(char *args, uint8_t args_size)>;
 template class Queue<void(*)()>;
 
+*/

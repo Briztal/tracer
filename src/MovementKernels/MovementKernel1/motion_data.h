@@ -21,7 +21,7 @@
 #define TRACER_MOTION_DATA_H
 
 #include <stdint.h>
-#include "../config.h"
+#include <config.h>
 
 typedef struct{//TODO REORG
         //First_last_sub_movement

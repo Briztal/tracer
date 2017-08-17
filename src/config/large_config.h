@@ -195,6 +195,8 @@ SERVO(2, servo3, 4, 0, 1)
 
 #define MOTION_DATA_QUEUE_SIZE 20
 
+#define DISTANCE_TARGET 15//TODO MAKE A KERNEL SECTION IN THIS FILE
+
 
 #define sig_t uint32_t
 #define delay_t uint32_t
@@ -227,25 +229,25 @@ AXIS(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
 
 //TODO DOC
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
-STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH,   2,      HIGH);
-STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH);
-STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH,   2,      HIGH)
+STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH)
+STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 
 /*
-STEPPER(4,  16,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(5,  32,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(6,  64,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(7,  128,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(8,  256,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(9,  512,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(10,  1024,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(11,  2048,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(12,  4096,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
-STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH);
+STEPPER(4,  16,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(5,  32,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(6,  64,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(7,  128,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(8,  256,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(9,  512,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(10,  1024,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(11,  2048,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(12,  4096,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 */
 
 #endif

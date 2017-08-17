@@ -18,17 +18,16 @@
 
 */
 
-#include <stdint.h>
-#include "../../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef CODE_MOTIONND_H
 #define CODE_MOTIONND_H
 
+#include <stdint.h>
+#include <DataStructures/Queue.h>
 
-#include "../motion_data.h"
-#include "../../DataStructures/Queue.h"
 
 class LinearMovement {
 

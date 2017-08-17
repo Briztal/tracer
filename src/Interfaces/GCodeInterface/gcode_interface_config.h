@@ -54,9 +54,9 @@
  *          Here, at every node, a switch is made over the direct children.
  *
  * To define the command tree, you have access to the three following commands :
- *      COMMAND(i, fname)           : defines a leaf node, that triggers a method in MachineController::fname
- *      GO_LOWER_COMMAND(i, fname)  : defines a non leaf node that triggers MachineController::fname if it terminates a GCode (ex : G1 upper), and go to its level
- *      GO_LOWER(i)                 : defines a non leaf node, that does not trigger any function, and goes to its level
+ *      COMMAND(k1_position_indice, fname)           : defines a leaf node, that triggers a method in MachineController::fname
+ *      GO_LOWER_COMMAND(k1_position_indice, fname)  : defines a non leaf node that triggers MachineController::fname if it terminates a GCode (ex : G1 upper), and go to its level
+ *      GO_LOWER(k1_position_indice)                 : defines a non leaf node, that does not trigger any function, and goes to its level
  *      GO_UPPER()                  : returns to the parent node level
  *
  *

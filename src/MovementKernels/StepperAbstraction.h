@@ -78,10 +78,29 @@
 
 class StepperAbstraction {
 
-    static void invert(const long *const steppers_coordinates, float *const hl_coordinates);
+
+
+    //--------------------------------------------current_stepper_positions---------------------------------------------
 
 public:
+
     static void translate(const float *const hl_coordinates, long *const steppers_coordinates);
+
+    static void invert(const long *const steppers_coordinates, float *const hl_coordinates);
+
+
+    //--------------------------------------------current_stepper_positions---------------------------------------------
+
+private :
+
+    static float *current_position;
+
+public :
+
+    static void get_current_position(float *const position);
+
+    void update_position(const float *const new_position);
+
 };
 
 

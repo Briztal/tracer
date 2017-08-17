@@ -18,19 +18,17 @@
 
 */
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "TrajectoryExecuter.h"
-#include "SpeedManager.h"
-#include "../Interfaces/TreeInterface/TreeInterface.h"
-#include "motion_data.h"
-#include "StepperController.h"
-#include "LinearMovement/LinearMovement.h"
-#include "SpeedPlanner.h"
-#include "../Actions/ContinuousActions.h"
 #include "MovementExecuter.h"
+#include "SpeedManager.h"
+#include "SpeedPlanner.h"
+#include <MovementKernels/StepperController.h>
+
+
 
 /*
  * TODOs for a correct motion setup :
@@ -66,7 +64,7 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
     if (nsig&sig) SpeedManager::end_distances[i] += elementary_dists[i];\
     else SpeedManager::end_distances[i] -= elementary_dists[i];
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -74,7 +72,7 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
     if (nsig&sig) SpeedManager::jerk_distances[i] += elementary_dists[i];\
     else SpeedManager::jerk_distances[i] -= elementary_dists[i];
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -90,7 +88,7 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
 
 #define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -103,7 +101,7 @@ void TrajectoryExecuter::fill_movement_data(bool first, uint8_t *elementary_dist
         //Step 2 : shift right and check if last enqueue_movement is reached
 #define STEPPER(i, sig, ...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -152,7 +150,7 @@ void TrajectoryExecuter::fill_processors(void (*init_f)(), void (*step_f)(sig_t)
 }
 
 void TrajectoryExecuter::enqueue_movement_data() {
-    motion_data_queue.push(motion_data_to_fill);
+    motion_data_queue.push_object(motion_data_to_fill);//TODO NON !
     MovementExecuter::enqueue_trajectory_movement();
 }
 
@@ -279,7 +277,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
         if (negative_signatures&sig) {SpeedManager::end_distances[i] += elementary_dists[i];SpeedManager::jerk_distances[i] += elementary_dists[i];}\
         else {SpeedManager::end_distances[i] -= elementary_dists[i];SpeedManager::jerk_distances[i] -= elementary_dists[i];}\
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -303,7 +301,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 
 #define STEPPER(i, signature,...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -316,7 +314,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
             //Step 2 : shift right and check if last enqueue_movement is reached
 #define STEPPER(i, signature,...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -365,7 +363,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 }
 
 //----------------------------------------------SPEED_MANAGEMENT--------------------------------------------------------
-int i = 4;
+int k1_position_indice = 4;
 void TrajectoryExecuter::finish_sub_movement() {
     disable_stepper_interrupt();
 
@@ -379,9 +377,9 @@ void TrajectoryExecuter::finish_sub_movement() {
             count--;
 
 #ifdef position_log
-            if (!(i--)) {
+            if (!(k1_position_indice--)) {
                 SpeedPlanner::send_position();
-                i=20;
+                k1_position_indice=20;
             }
 #endif
             set_stepper_int_function(prepare_next_sub_motion);
@@ -416,9 +414,6 @@ bool m::in_motion = false;
 Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;
 motion_data m::popped_data;
-
-sig_t *saved_elementary_signatures;
-uint8_t saved_trajectory_indice;
 
 uint8_t traj[255] = {
         0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0,5,

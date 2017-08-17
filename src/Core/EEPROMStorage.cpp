@@ -52,7 +52,7 @@
  *          indice
  *              max_speed
  *      6 : custom_parameters;
- *          i : parameter i;
+ *          k1_position_indice : parameter k1_position_indice;
  */
 
 
@@ -202,7 +202,7 @@ float EEPROMStorage::write(char *data, uint8_t size) {
 
     char t[4];
 
-    /*for (int i = 0; i<4; i++)CI::echo(String((uint8_t)data[i]));return 0;*/
+    /*for (int k1_position_indice = 0; k1_position_indice<4; k1_position_indice++)CI::echo(String((uint8_t)data[k1_position_indice]));return 0;*/
 #define WRITE_RETURN(var, type)  for (int i = 0; i<4; i++)t[i] = data[i];return (var = (type)(*(float*)t));
 
     if (!(size--)) return 0;
@@ -655,8 +655,8 @@ void EEPROMStorage::send_structure() {
      * reset_tree (beginning) :         0;
      * confirm_tree (end) :             1;
      * go_upper :                       2;
-     * go_lower(i, name) :              3, i, name
-     * create_leaf(i, name) :           4, i, name
+     * go_lower(k1_position_indice, name) :              3, k1_position_indice, name
+     * create_leaf(k1_position_indice, name) :           4, k1_position_indice, name
      */
 
     TI::prepare_EEPROM_packet();\

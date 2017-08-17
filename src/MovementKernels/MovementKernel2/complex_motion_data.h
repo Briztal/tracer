@@ -21,8 +21,10 @@
 #define TRACER_COMPLEX_MOTION_DATA_H
 
 #include <stdint.h>
-#include "../config.h"
+#include <config.h>
 
+
+/*
 typedef struct{//TODO REORG
         //First_last_sub_movement
     sig_t initial_signatures[8];//8
@@ -31,9 +33,9 @@ typedef struct{//TODO REORG
     sig_t initial_dir_signature;//1
     //-------------4--------------12
              //processors
-    void (*init_processor)();//2
+    void (*movement_initialisation)();//2
     //--------------4---------------16
-    sig_t (*position_processor)(float, float *);//2
+    sig_t (*trajectory_function)(float, float *);//2
     void (*speed_processor)(void);//2
     //--------------4---------------20
     void (*sub_move_init)(uint8_t);//2
@@ -51,18 +53,23 @@ typedef struct{//TODO REORG
     uint8_t processing_steps;//1
 
 } complex_motion_data;//36 bytes
+*/
 
+typedef struct{//TODO REORG
+    //processors
+    float min;
+    float max;
+    float increment;
+    void (*movement_initialisation)();
+    void (*movement_finalisation)();
+    void (*trajectory_function)(float, float *);
+} complex_motion_data;
 
 
 typedef struct{
-    float slopes[NB_STEPPERS];
-    //--------4*NB_STEPPERS------------
-    sig_t negative_signatures;
     uint8_t max_axis;
-    uint8_t first_pos[NB_STEPPERS];
-    //---------------2-----------------
-    uint32_t last_pos[NB_STEPPERS];
-    //-----------3*NB_STEPPERS-----------
+    float offsets[NB_AXIS];
+    float slopes[NB_STEPPERS];
 } complex_linear_data;
 
 
@@ -70,5 +77,6 @@ typedef struct{
     float distance;
     sig_t negative_signature;
 } pre_processor_data;
+
 
 #endif //TRACER_COMPLEX_MOTION_DATA_H

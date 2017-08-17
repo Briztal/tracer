@@ -18,15 +18,16 @@
 
 */
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
+
+#include <interface.h>
+#include <DataStructures/Queue.h>
 
 #include "MovementExecuter.h"
 #include "TrajectoryExecuter.h"
 #include "LinearMovement/HomingMovement.h"
-#include "../Interfaces/TreeInterface/TreeInterface.h"
-#include "../interface.h"
 #include "SpeedManager.h"
 /*
  * TODOs for a correct motion setup :
@@ -52,11 +53,11 @@ void MovementExecuter::start() {
 }
 
 void MovementExecuter::enqueue_trajectory_movement() {
-    movement_queue.push(0);
+    movement_queue.push_object(0);
 }
 
 void MovementExecuter::enqueue_homing_movement() {
-    movement_queue.push(1);
+    movement_queue.push_object(1);
 }
 
 /*
@@ -75,7 +76,7 @@ void MovementExecuter::process_next_move() {
             /*
              * First case : following a trajectory.
              *  All parameters have been enqueued in the trajectory executer queue.
-             *  All we need to do is to start_movement the tracing procedure
+             *  All we need to do is to start the tracing procedure
              */
             case 0 :
                 trajectory_move = true;
@@ -85,10 +86,10 @@ void MovementExecuter::process_next_move() {
                 /*
                  * Second case : a homing movement.
                  *  The movement does not require any pre-computed parameter.
-                 *  All we need to do is to start_movement the homing procedure
+                 *  All we need to do is to start the homing procedure
                  */
             case 1 :
-                //HomingMovement::start_movement();
+                //HomingMovement::start();
             default:
                 break;
 

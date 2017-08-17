@@ -19,19 +19,19 @@
 */
 
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include <math.h>
 #include <WString.h>
+#include <Actions/ContinuousActions.h>
+#include <hardware_language_abstraction.h>
+#include <interface.h>
 #include "SpeedManager.h"
-#include "TrajectoryExecuter.h"
-#include "../Core/EEPROMStorage.h"
-#include "../interface.h"
-#include "../Actions/ContinuousActions.h"
-#include "mathProcess.hpp"
 #include "SpeedPlanner.h"
+#include "mathProcess.hpp"
+
 
 void SpeedManager::begin() {
     set_speed_distance(0);
@@ -61,7 +61,7 @@ void SpeedManager::heuristic_end_distance() {
     distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -80,7 +80,7 @@ void SpeedManager::heuristic_jerk_distance() {
     distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 

@@ -19,20 +19,16 @@
 */
 
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "SpeedPlanner.h"
-#include "StepperController.h"
-#include "MovementExecuter.h"
-
-#include "../interface.h"
-#include "../Actions/ContinuousActions.h"
-#include "../Core/EEPROMStorage.h"
 #include "TrajectoryExecuter.h"
 #include "SpeedManager.h"
-#include "motion_data.h"
+#include <MovementKernels/StepperController.h>
+#include <interface.h>
+#include <Core/EEPROMStorage.h>
 
 
 void SpeedPlanner::begin() {
@@ -42,7 +38,7 @@ void SpeedPlanner::begin() {
     speed_groups_signatures[i] = ((s0!=-1) ? 1<<s0 : 0)|((s1!=-1) ? 1<<s1: 0)|((s2!=-1) ? 1<<s2 : 0);
 
 
-#include "../config.h"
+#include <config.h>
 
 #undef CARTESIAN_GROUP
 
@@ -113,7 +109,7 @@ float SpeedPlanner::get_regulation_speed(float *const relative_distsmm, const fl
         group_coeff+=relative_distsmm[i]*relative_distsmm[i];\
     }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -129,7 +125,7 @@ float SpeedPlanner::get_regulation_speed(float *const relative_distsmm, const fl
                 group_coeff+=relative_distsmm[i]*relative_distsmm[i];\
             }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -266,7 +262,7 @@ void SpeedPlanner::pre_set_speed_axis(uint8_t new_axis, float *relative_distsmm,
     delay_t tmp_delay_numerator = (delay_t) (1000000 / sqrt(2 * steps * acceleration));//TODO DELAY
     delay_t tmp_regulation_delay = (delay_t) (1000000 / (steps * distance_coefficient * regulation_speed));
 
-    //Determine the distance offset for the last move, so with the last acceleration and steps
+    //Determine the distance offset for the last prepare_movement, so with the last acceleration and steps
     uint32_t tmp_jerk_distance_offset = 0;
 
     last_steps = steps, last_acceleration = acceleration;
@@ -287,7 +283,7 @@ void SpeedPlanner::add_jerk_distances(int32_t *movement_distances) {
 
 
 /*
- * verify_jerk_limits : this function check if the jerk caused by the new move caracterised by the distances array
+ * verify_jerk_limits : this function check if the jerk caused by the new prepare_movement caracterised by the distances array
  *      does not exceeds limits on each axis.
  *
  * If the jerk on one axis exceeds the limit, it calculates the maximum speed that does not cause jerk excess,
@@ -301,16 +297,16 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
     /*
      * Formula :
      *
-     * The maximum (global) speed, to have the jerk on the axis i lesser than J is given by
+     * The maximum (global) speed, to have the jerk on the axis k1_position_indice lesser than J is given by
      *
-     *      V = J / abs(d1[i]/D1 - d2[i]/D2)
+     *      V = J / abs(d1[k1_position_indice]/D1 - d2[k1_position_indice]/D2)
      *
-     *      we will name the quantity d[i]/D a distance ratio.
+     *      we will name the quantity d[k1_position_indice]/D a distance ratio.
      *
      * Where :
      *
-     *      d1[i] is the distance traveled by the axis i during the last move
-     *      d2[i] is the distance that will be traveled by the axis i during the future enqueue_movement
+     *      d1[k1_position_indice] is the distance traveled by the axis k1_position_indice during the last prepare_movement
+     *      d2[k1_position_indice] is the distance that will be traveled by the axis k1_position_indice during the future enqueue_movement
      *
      *      D1 = sqrt(sum_k(d1[k]^2)), the euclidean norm of d1
      *      D2 = sqrt(sum_k(d2[k]^2)), the euclidean norm of d2
@@ -356,7 +352,7 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
 
             if ((TrajectoryExecuter::in_motion)&&(!SpeedManager::watch_for_jerk_point)) {
 
-                //If the current move is made without jerk point : notify SpeedManager to watch for jerk points
+                //If the current prepare_movement is made without jerk point : notify SpeedManager to watch for jerk points
                 pull_jerk_point();
                 SpeedManager::speed_offset = tmp_jerk_distance_offset;
 
@@ -403,7 +399,7 @@ void SpeedPlanner::push_jerk_point() {
 
     //Push the distance  (the queue is only here to manage pull and push indices on the array)
     unsigned char push_id = speed_distances_offsets.push_indice();
-    speed_distances_offsets.push(0);
+    speed_distances_offsets.push_object(0);
 
     //push all distances, used to update the jerk point in real time
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {

@@ -18,23 +18,17 @@
 */
 
 
-#include "../../config.h"
-#include "../../interface.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-
+#include <interface.h>
+#include <Core/EEPROMStorage.h>
+#include <MovementKernels/MovementKernel1/SpeedPlanner.h>
+#include <MovementKernels/MovementKernel1/SpeedManager.h>
+#include <MovementKernels/StepperController.h>
+#include <MovementKernels/MovementKernel1/TrajectoryExecuter.h>
 #include "LinearMovement.h"
-#include "../../Interfaces/TreeInterface/TreeInterface.h"
-#include "../../Actions/ContinuousActions.h"
-#include "../MovementExecuter.h"
-#include "../SpeedManager.h"
-#include "../SpeedPlanner.h"
-#include "../../Core/EEPROMStorage.h"
-#include "../StepperController.h"
-#include "../mathProcess.hpp"
-#include "../motion_data.h"
-#include "../TrajectoryExecuter.h"
 
 
 #define PROCESSING_STEPS (uint8_t)7
@@ -61,7 +55,7 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     //Move choice : a m
     if (absolute_distances[max_axis] < PROCESSING_STEPS) {
-        //max distance < steps per elementary-move -> only one micro enqueue_movement
+        //max distance < steps per elementary-prepare_movement -> only one micro enqueue_movement
         //TODO micro_move(absolute_distances);
     } else {
         //A enqueue_movement is indexed on an int value -> max distance must not be > INT_OVF
@@ -203,7 +197,7 @@ void LinearMovement::enqueue_movement(uint32_t *dists) {
     set_motion_data(dists);
 
     //Enqueue motion_data
-    data_queue.push(data_to_fill);
+    data_queue.push_object(data_to_fill);//TODO NON!
 
     //Enqueue motion_data
     TrajectoryExecuter::enqueue_movement_data();
@@ -317,7 +311,7 @@ sig_t LinearMovement::process_position(uint8_t *elementary_dists) {//2n-2
         MR_positions[i] += (elementary_dists[i] = (uint8_t) ((i2 - MR_positions[i])));\
     }\
 
-#include "../../config.h"
+#include <config.h>
 
 #undef STEPPER
 

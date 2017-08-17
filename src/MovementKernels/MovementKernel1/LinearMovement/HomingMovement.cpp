@@ -18,14 +18,14 @@
 
 */
 
-#include "../../config.h"
+#include "../../../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "../../config.h"
-#include "../../Core/EEPROMStorage.h"
+#include "../../../config.h"
+#include "../../../Core/EEPROMStorage.h"
 #include "HomingMovement.h"
-#include "../../StepperControl/StepperController.h"
+#include "../../StepperController.h"
 #include "../SpeedPlanner.h"
 #include "../MovementExecuter.h"
 
@@ -48,7 +48,7 @@ void HomingMovement::move() {
             StepperController::setDir##i(false);\
         }
 
-#include "../../config.h"
+#include "../../../config.h"
 
 #undef STEPPER
 
@@ -121,7 +121,7 @@ sig_t HomingMovement::readEndStops() {
         }\
     }
 
-#include "../../config.h"
+#include "../../../config.h"
 
 #undef STEPPER
 

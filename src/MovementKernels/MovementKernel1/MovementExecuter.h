@@ -19,16 +19,16 @@
 */
 
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef TRACER_MOVEMENTEXECUTER_H
 #define TRACER_MOVEMENTEXECUTER_H
 
-#include "../hardware_language_abstraction.h"
+#include <hardware_language_abstraction.h>
 #include "motion_data.h"
-#include "../DataStructures/Queue.h"
+#include "../../DataStructures/Queue.h"
 
 class MovementExecuter {
 
@@ -36,7 +36,7 @@ class MovementExecuter {
     static Queue<unsigned char> movement_queue;
 
     /*
-     * The methods to start_movement and stop the Movement Executer
+     * The methods to start and stop the Movements Executer
      */
 
 public :

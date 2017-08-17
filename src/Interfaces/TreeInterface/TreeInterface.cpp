@@ -363,10 +363,10 @@ void TI::send_tree_structure() {
      * reset_tree (beginning) :         0;
      * confirm_tree (end) :             1;
      * go_upper :                       2;
-     * go_lower(i) :                    3, i;
-     * create_leaf(i, name) :           4, i, name
-     * require_arg(i, name) :           5, i, name
-     * allow_multiplicity(i name)       6, i, name
+     * go_lower(k1_position_indice) :                    3, k1_position_indice;
+     * create_leaf(k1_position_indice, name) :           4, k1_position_indice, name
+     * require_arg(k1_position_indice, name) :           5, k1_position_indice, name
+     * allow_multiplicity(k1_position_indice name)       6, k1_position_indice, name
      */
 
     prepare_structure_packet();

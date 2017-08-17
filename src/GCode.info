@@ -5,11 +5,11 @@ Mi      M commands
 
 PARAMETER LETTERS :
 
-Ci mm	i axis coordinate
-Di mm    i coordinate in advanced moves
+Ci mm	k1_position_indice axis coordinate
+Di mm    k1_position_indice coordinate in advanced moves
 N : Carriage Return
 
-Amm 	X-offset in elliptic arc move
+Amm 	X-offset in elliptic arc prepare_movement
 Bmm	    Y-offset in elliptic arc enqueue_movement
 Rrad    Rotation angle
 Urad    Begin Angle
