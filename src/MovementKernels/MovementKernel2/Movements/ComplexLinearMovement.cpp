@@ -54,6 +54,8 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     //end if the machine is already at the destination;
     if (null_move) return;
 
+    StepperAbstraction::update_position(destination);
+
     //fill the slopes array
     get_slopes(slopes, distances, max_axis, max_distance);
 
@@ -66,10 +68,12 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     float increment = IncrementComputer::extract_increment(get_position, 0, 1, DISTANCE_TARGET);
 
     //Enqueue the movement in the trajectory executer
-    ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_motion, finalise_motion,  get_real_time_position);
+    ComplexTrajectoryExecuter::enqueue_movement(StepperAbstraction::get_speed(), 0, max_distance, increment,
+                                                initialise_motion, finalise_motion, get_real_time_position);
 
     //Push the local data
     linear_data_queue.push();
+
 
     //Terminate
     return;
@@ -82,7 +86,7 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
  * get_distances : this function computes the current move's distances.
  *
  * At the same time, it determines the maximum axis, and return "the current move is a null prepare_movement".
-
+ *
  */
 
 bool

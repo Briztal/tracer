@@ -1,6 +1,9 @@
 
 
 
+//TODO SPEED GROUPS IN STEPPERABSTRACTION,
+
+//TODO HL SPEED IN STEPPERABSTRACTION
 
 
 //BEFORE TESTING
@@ -17,6 +20,7 @@
 
     //TODO RESTREINDRE L'ENQUEUE DE MOUVEMENT DANS ComplexTrajectoryExecuter.
 
+    //TODO LA VERIFICATION DE LA FIN DE LA TRAJECTOIRE (index + 2*increment) < max_index n'est vraie que pour des trajectoires à l'index croissant.
 
 
 //END

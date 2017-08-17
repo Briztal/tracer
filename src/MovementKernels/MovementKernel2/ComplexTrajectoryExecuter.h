@@ -51,6 +51,7 @@ private :
 
     static bool stop_programmed;
     static bool final_sub_movement_started;
+    static bool jerk_point;
 
     //---------------------------------------------Real_Time_Movement_data----------------------------------------------
 
@@ -95,7 +96,7 @@ public :
     static void stop();
 
     //new movement enqueueing
-    static void enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
+    static void enqueue_movement(float speed, float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
                                  void (*trajectory_function)(float, float *));
 
 private:
@@ -104,7 +105,7 @@ private:
     static void (*movement_finalisation)();
 
     //new movement processing
-    static void process_next_movement();
+    static void process_next_movement(bool first_movement);
 
     //next sub_movement processing
     static void prepare_next_sub_movement();

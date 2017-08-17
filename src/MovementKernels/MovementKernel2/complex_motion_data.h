@@ -56,7 +56,7 @@ typedef struct{//TODO REORG
 */
 
 typedef struct{//TODO REORG
-    //processors
+    float speed;
     float min;
     float max;
     float increment;
@@ -76,6 +76,8 @@ typedef struct{
 typedef struct{
     float distance;
     sig_t negative_signature;
+    bool jerk_point;
+    float speed;
 } pre_processor_data;
 
 

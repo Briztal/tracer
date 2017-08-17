@@ -95,12 +95,17 @@ private :
 
     static float *current_position;
 
+    static float speed;//TODO SPEED GROUP
+
 public :
 
     static void get_current_position(float *const position);
 
-    void update_position(const float *const new_position);
+    static void update_position(const float *const new_position);
 
+    static float get_speed();
+
+    static void set_speed(float new_speed);
 };
 
 

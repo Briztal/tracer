@@ -24,6 +24,7 @@
 
 #include "ComplexTrajectoryExecuter.h"
 #include "RealTimeProcessor.h"
+#include "complex_motion_data.h"
 #include <interface.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
@@ -53,7 +54,7 @@ void ComplexTrajectoryExecuter::start() {
     final_sub_movement_started = false;
 
     //Initialise the RealTimeProcessor for the first movement
-    process_next_movement();
+    process_next_movement(true);
 
     //Set up the movement procedure
     prepare_first_sub_movement();
@@ -85,6 +86,39 @@ void ComplexTrajectoryExecuter::stop() {
 
 }
 
+
+/*
+ * process_next_movement : this function pops a movement from the movement queue, and initialises :
+ *      - the real time processor;
+ *      - the movement;
+ */
+
+void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
+
+    if (motion_data_queue.available_elements()) {
+
+        //Pull the next movement
+        complex_motion_data *d = motion_data_queue.peak();
+
+        //Update the trajectory variables
+        RealTimeProcessor::initialise_movement(d->min, d->max, d->increment, d->trajectory_function);
+
+        //Initialise the new movement
+        (*(d->movement_initialisation))();
+
+        movement_finalisation = d->movement_initialisation;
+
+        motion_data_queue.discard();
+
+        if (first_movement) {
+            RealTimeProcessor::set_regulation_speed(d->speed);
+        } else {
+            RealTimeProcessor::plan_speed_change(d->speed);
+        }
+
+    }
+
+}
 
 /*
  * prepare_first_sub_movement : this function sets all variables up for the movement routine.
@@ -133,13 +167,14 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
  *      - trajectory_function : the function that will be used to compute new positions in_real_time.
  *
  */
-void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(), void (*movement_finalisation)(),
+void ComplexTrajectoryExecuter::enqueue_movement(float speed, float min, float max, float incr, void (*movement_initialisation)(), void (*movement_finalisation)(),
                                                  void(*trajectory_function)(float, float *)) {
 
     //Get the insertion adress on the queue (faster than push-by-object)
     complex_motion_data *d = motion_data_queue.get_push_ptr();
 
     //Update the current case of the queue
+    d->speed = speed;
     d->min = min;
     d->max = max;
     d->increment = incr;
@@ -157,32 +192,6 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
 
 }
 
-/*
- * process_next_movement : this function pops a movement from the movement queue, and initialises :
- *      - the real time processor;
- *      - the movement;
- */
-
-void ComplexTrajectoryExecuter::process_next_movement() {
-
-    if (motion_data_queue.available_elements()) {
-
-        //Pull the next movement
-        complex_motion_data *d = motion_data_queue.peak();
-
-        //Update the trajectory variables
-        RealTimeProcessor::initialise_movement(d->min, d->max, d->increment, d->trajectory_function);
-
-        //Initialise the new movement
-        (*(d->movement_initialisation))();
-
-        movement_finalisation = d->movement_initialisation;
-
-        motion_data_queue.discard();
-
-    }
-
-}
 
 
 //----------------------------------------SUB_MOVEMENT_PRE_COMPUTATION--------------------------------------------------
@@ -448,7 +457,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 (*movement_finalisation)();
 
                 //Process the next movement
-                process_next_movement();
+                process_next_movement(false);
 
                 //interrupt on the normal routine
                 set_stepper_int_function(prepare_next_sub_movement);

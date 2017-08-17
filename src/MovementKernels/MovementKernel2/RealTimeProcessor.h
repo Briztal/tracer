@@ -93,16 +93,6 @@ public :
     static void reset_vars();
 
 
-    //-----------------------------------------------End_Jerk_Distances-------------------------------------------------
-
-
-public :
-
-    static void heuristic_end_distance();
-
-    static void heuristic_jerk_distance();
-
-
     //---------------------------------------------------End_Distances--------------------------------------------------
 
     /*  End Distances Conventions :
@@ -133,20 +123,14 @@ private :
 
     static int32_t *const end_distances;
 
-    static int32_t *const jerk_distances;
-
-    static uint32_t distance_to_end_point;
-
-    static uint32_t offseted_distance_to_jerk_point;
-
-    static uint32_t speed_offset;
-
-    static volatile bool watch_for_jerk_point;
-
 
     //------------------------------------------------Speed_Management--------------------------------------------------
 
+
 public :
+    static void set_regulation_speed(float speed);
+
+    static void plan_speed_change(float new_speed);
 
     static void update_speeds(const uint8_t *const stepper_distances, float time);
 
@@ -155,17 +139,21 @@ public :
 
 private :
 
+    static bool jerk_point;
+
+    static bool next_push_jerk;
+
+    static float next_regulation_speed;
+
+
+
     //Deceleration Fields,  computed during the heuristic calls;
-    static bool acceleration_required;
 
     static bool deceleration_required;
 
-    static float deceleration_dist;
-
-    static uint8_t deceleration_axis;
-
-
     //Speed fields.
+
+    static float regulation_speed;
 
     static float current_speed;
 

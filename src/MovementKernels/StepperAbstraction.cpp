@@ -82,6 +82,17 @@ void StepperAbstraction::update_position(const float *const new_position) {
 }
 
 
+float StepperAbstraction::get_speed() {
+    return speed;
+}
+
+void StepperAbstraction::set_speed(float new_speed) {
+    speed = new_speed;
+}
+
+
+float StepperAbstraction::speed = 0;
+
 //Static declaration - definition :
 float t_hl_pos[NB_AXIS];
 float *StepperAbstraction::current_position = t_hl_pos;

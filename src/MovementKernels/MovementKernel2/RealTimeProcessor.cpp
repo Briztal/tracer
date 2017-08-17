@@ -33,6 +33,7 @@
 
 void RealTimeProcessor::start() {
 
+
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //initialise speeds and distances
@@ -47,6 +48,9 @@ void RealTimeProcessor::start() {
 
 }
 
+void RealTimeProcessor::set_regulation_speed(float speed) {
+    regulation_speed = speed;
+}
 
 /*
  * initialise_movement : this function is called when the current movement is finished.
@@ -57,6 +61,7 @@ void RealTimeProcessor::start() {
  *      - trajectory_function : the function that actually computes stepper positions.
  *
  */
+
 void
 RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*trajectory_function)(float, float *)) {
 
@@ -79,50 +84,6 @@ void RealTimeProcessor::updateActions() {
         linear_tools_nb = 0;
     }
 }
-
-/*
- * Heuristic distance : this function calculates the heuristic distance between the actual position and the end position
- *
- * The current heuristic is the sum of all distances.
- */
-void RealTimeProcessor::heuristic_end_distance() {
-
-    int32_t td;
-    uint32_t distance = 0;
-    uint32_t dist = 0;
-
-#define STEPPER(i, ...) \
-    td = end_distances[i];\
-    distance=((uint32_t) (td<0) ? -td : td );\
-    if (distance>dist) dist = distance;
-
-#include "../../config.h"
-
-#undef STEPPER
-
-    distance_to_end_point = dist;
-
-}
-
-void RealTimeProcessor::heuristic_jerk_distance() {
-
-    int32_t td;
-    uint32_t distance = 0;
-    uint32_t dist = 0;
-
-#define STEPPER(i, ...) \
-    td = jerk_distances[i];\
-    distance=((uint32_t) (td<0) ? -td : td );\
-    if (distance>dist) dist = distance;
-
-#include "../../config.h"
-
-#undef STEPPER
-
-    offseted_distance_to_jerk_point = dist + speed_offset;
-
-}
-
 
 
 //-----------------------------------Intermediary_Positions_Pre_Computation---------------------------------------------
@@ -154,6 +115,7 @@ void RealTimeProcessor::fill_sub_movement_queue() {
  *
  *          //TODO UPDATE THE DOC WHEN THE CODE IS DONE
  */
+
 void RealTimeProcessor::push_new_position() {
 
     if (last_position_processed)
@@ -231,6 +193,12 @@ void RealTimeProcessor::push_new_position() {
 
     d->negative_signature = negative_signature;
     d->distance = movement_distance;
+    if (next_push_jerk) {
+        d->jerk_point = true;
+        d->speed = next_regulation_speed;
+    } else {
+        d->jerk_point = false;
+    }
 
     sub_movement_queue.push();
 
@@ -274,8 +242,6 @@ RealTimeProcessor::get_steppers_distances(const int32_t *const pos, const int32_
             return true;
         }
 
-
-
         //cast to small type
         uint8_t rdist = (uint8_t) distance;
 
@@ -298,6 +264,10 @@ RealTimeProcessor::get_steppers_distances(const int32_t *const pos, const int32_
     return false;
 }
 
+
+//TODO CALL HIGH LEVEL FUNCTION, FOR SPEED GROUPS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 float RealTimeProcessor::get_hl_distance(float *hl_distances) {
 
     float square_dist_sum = 0;
@@ -309,7 +279,6 @@ float RealTimeProcessor::get_hl_distance(float *hl_distances) {
 
     return (float) sqrt(square_dist_sum);
 }
-
 
 /*
  * update_end_distances : this function updates distances to end point and jerk point.
@@ -325,16 +294,13 @@ float RealTimeProcessor::get_hl_distance(float *hl_distances) {
 void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
 
 #define STEPPER(i, sig, ...)\
-    if (negative_signatures&sig) {end_distances[i] += elementary_dists[i];jerk_distances[i] += elementary_dists[i];}\
-    else {end_distances[i] -= elementary_dists[i];jerk_distances[i] -= elementary_dists[i];}\
+    if (negative_signatures&sig) {end_distances[i] += elementary_dists[i];}\
+    else {end_distances[i] -= elementary_dists[i];}\
 
 
 #include "../../config.h"
 
 #undef STEPPER
-
-    heuristic_end_distance();
-    heuristic_jerk_distance();
 
 }
 
@@ -342,95 +308,58 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 //TODO MODIFY THE SPEED ALGORITHM
 
+/*
+ * pre_process_speed : this function determines the correct time, for the movement passed as argument.
+ *
+ *  The movement is passed in he form of :
+ *      - movement distance : the high level distance
+ *      - stepper_distances : the effective stepper distances of the current movement;
+ *
+ *  It starts to determine the largest time window, at the current speeds. This window is the intersection of
+ *      time windows for all steppers.
+ *
+ *  Finally, the regulation time is determined, according to the following rule :
+ *      - if the machine must decelerate, the chosen time is the upper bound of the determined window.
+ *      - if not, if the regulation time is outside of the regulation window, the new time is the corresponding bound;
+ *      - if not, the current time is the regulation time.
+ *
+ */
+
 float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_t *const stepper_distances) {
 
 
-    if (deceleration_required) {
-        //If the machine must decelerate, because of the proximity of a jerk/end point:
+    //The regulation time, corresponding to the regulation speed;
+    float regulation_time = movement_distance / regulation_speed;
 
-        //temp value for the deceleration stepper.
-        uint8_t stepper = deceleration_axis;
+    //The final time
+    float new_time = 0;
 
-        //the value sqrt(2*acceleration*stepspmm)
-        float sqrt_2as = (float) sqrt(
-                2 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]);//TODO PRE_PROCESS
+    if (!jerk_point) {
+        //The movement time at the current speed, and its inverse,
+        float inv_time = current_speed / movement_distance;
 
-        //The square root of the deceleration distance
-        float sqrt_dist = (float) sqrt(deceleration_dist); //TODO FASTSQRT
-
-        //The delay time
-        float time = (float) stepper_distances[stepper] / (sqrt_2as * sqrt_dist);
-
-        //Update the speed
-        current_speed = movement_distance / time;
-
-        return time;
-
-    } else if (acceleration_required) {
-        //If the regulation speed hasn't been reached yet :
-
-        float min_time = 0;
-
-        /*
-         * We will here determine the minimum time for the current movement.
-         *
-         *  To do this, we will calculate the min time on each stepper and determine the minimum of those.
-         *
-         *  After, we update the current speed
-         *
-         */
-
-        for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-
-            //get the current speed on the stepper [stepper]
-            float act_speed = steppers_speeds[stepper];
-
-            //calculate the minimum time, according to the acceleration bound :
-            float time = stepper_distances[stepper] /
-                         (act_speed + EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]);
-
-            min_time = (time < min_time) ? min_time : time;
-
-        }
-
-        //Update the speed
-        current_speed = movement_distance / min_time;
-
-        return min_time;
-
-
-    } else {
-        //If the machine is at its regulation speed : verify the acceleration/deceleration bounds.
-
-
-        float time = movement_distance / current_speed;
-
-        float inv_time = 1 / time;
-
+        //Window computation variables
         float min_time = 0, max_time = 0;
-
         bool first_max = true;
 
-        bool max_reached = false, min_reached = false;
-
         //Get the time bounds for each stepper;
-
         for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-            //get the current speed on the stepper [stepper]
 
+            //Get the speed on last movement, on stepper [stepper]
             float act_speed = steppers_speeds[stepper];
 
+            //Compute the speed corresponding to the current movement
             float next_speed = (float) stepper_distances[stepper] * inv_time;
 
+            //Get the speed difference, its sign, and get its absolute value.
             float speed_diff = next_speed - act_speed;
-
             bool in_deceleration = (speed_diff > 0);
-
             if (in_deceleration) speed_diff = -speed_diff;
 
+            //Get the speed limit
             float speed_limit = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper];
 
-            //Acceleration or Deceleration limit reaching :
+            //Time window determination for all axis
             if (speed_diff > speed_limit) {
 
                 if (in_deceleration) {
@@ -443,8 +372,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
 
                     first_max = false;
 
-                    max_reached = true;
-
                 } else {
 
                     //if we accelerate, the new speed = act_speed + speed limit.
@@ -452,40 +379,67 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
 
                     //update minimum time, as the maximum of the new time and the current min time :
                     max_time = (n_time < max_time) ? n_time : max_time;
-
-                    min_reached = true;
                 }
 
             }
 
         }
 
-        float new_time = 0;
+        if (deceleration_required || (regulation_time > max_time)) {
+            //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
-        if (max_reached) {
-            //If the deceleration is too high, or if both limits are reached (impossible prepare_movement) : decelerate.
+            //Deceleration done
+            deceleration_required = false;
 
+            //choose the time corresponding to the maximum deceleration.
             new_time = max_time;
 
-        } else if (min_reached) {
-            //If the acceleration is too high : accelerate.
+        } else if (regulation_time < min_time) {
+            //If the regulation time is lower than the min time :
 
+            //choose the time corresponding to the maximum acceleration.
             new_time = min_time;
 
         } else {
-            //If all is normal, do not change time.
+            //If the regulation time is in the time window :
 
-            new_time = time;
+            //choose the regulation time.
+            new_time = regulation_time;
         }
 
-        //Update the speed
-        current_speed = movement_distance / new_time;
+    } else {
 
-        return new_time;
-
+        //if the next point is a jerk point, no acceleration checking is required.
+        new_time = regulation_time;
     }
+
+    //Update the speed
+    current_speed = movement_distance / new_time;
+
+    //validate the acceleration management for the next movement.
+    jerk_point = false;
+
+    return new_time;
+
 }
 
+
+/*
+ * plan_speed_change : this function marks that the next position to be pushed will be after a jerk point;
+ *
+ */
+
+void RealTimeProcessor::plan_speed_change(float speed) {
+
+    next_push_jerk = true;
+
+    next_regulation_speed = speed;
+}
+
+/*
+ * update_speeds : this function updates all stepper's speeds.
+ *
+ */
 
 void RealTimeProcessor::update_speeds(const uint8_t *const stepper_distances, float time) {
 
@@ -494,10 +448,20 @@ void RealTimeProcessor::update_speeds(const uint8_t *const stepper_distances, fl
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         //set the current speed on the stepper [stepper]
 
+        //get the speed for the stepper
         float v = steppers_speeds[stepper] = (float) stepper_distances[stepper] * inv_time;
 
-        deceleration_distances[stepper] = (uint32_t) ((v * v) / (2 * EEPROMStorage::accelerations[stepper]));//TODO PRE_PROCESS
+        //If a deceleration is required, no need for deceleration_distance checking
+        if (deceleration_required)
+            continue;
 
+        //Compute the deceleration deceleration_distance on the stepper
+        uint32_t deceleration_distance = (uint32_t) ((v * v) / (2 * EEPROMStorage::accelerations[stepper]));
+
+        //require a deceleration if the end distance on the stepper is below the deceleration_distance;
+        if (deceleration_distance > end_distances[stepper]) {
+            deceleration_required = true;
+        }
     }
 }
 
@@ -539,10 +503,15 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *nega
         memcpy(elementary_dists, ptr, NB_STEPPERS * sizeof(uint8_t));
 
         //update the direction signature and the distance memorised in the queue.
-        pre_processor_data data = sub_movement_queue.pull();
+        pre_processor_data *data = sub_movement_queue.peak();
 
-        *negative_signature = data.negative_signature;
-        *distance = data.distance;
+        *negative_signature = data->negative_signature;
+        *distance = data->distance;
+        bool jp = data->jerk_point;
+        jerk_point = jp;
+        if (jerk_point) {
+            regulation_speed = data->speed;
+        }
 
         return;
 
@@ -574,7 +543,6 @@ uint8_t *m::sub_movement_distances = t_sm_d;
 //Indexation variables
 float m::index_min = 0, m::index_max = 0, m::index = 0, m::increment = 0;
 
-
 //Trajectory function
 void (*m::get_new_position)(float, float *);
 
@@ -587,26 +555,17 @@ bool m::last_position_popped = false;
 int32_t k2ted[NB_STEPPERS]{0};
 int32_t *const m::end_distances = k2ted;
 
+bool m::deceleration_required = false;
 
-//jerk distances
-int32_t k2tjd[NB_STEPPERS]{0};
-int32_t *const m::jerk_distances = k2tjd;
-
-
-//distances to end and jerk point
-uint32_t m::distance_to_end_point = 0;
-uint32_t m::offseted_distance_to_jerk_point = 0;
-
-
-//Deceleration Fields
-bool m::acceleration_required = false;
-bool m::deceleration_required = false;//TODO SET THOSE VARS ?
-float m::deceleration_dist = false;
-uint8_t m::deceleration_axis = 0;
-
+bool m::jerk_point = true;
 
 //Global speed
+float m::regulation_speed;
 float m::current_speed;
+
+//next_speed parameters
+bool m::next_push_jerk = false;
+float m::next_regulation_speed = 0;
 
 //Steppers speeds
 float t_st_spd[NB_STEPPERS];
@@ -615,12 +574,6 @@ float *const m::steppers_speeds = t_st_spd;
 //Deceleration distances
 uint32_t t_dec_dst[NB_STEPPERS];
 uint32_t *const m::deceleration_distances = t_dec_dst;
-
-//Speed Offset
-uint32_t m::speed_offset;
-
-//Jerk point watch
-volatile bool m::watch_for_jerk_point;
 
 
 uint8_t m::linear_tools_nb;
