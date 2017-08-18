@@ -55,6 +55,8 @@ private :
     //The movement index and its bounds
     static float index_min, index_max, index;
 
+    static uint8_t movement_speed_group;
+
     static float increment;
 
     static void (*get_new_position)(float index, float *positions);
@@ -73,8 +75,6 @@ public :
 
     static bool get_steppers_distances(const int32_t *const pos, const int32_t *const dest, uint8_t *const dists,
                                        sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
-
-    static float get_hl_distance(float *hl_distances);
 
 //---------------------------------------------Pre_Computed_Positions_storage-------------------------------------------
 
@@ -123,14 +123,13 @@ private :
 
     static int32_t *const end_distances;
 
-
     //------------------------------------------------Speed_Management--------------------------------------------------
 
-
 public :
-    static void set_regulation_speed(float speed);
 
-    static void plan_speed_change(float new_speed);
+    static void set_regulation_speed(uint8_t speed_group, float speed);
+
+    static void set_regulation_speed_jerk(uint8_t speed_group, float new_speed);
 
     static void update_speeds(const uint8_t *const stepper_distances, float time);
 

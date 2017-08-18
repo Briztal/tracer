@@ -82,17 +82,132 @@ void StepperAbstraction::update_position(const float *const new_position) {
 }
 
 
+/*
+ * get_speed : this function returns the speed on the current speed group.
+ *
+ */
+
 float StepperAbstraction::get_speed() {
-    return speed;
-}
-
-void StepperAbstraction::set_speed(float new_speed) {
-    speed = new_speed;
+    return speeds[speed_group];
 }
 
 
-float StepperAbstraction::speed = 0;
+/*
+ * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument,
+ *      in the cartesian group provided in argument.
+ *
+ *  The movement is provided in the form of its distances.
+ *
+ *  The distance in the group is defined as the norm2 of the distance vector's projected
+ *      in the concerned cartesian group
+ *
+ */
+
+float StepperAbstraction::get_movement_distance_for_group(uint8_t speed_group, float *distances) {
+
+    float square_dist_sum = 0;
+
+    //Initialise the stepper index pointer
+    const int8_t * indexes = (speed_groups_indices + 3 * speed_group);
+
+    //Sum the square of all distance :
+    for (uint8_t stepper = 0; stepper < 3; stepper++) {
+
+        //Get the current axis value
+        int8_t index = indexes[stepper];
+
+        //if the cartesian group comprises less than 3 axis;
+        if (index==-1) break;
+
+        //get the distance
+        float dist = distances[indexes[stepper]];
+
+        //update the square sum
+        square_dist_sum += dist * dist;
+    }
+
+    //compute the square root and return it.
+    return (float) sqrt(square_dist_sum);
+}
+
+
+/*
+ * get_speed_group : this function provides the speed group to any external process.
+ */
+
+uint8_t StepperAbstraction::get_speed_group() {
+    return speed_group;
+}
+
+
+/*
+ * set_speed_group : this function updates the current speed group with the value provided inargument.
+ */
+
+void StepperAbstraction::set_speed_group(uint8_t speed_group) {
+    StepperAbstraction::speed_group = speed_group;
+}
+
+
+
+/*
+ * set_speed_for_group : this function updates the speed for the group provided in argument with the speed
+ *      provided in argument, or with the maximum speed for this group if the speed is greater than the limit.
+ *
+ */
+
+void StepperAbstraction::set_speed_for_group(uint8_t speed_group, float new_speed) {
+
+    //Get the maximum speed for this group
+    float max_speed = max_speeds[speed_group];
+
+    //update speeds with the minimum of speed and the maximum speed
+    speeds[speed_group] = min(max_speed, new_speed);
+
+}
 
 //Static declaration - definition :
+#define m StepperAbstraction
+
+//Positions
 float t_hl_pos[NB_AXIS];
-float *StepperAbstraction::current_position = t_hl_pos;
+float *m::current_position = t_hl_pos;
+
+//Speeds
+float t_speeds[NB_CARTESIAN_GROUPS];
+float *const m::speeds = t_speeds;
+
+uint8_t m::speed_group;
+
+//Speed groups indices
+
+//declare and fill the array
+int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
+
+#define CARTESIAN_GROUP(i, a, b, c, s) a, b, c,
+
+#include <config.h>
+
+#undef CARTESIAN_GROUP
+        //end the array
+        0 };
+
+//Assign the array
+const int8_t *const m::speed_groups_indices = t_sg_indices;
+
+
+//Maximum speeds
+
+//declare and fill the array
+static const float t_mx_speeds[NB_CARTESIAN_GROUPS + 1] = {
+
+#define CARTESIAN_GROUP(i, a, b, c, s) s,
+
+#include <config.h>
+
+#undef CARTESIAN_GROUP
+        //end the array
+        0};
+//Assign the array
+
+const float *const m::max_speeds = t_mx_speeds;

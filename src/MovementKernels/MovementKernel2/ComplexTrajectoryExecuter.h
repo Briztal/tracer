@@ -96,7 +96,7 @@ public :
     static void stop();
 
     //new movement enqueueing
-    static void enqueue_movement(float speed, float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
+    static void enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
                                  void (*trajectory_function)(float, float *));
 
 private:

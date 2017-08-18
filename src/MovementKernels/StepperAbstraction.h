@@ -91,22 +91,44 @@ public:
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
-private :
-
-    static float *current_position;
-
-    static float speed;//TODO SPEED GROUP
-
 public :
 
     static void get_current_position(float *const position);
 
     static void update_position(const float *const new_position);
 
+
+private :
+
+    static float *current_position;
+
+
+    //-------------------------------------------------Speed_Management-------------------------------------------------
+
+private :
+
+    static float *const speeds;
+
+    static const float *const max_speeds;
+
+    static uint8_t speed_group;
+
+    static const int8_t *const speed_groups_indices;
+
+public :
+
+    static float get_movement_distance_for_group(uint8_t speed_group, float *distances);
+
+    static uint8_t get_speed_group();
+
+    void set_speed_group(uint8_t speed_group);
+
     static float get_speed();
 
-    static void set_speed(float new_speed);
+    static void set_speed_for_group(uint8_t speed_group, float new_speed);
+
 };
+
 
 
 #endif //TRACER_STEPPERABSTRACTION_H

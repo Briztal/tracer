@@ -26,6 +26,7 @@
 #include "RealTimeProcessor.h"
 #include "complex_motion_data.h"
 #include <interface.h>
+#include <MovementKernels/StepperAbstraction.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -111,9 +112,9 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
         motion_data_queue.discard();
 
         if (first_movement) {
-            RealTimeProcessor::set_regulation_speed(d->speed);
+            RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
         } else {
-            RealTimeProcessor::plan_speed_change(d->speed);
+            RealTimeProcessor::set_regulation_speed_jerk(d->speed_group, d->speed);
         }
 
     }
@@ -167,20 +168,29 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
  *      - trajectory_function : the function that will be used to compute new positions in_real_time.
  *
  */
-void ComplexTrajectoryExecuter::enqueue_movement(float speed, float min, float max, float incr, void (*movement_initialisation)(), void (*movement_finalisation)(),
+
+void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(), void (*movement_finalisation)(),
                                                  void(*trajectory_function)(float, float *)) {
 
     //Get the insertion adress on the queue (faster than push-by-object)
     complex_motion_data *d = motion_data_queue.get_push_ptr();
 
-    //Update the current case of the queue
-    d->speed = speed;
+
+    //Update the current case of the queue :
+
+    //Speed vars
+    d->speed = StepperAbstraction::get_speed();
+    d->speed_group = StepperAbstraction::get_speed_group();
+
+    //Trajectory vars
     d->min = min;
     d->max = max;
     d->increment = incr;
-    d->movement_finalisation = movement_finalisation;
-    d->movement_initialisation = movement_initialisation;
     d->trajectory_function = trajectory_function;
+
+    //Movement initialisation - finalisation
+    d->movement_initialisation = movement_initialisation;
+    d->movement_finalisation = movement_finalisation;
 
     //Push
     motion_data_queue.push();
@@ -191,7 +201,6 @@ void ComplexTrajectoryExecuter::enqueue_movement(float speed, float min, float m
     }
 
 }
-
 
 
 //----------------------------------------SUB_MOVEMENT_PRE_COMPUTATION--------------------------------------------------

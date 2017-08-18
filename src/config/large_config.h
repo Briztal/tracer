@@ -288,9 +288,9 @@ STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,  1200.,      20.)
 
 #ifdef CARTESIAN_GROUP
 
-//              id,     s0      s1      s2      maxSpeed
-CARTESIAN_GROUP(0,      0,      1,      2,     500     )
-CARTESIAN_GROUP(1,      3,      -1,     -1,    500     )
+//              id,     a0      a1      a2      maxSpeed
+CARTESIAN_GROUP(0,      0,      1,      2,      500     )
+CARTESIAN_GROUP(1,      3,      -1,     -1,     500     )
 /*
 CARTESIAN_GROUP(2,      6,      7,      8,     500     )
 CARTESIAN_GROUP(3,      9,      10,     11,     500     )

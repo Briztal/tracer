@@ -57,6 +57,7 @@ typedef struct{//TODO REORG
 
 typedef struct{//TODO REORG
     float speed;
+    uint8_t speed_group;
     float min;
     float max;
     float increment;

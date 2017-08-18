@@ -48,8 +48,25 @@ void RealTimeProcessor::start() {
 
 }
 
-void RealTimeProcessor::set_regulation_speed(float speed) {
-    regulation_speed = speed;
+
+/*
+ * set_regulation_speed_jerk : this function updates the regulation speed,
+ *      and marks that the next position to be pushed will be after a jerk point;
+ *
+ */
+
+void RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float speed) {
+
+    next_push_jerk = true;
+
+    set_regulation_speed(speed_group, speed);
+}
+
+void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
+
+    RealTimeProcessor::movement_speed_group = speed_group;
+
+    next_regulation_speed = speed;
 }
 
 /*
@@ -150,7 +167,7 @@ void RealTimeProcessor::push_new_position() {
     //Get the new high level position;
     get_new_position(index_candidate, high_level_positions);
 
-    float movement_distance = get_hl_distance(high_level_positions);
+    float movement_distance = StepperAbstraction::get_movement_distance_for_group(movement_speed_group, high_level_positions);
 
     //Translate the high level position into steppers position;
     StepperAbstraction::translate(high_level_positions, steppers_positions);
@@ -265,21 +282,6 @@ RealTimeProcessor::get_steppers_distances(const int32_t *const pos, const int32_
 }
 
 
-//TODO CALL HIGH LEVEL FUNCTION, FOR SPEED GROUPS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-float RealTimeProcessor::get_hl_distance(float *hl_distances) {
-
-    float square_dist_sum = 0;
-
-    for (uint8_t stepper = 0; stepper < NB_AXIS; stepper++) {
-        float dist = hl_distances[stepper];
-        square_dist_sum += dist * dist;
-    }
-
-    return (float) sqrt(square_dist_sum);
-}
-
 /*
  * update_end_distances : this function updates distances to end point and jerk point.
  *
@@ -379,6 +381,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
 
                     //update minimum time, as the maximum of the new time and the current min time :
                     max_time = (n_time < max_time) ? n_time : max_time;
+
                 }
 
             }
@@ -424,17 +427,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
 }
 
 
-/*
- * plan_speed_change : this function marks that the next position to be pushed will be after a jerk point;
- *
- */
-
-void RealTimeProcessor::plan_speed_change(float speed) {
-
-    next_push_jerk = true;
-
-    next_regulation_speed = speed;
-}
 
 /*
  * update_speeds : this function updates all stepper's speeds.
@@ -543,6 +535,9 @@ uint8_t *m::sub_movement_distances = t_sm_d;
 //Indexation variables
 float m::index_min = 0, m::index_max = 0, m::index = 0, m::increment = 0;
 
+//Speed group for the current movement
+uint8_t m::movement_speed_group = 0;
+
 //Trajectory function
 void (*m::get_new_position)(float, float *);
 
@@ -581,8 +576,6 @@ uint8_t m::linear_tools_nb;
 void (*k2tf[NB_CONTINUOUS]);
 
 void (**m::linear_set_functions)(float) = (void (**)(float)) k2tf;
-
-
 
 
 //Axis signatures
