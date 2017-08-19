@@ -69,7 +69,7 @@ private :
     static void initialise_motion();
 
     //real time position provider
-    static void get_real_time_position(float indice, float *positions);
+    static void get_real_time_position(float index, float *positions);
 
     static void finalise_motion();
 };

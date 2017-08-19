@@ -204,7 +204,7 @@ SERVO(2, servo3, 4, 0, 1)
 //---------------------------------------------------STEPPER_ABSTRACTION------------------------------------------------
 
 //Number of axis in the high level coordinates system
-#define NB_AXIS 3
+#define NB_AXIS 4
 
 
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC

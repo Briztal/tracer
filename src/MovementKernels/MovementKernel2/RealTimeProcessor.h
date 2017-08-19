@@ -41,6 +41,11 @@ private:
 
     static int32_t *const current_stepper_positions;
 
+public :
+
+    static void send_position();
+
+
     //-----------------------------------------------Sub_movement_queue-------------------------------------------------
 
 private:
@@ -48,6 +53,10 @@ private:
     static Queue<pre_processor_data> sub_movement_queue;
     static uint8_t * sub_movement_distances;
 
+public :
+    static uint8_t elements() {
+        return sub_movement_queue.available_elements();
+    }
     //--------------------------------------------Positions_Computation-------------------------------------------------
 
 private :
@@ -73,7 +82,7 @@ public :
 #define MAXIMUM_DISTANCE_LIMIT 256
 
 
-    static bool get_steppers_distances(const int32_t *const pos, const int32_t *const dest, uint8_t *const dists,
+    static bool get_steppers_distances(int32_t *const pos, const int32_t *const dest, uint8_t *const dists,
                                        sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
 
 //---------------------------------------------Pre_Computed_Positions_storage-------------------------------------------
@@ -152,9 +161,9 @@ private :
 
     //Speed fields.
 
-    static float regulation_speed;
+    static float last_time;
 
-    static float current_speed;
+    static float regulation_speed;
 
     static float *const steppers_speeds;
 

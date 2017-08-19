@@ -19,6 +19,7 @@
 */
 
 #include <MovementKernels/MovementKernel2/Movements/ComplexLinearMovement.h>
+#include <MovementKernels/StepperAbstraction.h>
 #include "../../config.h"
 #ifdef ENABLE_TREE_INTERFACE
 
@@ -305,8 +306,6 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
 
 
-
-
 void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
 
@@ -316,6 +315,10 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[1] = 40;
     coords[2] = 10;
     coords[3] = 40;
+
+    StepperAbstraction::set_speed_group(0);
+
+    StepperAbstraction::set_speed_for_group(0, 200);
 
     ComplexLinearMovement::prepare_movement(coords);
 

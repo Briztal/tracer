@@ -30,7 +30,7 @@
 #include <Arduino.h>
 #include "StepperAbstraction.h"
 #include "../Core/EEPROMStorage.h"
-
+#include <interface.h>
 
 /*
  * translate : this function translates a position expressed in the high level coordinate system into
@@ -38,10 +38,12 @@
  *
  */
 
-void StepperAbstraction::translate(const float *const hl_coordinates, long *const steppers_coordinates) {
+void StepperAbstraction::translate(const float *const hl_coordinates, int32_t *const steppers_coordinates) {
 
+    //0.8 us
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        steppers_coordinates[axis] = (long) (EEPROMStorage::steps[axis] * hl_coordinates[axis]);
+        steppers_coordinates[axis] = (int32_t) (EEPROMStorage::steps[axis] * hl_coordinates[axis]);
+
     }
 
 }
@@ -53,11 +55,14 @@ void StepperAbstraction::translate(const float *const hl_coordinates, long *cons
  *
  */
 
-void StepperAbstraction::invert(const long *const steppers_coordinates, float *const hl_coordinates) {
+void StepperAbstraction::invert(const int32_t *const steppers_coordinates, float *const hl_coordinates) {
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         hl_coordinates[axis] = (float) (steppers_coordinates[axis]) / EEPROMStorage::steps[axis];
+
     }
+
+
 
 }
 
@@ -101,9 +106,11 @@ float StepperAbstraction::get_speed() {
  *  The distance in the group is defined as the norm2 of the distance vector's projected
  *      in the concerned cartesian group
  *
+ * 10 us
+ *
  */
 
-float StepperAbstraction::get_movement_distance_for_group(uint8_t speed_group, float *distances) {
+float StepperAbstraction::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
 
     float square_dist_sum = 0;
 

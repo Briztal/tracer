@@ -109,13 +109,13 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
 
         movement_finalisation = d->movement_initialisation;
 
-        motion_data_queue.discard();
-
         if (first_movement) {
             RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
         } else {
             RealTimeProcessor::set_regulation_speed_jerk(d->speed_group, d->speed);
         }
+
+        motion_data_queue.discard();
 
     }
 
@@ -143,11 +143,17 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
     RealTimeProcessor::pop_next_position(elementary_dists, &negative_signature, &distance);
 
     //update the speeds
-    float time = RealTimeProcessor::pre_process_speed(distance,
-                                                      elementary_dists);//TODO GET TIME IN THE PREPARATION FUNCTION
+    float time = RealTimeProcessor::pre_process_speed(distance, elementary_dists);
+
+    RealTimeProcessor::update_speeds(elementary_dists, time);
+
+    process_signatures(elementary_dists, es0, &trajectory_indice);
+    is_es_0 = false;
 
     //detemine the first delay
-    delay = (uint32_t) (time) / (uint32_t) trajectory_indice;
+    delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
+
+    CI::echo("delay : " + String(delay));
 
     //save the the signature
     saved_direction_sigature = negative_signature;
@@ -169,7 +175,8 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
  *
  */
 
-void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(), void (*movement_finalisation)(),
+void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
+                                                 void (*movement_finalisation)(),
                                                  void(*trajectory_function)(float, float *)) {
 
     //Get the insertion adress on the queue (faster than push-by-object)
@@ -227,7 +234,11 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
  *
  */
 
+bool bbbb = false;
+
 void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
+
+    //TODO CA PLANTE. MONITORER LES TAILLES DES FILES.
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
@@ -240,10 +251,13 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     sig_t negative_signatures = 0;
     float distance = 0;
 
+
     //Step 1 : Get a new position to reach
     RealTimeProcessor::pop_next_position(elementary_dists, &negative_signatures, &distance);
 
+
     saved_direction_sigature = negative_signatures;
+
 
     STEP_AND_WAIT
 
@@ -266,7 +280,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     process_signatures(elementary_dists, elementary_signatures, &trajectory_indice);
 
     //Step 6 : determine the dela time for the next sub_movement :
-    delay = (uint32_t) (time) / (uint32_t) trajectory_indice;
+    delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
 
     //If no more pre-process is required
     if (RealTimeProcessor::last_position_popped) {
@@ -282,6 +296,8 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     //Step 8 : if the position queue is not full, get a new position;
     RealTimeProcessor::push_new_position();
+
+    STEP_AND_WAIT;
 
 
     //Final steps :
@@ -306,6 +322,8 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
     saved_trajectory_indice = trajectory_indice;
 
     StepperController::set_directions(saved_direction_sigature);
+
+    CI::echo("delay " + String(delay));
 
     set_stepper_int_period(delay);
 
@@ -404,11 +422,13 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
 
+
+
     //Get the correct signature
     sig_t s_w_signature;
 
-    while (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]])) {
-        saved_trajectory_indice--;
+    if (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice--]])) {
+        s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]];
     }
 
     StepperController::fastStep(s_w_signature);
@@ -416,15 +436,18 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
     //If the current sub_movement is finished
     if (!saved_trajectory_indice--) {
 
+
         //Position log
 #ifdef position_log
         if (!(k2_position_indice--)) {
-            //TODO send_position();
+            RealTimeProcessor::send_position();
             k2_position_indice = 20;
         }
 #endif
 
         if (stop_programmed) {
+
+            CI::echo("stop programmed");
             //if the routine will stop at the end of the current movement:
 
             if (final_sub_movement_started) {
@@ -457,6 +480,8 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             }
 
         } else if (RealTimeProcessor::last_position_processed) {
+            CI::echo("last processed");
+
             //If the movement pre-processing is finished :
 
             if (motion_data_queue.available_elements()) {
@@ -482,6 +507,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
             //interrupt on the normal routine
             set_stepper_int_function(prepare_next_sub_movement);
+
         }
     }
 

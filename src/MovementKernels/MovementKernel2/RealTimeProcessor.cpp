@@ -42,9 +42,29 @@ void RealTimeProcessor::start() {
 
         deceleration_distances[stepper] = 0;
 
+        last_time = 0;
+
         //TODO PRE_PROCESSES
 
     }
+
+}
+
+
+/*
+ * send_position : this function sends the high level position to the controller.
+ *
+ *  It first inverts the current stepper positions, to obtain the high level position.
+ *
+ *  Then, it sends it using the interface.
+ *
+ */
+void RealTimeProcessor::send_position() {
+    float hl_positions[NB_AXIS];
+
+    StepperAbstraction::invert(current_stepper_positions, hl_positions);
+
+    CI::send_position(hl_positions);
 
 }
 
@@ -64,10 +84,13 @@ void RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float spe
 
 void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
 
+
     RealTimeProcessor::movement_speed_group = speed_group;
 
     next_regulation_speed = speed;
+
 }
+
 
 /*
  * initialise_movement : this function is called when the current movement is finished.
@@ -107,7 +130,8 @@ void RealTimeProcessor::updateActions() {
 
 
 void RealTimeProcessor::fill_sub_movement_queue() {
-    while (sub_movement_queue.available_spaces() || last_position_processed) {
+
+    while (sub_movement_queue.available_spaces() && !last_position_processed) {
         push_new_position();
     }
 }
@@ -135,7 +159,8 @@ void RealTimeProcessor::fill_sub_movement_queue() {
 
 void RealTimeProcessor::push_new_position() {
 
-    if (last_position_processed)
+
+    if ((!sub_movement_queue.available_spaces())||(last_position_processed))
         return;
 
     //High level positions : the new position in the high level system (will be provided by get_new_positions).
@@ -167,6 +192,7 @@ void RealTimeProcessor::push_new_position() {
     //Get the new high level position;
     get_new_position(index_candidate, high_level_positions);
 
+
     float movement_distance = StepperAbstraction::get_movement_distance_for_group(movement_speed_group, high_level_positions);
 
     //Translate the high level position into steppers position;
@@ -175,7 +201,6 @@ void RealTimeProcessor::push_new_position() {
     //Get the steppers distances, and the maximal stepper and distance
     bool up_check = get_steppers_distances(current_stepper_positions, steppers_positions, elementary_dists,
                                            &negative_signature, &max_axis, &max_distance);
-
 
     //-----------------Validity_Verification----------------------------
 
@@ -198,6 +223,7 @@ void RealTimeProcessor::push_new_position() {
     }
 
 
+
     //---------------------Movement_Enqueuing----------------------------
 
     /*
@@ -210,12 +236,8 @@ void RealTimeProcessor::push_new_position() {
 
     d->negative_signature = negative_signature;
     d->distance = movement_distance;
-    if (next_push_jerk) {
-        d->jerk_point = true;
-        d->speed = next_regulation_speed;
-    } else {
-        d->jerk_point = false;
-    }
+    d->speed = next_regulation_speed;
+    d->jerk_point = next_push_jerk;
 
     sub_movement_queue.push();
 
@@ -233,7 +255,7 @@ void RealTimeProcessor::push_new_position() {
  */
 
 bool
-RealTimeProcessor::get_steppers_distances(const int32_t *const pos, const int32_t *const dest,
+RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *const dest,
                                           uint8_t *const dists, sig_t *dir_dignature_p,
                                           uint8_t *max_axis_p, uint8_t *max_distance_p) {
 
@@ -246,7 +268,9 @@ RealTimeProcessor::get_steppers_distances(const int32_t *const pos, const int32_
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //get distance on stepper
-        int32_t distance = pos[stepper] - dest[stepper];
+        int32_t d = dest[stepper];
+        int32_t distance = pos[stepper] - d;
+        pos[stepper] = d;
 
         //get absolute distance
         if (distance < 0) {
@@ -337,58 +361,51 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
     float new_time = 0;
 
     if (!jerk_point) {
-        //The movement time at the current speed, and its inverse,
-        float inv_time = current_speed / movement_distance;
 
         //Window computation variables
         float min_time = 0, max_time = 0;
-        bool first_max = true;
+        bool first = true;
 
         //Get the time bounds for each stepper;
         for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
+            //TODO REFAIRE LE CALCUL DE LA FENETRE. Y A UN TRUC PAS NET, ON NE CALCULE QU'UNE BORNE LA ...
+
             //Get the speed on last movement, on stepper [stepper]
             float act_speed = steppers_speeds[stepper];
 
-            //Compute the speed corresponding to the current movement
-            float next_speed = (float) stepper_distances[stepper] * inv_time;
-
-            //Get the speed difference, its sign, and get its absolute value.
-            float speed_diff = next_speed - act_speed;
-            bool in_deceleration = (speed_diff > 0);
-            if (in_deceleration) speed_diff = -speed_diff;
+            if (last_time == 0) {
+                //For the Movement beginning, the standard time is 10 microseconds
+                last_time = 0.001;
+            }
 
             //Get the speed limit
-            float speed_limit = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper];
+            float speed_limit = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * last_time;
 
-            //Time window determination for all axis
-            if (speed_diff > speed_limit) {
+            //if the current stepper can stop, no processing is required :
+            float s;
 
-                if (in_deceleration) {
+            if ((s = act_speed - speed_limit) > 0) {
 
-                    //if we decelerate, the new speed = act_speed - speed limit.
-                    float n_time = stepper_distances[stepper] / (act_speed - speed_limit);
+                //update the maximum time, the new speed = act_speed - speed limit.
+                float up_time = stepper_distances[stepper] / s;
 
-                    //update maximum time, as the minimum of the new time and the current max time :
-                    min_time = (first_max) ? n_time : ((n_time < min_time) ? min_time : n_time);
+                //update maximum time, as the minimum of the new time and the current max time :
+                max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
 
-                    first_max = false;
-
-                } else {
-
-                    //if we accelerate, the new speed = act_speed + speed limit.
-                    float n_time = stepper_distances[stepper] / (act_speed + speed_limit);
-
-                    //update minimum time, as the maximum of the new time and the current min time :
-                    max_time = (n_time < max_time) ? n_time : max_time;
-
-                }
+                first = false;
 
             }
 
+            //update the minimum time, the new speed = act_speed + speed limit.
+            float down_time = stepper_distances[stepper] / (act_speed + speed_limit);
+
+            //update minimum time, as the maximum of the new time and the current min time :
+            min_time = (down_time < min_time) ? min_time : down_time;
+
         }
 
-        if (deceleration_required || (regulation_time > max_time)) {
+        if ((!first) && (deceleration_required || (regulation_time > max_time))) {
             //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
             //Deceleration done
@@ -416,11 +433,10 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
         new_time = regulation_time;
     }
 
-    //Update the speed
-    current_speed = movement_distance / new_time;
-
     //validate the acceleration management for the next movement.
     jerk_point = false;
+
+    last_time = new_time;
 
     return new_time;
 
@@ -499,11 +515,11 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *nega
 
         *negative_signature = data->negative_signature;
         *distance = data->distance;
-        bool jp = data->jerk_point;
-        jerk_point = jp;
-        if (jerk_point) {
-            regulation_speed = data->speed;
-        }
+        jerk_point = data->jerk_point;
+        regulation_speed = data->speed;
+
+        sub_movement_queue.discard();
+
 
         return;
 
@@ -556,7 +572,7 @@ bool m::jerk_point = true;
 
 //Global speed
 float m::regulation_speed;
-float m::current_speed;
+float m::last_time;
 
 //next_speed parameters
 bool m::next_push_jerk = false;

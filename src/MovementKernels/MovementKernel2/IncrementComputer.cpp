@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <MovementKernels/StepperAbstraction.h>
 #include "IncrementComputer.h"
+#include <interface.h>
 
 /*
  * extract_increment : this function takes as arguments :
@@ -43,6 +44,9 @@
 float IncrementComputer::extract_increment(void (*get_position)(float, float *), float point, float increment,
                                            const uint32_t distance_target) {
 
+
+
+    CI::echo("COMPUTING INCREMENT");
     //Arrays initialisation
     int32_t initial_positions[NB_AXIS], positions[NB_AXIS];
 
@@ -73,6 +77,8 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
         d = get_max_dists(initial_positions, positions);
 
     }
+
+    CI::echo("END INCREMENT");
 
     //return the increment that gives a position at the target distance of the initial position.
     return increment;

@@ -25,6 +25,7 @@
 #include <MovementKernels/MovementKernel2/IncrementComputer.h>
 #include "ComplexLinearMovement.h"
 
+#include <interface.h>
 
 /*
  * prepare_movement : this function takes a destination position as an argument and prepares a linear movement,
@@ -54,6 +55,8 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     //end if the machine is already at the destination;
     if (null_move) return;
 
+    d->max_axis = max_axis;
+
     StepperAbstraction::update_position(destination);
 
     //fill the slopes array
@@ -67,12 +70,15 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     //Extract the increment
     float increment = IncrementComputer::extract_increment(get_position, 0, 1, DISTANCE_TARGET);
 
-    //Enqueue the movement in the trajectory executer
-    ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_motion, finalise_motion,
-                                                get_real_time_position);
+
 
     //Push the local data
     linear_data_queue.push();
+
+    //Enqueue the movement in the trajectory executer, and eventually start the movement routine
+    ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_motion, finalise_motion,
+                                                get_real_time_position);
+
 
 
     //Terminate
@@ -116,7 +122,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
         }
 
         //if distance is not zero, the movement is not null
-        null_move = true;
+        null_move = false;
 
         //Update max_axis and max_dist if needed
         if (distance > max_dist) {
@@ -176,7 +182,7 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
     //positions for other axis
     for (int axis = 0; axis < NB_AXIS; axis++) {
         if (axis != max_axis) {
-            positions[max_axis] = offsets[axis] + indice * slopes[axis];
+            positions[axis] = offsets[axis] + indice * slopes[axis];
         }
     }
 
@@ -196,6 +202,7 @@ void ComplexLinearMovement::initialise_motion() {
     real_time_offsets = d->offsets;
     real_time_slopes = d->slopes;
 
+
     //Do not discard the current element, of it is likely to be rewritten.
 
     //The effective discard will be made in the finalisation function below.
@@ -209,7 +216,7 @@ void ComplexLinearMovement::finalise_motion() {
 
 }
 
-void ComplexLinearMovement::get_real_time_position(float indice, float *positions) {
+void ComplexLinearMovement::get_real_time_position(float index, float *positions) {
 
     //cache vars
     const uint8_t max_axis = real_time_max_axis;
@@ -217,12 +224,12 @@ void ComplexLinearMovement::get_real_time_position(float indice, float *position
     const float *const slopes = real_time_slopes;
 
     //position for the maximum axis;
-    positions[max_axis] = offsets[max_axis] + indice;
+    positions[max_axis] = offsets[max_axis] + index;
 
     //positions for other axis
     for (int axis = 0; axis < NB_AXIS; axis++) {
         if (axis != max_axis) {
-            positions[max_axis] = offsets[axis] + indice * slopes[axis];
+            positions[axis] = offsets[axis] + index * slopes[axis];
         }
     }
 

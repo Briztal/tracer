@@ -136,7 +136,9 @@ private:
 #define STEP_AND_WAIT \
     {\
         sig_t s_w_signature;\
-        while (!(s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]])){}\
+        if (!(s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]])){\
+            s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
+        }\
         StepperController::fastStep(s_w_signature);\
     }\
     WAIT

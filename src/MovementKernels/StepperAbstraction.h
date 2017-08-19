@@ -84,9 +84,9 @@ class StepperAbstraction {
 
 public:
 
-    static void translate(const float *const hl_coordinates, long *const steppers_coordinates);
+    static void translate(const float *const hl_coordinates, int32_t *const steppers_coordinates);
 
-    static void invert(const long *const steppers_coordinates, float *const hl_coordinates);
+    static void invert(const int32_t *const steppers_coordinates, float *const hl_coordinates);
 
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
@@ -117,11 +117,11 @@ private :
 
 public :
 
-    static float get_movement_distance_for_group(uint8_t speed_group, float *distances);
+    static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
 
     static uint8_t get_speed_group();
 
-    void set_speed_group(uint8_t speed_group);
+    static void set_speed_group(uint8_t speed_group);
 
     static float get_speed();
 
