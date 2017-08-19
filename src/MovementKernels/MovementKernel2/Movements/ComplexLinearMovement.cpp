@@ -26,6 +26,7 @@
 #include "ComplexLinearMovement.h"
 
 #include <interface.h>
+#include <MovementKernels/MovementKernel2/RealTimeProcessor.h>
 
 /*
  * prepare_movement : this function takes a destination position as an argument and prepares a linear movement,

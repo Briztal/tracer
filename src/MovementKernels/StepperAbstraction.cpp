@@ -31,6 +31,7 @@
 #include "StepperAbstraction.h"
 #include "../Core/EEPROMStorage.h"
 #include <interface.h>
+#include <MovementKernels/MovementKernel2/RealTimeProcessor.h>
 
 /*
  * translate : this function translates a position expressed in the high level coordinate system into
@@ -59,9 +60,7 @@ void StepperAbstraction::invert(const int32_t *const steppers_coordinates, float
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         hl_coordinates[axis] = (float) (steppers_coordinates[axis]) / EEPROMStorage::steps[axis];
-
     }
-
 
 
 }
@@ -83,7 +82,13 @@ void StepperAbstraction::get_current_position(float *const position) {
  */
 
 void StepperAbstraction::update_position(const float *const new_position) {
+
+    //Update the current position
     memcpy(current_position, new_position, sizeof(float) * NB_AXIS);
+
+    //Update the low level's end point.
+    RealTimeProcessor::update_end_position(new_position);
+
 }
 
 
@@ -115,7 +120,7 @@ float StepperAbstraction::get_movement_distance_for_group(uint8_t speed_group, c
     float square_dist_sum = 0;
 
     //Initialise the stepper index pointer
-    const int8_t * indexes = (speed_groups_indices + 3 * speed_group);
+    const int8_t *indexes = (speed_groups_indices + 3 * speed_group);
 
     //Sum the square of all distance :
     for (uint8_t stepper = 0; stepper < 3; stepper++) {
@@ -124,7 +129,7 @@ float StepperAbstraction::get_movement_distance_for_group(uint8_t speed_group, c
         int8_t index = indexes[stepper];
 
         //if the cartesian group comprises less than 3 axis;
-        if (index==-1) break;
+        if (index == -1) break;
 
         //get the distance
         float dist = distances[indexes[stepper]];
@@ -154,7 +159,6 @@ uint8_t StepperAbstraction::get_speed_group() {
 void StepperAbstraction::set_speed_group(uint8_t speed_group) {
     StepperAbstraction::speed_group = speed_group;
 }
-
 
 
 /*
@@ -197,7 +201,7 @@ int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
 
 #undef CARTESIAN_GROUP
         //end the array
-        0 };
+        0};
 
 //Assign the array
 const int8_t *const m::speed_groups_indices = t_sg_indices;

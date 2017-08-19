@@ -142,12 +142,15 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
     //pop the stored position
     RealTimeProcessor::pop_next_position(elementary_dists, &negative_signature, &distance);
 
+    //Update end distances with the computed distances.
+    RealTimeProcessor::update_end_distances(negative_signature, elementary_dists);
+
     //update the speeds
     float time = RealTimeProcessor::pre_process_speed(distance, elementary_dists);
 
     RealTimeProcessor::update_speeds(elementary_dists, time);
 
-    process_signatures(elementary_dists, es0, &trajectory_indice);
+    process_signatures(elementary_dists, es0);
     is_es_0 = false;
 
     //detemine the first delay
@@ -234,14 +237,12 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
  *
  */
 
-bool bbbb = false;
 
 void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
-    //TODO CA PLANTE. MONITORER LES TAILLES DES FILES.
-
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
+
 
     uint8_t elementary_dists[NB_STEPPERS];
 
@@ -251,13 +252,10 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     sig_t negative_signatures = 0;
     float distance = 0;
 
-
     //Step 1 : Get a new position to reach
     RealTimeProcessor::pop_next_position(elementary_dists, &negative_signatures, &distance);
 
-
     saved_direction_sigature = negative_signatures;
-
 
     STEP_AND_WAIT
 
@@ -277,13 +275,15 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     STEP_AND_WAIT;
 
     //Step 5 : Extract signatures from this distances array
-    process_signatures(elementary_dists, elementary_signatures, &trajectory_indice);
+    process_signatures(elementary_dists, elementary_signatures);
 
-    //Step 6 : determine the dela time for the next sub_movement :
+    //Step 6 : determine the delay time for the next sub_movement :
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
+    CI::echo("delay : " + String(delay));
+
 
     //If no more pre-process is required
-    if (RealTimeProcessor::last_position_popped) {
+    if (RealTimeProcessor::last_position_processed) {
         goto end;
     }
 
@@ -298,7 +298,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     RealTimeProcessor::push_new_position();
 
     STEP_AND_WAIT;
-
 
     //Final steps :
     end :
@@ -323,7 +322,6 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
     StepperController::set_directions(saved_direction_sigature);
 
-    CI::echo("delay " + String(delay));
 
     set_stepper_int_period(delay);
 
@@ -335,6 +333,8 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
         saved_elementary_signatures = es0, is_es_0 = true;
         return es1;
     }
+
+
 }
 
 
@@ -347,8 +347,7 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
  *
  */
 
-void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures,
-                                                   uint8_t *trajectory_indice) {
+void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures) {
     uint8_t motion_depth = 0;
     sig_t pre_signatures[8];
 
@@ -377,7 +376,7 @@ void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dis
 #undef STEPPER
 
         if (end_move) {//if next_move is null
-            *trajectory_indice = trajectory_indices[motion_depth - 1];
+            trajectory_indice = trajectory_indices[motion_depth - 1];
             break;
         }
     }
@@ -422,20 +421,15 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
 
-
-
     //Get the correct signature
     sig_t s_w_signature;
 
-    if (!(s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice--]])) {
-        s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]];
-    }
+    s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]];
 
     StepperController::fastStep(s_w_signature);
 
     //If the current sub_movement is finished
     if (!saved_trajectory_indice--) {
-
 
         //Position log
 #ifdef position_log
@@ -445,9 +439,10 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
         }
 #endif
 
-        if (stop_programmed) {
 
-            CI::echo("stop programmed");
+        if (stop_programmed) {
+        //if (false) {
+
             //if the routine will stop at the end of the current movement:
 
             if (final_sub_movement_started) {
@@ -456,12 +451,19 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 //finalise the current movement
                 (*movement_finalisation)();
 
+                RealTimeProcessor::send_position();
+
                 //Stop the routine
                 stop();
 
+                CI::echo("STOPPED");
                 return;
 
+
+
             } else if (RealTimeProcessor::last_position_popped) {
+
+
                 //if the last position has just been popped :
 
                 //engage the last sub_movement
@@ -471,45 +473,41 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 final_sub_movement_started = true;
 
                 //re-interrupt on this function, as no more process is required
+                enable_stepper_interrupt();
+                return;
 
-            } else {
-                //if the queue still contains sub_movements :
-
-                //interrupt on the normal routine
-                set_stepper_int_function(prepare_next_sub_movement);
             }
 
+
         } else if (RealTimeProcessor::last_position_processed) {
-            CI::echo("last processed");
 
             //If the movement pre-processing is finished :
 
+
             if (motion_data_queue.available_elements()) {
                 //If another movement can be loaded :
-
+                ;
                 //finalise the current movement
                 (*movement_finalisation)();
 
                 //Process the next movement
                 process_next_movement(false);
 
-                //interrupt on the normal routine
-                set_stepper_int_function(prepare_next_sub_movement);
-
             } else {
                 //If no more movement have been planned :
 
                 stop_programmed = true;
+
             }
 
-        } else {
-            //if more pre-process is required :
-
-            //interrupt on the normal routine
-            set_stepper_int_function(prepare_next_sub_movement);
-
         }
+
+        //interrupt on the normal routine
+        set_stepper_int_function(prepare_next_sub_movement);
+
     }
+
+
 
     enable_stepper_interrupt();
 }

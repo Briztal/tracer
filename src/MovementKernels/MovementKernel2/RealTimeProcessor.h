@@ -29,7 +29,6 @@
 #define TRACER_SPEEDMANAGER_H
 
 
-
 class RealTimeProcessor {
 
 public:
@@ -51,7 +50,7 @@ public :
 private:
 
     static Queue<pre_processor_data> sub_movement_queue;
-    static uint8_t * sub_movement_distances;
+    static uint8_t *sub_movement_distances;
 
 public :
     static uint8_t elements() {
@@ -72,7 +71,8 @@ private :
 
 public :
 
-    static void initialise_movement(float min, float max, float increment, void (*trajectory_function)(float index, float *positions));
+    static void initialise_movement(float min, float max, float increment,
+                                    void (*trajectory_function)(float index, float *positions));
 
     //---------------------------------------High_level_and_Low_level_distances-----------------------------------------
 
@@ -118,8 +118,8 @@ public :
     */
 
     /*  Axis direction conventions :
-     *      true    : negative direction (- <-)
-     *      false   : positive direction (-> +)
+     *      1    : negative direction (- <-)
+     *      0   : positive direction (-> +)
      */
 
 
@@ -128,9 +128,12 @@ public :
     //End distances updating
     static void update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
 
+    static void update_end_position(const float *const new_hl_position);
+
 private :
 
     static int32_t *const end_distances;
+    static int32_t *const end_position;
 
     //------------------------------------------------Speed_Management--------------------------------------------------
 

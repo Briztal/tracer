@@ -29,6 +29,7 @@
 #include "../../Core/EEPROMStorage.h"
 #include "complex_motion_data.h"
 #include "../StepperAbstraction.h"
+#include "ComplexTrajectoryExecuter.h"
 
 
 void RealTimeProcessor::start() {
@@ -160,7 +161,7 @@ void RealTimeProcessor::fill_sub_movement_queue() {
 void RealTimeProcessor::push_new_position() {
 
 
-    if ((!sub_movement_queue.available_spaces())||(last_position_processed))
+    if ((!sub_movement_queue.available_spaces()) || (last_position_processed))
         return;
 
     //High level positions : the new position in the high level system (will be provided by get_new_positions).
@@ -184,7 +185,7 @@ void RealTimeProcessor::push_new_position() {
     //Get the new index candidate;
     float index_candidate = index + increment;
 
-    if (index_candidate + index_candidate > index_max) {
+    if (index_candidate + increment > index_max) {
         last_position_processed = true;
         index_candidate = index_max;
     }
@@ -193,7 +194,8 @@ void RealTimeProcessor::push_new_position() {
     get_new_position(index_candidate, high_level_positions);
 
 
-    float movement_distance = StepperAbstraction::get_movement_distance_for_group(movement_speed_group, high_level_positions);
+    float movement_distance = StepperAbstraction::get_movement_distance_for_group(movement_speed_group,
+                                                                                  high_level_positions);
 
     //Translate the high level position into steppers position;
     StepperAbstraction::translate(high_level_positions, steppers_positions);
@@ -201,6 +203,8 @@ void RealTimeProcessor::push_new_position() {
     //Get the steppers distances, and the maximal stepper and distance
     bool up_check = get_steppers_distances(current_stepper_positions, steppers_positions, elementary_dists,
                                            &negative_signature, &max_axis, &max_distance);
+
+
 
     //-----------------Validity_Verification----------------------------
 
@@ -239,9 +243,11 @@ void RealTimeProcessor::push_new_position() {
     d->speed = next_regulation_speed;
     d->jerk_point = next_push_jerk;
 
+
     sub_movement_queue.push();
 
     index = index_candidate;
+
 
 }
 
@@ -269,7 +275,7 @@ RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *con
 
         //get distance on stepper
         int32_t d = dest[stepper];
-        int32_t distance = pos[stepper] - d;
+        int32_t distance = d - pos[stepper];
         pos[stepper] = d;
 
         //get absolute distance
@@ -303,6 +309,40 @@ RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *con
 
     //No error
     return false;
+}
+
+
+/*
+ * set_end_position : this function updates distances to end point and jerk point.
+ *
+ *  It takes as arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
+ *
+ *      Reminder : the i_th bit of negative_signature is 1 if the distance on the i_th stepper is negative.
+ *
+ *  The global distance is given by the maximum of all distance on each stepper.
+ *
+ */
+
+
+void RealTimeProcessor::update_end_position(const float *const new_hl_position) {
+
+    int32_t stepper_end_position[NB_STEPPERS];
+
+    StepperAbstraction::translate(new_hl_position, stepper_end_position);
+
+    if (ComplexTrajectoryExecuter::started) {
+        disable_stepper_interrupt();
+    }
+
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+        int32_t d = stepper_end_position[stepper];
+        end_distances[stepper] += d - end_position[stepper];
+        end_position[stepper] = d;
+    }
+
+    if (ComplexTrajectoryExecuter::started) {
+        enable_stepper_interrupt()
+    }
 }
 
 
@@ -368,9 +408,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
 
         //Get the time bounds for each stepper;
         for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-
-            //TODO REFAIRE LE CALCUL DE LA FENETRE. Y A UN TRUC PAS NET, ON NE CALCULE QU'UNE BORNE LA ...
-
+            
             //Get the speed on last movement, on stepper [stepper]
             float act_speed = steppers_speeds[stepper];
 
@@ -404,8 +442,11 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
             min_time = (down_time < min_time) ? min_time : down_time;
 
         }
+        CI::echo("bounds : "+String(min_time, 5)+" "+String(max_time, 5));
+        CI::echo("time : "+String(regulation_time, 5));
 
         if ((!first) && (deceleration_required || (regulation_time > max_time))) {
+            CI::echo("DECELERATION");
             //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
             //Deceleration done
@@ -415,12 +456,16 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
             new_time = max_time;
 
         } else if (regulation_time < min_time) {
+            CI::echo("ACCELERATION");
+
             //If the regulation time is lower than the min time :
 
             //choose the time corresponding to the maximum acceleration.
             new_time = min_time;
 
         } else {
+            CI::echo("CONSTANCE");
+
             //If the regulation time is in the time window :
 
             //choose the regulation time.
@@ -441,7 +486,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
     return new_time;
 
 }
-
 
 
 /*
@@ -499,6 +543,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *nega
 
     } else {
 
+
         //If the queue only contains the last sub_movement : disable the sub_movement pre_processing
         if ((size == 1) && (last_position_processed)) {
             last_position_popped = true;
@@ -519,7 +564,6 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *nega
         regulation_speed = data->speed;
 
         sub_movement_queue.discard();
-
 
         return;
 
@@ -544,7 +588,7 @@ int32_t *const m::current_stepper_positions = t_cur_pos;
 Queue<pre_processor_data> m::sub_movement_queue(MOTION_DATA_QUEUE_SIZE);
 
 //the elementary distances data
-uint8_t t_sm_d[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS];
+uint8_t t_sm_d[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
 uint8_t *m::sub_movement_distances = t_sm_d;
 
 
@@ -565,6 +609,9 @@ bool m::last_position_popped = false;
 //End distances
 int32_t k2ted[NB_STEPPERS]{0};
 int32_t *const m::end_distances = k2ted;
+
+int32_t k2tep[NB_STEPPERS]{0};
+int32_t *const m::end_position = k2tep;
 
 bool m::deceleration_required = false;
 

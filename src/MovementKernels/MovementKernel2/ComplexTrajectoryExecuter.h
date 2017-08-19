@@ -117,7 +117,7 @@ private:
     //----------------------------------------------------Signatures----------------------------------------------------
 
     //Signatures processing
-    static void process_signatures(uint8_t *const elementary_dists, sig_t * elementary_signatures, uint8_t *trajectory_indice);
+    static void process_signatures(uint8_t *const elementary_dists, sig_t * elementary_signatures);
 
     //Method to initialise a sub_movement
     static sig_t *initialise_sub_movement();
@@ -136,9 +136,7 @@ private:
 #define STEP_AND_WAIT \
     {\
         sig_t s_w_signature;\
-        if (!(s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]])){\
-            s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
-        }\
+        s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
         StepperController::fastStep(s_w_signature);\
     }\
     WAIT
