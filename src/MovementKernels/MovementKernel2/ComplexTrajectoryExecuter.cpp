@@ -155,11 +155,8 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 
     RealTimeProcessor::update_speeds(real_dists, time);
 
-
     //detemine the first delay
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
-
-    CI::echo("delay : " + String(delay));
 
     //save the the signature
     saved_direction_sigature = negative_signature;
@@ -240,7 +237,6 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
  *      - get a new distance array
  *      - if queue not empty, get one more new distance array
  *
- *
  */
 
 
@@ -248,7 +244,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
-
 
     uint8_t elementary_dists[NB_STEPPERS];
     float real_dists[NB_STEPPERS];
@@ -284,12 +279,8 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Step 5 : Update the speed distance with the new heuristic distances
     RealTimeProcessor::update_speeds(real_dists, time);
 
-
     //Step 6 : determine the delay time for the next sub_movement :
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
-    CI::echo("delay : " + String(delay));
-
-
 
     //If no more pre-process is required
     if (RealTimeProcessor::last_position_processed) {

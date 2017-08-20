@@ -311,14 +311,14 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
     CI::echo("400");
     float coords[NB_AXIS]{0};
-    coords[0] = 140;
-    coords[1] = 140;
-    coords[2] = 140;
-    coords[3] = 140;
+    coords[0] = 140.2564;
+    coords[1] = 140.1523;
+    coords[2] = 115.9854;
+    coords[3] = 140.9999;
 
     StepperAbstraction::set_speed_group(0);
 
-    StepperAbstraction::set_speed_for_group(0, 500);
+    StepperAbstraction::set_speed_for_group(0, 100);
 
     ComplexLinearMovement::prepare_movement(coords);
 

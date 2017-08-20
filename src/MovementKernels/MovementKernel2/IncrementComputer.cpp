@@ -44,8 +44,6 @@
 float IncrementComputer::extract_increment(void (*get_position)(float, float *), float point, float increment,
                                            const uint32_t distance_target) {
 
-
-    CI::echo("COMPUTING INCREMENT");
     //Arrays initialisation
     float initial_positions[NB_AXIS], positions[NB_AXIS];
 
@@ -60,8 +58,6 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
     //cache float var for distance_target
     float ftarget = (float) distance_target;
-
-    CI::echo("dist : " + String(d) + " " + String(increment));
 
 
     //correct the increment until it gives a position at the target distance.
@@ -78,11 +74,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
         //get the distance between the initial distance and the new candidate position.
         d = get_max_dist(initial_positions, positions);
 
-        CI::echo("dist : " + String(d) + " " + String(increment, 5));
-
     }
-
-    CI::echo("END INCREMENT");
 
     //return the increment that gives a position at the target distance of the initial position.
     return increment;
@@ -114,8 +106,6 @@ uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
         //get the algebric distance
 
         int32_t dist = (int32_t) p1[stepper] - (int32_t) p0[stepper];
-
-        CI::echo("p0 "+String(p0[stepper]) + " p1 : "+String(p1[stepper])+" dist : " + String(dist));
 
         //obtain the absolute distance
         if (dist < 0) {

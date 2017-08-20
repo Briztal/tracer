@@ -34,7 +34,6 @@
 
 void RealTimeProcessor::start() {
 
-
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //initialise speeds and distances
@@ -63,6 +62,7 @@ void RealTimeProcessor::start() {
  *
  */
 void RealTimeProcessor::send_position() {
+
     float hl_positions[NB_AXIS];
 
     StepperAbstraction::invert(current_stepper_positions, hl_positions);
@@ -167,8 +167,6 @@ void RealTimeProcessor::fill_sub_movement_queue() {
 
 void RealTimeProcessor::push_new_position() {
 
-    CI::echo("push. last : "+String(last_position_processed));
-
     if ((!sub_movement_queue.available_spaces()) || (last_position_processed))
         return;
 
@@ -196,10 +194,7 @@ void RealTimeProcessor::push_new_position() {
     //Get the new index candidate;
     float index_candidate = index + increment;
 
-    CI::echo("max : "+String(index_max)+" index "+String(index) +" index_c "+String(index_candidate) +" incre "+String(increment));
-
     if (((positive_index_dir)&&(index_candidate + increment > index_max))||((!positive_index_dir)&&(index_candidate + increment < index_max))) {
-        CI::echo("incr finish.");
         last_position_processed = true;
         index_candidate = index_max;
     }
@@ -338,7 +333,6 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
 
         uint8_t int_dist;
 
-        CI::echo("dist : "+String(distance));
         //get absolute distance
         if (distance < 0) {
             distance = -distance;
@@ -347,9 +341,6 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
         } else {
             int_dist = (uint8_t) ((uint32_t) d - (uint32_t)p);
         }
-
-        CI::echo("idist : "+String(int_dist));
-
 
         //if the distance is greater than the limit : fail with true
         if (distance >= MAXIMUM_DISTANCE_LIMIT) {

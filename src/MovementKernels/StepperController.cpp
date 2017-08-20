@@ -234,7 +234,6 @@ void StepperController::echo_positions() {
 void StepperController::send_position() {
     float t[NB_STEPPERS];
 #define STEPPER(i, ...) \
-    CI::echo("pos"+String(pos##i));\
     t[i] = ((float)pos##i/(float)EEPROMStorage::steps[i]);
 
 #include "../config.h"
