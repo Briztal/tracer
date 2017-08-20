@@ -22,6 +22,7 @@
 #define CODE_CONTINUOUSACTIONS_H
 
 #include <stdint.h>
+#include <config.h>
 
 class ContinuousActions {
 
@@ -31,29 +32,32 @@ public:
 
     static bool linear_modes_enabled();
 
-    static uint8_t getSetFunctions(void (**f)(float));
+    static sig_t get_linear_actions_data(float *linear_powers);
+
+    static uint8_t set_action_updating_function(sig_t action_signatures, void (**f)(float));
+
+
 
 #define CONTINUOUS(i, name, pin, max) \
-    static void setPower##i(float f);\
-    static void setLinearPower##i(float f);\
+    static void set_power##i(float f);\
+    static void set_linear_power##i(float f);\
     static void set_power_for_speed_##i(float speed);\
     static void disable##i();
 
 
-#include "../config.h"
+#include <config.h>
 #undef CONTINUOUS
 
 private:
 
-    static uint8_t linear_id;
 
 #define CONTINUOUS(i, name, pin, max) \
-    static float linearPower##i;
+    static float linear_power##i;
 
     static sig_t linear_modes;
     static sig_t enabled_actions;
 
-#include "../config.h"
+#include <config.h>
 #undef CONTINUOUS
 
 };

@@ -24,9 +24,12 @@
 
 #include "ComplexTrajectoryExecuter.h"
 #include "RealTimeProcessor.h"
-#include "complex_motion_data.h"
+#include "_kernel_2_data.h"
 #include <interface.h>
 #include <MovementKernels/StepperAbstraction.h>
+#include <Actions/ContinuousActions.h>
+
+
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -43,7 +46,7 @@
 
 void ComplexTrajectoryExecuter::start() {
 
-    if (!motion_data_queue.available_elements()) {
+    if (!movement_data_queue.available_elements()) {
         //If no movements are in the queue, no need to start.
 
         //send an error message
@@ -90,6 +93,8 @@ void ComplexTrajectoryExecuter::start() {
 
 void ComplexTrajectoryExecuter::stop() {
 
+    //TODO STOP TOOLS
+
     //Interrupt the movement routing, by stopping the interrupt sequence
     disable_stepper_interrupt()
 
@@ -109,6 +114,75 @@ void ComplexTrajectoryExecuter::stop() {
 }
 
 
+
+/*
+ * enqueue_unauthorised : this function is used by another process, to verify if the movement queue is not locked.
+ *      It returns true if the queue is locked, and the enqueuing is not permitted.
+ */
+
+bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
+    return queue_lock_flag;
+}
+
+
+/*
+ * enqueue_movement : this function adds the movement provided in argument to the motion queue.
+ *
+ *  The movement is provided in the form of :
+ *      - min and max, the index variable minimum and maximum values, for (resp) the beginning and end positions
+ *      - incr : the index increment for the first movement;
+ *      - movement_initialisation : the movement's in_real_time initialisation function;
+ *      - trajectory_function : the function that will be used to compute new positions in_real_time.
+ *
+ */
+
+void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
+                                                 void (*movement_finalisation)(),
+                                                 void(*trajectory_function)(float, float *)) {
+
+    if (queue_lock_flag)
+        return;
+
+    //Get the insertion adress on the queue (faster than push-by-object)
+    k2_movement_data *d = movement_data_queue.get_push_ptr();
+
+
+    //Update the current case of the queue :
+
+    //Speed vars
+    d->speed = StepperAbstraction::get_speed();
+    d->speed_group = StepperAbstraction::get_speed_group();
+
+    //Trajectory vars
+    d->min = min;
+    d->max = max;
+    d->increment = incr;
+    d->trajectory_function = trajectory_function;
+
+    //Movement initialisation - finalisation
+    d->movement_initialisation = movement_initialisation;
+    d->movement_finalisation = movement_finalisation;
+
+    //Get the current insertion position in the linear_powers storage
+    float *tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.push_indice();
+
+    //Get the action signature and fill the linear_powers storage.
+    d->action_signatures = ContinuousActions::get_linear_actions_data(tools_linear_powers);
+
+    //Push
+    movement_data_queue.push();
+
+    CI::echo("ENQUEUED : " + String(movement_data_queue.available_elements()));
+
+    //Start the movement procedure if it is not already started.
+    if (!started) {
+        CI::echo("STARTING");
+        start();
+    }
+
+}
+
+
 /*
  * process_next_movement : this function pops a movement from the movement queue, and initialises :
  *      - the real time processor;
@@ -117,10 +191,10 @@ void ComplexTrajectoryExecuter::stop() {
 
 void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
 
-    if (motion_data_queue.available_elements()) {
+    if (movement_data_queue.available_elements()) {
 
         //Pull the next movement
-        complex_motion_data *d = motion_data_queue.peak();
+        k2_movement_data *d = movement_data_queue.peak();
 
         //Update the trajectory variables
         RealTimeProcessor::initialise_movement(d->min, d->max, d->increment, d->trajectory_function);
@@ -128,19 +202,26 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
         //Initialise the new movement
         (*(d->movement_initialisation))();
 
+        //update the finalisation function
         movement_finalisation = d->movement_finalisation;
 
+        next_tools_powers_indice =  movement_data_queue.pull_indice();
+        next_tools_signature = d->action_signatures;
+
+        //Update the speed according to the movement type
         if (first_movement) {
             RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
         } else {
             RealTimeProcessor::set_regulation_speed_jerk(d->speed_group, d->speed);
         }
 
-        motion_data_queue.discard();
+        //leave a space for a future movement.
+        movement_data_queue.discard();
 
     }
 
 }
+
 
 /*
  * prepare_first_sub_movement : this function sets all variables up for the movement routine.
@@ -185,64 +266,10 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
     //Push as much sub_movements as possible.
     RealTimeProcessor::fill_sub_movement_queue();
 
-}
-
-
-bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
-    return queue_lock_flag;
-}
-
-/*
- * enqueue_movement : this function adds the movement provided in argument to the motion queue.
- *
- *  The movement is provided in the form of :
- *      - min and max, the index variable minimum and maximum values, for (resp) the beginning and end positions
- *      - incr : the index increment for the first movement;
- *      - movement_initialisation : the movement's in_real_time initialisation function;
- *      - trajectory_function : the function that will be used to compute new positions in_real_time.
- *
- */
-
-void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
-                                                 void (*movement_finalisation)(),
-                                                 void(*trajectory_function)(float, float *)) {
-
-    if (queue_lock_flag)
-        return;
-
-    //Get the insertion adress on the queue (faster than push-by-object)
-    complex_motion_data *d = motion_data_queue.get_push_ptr();
-
-
-    //Update the current case of the queue :
-
-    //Speed vars
-    d->speed = StepperAbstraction::get_speed();
-    d->speed_group = StepperAbstraction::get_speed_group();
-
-    //Trajectory vars
-    d->min = min;
-    d->max = max;
-    d->increment = incr;
-    d->trajectory_function = trajectory_function;
-
-    //Movement initialisation - finalisation
-    d->movement_initialisation = movement_initialisation;
-    d->movement_finalisation = movement_finalisation;
-
-    //Push
-    motion_data_queue.push();
-
-    CI::echo("ENQUEUED : " + String(motion_data_queue.available_elements()));
-
-    //Start the movement procedure if it is not already started.
-    if (!started) {
-        CI::echo("STARTING");
-        start();
-    }
+    //update the linear_powers now.
+    update_tools_data();
 
 }
-
 
 //----------------------------------------SUB_MOVEMENT_PRE_COMPUTATION--------------------------------------------------
 
@@ -310,8 +337,11 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Step 6 : determine the delay time for the next sub_movement :
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
 
+    //Update tools powers
+    update_tools_powers(time, distance);
+
     //If no more pre-process is required
-    if (RealTimeProcessor::movement_finished) {
+    if (RealTimeProcessor::movement_processed) {
         goto end;
     }
 
@@ -466,11 +496,10 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
         }
 #endif
 
-
         if (stop_programmed) {
             //if (false) {
 
-            if (motion_data_queue.available_elements()) {
+            if (movement_data_queue.available_elements()) {
                 //If another movement has been pushed just after stop_programmed was set (rare case) :
 
                 //Process the next movement
@@ -480,7 +509,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 stop_programmed = false;
 
                 final_sub_movement_started = true;
-
 
             } else if (final_sub_movement_started) {
                 //if the final sub_movement is now executed :
@@ -513,25 +541,31 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             }
 
 
-        } else if (RealTimeProcessor::movement_finished) {
+        } else if (RealTimeProcessor::movement_processed) {
 
             //If the movement pre-processing is finished :
 
             //finalise the current movement
             (*movement_finalisation)();
 
-            if (motion_data_queue.available_elements()) {
+            if (movement_data_queue.available_elements()) {
                 //If another movement can be loaded :
 
-                //Process the next movement
+                movement_switch_flag = true;
+
+                movement_switch_counter = RealTimeProcessor::elements();
+
+                        //Process the next movement
                 process_next_movement(false);
+
+
+
 
             } else {
                 //If no more movement have been planned :
 
                 stop_programmed = true;
             }
-
         }
 
         //interrupt on the normal routine
@@ -539,15 +573,53 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
     }
 
-
     enable_stepper_interrupt();
 }
 
 
+//--------------------------------------------------------TOOLS---------------------------------------------------------
+
+
+/*
+ * update_tools_data : this function changes tools linear speeds, at an effective movement switch.
+ *
+ *  It updates the number of tools, speeds, and update function.
+ *
+ */
+
+void ComplexTrajectoryExecuter::update_tools_data() {
+
+    tools_nb = ContinuousActions::set_action_updating_function(next_tools_signature, tools_update_functions);
+
+    tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_indice;
+}
+
+
+/*
+ * update_tools_powers : this function updates the number of tools, and the action_update functions
+ */
+
+void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) {
+
+    if (movement_switch_flag) {
+        if (!(movement_switch_counter--)) {
+            movement_switch_flag = false;
+            update_tools_data();
+        }
+    }
+
+    //Determine the current speed
+    float speed = distance / time;
+    
+    //Update each tool power with the value 'speed * linear_power'
+    for (uint8_t action = 0; action < tools_nb; action++) {
+        (*tools_update_functions[action])(tools_linear_powers[action] * speed);
+    }
+
+}
 
 
 //---------------------------------------------DECLARATIONS_DEFINITIONS-------------------------------------------------
-
 
 #define m ComplexTrajectoryExecuter
 
@@ -561,7 +633,7 @@ bool m::final_sub_movement_started = false;
 bool m::queue_lock_flag = false;
 
 
-Queue<complex_motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<k2_movement_data> m::movement_data_queue(MOTION_DATA_QUEUE_SIZE);
 
 uint8_t ctraj[255] = {
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 5,
@@ -592,6 +664,22 @@ void (*m::movement_finalisation)();
 
 uint32_t m::delay = 0;
 
+uint8_t m::tools_nb;
+
+void (*k2tf[NB_CONTINUOUS]);
+
+void (**m::tools_update_functions)(float) = (void (**)(float)) k2tf;
+
+float t_a_ls[NB_CONTINUOUS * MOTION_DATA_QUEUE_SIZE];
+float *const m::tools_linear_powers_storage = t_a_ls;
+
+float * m::tools_linear_powers;
+
+uint8_t m::next_tools_powers_indice = 0;
+sig_t m::next_tools_signature = 0;
+
+bool m::movement_switch_flag = false;
+uint8_t m::movement_switch_counter = 0;
 
 #undef m
 #endif

@@ -39,7 +39,7 @@ void SpeedManager::begin() {
 
 void SpeedManager::updateActions() {
     if (ContinuousActions::linear_modes_enabled()) {
-        linear_tools_nb = ContinuousActions::getSetFunctions(linear_set_functions);
+        //linear_tools_nb = ContinuousActions::set_action_updating_function(linear_set_functions);
     } else {
         linear_tools_nb = 0;
     }

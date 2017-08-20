@@ -113,7 +113,7 @@ add_library(actions
         ${AP}/ContinuousActions.h
         ${AP}/ContinuousActions.cpp
 
-        src/MovementKernels/MovementKernel2/Movements/ComplexLinearMovement.cpp src/MovementKernels/MovementKernel2/Movements/ComplexLinearMovement.h)
+        src/MovementKernels/Kernel2/Movements/ComplexLinearMovement.cpp src/MovementKernels/Kernel2/Movements/ComplexLinearMovement.h)
 
 #-------------------------------------------------ASSERV----------------------------------------------------------------
 
@@ -174,9 +174,9 @@ add_library(kernels
 #-------------------------------------------------KERNEL1---------------------------------------------------------------
 
 
-set(K1P "src/MovementKernels/MovementKernel1")
-set(K1LP "src/MovementKernels/MovementKernel1/LinearMovement")
-set(K1NP "src/MovementKernels/MovementKernel1/NonLinearMovements")
+set(K1P "src/MovementKernels/Kernel1")
+set(K1LP "src/MovementKernels/Kernel1/LinearMovement")
+set(K1NP "src/MovementKernels/Kernel1/NonLinearMovements")
 
 include_directories(${K1P}/)
 include_directories(${K1LP}/)
@@ -215,15 +215,15 @@ add_library(kernel1
 #-------------------------------------------------KERNEL2---------------------------------------------------------------
 
 
-set(K2P "src/MovementKernels/MovementKernel2")
-set(K2MP "src/MovementKernels/MovementKernel2/Movements")
+set(K2P "src/MovementKernels/Kernel2")
+set(K2MP "src/MovementKernels/Kernel2/Movements")
 
 include_directories(${K2P}/)
 
 add_library(kernel2
 
         #kernel2
-        ${K2P}/complex_motion_data.h
+        ${K2P}/_kernel_2_data.h
         ${K2P}/ComplexTrajectoryExecuter.h
         ${K2P}/ComplexTrajectoryExecuter.cpp
         ${K2P}/RealTimeProcessor.h

@@ -37,7 +37,7 @@
 #define TRACER_TRAJECTORYEXECUTER_H
 
 #include "../../hardware_language_abstraction.h"
-#include "complex_motion_data.h"
+#include "_kernel_2_data.h"
 #include "../../DataStructures/Queue.h"
 #include "../StepperController.h"
 
@@ -49,7 +49,7 @@ class ComplexTrajectoryExecuter {
 
 private:
 
-    static Queue<complex_motion_data> motion_data_queue;
+    static Queue<k2_movement_data> movement_data_queue;
 
 
     //-----------------------------------------------sub_movement_queue-------------------------------------------------
@@ -150,6 +150,45 @@ private :
 
     //Method to initialise the first sub movement of the movement procedure
     static void prepare_first_sub_movement();
+
+
+    //--------------------------------------------------------Tools-----------------------------------------------------
+
+    //NOT WORKING YET
+
+public :
+
+    //The function to update the action variables
+    static void update_tools_powers(float time, float distance) ;
+
+
+private:
+
+    //Number of actions enabled during the current movement
+    static uint8_t tools_nb;
+
+    //The action linear power array
+    static float *tools_linear_powers;
+
+    //The container of action linear power arrays
+    static float *const tools_linear_powers_storage;
+
+    //The variables for action data update :
+    static uint8_t next_tools_powers_indice;
+    static sig_t next_tools_signature;
+
+    //The flag for a movement speeds switch
+    static bool movement_switch_flag;
+
+    //The number of sub_movements before the movement switch
+    static uint8_t movement_switch_counter;
+
+    //The function to update actions speed
+    static void (**tools_update_functions)(float);
+
+    //the function to change the linear powers and functions
+    static void update_tools_data();
+
 
 };
 

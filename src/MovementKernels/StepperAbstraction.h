@@ -27,62 +27,6 @@
  *
  */
 
-
-
-/*
- * StepperAbstraction : This class is in charge of the interface between high level and stepper coordinates
- *
- * Options :
- *      - Create Upper coordinate system
- *      - Translation to basement coordinate
- *      -
- *
- *
- * Process for tracing a line in the stepper coordinates from Ar to Br :
- *
- *      Trajectory tracing :
- *
- *      - get As and Bs, the equivalent of Ar and Br in the stepper referential
- *      - divide the segment [AsBs] in the stepper referential in consecutive positions
- *      - go to these positions, using an elementary movement algorithm.
- *      - The speed is the same for all elementary moves, as speed is constant in a line
- *
- *      Acceleration management :
- *
- *      Jerk points and stop points are defined across the trajectory. An heuristic distance
- *          (here the max distance of all axis) is calculated, and as the speed on each axis is known, the deceleration
- *          distance is known too. As a consequence, the speed is modified if the deceleration distance is greater than
- *          the distance to the jerk point.
- *
- *
- *
- * Process for tracing any type of of trajectory in the high level coordinates :
- *
- *      Trajectory tracing :
- *      - Divide the trajectory in consecutive positions, expressed in high level coordinates;
- *      - Translate each position into Stepper coordinates;
- *      - Go to These positions, using the elementary movement algorithm :
- *      - Before beginning each elementary movement, get the greater axis (the axis that moves the most)
- *      - get the delay time, projected on this axis.
- *      - Make the elementary movement with the delay.
- *
- *      Speed Management :
- *      - The speed is increased according to the acceleration bounds (see Acceleration Managemet below)
- *      - The delay is updated continuously, before each elementary movement
- *
- *      Acceleration Management :
- *      - The constraint is to have no axis accelerating more than its limit.
- *      - As the trajectory is not known, speeds on each axis either are not. So, we must consider that all axis are
- *          at their maximum speed. It is a very restrictive hypothesis.
- *      - Csq : the maximum acceleration is known.
- *      - At each delay axis change, the deceleration distance is upddated.
- *
- *
- *
- */
-
-
-
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL

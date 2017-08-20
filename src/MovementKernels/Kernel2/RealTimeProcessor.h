@@ -25,7 +25,7 @@
 #define TRACER_REAL_TIME_PROCESS_H
 
 #include <DataStructures/Queue.h>
-#include "complex_motion_data.h"
+#include "_kernel_2_data.h"
 
 class RealTimeProcessor {
 
@@ -60,7 +60,7 @@ public :
 private:
 
     //The sub_movements queue
-    static Queue<pre_processor_data> sub_movement_queue;
+    static Queue<k2_real_time_data> sub_movement_queue;
 
     //The arrays to store real and integer distances
     static float *sub_movement_real_distances;
@@ -130,8 +130,8 @@ public :
     //empty_queue flag : true when the sub_movement queue is empty.
     static bool empty_queue;
 
-    //movement_finished flag, true when the current movement's last position have been processed
-    static bool movement_finished;
+    //movement_processed flag, true when the current movement's last position have been processed
+    static bool movement_processed;
 
     //function to determine and push (if the distances bounds are respected) a new position in the queue.
     static void push_new_position();
@@ -226,25 +226,6 @@ private :
 
     //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
-
-
-    //-------------------------------------------------------Actions----------------------------------------------------
-
-    //NOT WORKING YET
-
-public :
-
-    //The function to update the action variables
-    static void updateActions();
-
-
-private:
-
-    //Number of actions enabled during the current movement
-    static uint8_t linear_tools_nb;
-
-    //The function to update actions speed
-    static void (**linear_set_functions)(float);
 
 };
 

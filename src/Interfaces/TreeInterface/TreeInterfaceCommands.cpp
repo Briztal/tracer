@@ -18,8 +18,9 @@
 
 */
 
-#include <MovementKernels/MovementKernel2/Movements/ComplexLinearMovement.h>
+#include <MovementKernels/Kernel2/Movements/ComplexLinearMovement.h>
 #include <MovementKernels/StepperAbstraction.h>
+#include <Actions/ContinuousActions.h>
 #include "../../config.h"
 #ifdef ENABLE_TREE_INTERFACE
 
@@ -39,8 +40,6 @@
 
 
 void TreeInterfaceCommands::system_canal_function(char *data, uint8_t size) {
-
-
 
     if (!(size--)) return;
     char sub_canal = *(data++);
@@ -320,6 +319,8 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
     StepperAbstraction::set_speed_for_group(0, 100);
 
+    ContinuousActions::set_linear_power0(1);
+
     ComplexLinearMovement::prepare_movement(coords);
 
 
@@ -332,6 +333,10 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
     StepperAbstraction::set_speed_for_group(0, 500);
 
+    ContinuousActions::set_linear_power0(2);
+    ContinuousActions::set_linear_power1(0.2);
+
+
     ComplexLinearMovement::prepare_movement(coords);
 
 
@@ -343,6 +348,11 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     StepperAbstraction::set_speed_group(0);
 
     StepperAbstraction::set_speed_for_group(0, 200);
+
+    ContinuousActions::set_linear_power0(3);
+    ContinuousActions::set_linear_power1(0.3);
+    ContinuousActions::set_linear_power2(0.03);
+
 
     ComplexLinearMovement::prepare_movement(coords);
 

@@ -27,7 +27,7 @@
 #include "../../Actions/ContinuousActions.h"
 #include "../../interface.h"
 #include "../../Core/EEPROMStorage.h"
-#include "complex_motion_data.h"
+#include "_kernel_2_data.h"
 #include "../StepperAbstraction.h"
 #include "ComplexTrajectoryExecuter.h"
 
@@ -125,19 +125,10 @@ RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*
     //update position provider
     get_new_position = trajectory_function;
 
-    movement_finished = false;
+    movement_processed = false;
 
     empty_queue = false;
 
-}
-
-
-void RealTimeProcessor::updateActions() {
-    if (ContinuousActions::linear_modes_enabled()) {
-        linear_tools_nb = ContinuousActions::getSetFunctions(linear_set_functions);
-    } else {
-        linear_tools_nb = 0;
-    }
 }
 
 
@@ -146,9 +137,10 @@ void RealTimeProcessor::updateActions() {
 
 void RealTimeProcessor::fill_sub_movement_queue() {
 
-    while (sub_movement_queue.available_spaces() && !movement_finished) {
+    while (sub_movement_queue.available_spaces() && !movement_processed) {
         push_new_position();
     }
+
 }
 
 /*
@@ -174,7 +166,7 @@ void RealTimeProcessor::fill_sub_movement_queue() {
 
 void RealTimeProcessor::push_new_position() {
 
-    if ((!sub_movement_queue.available_spaces()) || (movement_finished))
+    if ((!sub_movement_queue.available_spaces()) || (movement_processed))
         return;
 
     //High level positions : the new position in the high level system (will be provided by get_new_positions).
@@ -202,7 +194,7 @@ void RealTimeProcessor::push_new_position() {
     float index_candidate = index + increment;
 
     if (((positive_index_dir)&&(index_candidate + increment > index_limit))||((!positive_index_dir)&&(index_candidate + increment < index_limit))) {
-        movement_finished = true;
+        movement_processed = true;
         index_candidate = index_limit;
     }
 
@@ -231,12 +223,12 @@ void RealTimeProcessor::push_new_position() {
 
     //If the maximal distance is below the lower limit :
     if (up_check) {
-        movement_finished = false;
+        movement_processed = false;
         return;
     }
 
     //If the maximal distance is below the lower limit :
-    if ((!movement_finished) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
+    if ((!movement_processed) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
         return;
     }
 
@@ -249,7 +241,7 @@ void RealTimeProcessor::push_new_position() {
      *      and validate the candidate index.
      */
 
-    pre_processor_data *d = sub_movement_queue.get_push_ptr();
+    k2_real_time_data *d = sub_movement_queue.get_push_ptr();
 
     d->negative_signature = negative_signature;
     d->distance = movement_distance;
@@ -619,7 +611,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
     } else {
 
         //If the queue only contains the last sub_movement : disable the sub_movement pre_processing
-        if ((size == 1) && (movement_finished)) {
+        if ((size == 1) && (movement_processed)) {
             empty_queue = true;
         }
 
@@ -633,7 +625,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
         memcpy(real_dists, r_ptr, NB_STEPPERS * sizeof(float));
 
         //update the direction signature and the distance memorised in the queue.
-        pre_processor_data *data = sub_movement_queue.peak();
+        k2_real_time_data *data = sub_movement_queue.peak();
 
         *negative_signature = data->negative_signature;
         *distance = data->distance;
@@ -647,7 +639,6 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
     }
 
 }
-
 
 //Static declarations - definitions;
 
@@ -663,7 +654,7 @@ float t_rl_pos[NB_AXIS]{0};
 float *const m::current_hl_position = t_rl_pos;
 
 //movement data queue;
-Queue<pre_processor_data> m::sub_movement_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<k2_real_time_data> m::sub_movement_queue(MOTION_DATA_QUEUE_SIZE);
 
 //the integer distances data
 uint8_t t_sm_d[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
@@ -685,7 +676,7 @@ uint8_t m::movement_speed_group = 0;
 void (*m::get_new_position)(float, float *);
 
 //Queue state
-bool m::movement_finished = false;
+bool m::movement_processed = false;
 bool m::empty_queue = false;
 
 
@@ -715,14 +706,6 @@ float *const m::steppers_speeds = t_st_spd;
 //Deceleration distances
 uint32_t t_dec_dst[NB_STEPPERS];
 uint32_t *const m::deceleration_distances = t_dec_dst;
-
-
-uint8_t m::linear_tools_nb;
-
-void (*k2tf[NB_CONTINUOUS]);
-
-void (**m::linear_set_functions)(float) = (void (**)(float)) k2tf;
-
 
 //Axis signatures
 

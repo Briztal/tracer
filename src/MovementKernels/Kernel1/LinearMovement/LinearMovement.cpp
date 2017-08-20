@@ -24,10 +24,10 @@
 
 #include <interface.h>
 #include <Core/EEPROMStorage.h>
-#include <MovementKernels/MovementKernel1/SpeedPlanner.h>
-#include <MovementKernels/MovementKernel1/SpeedManager.h>
+#include <MovementKernels/Kernel1/SpeedPlanner.h>
+#include <MovementKernels/Kernel1/SpeedManager.h>
 #include <MovementKernels/StepperController.h>
-#include <MovementKernels/MovementKernel1/TrajectoryExecuter.h>
+#include <MovementKernels/Kernel1/TrajectoryExecuter.h>
 #include "LinearMovement.h"
 
 

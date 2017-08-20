@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include "../../config.h"
 #include "../../DataStructures/Queue.h"
-#include "complex_motion_data.h"
+#include "_kernel_2_data.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 

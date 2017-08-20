@@ -27,7 +27,7 @@
 
 
 #include <DataStructures/Queue.h>
-#include "../complex_motion_data.h"
+#include "MovementKernels/Kernel2/_kernel_2_data.h"
 
 class ComplexLinearMovement {
 
@@ -61,7 +61,7 @@ private :
     //--------------------------------------------Pre-processed_Data_Storage--------------------------------------------
 
     //The Queue containing the movement data.
-    static Queue<complex_linear_data> linear_data_queue;
+    static Queue<k2_linear_data> linear_data_queue;
 
 
     //-----------------------------------------------Real_time_Processing-----------------------------------------------

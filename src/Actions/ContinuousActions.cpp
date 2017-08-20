@@ -19,15 +19,15 @@
 */
 
 #include "ContinuousActions.h"
-#include "../hardware_language_abstraction.h"
-#include "../Interfaces/TreeInterface/TreeInterface.h"
+#include <hardware_language_abstraction.h>
+#include <interface.h>
 
 void ContinuousActions::begin() {
     //INIT : PWM à 0;
 #define CONTINUOUS(i, name, pin, max) \
     analog_write(pin, 0);
 
-#include "../config.h"
+#include <config.h>
 
 #undef CONTINUOUS
 }
@@ -43,7 +43,7 @@ bool ContinuousActions::linear_modes_enabled() {
 
 
 #define CONTINUOUS(i, name, pin, max) \
-void ContinuousActions::setPower##i (float f) {\
+void ContinuousActions::set_power##i (float f) {\
     linear_modes &= (!POW_2(i));\
     if (f<=0){\
         disable##i();\
@@ -55,9 +55,9 @@ void ContinuousActions::setPower##i (float f) {\
     else \
         analog_write(pin, 255);\
 }\
-void ContinuousActions::setLinearPower##i (float f) {\
+void ContinuousActions::set_linear_power##i (float f) {\
     if (!(enabled_actions&POW_2(i))){\
-        linearPower##i = f;\
+        linear_power##i = f;\
         linear_modes |= POW_2(i);\
     }\
 }\
@@ -66,7 +66,7 @@ void ContinuousActions::set_power_for_speed_##i (float speed) {\
         disable##i();\
         return;\
     }\
-    float power = speed*linearPower##i;\
+    float power = speed*linear_power##i;\
     enabled_actions|=POW_2(i);\
     if (power<=max) {\
         analog_write(pin,  power * (255.0 / (float)max));\
@@ -77,23 +77,59 @@ void ContinuousActions::disable##i() {\
     enabled_actions&=(!POW_2(i));\
     analogWrite(pin, 0);\
 }\
-float ContinuousActions::linearPower##i = 0;\
+float ContinuousActions::linear_power##i = 0;\
 
-#include "../config.h"
+
+#include <config.h>
 
 #undef CONTINUOUS
 
-uint8_t ContinuousActions::getSetFunctions(void (**f)(float)) {
+
+
+
+/*
+ * get_linear_actions_data : this function makes a copy of the current linear powers, and returns the signatures of
+ *      actions that are currently in linear mode.
+ */
+
+sig_t ContinuousActions::get_linear_actions_data(float *linear_powers) {
+
     uint8_t id = 0;
+
 #define CONTINUOUS(i, name, pin, max) \
     if (linear_modes&POW_2(i)) {\
-        f[id] = set_power_for_speed_##i;\
-        id++;\
+        linear_powers[id++] = linear_power##i;\
     }
-#include "../config.h"
+
+#include <config.h>
+
 #undef CONTINUOUS
-    return id;
+
+    return linear_modes;
+
 }
+
+/*
+ * set_action_updating_function : this function, given a signature, (i_th bit = true -> action i enabled),
+ *      updates the function array given in argument, with the power settng function
+ */
+uint8_t ContinuousActions::set_action_updating_function(sig_t signature, void (**f)(float)) {
+
+    uint8_t id = 0;
+
+#define CONTINUOUS(i, name, pin, max) \
+    if (signature&POW_2(i)) {\
+        f[id++] = set_power##i;\
+    }
+
+#include <config.h>
+
+#undef CONTINUOUS
+
+    return id;
+
+}
+
 
 sig_t ContinuousActions::enabled_actions = 0;
 sig_t ContinuousActions::linear_modes = 0;

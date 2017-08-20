@@ -23,10 +23,10 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include <MovementKernels/MovementKernel2/complex_motion_data.h>
+#include <MovementKernels/Kernel2/_kernel_2_data.h>
 #include <MovementKernels/StepperAbstraction.h>
-#include <MovementKernels/MovementKernel2/ComplexTrajectoryExecuter.h>
-#include <MovementKernels/MovementKernel2/IncrementComputer.h>
+#include <MovementKernels/Kernel2/ComplexTrajectoryExecuter.h>
+#include <MovementKernels/Kernel2/IncrementComputer.h>
 #include "ComplexLinearMovement.h"
 
 
@@ -42,7 +42,7 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     float distances[NB_AXIS];
 
     //extract the array case address (more efficient than by-object-push)
-    complex_linear_data *d = linear_data_queue.get_push_ptr();
+    k2_linear_data *d = linear_data_queue.get_push_ptr();
 
     //get the positions and slopes pointer;
     float *positions = d->offsets;
@@ -211,7 +211,7 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
 void ComplexLinearMovement::initialise_movement() {
 
     //Get the address of the top element
-    complex_linear_data *d = linear_data_queue.peak();
+    k2_linear_data *d = linear_data_queue.peak();
 
     //Update all real-time data
     real_time_max_axis = d->max_axis;
@@ -270,7 +270,7 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
 #define m ComplexLinearMovement
 
 //the data queue
-Queue<complex_linear_data> ComplexLinearMovement::linear_data_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<k2_linear_data> ComplexLinearMovement::linear_data_queue(MOTION_DATA_QUEUE_SIZE);
 
 //Pre_processing data
 float t_ppof[NB_AXIS], t_ppsl[NB_AXIS];

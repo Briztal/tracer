@@ -28,7 +28,7 @@
 #include "StepperAbstraction.h"
 #include "../Core/EEPROMStorage.h"
 #include <interface.h>
-#include <MovementKernels/MovementKernel2/RealTimeProcessor.h>
+#include <MovementKernels/Kernel2/RealTimeProcessor.h>
 
 
 /*
