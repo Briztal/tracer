@@ -45,7 +45,6 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
                                            const uint32_t distance_target) {
 
 
-
     CI::echo("COMPUTING INCREMENT");
     //Arrays initialisation
     float initial_positions[NB_AXIS], positions[NB_AXIS];
@@ -57,10 +56,13 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     get_stepper_position(get_position, point + increment, positions);
 
     //get the distance between the initial distance and the candidate position.
-    uint32_t d = get_max_dists(initial_positions, positions);
+    uint32_t d = get_max_dist(initial_positions, positions);
 
     //cache float var for distance_target
     float ftarget = (float) distance_target;
+
+    CI::echo("dist : " + String(d) + " " + String(increment));
+
 
     //correct the increment until it gives a position at the target distance.
     while (d != distance_target) {
@@ -74,7 +76,9 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
         get_stepper_position(get_position, point + increment, positions);
 
         //get the distance between the initial distance and the new candidate position.
-        d = get_max_dists(initial_positions, positions);
+        d = get_max_dist(initial_positions, positions);
+
+        CI::echo("dist : " + String(d) + " " + String(increment, 5));
 
     }
 
@@ -99,7 +103,7 @@ void IncrementComputer::get_stepper_position(void (*get_position)(float, float *
 }
 
 
-uint32_t IncrementComputer::get_max_dists(float *p0, float *p1) {
+uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
 
     //initialise the maimum distance
     uint32_t max_dist = 0;
@@ -108,12 +112,16 @@ uint32_t IncrementComputer::get_max_dists(float *p0, float *p1) {
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //get the algebric distance
-        int32_t dist = (int32_t)p1[stepper] - (int32_t)p0[stepper];
+
+        int32_t dist = (int32_t) p1[stepper] - (int32_t) p0[stepper];
+
+        CI::echo("p0 "+String(p0[stepper]) + " p1 : "+String(p1[stepper])+" dist : " + String(dist));
 
         //obtain the absolute distance
         if (dist < 0) {
             dist = -dist;
         }
+
 
         //cast to unsigned
         uint32_t distance = (uint32_t) dist;

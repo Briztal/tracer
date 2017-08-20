@@ -311,10 +311,34 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
     CI::echo("400");
     float coords[NB_AXIS]{0};
-    coords[0] = 100;
-    coords[1] = 40;
-    coords[2] = 10;
-    coords[3] = 40;
+    coords[0] = 140;
+    coords[1] = 140;
+    coords[2] = 140;
+    coords[3] = 140;
+
+    StepperAbstraction::set_speed_group(0);
+
+    StepperAbstraction::set_speed_for_group(0, 500);
+
+    ComplexLinearMovement::prepare_movement(coords);
+
+
+    coords[0] = 80;
+    coords[1] = 120;
+    coords[2] = 80;
+    coords[3] = 120;
+
+    StepperAbstraction::set_speed_group(0);
+
+    StepperAbstraction::set_speed_for_group(0, 500);
+
+    ComplexLinearMovement::prepare_movement(coords);
+
+
+    coords[0] = 20;
+    coords[1] = 60;
+    coords[2] = 100;
+    coords[3] = 140;
 
     StepperAbstraction::set_speed_group(0);
 
@@ -323,6 +347,8 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     ComplexLinearMovement::prepare_movement(coords);
 
     CI::echo("EXIT");
+
+
 
 }
 

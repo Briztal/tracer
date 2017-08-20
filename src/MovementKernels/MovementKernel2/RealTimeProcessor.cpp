@@ -113,9 +113,14 @@ RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*
     index_max = max;
     index = min;
     increment = incr;
+    positive_index_dir = incr>0;
 
     //update position provider
     get_new_position = trajectory_function;
+
+    last_position_processed = false;
+
+    last_position_popped = false;
 
 }
 
@@ -189,7 +194,7 @@ void RealTimeProcessor::push_new_position() {
     //Get the new index candidate;
     float index_candidate = index + increment;
 
-    if (index_candidate + increment > index_max) {
+    if (((positive_index_dir)&&(index_candidate + increment > index_max))||((!positive_index_dir)&&(index_candidate + increment < index_max))) {
         last_position_processed = true;
         index_candidate = index_max;
     }
@@ -459,8 +464,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
     //The final time
     float new_time = 0;
 
-    CI::echo("distance : " + String(movement_distance, 5));
-
     if (!jerk_point) {
 
         //Window computation variables
@@ -472,8 +475,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             last_time = 0.01;
         }
 
-        CI::echo("last_speed - time : " + String(last_time) + " " + String(last_time, 5));
-
         //Get the time bounds for each stepper;
         for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
@@ -483,7 +484,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             //Get the speed limit
             float speed_step = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * last_time;
 
-            CI::echo("speed_step : " + String(speed_step));
             //if the current stepper can stop, no processing is required :
 
             float s;
@@ -500,26 +500,16 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
             }
 
-            CI::echo("current speed : " + String(act_speed));
 
             //update the minimum time, the new speed = act_speed + speed limit.
-            CI::echo("stepper_distance : " + String(stepper_distances[stepper]));
             float down_time = stepper_distances[stepper] / (act_speed + speed_step);
-
-            CI::echo("down_time : " + String(down_time, 5));
-
 
             //update minimum time, as the maximum of the new time and the current min time :
             min_time = (down_time < min_time) ? min_time : down_time;
 
         }
-        CI::echo("bounds : " + String(min_time, 5) + " " + String(max_time, 5));
-        CI::echo("time : " + String(regulation_time, 5));
-        CI::echo("first : " + String(first));
-        CI::echo("dec : " + String(deceleration_required));
 
         if ((!first) && (deceleration_required || (regulation_time > max_time))) {
-            CI::echo("DECELERATION");
             //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
             //Deceleration done
@@ -529,7 +519,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             new_time = max_time;
 
         } else if (regulation_time < min_time) {
-            CI::echo("ACCELERATION");
 
             //If the regulation time is lower than the min time :
 
@@ -537,8 +526,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             new_time = min_time;
 
         } else {
-            CI::echo("CONSTANCE");
-
             //If the regulation time is in the time window :
 
             //choose the regulation time.
@@ -551,7 +538,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
         new_time = regulation_time;
     }
 
-    CI::echo(" ");
 
     //validate the acceleration management for the next movement.
     jerk_point = false;
@@ -622,7 +608,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
         return;
 
     } else {
-        
+
         //If the queue only contains the last sub_movement : disable the sub_movement pre_processing
         if ((size == 1) && (last_position_processed)) {
             last_position_popped = true;
@@ -685,6 +671,7 @@ float *m::sub_movement_real_distances = t_sm_rd;
 
 //Indexation variables
 float m::index_min = 0, m::index_max = 0, m::index = 0, m::increment = 0;
+bool m::positive_index_dir = false;
 
 //Speed group for the current movement
 uint8_t m::movement_speed_group = 0;

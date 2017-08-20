@@ -208,8 +208,11 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
     //Push
     motion_data_queue.push();
 
+    CI::echo("ENQUEUED : "+String(motion_data_queue.available_elements()));
+
     //Start the movement procedure if it is not already started.
     if (!started) {
+        CI::echo("STARTING");
         start();
     }
 
@@ -285,7 +288,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Step 6 : determine the delay time for the next sub_movement :
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
     CI::echo("delay : " + String(delay));
-    CI::echo(" ");
 
 
 
@@ -329,7 +331,7 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
     StepperController::set_directions(saved_direction_sigature);
 
-    set_stepper_int_period(200);
+    set_stepper_int_period(delay);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -441,7 +443,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 #ifdef position_log
         if (!(k2_position_indice--)) {
             RealTimeProcessor::send_position();
-            k2_position_indice = 20;
+            k2_position_indice = 4;
         }
 #endif
 
@@ -453,9 +455,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
             if (final_sub_movement_started) {
                 //if the final sub_movement is now executed :
-
-                //finalise the current movement
-                (*movement_finalisation)();
 
                 RealTimeProcessor::send_position();
 
@@ -489,12 +488,16 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
             //If the movement pre-processing is finished :
 
+            //finalise the current movement
+            (*movement_finalisation)();
+
+            CI::echo("available movements : "+String(motion_data_queue.available_elements()));
+
+            //TODO PROBLEM DURING THE MOVEMENT CHANGE.
 
             if (motion_data_queue.available_elements()) {
                 //If another movement can be loaded :
-                ;
-                //finalise the current movement
-                (*movement_finalisation)();
+
 
                 //Process the next movement
                 process_next_movement(false);
@@ -503,7 +506,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 //If no more movement have been planned :
 
                 stop_programmed = true;
-
             }
 
         }

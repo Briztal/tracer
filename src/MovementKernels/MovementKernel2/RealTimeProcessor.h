@@ -66,6 +66,7 @@ private :
 
     //The movement index and its bounds
     static float index_min, index_max, index;
+    static bool positive_index_dir;
 
     static uint8_t movement_speed_group;
 
