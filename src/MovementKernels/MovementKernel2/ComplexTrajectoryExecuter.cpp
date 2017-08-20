@@ -19,6 +19,7 @@
 */
 
 #include <config.h>
+
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "ComplexTrajectoryExecuter.h"
@@ -99,8 +100,11 @@ void ComplexTrajectoryExecuter::stop() {
     disable_stepper_interrupt()
 
     disable_stepper_timer();
+
     //Mark the movement routine as stopped
     started = false;
+
+    queue_lock_flag = false;
 
 }
 
@@ -184,6 +188,10 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 }
 
 
+bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
+    return queue_lock_flag;
+}
+
 /*
  * enqueue_movement : this function adds the movement provided in argument to the motion queue.
  *
@@ -198,6 +206,9 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
                                                  void (*movement_finalisation)(),
                                                  void(*trajectory_function)(float, float *)) {
+
+    if (queue_lock_flag)
+        return;
 
     //Get the insertion adress on the queue (faster than push-by-object)
     complex_motion_data *d = motion_data_queue.get_push_ptr();
@@ -222,7 +233,7 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
     //Push
     motion_data_queue.push();
 
-    CI::echo("ENQUEUED : "+String(motion_data_queue.available_elements()));
+    CI::echo("ENQUEUED : " + String(motion_data_queue.available_elements()));
 
     //Start the movement procedure if it is not already started.
     if (!started) {
@@ -457,11 +468,21 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
 
         if (stop_programmed) {
-        //if (false) {
+            //if (false) {
 
-            //if the routine will stop at the end of the current movement:
+            if (motion_data_queue.available_elements()) {
+                //If another movement has been pushed just after stop_programmed was set (rare case) :
 
-            if (final_sub_movement_started) {
+                //Process the next movement
+                process_next_movement(false);
+                //if the routine will stop at the end of the current movement:
+
+                stop_programmed = false;
+
+                final_sub_movement_started = true;
+
+
+            } else if (final_sub_movement_started) {
                 //if the final sub_movement is now executed :
 
                 RealTimeProcessor::send_position();
@@ -474,7 +495,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
             } else if (RealTimeProcessor::empty_queue) {
 
-
                 //if the last position has just been popped :
 
                 //engage the last sub_movement
@@ -485,8 +505,11 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
                 //re-interrupt on this function, as no more process is required
                 enable_stepper_interrupt();
+
                 return;
 
+            } else if (RealTimeProcessor::elements() == 1) {
+                queue_lock_flag = true;
             }
 
 
@@ -495,11 +518,10 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             //If the movement pre-processing is finished :
 
             //finalise the current movement
-           (*movement_finalisation)();
+            (*movement_finalisation)();
 
             if (motion_data_queue.available_elements()) {
                 //If another movement can be loaded :
-
 
                 //Process the next movement
                 process_next_movement(false);
@@ -516,7 +538,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
         set_stepper_int_function(prepare_next_sub_movement);
 
     }
-
 
 
     enable_stepper_interrupt();
@@ -537,6 +558,7 @@ bool m::started = false;
 
 bool m::stop_programmed = false;
 bool m::final_sub_movement_started = false;
+bool m::queue_lock_flag = false;
 
 
 Queue<complex_motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);

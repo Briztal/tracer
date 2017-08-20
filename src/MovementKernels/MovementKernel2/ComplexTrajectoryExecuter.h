@@ -68,6 +68,9 @@ private :
     //the final sub_movement flag : enabled when the last sub_movement of the movement procedure has begun.
     static bool final_sub_movement_started;
 
+    //the queue lock flag :
+    static bool queue_lock_flag;
+
 
     //---------------------------------------------Real_Time_Movement_data----------------------------------------------
 
@@ -111,6 +114,9 @@ public :
 
     //movement routine interruption
     static void stop();
+
+    //The function to verify that the enqueueing is authorised. returns true if the push isn't unauthorised.
+    static bool enqueue_unauthorised();
 
     //new movement enqueueing
     static void enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),

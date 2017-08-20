@@ -32,7 +32,6 @@
 bool StepperController::isAtMax##i ()  {return (digital_read(pinEndMax )==HIGH);}\
 bool StepperController::isAtMin##i() { return (digital_read(pinEndMin)==HIGH);}\
 
-
 #include <config.h>
 
 #undef STEPPER

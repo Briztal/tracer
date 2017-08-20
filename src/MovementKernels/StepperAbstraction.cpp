@@ -23,7 +23,6 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-
 #include <stdint.h>
 #include <Arduino.h>
 #include "StepperAbstraction.h"

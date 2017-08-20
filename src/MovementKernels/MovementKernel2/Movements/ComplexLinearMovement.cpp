@@ -29,6 +29,7 @@
 #include <MovementKernels/MovementKernel2/IncrementComputer.h>
 #include "ComplexLinearMovement.h"
 
+
 /*
  * prepare_movement : this function takes a destination position in argument and prepares a linear movement,
  *      from the current position to the given destination, if the required movement is not a null movement.
@@ -76,6 +77,9 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
 
     //Push the local data
     linear_data_queue.push();
+
+    //Wait for the enqueuing to be authorised in ComplexTrajectoryExecuter.
+    while(ComplexTrajectoryExecuter::enqueue_unauthorised());
 
     //Enqueue the movement in the trajectory executer, and eventually start the movement routine
     ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_movement, finalise_movement,
@@ -158,7 +162,6 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 void ComplexLinearMovement::get_slopes(float *slopes, const float *const distances, const uint8_t max_axis,
                                        const float max_distance) {
 
-
     //get the inverse of the maximum distance
     float inv_max_dist = 1 / max_distance;
 
@@ -181,7 +184,7 @@ void ComplexLinearMovement::get_slopes(float *slopes, const float *const distanc
 
 void ComplexLinearMovement::get_position(float indice, float *positions) {
 
-    //cache vars
+    //cache vars : in this function, only pre_process variables are used.
     const uint8_t max_axis = pre_process_max_axis;
     const float *const offsets = pre_process_offsets;
     const float *const slopes = pre_process_slopes;
@@ -199,7 +202,6 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
 
 
 //-----------------------------------------------Real_time_Processing-----------------------------------------------
-
 
 /* initialise_movement : this function initialises the movement, in peaking the next movement in the queue, and
  *      updating the slopes and offsets pointers, and the maimum axis.
@@ -245,7 +247,7 @@ void ComplexLinearMovement::finalise_movement() {
 
 void ComplexLinearMovement::get_real_time_position(float index, float *positions) {
 
-    //cache vars
+    //cache vars : in this function, only real time variables are used.
     const uint8_t max_axis = real_time_max_axis;
     const float *const offsets = real_time_offsets;
     const float *const slopes = real_time_slopes;

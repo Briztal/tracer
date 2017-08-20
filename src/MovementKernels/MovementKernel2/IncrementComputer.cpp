@@ -121,7 +121,6 @@ uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //get the algebric distance
-
         int32_t dist = (int32_t) p1[stepper] - (int32_t) p0[stepper];
 
         //obtain the absolute distance
