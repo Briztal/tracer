@@ -338,6 +338,7 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
 
         uint8_t int_dist;
 
+        CI::echo("dist : "+String(distance));
         //get absolute distance
         if (distance < 0) {
             distance = -distance;
@@ -347,6 +348,9 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
             int_dist = (uint8_t) ((uint32_t) d - (uint32_t)p);
         }
 
+        CI::echo("idist : "+String(int_dist));
+
+
         //if the distance is greater than the limit : fail with true
         if (distance >= MAXIMUM_DISTANCE_LIMIT) {
             return true;
@@ -355,6 +359,8 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
         //persist distances
         real_dists[stepper] = distance;
         int_dists[stepper] = int_dist;
+
+
 
 
         //Update max dist

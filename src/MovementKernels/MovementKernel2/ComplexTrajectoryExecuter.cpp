@@ -107,7 +107,7 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
         //Initialise the new movement
         (*(d->movement_initialisation))();
 
-        movement_finalisation = d->movement_initialisation;
+        movement_finalisation = d->movement_finalisation;
 
         if (first_movement) {
             RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
@@ -487,9 +487,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             //If the movement pre-processing is finished :
 
             //finalise the current movement
-            (*movement_finalisation)();
-
-            CI::echo("available movements : "+String(motion_data_queue.available_elements()));
+           (*movement_finalisation)();
 
             if (motion_data_queue.available_elements()) {
                 //If another movement can be loaded :

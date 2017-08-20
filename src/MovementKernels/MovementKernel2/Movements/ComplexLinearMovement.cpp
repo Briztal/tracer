@@ -68,6 +68,10 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     pre_process_offsets = positions;
     pre_process_max_axis = max_axis;
 
+    for (int axis = 0; axis<NB_STEPPERS; axis++)
+        CI::echo("push_slopes : "+String(slopes[axis])+" push_off "+String(positions[axis]));
+
+
     float incr = (max_distance<0) ? -1 : 1;
 
     //Extract the increment
@@ -205,6 +209,11 @@ void ComplexLinearMovement::initialise_motion() {
     real_time_offsets = d->offsets;
     real_time_slopes = d->slopes;
 
+    for (int axis = 0; axis<NB_STEPPERS; axis++)
+        CI::echo("pop_slopes : "+String(real_time_slopes[axis])+" push_off "+String(real_time_offsets[axis]));
+
+
+
 
     //Do not discard the current element, of it is likely to be rewritten.
 
@@ -231,10 +240,16 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
 
     //positions for other axis
     for (int axis = 0; axis < NB_AXIS; axis++) {
+
         if (axis != max_axis) {
             positions[axis] = offsets[axis] + index * slopes[axis];
         }
+
+        CI::echo("p : "+String(positions[axis]));
+        CI::echo("s : "+String(slopes[axis]));
     }
+
+
 
 }
 

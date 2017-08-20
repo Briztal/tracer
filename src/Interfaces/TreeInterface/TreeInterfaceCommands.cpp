@@ -349,7 +349,6 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     CI::echo("EXIT");
 
 
-
 }
 
 void TreeInterfaceCommands::home(char * dptr, uint8_t size) {
