@@ -48,7 +48,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
     CI::echo("COMPUTING INCREMENT");
     //Arrays initialisation
-    int32_t initial_positions[NB_AXIS], positions[NB_AXIS];
+    float initial_positions[NB_AXIS], positions[NB_AXIS];
 
     //Get the initial stepper position
     get_stepper_position(get_position, point, initial_positions);
@@ -86,7 +86,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 }
 
 
-void IncrementComputer::get_stepper_position(void (*get_position)(float, float *), float point, int32_t *positions) {
+void IncrementComputer::get_stepper_position(void (*get_position)(float, float *), float point, float *positions) {
 
     //Initialisa the local high level position array;
     float hl_positions[NB_AXIS];
@@ -99,7 +99,7 @@ void IncrementComputer::get_stepper_position(void (*get_position)(float, float *
 }
 
 
-uint32_t IncrementComputer::get_max_dists(int32_t *p0, int32_t *p1) {
+uint32_t IncrementComputer::get_max_dists(float *p0, float *p1) {
 
     //initialise the maimum distance
     uint32_t max_dist = 0;
@@ -108,7 +108,7 @@ uint32_t IncrementComputer::get_max_dists(int32_t *p0, int32_t *p1) {
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //get the algebric distance
-        int32_t dist = p1[stepper] - p0[stepper];
+        int32_t dist = (int32_t)p1[stepper] - (int32_t)p0[stepper];
 
         //obtain the absolute distance
         if (dist < 0) {

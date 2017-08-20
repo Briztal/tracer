@@ -56,8 +56,6 @@ static void send_position();
 
     static void fastStep(sig_t id);
 
-    static uint16_t fastStepDelay(sig_t id);
-
     static uint16_t *const delays;
 private:
 

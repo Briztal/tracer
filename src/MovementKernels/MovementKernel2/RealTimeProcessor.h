@@ -38,7 +38,10 @@ public:
 
 private:
 
-    static int32_t *const current_stepper_positions;
+    static float *const current_stepper_positions;
+    static float *const current_hl_position;
+
+
 
 public :
 
@@ -50,7 +53,8 @@ public :
 private:
 
     static Queue<pre_processor_data> sub_movement_queue;
-    static uint8_t *sub_movement_distances;
+    static uint8_t *sub_movement_int_distances;
+    static float *sub_movement_real_distances;
 
 public :
     static uint8_t elements() {
@@ -81,8 +85,11 @@ public :
 
 #define MAXIMUM_DISTANCE_LIMIT 256
 
+    static const int8_t *const speed_groups_indices;
 
-    static bool get_steppers_distances(int32_t *const pos, const int32_t *const dest, uint8_t *const dists,
+    static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
+
+    static bool get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists, float *const real_dists,
                                        sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
 
 //---------------------------------------------Pre_Computed_Positions_storage-------------------------------------------
@@ -97,7 +104,7 @@ public :
 
     static void fill_sub_movement_queue();
 
-    static void pop_next_position(uint8_t *elementary_dists, sig_t *negative_signature, float *distance);
+    static void pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature, float *distance);
 
     static void reset_vars();
 
@@ -143,9 +150,9 @@ public :
 
     static void set_regulation_speed_jerk(uint8_t speed_group, float new_speed);
 
-    static void update_speeds(const uint8_t *const stepper_distances, float time);
+    static void update_speeds(const float *const stepper_distances, float time);
 
-    static float pre_process_speed(float movement_distance, const uint8_t *const stepper_distances);
+    static float pre_process_speed(float movement_distance, const float *const stepper_distances);
 
 
 private :
@@ -164,9 +171,8 @@ private :
 
     //Speed fields.
 
-    static float last_time;
-
     static float regulation_speed;
+    static float last_time;
 
     static float *const steppers_speeds;
 
@@ -188,6 +194,7 @@ private:
 
     static void (**linear_set_functions)(float);
 
+    static void update_current_hl_position(float *new_hl_position);
 };
 
 #endif //TRACER_SPEEDMANAGER_H

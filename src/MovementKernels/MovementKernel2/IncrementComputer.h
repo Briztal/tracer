@@ -31,9 +31,9 @@ public:
 
 private :
 
-    static uint32_t get_max_dists(int32_t *p0, int32_t *p1);
+    static uint32_t get_max_dists(float *p0, float *p1);
 
-    void static get_stepper_position(void (*get_position)(float, float *), float point, int32_t *positions);
+    void static get_stepper_position(void (*get_position)(float, float *), float point, float *positions);
 
 };
 

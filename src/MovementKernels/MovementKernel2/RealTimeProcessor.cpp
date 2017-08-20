@@ -45,6 +45,8 @@ void RealTimeProcessor::start() {
 
         last_time = 0;
 
+        //TODO MINIMAL SPEED;
+
         //TODO PRE_PROCESSES
 
     }
@@ -165,15 +167,17 @@ void RealTimeProcessor::push_new_position() {
         return;
 
     //High level positions : the new position in the high level system (will be provided by get_new_positions).
-    float high_level_positions[NB_AXIS];
+    float candidate_high_level_positions[NB_AXIS];
+
 
     //Stepper positions : the new position in the steppers system (translated by StepperAbstraction).
-    int32_t steppers_positions[NB_STEPPERS];
+    float steppers_positions[NB_STEPPERS];
 
 
     //Stepper distances : As copying requires time, we directly put the temp distances in the final array.
     uint8_t push_indice = sub_movement_queue.push_indice();
-    uint8_t *elementary_dists = sub_movement_distances + push_indice * NB_STEPPERS;
+    uint8_t *elementary_dists = sub_movement_int_distances + push_indice * NB_STEPPERS;
+    float *real_dists = sub_movement_real_distances + push_indice * NB_STEPPERS;
 
     //The maximal stepper distance, and the maximum stepper
     uint8_t max_distance, max_axis;
@@ -191,20 +195,18 @@ void RealTimeProcessor::push_new_position() {
     }
 
     //Get the new high level position;
-    get_new_position(index_candidate, high_level_positions);
+    get_new_position(index_candidate, candidate_high_level_positions);
 
 
-    float movement_distance = StepperAbstraction::get_movement_distance_for_group(movement_speed_group,
-                                                                                  high_level_positions);
+    //Compute the movement distance for the current speed group
+    float movement_distance = get_movement_distance_for_group(movement_speed_group, candidate_high_level_positions);
 
     //Translate the high level position into steppers position;
-    StepperAbstraction::translate(high_level_positions, steppers_positions);
+    StepperAbstraction::translate(candidate_high_level_positions, steppers_positions);
 
     //Get the steppers distances, and the maximal stepper and distance
-    bool up_check = get_steppers_distances(current_stepper_positions, steppers_positions, elementary_dists,
+    bool up_check = get_steppers_distances(current_stepper_positions, steppers_positions, elementary_dists, real_dists,
                                            &negative_signature, &max_axis, &max_distance);
-
-
 
     //-----------------Validity_Verification----------------------------
 
@@ -227,7 +229,6 @@ void RealTimeProcessor::push_new_position() {
     }
 
 
-
     //---------------------Movement_Enqueuing----------------------------
 
     /*
@@ -248,7 +249,50 @@ void RealTimeProcessor::push_new_position() {
 
     index = index_candidate;
 
+    update_current_hl_position(candidate_high_level_positions);
 
+}
+
+
+/*
+ * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument,
+ *      in the cartesian group provided in argument.
+ *
+ *  The movement is provided in the form of its distances.
+ *
+ *  The distance in the group is defined as the norm2 of the distance vector's projected
+ *      in the concerned cartesian group
+ *
+ * 10 us
+ *
+ */
+
+float RealTimeProcessor::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
+
+    float square_dist_sum = 0;
+
+    //Initialise the stepper index pointer
+    const int8_t *indexes = (speed_groups_indices + 3 * speed_group);
+
+
+    //Sum the square of all distance :
+    for (uint8_t stepper = 0; stepper < 3; stepper++) {
+
+        //Get the current axis value
+        int8_t index = indexes[stepper];
+
+        //if the cartesian group comprises less than 3 axis;
+        if (index == -1) break;
+
+        //get the distance
+        float dist = distances[index] - current_hl_position[index];
+
+        //update the square sum
+        square_dist_sum += dist * dist;
+    }
+
+    //compute the square root and return it.
+    return (float) sqrt(square_dist_sum);
 }
 
 
@@ -261,9 +305,9 @@ void RealTimeProcessor::push_new_position() {
  */
 
 bool
-RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *const dest,
-                                          uint8_t *const dists, sig_t *dir_dignature_p,
-                                          uint8_t *max_axis_p, uint8_t *max_distance_p) {
+RealTimeProcessor::get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists,
+                                          float *const real_dists, sig_t *dir_dignature_p, uint8_t *max_axis_p,
+                                          uint8_t *max_distance_p) {
 
     //Cache variable, to avoid pointer access.
     uint8_t max_dist = 0;
@@ -273,15 +317,24 @@ RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *con
     //We must determine the distance for every stepper
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
-        //get distance on stepper
-        int32_t d = dest[stepper];
-        int32_t distance = d - pos[stepper];
+        //get destination and position
+        float d = dest[stepper], p = pos[stepper];
+
+        //update position with destination;
         pos[stepper] = d;
+
+        //get the real distance
+        float distance = d - p;
+
+        uint8_t int_dist;
 
         //get absolute distance
         if (distance < 0) {
             distance = -distance;
             dir_signature |= axis_signatures[stepper];
+            int_dist = (uint8_t) ((uint32_t) p - (uint32_t)d);
+        } else {
+            int_dist = (uint8_t) ((uint32_t) d - (uint32_t)p);
         }
 
         //if the distance is greater than the limit : fail with true
@@ -289,15 +342,14 @@ RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *con
             return true;
         }
 
-        //cast to small type
-        uint8_t rdist = (uint8_t) distance;
+        //persist distances
+        real_dists[stepper] = distance;
+        int_dists[stepper] = int_dist;
 
-        //persist distance
-        dists[stepper] = rdist;
 
         //Update max dist
-        if (rdist > max_dist) {
-            max_dist = rdist;
+        if (int_dist > max_dist) {
+            max_dist = int_dist;
             max_axis = stepper;
         }
     }
@@ -312,8 +364,15 @@ RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *con
 }
 
 
+void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
+    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
+
+
+}
+
+
 /*
- * set_end_position : this function updates distances to end point and jerk point.
+ * update_end_position : this function updates distances to end point and jerk point.
  *
  *  It takes as arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
  *
@@ -326,7 +385,7 @@ RealTimeProcessor::get_steppers_distances(int32_t *const pos, const int32_t *con
 
 void RealTimeProcessor::update_end_position(const float *const new_hl_position) {
 
-    int32_t stepper_end_position[NB_STEPPERS];
+    float stepper_end_position[NB_STEPPERS];
 
     StepperAbstraction::translate(new_hl_position, stepper_end_position);
 
@@ -335,7 +394,7 @@ void RealTimeProcessor::update_end_position(const float *const new_hl_position) 
     }
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        int32_t d = stepper_end_position[stepper];
+        int32_t d = (int32_t) stepper_end_position[stepper];
         end_distances[stepper] += d - end_position[stepper];
         end_position[stepper] = d;
     }
@@ -391,7 +450,7 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
  *
  */
 
-float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_t *const stepper_distances) {
+float RealTimeProcessor::pre_process_speed(float movement_distance, const float *const stepper_distances) {
 
 
     //The regulation time, corresponding to the regulation speed;
@@ -400,30 +459,36 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
     //The final time
     float new_time = 0;
 
+    CI::echo("distance : " + String(movement_distance, 5));
+
     if (!jerk_point) {
 
         //Window computation variables
         float min_time = 0, max_time = 0;
         bool first = true;
 
+        if (last_time == 0) {
+            //For the Movement beginning, the standard time is 10 microseconds
+            last_time = 0.01;
+        }
+
+        CI::echo("last_speed - time : " + String(last_time) + " " + String(last_time, 5));
+
         //Get the time bounds for each stepper;
         for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-            
+
             //Get the speed on last movement, on stepper [stepper]
             float act_speed = steppers_speeds[stepper];
 
-            if (last_time == 0) {
-                //For the Movement beginning, the standard time is 10 microseconds
-                last_time = 0.001;
-            }
-
             //Get the speed limit
-            float speed_limit = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * last_time;
+            float speed_step = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * last_time;
 
+            CI::echo("speed_step : " + String(speed_step));
             //if the current stepper can stop, no processing is required :
+
             float s;
 
-            if ((s = act_speed - speed_limit) > 0) {
+            if ((s = act_speed - speed_step) > 0) {
 
                 //update the maximum time, the new speed = act_speed - speed limit.
                 float up_time = stepper_distances[stepper] / s;
@@ -435,15 +500,23 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
 
             }
 
+            CI::echo("current speed : " + String(act_speed));
+
             //update the minimum time, the new speed = act_speed + speed limit.
-            float down_time = stepper_distances[stepper] / (act_speed + speed_limit);
+            CI::echo("stepper_distance : " + String(stepper_distances[stepper]));
+            float down_time = stepper_distances[stepper] / (act_speed + speed_step);
+
+            CI::echo("down_time : " + String(down_time, 5));
+
 
             //update minimum time, as the maximum of the new time and the current min time :
             min_time = (down_time < min_time) ? min_time : down_time;
 
         }
-        CI::echo("bounds : "+String(min_time, 5)+" "+String(max_time, 5));
-        CI::echo("time : "+String(regulation_time, 5));
+        CI::echo("bounds : " + String(min_time, 5) + " " + String(max_time, 5));
+        CI::echo("time : " + String(regulation_time, 5));
+        CI::echo("first : " + String(first));
+        CI::echo("dec : " + String(deceleration_required));
 
         if ((!first) && (deceleration_required || (regulation_time > max_time))) {
             CI::echo("DECELERATION");
@@ -478,6 +551,8 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
         new_time = regulation_time;
     }
 
+    CI::echo(" ");
+
     //validate the acceleration management for the next movement.
     jerk_point = false;
 
@@ -493,22 +568,27 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const uint8_
  *
  */
 
-void RealTimeProcessor::update_speeds(const uint8_t *const stepper_distances, float time) {
+void RealTimeProcessor::update_speeds(const float *const stepper_distances, float time) {
 
     float inv_time = 1 / time;
+
+    //CI::echo("distances : ");
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         //set the current speed on the stepper [stepper]
 
         //get the speed for the stepper
-        float v = steppers_speeds[stepper] = (float) stepper_distances[stepper] * inv_time;
+        float v = steppers_speeds[stepper] = stepper_distances[stepper] * inv_time;
 
         //If a deceleration is required, no need for deceleration_distance checking
         if (deceleration_required)
             continue;
 
         //Compute the deceleration deceleration_distance on the stepper
-        uint32_t deceleration_distance = (uint32_t) ((v * v) / (2 * EEPROMStorage::accelerations[stepper]));
+        uint32_t deceleration_distance = (uint32_t) ((v * v) / (2 * EEPROMStorage::accelerations[stepper] *
+                                                                EEPROMStorage::steps[stepper]));
+
+        //CI::echo(String(deceleration_distance));
 
         //require a deceleration if the end distance on the stepper is below the deceleration_distance;
         if (deceleration_distance > end_distances[stepper]) {
@@ -530,7 +610,7 @@ void RealTimeProcessor::update_speeds(const uint8_t *const stepper_distances, fl
  *
  */
 
-void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *negative_signature, float *distance) {
+void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature, float *distance) {
 
     uint8_t size = sub_movement_queue.available_elements();
 
@@ -542,18 +622,20 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, sig_t *nega
         return;
 
     } else {
-
-
+        
         //If the queue only contains the last sub_movement : disable the sub_movement pre_processing
         if ((size == 1) && (last_position_processed)) {
             last_position_popped = true;
         }
 
+        uint8_t pull_index = sub_movement_queue.pull_indice();
         //The pointer to the beginning of pre-processed elementary distances
-        uint8_t *ptr = sub_movement_distances + NB_STEPPERS * sub_movement_queue.pull_indice();
+        uint8_t *e_ptr = sub_movement_int_distances + NB_STEPPERS * pull_index;
+        float *r_ptr = sub_movement_real_distances + NB_STEPPERS * pull_index;
 
         //copy
-        memcpy(elementary_dists, ptr, NB_STEPPERS * sizeof(uint8_t));
+        memcpy(elementary_dists, e_ptr, NB_STEPPERS * sizeof(uint8_t));
+        memcpy(real_dists, r_ptr, NB_STEPPERS * sizeof(float));
 
         //update the direction signature and the distance memorised in the queue.
         pre_processor_data *data = sub_movement_queue.peak();
@@ -581,15 +663,24 @@ void RealTimeProcessor::reset_vars() {
 #define m RealTimeProcessor
 
 //Current stepper position;
-int32_t t_cur_pos[NB_STEPPERS];
-int32_t *const m::current_stepper_positions = t_cur_pos;
+float t_cur_pos[NB_STEPPERS];
+float *const m::current_stepper_positions = t_cur_pos;
+
+
+//Positions
+float t_rl_pos[NB_AXIS]{0};
+float *const m::current_hl_position = t_rl_pos;
 
 //movement data queue;
 Queue<pre_processor_data> m::sub_movement_queue(MOTION_DATA_QUEUE_SIZE);
 
-//the elementary distances data
+//the integer distances data
 uint8_t t_sm_d[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
-uint8_t *m::sub_movement_distances = t_sm_d;
+uint8_t *m::sub_movement_int_distances = t_sm_d;
+
+//the real distances data
+float t_sm_rd[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
+float *m::sub_movement_real_distances = t_sm_rd;
 
 
 //Indexation variables
@@ -654,7 +745,24 @@ sig_t k2t_sig[NB_STEPPERS + 1]{
 
 const sig_t *const m::axis_signatures = k2t_sig;
 
-#undef m
 
+//Speed groups indices
+
+//declare and fill the array
+int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
+
+#define CARTESIAN_GROUP(i, a, b, c, s) a, b, c,
+
+#include <config.h>
+
+#undef CARTESIAN_GROUP
+        //end the array
+        0};
+
+//Assign the array
+const int8_t *const m::speed_groups_indices = t_sg_indices;
+
+
+#undef m
 
 #endif

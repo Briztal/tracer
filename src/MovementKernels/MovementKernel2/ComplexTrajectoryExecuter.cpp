@@ -136,22 +136,25 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 
     //start by initialising vars for processing
     uint8_t elementary_dists[NB_STEPPERS];
+    float real_dists[NB_STEPPERS];
     sig_t negative_signature = 0;
     float distance = 0;
 
     //pop the stored position
-    RealTimeProcessor::pop_next_position(elementary_dists, &negative_signature, &distance);
+    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signature, &distance);
+
+    //Process the signatures for the next movement
+    process_signatures(elementary_dists, es0);
+    is_es_0 = false;
 
     //Update end distances with the computed distances.
     RealTimeProcessor::update_end_distances(negative_signature, elementary_dists);
 
     //update the speeds
-    float time = RealTimeProcessor::pre_process_speed(distance, elementary_dists);
+    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
 
-    RealTimeProcessor::update_speeds(elementary_dists, time);
+    RealTimeProcessor::update_speeds(real_dists, time);
 
-    process_signatures(elementary_dists, es0);
-    is_es_0 = false;
 
     //detemine the first delay
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
@@ -245,6 +248,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
 
     uint8_t elementary_dists[NB_STEPPERS];
+    float real_dists[NB_STEPPERS];
 
     //Step 0 : update signatures for the current prepare_movement;
     sig_t *elementary_signatures = initialise_sub_movement();
@@ -253,7 +257,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     float distance = 0;
 
     //Step 1 : Get a new position to reach
-    RealTimeProcessor::pop_next_position(elementary_dists, &negative_signatures, &distance);
+    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);
 
     saved_direction_sigature = negative_signatures;
 
@@ -264,22 +268,25 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     STEP_AND_WAIT;
 
-    //Step 3 : Update the speed distance with the new heuristic distances
-    float time = RealTimeProcessor::pre_process_speed(distance, elementary_dists);
+    //Step 3 : Extract signatures from this distances array
+    process_signatures(elementary_dists, elementary_signatures);
 
     STEP_AND_WAIT;
 
     //Step 4 : Update the speed distance with the new heuristic distances
-    RealTimeProcessor::update_speeds(elementary_dists, time);
+    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
 
     STEP_AND_WAIT;
 
-    //Step 5 : Extract signatures from this distances array
-    process_signatures(elementary_dists, elementary_signatures);
+    //Step 5 : Update the speed distance with the new heuristic distances
+    RealTimeProcessor::update_speeds(real_dists, time);
+
 
     //Step 6 : determine the delay time for the next sub_movement :
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
     CI::echo("delay : " + String(delay));
+    CI::echo(" ");
+
 
 
     //If no more pre-process is required
@@ -322,8 +329,7 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
     StepperController::set_directions(saved_direction_sigature);
 
-
-    set_stepper_int_period(delay);
+    set_stepper_int_period(200);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
