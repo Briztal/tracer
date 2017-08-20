@@ -68,12 +68,10 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     pre_process_offsets = positions;
     pre_process_max_axis = max_axis;
 
-    float incr = (distances[max_axis]<0) ? -1 : 1;
+    float incr = (max_distance<0) ? -1 : 1;
 
     //Extract the increment
     float increment = IncrementComputer::extract_increment(get_position, 0, incr , DISTANCE_TARGET);
-
-    CI::echo("SUUS");
 
     //Push the local data
     linear_data_queue.push();
@@ -118,10 +116,11 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
         //get the distance
         float distance = destination[axis] - position[axis];
 
-        if (distance<0) distance = -distance;
+
+        float a_dist =  (distance>0) ? distance : -distance;
 
         //check if the distance is zero
-        if (!distance) {
+        if (!a_dist) {
             break;
         }
 
@@ -129,9 +128,9 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
         null_move = false;
 
         //Update max_axis and max_dist if needed
-        if (distance > max_dist) {
+        if (a_dist > max_dist) {
             max_axis = axis;
-            max_dist = distance;
+            max_dist = a_dist;
         }
 
         //save distance
@@ -141,7 +140,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 
     //update maximum_axis and distance with the determined values
     *maximum_axis = max_axis;
-    *maximum_distance = max_dist;
+    *maximum_distance = distances[max_axis];
 
     //return if the current movement is null
     return null_move;

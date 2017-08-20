@@ -167,6 +167,7 @@ void RealTimeProcessor::fill_sub_movement_queue() {
 
 void RealTimeProcessor::push_new_position() {
 
+    CI::echo("push. last : "+String(last_position_processed));
 
     if ((!sub_movement_queue.available_spaces()) || (last_position_processed))
         return;
@@ -191,10 +192,14 @@ void RealTimeProcessor::push_new_position() {
 
     //------------------Distances_computing-----------------------------
 
+
     //Get the new index candidate;
     float index_candidate = index + increment;
 
+    CI::echo("max : "+String(index_max)+" index "+String(index) +" index_c "+String(index_candidate) +" incre "+String(increment));
+
     if (((positive_index_dir)&&(index_candidate + increment > index_max))||((!positive_index_dir)&&(index_candidate + increment < index_max))) {
+        CI::echo("incr finish.");
         last_position_processed = true;
         index_candidate = index_max;
     }

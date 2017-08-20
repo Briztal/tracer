@@ -464,8 +464,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 CI::echo("STOPPED");
                 return;
 
-
-
             } else if (RealTimeProcessor::last_position_popped) {
 
 
@@ -492,8 +490,6 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             (*movement_finalisation)();
 
             CI::echo("available movements : "+String(motion_data_queue.available_elements()));
-
-            //TODO PROBLEM DURING THE MOVEMENT CHANGE.
 
             if (motion_data_queue.available_elements()) {
                 //If another movement can be loaded :
