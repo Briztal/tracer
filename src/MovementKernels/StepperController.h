@@ -18,19 +18,18 @@
 
 */
 
-#include <stdint.h>
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef CODE_STEPPERCONTROLLER_H
-#define CODE_STEPPERCONTROLLER_H
+#ifndef CODE_STEPPER_CONTROLLER_H
+#define CODE_STEPPER_CONTROLLER_H
 
-#include "../config.h"
+#include <stdint.h>
 
 class StepperController {
-public:
 
+public:
 
 #define STEPPER(i, ...) \
     static bool isAtMax##i();\
@@ -40,11 +39,15 @@ public:
     static void setDir##i (bool sens);\
     static void step##i();\
 
+
 #include   "../config.h"
+
 #undef STEPPER
 
+
 #ifdef position_log
-static void send_position();
+
+    static void send_position();
 
 #endif
 
@@ -56,14 +59,13 @@ static void send_position();
 
     static void fastStep(sig_t id);
 
-    static uint16_t *const delays;
 private:
-
-    static uint8_t *step_path;
 
 #define STEPPER(i, ...) \
     static bool dir##i;
+
 #include  "../config.h"
+
 #undef STEPPER
 
 #ifdef position_log
@@ -71,13 +73,14 @@ private:
     static int32_t incr##i;\
     public:static int32_t pos##i;\
 
+
 #include  "../config.h"
+
 #undef STEPPER
 #endif
 
-    static void echo_positions();
 };
 
-#endif //CODE_MOTIONCONTROLLER_H
+#endif
 
 #endif

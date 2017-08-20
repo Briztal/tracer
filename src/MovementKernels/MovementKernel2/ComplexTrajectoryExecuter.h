@@ -19,7 +19,17 @@
 */
 
 
-#include "../../config.h"
+/*
+ * ComplexTrajectoryExecuter : this class is in charge of the two following tasks :
+ *
+ *  - Managing the planned movement : it disposes of a movement queue containing all data related to any kind
+ *      of movement, and provides functions to enqueue a movement.
+ *
+ *  - Executing the movements : it executes the procedure to trace movement and to regulate speed, for each movement.
+ *
+ */
+
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -36,9 +46,11 @@ class ComplexTrajectoryExecuter {
 
     //--------------------------------------------movement_queue_management---------------------------------------------
 
+
 private:
 
     static Queue<complex_motion_data> motion_data_queue;
+
 
     //-----------------------------------------------sub_movement_queue-------------------------------------------------
 
@@ -47,17 +59,19 @@ public :
     //The state of the movement routine;
     static bool started;
 
+
 private :
 
+    //the stop flag : enabled when all sub_movements have been processed
     static bool stop_programmed;
+
+    //the final sub_movement flag : enabled when the last sub_movement of the movement procedure has begun.
     static bool final_sub_movement_started;
-    static bool jerk_point;
+
 
     //---------------------------------------------Real_Time_Movement_data----------------------------------------------
 
 public :
-
-    //Sub movement procedure variables :
 
     //The signatures for the sub_movement that is currently executed
     static sig_t *saved_elementary_signatures;
@@ -76,16 +90,19 @@ public :
     //the trajectory array : contains the signature order.
     static const uint8_t *const trajectory_array;
 
+
     //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
 
 private :
 
-    //The arrys to store signatures
+    //The arrays to store signatures. They alternately store the current signature, or the saved signatures
     static sig_t *const es0, *const es1;
+
+    //The array flag : is true when saved elementary_signatures is es0.
     static bool is_es_0;
 
-    //------------------------------------------------Movement_Procedure------------------------------------------------
 
+    //------------------------------------------------Movement_Procedure------------------------------------------------
 
 public :
 
@@ -98,6 +115,7 @@ public :
     //new movement enqueueing
     static void enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
                                  void (*trajectory_function)(float, float *));
+
 
 private:
 
@@ -116,15 +134,18 @@ private:
 
     //----------------------------------------------------Signatures----------------------------------------------------
 
+private :
+
     //Signatures processing
-    static void process_signatures(uint8_t *const elementary_dists, sig_t * elementary_signatures);
+    static void process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures);
 
     //Method to initialise a sub_movement
     static sig_t *initialise_sub_movement();
 
+    //Method to initialise the first sub movement of the movement procedure
     static void prepare_first_sub_movement();
-};
 
+};
 
 
 #define WAIT\

@@ -18,17 +18,15 @@
 
 */
 
-
-#include <math.h>
 #include "SqrtFastComputer.h"
 #include "../../interface.h"
-
 
 /*
  * sqrt_slow : this function updates the speed_distances, and its square root, with a call to sqrt.
  *
  * It also sets correct variables for the fast algorithm.
  */
+
 void SqrtFastComputer::sqrt_slow(uint32_t distance_to_end) {
     primary = distance_to_end;
     square_root = (uint16_t) sqrt(distance_to_end);

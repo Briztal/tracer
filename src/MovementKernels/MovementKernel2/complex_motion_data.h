@@ -46,7 +46,7 @@ typedef struct{//TODO REORG
     delay_t delay_numerator;//2
     delay_t regulation_delay;//2
     uint32_t jerk_distance_offset;
-    bool jerk_point;//1
+    bool jerk_flag;//1
     //-------------4----------------
     float speed_factor;//2
     //-------------4----------------32

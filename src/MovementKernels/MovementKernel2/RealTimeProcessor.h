@@ -18,33 +18,40 @@
 
 */
 
-#include <stdint.h>
-#include "../../config.h"
-#include "../../DataStructures/Queue.h"
-#include "complex_motion_data.h"
-
+#include <config.h>
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef TRACER_SPEEDMANAGER_H
-#define TRACER_SPEEDMANAGER_H
+#ifndef TRACER_REAL_TIME_PROCESS_H
+#define TRACER_REAL_TIME_PROCESS_H
 
+#include <DataStructures/Queue.h>
+#include "complex_motion_data.h"
 
 class RealTimeProcessor {
 
 public:
+
     static void start();
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
+
 private:
 
+    //The current positions of stepper motors
     static float *const current_stepper_positions;
+
+    //The current position in the high level system.
     static float *const current_hl_position;
 
-
+    //Remark : the current stepper position is the translation if the high level positions, by StepperAbstraction.
 
 public :
 
+    //the function to update the high level position
+    static void update_current_hl_position(float *new_hl_position);
+
+    //The function to send the current position through the interface.
     static void send_position();
 
 
@@ -52,65 +59,93 @@ public :
 
 private:
 
+    //The sub_movements queue
     static Queue<pre_processor_data> sub_movement_queue;
-    static uint8_t *sub_movement_int_distances;
+
+    //The arrays to store real and integer distances
     static float *sub_movement_real_distances;
+    static uint8_t *sub_movement_int_distances;
 
 public :
+
+    //A simple method to return the number of elements currently in the sub_movement queue.
     static uint8_t elements() {
         return sub_movement_queue.available_elements();
     }
-    //--------------------------------------------Positions_Computation-------------------------------------------------
 
-private :
 
-    //The movement index and its bounds
-    static float index_min, index_max, index;
-    static bool positive_index_dir;
-
-    static uint8_t movement_speed_group;
-
-    static float increment;
-
-    static void (*get_new_position)(float index, float *positions);
+    //-----------------------------------------Current_Movement_Variables-----------------------------------------------
 
 public :
 
+    //The function to initialise all movement variables, during the movement change.
     static void initialise_movement(float min, float max, float increment,
                                     void (*trajectory_function)(float index, float *positions));
 
+private :
+
+
+    //The movement index and its limit
+    static float index, index_limit;
+
+    //The index increment
+    static float increment;
+
+    //The index direction flag : true if the increment is positive.
+    static bool positive_index_dir;
+
+    //The speed group for the current movement
+    static uint8_t movement_speed_group;
+
+    //The trajectory function for the current movement
+    static void (*get_new_position)(float index, float *positions);
+
+
     //---------------------------------------High_level_and_Low_level_distances-----------------------------------------
 
+private :
+
+    //The distance bounds
 
 #define MINIMUM_DISTANCE_LIMIT 10
 
 #define MAXIMUM_DISTANCE_LIMIT 256
 
+    //The speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the speed group j. Compiler constant.
     static const int8_t *const speed_groups_indices;
 
+    //function to compute the high level movement distance for a particular speed group.
     static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
 
-    static bool get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists, float *const real_dists,
-                                       sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
+    //function to get low level distances.
+    static bool
+    get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists, float *const real_dists,
+                           sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
 
-//---------------------------------------------Pre_Computed_Positions_storage-------------------------------------------
+
+    //----------------------------------------Pre_Computed_Positions_storage--------------------------------------------
 
 public :
 
-    static bool last_position_popped;
+    //empty_queue flag : true when the sub_movement queue is empty.
+    static bool empty_queue;
 
-    static bool last_position_processed;
+    //movement_finished flag, true when the current movement's last position have been processed
+    static bool movement_finished;
 
+    //function to determine and push (if the distances bounds are respected) a new position in the queue.
     static void push_new_position();
 
+    //function to push the maximum number of positions in the queue.
     static void fill_sub_movement_queue();
 
-    static void pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature, float *distance);
-
-    static void reset_vars();
+    //function to pop the next position in the queue.
+    static void
+    pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature, float *distance);
 
 
     //---------------------------------------------------End_Distances--------------------------------------------------
+
 
     /*  End Distances Conventions :
     *      pos              end_distance>0        destination   -> +
@@ -130,74 +165,90 @@ public :
      *      0   : positive direction (-> +)
      */
 
-
-public :
-
-    //End distances updating
+    //End distances update
     static void update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
 
+    //End position update
     static void update_end_position(const float *const new_hl_position);
+
 
 private :
 
-    static int32_t *const end_distances;
+    //The stepper end positions;
     static int32_t *const end_position;
+
+    //the stepper end distances;
+    static int32_t *const end_distances;
+
 
     //------------------------------------------------Speed_Management--------------------------------------------------
 
 public :
 
+    //The function to set the next regulation speed
     static void set_regulation_speed(uint8_t speed_group, float speed);
 
+    //The function to set the next regulation speed, and to enable the jerk flag for the next transition
     static void set_regulation_speed_jerk(uint8_t speed_group, float new_speed);
 
-    static void update_speeds(const float *const stepper_distances, float time);
-
+    //the function to compute the time for the current movement.
     static float pre_process_speed(float movement_distance, const float *const stepper_distances);
+
+    //the function to update the current speed of the steppers, knowing the current movement time
+    static void update_speeds(const float *const stepper_distances, float time);
 
 
 private :
 
-    static bool jerk_point;
+    //next_jerk_flag : true when the next sub_movement to pop will be after a jerk point
+    static bool next_jerk_flag;
 
-    static bool next_push_jerk;
+    //jerk_flag : true when the current sub_movement is after a jerk point
+    static bool jerk_flag;
 
+    //the regulation speed for the current movement
     static float next_regulation_speed;
 
-
-
-    //Deceleration Fields,  computed during the heuristic calls;
-
+    //Deceleration Fields,  computed during the heuristic calls
     static bool deceleration_required;
 
-    //Speed fields.
-
+    //Current target speed
     static float regulation_speed;
+
+    //Previous sub_movement duration
     static float last_time;
 
+    //Current speed of steppers
     static float *const steppers_speeds;
 
+    //Current steppers deceleration distances
     static uint32_t *const deceleration_distances;
 
+    //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
 
 
     //-------------------------------------------------------Actions----------------------------------------------------
 
+    //NOT WORKING YET
+
 public :
 
+    //The function to update the action variables
     static void updateActions();
 
 
 private:
 
+    //Number of actions enabled during the current movement
     static uint8_t linear_tools_nb;
 
+    //The function to update actions speed
     static void (**linear_set_functions)(float);
 
-    static void update_current_hl_position(float *new_hl_position);
 };
 
-#endif //TRACER_SPEEDMANAGER_H
+
+#endif //TRACER_REAL_TIME_PROCESS_H
 
 #endif

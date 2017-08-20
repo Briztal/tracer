@@ -18,8 +18,7 @@
 
 */
 
-#include "../../config.h"
-
+#include <config.h>
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "ComplexTrajectoryExecuter.h"
@@ -32,6 +31,12 @@
 
 /*
  * The function to start the movement routine. It will run in interrupts while movements are to trace, and then stop.
+ *
+ *  It first verifies that movement are enqueued,
+ *
+ *  If there are, it pops the first one, and initialises it.
+ *
+ *  It then prepare the movement procedure, and starts the movement routine.
  *
  */
 
@@ -71,6 +76,17 @@ void ComplexTrajectoryExecuter::start() {
 
 }
 
+/*
+ * stop : this function stops the movement procedure, by simply disabling the interrupt.
+ *
+ *  After disabling the interrupt, it disables the timer, and set the state flag to disables.
+ *
+ *  If this function is called during a movement, it will be discarded, and won't continue at next start.
+ *
+ *  It can be called during the emergency procedure, to stop the machine from moving.
+ *
+ */
+
 void ComplexTrajectoryExecuter::stop() {
 
     //Interrupt the movement routing, by stopping the interrupt sequence
@@ -82,6 +98,7 @@ void ComplexTrajectoryExecuter::stop() {
     //re-disable the movement routine, prevents the case where the previous disable occured just before the interrupt.
     disable_stepper_interrupt()
 
+    disable_stepper_timer();
     //Mark the movement routine as stopped
     started = false;
 
@@ -283,7 +300,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
 
     //If no more pre-process is required
-    if (RealTimeProcessor::last_position_processed) {
+    if (RealTimeProcessor::movement_finished) {
         goto end;
     }
 
@@ -455,7 +472,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 CI::echo("STOPPED");
                 return;
 
-            } else if (RealTimeProcessor::last_position_popped) {
+            } else if (RealTimeProcessor::empty_queue) {
 
 
                 //if the last position has just been popped :
@@ -473,7 +490,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             }
 
 
-        } else if (RealTimeProcessor::last_position_processed) {
+        } else if (RealTimeProcessor::movement_finished) {
 
             //If the movement pre-processing is finished :
 

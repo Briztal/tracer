@@ -18,13 +18,11 @@
 
 */
 
-/*
- * StepperAbstraction : this class is the interface between the high level coordinate system
- *      the stepper coordinate system.
- *
- *  It is also in charge of the current position storage.
- *
- */
+
+#include <config.h>
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 
 #include <stdint.h>
 #include <Arduino.h>
@@ -32,6 +30,7 @@
 #include "../Core/EEPROMStorage.h"
 #include <interface.h>
 #include <MovementKernels/MovementKernel2/RealTimeProcessor.h>
+
 
 /*
  * translate : this function translates a position expressed in the high level coordinate system into
@@ -46,7 +45,6 @@ void StepperAbstraction::translate(const float *const hl_coordinates, float *con
         steppers_coordinates[axis] = (EEPROMStorage::steps[axis] * hl_coordinates[axis]);
 
     }
-
 }
 
 
@@ -61,7 +59,6 @@ void StepperAbstraction::invert(const float *const steppers_coordinates, float *
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         hl_coordinates[axis] = (steppers_coordinates[axis]) / EEPROMStorage::steps[axis];
     }
-
 }
 
 
@@ -162,3 +159,7 @@ static const float t_mx_speeds[NB_CARTESIAN_GROUPS + 1] = {
 //Assign the array
 
 const float *const m::max_speeds = t_mx_speeds;
+
+#undef m
+
+#endif

@@ -19,8 +19,8 @@
 */
 
 
-#include "../../config.h"
 
+#include <config.h>
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "RealTimeProcessor.h"
@@ -73,6 +73,21 @@ void RealTimeProcessor::send_position() {
 
 
 /*
+ * set_regulation_speed : this function updates the regulation speed,
+ */
+
+void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
+
+    //Set the speed group
+    RealTimeProcessor::movement_speed_group = speed_group;
+
+    //Set the speed
+    next_regulation_speed = speed;
+
+}
+
+
+/*
  * set_regulation_speed_jerk : this function updates the regulation speed,
  *      and marks that the next position to be pushed will be after a jerk point;
  *
@@ -80,18 +95,11 @@ void RealTimeProcessor::send_position() {
 
 void RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float speed) {
 
-    next_push_jerk = true;
+    //Program a jerk point
+    next_jerk_flag = true;
 
+    //Set the speed
     set_regulation_speed(speed_group, speed);
-}
-
-void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
-
-
-    RealTimeProcessor::movement_speed_group = speed_group;
-
-    next_regulation_speed = speed;
-
 }
 
 
@@ -109,8 +117,7 @@ void
 RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*trajectory_function)(float, float *)) {
 
     //update trajectory extrmas, index, and increment
-    index_min = min;
-    index_max = max;
+    index_limit = max;
     index = min;
     increment = incr;
     positive_index_dir = incr>0;
@@ -118,9 +125,9 @@ RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*
     //update position provider
     get_new_position = trajectory_function;
 
-    last_position_processed = false;
+    movement_finished = false;
 
-    last_position_popped = false;
+    empty_queue = false;
 
 }
 
@@ -139,7 +146,7 @@ void RealTimeProcessor::updateActions() {
 
 void RealTimeProcessor::fill_sub_movement_queue() {
 
-    while (sub_movement_queue.available_spaces() && !last_position_processed) {
+    while (sub_movement_queue.available_spaces() && !movement_finished) {
         push_new_position();
     }
 }
@@ -167,7 +174,7 @@ void RealTimeProcessor::fill_sub_movement_queue() {
 
 void RealTimeProcessor::push_new_position() {
 
-    if ((!sub_movement_queue.available_spaces()) || (last_position_processed))
+    if ((!sub_movement_queue.available_spaces()) || (movement_finished))
         return;
 
     //High level positions : the new position in the high level system (will be provided by get_new_positions).
@@ -194,9 +201,9 @@ void RealTimeProcessor::push_new_position() {
     //Get the new index candidate;
     float index_candidate = index + increment;
 
-    if (((positive_index_dir)&&(index_candidate + increment > index_max))||((!positive_index_dir)&&(index_candidate + increment < index_max))) {
-        last_position_processed = true;
-        index_candidate = index_max;
+    if (((positive_index_dir)&&(index_candidate + increment > index_limit))||((!positive_index_dir)&&(index_candidate + increment < index_limit))) {
+        movement_finished = true;
+        index_candidate = index_limit;
     }
 
     //Get the new high level position;
@@ -224,12 +231,12 @@ void RealTimeProcessor::push_new_position() {
 
     //If the maximal distance is below the lower limit :
     if (up_check) {
-        last_position_processed = false;
+        movement_finished = false;
         return;
     }
 
     //If the maximal distance is below the lower limit :
-    if ((!last_position_processed) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
+    if ((!movement_finished) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
         return;
     }
 
@@ -247,7 +254,7 @@ void RealTimeProcessor::push_new_position() {
     d->negative_signature = negative_signature;
     d->distance = movement_distance;
     d->speed = next_regulation_speed;
-    d->jerk_point = next_push_jerk;
+    d->jerk_point = next_jerk_flag;
 
 
     sub_movement_queue.push();
@@ -381,7 +388,7 @@ void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
 /*
  * update_end_position : this function updates distances to end point and jerk point.
  *
- *  It takes as arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
+ *  It takes in arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
  *
  *      Reminder : the i_th bit of negative_signature is 1 if the distance on the i_th stepper is negative.
  *
@@ -415,7 +422,7 @@ void RealTimeProcessor::update_end_position(const float *const new_hl_position) 
 /*
  * update_end_distances : this function updates distances to end point and jerk point.
  *
- *  It takes as arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
+ *  It takes in arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
  *
  *      Reminder : the i_th bit of negative_signature is 1 if the distance on the i_th stepper is negative.
  *
@@ -441,7 +448,7 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
 //TODO MODIFY THE SPEED ALGORITHM
 
 /*
- * pre_process_speed : this function determines the correct time, for the movement passed as argument.
+ * pre_process_speed : this function determines the correct time, for the movement passed in argument.
  *
  *  The movement is passed in he form of :
  *      - movement distance : the high level distance
@@ -466,7 +473,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
     //The final time
     float new_time = 0;
 
-    if (!jerk_point) {
+    if (!jerk_flag) {
 
         //Window computation variables
         float min_time = 0, max_time = 0;
@@ -542,7 +549,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
 
     //validate the acceleration management for the next movement.
-    jerk_point = false;
+    jerk_flag = false;
 
     last_time = new_time;
 
@@ -612,8 +619,8 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
     } else {
 
         //If the queue only contains the last sub_movement : disable the sub_movement pre_processing
-        if ((size == 1) && (last_position_processed)) {
-            last_position_popped = true;
+        if ((size == 1) && (movement_finished)) {
+            empty_queue = true;
         }
 
         uint8_t pull_index = sub_movement_queue.pull_indice();
@@ -630,7 +637,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
 
         *negative_signature = data->negative_signature;
         *distance = data->distance;
-        jerk_point = data->jerk_point;
+        jerk_flag = data->jerk_point;
         regulation_speed = data->speed;
 
         sub_movement_queue.discard();
@@ -639,10 +646,6 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
 
     }
 
-}
-
-void RealTimeProcessor::reset_vars() {
-    RealTimeProcessor::last_position_popped = RealTimeProcessor::last_position_processed = false;
 }
 
 
@@ -672,7 +675,7 @@ float *m::sub_movement_real_distances = t_sm_rd;
 
 
 //Indexation variables
-float m::index_min = 0, m::index_max = 0, m::index = 0, m::increment = 0;
+float m::index_limit = 0, m::index = 0, m::increment = 0;
 bool m::positive_index_dir = false;
 
 //Speed group for the current movement
@@ -682,8 +685,8 @@ uint8_t m::movement_speed_group = 0;
 void (*m::get_new_position)(float, float *);
 
 //Queue state
-bool m::last_position_processed = false;
-bool m::last_position_popped = false;
+bool m::movement_finished = false;
+bool m::empty_queue = false;
 
 
 //End distances
@@ -695,14 +698,14 @@ int32_t *const m::end_position = k2tep;
 
 bool m::deceleration_required = false;
 
-bool m::jerk_point = true;
+bool m::jerk_flag = true;
 
 //Global speed
 float m::regulation_speed;
 float m::last_time;
 
 //next_speed parameters
-bool m::next_push_jerk = false;
+bool m::next_jerk_flag = false;
 float m::next_regulation_speed = 0;
 
 //Steppers speeds

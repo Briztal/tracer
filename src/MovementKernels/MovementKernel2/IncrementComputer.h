@@ -18,8 +18,30 @@
 
 */
 
-#ifndef TRACER_INCREMENTCOMPUTER_H
-#define TRACER_INCREMENTCOMPUTER_H
+/*
+ * The Increment Computing class : this class computes the initial increment for a trajectory.
+ *
+ *  This step is absolutely necessary, as a position can only be enqueued in the sub_movement queue if the distance
+ *      between this new position and the previous one is comprised in a certain interval.
+ *
+ *  This distance is determined by the index increment, the delta of the trajectory function's input variable.
+ *
+ *  This increment needs to be adjusted when a movement is planned. During the real-time position computation, it is
+ *      again adjusted continuously, so that the distances between two consecutive positions continue to fit in the
+ *      interval.
+ *
+ */
+
+
+#include <stdint.h>
+#include "../../config.h"
+#include "../../DataStructures/Queue.h"
+#include "complex_motion_data.h"
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+#ifndef TRACER_INCREMENT_COMPUTER_H
+#define TRACER_INCREMENT_COMPUTER_H
 
 
 class IncrementComputer {
@@ -38,4 +60,6 @@ private :
 };
 
 
-#endif //TRACER_INCREMENTCOMPUTER_H
+#endif //TRACER_INCREMENT_COMPUTER_H
+
+#endif

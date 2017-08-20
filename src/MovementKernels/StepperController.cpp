@@ -20,24 +20,20 @@
 
 
 
-#include "../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
-
 
 #include "StepperController.h"
 #include "../interface.h"
 #include "../Core/EEPROMStorage.h"
 
-#define PINS_REQUIRED
-#define PARAMS_REQUIRED
-
-#define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
+#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
 bool StepperController::isAtMax##i ()  {return (digital_read(pinEndMax )==HIGH);}\
 bool StepperController::isAtMin##i() { return (digital_read(pinEndMin)==HIGH);}\
 
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -50,7 +46,7 @@ void StepperController::enable(sig_t signature) {
         digital_write(pinPower, HIGH);\
     }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -60,7 +56,7 @@ void StepperController::enable(sig_t signature) {
 void StepperController::set_directions(sig_t negative_signatures) {
     bool sig_dir;
 #ifdef position_log
-#define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
     if ((!sig_dir) && !dir##i) {\
         dir##i = true;\
@@ -87,14 +83,14 @@ void StepperController::set_directions(sig_t negative_signatures) {
 
 #endif
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
 }
 
 #ifdef position_log
-#define STEPPER(i, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
 void StepperController::setDir##i(bool sens) {\
     CI::echo(String(i)+" "+String(sens));\
     if (!(sens ^ dir##i )) return;\
@@ -108,7 +104,7 @@ void StepperController::setDir##i(bool sens) {\
     }\
 }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 #else
@@ -125,18 +121,18 @@ void StepperController::setDir##k1_position_indice(bool sens) {\
     }\
 }
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER;
 #endif
 
 void StepperController::begin() {
 
-#define STEPPER(i, sig, rel, pinStep, pinDir, dp,  pinPower, ve, pinEndMin, vi, pinEndMax, va)\
+#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
     pinMode(pinPower, OUTPUT);pinMode(pinDir, OUTPUT);pinMode(pinStep, OUTPUT);\
     digital_write(pinPower, HIGH);setDir##i(true);
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -146,7 +142,7 @@ void StepperController::fastStep(sig_t id) {
 //CI::echo("S");
 #ifdef position_log
 
-#define STEPPER(i, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
+#define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
         /*if (id&(sig_t)1) {*/\
         if (id&sig) {\
             pos##i += incr##i;\
@@ -155,7 +151,7 @@ void StepperController::fastStep(sig_t id) {
         }\
         //if (!(id>>=1)) return;
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -168,7 +164,7 @@ void StepperController::fastStep(sig_t id) {
         }\
         //if (!(id>>=1)) return;
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -176,58 +172,6 @@ void StepperController::fastStep(sig_t id) {
 
 }
 
-/*
-uint16_t StepperController::fastStepDelay(sig_t id) {
-    uint16_t delay = 0;
-#ifdef position_log
-
-    #define STEPPER(k1_position_indice, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-        if (id&(sig_t)1) {\
-            pos##k1_position_indice += incr##k1_position_indice;\
-            delay+=delays[k1_position_indice];\
-            BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-            BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-        }\
-        if (!(id>>=1)) return delay;
-
-#include "../config.h"
-#undef STEPPER
-
-#else
-#define STEPPER(k1_position_indice, sig, rel, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-        if (id&(sig_t)1) {\
-            delay+=delays[k1_position_indice];\
-            BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-            BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-        }\
-        if (!(id>>=1)) return delay;
-
-#include "../config.h"
-
-#undef STEPPER
-
-#endif
-
-    return delay;
-
-}
-
- */
-
-
-
-void StepperController::echo_positions() {
-#ifdef position_log
-    CI::echo("ENDPOS : ");
-#define STEPPER(i, ...)\
-    CI::echo(String(StepperController::pos##i));
-
-#include "../config.h"
-
-#undef STEPPER
-#endif
-
-}
 
 #ifdef position_log
 
@@ -236,7 +180,7 @@ void StepperController::send_position() {
 #define STEPPER(i, ...) \
     t[i] = ((float)pos##i/(float)EEPROMStorage::steps[i]);
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -250,7 +194,7 @@ void StepperController::send_position() {
 #define STEPPER(i, ...) \
     bool m::dir##i = false;
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -259,13 +203,12 @@ void StepperController::send_position() {
     int32_t m::incr##i = 1;\
     int32_t m::pos##i = 0;
 
-#include "../config.h"
+#include <config.h>
 
 #undef STEPPER
+
+#undef m
+
 #endif
-
-uint16_t td[NB_STEPPERS];
-uint16_t *const m::delays = td;
-
 
 #endif

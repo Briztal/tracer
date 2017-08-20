@@ -19,8 +19,11 @@
 */
 
 
-#ifndef TRACER_LINEARMOVEMENT_H
-#define TRACER_LINEARMOVEMENT_H
+#include <config.h>
+#ifdef ENABLE_STEPPER_CONTROL
+
+#ifndef TRACER_LINEAR_MOVEMENT_H
+#define TRACER_LINEAR_MOVEMENT_H
 
 
 #include <DataStructures/Queue.h>
@@ -31,8 +34,10 @@ class ComplexLinearMovement {
 //--------------------------------------------------Pre-Processing--------------------------------------------------
 
 public:
-    //The function to call to trace a line from the current position to the destination provided as argument.
+
+    //The function to call to trace a line from the current position to the destination provided in argument.
     static void prepare_movement(const float *const destination);
+
 
 private :
 
@@ -52,9 +57,12 @@ private :
     //position provider for increment computing
     static void get_position(float indice, float *positions);
 
+
     //--------------------------------------------Pre-processed_Data_Storage--------------------------------------------
 
+    //The Queue containing the movement data.
     static Queue<complex_linear_data> linear_data_queue;
+
 
     //-----------------------------------------------Real_time_Processing-----------------------------------------------
 
@@ -66,13 +74,18 @@ private :
     static uint8_t real_time_max_axis;
 
     //the function to initialise movement
-    static void initialise_motion();
+    static void initialise_movement();
+
+    //The function to finalise the movement
+    static void finalise_movement();
 
     //real time position provider
     static void get_real_time_position(float index, float *positions);
 
-    static void finalise_motion();
+
 };
 
 
-#endif //TRACER_LINEARMOVEMENT_H
+#endif //TRACER_LINEAR_MOVEMENT_H
+
+#endif

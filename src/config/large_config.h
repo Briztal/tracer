@@ -110,6 +110,7 @@ EXTERNAL_PARAMETER(1, temp_hotbed, 0, 300, degree)
 #ifdef PID
 
 PID(0, hotend, 1, 0, 0)
+
 PID(1, hotbed, 1, 1, 0)
 #endif
 

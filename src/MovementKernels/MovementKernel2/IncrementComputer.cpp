@@ -18,14 +18,18 @@
 
 */
 
+
 #include <config.h>
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #include <stdint.h>
 #include <MovementKernels/StepperAbstraction.h>
 #include "IncrementComputer.h"
-#include <interface.h>
+
 
 /*
- * extract_increment : this function takes as arguments :
+ * extract_increment : this function takes in arguments :
  *      - get_position : a trajectory function
  *      - point : a float, of the dimension of get_function's input.
  *      - increment : a distance from point, of the same dimension than point
@@ -82,6 +86,12 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 }
 
 
+/*
+ * get_stepper_position : this function gets the stepper positions, for the provided point, according to
+ *      the provided trajectory_function (get_position).
+ *
+ */
+
 void IncrementComputer::get_stepper_position(void (*get_position)(float, float *), float point, float *positions) {
 
     //Initialisa the local high level position array;
@@ -94,6 +104,13 @@ void IncrementComputer::get_stepper_position(void (*get_position)(float, float *
     StepperAbstraction::translate(hl_positions, positions);
 }
 
+
+/*
+ * get_max_dists : this function gets the distances between the two provided stepper positions, p0 and p1.
+ *
+ *  For each stepper, it determines the real distance (float), and determines the absolute integer distance.
+ *
+ */
 
 uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
 
@@ -112,7 +129,6 @@ uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
             dist = -dist;
         }
 
-
         //cast to unsigned
         uint32_t distance = (uint32_t) dist;
 
@@ -123,7 +139,9 @@ uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
 
     }
 
-    //return the macimum distance.
+    //return the maximum distance.
     return max_dist;
 
 }
+
+#endif

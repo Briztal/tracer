@@ -22,8 +22,8 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef TRACER_SPEEDMANAGER_H
-#define TRACER_SPEEDMANAGER_H
+#ifndef TRACER_REAL_TIME_PROCESS_H
+#define TRACER_REAL_TIME_PROCESS_H
 
 class SpeedManager {
 
@@ -101,6 +101,6 @@ private :
 
 };
 
-#endif //TRACER_SPEEDMANAGER_H
+#endif //TRACER_REAL_TIME_PROCESS_H
 
 #endif

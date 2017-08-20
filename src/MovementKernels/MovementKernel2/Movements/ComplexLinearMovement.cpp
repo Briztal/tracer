@@ -19,17 +19,18 @@
 */
 
 
+#include <config.h>
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 #include <MovementKernels/MovementKernel2/complex_motion_data.h>
 #include <MovementKernels/StepperAbstraction.h>
 #include <MovementKernels/MovementKernel2/ComplexTrajectoryExecuter.h>
 #include <MovementKernels/MovementKernel2/IncrementComputer.h>
 #include "ComplexLinearMovement.h"
 
-#include <interface.h>
-#include <MovementKernels/MovementKernel2/RealTimeProcessor.h>
-
 /*
- * prepare_movement : this function takes a destination position as an argument and prepares a linear movement,
+ * prepare_movement : this function takes a destination position in argument and prepares a linear movement,
  *      from the current position to the given destination, if the required movement is not a null movement.
  *
  */
@@ -68,25 +69,24 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     pre_process_offsets = positions;
     pre_process_max_axis = max_axis;
 
-    float incr = (max_distance<0) ? -1 : 1;
+    float incr = (max_distance < 0) ? -1 : 1;
 
     //Extract the increment
-    float increment = IncrementComputer::extract_increment(get_position, 0, incr , DISTANCE_TARGET);
+    float increment = IncrementComputer::extract_increment(get_position, 0, incr, DISTANCE_TARGET);
 
     //Push the local data
     linear_data_queue.push();
 
     //Enqueue the movement in the trajectory executer, and eventually start the movement routine
-    ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_motion, finalise_motion,
+    ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_movement, finalise_movement,
                                                 get_real_time_position);
-
 
     //Terminate
     return;
 }
 
-//--------------------------------------------------Pre-Processing--------------------------------------------------
 
+//--------------------------------------------------Pre-Processing--------------------------------------------------
 
 /*
  * get_distances : this function computes the current move's distances.
@@ -117,7 +117,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
         float distance = destination[axis] - position[axis];
 
 
-        float a_dist =  (distance>0) ? distance : -distance;
+        float a_dist = (distance > 0) ? distance : -distance;
 
         //check if the distance is zero
         if (!a_dist) {
@@ -173,6 +173,12 @@ void ComplexLinearMovement::get_slopes(float *slopes, const float *const distanc
     }
 }
 
+
+/*
+ * get_position : this function computes the position for the increment calculation procedure, according to
+ *      the point provided in argument.
+ */
+
 void ComplexLinearMovement::get_position(float indice, float *positions) {
 
     //cache vars
@@ -195,7 +201,12 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
 //-----------------------------------------------Real_time_Processing-----------------------------------------------
 
 
-void ComplexLinearMovement::initialise_motion() {
+/* initialise_movement : this function initialises the movement, in peaking the next movement in the queue, and
+ *      updating the slopes and offsets pointers, and the maimum axis.
+ *
+ */
+
+void ComplexLinearMovement::initialise_movement() {
 
     //Get the address of the top element
     complex_linear_data *d = linear_data_queue.peak();
@@ -213,12 +224,24 @@ void ComplexLinearMovement::initialise_motion() {
 
 }
 
-void ComplexLinearMovement::finalise_motion() {
+
+/*
+ * finalise_movement : this function finalises the movement, in discarding the current movement in the queue, peaked
+ *      in the function above.
+ */
+
+void ComplexLinearMovement::finalise_movement() {
 
     //the current element is now used, discard it.
     linear_data_queue.discard();
 
 }
+
+
+/*
+ * get_real_time_position : this function computes the position for the increment calculation procedure, according to
+ *      the point provided in argument.
+ */
 
 void ComplexLinearMovement::get_real_time_position(float index, float *positions) {
 
@@ -238,10 +261,7 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
         }
     }
 
-
-
 }
-
 
 //Static declaration - definition :
 
@@ -263,3 +283,5 @@ float *m::real_time_slopes = t_rtsl;
 uint8_t m::real_time_max_axis = 0;
 
 #undef m
+
+#endif

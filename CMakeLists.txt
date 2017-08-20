@@ -185,7 +185,6 @@ include_directories(${K1NP}/)
 add_library(kernel1
 
         #general
-
         ${K1P}/motion_data.h
         ${K1P}/mathProcess.hpp
         ${K1P}/mathProcess.cpp
@@ -201,6 +200,8 @@ add_library(kernel1
         ${K1P}/TrajectoryExecuter.cpp
         ${K1P}/SpeedManager.h
         ${K1P}/SpeedManager.cpp
+        ${K1P}/SqrtFastComputer.h
+        ${K1P}/SqrtFastComputer.cpp
 
         #Linear Movements
         ${K1LP}/HomingMovement.h
@@ -227,8 +228,6 @@ add_library(kernel2
         ${K2P}/ComplexTrajectoryExecuter.cpp
         ${K2P}/RealTimeProcessor.h
         ${K2P}/RealTimeProcessor.cpp
-        ${K2P}/SqrtFastComputer.h
-        ${K2P}/SqrtFastComputer.cpp
         ${K2P}/IncrementComputer.h
         ${K2P}/IncrementComputer.cpp
 
