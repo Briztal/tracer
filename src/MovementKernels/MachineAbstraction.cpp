@@ -192,6 +192,24 @@ uint8_t MachineAbstraction::set_tools_updating_function(sig_t tools_signature, v
 }
 
 
+/*
+ * stop_tools : stop tools referred by the provided signature.
+ */
+
+void MachineAbstraction::stop_tools(sig_t stop_signature) {
+
+#define CONTINUOUS(i, name, pin, max) \
+    if (stop_signature & ((sig_t)((sig_t) 1 << i))) {\
+        ContinuousActions::stop_##i();\
+    }
+
+#include <config.h>
+
+#undef CONTINUOUS
+
+}
+
+
 //--------------------------------------------Static declaration - definition-------------------------------------------
 
 #define m MachineAbstraction

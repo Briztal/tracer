@@ -102,6 +102,8 @@ public :
 
     static uint8_t set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float));
 
+    static void stop_tools(sig_t stop_signature);
+
 
 private :
 

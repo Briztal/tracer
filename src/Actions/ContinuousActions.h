@@ -30,10 +30,9 @@ public:
 
     static void begin();
 
-
 #define CONTINUOUS(i, name, pin, max) \
     static void set_power##i(float f);\
-    static void disable_##i();
+    static void stop_##i();
 
 #include <config.h>
 

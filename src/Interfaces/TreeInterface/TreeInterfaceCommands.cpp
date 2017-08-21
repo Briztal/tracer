@@ -323,7 +323,7 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
     MachineAbstraction::set_speed_for_group(0, 100);
 
-    MachineAbstraction::set_energy_density(1, 1);
+    MachineAbstraction::set_energy_density(2, 1);
 
     ComplexLinearMovement::prepare_movement(coords);
 
@@ -338,8 +338,8 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     MachineAbstraction::set_speed_for_group(0, 500);
 
     MachineAbstraction::set_energy_density(0, 2);
-    MachineAbstraction::set_energy_density(01, 0.2);
-
+    MachineAbstraction::set_energy_density(1, 0.2);
+    MachineAbstraction::set_energy_density(2, 0);
 
     ComplexLinearMovement::prepare_movement(coords);
 
@@ -356,7 +356,6 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     MachineAbstraction::set_energy_density(0, 3);
     MachineAbstraction::set_energy_density(1, 0.3);
     MachineAbstraction::set_energy_density(2, 0.03);
-
 
     ComplexLinearMovement::prepare_movement(coords);
 

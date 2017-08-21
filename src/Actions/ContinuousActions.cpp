@@ -20,7 +20,6 @@
 
 #include "ContinuousActions.h"
 #include <hardware_language_abstraction.h>
-#include <interface.h>
 
 void ContinuousActions::begin() {
     //INIT : PWM à 0;
@@ -34,9 +33,8 @@ void ContinuousActions::begin() {
 
 #define CONTINUOUS(i, name, pin, max) \
 void ContinuousActions::set_power##i (float f) {\
-    CI::echo("power set for "+String(i)+" : "+String(f));\
     if (f<=0){\
-        disable_##i();\
+        stop_##i();\
         return;\
     }\
     if (f<=max)\
@@ -44,7 +42,7 @@ void ContinuousActions::set_power##i (float f) {\
     else \
         analog_write(pin, 255);\
 }\
-void ContinuousActions::disable_##i() {\
+void ContinuousActions::stop_##i() {\
     analog_write(pin,0);\
 }
 

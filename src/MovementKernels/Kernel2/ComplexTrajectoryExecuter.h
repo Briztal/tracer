@@ -174,6 +174,7 @@ private:
 
     //The variables for action data update :
     static uint8_t next_tools_powers_indice;
+    static sig_t current_tools_signature;
     static sig_t next_tools_signature;
 
     //The flag for a movement speeds switch
@@ -189,6 +190,7 @@ private:
     static void update_tools_data();
 
 
+    static void stop_tools();
 };
 
 

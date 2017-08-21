@@ -92,26 +92,28 @@ void ComplexTrajectoryExecuter::start() {
 
 void ComplexTrajectoryExecuter::stop() {
 
-    //TODO STOP TOOLS
-
     //Interrupt the movement routing, by stopping the interrupt sequence
     disable_stepper_interrupt()
 
     //Wait the half of the delay period
     delay_us(delay / 2);
 
-    //re-disable the movement routine, prevents the case where the previous disable occured just before the interrupt.
+    //re-disable the movement routine, prevents the case where the previous disable occurred just before the interrupt.
     disable_stepper_interrupt()
 
+    //Disable the stepper timer, now that the interrupt is disabled.
     disable_stepper_timer();
+
+    //Stop all currently enabled tools;
+    stop_tools();
 
     //Mark the movement routine as stopped
     started = false;
 
+    //Enable the movement enqueuing
     queue_lock_flag = false;
 
 }
-
 
 
 /*
@@ -204,7 +206,7 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
         //update the finalisation function
         movement_finalisation = d->movement_finalisation;
 
-        next_tools_powers_indice =  movement_data_queue.pull_indice();
+        next_tools_powers_indice = movement_data_queue.pull_indice();
         next_tools_signature = d->action_signatures;
 
         //Update the speed according to the movement type
@@ -554,10 +556,8 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
                 movement_switch_counter = RealTimeProcessor::elements();
 
-                        //Process the next movement
+                //Process the next movement
                 process_next_movement(false);
-
-
 
 
             } else {
@@ -582,15 +582,41 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 /*
  * update_tools_data : this function changes tools linear speeds, at an effective movement switch.
  *
- *  It updates the number of tools, speeds, and update function.
+ *  It stops tools that are not used, and  updates the number of tools, speeds, and update function,
  *
  */
 
 void ComplexTrajectoryExecuter::update_tools_data() {
 
+    //determine the tools that must be stopped : those are present in the current signature and not in the next one.
+    sig_t stop_signature = current_tools_signature & (~next_tools_signature);
+
+    //Stop these tools
+    MachineAbstraction::stop_tools(stop_signature);
+
+    //Update the tool number and the update functions
     tools_nb = MachineAbstraction::set_tools_updating_function(next_tools_signature, tools_update_functions);
 
+    //update linear powers
     tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_indice;
+
+    //update the tools signature
+    current_tools_signature = next_tools_signature;
+}
+
+
+/*
+ * stop_tools : this function stops the currently enabled tools
+ */
+
+void ComplexTrajectoryExecuter::stop_tools() {
+
+    //Update each tool power with the value 'speed * linear_power'
+    for (uint8_t action = 0; action < tools_nb; action++) {
+        (*tools_update_functions[action])(0);
+    }
+
+    current_tools_signature = 0;
 }
 
 
@@ -672,9 +698,10 @@ void (**m::tools_update_functions)(float) = (void (**)(float)) k2tf;
 float t_a_ls[NB_CONTINUOUS * MOTION_DATA_QUEUE_SIZE];
 float *const m::tools_linear_powers_storage = t_a_ls;
 
-float * m::tools_linear_powers;
+float *m::tools_linear_powers;
 
 uint8_t m::next_tools_powers_indice = 0;
+sig_t m::current_tools_signature = 0;
 sig_t m::next_tools_signature = 0;
 
 bool m::movement_switch_flag = false;
