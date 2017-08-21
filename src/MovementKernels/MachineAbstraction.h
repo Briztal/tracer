@@ -20,7 +20,7 @@
 
 
 /*
- * StepperAbstraction : this class is the interface between the high level coordinate system
+ * MachineAbstraction : this class is the interface between the high level coordinate system
  *      the stepper coordinate system.
  *
  *  It is also in charge of the current position storage.
@@ -35,7 +35,7 @@
 #define TRACER_STEPPER_ABSTRACTION_H
 
 
-class StepperAbstraction {
+class MachineAbstraction {
 
     //------------------------------------------Coordinate_Systems_Translation------------------------------------------
 
@@ -46,7 +46,6 @@ public:
 
     //The function to translate the steppers positions into a high level position
     static void invert(const float *const steppers_coordinates, float *const hl_coordinates);
-
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
@@ -92,6 +91,21 @@ private :
 
     //The current speed group
     static uint8_t speed_group;
+
+    //-------------------------------------------------Tools_Management-------------------------------------------------
+
+public :
+
+    static void set_energy_density(uint8_t tool_index, float power);
+
+    static sig_t get_tools_data(float *energy_densities);
+
+    static uint8_t set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float));
+
+
+private :
+
+    static float *tools_energy_densities;
 
 };
 

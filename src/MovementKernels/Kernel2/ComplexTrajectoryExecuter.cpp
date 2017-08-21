@@ -24,9 +24,8 @@
 
 #include "ComplexTrajectoryExecuter.h"
 #include "RealTimeProcessor.h"
-#include "_kernel_2_data.h"
 #include <interface.h>
-#include <MovementKernels/StepperAbstraction.h>
+#include <MovementKernels/MachineAbstraction.h>
 #include <Actions/ContinuousActions.h>
 
 
@@ -150,8 +149,8 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
     //Update the current case of the queue :
 
     //Speed vars
-    d->speed = StepperAbstraction::get_speed();
-    d->speed_group = StepperAbstraction::get_speed_group();
+    d->speed = MachineAbstraction::get_speed();
+    d->speed_group = MachineAbstraction::get_speed_group();
 
     //Trajectory vars
     d->min = min;
@@ -167,7 +166,7 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
     float *tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.push_indice();
 
     //Get the action signature and fill the linear_powers storage.
-    d->action_signatures = ContinuousActions::get_linear_actions_data(tools_linear_powers);
+    d->action_signatures = MachineAbstraction::get_tools_data(tools_linear_powers);
 
     //Push
     movement_data_queue.push();
@@ -589,7 +588,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
 void ComplexTrajectoryExecuter::update_tools_data() {
 
-    tools_nb = ContinuousActions::set_action_updating_function(next_tools_signature, tools_update_functions);
+    tools_nb = MachineAbstraction::set_tools_updating_function(next_tools_signature, tools_update_functions);
 
     tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_indice;
 }
@@ -610,7 +609,7 @@ void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) 
 
     //Determine the current speed
     float speed = distance / time;
-    
+
     //Update each tool power with the value 'speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {
         (*tools_update_functions[action])(tools_linear_powers[action] * speed);

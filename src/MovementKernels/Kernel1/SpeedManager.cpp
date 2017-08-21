@@ -38,11 +38,11 @@ void SpeedManager::begin() {
 }
 
 void SpeedManager::updateActions() {
-    if (ContinuousActions::linear_modes_enabled()) {
-        //linear_tools_nb = ContinuousActions::set_action_updating_function(linear_set_functions);
+    /*if (ContinuousActions::linear_modes_enabled()) {
+        //linear_tools_nb = ContinuousActions::set_tools_updating_function(linear_set_functions);
     } else {
         linear_tools_nb = 0;
-    }
+    */
 }
 
 /*
@@ -85,7 +85,6 @@ void SpeedManager::heuristic_jerk_distance() {
 #undef STEPPER
 
     offseted_distance_to_jerk_point = dist + speed_offset;
-
 
 }
 

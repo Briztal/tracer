@@ -161,7 +161,6 @@ public :
     //The function to update the action variables
     static void update_tools_powers(float time, float distance) ;
 
-
 private:
 
     //Number of actions enabled during the current movement

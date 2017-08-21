@@ -18,15 +18,18 @@
 
 */
 
-#include <MovementKernels/Kernel2/Movements/ComplexLinearMovement.h>
-#include <MovementKernels/StepperAbstraction.h>
-#include <Actions/ContinuousActions.h>
-#include "../../config.h"
+
+#include <config.h>
 #ifdef ENABLE_TREE_INTERFACE
 
+#include "TreeInterface.h"
 #include "TreeInterfaceCommands.h"
-#include "../../interface.h"
-#include "../../Core/EEPROMStorage.h"
+#include <MovementKernels/Kernel2/Movements/ComplexLinearMovement.h>
+#include <MovementKernels/MachineAbstraction.h>
+#include <Actions/ContinuousActions.h>
+#include <Core/EEPROMStorage.h>
+#include <interface.h>
+
 
 #define EEPROM_SUBCANAL 1
 #define PID_SUBCANAL 2
@@ -120,7 +123,7 @@ void TreeInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
 
-    if (!size--) return;
+    if (!size) return;
     char sub_canal = *data;
     int pi;
     switch(sub_canal) {
@@ -263,6 +266,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
     char sub_canal = *(data++);
     float f;
     switch(sub_canal) {
+
         case 0 : //The initialisation case : send the EEPROM_structure
             EEPROMStorage::send_structure();
             return;
@@ -315,11 +319,11 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[2] = 115.9854;
     coords[3] = 140.9999;
 
-    StepperAbstraction::set_speed_group(0);
+    MachineAbstraction::set_speed_group(0);
 
-    StepperAbstraction::set_speed_for_group(0, 100);
+    MachineAbstraction::set_speed_for_group(0, 100);
 
-    ContinuousActions::set_linear_power0(1);
+    MachineAbstraction::set_energy_density(1, 1);
 
     ComplexLinearMovement::prepare_movement(coords);
 
@@ -329,12 +333,12 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[2] = 80;
     coords[3] = 120;
 
-    StepperAbstraction::set_speed_group(0);
+    MachineAbstraction::set_speed_group(0);
 
-    StepperAbstraction::set_speed_for_group(0, 500);
+    MachineAbstraction::set_speed_for_group(0, 500);
 
-    ContinuousActions::set_linear_power0(2);
-    ContinuousActions::set_linear_power1(0.2);
+    MachineAbstraction::set_energy_density(0, 2);
+    MachineAbstraction::set_energy_density(01, 0.2);
 
 
     ComplexLinearMovement::prepare_movement(coords);
@@ -345,13 +349,13 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
     coords[2] = 100;
     coords[3] = 140;
 
-    StepperAbstraction::set_speed_group(0);
+    MachineAbstraction::set_speed_group(0);
 
-    StepperAbstraction::set_speed_for_group(0, 200);
+    MachineAbstraction::set_speed_for_group(0, 200);
 
-    ContinuousActions::set_linear_power0(3);
-    ContinuousActions::set_linear_power1(0.3);
-    ContinuousActions::set_linear_power2(0.03);
+    MachineAbstraction::set_energy_density(0, 3);
+    MachineAbstraction::set_energy_density(1, 0.3);
+    MachineAbstraction::set_energy_density(2, 0.03);
 
 
     ComplexLinearMovement::prepare_movement(coords);

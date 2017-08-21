@@ -28,7 +28,7 @@
 #include "../../interface.h"
 #include "../../Core/EEPROMStorage.h"
 #include "_kernel_2_data.h"
-#include "../StepperAbstraction.h"
+#include "MovementKernels/MachineAbstraction.h"
 #include "ComplexTrajectoryExecuter.h"
 
 
@@ -65,7 +65,7 @@ void RealTimeProcessor::send_position() {
 
     float hl_positions[NB_AXIS];
 
-    StepperAbstraction::invert(current_stepper_positions, hl_positions);
+    MachineAbstraction::invert(current_stepper_positions, hl_positions);
 
     CI::send_position(hl_positions);
 
@@ -173,7 +173,7 @@ void RealTimeProcessor::push_new_position() {
     float candidate_high_level_positions[NB_AXIS];
 
 
-    //Stepper positions : the new position in the steppers system (translated by StepperAbstraction).
+    //Stepper positions : the new position in the steppers system (translated by MachineAbstraction).
     float steppers_positions[NB_STEPPERS];
 
 
@@ -206,7 +206,7 @@ void RealTimeProcessor::push_new_position() {
     float movement_distance = get_movement_distance_for_group(movement_speed_group, candidate_high_level_positions);
 
     //Translate the high level position into steppers position;
-    StepperAbstraction::translate(candidate_high_level_positions, steppers_positions);
+    MachineAbstraction::translate(candidate_high_level_positions, steppers_positions);
 
     //Get the steppers distances, and the maximal stepper and distance
     bool up_check = get_steppers_distances(current_stepper_positions, steppers_positions, elementary_dists, real_dists,
@@ -393,7 +393,7 @@ void RealTimeProcessor::update_end_position(const float *const new_hl_position) 
 
     float stepper_end_position[NB_STEPPERS];
 
-    StepperAbstraction::translate(new_hl_position, stepper_end_position);
+    MachineAbstraction::translate(new_hl_position, stepper_end_position);
 
     if (ComplexTrajectoryExecuter::started) {
         disable_stepper_interrupt();

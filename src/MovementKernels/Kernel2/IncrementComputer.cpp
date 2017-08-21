@@ -24,7 +24,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include <stdint.h>
-#include <MovementKernels/StepperAbstraction.h>
+#include <MovementKernels/MachineAbstraction.h>
 #include "IncrementComputer.h"
 
 
@@ -101,7 +101,7 @@ void IncrementComputer::get_stepper_position(void (*get_position)(float, float *
     get_position(point, hl_positions);
 
     //Translate it to obtain the initial stepper position
-    StepperAbstraction::translate(hl_positions, positions);
+    MachineAbstraction::translate(hl_positions, positions);
 }
 
 

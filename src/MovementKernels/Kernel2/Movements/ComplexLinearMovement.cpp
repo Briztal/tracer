@@ -24,7 +24,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include <MovementKernels/Kernel2/_kernel_2_data.h>
-#include <MovementKernels/StepperAbstraction.h>
+#include <MovementKernels/MachineAbstraction.h>
 #include <MovementKernels/Kernel2/ComplexTrajectoryExecuter.h>
 #include <MovementKernels/Kernel2/IncrementComputer.h>
 #include "ComplexLinearMovement.h"
@@ -60,7 +60,7 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
 
     d->max_axis = max_axis;
 
-    StepperAbstraction::update_position(destination);
+    MachineAbstraction::update_position(destination);
 
     //fill the slopes array
     get_slopes(slopes, distances, max_axis, max_distance);
@@ -105,7 +105,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 
 
     //Get the current position
-    StepperAbstraction::get_current_position(position);
+    MachineAbstraction::get_current_position(position);
 
     //Initialise the maximum axis and maximum distance.
     uint8_t max_axis = 0;

@@ -26,38 +26,17 @@
 
 class ContinuousActions {
 
-
 public:
+
     static void begin();
-
-    static bool linear_modes_enabled();
-
-    static sig_t get_linear_actions_data(float *linear_powers);
-
-    static uint8_t set_action_updating_function(sig_t action_signatures, void (**f)(float));
-
 
 
 #define CONTINUOUS(i, name, pin, max) \
     static void set_power##i(float f);\
-    static void set_linear_power##i(float f);\
-    static void set_power_for_speed_##i(float speed);\
-    static void disable##i();
-
+    static void disable_##i();
 
 #include <config.h>
-#undef CONTINUOUS
 
-private:
-
-
-#define CONTINUOUS(i, name, pin, max) \
-    static float linear_power##i;
-
-    static sig_t linear_modes;
-    static sig_t enabled_actions;
-
-#include <config.h>
 #undef CONTINUOUS
 
 };

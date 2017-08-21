@@ -25,10 +25,10 @@
 
 #include <stdint.h>
 #include <Arduino.h>
-#include "StepperAbstraction.h"
+#include "MachineAbstraction.h"
 #include "../Core/EEPROMStorage.h"
-#include <interface.h>
 #include <MovementKernels/Kernel2/RealTimeProcessor.h>
+#include <Actions/ContinuousActions.h>
 
 
 /*
@@ -37,7 +37,7 @@
  *
  */
 
-void StepperAbstraction::translate(const float *const hl_coordinates, float *const steppers_coordinates) {
+void MachineAbstraction::translate(const float *const hl_coordinates, float *const steppers_coordinates) {
 
     //0.8 us
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
@@ -53,7 +53,7 @@ void StepperAbstraction::translate(const float *const hl_coordinates, float *con
  *
  */
 
-void StepperAbstraction::invert(const float *const steppers_coordinates, float *const hl_coordinates) {
+void MachineAbstraction::invert(const float *const steppers_coordinates, float *const hl_coordinates) {
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         hl_coordinates[axis] = (steppers_coordinates[axis]) / EEPROMStorage::steps[axis];
@@ -66,7 +66,7 @@ void StepperAbstraction::invert(const float *const steppers_coordinates, float *
  *
  */
 
-void StepperAbstraction::get_current_position(float *const position) {
+void MachineAbstraction::get_current_position(float *const position) {
     memcpy(position, current_position, sizeof(float) * NB_AXIS);
 }
 
@@ -76,7 +76,7 @@ void StepperAbstraction::get_current_position(float *const position) {
  *
  */
 
-void StepperAbstraction::update_position(const float *const new_position) {
+void MachineAbstraction::update_position(const float *const new_position) {
 
     //Update the current position
     memcpy(current_position, new_position, sizeof(float) * NB_AXIS);
@@ -92,7 +92,7 @@ void StepperAbstraction::update_position(const float *const new_position) {
  *
  */
 
-float StepperAbstraction::get_speed() {
+float MachineAbstraction::get_speed() {
     return speeds[speed_group];
 }
 
@@ -101,7 +101,7 @@ float StepperAbstraction::get_speed() {
  * get_speed_group : this function provides the speed group to any external process.
  */
 
-uint8_t StepperAbstraction::get_speed_group() {
+uint8_t MachineAbstraction::get_speed_group() {
     return speed_group;
 }
 
@@ -110,8 +110,8 @@ uint8_t StepperAbstraction::get_speed_group() {
  * set_speed_group : this function updates the current speed group with the value provided inargument.
  */
 
-void StepperAbstraction::set_speed_group(uint8_t speed_group) {
-    StepperAbstraction::speed_group = speed_group;
+void MachineAbstraction::set_speed_group(uint8_t speed_group) {
+    MachineAbstraction::speed_group = speed_group;
 }
 
 
@@ -121,7 +121,7 @@ void StepperAbstraction::set_speed_group(uint8_t speed_group) {
  *
  */
 
-void StepperAbstraction::set_speed_for_group(uint8_t speed_group, float new_speed) {
+void MachineAbstraction::set_speed_for_group(uint8_t speed_group, float new_speed) {
 
     //Get the maximum speed for this group
     float max_speed = max_speeds[speed_group];
@@ -131,8 +131,70 @@ void StepperAbstraction::set_speed_for_group(uint8_t speed_group, float new_spee
 
 }
 
-//Static declaration - definition :
-#define m StepperAbstraction
+//---------------------------------------------------TOOLS_MANAGEMENT---------------------------------------------------
+
+
+/*
+ * set_energy_density : sets the energy density for the action whose index is provided in argument
+ */
+
+void MachineAbstraction::set_energy_density(uint8_t tool_index, float power) {
+    tools_energy_densities[tool_index] = power;
+}
+
+
+/*
+ * get_tools_data : this function makes a copy of current energy densities, and returns the signatures of
+ *      enabled tools.
+ */
+
+sig_t MachineAbstraction::get_tools_data(float *energy_densities) {
+
+    uint8_t id = 0;
+    sig_t sig = 0;
+    float density;
+
+#define CONTINUOUS(i, name, pin, max) \
+    if ((density = tools_energy_densities[i])) {\
+        energy_densities[id++] = density;\
+        sig |= ((sig_t)1<<i);\
+    }
+
+#include <config.h>
+
+#undef CONTINUOUS
+
+    return sig;
+
+}
+
+
+/*
+ * set_tools_updating_function : this function, given a signature, (i_th bit = true -> action i enabled),
+ *      updates the function array given in argument, with the power settng function
+ */
+
+uint8_t MachineAbstraction::set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float)) {
+
+    uint8_t id = 0;
+
+#define CONTINUOUS(i, name, pin, max) \
+    if (tools_signature&((sig_t)1<<i)) {\
+        updating_functions[id++] = ContinuousActions::set_power##i;\
+    }
+
+#include <config.h>
+
+#undef CONTINUOUS
+
+    return id;
+
+}
+
+
+//--------------------------------------------Static declaration - definition-------------------------------------------
+
+#define m MachineAbstraction
 
 //Positions
 float t_hl_pos[NB_AXIS]{0};
@@ -158,6 +220,11 @@ static const float t_mx_speeds[NB_CARTESIAN_GROUPS + 1] = {
 //Assign the array
 
 const float *const m::max_speeds = t_mx_speeds;
+
+//Tools
+float t_tl_lp[NB_CONTINUOUS];
+float *m::tools_energy_densities = t_tl_lp;
+
 
 #undef m
 
