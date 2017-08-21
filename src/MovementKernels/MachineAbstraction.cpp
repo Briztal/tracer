@@ -48,12 +48,12 @@ void MachineAbstraction::translate(const float *const hl_coordinates, float *con
 
 
 /*
- * invert : this function translates a position expressed in the stepper coordinate system into
+ * revert : this function translates a position expressed in the stepper coordinate system into
  *      its image, in the high level coordinate system.
  *
  */
 
-void MachineAbstraction::invert(const float *const steppers_coordinates, float *const hl_coordinates) {
+void MachineAbstraction::revert(const float *const steppers_coordinates, float *const hl_coordinates) {
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         hl_coordinates[axis] = (steppers_coordinates[axis]) / EEPROMStorage::steps[axis];

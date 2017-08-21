@@ -227,6 +227,41 @@ private :
     //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
 
+
+    //-------------------------------------------------Speed_Constants--------------------------------------------------
+
+
+private :
+
+    //The function to actualise the movement constants
+    static void pre_compute_speed_constants();
+
+    /*
+     * The array containing the deceleration constants : in the deceleration distance formula :
+     *      (((v * v) / (2 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]));
+     *
+     *  the denominator is constant. This array wil contain the float value
+     *      1.0 / (2.0 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]));
+     *
+     *      for each stepper.
+     */
+
+    static float *const deceleration_constants;
+
+
+    /*
+     * The array containing the deceleration constants : in the deceleration distance formula :
+     *      max_delta_speed = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * time;
+     *
+     *  the product of the two first terms is constant. This array wil contain the float value
+     *      EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]
+     *
+     *      for each stepper.
+     */
+
+    static float *const delta_speed_constants;
+
+
 };
 
 

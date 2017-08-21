@@ -21,34 +21,29 @@
 
 
 #include <config.h>
+
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "RealTimeProcessor.h"
 #include "../../Actions/ContinuousActions.h"
 #include "../../interface.h"
 #include "../../Core/EEPROMStorage.h"
-#include "_kernel_2_data.h"
 #include "MovementKernels/MachineAbstraction.h"
 #include "ComplexTrajectoryExecuter.h"
 
 
 void RealTimeProcessor::start() {
 
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+    //initialise speeds and distances to zeros.
+    memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
+    memset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
 
-        //initialise speeds and distances
+    //Initialise the last movement time
+    last_time = 0.01;
 
-        steppers_speeds[stepper] = 0;
+    //Pre compute the speed constants
+    pre_compute_speed_constants();
 
-        deceleration_distances[stepper] = 0;
-
-        last_time = 0;
-
-        //TODO MINIMAL SPEED;
-
-        //TODO PRE_PROCESSES
-
-    }
 
 }
 
@@ -63,11 +58,9 @@ void RealTimeProcessor::start() {
  */
 void RealTimeProcessor::send_position() {
 
-    float hl_positions[NB_AXIS];
+    //Send the current high level position
+    CI::send_position(current_hl_position);
 
-    MachineAbstraction::invert(current_stepper_positions, hl_positions);
-
-    CI::send_position(hl_positions);
 
 }
 
@@ -120,7 +113,7 @@ RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*
     index_limit = max;
     index = min;
     increment = incr;
-    positive_index_dir = incr>0;
+    positive_index_dir = incr > 0;
 
     //update position provider
     get_new_position = trajectory_function;
@@ -193,7 +186,8 @@ void RealTimeProcessor::push_new_position() {
     //Get the new index candidate;
     float index_candidate = index + increment;
 
-    if (((positive_index_dir)&&(index_candidate + increment > index_limit))||((!positive_index_dir)&&(index_candidate + increment < index_limit))) {
+    if (((positive_index_dir) && (index_candidate + increment > index_limit)) ||
+        ((!positive_index_dir) && (index_candidate + increment < index_limit))) {
         movement_processed = true;
         index_candidate = index_limit;
     }
@@ -336,9 +330,9 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
         if (distance < 0) {
             distance = -distance;
             dir_signature |= axis_signatures[stepper];
-            int_dist = (uint8_t) ((uint32_t) p - (uint32_t)d);
+            int_dist = (uint8_t) ((uint32_t) p - (uint32_t) d);
         } else {
-            int_dist = (uint8_t) ((uint32_t) d - (uint32_t)p);
+            int_dist = (uint8_t) ((uint32_t) d - (uint32_t) p);
         }
 
         //if the distance is greater than the limit : fail with true
@@ -437,7 +431,6 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
 
 
 //-----------------------------------------------Speed_Management-------------------------------------------------------
-//TODO MODIFY THE SPEED ALGORITHM
 
 /*
  * pre_process_speed : this function determines the correct time, for the movement passed in argument.
@@ -458,7 +451,6 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
 
 float RealTimeProcessor::pre_process_speed(float movement_distance, const float *const stepper_distances) {
 
-
     //The regulation time, corresponding to the regulation speed;
     float regulation_time = movement_distance / regulation_speed;
 
@@ -471,11 +463,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
         float min_time = 0, max_time = 0;
         bool first = true;
 
-        if (last_time == 0) {
-            //For the Movement beginning, the standard time is 10 microseconds
-            last_time = 0.01;
-        }
-
         //Get the time bounds for each stepper;
         for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
@@ -483,15 +470,17 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             float act_speed = steppers_speeds[stepper];
 
             //Get the speed limit
-            float speed_step = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * last_time;
+            //Formula : delta_speed = acceleration * steps * time; acceleration * steps is pre-computed (optimisation)
+            float max_delta_speed = delta_speed_constants[stepper] * last_time;
 
             //if the current stepper can stop, no processing is required :
 
             float s;
 
-            if ((s = act_speed - speed_step) > 0) {
+            if ((s = act_speed - max_delta_speed) > 0) {
 
                 //update the maximum time, the new speed = act_speed - speed limit.
+                //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
                 float up_time = stepper_distances[stepper] / s;
 
                 //update maximum time, as the minimum of the new time and the current max time :
@@ -501,9 +490,9 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
             }
 
-
             //update the minimum time, the new speed = act_speed + speed limit.
-            float down_time = stepper_distances[stepper] / (act_speed + speed_step);
+            //Formula : low_time_bound = stepper_distance / (actual_speed + max_delta_speed)
+            float down_time = stepper_distances[stepper] / (act_speed + max_delta_speed);
 
             //update minimum time, as the maximum of the new time and the current min time :
             min_time = (down_time < min_time) ? min_time : down_time;
@@ -557,6 +546,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
 void RealTimeProcessor::update_speeds(const float *const stepper_distances, float time) {
 
+    //Only the inverse of time is used, computes now for optimisation purposes.
     float inv_time = 1 / time;
 
     //CI::echo("distances : ");
@@ -565,6 +555,7 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
         //set the current speed on the stepper [stepper]
 
         //get the speed for the stepper
+        //Formula : v = d / t -> v = d * (1 / t).
         float v = steppers_speeds[stepper] = stepper_distances[stepper] * inv_time;
 
         //If a deceleration is required, no need for deceleration_distance checking
@@ -572,17 +563,36 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
             continue;
 
         //Compute the deceleration deceleration_distance on the stepper
-        uint32_t deceleration_distance = (uint32_t) ((v * v) / (2 * EEPROMStorage::accelerations[stepper] *
-                                                                EEPROMStorage::steps[stepper]));
+        //Formula : v * v / (2 * acceleration * steps); the denominator is pre-computed for optimisation purposes.
+        uint32_t deceleration_distance = (uint32_t) (v * v * deceleration_constants[stepper]);
 
-        //CI::echo(String(deceleration_distance));
+        //get the algebraic end distance.
+        int32_t end_distance = end_distances[stepper];
+
+        //get the absolute
+        if (end_distance<0) end_distance = -end_distance;
 
         //require a deceleration if the end distance on the stepper is below the deceleration_distance;
-        if (deceleration_distance > end_distances[stepper]) {
+        if (deceleration_distance > (uint32_t) end_distance) {
             deceleration_required = true;
         }
     }
 }
+
+
+//---------------------------------------------------Speed_Constants----------------------------------------------------
+
+
+
+void RealTimeProcessor::pre_compute_speed_constants() {
+
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+        delta_speed_constants[stepper] = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper];
+        deceleration_constants[stepper] =  (float) 1 / ((float) 2 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]);
+    }
+
+}
+
 
 
 //----------------------------------------------------pop---------------------------------------------------------------
@@ -597,7 +607,8 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
  *
  */
 
-void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature, float *distance) {
+void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature,
+                                          float *distance) {
 
     uint8_t size = sub_movement_queue.available_elements();
 
@@ -615,7 +626,9 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
             empty_queue = true;
         }
 
+        //Get the current sub movement index of the queue, for arrays indexation
         uint8_t pull_index = sub_movement_queue.pull_indice();
+
         //The pointer to the beginning of pre-processed elementary distances
         uint8_t *e_ptr = sub_movement_int_distances + NB_STEPPERS * pull_index;
         float *r_ptr = sub_movement_real_distances + NB_STEPPERS * pull_index;
@@ -736,6 +749,16 @@ int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
 
 //Assign the array
 const int8_t *const m::speed_groups_indices = t_sg_indices;
+
+
+//Deceleration distances
+float t_dec_const[NB_STEPPERS];
+float *const m::deceleration_constants = t_dec_const;
+
+
+//Deceleration distances
+float t_dsp_const[NB_STEPPERS];
+float *const m::delta_speed_constants = t_dsp_const;
 
 
 #undef m

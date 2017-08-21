@@ -45,7 +45,7 @@ public:
     static void translate(const float *const hl_coordinates, float *const steppers_coordinates);
 
     //The function to translate the steppers positions into a high level position
-    static void invert(const float *const steppers_coordinates, float *const hl_coordinates);
+    static void revert(const float *const steppers_coordinates, float *const hl_coordinates);
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
