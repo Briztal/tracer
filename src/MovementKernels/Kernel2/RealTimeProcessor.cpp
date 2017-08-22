@@ -364,9 +364,12 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
 }
 
 
+/*
+ * update_current_hl_position : updates the current high level position with the provided one.
+ */
 void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
-    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
 
+    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
 
 }
 
@@ -381,7 +384,6 @@ void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
  *  The global distance is given by the maximum of all distance on each stepper.
  *
  */
-
 
 void RealTimeProcessor::update_end_position(const float *const new_hl_position) {
 
@@ -490,9 +492,16 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
             }
 
-            //update the minimum time, the new speed = act_speed + speed limit.
-            //Formula : low_time_bound = stepper_distance / (actual_speed + max_delta_speed)
-            float down_time = stepper_distances[stepper] / (act_speed + max_delta_speed);
+            float maximum_speed = act_speed + max_delta_speed;
+            float maximum_speed_bound = max_speed_constants[stepper];
+
+            if (maximum_speed > maximum_speed_bound) {
+                maximum_speed = maximum_speed_bound;
+            }
+
+            //update the minimum time :
+            //Formula : low_time_bound = stepper_distance / maximum_speed
+            float down_time = stepper_distances[stepper] / maximum_speed;
 
             //update minimum time, as the maximum of the new time and the current min time :
             min_time = (down_time < min_time) ? min_time : down_time;
@@ -587,8 +596,11 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
 void RealTimeProcessor::pre_compute_speed_constants() {
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        delta_speed_constants[stepper] = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper];
-        deceleration_constants[stepper] =  (float) 1 / ((float) 2 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]);
+        float steps = EEPROMStorage::steps[stepper];
+        float as = EEPROMStorage::accelerations[stepper] * steps;
+        max_speed_constants[stepper] = EEPROMStorage::maximum_speeds[stepper] * steps;
+        delta_speed_constants[stepper] = as;
+        deceleration_constants[stepper] =  (float) 1 / ((float) 2 * as);
     }
 
 }
@@ -759,6 +771,11 @@ float *const m::deceleration_constants = t_dec_const;
 //Deceleration distances
 float t_dsp_const[NB_STEPPERS];
 float *const m::delta_speed_constants = t_dsp_const;
+
+
+//Deceleration distances
+float t_msp_const[NB_STEPPERS];
+float *const m::max_speed_constants = t_msp_const;
 
 
 #undef m

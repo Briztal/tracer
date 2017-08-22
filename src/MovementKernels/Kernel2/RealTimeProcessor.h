@@ -250,7 +250,7 @@ private :
 
 
     /*
-     * The array containing the deceleration constants : in the deceleration distance formula :
+     * The array containing the delta speed constants : in the deceleration distance formula :
      *      max_delta_speed = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * time;
      *
      *  the product of the two first terms is constant. This array wil contain the float value
@@ -260,6 +260,18 @@ private :
      */
 
     static float *const delta_speed_constants;
+
+    /*
+     * The array containing the maximum speed constants : in the deceleration distance formula :
+     *      max_speed = EEPROMStorage::speeds[stepper] * EEPROMStorage::steps[stepper] * time;
+     *
+     *  the product is constant. This array wil contain the float value
+     *      EEPROMStorage::speeds[stepper] * EEPROMStorage::steps[stepper]
+     *
+     *      for each stepper.
+     */
+
+    static float *const max_speed_constants;
 
 
 };
