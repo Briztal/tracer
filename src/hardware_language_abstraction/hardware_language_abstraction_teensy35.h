@@ -136,12 +136,11 @@ inline static void delay_ms(uint16_t time_ms){
 //END SECTION
 
 //The frequency of the timer :
-#define STEPPER_TIMER_FREQUENCY STEPPER_TIMER_RESOLUTION * (float) 1000000
+#define STEPPER_TIMER_FREQUENCY (STEPPER_TIMER_RESOLUTION * (float) 1000000)
 
-#define STEPPER_TIMER_TICS_PER_UNIT (uint32_t) (F_BUS / ( STEPPER_TIMER_FREQUENCY ))
+#define STEPPER_TIMER_TICS_PER_UNIT ((uint32_t) (F_BUS / STEPPER_TIMER_FREQUENCY ))
 
-#define STEPPER_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / STEPPER_TIMER_TICS_PER_UNIT)
-
+#define STEPPER_TIMER_MAX_PERIOD ((uint32_t) (UINT32_MAX / STEPPER_TIMER_TICS_PER_UNIT))
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\

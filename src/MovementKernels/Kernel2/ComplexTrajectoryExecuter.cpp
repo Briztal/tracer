@@ -404,6 +404,10 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
     //update the interrupt period with the effective delay
     set_stepper_int_period(effective_delay);
 
+    //
+    CI::echo("period : "+String(effective_delay)+" max "+String(STEPPER_TIMER_MAX_PERIOD)+" "+String(STEPPER_TIMER_TICS_PER_UNIT)+" frequency : "+String(STEPPER_TIMER_FREQUENCY));\
+
+
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
         saved_elementary_signatures = es1, is_es_0 = false;
