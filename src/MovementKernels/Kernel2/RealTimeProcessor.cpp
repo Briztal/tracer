@@ -460,6 +460,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
     //The final time
     float new_time = 0;
 
+    CI::echo("REGULATION");
     if (!jerk_flag) {
 
         //Window computation variables
@@ -499,6 +500,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
             if (maximum_speed > maximum_speed_bound) {
                 maximum_speed = maximum_speed_bound;
+                CI::echo("MAX_SPEED ");
             }
 
             //update the minimum time :
@@ -508,11 +510,30 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             //update minimum time, as the maximum of the new time and the current min time :
             min_time = (down_time < min_time) ? min_time : down_time;
 
+            CI::echo("down time : "+String(min_time, 5)+" "+String(down_time, 5)+" "+String(max_time, 5));
+
+        }
+
+        /*
+         * A particular case we must care of, if when the bounds are inverted. It may result of :
+         *  - a fast direction variation in the current trajectory, that makes an axis decelerate too much
+         *      and another accelerating too much.
+         *  - a jerk point speed update, where the target speed makes a stepper overflow its limit.
+         *      As in jerk points, speed limits are not checked, it can happen.
+         *
+         * In this case, the deceleration is prioritised.
+         *
+         */
+
+        //If the bounds are inverted, decelerate in priority.
+        if ((!first) && (max_time < min_time)) {
+            max_time = min_time;
         }
 
         if ((!first) && (deceleration_required || (regulation_time > max_time))) {
             //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
+            CI::echo("DECELERATION");
             //Deceleration done
             deceleration_required = false;
 
@@ -521,12 +542,17 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
         } else if (regulation_time < min_time) {
 
+            CI::echo("ACCELERATION");
+
             //If the regulation time is lower than the min time :
 
             //choose the time corresponding to the maximum acceleration.
             new_time = min_time;
 
         } else {
+
+            CI::echo("ADAPTATION");
+
             //If the regulation time is in the time window :
 
             //choose the regulation time.
@@ -535,8 +561,12 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
     } else {
 
-        //if the next point is a jerk point, no acceleration checking is required.
+        //if the next point is a jerk point, no acceleration checking is required, only the maximum speed checking.
         new_time = regulation_time;
+
+
+
+        CI::echo("\n\nJERK_POINT\n\n");
     }
 
 

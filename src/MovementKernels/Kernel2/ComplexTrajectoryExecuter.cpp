@@ -330,6 +330,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Step 4 : Update the speed distance with the new heuristic distances
     float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
 
+    CI::echo("time " +String(time, 5));
     STEP_AND_WAIT;
 
     //Step 5 : Update the speed distance with the new heuristic distances
