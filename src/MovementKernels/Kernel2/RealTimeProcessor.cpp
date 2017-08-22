@@ -460,7 +460,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
     //The final time
     float new_time = 0;
 
-    CI::echo("REGULATION");
     if (!jerk_flag) {
 
         //Window computation variables
@@ -500,7 +499,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
             if (maximum_speed > maximum_speed_bound) {
                 maximum_speed = maximum_speed_bound;
-                CI::echo("MAX_SPEED ");
             }
 
             //update the minimum time :
@@ -510,7 +508,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
             //update minimum time, as the maximum of the new time and the current min time :
             min_time = (down_time < min_time) ? min_time : down_time;
 
-            CI::echo("down time : "+String(min_time, 5)+" "+String(down_time, 5)+" "+String(max_time, 5));
 
         }
 
@@ -533,7 +530,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
         if ((!first) && (deceleration_required || (regulation_time > max_time))) {
             //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
-            CI::echo("DECELERATION");
             //Deceleration done
             deceleration_required = false;
 
@@ -542,8 +538,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
         } else if (regulation_time < min_time) {
 
-            CI::echo("ACCELERATION");
-
             //If the regulation time is lower than the min time :
 
             //choose the time corresponding to the maximum acceleration.
@@ -551,7 +545,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
         } else {
 
-            CI::echo("ADAPTATION");
 
             //If the regulation time is in the time window :
 
@@ -566,7 +559,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
 
 
-        CI::echo("\n\nJERK_POINT\n\n");
     }
 
 
@@ -587,7 +579,6 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
     //Only the inverse of time is used, computes now for optimisation purposes.
     float inv_time = 1 / time;
 
-    //CI::echo("distances : ");
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         //set the current speed on the stepper [stepper]

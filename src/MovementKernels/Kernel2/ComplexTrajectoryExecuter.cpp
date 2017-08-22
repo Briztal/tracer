@@ -275,6 +275,22 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 //----------------------------------------SUB_MOVEMENT_PRE_COMPUTATION--------------------------------------------------
 
 
+//The delay macros, used in the function below.
+
+#define WAIT\
+    while(!stepper_int_flag) {}\
+        stepper_int_flag_clear();
+
+
+#define STEP_AND_WAIT \
+    {\
+        sig_t s_w_signature;\
+        s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice--]];\
+        StepperController::fastStep(s_w_signature);\
+    }\
+    WAIT
+
+
 /*
  * prepare_next_sub_movement : This function prepares the next sub_movement.
  *
@@ -294,7 +310,6 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
  *      - if queue not empty, get one more new distance array
  *
  */
-
 
 void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
@@ -330,14 +345,13 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Step 4 : Update the speed distance with the new heuristic distances
     float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
 
-    CI::echo("time " +String(time, 5));
     STEP_AND_WAIT;
 
     //Step 5 : Update the speed distance with the new heuristic distances
     RealTimeProcessor::update_speeds(real_dists, time);
 
     //Step 6 : determine the delay time for the next sub_movement :
-    delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
+    delay = ((float) 1000000 * time) / (uint32_t) trajectory_indice;
 
     //Update tools powers
     update_tools_powers(time, distance);
@@ -378,11 +392,17 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
 sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
+    //Update the trajectory indice
     saved_trajectory_indice = trajectory_indice;
 
+    //Set the correct direction
     StepperController::set_directions(saved_direction_sigature);
 
-    set_stepper_int_period(delay);
+    //Get the effetive delay, in stepper timer units.
+    uint32_t effective_delay = (uint32_t) (delay * STEPPER_TIMER_RESOLUTION);
+
+    //update the interrupt period with the effective delay
+    set_stepper_int_period(effective_delay);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -688,7 +708,7 @@ sig_t m::saved_direction_sigature;
 
 void (*m::movement_finalisation)();
 
-uint32_t m::delay = 0;
+float m::delay = 0;
 
 uint8_t m::tools_nb;
 

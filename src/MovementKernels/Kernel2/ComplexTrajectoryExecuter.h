@@ -74,7 +74,7 @@ private :
 
     //---------------------------------------------Real_Time_Movement_data----------------------------------------------
 
-public :
+private :
 
     //The signatures for the sub_movement that is currently executed
     static sig_t *saved_elementary_signatures;
@@ -87,8 +87,10 @@ public :
     //The trajectory indices. Those are constant in the algorithm.
     static const uint8_t *const trajectory_indices;
 
+private :
+
     //the delay for the next movement;
-    static uint32_t delay;
+    static float delay;
 
     //the trajectory array : contains the signature order.
     static const uint8_t *const trajectory_array;
@@ -192,22 +194,6 @@ private:
 
     static void stop_tools();
 };
-
-
-#define WAIT\
-    while(!stepper_int_flag) {}\
-        stepper_int_flag_clear();
-
-#define ME ComplexTrajectoryExecuter
-
-#define STEP_AND_WAIT \
-    {\
-        sig_t s_w_signature;\
-        s_w_signature = ME::saved_elementary_signatures[ME::trajectory_array[ME::saved_trajectory_indice--]];\
-        StepperController::fastStep(s_w_signature);\
-    }\
-    WAIT
-
 
 #endif //TRACER_MOTIONEXECUTER_H
 
