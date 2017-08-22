@@ -121,7 +121,7 @@ public :
     static bool enqueue_unauthorised();
 
     //new movement enqueueing
-    static void enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
+    static bool enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
                                  void (*trajectory_function)(float, float *));
 
 

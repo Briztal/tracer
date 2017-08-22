@@ -118,8 +118,8 @@ inline static void delay_ms(uint16_t time_ms){
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
-     {PIT_LDVAL0 = ((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
-        (uint32_t) STEPPER_TIMER_MAX_PERIOD :  (uint32_t) (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0));};
+     {PIT_LDVAL0 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
+        STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
 
 //Enabling interrupt
 #define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;

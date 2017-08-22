@@ -211,6 +211,7 @@ void RealTimeProcessor::push_new_position() {
 
         //Increment adjustment according to the target
         increment = increment * (float) DISTANCE_TARGET / max_distance;
+
     }
 
     //If the maximal distance is below the lower limit :
@@ -223,7 +224,6 @@ void RealTimeProcessor::push_new_position() {
     if ((!movement_processed) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
         return;
     }
-
 
     //---------------------Movement_Enqueuing----------------------------
 
@@ -242,7 +242,6 @@ void RealTimeProcessor::push_new_position() {
 
     //A jerk point is punctual (no shit !), so when he has been enqueued, set the flag to false;
     next_jerk_flag = false;
-
 
     sub_movement_queue.push();
 
@@ -611,8 +610,6 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
 
 //---------------------------------------------------Speed_Constants----------------------------------------------------
 
-
-
 void RealTimeProcessor::pre_compute_speed_constants() {
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -628,7 +625,6 @@ void RealTimeProcessor::pre_compute_speed_constants() {
 
 
 //----------------------------------------------------pop---------------------------------------------------------------
-
 
 /*
  * pop_next_position : this function pops a previously enqueued position.
@@ -684,6 +680,8 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
     }
 
 }
+
+//-----------------------------------------Static declarations - definitions--------------------------------------------
 
 //Static declarations - definitions;
 

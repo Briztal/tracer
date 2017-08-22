@@ -36,7 +36,7 @@ class ComplexLinearMovement {
 public:
 
     //The function to call to trace a line from the current position to the destination provided in argument.
-    static void prepare_movement(const float *const destination);
+    static bool prepare_movement(const float *const destination);
 
 
 private :

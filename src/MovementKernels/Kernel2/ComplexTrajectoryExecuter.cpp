@@ -95,8 +95,11 @@ void ComplexTrajectoryExecuter::stop() {
     //Interrupt the movement routing, by stopping the interrupt sequence
     disable_stepper_interrupt()
 
+    //Get the half of the delay period
+    uint32_t half_delay = (uint32_t) (delay / 2);
+
     //Wait the half of the delay period
-    delay_us(delay / 2);
+    delay_us(half_delay);
 
     //re-disable the movement routine, prevents the case where the previous disable occurred just before the interrupt.
     disable_stepper_interrupt()
@@ -137,16 +140,37 @@ bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
  *
  */
 
-void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
+bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
                                                  void (*movement_finalisation)(),
                                                  void(*trajectory_function)(float, float *)) {
 
-    if (queue_lock_flag)
-        return;
+    if (queue_lock_flag) {
+
+        //Send an error message.
+        CI::echo("ERROR : THE MOVEMENT QUEUE WAS LOCKED WHEN THE MOVEMENT WAS PUSHED. THE MOVEMENT WILL BE IGNORED.");
+
+        //Fail
+        return false;
+
+    }
+
+    /* First, we must check if the movement is a micro movement. A movement is qualified by micro-movement when
+     *      its first sub-movement goes beyond its limit. It is not actually traceable, so we must ignore it.
+     */
+
+    //Micro movement check :
+    if (((incr>0) && (min + incr > max) || (incr<0) && (min + incr <max))) {
+
+        //Send an error message
+        CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
+
+        //ignore movement
+        return false;
+
+    }
 
     //Get the insertion adress on the queue (faster than push-by-object)
     k2_movement_data *d = movement_data_queue.get_push_ptr();
-
 
     //Update the current case of the queue :
 
@@ -180,6 +204,8 @@ void ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
         CI::echo("STARTING");
         start();
     }
+
+    return true;
 
 }
 
@@ -660,7 +686,7 @@ void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) 
 }
 
 
-//---------------------------------------------DECLARATIONS_DEFINITIONS-------------------------------------------------
+//-----------------------------------------Static declarations - definitions--------------------------------------------
 
 #define m ComplexTrajectoryExecuter
 

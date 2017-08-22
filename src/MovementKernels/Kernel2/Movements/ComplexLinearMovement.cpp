@@ -22,12 +22,12 @@
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
+#include "ComplexLinearMovement.h"
 
-#include <MovementKernels/Kernel2/_kernel_2_data.h>
+#include <interface.h>
 #include <MovementKernels/MachineAbstraction.h>
 #include <MovementKernels/Kernel2/ComplexTrajectoryExecuter.h>
 #include <MovementKernels/Kernel2/IncrementComputer.h>
-#include "ComplexLinearMovement.h"
 
 
 /*
@@ -36,7 +36,7 @@
  *
  */
 
-void ComplexLinearMovement::prepare_movement(const float *const destination) {
+bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 
     //get the movement distances
     float distances[NB_AXIS];
@@ -56,11 +56,17 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     bool null_move = get_distances(positions, destination, distances, &max_axis, &max_distance);
 
     //end if the machine is already at the destination;
-    if (null_move) return;
+    if (null_move) {
+
+        //Send an error message.
+        CI::echo("ERROR : THE MACHINE IS ALREADY AT ITS DESTINATION POSITION THE MOVEMENT WILL BE IGNORED.");
+
+        //Fail
+        return false;
+
+    }
 
     d->max_axis = max_axis;
-
-    MachineAbstraction::update_position(destination);
 
     //fill the slopes array
     get_slopes(slopes, distances, max_axis, max_distance);
@@ -75,18 +81,25 @@ void ComplexLinearMovement::prepare_movement(const float *const destination) {
     //Extract the increment
     float increment = IncrementComputer::extract_increment(get_position, 0, incr, DISTANCE_TARGET);
 
-    //Push the local data
-    linear_data_queue.push();
-
     //Wait for the enqueuing to be authorised in ComplexTrajectoryExecuter.
     while(ComplexTrajectoryExecuter::enqueue_unauthorised());
 
-    //Enqueue the movement in the trajectory executer, and eventually start the movement routine
-    ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_movement, finalise_movement,
-                                                get_real_time_position);
+    //Enqueue the movement in the trajectory executer, and eventually start the movement routine and terminate
+    if (ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_movement, finalise_movement,
+                                                get_real_time_position)) {
 
-    //Terminate
-    return;
+        //Push the local data
+        linear_data_queue.push();
+
+        MachineAbstraction::update_position(destination);
+
+        return true;
+
+    }
+
+    return false;
+
+
 }
 
 
@@ -119,7 +132,6 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 
         //get the distance
         float distance = destination[axis] - position[axis];
-
 
         float a_dist = (distance > 0) ? distance : -distance;
 
@@ -218,8 +230,6 @@ void ComplexLinearMovement::initialise_movement() {
     real_time_offsets = d->offsets;
     real_time_slopes = d->slopes;
 
-
-
     //Do not discard the current element, of it is likely to be rewritten.
 
     //The effective discard will be made in the finalisation function below.
@@ -265,7 +275,7 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
 
 }
 
-//Static declaration - definition :
+//--------------------------------------------Static declaration - definition-------------------------------------------
 
 #define m ComplexLinearMovement
 
