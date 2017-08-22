@@ -310,9 +310,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
 
 void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
-
-
-    CI::echo("400");
+    
     float coords[NB_AXIS]{0};
     coords[0] = 140.2564;
     coords[1] = 140.1523;

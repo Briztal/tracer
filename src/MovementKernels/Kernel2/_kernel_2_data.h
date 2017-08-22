@@ -28,36 +28,81 @@
 
 #include <stdint.h>
 #include <config.h>
+#include <wiring.h>
 
-//TODO REORG AND COMMENT
+/*
+ * The structures used to save and update information through the movement procedure of the kernel2.
+ *
+ *  Reminder : data sizes (in bytes)
+ *      - uint8_t :     1
+ *      - uint16_t :    2
+ *      - uint32_t :    4
+ *      - float :       4
+ *      - pointer :     4
+ */
 
-typedef struct{
-    float speed;
-    uint8_t speed_group;
-    float min;
-    float max;
-    float increment;
-    void (*movement_initialisation)();
-    void (*movement_finalisation)();
-    void (*trajectory_function)(float, float *);
-    sig_t action_signatures;
+
+//---------------------------------------------------Kernel Structures--------------------------------------------------
+
+/*
+ * k2_movement_data : this structure contains all data related to one movement :
+ *  - the index variables : min, max, increment;
+ *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
+ *  - the trajectory function, used continuously during the movement to get positions;
+ *  - The speed variables : the speed and the speed group,
+ *  - The tools signature, indicating tools enabled during this movement.
+ *
+ */
+
+typedef struct {
+    float min; //4
+    float max;//8
+    float increment; //12
+    void (*movement_initialisation)(); //16
+    void (*movement_finalisation)(); //20
+    void (*trajectory_function)(float, float *); //24
+    float speed; //28
+    uint8_t speed_group; //29
+    sig_t action_signatures; //30 -> 33
+    //-----------end : 32 to 36 bytes----------
 } k2_movement_data;
 
 
+/*
+ * k2_real_time_data : this structure contains all data related to sub_movements :
+ *  - the distance of the sub_movement
+ *  - the speed of the sub_movement
+ *  - if the starting point is a jerk point
+ *  - the signature of the movement distances (1 for negative distance, 0 for positive)
+ *
+ * float and integer distances are also stored, in a separate queue.
+ *
+ */
 
-typedef struct{
-    float distance;
-    sig_t negative_signature;
-    bool jerk_point;
-    float speed;
+typedef struct {
+    float distance; //4
+    float speed; //8
+    bool jerk_point; //9
+    sig_t negative_signature; //10 -> 13
+    //--------end : 12 to 16 bytes-------
 } k2_real_time_data;
 
 
+//-------------------------------------------------Movements Structures-------------------------------------------------
 
-typedef struct{
-    uint8_t max_axis;
-    float offsets[NB_AXIS];
-    float slopes[NB_STEPPERS];
+/*
+ * k2_linear_data : this structure contains all data related to a linear movement :
+ *  - offsets : the stepper positions at the starting point of the line;
+ *  - slopes : the slopes of the line, relatively to the greater axis;
+ *  - max_axis : the greater axis, in term of movement distance.
+ *
+ */
+
+typedef struct {
+    float offsets[NB_AXIS]; //4*NB_AXIS
+    float slopes[NB_STEPPERS]; //4 * (NB_AXIS + NB_STEPPERS)
+    uint8_t max_axis; //4 * (NB_AXIS + NB_STEPPERS) + 1
+    //--end : 4 * (NB_AXIS + NB_STEPPERS + 1) bytes--
 } k2_linear_data;
 
 
