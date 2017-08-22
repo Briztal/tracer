@@ -398,15 +398,8 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
     //Set the correct direction
     StepperController::set_directions(saved_direction_sigature);
 
-    //Get the effetive delay, in stepper timer units.
-    uint32_t effective_delay = (uint32_t) (delay * STEPPER_TIMER_RESOLUTION);
-
-    //update the interrupt period with the effective delay
-    set_stepper_int_period(effective_delay);
-
-    //
-    CI::echo("period : "+String(effective_delay)+" max "+String(STEPPER_TIMER_MAX_PERIOD)+" "+String(STEPPER_TIMER_TICS_PER_UNIT)+" frequency : "+String(STEPPER_TIMER_FREQUENCY));\
-
+    //update the interrupt period with the float delay, that is computed to provde the most accurate period.
+    set_stepper_int_period(delay);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -416,8 +409,6 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
         saved_elementary_signatures = es0, is_es_0 = true;
         return es1;
     }
-
-
 }
 
 

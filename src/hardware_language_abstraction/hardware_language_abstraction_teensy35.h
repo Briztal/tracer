@@ -109,44 +109,17 @@ inline static void delay_ms(uint16_t time_ms){
 
 #ifdef HL_STEPPER_TIMER
 
-//Stepper timer resolution : if R is the provided value, the resolution is a microsecond divided by 2 ^ R
-#define STEPPER_TIMER_MAGNITUDE 3
-
-//Resolution determination :
-//DO NOT MODIFY THIS SECTION
-#if STEPPER_TIMER_MAGNITUDE == 0
-#define STEPPER_TIMER_RESOLUTION (float) 1
-#elif STEPPER_TIMER_MAGNITUDE == 1
-#define STEPPER_TIMER_RESOLUTION (float) 2
-#elif STEPPER_TIMER_MAGNITUDE == 2
-#define STEPPER_TIMER_RESOLUTION (float) 4
-#elif STEPPER_TIMER_MAGNITUDE == 3
-#define STEPPER_TIMER_RESOLUTION (float) 8
-#elif STEPPER_TIMER_MAGNITUDE == 4
-#define STEPPER_TIMER_RESOLUTION (float) 16
-#elif STEPPER_TIMER_MAGNITUDE == 4
-#define STEPPER_TIMER_RESOLUTION (float) 32
-#elif STEPPER_TIMER_MAGNITUDE == 6
-#define STEPPER_TIMER_RESOLUTION (float) 64
-#elif STEPPER_TIMER_MAGNITUDE == 7
-#define STEPPER_TIMER_RESOLUTION (float) 128
-#elif STEPPER_TIMER_MAGNITUDE == 8
-#define STEPPER_TIMER_RESOLUTION (float) 256
-#endif
-//END SECTION
-
 //The frequency of the timer :
-#define STEPPER_TIMER_FREQUENCY (STEPPER_TIMER_RESOLUTION * (float) 1000000)
+#define STEPPER_TIMER_FREQUENCY (float) 1000000.0
 
-#define STEPPER_TIMER_TICS_PER_UNIT ((uint32_t) (F_BUS / STEPPER_TIMER_FREQUENCY ))
+#define STEPPER_TIMER_TICS_PER_UNIT ((float) ((float) F_BUS / STEPPER_TIMER_FREQUENCY ))
 
-#define STEPPER_TIMER_MAX_PERIOD ((uint32_t) (UINT32_MAX / STEPPER_TIMER_TICS_PER_UNIT))
+#define STEPPER_TIMER_MAX_PERIOD ((float) (UINT32_MAX / STEPPER_TIMER_TICS_PER_UNIT))
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
      {PIT_LDVAL0 = ((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
-        STEPPER_TIMER_MAX_PERIOD :  (uint32_t) (STEPPER_TIMER_TICS_PER_UNIT * ((uint32_t) period_timer_unit - 1));};
-
+        (uint32_t) STEPPER_TIMER_MAX_PERIOD :  (uint32_t) (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0));};
 
 //Enabling interrupt
 #define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
