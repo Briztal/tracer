@@ -31,7 +31,7 @@
 #include <interface.h>
 
 
-#define EEPROM_SUBCANAL 1
+//#define EEPROM_SUBCANAL 1
 #define PID_SUBCANAL 2
 #define LOOP_SUBCANAL 3
 #define ACTION_SUBCANAL 4
@@ -309,8 +309,8 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
 
 
-void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
-    
+void TreeInterfaceCommands::action(char * ,uint8_t) {
+
     float coords[NB_AXIS]{0};
     coords[0] = 140.2564;
     coords[1] = 140.1523;
@@ -362,7 +362,7 @@ void TreeInterfaceCommands::action(char * dptr, uint8_t size) {
 
 }
 
-void TreeInterfaceCommands::home(char * dptr, uint8_t size) {
+void TreeInterfaceCommands::home(char *, uint8_t) {
 
     //HomingMovement::prepare_movement();
 

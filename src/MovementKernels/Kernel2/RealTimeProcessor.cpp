@@ -140,9 +140,8 @@ void RealTimeProcessor::fill_sub_movement_queue() {
  * push_new_position : this function gets the next position, defined by the image of index+increment
  *      by the trajectory function.
  *
- *      If the image verifies one of the criteria below :
- *          - at a distance from the current position comprised on MINIMUM_DISTANCE_LIMIT and MAXIMUM_DISTANCE_LIMIT
- *          - at a distance from the current position that equals DISTANCE_TARGET
+ *      If the image is at a distance from the current position comprised on
+ *          MINIMUM_DISTANCE_LIMIT and MAXIMUM_DISTANCE_LIMIT
  *
  *      Then the position is accepted and enqueued in the position queue.
  *
@@ -154,7 +153,6 @@ void RealTimeProcessor::fill_sub_movement_queue() {
  *          - The distance is given by the maximum of all distances on each stepper.
  *          - The second criteria is (far) more restrictive than the first, but gives a better speed regulation
  *
- *          //TODO UPDATE THE DOC WHEN THE CODE IS DONE
  */
 
 void RealTimeProcessor::push_new_position() {
@@ -176,7 +174,8 @@ void RealTimeProcessor::push_new_position() {
     float *real_dists = sub_movement_real_distances + push_indice * NB_STEPPERS;
 
     //The maximal stepper distance, and the maximum stepper
-    uint8_t max_distance, max_axis;
+    uint8_t max_axis;
+    float max_distance;
 
     sig_t negative_signature;
 
@@ -202,7 +201,7 @@ void RealTimeProcessor::push_new_position() {
     //Translate the high level position into steppers position;
     MachineAbstraction::translate(candidate_high_level_positions, steppers_positions);
 
-    //Get the steppers distances, and the maximal stepper and distance
+    //Get the steppers distances, high level distances, and the maximal stepper and distance
     bool up_check = get_steppers_distances(current_stepper_positions, steppers_positions, elementary_dists, real_dists,
                                            &negative_signature, &max_axis, &max_distance);
 
@@ -211,8 +210,7 @@ void RealTimeProcessor::push_new_position() {
     if (max_distance != DISTANCE_TARGET) {
 
         //Increment adjustment according to the target
-        increment = increment * (float) DISTANCE_TARGET / (float) max_distance;
-        //TODO : if the queue is full, discard the current prepare_movement
+        increment = increment * (float) DISTANCE_TARGET / max_distance;
     }
 
     //If the maximal distance is below the lower limit :
@@ -241,6 +239,9 @@ void RealTimeProcessor::push_new_position() {
     d->distance = movement_distance;
     d->speed = next_regulation_speed;
     d->jerk_point = next_jerk_flag;
+
+    //A jerk point is punctual (no shit !), so when he has been enqueued, set the flag to false;
+    next_jerk_flag = false;
 
 
     sub_movement_queue.push();
@@ -305,10 +306,11 @@ float RealTimeProcessor::get_movement_distance_for_group(uint8_t speed_group, co
 bool
 RealTimeProcessor::get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists,
                                           float *const real_dists, sig_t *dir_dignature_p, uint8_t *max_axis_p,
-                                          uint8_t *max_distance_p) {
+                                          float *max_distance_p) {
 
     //Cache variable, to avoid pointer access.
-    uint8_t max_dist = 0;
+    uint8_t max_int_dist = 0;
+    float max_f_dist = 0;
     uint8_t max_axis = 0;
     sig_t dir_signature = 0;
 
@@ -345,18 +347,17 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
         int_dists[stepper] = int_dist;
 
 
-
-
         //Update max dist
-        if (int_dist > max_dist) {
-            max_dist = int_dist;
+        if (int_dist > max_int_dist) {
+            max_int_dist = int_dist;
+            max_f_dist = distance;
             max_axis = stepper;
         }
     }
 
     //Finally update all data
     *max_axis_p = max_axis;
-    *max_distance_p = max_dist;
+    *max_distance_p = max_f_dist;
     *dir_dignature_p = dir_signature;
 
     //No error
@@ -492,6 +493,7 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
 
             }
 
+
             float maximum_speed = act_speed + max_delta_speed;
             float maximum_speed_bound = max_speed_constants[stepper];
 
@@ -537,9 +539,6 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
         new_time = regulation_time;
     }
 
-
-    //validate the acceleration management for the next movement.
-    jerk_flag = false;
 
     last_time = new_time;
 

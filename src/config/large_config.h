@@ -259,7 +259,7 @@ STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     H
 
 //TODO REMOVE SIZE
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
-STEPPER_DATA(   0,  '0',    170,    80.16,  10.,   1350.,      20.)
+STEPPER_DATA(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
 STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,   1200.,      20.)
 STEPPER_DATA(   2,  '3',    150.,   80.16,  500.,   1200.,      20.)
 STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,   1200.,      20.)

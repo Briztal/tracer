@@ -120,7 +120,7 @@ private :
     //function to get low level distances.
     static bool
     get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists, float *const real_dists,
-                           sig_t *dir_dignature_p, uint8_t *max_axis_p, uint8_t *max_distance_p);
+                           sig_t *dir_dignature_p, uint8_t *max_axis_p, float *max_distance_p);
 
 
     //----------------------------------------Pre_Computed_Positions_storage--------------------------------------------

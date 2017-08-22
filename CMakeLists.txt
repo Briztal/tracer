@@ -164,8 +164,8 @@ include_directories(${KP}/)
 
 add_library(kernels
 
-        ${KP}/StepperAbstraction.h
-        ${KP}/StepperAbstraction.cpp
+        ${KP}/MachineAbstraction.h
+        ${KP}/MachineAbstraction.cpp
         ${KP}/StepperController.h
         ${KP}/StepperController.cpp
 
