@@ -29,26 +29,14 @@
 
 class StepperController {
 
-public:
-
-#define STEPPER(i, ...) \
-    static bool isAtMax##i();\
-    static bool isAtMin##i();\
-    static void enable##i();\
-    static void disable##i();\
-    static void setDir##i (bool sens);\
-    static void step##i();\
-
-#include   <config.h>
-
-#undef STEPPER
-
 
 #ifdef position_log
-
+public:
     static void send_position();
 
 #endif
+
+public:
 
     static void set_directions(sig_t negative_signatures);
 

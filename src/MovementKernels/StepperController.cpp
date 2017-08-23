@@ -28,14 +28,6 @@
 #include "../interface.h"
 #include "../Core/EEPROMStorage.h"
 
-#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
-bool StepperController::isAtMax##i ()  {return (digital_read(pinEndMax )==HIGH);}\
-bool StepperController::isAtMin##i() { return (digital_read(pinEndMin)==HIGH);}\
-
-#include <config.h>
-
-#undef STEPPER
-
 
 void StepperController::enable(sig_t signature) {
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
@@ -57,6 +49,7 @@ void StepperController::set_directions(sig_t negative_signatures) {
     long d = micros();
 
     bool sig_dir;
+
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
@@ -70,16 +63,15 @@ void StepperController::set_directions(sig_t negative_signatures) {
         incr##i=-1;\
     }\
 
-
 #else
 
-#define STEPPER(k1_position_indice, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
-    if ((!sig_dir) && !dir##k1_position_indice) {\
-        dir##k1_position_indice = true;\
+    if ((!sig_dir) && !dir##i) {\
+        dir##i = true;\
         digital_write(pinDir, dirp);\
-    } else if (sig_dir && (dir##k1_position_indice)) {\
-        dir##k1_position_indice = false;\
+    } else if (sig_dir && (dir##i)) {\
+        dir##i = false;\
         digital_write(pinDir, !dirp);\
     }\
 
@@ -93,6 +85,7 @@ void StepperController::set_directions(sig_t negative_signatures) {
     CI::echo("TIME : "+String(d));
 }
 
+/*
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
 void StepperController::setDir##i(bool sens) {\
@@ -129,47 +122,44 @@ void StepperController::setDir##k1_position_indice(bool sens) {\
 
 #undef STEPPER;
 #endif
+ */
 
 void StepperController::begin() {
 
 #define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
     pinMode(pinPower, OUTPUT);pinMode(pinDir, OUTPUT);pinMode(pinStep, OUTPUT);\
-    digital_write(pinPower, HIGH);setDir##i(true);
 
 #include <config.h>
 
 #undef STEPPER
+
+    enable(0);
 
 }
 
 
 void StepperController::fastStep(sig_t id) {
 
-    long d = micros();
-//CI::echo("S");
 #ifdef position_log
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
-        /*if (id&(sig_t)1) {*/\
         if (id&sig) {\
-            /*pos##i += incr##i;*/\
+            pos##i += incr##i;\
             digital_write(pinStep, HIGH);\
             digital_write(pinStep, LOW);\
-        }\
-        //if (!(id>>=1)) return;
+        }
 
 #include <config.h>
 
 #undef STEPPER
 
 #else
+
 #define STEPPER(k1_position_indice, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
-        /*if (id&(sig_t)1) {*/\
         if (id&sig) {\
-            BIT_SET(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-            BIT_CLEAR(*__digitalPinToPortReg(pinStep), __digitalPinToBit(pinStep));\
-        }\
-        //if (!(id>>=1)) return;
+            digital_write(pinStep, HIGH);\
+            digital_write(pinStep, LOW);\
+        }
 
 #include <config.h>
 
@@ -177,8 +167,6 @@ void StepperController::fastStep(sig_t id) {
 
 #endif
 
-    d = micros()-d;
-    CI::echo("TIME_STEP : "+String(d));
 }
 
 

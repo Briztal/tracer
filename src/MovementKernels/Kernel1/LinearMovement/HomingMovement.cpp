@@ -41,6 +41,7 @@ void HomingMovement::move() {
 
     //TODO DIRECTIONS : 0 quand C'est en increment... Ca va pas !!
 
+    /*
 #define STEPPER(i, sig, rel, ...) \
         if (!rel) {\
             signature|=sig;\
@@ -52,6 +53,8 @@ void HomingMovement::move() {
 
 #undef STEPPER
 
+     */
+
 
     uint32_t delay = 100;//TODO AJUSTER LE DELAY EN FONCTION DE LA VITESSE DES AXES RESTANTS
     uint32_t timeline = micros();
@@ -60,7 +63,7 @@ void HomingMovement::move() {
     float speed;
     uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * 0.05);
+        speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
         d = (uint32_t) (1000000 / (speed * EEPROMStorage::steps[axis]));
         delays[axis] = delay;
         delay = max(delay, d);
