@@ -352,26 +352,29 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     float distance = 0;
 
     //Step 1 : Get a new position to reach
-    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);
-
+    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);//2us
     saved_direction_sigature = negative_signatures;
 
     STEP_AND_WAIT
 
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);
+    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);//1us
 
     STEP_AND_WAIT;
 
+
     //Step 3 : Extract signatures from this distances array
-    process_signatures(elementary_dists, elementary_signatures);
+    process_signatures(elementary_dists, elementary_signatures);//3us
+
 
     STEP_AND_WAIT;
 
     //Step 4 : Update the speed distance with the new heuristic distances
-    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
+    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);//4us
 
     STEP_AND_WAIT;
+
+    //5us
 
     //Step 5 : Update the speed distance with the new heuristic distances
     RealTimeProcessor::update_speeds(real_dists, time);
@@ -382,6 +385,9 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Update tools powers
     update_tools_powers(time, distance);
 
+
+    long d;
+
     //If no more pre-process is required
     if (RealTimeProcessor::movement_processed) {
         goto end;
@@ -389,13 +395,29 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     STEP_AND_WAIT;
 
+
+
     //Step 7 : get a new position
-    RealTimeProcessor::push_new_position();
+    RealTimeProcessor::push_new_position_1();//8us
+
+
+
+    STEP_AND_WAIT;
+    d = micros();
+
+    RealTimeProcessor::push_new_position_2();//5us
+
+    d = micros()-d;
+    CI::echo("TIME : "+String(d));
 
     STEP_AND_WAIT;
 
     //Step 8 : if the position queue is not full, get a new position;
-    RealTimeProcessor::push_new_position();
+    RealTimeProcessor::push_new_position_1();//8us
+
+    STEP_AND_WAIT;
+
+    RealTimeProcessor::push_new_position_2();//5us
 
     STEP_AND_WAIT;
 

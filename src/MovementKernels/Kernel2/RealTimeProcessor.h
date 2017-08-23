@@ -41,6 +41,9 @@ private:
     //The current positions of stepper motors
     static float *const current_stepper_positions;
 
+    //The future positions of stepper motors
+    static float *const future_stepper_positions;
+
     //The current position in the high level system.
     static float *const current_hl_position;
 
@@ -133,8 +136,20 @@ public :
     //movement_processed flag, true when the current movement's last position have been processed
     static bool movement_processed;
 
-    //function to determine and push (if the distances bounds are respected) a new position in the queue.
+    /*
+     * position pushing functions :
+     *  As the pushing procedure is costly, it is divided in two procedures. They must be called one after the other
+     *      for a new position to be effectively pushed.
+     */
+
+    //function to determine and push a candidate position.
     static void push_new_position();
+
+    //function to determine a candidate position.
+    static void push_new_position_1();
+
+    //function to push (if the distances bounds are respected) the previously computed position in the queue.
+    static void push_new_position_2();
 
     //function to push the maximum number of positions in the queue.
     static void fill_sub_movement_queue();
@@ -226,6 +241,7 @@ private :
 
     //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
+
 
 
     //-------------------------------------------------Speed_Constants--------------------------------------------------

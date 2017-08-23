@@ -106,6 +106,16 @@ typedef struct {
 } k2_linear_data;
 
 
+typedef struct {
+    uint8_t *elementary_dists;
+    float *real_dists;
+    float index_candidate;
+    float movement_distance;
+    float future_steppers_positions[NB_STEPPERS];
+    float candidate_high_level_positions[NB_AXIS];
+
+} position_data_struct;
+
 #endif //TRACER_COMPLEX_MOTION_DATA_H
 
 #endif
