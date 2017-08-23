@@ -20,6 +20,7 @@
 
 
 #include <config.h>
+
 #ifdef ENABLE_TREE_INTERFACE
 
 #include "TreeInterface.h"
@@ -47,7 +48,7 @@ void TreeInterfaceCommands::system_canal_function(char *data, uint8_t size) {
     if (!(size--)) return;
     char sub_canal = *(data++);
 
-    switch(sub_canal) {
+    switch (sub_canal) {
         case 0 :
             TI::send_tree_structure();
             break;
@@ -73,7 +74,8 @@ void TreeInterfaceCommands::system_canal_function(char *data, uint8_t size) {
             parameters_system_canal(data, size);
             break;
 
-        default:break;
+        default:
+            break;
     }
     return;
 }
@@ -94,7 +96,7 @@ void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
     if (!size) return;
     char sub_canal = *data;
 
-    switch(sub_canal) {
+    switch (sub_canal) {
         case 0 :
             /* Init case : send_packet data concerning all External Parameters.
              * Packet Structure : indice, name, min, max, unit
@@ -109,7 +111,7 @@ void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
 
 #undef EXTERNAL_PARAMETER
 
-        break;
+            break;
         default:
             break;
     }
@@ -126,7 +128,7 @@ void TreeInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
     if (!size) return;
     char sub_canal = *data;
     int pi;
-    switch(sub_canal) {
+    switch (sub_canal) {
 
         case 0 :
             /* Init case : send_packet data concerning all External Parameters.
@@ -159,7 +161,7 @@ void TreeInterfaceCommands::loop_system_canal(char *data, uint8_t size) {
     if (!size) return;
     char sub_canal = *data;
 
-    switch(sub_canal) {
+    switch (sub_canal) {
         case 0 :
             /* Init case : send_packet data concerning all External Parameters.
              * Packet Structure : indice, name, min, max, unit
@@ -188,7 +190,7 @@ void TreeInterfaceCommands::actions_system_canal(char *data, uint8_t size) {
     if (!size) return;
     char sub_canal = *data;
 
-    switch(sub_canal) {
+    switch (sub_canal) {
         case 0 ://The initialisation case : send_packet a packet for each stepper
 
 #define BINARY(i, name, powerPin, enableValue)\
@@ -203,6 +205,7 @@ void TreeInterfaceCommands::actions_system_canal(char *data, uint8_t size) {
             TI::prepare_system_packet();TI::add_char_out(ACTION_SUBCANAL);TI::add_char_out(0);TI::add_char_out(2);\
             TI::add_char_out(i);TI::add_string_out(#name);TI::add_float_out(minValue);TI::add_float_out(maxValue);\
             TI::send_packet();\
+
 
 #include "../../config.h"
 
@@ -226,7 +229,7 @@ void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
 
     int group_size;
 
-    switch(sub_canal) {
+    switch (sub_canal) {
         case 0 ://The initialisation case : send_packet a packet for each stepper
 
 #define STEPPER_DATA(i, j, ...)\
@@ -259,13 +262,12 @@ void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
 }
 
 
-
 void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
     if (!size--) return;
     char sub_canal = *(data++);
     float f;
-    switch(sub_canal) {
+    switch (sub_canal) {
 
         case 0 : //The initialisation case : send the EEPROM_structure
             EEPROMStorage::send_structure();
@@ -308,14 +310,27 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 }
 
 
-
-void TreeInterfaceCommands::action(char * ,uint8_t) {
+void TreeInterfaceCommands::action(char *, uint8_t) {
 
     float coords[NB_AXIS]{0};
-    coords[0] = 140.2564;
-    coords[1] = 140.1523;
-    coords[2] = 115.9854;
-    coords[3] = 140.9999;
+    coords[0] = 140;
+    coords[1] = 140;
+    coords[2] = 140;
+    coords[3] = 140;
+    coords[4] = 140;
+    coords[5] = 140;
+    coords[6] = 140;
+    coords[7] = 140;
+    coords[8] = 140;
+    coords[9] = 140;
+    coords[10] = 140;
+    coords[11] = 140;
+    coords[12] = 140;
+    coords[13] = 140;
+    coords[14] = 140;
+    coords[15] = 140;
+    coords[16] = 140;
+
 
     MachineAbstraction::set_speed_group(0);
 
@@ -330,6 +345,19 @@ void TreeInterfaceCommands::action(char * ,uint8_t) {
     coords[1] = 120;
     coords[2] = 80;
     coords[3] = 120;
+    coords[4] = 120;
+    coords[5] = 80;
+    coords[6] = 120;
+    coords[7] = 80;
+    coords[8] = 120;
+    coords[9] = 80;
+    coords[10] = 120;
+    coords[11] = 80;
+    coords[12] = 120;
+    coords[13] = 80;
+    coords[14] = 120;
+    coords[15] = 80;
+    coords[16] = 120;
 
     MachineAbstraction::set_speed_group(0);
 
@@ -343,9 +371,22 @@ void TreeInterfaceCommands::action(char * ,uint8_t) {
 
 
     coords[0] = 20;
-    coords[1] = 60;
-    coords[2] = 100;
-    coords[3] = 140;
+    coords[1] = 25;
+    coords[2] = 30;
+    coords[3] = 35;
+    coords[4] = 37.5;
+    coords[5] = 40;
+    coords[6] = 45;
+    coords[7] = 50;
+    coords[8] = 55;
+    coords[9] = 60;
+    coords[10] = 65;
+    coords[11] = 70;
+    coords[12] = 75;
+    coords[13] = 80;
+    coords[14] = 85;
+    coords[15] = 90;
+    coords[16] = 95;
 
     MachineAbstraction::set_speed_group(0);
 

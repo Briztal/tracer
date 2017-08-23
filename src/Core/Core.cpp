@@ -17,16 +17,16 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "../sanity_check.h"
 #include "../config.h"
+
+
+#ifdef ENABLE_STEPPER_CONTROL
+
 
 #include "Core.h"
 #include "../interface.h"
 #include "EEPROMStorage.h"
-#ifdef ENABLE_STEPPER_CONTROL
 #include "../MovementKernels/StepperController.h"
-#endif
-
 
 void Core::begin() {
 
@@ -155,11 +155,4 @@ Queue<void(*)()> Core::internal_tasks(MAX_TASKS);
 char args_tab[MAX_TASKS][PACKET_SIZE+1];
 char *Core::external_args = (char *) args_tab;
 
-/*
-template class Queue<motion_data>;
-template class Queue<linear_data>;
-template class Queue<int>;
-template class Queue<void(*)(char *args, uint8_t args_size)>;
-template class Queue<void(*)()>;
-
-*/
+#endif

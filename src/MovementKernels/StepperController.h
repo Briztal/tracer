@@ -39,8 +39,7 @@ public:
     static void setDir##i (bool sens);\
     static void step##i();\
 
-
-#include   "../config.h"
+#include   <config.h>
 
 #undef STEPPER
 
@@ -64,19 +63,21 @@ private:
 #define STEPPER(i, ...) \
     static bool dir##i;
 
-#include  "../config.h"
+#include  <config.h>
 
 #undef STEPPER
 
 #ifdef position_log
+
 #define STEPPER(i, ...) \
     static int32_t incr##i;\
     public:static int32_t pos##i;\
 
 
-#include  "../config.h"
+#include  <config.h>
 
 #undef STEPPER
+
 #endif
 
 };

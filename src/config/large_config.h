@@ -205,7 +205,7 @@ SERVO(2, servo3, 4, 0, 1)
 //---------------------------------------------------STEPPER_ABSTRACTION------------------------------------------------
 
 //Number of axis in the high level coordinates system
-#define NB_AXIS 4
+#define NB_AXIS 17
 
 
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
@@ -214,14 +214,31 @@ SERVO(2, servo3, 4, 0, 1)
 
 //      id, letter, size,   steps,  speed,  acceler.,   jerk)
 AXIS(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   1,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   2,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   3,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   4,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   5,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   6,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   7,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   8,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   9,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   10,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   11,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   12,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   13,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   14,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   15,  '0',    170,    80.16,  500.,   1350.,      20.)
+AXIS(   16,  '0',    170,    80.16,  500.,   1350.,      20.)
 
 #endif
 
 //------------------------------------------------------STEPPER_MOTORS--------------------------------------------------
 
+//Number of axis in the high level coordinates system
 
 //Number of stepper motors, must be set accordingly to the next lines
-#define NB_STEPPERS 4
+#define NB_STEPPERS 17
 
 //Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters//TODO DOC
 
@@ -234,8 +251,6 @@ STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH
 STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH)
 STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-
-/*
 STEPPER(4,  16,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(5,  32,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(6,  64,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
@@ -249,7 +264,7 @@ STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HI
 STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-*/
+
 
 #endif
 
@@ -263,8 +278,6 @@ STEPPER_DATA(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
 STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,   1200.,      20.)
 STEPPER_DATA(   2,  '3',    150.,   80.16,  500.,   1200.,      20.)
 STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,   1200.,      20.)
-
-/*
 STEPPER_DATA(   4,  '3',    150.,   80.16,  500.,   1200.,      20.)
 STEPPER_DATA(   5,  '3',    150.,   80.16,  500.,   1200.,      20.)
 STEPPER_DATA(   6,  '3',    150.,   80.16,  500.,   1200.,      20.)
@@ -278,26 +291,25 @@ STEPPER_DATA(   13,  '3',    150.,   80.16,  500.,  1200.,      20.)
 STEPPER_DATA(   14,  '3',    150.,   80.16,  500.,  1200.,      20.)
 STEPPER_DATA(   15,  '3',    150.,   80.16,  500.,  1200.,      20.)
 STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,  1200.,      20.)
-*/
+
 
 #endif
 
 //-----------------------------------------------------CARTESIAN_GROUPS-------------------------------------------------
 
 //TODO DOC
-#define NB_CARTESIAN_GROUPS 2
+#define NB_CARTESIAN_GROUPS 6
 
 #ifdef CARTESIAN_GROUP
 
 //              id,     a0      a1      a2      maxSpeed
 CARTESIAN_GROUP(0,      0,      1,      2,      500     )
 CARTESIAN_GROUP(1,      3,      -1,     -1,     500     )
-/*
 CARTESIAN_GROUP(2,      6,      7,      8,     500     )
 CARTESIAN_GROUP(3,      9,      10,     11,     500     )
 CARTESIAN_GROUP(4,      12,     13,     14,     500     )
 CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
-*/
+
 
 #endif
 

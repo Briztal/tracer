@@ -82,7 +82,7 @@ private:
     static float last_##i;\
     static float sum_##i;\
     static float get_pid_##i(float error);\
-    static float reset_pid_##i();
+    static void reset_pid_##i();
 
 #include "../config.h"
 
@@ -109,7 +109,7 @@ private:\
 
 #include "../config.h"
 
-#undef LOOP_FUNCTION;
+#undef LOOP_FUNCTION
 
 };
 

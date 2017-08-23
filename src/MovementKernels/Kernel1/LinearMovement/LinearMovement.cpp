@@ -338,6 +338,6 @@ float *const m::MR_slopes = new float[NB_STEPPERS];
 uint8_t m::MR_max_axis;
 sig_t m::MR_negative_signatures;
 
-#undef m;
+#undef m
 
 #endif

@@ -55,6 +55,11 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     //Get distance relative variables
     bool null_move = get_distances(positions, destination, distances, &max_axis, &max_distance);
 
+    CI::echo("dists : ");
+    for (int i = 0; i<NB_AXIS; i++) {
+        CI::echo("d : "+String(distances[i]));
+    }
+
     //end if the machine is already at the destination;
     if (null_move) {
 
@@ -135,13 +140,10 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 
         float a_dist = (distance > 0) ? distance : -distance;
 
-        //check if the distance is zero
-        if (!a_dist) {
-            break;
-        }
-
         //if distance is not zero, the movement is not null
-        null_move = false;
+        if (a_dist) {
+            null_move = false;
+        }
 
         //Update max_axis and max_dist if needed
         if (a_dist > max_dist) {

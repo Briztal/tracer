@@ -29,7 +29,7 @@ float Asserv::get_pid_##i(float error) {\
     last_##i = error;\
     return ret;\
 }\
-float Asserv::reset_pid_##i() {\
+void Asserv::reset_pid_##i() {\
     sum_##i=0;last_##i = 0;\
 }\
 float Asserv::sum_##i;\

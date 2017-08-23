@@ -159,7 +159,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
      */
 
     //Micro movement check :
-    if (((incr>0) && (min + incr > max) || (incr<0) && (min + incr <max))) {
+    if (((incr>0) && (min + incr > max)) || ((incr<0) && (min + incr <max))) {
 
         //Send an error message
         CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
@@ -256,6 +256,7 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
  *  It processes the first sub_movement, and then fills the sub_movement queue;
  *
  */
+
 void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 
     //Push the first position;

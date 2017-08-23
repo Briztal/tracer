@@ -112,7 +112,6 @@ uint32_t HomingMovement::getMaxDelay(sig_t signature, uint32_t *delays) {
 
 sig_t HomingMovement::readEndStops() {
     sig_t signature = 0;
-    sig_t bit = 1;
 
 #define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
     if (!rel) {\
