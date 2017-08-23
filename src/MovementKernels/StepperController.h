@@ -31,8 +31,8 @@ class StepperController {
 
 
 #ifdef position_log
-public:
-    static void send_position();
+    public:
+        static void send_position();
 
 #endif
 
@@ -48,19 +48,13 @@ public:
 
 private:
 
-#define STEPPER(i, ...) \
-    static bool dir##i;
-
-#include  <config.h>
-
-#undef STEPPER
+    static sig_t direction_signature;
 
 #ifdef position_log
 
 #define STEPPER(i, ...) \
     static int32_t incr##i;\
     public:static int32_t pos##i;\
-
 
 #include  <config.h>
 
@@ -69,6 +63,7 @@ private:
 #endif
 
 };
+
 
 #endif
 

@@ -41,9 +41,6 @@ private:
     //The current positions of stepper motors
     static float *const current_stepper_positions;
 
-    //The future positions of stepper motors
-    static float *const future_stepper_positions;
-
     //The current position in the high level system.
     static float *const current_hl_position;
 

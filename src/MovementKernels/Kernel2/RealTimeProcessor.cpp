@@ -61,6 +61,7 @@ void RealTimeProcessor::send_position() {
 
     //Send the current high level position
     CI::send_position(current_hl_position);
+    //StepperController::send_position();
 
 
 }
@@ -714,10 +715,6 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
 //Current stepper position;
 float t_cur_pos[NB_STEPPERS]{0};
 float *const m::current_stepper_positions = t_cur_pos;
-
-//Future stepper position;
-float t_fut_pos[NB_STEPPERS]{0};
-float *const m::future_stepper_positions = t_fut_pos;
 
 //Positions
 float t_rl_pos[NB_AXIS]{0};

@@ -46,19 +46,20 @@ void StepperController::enable(sig_t signature) {
 //TODO PASSER EN SIGNATURES PLUTOT QU'EN ATTRIBUTS
 void StepperController::set_directions(sig_t negative_signatures) {
 
-    long d = micros();
-
+    sig_t direction_signature = StepperController::direction_signature;
     bool sig_dir;
+    bool dir;
 
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
-    if ((!sig_dir) && !dir##i) {\
-        dir##i = true;\
+    dir = direction_signature&sig;\
+    if ((!sig_dir) && (!dir)) {\
+        direction_signature |= sig;\
         digital_write(pinDir, dirp);\
         incr##i=1;\
-    } else if (sig_dir && (dir##i)) {\
-        dir##i = false;\
+    } else if (sig_dir && dir) {\
+        direction_signature &= ~sig;\
         digital_write(pinDir, !dirp);\
         incr##i=-1;\
     }\
@@ -67,11 +68,12 @@ void StepperController::set_directions(sig_t negative_signatures) {
 
 #define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
     sig_dir = negative_signatures&sig;\
-    if ((!sig_dir) && !dir##i) {\
-        dir##i = true;\
+    dir = direction_signature&sig;\
+    if ((!sig_dir) && (!dir)) {\
+        direction_signature |= sig;\
         digital_write(pinDir, dirp);\
-    } else if (sig_dir && (dir##i)) {\
-        dir##i = false;\
+    } else if (sig_dir && dir) {\
+        direction_signature &= ~sig;\
         digital_write(pinDir, !dirp);\
     }\
 
@@ -81,48 +83,9 @@ void StepperController::set_directions(sig_t negative_signatures) {
 
 #undef STEPPER
 
-    d = micros()-d;
-    CI::echo("TIME : "+String(d));
+    StepperController::direction_signature = direction_signature;
+
 }
-
-/*
-#ifdef position_log
-#define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
-void StepperController::setDir##i(bool sens) {\
-    CI::echo(String(i)+" "+String(sens));\
-    if (!(sens ^ dir##i )) return;\
-        dir##i = sens;\
-        if (sens) {\
-            digital_write(pinDir, dirp);\
-            incr##i=1;\
-        } else {\
-            digital_write(pinDir, !dirp);\
-            incr##i=-1;\
-    }\
-}
-
-#include <config.h>
-
-#undef STEPPER
-#else
-#define STEPPER(k1_position_indice, sig, rel, ps, pinDir, dirp,  pp, ve, pmi, vi, pma, va) \
-void StepperController::setDir##k1_position_indice(bool sens) {\
-    if (!(sens ^ dir##k1_position_indice )) return;\
-        dir##k1_position_indice = sens;\
-        if (sens) {\
-            digital_write(pinDir, dirp);\
-            lim##k1_position_indice = max##k1_position_indice ;\
-        } else {\
-            digital_write(pinDir, !dirp);\
-            lim##k1_position_indice = 0;\
-    }\
-}
-
-#include <config.h>
-
-#undef STEPPER;
-#endif
- */
 
 void StepperController::begin() {
 
@@ -182,16 +145,14 @@ void StepperController::send_position() {
 #undef STEPPER
 
     CI::send_position(t);
+
 }
 
 #endif
 
 #define m StepperController
 
-#define STEPPER(i, ...) \
-    bool m::dir##i = false;
-
-#include <config.h>
+sig_t m::direction_signature = 0;
 
 #undef STEPPER
 

@@ -702,8 +702,15 @@ void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) 
 
     if (movement_switch_flag) {
         if (!(movement_switch_counter--)) {
+
+            //Movement switch
             movement_switch_flag = false;
             update_tools_data();
+
+            //Send position
+            RealTimeProcessor::send_position();
+
+
         }
     }
 
