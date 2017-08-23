@@ -343,23 +343,34 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
 
+
     uint8_t elementary_dists[NB_STEPPERS];
     float real_dists[NB_STEPPERS];
+
+    long d = micros();
 
     //Step 0 : update signatures for the current prepare_movement;
     sig_t *elementary_signatures = initialise_sub_movement();
 
+
+
     sig_t negative_signatures = 0;
     float distance = 0;
+
 
     //Step 1 : Get a new position to reach
     RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);//2us
     saved_direction_sigature = negative_signatures;
 
+
+
     STEP_AND_WAIT
 
+
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);//1us
+    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);//1us 1 stepper, 2 us 17 steppers
+
+
 
     STEP_AND_WAIT;
 
@@ -368,26 +379,28 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     process_signatures(elementary_dists, elementary_signatures);//3us
 
 
+
     STEP_AND_WAIT;
 
     //Step 4 : Update the speed distance with the new heuristic distances
-    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);//4us
+    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);//4us 4 steppers, 13us 17 steppers
+
+
 
     STEP_AND_WAIT;
 
-    //5us
+    //5us 4 steppers, 9 us 17 steppers
+
 
     //Step 5 : Update the speed distance with the new heuristic distances
     RealTimeProcessor::update_speeds(real_dists, time);
 
     //Step 6 : determine the delay time for the next sub_movement :
-    delay = ((float) 1000000 * time) / (uint32_t) trajectory_indice;
+    delay = ((float) 1000000 * time) / (float) trajectory_indice;
 
     //Update tools powers
     update_tools_powers(time, distance);
 
-
-    long d;
 
     //If no more pre-process is required
     if (RealTimeProcessor::movement_processed) {
@@ -396,20 +409,14 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     STEP_AND_WAIT;
 
-
-
     //Step 7 : get a new position
-    RealTimeProcessor::push_new_position_1();//8us
-
-
+    RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
 
     STEP_AND_WAIT;
-    d = micros();
 
-    RealTimeProcessor::push_new_position_2();//5us
+    RealTimeProcessor::push_new_position_2();//5us 4 steppers, 11us 17steppers
 
-    d = micros()-d;
-    CI::echo("TIME : "+String(d));
+
 
     STEP_AND_WAIT;
 
@@ -441,6 +448,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
 sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
+
     //Update the trajectory indice
     saved_trajectory_indice = trajectory_indice;
 
@@ -449,6 +457,7 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
     //update the interrupt period with the float delay, that is computed to provde the most accurate period.
     set_stepper_int_period(delay);
+
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -700,6 +709,8 @@ void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) 
 
     //Determine the current speed
     float speed = distance / time;
+
+    CI::echo("current speed : "+String(speed));
 
     //Update each tool power with the value 'speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {

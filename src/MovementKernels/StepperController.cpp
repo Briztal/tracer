@@ -53,6 +53,9 @@ void StepperController::enable(sig_t signature) {
 
 //TODO PASSER EN SIGNATURES PLUTOT QU'EN ATTRIBUTS
 void StepperController::set_directions(sig_t negative_signatures) {
+
+    long d = micros();
+
     bool sig_dir;
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
@@ -86,6 +89,8 @@ void StepperController::set_directions(sig_t negative_signatures) {
 
 #undef STEPPER
 
+    d = micros()-d;
+    CI::echo("TIME : "+String(d));
 }
 
 #ifdef position_log
@@ -137,14 +142,17 @@ void StepperController::begin() {
 
 }
 
+
 void StepperController::fastStep(sig_t id) {
+
+    long d = micros();
 //CI::echo("S");
 #ifdef position_log
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
         /*if (id&(sig_t)1) {*/\
         if (id&sig) {\
-            pos##i += incr##i;\
+            /*pos##i += incr##i;*/\
             digital_write(pinStep, HIGH);\
             digital_write(pinStep, LOW);\
         }\
@@ -169,6 +177,8 @@ void StepperController::fastStep(sig_t id) {
 
 #endif
 
+    d = micros()-d;
+    CI::echo("TIME_STEP : "+String(d));
 }
 
 

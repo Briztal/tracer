@@ -61,9 +61,8 @@ include_directories(src/)
 #--------------------------------------------------CORE-----------------------------------------------------------------
 
 set(CP "src/Core")
-set(HP src/hardware_language_abstraction)
 
-include_directories(${CP}/  ${HP}/)
+include_directories(${CP}/)
 
 add_library(core
 
@@ -71,9 +70,20 @@ add_library(core
         ${CP}/Core.cpp
         ${CP}/EEPROMStorage.h
         ${CP}/EEPROMStorage.cpp
-        ${HP}/hardware_language_abstraction_teensy35.cpp
 
         )
+
+
+set(HP src/hardware_language_abstraction)
+
+include_directories(${HP}/)
+
+add_library(hardware
+
+        ${HP}/hardware_language_abstraction_teensy35.cpp
+
+        ${HP}/digital_write_fast.h)
+
 
 #-----------------------------------------------INTERFACES--------------------------------------------------------------
 
