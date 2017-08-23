@@ -43,7 +43,6 @@ void StepperController::enable(sig_t signature) {
 
 }
 
-//TODO PASSER EN SIGNATURES PLUTOT QU'EN ATTRIBUTS
 void StepperController::set_directions(sig_t negative_signatures) {
 
     sig_t direction_signature = StepperController::direction_signature;

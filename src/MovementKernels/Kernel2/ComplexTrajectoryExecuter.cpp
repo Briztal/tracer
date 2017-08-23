@@ -159,7 +159,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
      */
 
     //Micro movement check :
-    if (((incr>0) && (min + incr > max)) || ((incr<0) && (min + incr <max))) {
+    if (((incr > 0) && (min + incr > max)) || ((incr < 0) && (min + incr < max))) {
 
         //Send an error message
         CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
@@ -344,52 +344,49 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     disable_stepper_interrupt();
 
 
+    //2us 4 steppers, 6us 17 stepper : 0.8us + 0.3us per stepper
+
+
     uint8_t elementary_dists[NB_STEPPERS];
     float real_dists[NB_STEPPERS];
 
-    long d = micros();
-
     //Step 0 : update signatures for the current prepare_movement;
     sig_t *elementary_signatures = initialise_sub_movement();
-
-
 
     sig_t negative_signatures = 0;
     float distance = 0;
 
 
     //Step 1 : Get a new position to reach
-    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);//2us
+    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);
     saved_direction_sigature = negative_signatures;
-
-
 
     STEP_AND_WAIT
 
+    //1us 1 stepper, 2us 17 steppers : 0.7 us + 0.07us per stepper
 
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);//1us 1 stepper, 2 us 17 steppers
-
-
+    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);
 
     STEP_AND_WAIT;
+
+    //3us 4 steppers, 9us 17 steppers : 1.15us + 0.46us per stepper
 
 
     //Step 3 : Extract signatures from this distances array
-    process_signatures(elementary_dists, elementary_signatures);//3us
-
+    process_signatures(elementary_dists, elementary_signatures);
 
 
     STEP_AND_WAIT;
+
+    //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
 
     //Step 4 : Update the speed distance with the new heuristic distances
-    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);//4us 4 steppers, 13us 17 steppers
-
-
+    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
 
     STEP_AND_WAIT;
 
-    //5us 4 steppers, 9 us 17 steppers
+    //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
 
 
     //Step 5 : Update the speed distance with the new heuristic distances
@@ -401,7 +398,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Update tools powers
     update_tools_powers(time, distance);
 
-
+long d;
     //If no more pre-process is required
     if (RealTimeProcessor::movement_processed) {
         goto end;
@@ -409,14 +406,20 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     STEP_AND_WAIT;
 
+    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
+
     //Step 7 : get a new position
+    d = micros();
     RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
+    d= micros()-d;
+    CI::echo("TIME : "+String(d));
+
 
     STEP_AND_WAIT;
 
-    RealTimeProcessor::push_new_position_2();//5us 4 steppers, 11us 17steppers
+    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
 
-
+    RealTimeProcessor::push_new_position_2();
 
     STEP_AND_WAIT;
 
@@ -717,7 +720,7 @@ void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) 
     //Determine the current speed
     float speed = distance / time;
 
-    CI::echo("current speed : "+String(speed));
+    CI::echo("current speed : " + String(speed));
 
     //Update each tool power with the value 'speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {
