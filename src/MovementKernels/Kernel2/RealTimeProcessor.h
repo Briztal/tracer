@@ -107,9 +107,11 @@ private :
 
     //The distance bounds
 
-#define MINIMUM_DISTANCE_LIMIT 10
+#define MINIMUM_DISTANCE_LIMIT 8
 
-#define MAXIMUM_DISTANCE_LIMIT 256
+#define DISTANCE_TARGET 11
+
+#define MAXIMUM_DISTANCE_LIMIT 14
 
     //The speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the speed group j. Compiler constant.
     static const int8_t *const speed_groups_indices;

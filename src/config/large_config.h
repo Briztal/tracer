@@ -184,7 +184,7 @@ SERVO(2, servo3, 4, 0, 1)
 //#################################################LOG_SETTINGS#########################################################
 
 //Log settings. Uncomment those lines to output (resp) position and overflow marker in Monitor
-//#define position_log
+#define position_log
 
 
 //distance btw two position logs
@@ -195,8 +195,6 @@ SERVO(2, servo3, 4, 0, 1)
 //###########################################STEPPER_CONTROLLER_SETTINGS###############################################
 
 #define MOTION_DATA_QUEUE_SIZE 20
-
-#define DISTANCE_TARGET 31//TODO MAKE A KERNEL SECTION IN THIS FILE
 
 
 #define sig_t uint32_t
@@ -212,24 +210,24 @@ SERVO(2, servo3, 4, 0, 1)
 #ifdef AXIS
 //AXIS(i, j, si, st, sp, a)
 
-//      id, letter, size,   steps,  speed,  acceler.,   jerk)
-AXIS(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   1,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   2,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   3,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   4,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   5,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   6,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   7,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   8,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   9,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   10,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   11,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   12,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   13,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   14,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   15,  '0',    170,    80.16,  500.,   1350.,      20.)
-AXIS(   16,  '0',    170,    80.16,  500.,   1350.,      20.)
+//      id, letter,)
+AXIS(   0,  '0')
+AXIS(   1,  '0')
+AXIS(   2,  '0')
+AXIS(   3,  '0')
+AXIS(   4,  '0')
+AXIS(   5,  '0')
+AXIS(   6,  '0')
+AXIS(   7,  '0')
+AXIS(   8,  '0')
+AXIS(   9,  '0')
+AXIS(   10,  '0')
+AXIS(   11,  '0')
+AXIS(   12,  '0')
+AXIS(   13,  '0')
+AXIS(   14,  '0')
+AXIS(   15,  '0')
+AXIS(   16,  '0')
 
 #endif
 
@@ -264,7 +262,6 @@ STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HI
 STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-
 
 #endif
 
@@ -309,7 +306,6 @@ CARTESIAN_GROUP(2,      6,      7,      8,     500     )
 CARTESIAN_GROUP(3,      9,      10,     11,     500     )
 CARTESIAN_GROUP(4,      12,     13,     14,     500     )
 CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
-
 
 #endif
 

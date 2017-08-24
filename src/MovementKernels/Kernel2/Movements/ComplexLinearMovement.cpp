@@ -55,10 +55,6 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     //Get distance relative variables
     bool null_move = get_distances(positions, destination, distances, &max_axis, &max_distance);
 
-    CI::echo("dists : ");
-    for (int i = 0; i<NB_AXIS; i++) {
-        CI::echo("d : "+String(distances[i]));
-    }
 
     //end if the machine is already at the destination;
     if (null_move) {
@@ -84,7 +80,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     float incr = (max_distance < 0) ? -1 : 1;
 
     //Extract the increment
-    float increment = IncrementComputer::extract_increment(get_position, 0, incr, DISTANCE_TARGET);
+    float increment = IncrementComputer::extract_increment(get_position, 0, incr);
 
     //Wait for the enqueuing to be authorised in ComplexTrajectoryExecuter.
     while(ComplexTrajectoryExecuter::enqueue_unauthorised());

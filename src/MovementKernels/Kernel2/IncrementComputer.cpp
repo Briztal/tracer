@@ -23,9 +23,10 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include <stdint.h>
-#include <MovementKernels/MachineAbstraction.h>
 #include "IncrementComputer.h"
+#include "RealTimeProcessor.h"
+
+#include <MovementKernels/MachineAbstraction.h>
 
 
 /*
@@ -45,8 +46,7 @@
  *
  */
 
-float IncrementComputer::extract_increment(void (*get_position)(float, float *), float point, float increment,
-                                           const uint32_t distance_target) {
+float IncrementComputer::extract_increment(void (*get_position)(float, float *), float point, float increment) {
 
     //Arrays initialisation
     float initial_positions[NB_AXIS], positions[NB_AXIS];
@@ -61,11 +61,11 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     uint32_t d = get_max_dist(initial_positions, positions);
 
     //cache float var for distance_target
-    float ftarget = (float) distance_target;
+    float ftarget = (float) DISTANCE_TARGET;
 
 
     //correct the increment until it gives a position at the target distance.
-    while (d != distance_target) {
+    while (d != DISTANCE_TARGET) {
 
         if (!d) d = 1;
 

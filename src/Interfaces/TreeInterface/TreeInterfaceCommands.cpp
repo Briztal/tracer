@@ -317,6 +317,8 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[1] = 140;
     coords[2] = 140;
     coords[3] = 140;
+
+    /*
     coords[4] = 140;
     coords[5] = 140;
     coords[6] = 140;
@@ -330,6 +332,7 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[14] = 140;
     coords[15] = 140;
     coords[16] = 140;
+     */
 
 
     MachineAbstraction::set_speed_group(0);
@@ -345,6 +348,7 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[1] = 120;
     coords[2] = 80;
     coords[3] = 120;
+    /*
     coords[4] = 120;
     coords[5] = 80;
     coords[6] = 120;
@@ -358,6 +362,7 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[14] = 120;
     coords[15] = 80;
     coords[16] = 120;
+     */
 
     MachineAbstraction::set_speed_group(0);
 
@@ -374,6 +379,7 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[1] = 25;
     coords[2] = 30;
     coords[3] = 35;
+    /*
     coords[4] = 37.5;
     coords[5] = 40;
     coords[6] = 45;
@@ -387,6 +393,7 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[14] = 85;
     coords[15] = 90;
     coords[16] = 95;
+     */
 
     MachineAbstraction::set_speed_group(0);
 

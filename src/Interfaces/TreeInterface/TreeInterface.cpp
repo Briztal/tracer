@@ -78,13 +78,13 @@ void TI::echo(const String msg) {
 
 /*
  * send_position : this is a public shortcut allowing to send_packet steppers position all aint32_t the code
- *      (t must be a float *, of size [NB_STEPPERS])
+ *      (t must be a float *, of size [NB_AXIS])
  *
  * The command id is the following : 0 (system canal) - 5 (steppers canal) - 0 (position canal);
  */
 void TI::send_position(float *t) {
     prepare_data_out("\0\5\1", 3);
-    for (uint8_t i = 0; i<NB_STEPPERS; i++) {
+    for (uint8_t i = 0; i<NB_AXIS; i++) {
         add_float_out(t[i]);
     }
     send_packet();

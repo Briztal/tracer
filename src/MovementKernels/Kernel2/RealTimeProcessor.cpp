@@ -211,7 +211,7 @@ void RealTimeProcessor::push_new_position_1() {
 
 void RealTimeProcessor::push_new_position_2() {
 
-    if ((!sub_movement_queue.available_spaces()) || (movement_processed))
+    if ((!sub_movement_queue.available_spaces()))
         return;
 
 
@@ -228,8 +228,9 @@ void RealTimeProcessor::push_new_position_2() {
 
     //-----------------Validity_Verification----------------------------
 
-    if (max_distance != DISTANCE_TARGET) {
 
+    if (max_distance != DISTANCE_TARGET) {
+        //CI::echo("max dist : "+String(max_distance)+" "+String(DISTANCE_TARGET));
         //Increment adjustment according to the target
         increment = increment * (float) DISTANCE_TARGET / max_distance;
 
@@ -237,12 +238,14 @@ void RealTimeProcessor::push_new_position_2() {
 
     //If the maximal distance is below the lower limit :
     if (up_check) {
+        //CI::echo("REJECTED "+String(sub_movement_queue.available_elements()));
         movement_processed = false;
         return;
     }
 
     //If the maximal distance is below the lower limit :
     if ((!movement_processed) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
+        //CI::echo("LOWER_REJECTED");
         return;
     }
 

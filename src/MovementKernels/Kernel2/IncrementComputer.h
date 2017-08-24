@@ -48,8 +48,7 @@ class IncrementComputer {
 
 public:
 
-    static float extract_increment(void (*get_position)(float, float *), float point, float increment,
-                                   const uint32_t distance_target);
+    static float extract_increment(void (*get_position)(float, float *), float point, float increment);
 
 private :
 

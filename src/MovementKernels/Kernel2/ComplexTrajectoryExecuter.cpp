@@ -344,7 +344,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     disable_stepper_interrupt();
 
 
-    //2us 4 steppers, 6us 17 stepper : 0.8us + 0.3us per stepper
+    //3us 4 steppers, 8us 17 stepper : 1.5 us + 0.37us per stepper
 
 
     uint8_t elementary_dists[NB_STEPPERS];
@@ -361,9 +361,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);
     saved_direction_sigature = negative_signatures;
 
-    STEP_AND_WAIT
-
-    //1us 1 stepper, 2us 17 steppers : 0.7 us + 0.07us per stepper
 
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
     RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);
@@ -371,7 +368,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     STEP_AND_WAIT;
 
     //3us 4 steppers, 9us 17 steppers : 1.15us + 0.46us per stepper
-
 
     //Step 3 : Extract signatures from this distances array
     process_signatures(elementary_dists, elementary_signatures);
@@ -388,7 +384,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
 
-
     //Step 5 : Update the speed distance with the new heuristic distances
     RealTimeProcessor::update_speeds(real_dists, time);
 
@@ -398,39 +393,32 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //Update tools powers
     update_tools_powers(time, distance);
 
-long d;
     //If no more pre-process is required
-    if (RealTimeProcessor::movement_processed) {
-        goto end;
-    }
+    if (RealTimeProcessor::movement_processed) goto end;
 
     STEP_AND_WAIT;
 
     //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
-
-    //Step 7 : get a new position
-    d = micros();
+    //Step 7 : get a new position part 1
     RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
-    d= micros()-d;
-    CI::echo("TIME : "+String(d));
-
 
     STEP_AND_WAIT;
 
     //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
-
+    //get a new position part 2
     RealTimeProcessor::push_new_position_2();
 
     STEP_AND_WAIT;
 
-    //Step 8 : if the position queue is not full, get a new position;
+    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
+    //Step 8 : if the position queue is not full, get a new position part 1;
     RealTimeProcessor::push_new_position_1();//8us
 
     STEP_AND_WAIT;
 
+    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
+    //get a new position part 2
     RealTimeProcessor::push_new_position_2();//5us
-
-    STEP_AND_WAIT;
 
     //Final steps :
     end :
@@ -719,8 +707,6 @@ void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) 
 
     //Determine the current speed
     float speed = distance / time;
-
-    CI::echo("current speed : " + String(speed));
 
     //Update each tool power with the value 'speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {
