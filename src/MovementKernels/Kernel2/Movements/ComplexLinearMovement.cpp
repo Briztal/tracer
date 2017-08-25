@@ -27,7 +27,7 @@
 #include <interface.h>
 #include <MovementKernels/MachineAbstraction.h>
 #include <MovementKernels/Kernel2/ComplexTrajectoryExecuter.h>
-#include <MovementKernels/Kernel2/IncrementComputer.h>
+#include <MovementKernels/Kernel2/PreProcessor.h>
 
 
 /*
@@ -77,16 +77,11 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     pre_process_offsets = positions;
     pre_process_max_axis = max_axis;
 
-    float incr = (max_distance < 0) ? -1 : 1;
-
-    //Extract the increment
-    float increment = IncrementComputer::extract_increment(get_position, 0, incr);
-
     //Wait for the enqueuing to be authorised in ComplexTrajectoryExecuter.
     while(ComplexTrajectoryExecuter::enqueue_unauthorised());
 
     //Enqueue the movement in the trajectory executer, and eventually start the movement routine and terminate
-    if (ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, increment, initialise_movement, finalise_movement,
+    if (ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, initialise_movement, finalise_movement,
                                                 get_real_time_position)) {
 
         //Push the local data
@@ -99,7 +94,6 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     }
 
     return false;
-
 
 }
 
@@ -221,7 +215,7 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
 void ComplexLinearMovement::initialise_movement() {
 
     //Get the address of the top element
-    k2_linear_data *d = linear_data_queue.peak();
+    k2_linear_data *d = linear_data_queue.read();
 
     //Update all real-time data
     real_time_max_axis = d->max_axis;

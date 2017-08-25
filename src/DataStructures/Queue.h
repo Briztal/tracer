@@ -53,7 +53,7 @@ public:
 
     }
 
-    T *peak() {
+    T *read() {
 
         return content + pull_index;
     }
@@ -104,11 +104,19 @@ public:
     }
 
 
-    T *peak_pushed() {
+    T *read_pushed() {
         if (push_index != max_indice) {
             return content + push_index + 1;
         } else {
             return content;
+        }
+    }
+
+    T *read_pushed(uint8_t i) {
+        if (push_index + i <=  max_indice) {
+            return content + push_index + i;
+        } else {
+            return content + i - (max_indice - push_index) -1;
         }
     }
 

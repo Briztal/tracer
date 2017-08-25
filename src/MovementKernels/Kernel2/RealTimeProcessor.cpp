@@ -198,13 +198,22 @@ void RealTimeProcessor::push_new_position_1() {
 
     position_data->index_candidate = local_index_candidate;
 
+
+    float high_level_distances[NB_AXIS];
+    float *candidate = position_data->candidate_high_level_positions;
+    float *current = current_hl_position;
+    for (uint8_t axis = 0; axis < NB_AXIS; axis++) {
+        high_level_distances[axis] = candidate[axis] - current[axis];
+    }
+
     //Compute the movement distance for the current speed group
-    position_data->movement_distance = get_movement_distance_for_group(movement_speed_group,
-                                                           position_data->candidate_high_level_positions);
+    position_data->movement_distance = MachineAbstraction::get_movement_distance_for_group(movement_speed_group,
+                                                                                           high_level_distances);
 
 
     //Translate the high level position into steppers position;
-    MachineAbstraction::translate(position_data->candidate_high_level_positions, position_data->future_steppers_positions);
+    MachineAbstraction::translate(position_data->candidate_high_level_positions,
+                                  position_data->future_steppers_positions);
 
 
 }
@@ -273,50 +282,6 @@ void RealTimeProcessor::push_new_position_2() {
 
     update_current_hl_position(position_data->candidate_high_level_positions);
 
-}
-
-
-/*
- * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument,
- *      in the cartesian group provided in argument.
- *
- *  The movement is provided in the form of its distances.
- *
- *  The distance in the group is defined as the norm2 of the distance vector's projected
- *      in the concerned cartesian group
- *
- * 10 us
- *
- */
-
-float RealTimeProcessor::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
-
-    float square_dist_sum = 0;
-
-    //Initialise the stepper index pointer
-    const int8_t *indexes = (speed_groups_indices + 3 * speed_group);
-
-
-    //Sum the square of all distance :
-    for (uint8_t stepper = 0; stepper < 3; stepper++) {
-
-        //Get the current axis value
-        int8_t index = indexes[stepper];
-
-        //if the cartesian group comprises less than 3 axis;
-        if (index == -1) break;
-
-        //get the distance
-        float dist = distances[index] - current_hl_position[index];
-
-        //update the square sum
-        square_dist_sum += dist * dist;
-    }
-
-    //compute the square root and return it.
-    float f = sqrtf(square_dist_sum);
-
-    return f;
 }
 
 
@@ -401,13 +366,8 @@ void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
 
 
 /*
- * update_end_position : this function updates distances to end point and jerk point.
+ * update_end_position : this function updates the end point position.
  *
- *  It takes in arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
- *
- *      Reminder : the i_th bit of negative_signature is 1 if the distance on the i_th stepper is negative.
- *
- *  The global distance is given by the maximum of all distance on each stepper.
  *
  */
 
@@ -430,6 +390,43 @@ void RealTimeProcessor::update_end_position(const float *const new_hl_position) 
     if (ComplexTrajectoryExecuter::started) {
         enable_stepper_interrupt()
     }
+}
+
+
+
+/*
+ * update_jerk_position : this function updates the jerk point position.
+ *
+ */
+
+void RealTimeProcessor::update_jerk_position(const int32_t *const new_stepper_position) {
+
+
+    if (ComplexTrajectoryExecuter::started) {
+        disable_stepper_interrupt();
+    }
+
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+        int32_t d = (int32_t) new_stepper_position[stepper];
+        jerk_distances[stepper] += d - jerk_position[stepper];
+        jerk_position[stepper] = d;
+    }
+
+    if (ComplexTrajectoryExecuter::started) {
+        enable_stepper_interrupt()
+    }
+}
+
+
+/*
+ * update_jerk_offsets : this function updates the jerk offsets
+ *
+ */
+
+void RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
+
+    memcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
+
 }
 
 
@@ -694,7 +691,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
         memcpy(real_dists, r_ptr, NB_STEPPERS * sizeof(float));
 
         //update the direction signature and the distance memorised in the queue.
-        k2_real_time_data *data = sub_movement_queue.peak();
+        k2_real_time_data *data = sub_movement_queue.read();
 
         *negative_signature = data->negative_signature;
         *distance = data->distance;
@@ -789,24 +786,6 @@ sig_t k2t_sig[NB_STEPPERS + 1]{
 #undef STEPPER
 
 const sig_t *const m::axis_signatures = k2t_sig;
-
-
-//Speed groups indices
-
-//declare and fill the array
-int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
-
-#define CARTESIAN_GROUP(i, a, b, c, s) a, b, c,
-
-#include <config.h>
-
-#undef CARTESIAN_GROUP
-        //end the array
-        0};
-
-//Assign the array
-const int8_t *const m::speed_groups_indices = t_sg_indices;
-
 
 //Deceleration distances
 float t_dec_const[NB_STEPPERS];

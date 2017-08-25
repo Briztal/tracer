@@ -64,6 +64,8 @@ typedef struct {
     float speed; //28
     uint8_t speed_group; //29
     sig_t action_signatures; //30 -> 33
+    uint32_t jerk_offsets[NB_STEPPERS];
+    int32_t jerk_position[NB_STEPPERS];
     //-----------end : 32 to 36 bytes----------
 } k2_movement_data;
 

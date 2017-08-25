@@ -36,10 +36,8 @@
 #ifndef TRACER_TRAJECTORYEXECUTER_H
 #define TRACER_TRAJECTORYEXECUTER_H
 
-#include "../../hardware_language_abstraction.h"
 #include "_kernel_2_data.h"
 #include "../../DataStructures/Queue.h"
-#include "../StepperController.h"
 
 class ComplexTrajectoryExecuter {
 
@@ -121,7 +119,7 @@ public :
     static bool enqueue_unauthorised();
 
     //new movement enqueueing
-    static bool enqueue_movement(float min, float max, float incr, void (*m_initialisation)(), void (*m_finalisation)(),
+    static bool enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
                                  void (*trajectory_function)(float, float *));
 
 
@@ -132,6 +130,8 @@ private:
 
     //new movement processing
     static void process_next_movement(bool first_movement);
+
+    static void actualise_jerk_environment(uint32_t *jerk_offsets, int32_t *jerk_position);
 
     //next sub_movement processing
     static void prepare_next_sub_movement();
@@ -193,6 +193,8 @@ private:
 
 
     static void stop_tools();
+
+
 };
 
 #endif //TRACER_MOTIONEXECUTER_H

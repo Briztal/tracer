@@ -238,8 +238,8 @@ add_library(kernel2
         ${K2P}/ComplexTrajectoryExecuter.cpp
         ${K2P}/RealTimeProcessor.h
         ${K2P}/RealTimeProcessor.cpp
-        ${K2P}/IncrementComputer.h
-        ${K2P}/IncrementComputer.cpp
+        ${K2P}/PreProcessor.h
+        ${K2P}/PreProcessor.cpp
 
         #movements
         ${K2MP}/ComplexLinearMovement.h

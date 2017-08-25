@@ -276,21 +276,18 @@ void SpeedPlanner::add_jerk_distances(int32_t *movement_distances) {
     //push all distances, used to update the jerk point in real time
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
         next_jerk_distances[axis] += movement_distances[axis];
-
-
     }
 }
 
 
 /*
- * verify_jerk_limits : this function check if the jerk caused by the new prepare_movement caracterised by the distances array
+ * get_jerk_offsets : this function check if the jerk caused by the new prepare_movement caracterised by the distances array
  *      does not exceeds limits on each axis.
  *
  * If the jerk on one axis exceeds the limit, it calculates the maximum speed that does not cause jerk excess,
  *      and plans a deceleration before the planned enqueue_movement.
  *
  */
-
 
 bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square_dist_sum, const float regulation_speed) {
 
@@ -315,7 +312,6 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
 
 
     if (last_regulation_speed != 0) {
-
 
         float jerk_speed = regulation_speed;
 

@@ -131,6 +131,51 @@ void MachineAbstraction::set_speed_for_group(uint8_t speed_group, float new_spee
 
 }
 
+
+/*
+ * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument,
+ *      in the cartesian group provided in argument.
+ *
+ *  The movement is provided in the form of its distances.
+ *
+ *  The distance in the group is defined as the norm2 of the distance vector's projected
+ *      in the concerned cartesian group
+ *
+ * 4 us
+ *
+ */
+
+float MachineAbstraction::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
+
+    float square_dist_sum = 0;
+
+    //Initialise the stepper index pointer
+    const int8_t *indexes = (speed_groups_indices + 3 * speed_group);
+
+
+    //Sum the square of all distance :
+    for (uint8_t stepper = 0; stepper < 3; stepper++) {
+
+        //Get the current axis value
+        int8_t index = indexes[stepper];
+
+        //if the cartesian group comprises less than 3 axis;
+        if (index == -1) break;
+
+        //get the distance
+        float dist = distances[index];
+
+        //update the square sum
+        square_dist_sum += dist * dist;
+    }
+
+    //compute the square root and return it.
+    float f = sqrtf(square_dist_sum);
+
+    return f;
+}
+
+
 //---------------------------------------------------TOOLS_MANAGEMENT---------------------------------------------------
 
 
@@ -242,6 +287,24 @@ const float *const m::max_speeds = t_mx_speeds;
 //Tools
 float t_tl_lp[NB_CONTINUOUS];
 float *m::tools_energy_densities = t_tl_lp;
+
+
+
+//Speed groups indices
+
+//declare and fill the array
+int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
+
+#define CARTESIAN_GROUP(i, a, b, c, s) a, b, c,
+
+#include <config.h>
+
+#undef CARTESIAN_GROUP
+        //end the array
+        0};
+
+//Assign the array
+const int8_t *const m::speed_groups_indices = t_sg_indices;
 
 
 #undef m

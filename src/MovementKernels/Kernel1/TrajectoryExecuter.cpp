@@ -155,7 +155,7 @@ void TrajectoryExecuter::enqueue_movement_data() {
 }
 
 motion_data * TrajectoryExecuter::peak_last_motion_data() {
-    return motion_data_queue.peak_pushed();
+    return motion_data_queue.read_pushed();
 }
 
 /*

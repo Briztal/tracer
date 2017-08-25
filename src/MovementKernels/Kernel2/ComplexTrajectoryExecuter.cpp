@@ -24,11 +24,12 @@
 
 #include "ComplexTrajectoryExecuter.h"
 #include "RealTimeProcessor.h"
+#include "PreProcessor.h"
+#include "_kernel_2_data.h"
 #include <interface.h>
 #include <MovementKernels/MachineAbstraction.h>
 #include <Actions/ContinuousActions.h>
-
-
+#include <MovementKernels/StepperController.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -134,13 +135,13 @@ bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
  *
  *  The movement is provided in the form of :
  *      - min and max, the index variable minimum and maximum values, for (resp) the beginning and end positions
- *      - incr : the index increment for the first movement;
+ *      - increment : the index increment for the first movement;
  *      - movement_initialisation : the movement's in_real_time initialisation function;
  *      - trajectory_function : the function that will be used to compute new positions in_real_time.
  *
  */
 
-bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float incr, void (*movement_initialisation)(),
+bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*movement_initialisation)(),
                                                  void (*movement_finalisation)(),
                                                  void(*trajectory_function)(float, float *)) {
 
@@ -154,12 +155,31 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
 
     }
 
-    /* First, we must check if the movement is a micro movement. A movement is qualified by micro-movement when
+    //---------------Increment, Speed and Jerk-----------------
+
+    k2_movement_data *d = movement_data_queue.get_push_ptr(), *previous = movement_data_queue.read_pushed(
+            1), *previous_1 = movement_data_queue.read_pushed(2);
+
+    //Initialisation of speed variables
+    float speed = MachineAbstraction::get_speed();
+    uint8_t speed_group = MachineAbstraction::get_speed_group();
+
+    uint8_t elements = movement_data_queue.available_elements();
+    //we must check the jerk if the routine is started, or if movements are already present in the queue.
+    bool jerk_checking = (started) || (elements);
+
+    uint32_t *jerk_distances_offsets = (jerk_checking) ? previous->jerk_offsets : 0;
+
+    //Do all the pre-processing for the movement
+    float increment = PreProcessor::pre_process_increment_and_jerk(min, max, trajectory_function, speed_group,
+                                                                   jerk_checking, jerk_distances_offsets);
+
+    /* We must check if the movement is a micro movement. A movement is qualified by micro-movement when
      *      its first sub-movement goes beyond its limit. It is not actually traceable, so we must ignore it.
      */
 
     //Micro movement check :
-    if (((incr > 0) && (min + incr > max)) || ((incr < 0) && (min + incr < max))) {
+    if (((increment > 0) && (min + increment > max)) || ((increment < 0) && (min + increment < max))) {
 
         //Send an error message
         CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
@@ -169,19 +189,47 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
 
     }
 
+    //---------------Jerk adjusting----------------------
+
+
+    if (jerk_checking) {
+
+        //If the movement has been popped since the processing has started
+        if (!movement_data_queue.available_elements()) {
+
+            actualise_jerk_environment(previous->jerk_offsets, previous->jerk_position);
+        }
+    }
+
+    //we must adjust the jerk if the routine is started and if one movement is still in the queue of if it is not started and if two movements are still in the queue
+    bool jerk_modif = ((started && (elements) || ((!started) && (elements > 1))));
+
+    if (jerk_modif) {
+
+        PreProcessor::verify_jerk_absorptions(previous_1->jerk_offsets, previous_1->jerk_position, previous->jerk_offsets, previous->jerk_position);
+
+        if (started && (movement_data_queue.available_elements()<1)) {
+
+            actualise_jerk_environment(previous_1->jerk_offsets, previous_1->jerk_position);
+
+        }
+    }
+
+    //---------------Persisting in Queue-----------------
+
+
     //Get the insertion adress on the queue (faster than push-by-object)
-    k2_movement_data *d = movement_data_queue.get_push_ptr();
 
     //Update the current case of the queue :
 
     //Speed vars
-    d->speed = MachineAbstraction::get_speed();
-    d->speed_group = MachineAbstraction::get_speed_group();
+    d->speed = speed;
+    d->speed_group = speed_group;
 
     //Trajectory vars
     d->min = min;
     d->max = max;
-    d->increment = incr;
+    d->increment = increment;
     d->trajectory_function = trajectory_function;
 
     //Movement initialisation - finalisation
@@ -209,6 +257,16 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, float inc
 
 }
 
+/*
+ * actualise_jerk_environment : this function actualises the jerk environment for the current move
+ *      with the provided data.
+ */
+void ComplexTrajectoryExecuter::actualise_jerk_environment(uint32_t *jerk_offsets, int32_t *jerk_position) {
+    RealTimeProcessor::update_jerk_position(jerk_position);
+    RealTimeProcessor::update_jerk_offsets(jerk_offsets);
+}
+
+
 
 /*
  * process_next_movement : this function pops a movement from the movement queue, and initialises :
@@ -221,7 +279,7 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
     if (movement_data_queue.available_elements()) {
 
         //Pull the next movement
-        k2_movement_data *d = movement_data_queue.peak();
+        k2_movement_data *d = movement_data_queue.read();
 
         //Update the trajectory variables
         RealTimeProcessor::initialise_movement(d->min, d->max, d->increment, d->trajectory_function);

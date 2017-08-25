@@ -113,11 +113,7 @@ private :
 
 #define MAXIMUM_DISTANCE_LIMIT 14
 
-    //The speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the speed group j. Compiler constant.
-    static const int8_t *const speed_groups_indices;
 
-    //function to compute the high level movement distance for a particular speed group.
-    static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
 
     //function to get low level distances.
     static bool
@@ -185,6 +181,10 @@ public :
     //End position update
     static void update_end_position(const float *const new_hl_position);
 
+    //Jerk position update
+    static void update_jerk_position(const int32_t *const new_hl_position);
+
+    static void update_jerk_offsets(const uint32_t *const new_jerk_offsets);
 
 private :
 
@@ -193,6 +193,15 @@ private :
 
     //the stepper end distances;
     static int32_t *const end_distances;
+
+    //The stepper jerk positions;
+    static int32_t *const jerk_position;
+
+    //the stepper jerk distances;
+    static int32_t *const jerk_distances;
+
+    //The stepper jerk offsets;
+    static uint32_t *const jerk_offsets;
 
 
     //------------------------------------------------Speed_Management--------------------------------------------------

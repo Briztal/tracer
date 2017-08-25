@@ -81,7 +81,14 @@ public :
     static void set_speed_for_group(uint8_t speed_group, float new_speed);
 
 
+    //function to compute the high level movement distance for a particular speed group.
+    static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
+
+
 private :
+
+    //The speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the speed group j. Compiler constant.
+    static const int8_t *const speed_groups_indices;
 
     //the current target speeds, indexed on speed groups
     static float *const speeds;
