@@ -43,12 +43,6 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     //get the movement distances
     float distances[NB_AXIS];
 
-    MachineAbstraction::translate(destination, distances);
-
-    for (int i = 0; i<NB_STEPPERS; i++) {
-        CI::echo("dest : "+String(distances[i]));
-    }
-
     //extract the array case address (more efficient than by-object-push)
     k2_linear_data *d = linear_data_queue.get_push_ptr();
 

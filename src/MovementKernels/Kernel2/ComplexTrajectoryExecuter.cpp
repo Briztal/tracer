@@ -117,8 +117,6 @@ void ComplexTrajectoryExecuter::stop() {
     //Enable the movement enqueuing
     queue_lock_flag = false;
 
-    RealTimeProcessor::display_distances();
-
     StepperController::send_position();
 
 }
@@ -245,7 +243,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 /*
  * set_jerk_environment : this function actualises the jerk environment for the current move
  *      with the provided data.
- *      
+ *
  */
 
 void ComplexTrajectoryExecuter::update_movement_environment() {
@@ -254,8 +252,6 @@ void ComplexTrajectoryExecuter::update_movement_environment() {
 
     //Update tool_environment
     update_tools_data(movement);
-
-    RealTimeProcessor::display_distances();
 
     //Jerk
     if (movement->jerk_point) {
@@ -270,8 +266,6 @@ void ComplexTrajectoryExecuter::update_movement_environment() {
 
     //leave a space for a future movement.
     movement_data_queue.discard();
-
-    StepperController::send_position();
 
 }
 
