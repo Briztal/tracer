@@ -25,48 +25,48 @@
 
 #include <stdint.h>
 #include <Arduino.h>
-#include "MachineAbstraction.h"
+#include "MachineInterface.h"
 #include "../Core/EEPROMStorage.h"
-#include <MovementKernels/Kernel2/RealTimeProcessor.h>
+#include <StepperControl/Kernel2/RealTimeProcessor.h>
 #include <Actions/ContinuousActions.h>
 
+#if (KERNEL == 0)
+#include <LinearMovement.h>
+#elif (KERNEL == 1)
+#include <LinearMovement.h>
+#elif (KERNEL == 2)
+#include <StepperControl/Kernel2/Movements/ComplexLinearMovement.h>
+#endif
+
+//------------------------------------------------------Movements-------------------------------------------------------
 
 /*
- * translate : this function translates a position expressed in the high level coordinate system into
- *      its image, in the stepper coordinate system.
- *
+ * linear_movement : this function prepares a linear movement from the current position to the provided destination,
+ *      realised by the selected kernel.
  */
 
-void MachineAbstraction::translate(const float *const hl_coordinates, float *const steppers_coordinates) {
+void MachineInterface::linear_movement(float *destination) {
 
-    //0.8 us
-    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        steppers_coordinates[axis] = (EEPROMStorage::steps[axis] * hl_coordinates[axis]);
+#if (KERNEL == 0)
+    LinearMovement::prepare_movement(destination);
+#elif (KERNEL == 1)
+    LinearMovement::prepare_movement(destination);
+#elif (KERNEL == 2)
+    ComplexLinearMovement::prepare_movement(destination);
+#endif
 
-    }
 }
 
 
-/*
- * revert : this function translates a position expressed in the stepper coordinate system into
- *      its image, in the high level coordinate system.
- *
- */
 
-void MachineAbstraction::revert(const float *const steppers_coordinates, float *const hl_coordinates) {
-
-    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        hl_coordinates[axis] = (steppers_coordinates[axis]) / EEPROMStorage::steps[axis];
-    }
-}
-
+//----------------------------------------------current_stepper_positions-----------------------------------------------
 
 /*
  * get_current_position : this function provides the current position to any external process.
  *
  */
 
-void MachineAbstraction::get_current_position(float *const position) {
+void MachineInterface::get_current_position(float *const position) {
     memcpy(position, current_position, sizeof(float) * NB_AXIS);
 }
 
@@ -76,7 +76,7 @@ void MachineAbstraction::get_current_position(float *const position) {
  *
  */
 
-void MachineAbstraction::update_position(const float *const new_position) {
+void MachineInterface::update_position(const float *const new_position) {
 
     //Update the current position
     memcpy(current_position, new_position, sizeof(float) * NB_AXIS);
@@ -87,12 +87,32 @@ void MachineAbstraction::update_position(const float *const new_position) {
 }
 
 
+//--------------------------------------------Coordinate_Systems_Translation--------------------------------------------
+
+/*
+ * translate : this function translates a position expressed in the high level coordinate system into
+ *      its image, in the stepper coordinate system.
+ *
+ */
+
+void MachineInterface::translate(const float *const hl_coordinates, float *const steppers_coordinates) {
+
+    //0.8 us
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
+        steppers_coordinates[axis] = (EEPROMStorage::steps[axis] * hl_coordinates[axis]);
+
+    }
+}
+
+
+//---------------------------------------------------Speed_Management---------------------------------------------------
+
 /*
  * get_speed : this function returns the speed on the current speed group.
  *
  */
 
-float MachineAbstraction::get_speed() {
+float MachineInterface::get_speed() {
     return speeds[speed_group];
 }
 
@@ -101,7 +121,7 @@ float MachineAbstraction::get_speed() {
  * get_speed_group : this function provides the speed group to any external process.
  */
 
-uint8_t MachineAbstraction::get_speed_group() {
+uint8_t MachineInterface::get_speed_group() {
     return speed_group;
 }
 
@@ -110,8 +130,8 @@ uint8_t MachineAbstraction::get_speed_group() {
  * set_speed_group : this function updates the current speed group with the value provided inargument.
  */
 
-void MachineAbstraction::set_speed_group(uint8_t speed_group) {
-    MachineAbstraction::speed_group = speed_group;
+void MachineInterface::set_speed_group(uint8_t speed_group) {
+    MachineInterface::speed_group = speed_group;
 }
 
 
@@ -121,7 +141,7 @@ void MachineAbstraction::set_speed_group(uint8_t speed_group) {
  *
  */
 
-void MachineAbstraction::set_speed_for_group(uint8_t speed_group, float new_speed) {
+void MachineInterface::set_speed_for_group(uint8_t speed_group, float new_speed) {
 
     //Get the maximum speed for this group
     float max_speed = max_speeds[speed_group];
@@ -145,7 +165,7 @@ void MachineAbstraction::set_speed_for_group(uint8_t speed_group, float new_spee
  *
  */
 
-float MachineAbstraction::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
+float MachineInterface::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
 
     float square_dist_sum = 0;
 
@@ -176,14 +196,13 @@ float MachineAbstraction::get_movement_distance_for_group(uint8_t speed_group, c
 }
 
 
-//---------------------------------------------------TOOLS_MANAGEMENT---------------------------------------------------
-
+//---------------------------------------------------Tools_Management---------------------------------------------------
 
 /*
  * set_energy_density : sets the energy density for the action whose index is provided in argument
  */
 
-void MachineAbstraction::set_energy_density(uint8_t tool_index, float power) {
+void MachineInterface::set_energy_density(uint8_t tool_index, float power) {
     tools_energy_densities[tool_index] = power;
 }
 
@@ -193,7 +212,7 @@ void MachineAbstraction::set_energy_density(uint8_t tool_index, float power) {
  *      enabled tools.
  */
 
-sig_t MachineAbstraction::get_tools_data(float *energy_densities) {
+sig_t MachineInterface::get_tools_data(float *energy_densities) {
 
     uint8_t id = 0;
     sig_t sig = 0;
@@ -219,7 +238,7 @@ sig_t MachineAbstraction::get_tools_data(float *energy_densities) {
  *      updates the function array given in argument, with the power settng function
  */
 
-uint8_t MachineAbstraction::set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float)) {
+uint8_t MachineInterface::set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float)) {
 
     uint8_t id = 0;
 
@@ -241,7 +260,7 @@ uint8_t MachineAbstraction::set_tools_updating_function(sig_t tools_signature, v
  * stop_tools : stop tools referred by the provided signature.
  */
 
-void MachineAbstraction::stop_tools(sig_t stop_signature) {
+void MachineInterface::stop_tools(sig_t stop_signature) {
 
 #define CONTINUOUS(i, name, pin, max) \
     if (stop_signature & ((sig_t)((sig_t) 1 << i))) {\
@@ -257,7 +276,7 @@ void MachineAbstraction::stop_tools(sig_t stop_signature) {
 
 //--------------------------------------------Static declaration - definition-------------------------------------------
 
-#define m MachineAbstraction
+#define m MachineInterface
 
 //Positions
 float t_hl_pos[NB_AXIS]{0};

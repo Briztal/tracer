@@ -20,8 +20,7 @@
 
 
 /*
- * MachineAbstraction : this class is the interface between the high level coordinate system
- *      the stepper coordinate system.
+ * MachineInterface : this class is the interface between the kernel and the
  *
  *  It is also in charge of the current position storage.
  *
@@ -35,17 +34,18 @@
 #define TRACER_STEPPER_ABSTRACTION_H
 
 
-class MachineAbstraction {
+class MachineInterface {
 
-    //------------------------------------------Coordinate_Systems_Translation------------------------------------------
+    //----------------------------------------------------Movements-----------------------------------------------------
 
 public:
 
-    //The function to translate a high level position into stepper positions
-    static void translate(const float *const hl_coordinates, float *const steppers_coordinates);
+    //The basic linear movement, from the current position to the destination position.
+    static void linear_movement(float *destination);
 
-    //The function to translate the steppers positions into a high level position
-    static void revert(const float *const steppers_coordinates, float *const hl_coordinates);
+    //If the selected kernel is kernel2, then we must register other movements.
+    //TODO
+
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
@@ -64,6 +64,14 @@ private :
     static float *current_position;
 
 
+    //------------------------------------------Coordinate_Systems_Translation------------------------------------------
+
+public:
+
+    //The function to translate a high level position into stepper positions
+    static void translate(const float *const hl_coordinates, float *const steppers_coordinates);
+
+
     //-------------------------------------------------Speed_Management-------------------------------------------------
 
 public :
@@ -79,7 +87,6 @@ public :
 
     //The function to set the speed for the provided speed group.
     static void set_speed_for_group(uint8_t speed_group, float new_speed);
-
 
     //function to compute the high level movement distance for a particular speed group.
     static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
@@ -98,6 +105,7 @@ private :
 
     //The current speed group
     static uint8_t speed_group;
+
 
     //-------------------------------------------------Tools_Management-------------------------------------------------
 

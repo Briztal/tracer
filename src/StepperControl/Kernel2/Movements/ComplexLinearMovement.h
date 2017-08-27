@@ -27,7 +27,7 @@
 
 
 #include <DataStructures/Queue.h>
-#include "MovementKernels/Kernel2/_kernel_2_data.h"
+#include "StepperControl/Kernel2/_kernel_2_data.h"
 
 class ComplexLinearMovement {
 

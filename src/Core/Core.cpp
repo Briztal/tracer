@@ -17,8 +17,8 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "../config.h"
 
+#include "../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -26,7 +26,7 @@
 #include "Core.h"
 #include "../interface.h"
 #include "EEPROMStorage.h"
-#include "../MovementKernels/StepperController.h"
+#include "../StepperControl/StepperController.h"
 
 void Core::begin() {
 

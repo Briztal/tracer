@@ -17,6 +17,7 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
 #include "../../config.h"
 #ifdef ENABLE_TREE_INTERFACE
 
@@ -68,6 +69,7 @@ void TI::initialise_aliases() {
  *
  * The command id is the following : 0 (system canal) - 6 (echo canal);
  */
+
 void TI::echo(const String msg) {
 
     prepare_data_out("\0\6",2);

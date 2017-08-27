@@ -18,8 +18,44 @@
 
 */
 
+#include <hardware_language_abstraction.h>
+#include <config.h>
 
+//Control Interface checking
 
 #if defined(MAIN_CI_TREE) && defined(MAIN_CI_GCODE)
 #error : "There can be only one main interface. Please enable only one."
 #endif
+
+
+//Stepper Control Kernel checking
+#ifdef ENABLE_STEPPER_CONTROL
+
+#ifndef KERNEL
+#error "The Kernel version is not defined in your config.h"
+#endif
+
+#if (KERNEL == 0)
+//NO verification required, this kernel works on every damn thing...
+
+#elif ((KERNEL == 1) || (KERNEL == 2))
+//Kernel1 and Kernel2 require a 32 bits processor with an FPU
+
+
+
+//FPU
+#ifndef HL_FPU_FLAG
+#error "Kernel1 requires an FPU, and your processor doesn't have one."
+#endif
+
+
+//FPU
+#ifndef HL_32BITS_FLAG
+#error "Kernel1 requires  a 32 bit processor. Your processor has a lower native type."
+#endif
+
+#else
+#error "Please enter a valid kernel name. You may enter one of the following : 0, 1, and 2."
+#endif
+
+#endif //ENABLE_STEPPER_CONTROL

@@ -34,6 +34,7 @@
 
 //The maximum size of a data in one message
 #define PACKET_SIZE 200
+
 //######################################################Core############################################################
 
 /*
@@ -80,6 +81,8 @@ THERMISTOR(0, B57540G0104F000_TABLE, B57540G0104F000_SIZE)
 #endif
 
 //######################################################ASSERV##########################################################
+
+#ifdef ENABLE_ASSERV
 
 /* This section sets up the asserv code structure.
  * The structure is composed of external parameters, representing the information you possess about your environment,
@@ -129,6 +132,7 @@ LOOP_FUNCTION(1, ts,    105);
 
 #endif
 
+#endif
 
 //######################################################ACTIONS#########################################################
 
@@ -152,6 +156,7 @@ BINARY(1, binary2, 9, 1)
  * For each actuator you want to control in linear, put one line like behind and provide the three required parameter
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
+
 #define NB_CONTINUOUS 3
 
 #ifdef CONTINUOUS
@@ -177,37 +182,39 @@ SERVO(2, servo3, 4, 0, 1)
 #endif
 
 
-//###############################################CURVES SETTINGS########################################################
-//The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
-#define MAX_CURVE_POINTS 5
-
-//#################################################LOG_SETTINGS#########################################################
-
-//Log settings. Uncomment those lines to output (resp) position and overflow marker in Monitor
-#define position_log
-
-
-//distance btw two position logs
-#ifdef position_log
-#define LOG_SPACE_MAX 5
-#endif
-
 //###########################################STEPPER_CONTROLLER_SETTINGS###############################################
 
-#define MOTION_DATA_QUEUE_SIZE 20
+#ifdef ENABLE_STEPPER_CONTROL
+//------------------------------------------------------Kernel Version--------------------------------------------------
 
+/*
+ * The version of the Stepper Control Kernel you want to use. You have 3 versions available :
+ *  - 0 : KERNEL0, a basic kernel for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
+ *  - 1 : KERNEL1, a faster kernel for 32 bits processors with FPU, for cartesian-by-group machines. Only lines available.
+ *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.
+ */
 
-#define sig_t uint32_t
-#define delay_t uint32_t
+#define KERNEL 2
 
-//---------------------------------------------------STEPPER_ABSTRACTION------------------------------------------------
+//-----------------------------------------------High Level Coordinate System-------------------------------------------
+
+/*
+ * The high level coordinate system is the system you will use to send explicit coordinates. They will be interpreted
+ *  by the kernel, who will trace you movements.
+ *
+ *  High level coordinates are not meant to have a physical meaning (a particular stepper orientation).
+ *
+ *  you must also define the translation from high level coordinates to stepper positions, in implementing
+ *      the translate and revert methods in the MachineAbstraction class.
+ *
+ */
 
 //Number of axis in the high level coordinates system
 #define NB_AXIS 17
 
-
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
 #ifdef AXIS
+
 //AXIS(i, j, si, st, sp, a)
 
 //      id, letter,)
@@ -231,9 +238,12 @@ AXIS(   16,  '0')
 
 #endif
 
-//------------------------------------------------------STEPPER_MOTORS--------------------------------------------------
+//------------------------------------------------------Stepper Motors--------------------------------------------------
 
-//Number of axis in the high level coordinates system
+/*
+ * The stepper motors are the physical actuators the kernel will manipulate. Each one represents a physical axis of
+ *      your machine.
+ */
 
 //Number of stepper motors, must be set accordingly to the next lines
 #define NB_STEPPERS 17
@@ -241,6 +251,7 @@ AXIS(   16,  '0')
 //Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters//TODO DOC
 
 #ifdef STEPPER
+
 //#define STEPPER(i, j, r, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
 
 //TODO DOC
@@ -265,6 +276,10 @@ STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     H
 
 #endif
 
+
+/*
+ *
+ */
 #ifdef STEPPER_DATA
 
 //STEPPER_DATA(i, j, si, st, sp, a)
@@ -306,6 +321,41 @@ CARTESIAN_GROUP(2,      6,      7,      8,     500     )
 CARTESIAN_GROUP(3,      9,      10,     11,     500     )
 CARTESIAN_GROUP(4,      12,     13,     14,     500     )
 CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
+
+#endif
+
+
+//-------------------------------------------------------Data types-----------------------------------------------------
+
+/* The signature type. The type size depends on the number of steppers you want to control. Set :
+ *  - uint8_t for at most 8 steppers;
+ *  - uint16_t for at most 16 steppers;
+ *  - uint32_t for at most 32 steppers;
+ *  - uint64_t for at most 64 steppers; (not tested, tell me if it works !)
+ *
+ */
+#define sig_t uint32_t
+
+//The delay type
+#define delay_t uint32_t
+
+//----------------------------------------------------------Log---------------------------------------------------------
+
+//Log settings. Uncomment those lines to output (resp) position and overflow marker in Monitor
+#define position_log
+
+//distance btw two position logs
+#ifdef position_log
+#define LOG_SPACE_MAX 5
+#endif
+
+//---------------------------------------------------------Other--------------------------------------------------------
+
+//The maximum number of pre-processable movements.
+#define MOVEMENT_DATA_QUEUE_SIZE 20
+
+//The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
+#define MAX_CURVE_POINTS 5
 
 #endif
 

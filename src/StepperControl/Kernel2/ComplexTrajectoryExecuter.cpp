@@ -27,9 +27,9 @@
 #include "PreProcessor.h"
 #include "_kernel_2_data.h"
 #include <interface.h>
-#include <MovementKernels/MachineAbstraction.h>
+#include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
-#include <MovementKernels/StepperController.h>
+#include <StepperControl/StepperController.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -165,8 +165,9 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     k2_movement_data *previous_movement = movement_data_queue.read_pushed(1);
 
     //Initialisation of speed variables
-    float speed = MachineAbstraction::get_speed();
-    uint8_t speed_group = MachineAbstraction::get_speed_group();
+    float speed = MachineInterface::get_speed();
+    uint8_t speed_group = MachineInterface::get_speed_group();
+
 
     //---------------fill the current movement container-----------------
 
@@ -190,7 +191,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     float *tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.push_indice();
 
     //Get the action signature and fill the linear_powers storage.
-    current_movement->tools_signatures = MachineAbstraction::get_tools_data(tools_linear_powers);
+    current_movement->tools_signatures = MachineInterface::get_tools_data(tools_linear_powers);
 
 
     //---------------Increment, Speed and Jerk-----------------
@@ -732,10 +733,10 @@ void ComplexTrajectoryExecuter::update_tools_data(k2_movement_data *movement) {
     sig_t stop_signature = current_tools_signature & (~next_tools_signature);
 
     //Stop these tools
-    MachineAbstraction::stop_tools(stop_signature);
+    MachineInterface::stop_tools(stop_signature);
 
     //Update the tool number and the update functions
-    tools_nb = MachineAbstraction::set_tools_updating_function(next_tools_signature, tools_update_functions);
+    tools_nb = MachineInterface::set_tools_updating_function(next_tools_signature, tools_update_functions);
 
     //update linear powers
     tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_indice;
@@ -791,7 +792,7 @@ bool m::final_sub_movement_started = false;
 bool m::queue_lock_flag = false;
 
 
-Queue<k2_movement_data> m::movement_data_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<k2_movement_data> m::movement_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
 uint8_t ctraj[255] = {
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 5,
@@ -828,7 +829,7 @@ void (*k2tf[NB_CONTINUOUS]);
 
 void (**m::tools_update_functions)(float) = (void (**)(float)) k2tf;
 
-float t_a_ls[NB_CONTINUOUS * MOTION_DATA_QUEUE_SIZE];
+float t_a_ls[NB_CONTINUOUS * MOVEMENT_DATA_QUEUE_SIZE];
 float *const m::tools_linear_powers_storage = t_a_ls;
 
 float *m::tools_linear_powers;

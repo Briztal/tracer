@@ -26,7 +26,7 @@
 #include "SpeedPlanner.h"
 #include "TrajectoryExecuter.h"
 #include "SpeedManager.h"
-#include <MovementKernels/StepperController.h>
+#include <StepperControl/StepperController.h>
 #include <interface.h>
 #include <Core/EEPROMStorage.h>
 
@@ -446,11 +446,11 @@ float m::last_steps = 0, m::last_acceleration = 0;
 float drt[NB_STEPPERS];
 float *m::dist_ratios = drt;
 
-Queue<uint8_t> m::speed_distances_offsets(MOTION_DATA_QUEUE_SIZE);
+Queue<uint8_t> m::speed_distances_offsets(MOVEMENT_DATA_QUEUE_SIZE);
 
 float m::last_regulation_speed = 0;
 
-int32_t teed[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS];
+int32_t teed[MOVEMENT_DATA_QUEUE_SIZE * NB_STEPPERS];
 int32_t *const m::enqueued_end_distances = teed;
 
 uint8_t m::speed_group = 0;

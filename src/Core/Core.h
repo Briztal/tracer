@@ -37,7 +37,7 @@
  * Main thread: Task manager. Runs basic tasks, like
  * - Communication Interface
  * - Basic interaction
- * - MovementKernels Plannification for TRACER
+ * - StepperControl Plannification for TRACER
  *
  * A task can be added, in the queue. Priorities may be defined in a future commit.
  *
@@ -78,6 +78,7 @@
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
+#include <sanity_check.h>
 
 #include "../DataStructures/Queue.h"
 

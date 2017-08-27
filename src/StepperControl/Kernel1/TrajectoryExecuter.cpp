@@ -26,7 +26,7 @@
 #include "MovementExecuter.h"
 #include "SpeedManager.h"
 #include "SpeedPlanner.h"
-#include <MovementKernels/StepperController.h>
+#include <StepperControl/StepperController.h>
 
 
 
@@ -411,7 +411,7 @@ uint32_t m::count;
 
 bool m::in_motion = false;
 
-Queue<motion_data> m::motion_data_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<motion_data> m::motion_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 motion_data m::motion_data_to_fill;
 motion_data m::popped_data;
 

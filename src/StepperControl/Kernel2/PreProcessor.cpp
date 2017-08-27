@@ -27,7 +27,7 @@
 #include "RealTimeProcessor.h"
 #include "_kernel_2_data.h"
 
-#include <MovementKernels/MachineAbstraction.h>
+#include <StepperControl/MachineInterface.h>
 #include <Core/EEPROMStorage.h>
 #include <interface.h>
 
@@ -174,7 +174,7 @@ void PreProcessor::get_jerk_offsets(float *initial_steps_distances, const uint8_
     //-----------initial jerk ratios and minimum speed------------
 
     //First, determine the inverse of th high level distance for the sub_movement.
-    float distance_inverse = MachineAbstraction::get_movement_distance_for_group(speed_group, initial_steps_distances);
+    float distance_inverse = MachineInterface::get_movement_distance_for_group(speed_group, initial_steps_distances);
 
     float speed = 0;
     bool first = true;
@@ -231,7 +231,7 @@ void PreProcessor::update_jerk_final_data(float *final_steps_distances, const ui
 
     //First, determine the inverse of the high level distance for the sub_movement
     float distance_inverse =
-            1 / MachineAbstraction::get_movement_distance_for_group(speed_group, final_steps_distances);
+            1 / MachineInterface::get_movement_distance_for_group(speed_group, final_steps_distances);
 
     //Then, update the end ratios :
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -335,7 +335,7 @@ void PreProcessor::get_stepper_position(void (*get_position)(float, float *), fl
     get_position(point, hl_positions);
 
     //Translate it to obtain the initial stepper position
-    MachineAbstraction::translate(hl_positions, positions);
+    MachineInterface::translate(hl_positions, positions);
 }
 
 

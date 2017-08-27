@@ -28,7 +28,7 @@
 #include "../../Actions/ContinuousActions.h"
 #include "../../interface.h"
 #include "../../Core/EEPROMStorage.h"
-#include "MovementKernels/MachineAbstraction.h"
+#include "StepperControl/MachineInterface.h"
 #include "ComplexTrajectoryExecuter.h"
 #include "_kernel_2_data.h"
 
@@ -176,7 +176,7 @@ void RealTimeProcessor::push_new_position_1() {
 
     suus_process = true;
 
-    //Stepper positions : the new position in the steppers system (translated by MachineAbstraction).
+    //Stepper positions : the new position in the steppers system (translated by MachineInterface).
 
     //Stepper distances : As copying requires time, we directly put the temp distances in the final array.
     uint8_t push_indice = sub_movement_queue.push_indice();
@@ -216,13 +216,13 @@ void RealTimeProcessor::push_new_position_1() {
     }
 
     //Compute the movement distance for the current speed group
-    position_data->movement_distance = MachineAbstraction::get_movement_distance_for_group(movement_speed_group,
+    position_data->movement_distance = MachineInterface::get_movement_distance_for_group(movement_speed_group,
                                                                                            high_level_distances);
 
 
 
     //Translate the high level position into steppers position;
-    MachineAbstraction::translate(position_data->candidate_high_level_positions,
+    MachineInterface::translate(position_data->candidate_high_level_positions,
                                   position_data->future_steppers_positions);
 
 
@@ -391,7 +391,7 @@ void RealTimeProcessor::update_end_position(const float *const new_hl_position) 
 
     float stepper_end_position[NB_STEPPERS];
 
-    MachineAbstraction::translate(new_hl_position, stepper_end_position);
+    MachineInterface::translate(new_hl_position, stepper_end_position);
 
     if (ComplexTrajectoryExecuter::started) {
         disable_stepper_interrupt();
@@ -751,14 +751,14 @@ float t_rl_pos[NB_AXIS]{0};
 float *const m::current_hl_position = t_rl_pos;
 
 //movement data queue;
-Queue<k2_real_time_data> m::sub_movement_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<k2_real_time_data> m::sub_movement_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
 //the integer distances data
-uint8_t t_sm_d[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
+uint8_t t_sm_d[MOVEMENT_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
 uint8_t *m::sub_movement_int_distances = t_sm_d;
 
 //the real distances data
-float t_sm_rd[MOTION_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
+float t_sm_rd[MOVEMENT_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
 float *m::sub_movement_real_distances = t_sm_rd;
 
 

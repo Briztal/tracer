@@ -194,7 +194,7 @@ SERVO(2, servo3, 4, 0, 1)
 
 //###########################################STEPPER_CONTROLLER_SETTINGS###############################################
 
-#define MOTION_DATA_QUEUE_SIZE 20
+#define MOVEMENT_DATA_QUEUE_SIZE 20
 
 
 #define sig_t uint32_t

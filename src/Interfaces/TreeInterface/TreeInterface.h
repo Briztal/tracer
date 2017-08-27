@@ -22,7 +22,7 @@
 #ifdef ENABLE_TREE_INTERFACE
 
 #include "../../hardware_language_abstraction.h"
-#if !defined(HL_SERIAL)
+#if !defined(HL_SERIAL_FLAG)
 #error TreeInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
 #endif
 

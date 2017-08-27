@@ -24,10 +24,10 @@
 
 #include <interface.h>
 #include <Core/EEPROMStorage.h>
-#include <MovementKernels/Kernel1/SpeedPlanner.h>
-#include <MovementKernels/Kernel1/SpeedManager.h>
-#include <MovementKernels/StepperController.h>
-#include <MovementKernels/Kernel1/TrajectoryExecuter.h>
+#include <StepperControl/Kernel1/SpeedPlanner.h>
+#include <StepperControl/Kernel1/SpeedManager.h>
+#include <StepperControl/StepperController.h>
+#include <StepperControl/Kernel1/TrajectoryExecuter.h>
 #include "LinearMovement.h"
 
 
@@ -183,7 +183,7 @@ void LinearMovement::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTAR
     for (uint8_t axis = 0; axis < dimension; axis++)
         next_t[axis] = (uint16_t) deceleration_distances[axis];
 
-    //Effective MovementKernels.
+    //Effective StepperControl.
     elementary_motion(0);
      */
 }
@@ -330,7 +330,7 @@ void LinearMovement::process_speed() {
 
 #define m LinearMovement
 
-Queue<linear_data> m::data_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<linear_data> m::data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 linear_data m::data_to_fill;
 
 uint32_t *const m::MR_positions = new uint32_t[NB_STEPPERS];

@@ -25,9 +25,9 @@
 #include "ComplexLinearMovement.h"
 
 #include <interface.h>
-#include <MovementKernels/MachineAbstraction.h>
-#include <MovementKernels/Kernel2/ComplexTrajectoryExecuter.h>
-#include <MovementKernels/Kernel2/PreProcessor.h>
+#include <StepperControl/MachineInterface.h>
+#include <StepperControl/Kernel2/ComplexTrajectoryExecuter.h>
+#include <StepperControl/Kernel2/PreProcessor.h>
 
 
 /*
@@ -89,7 +89,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
         //Push the local data
         linear_data_queue.push();
 
-        MachineAbstraction::update_position(destination);
+        MachineInterface::update_position(destination);
 
         return true;
 
@@ -115,7 +115,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 
 
     //Get the current position
-    MachineAbstraction::get_current_position(position);
+    MachineInterface::get_current_position(position);
 
     //Initialise the maximum axis and maximum distance.
     uint8_t max_axis = 0;
@@ -274,7 +274,7 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
 #define m ComplexLinearMovement
 
 //the data queue
-Queue<k2_linear_data> ComplexLinearMovement::linear_data_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<k2_linear_data> ComplexLinearMovement::linear_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
 //Pre_processing data
 float t_ppof[NB_AXIS], t_ppsl[NB_AXIS];

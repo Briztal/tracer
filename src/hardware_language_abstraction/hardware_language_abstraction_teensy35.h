@@ -44,6 +44,30 @@
 #include "Arduino.h"
 #include "EEPROM.h"
 
+//------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
+
+
+#define HL_8BITS_FLAG
+
+#define HL_16BITS_FLAG
+
+#define HL_32BITS_FLAG
+
+#define HL_FPU_FLAG
+
+#define HL_SERIAL_FLAG
+
+#define HL_CONTROL_LOOPS_FLAG
+
+#define HL_STEPPER_TIMER_FLAG
+
+#define HL_IO_FLAG
+
+#define HL_INTERRUPTS_FLAG
+
+#define HL_DELAY_FLAG
+
+
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
 void hl_begin();
@@ -67,7 +91,7 @@ void hl_begin();
 #define pin_mode(i, mode) pinMode(i, mode)
 
 
-//-----------------------------------------------------IO--------------------------------------------------------------
+//--------------------------------------------------INTERRUPTS----------------------------------------------------------
 
 /*
  * An alias for external interrupt attachment and detachment
@@ -76,13 +100,11 @@ void hl_begin();
 
 #define detach_interrupt(pin) detachInterrupt(pin);
 
+
 //----------------------------------------------------Delay-------------------------------------------------------------
 
 //Uncomment this line to provide delay support across LowLevel
-#define HL_DELAY
 
-
-#ifdef HL_DELAY
 /* The function to call to wait for a specified number of milliseconds
  *  void delay_ms(uint16_t time_ms);
  *//*
@@ -100,14 +122,7 @@ inline static void delay_ms(uint16_t time_ms){
 }*/
 #define delay_us(us) delayMicroseconds(us)
 
-#endif
-
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
-
-//Uncomment this line to provide a microseconds resolution timer.
-#define HL_STEPPER_TIMER
-
-#ifdef HL_STEPPER_TIMER
 
 //The frequency of the timer :
 #define STEPPER_TIMER_FREQUENCY (float) 1000000.0
@@ -153,15 +168,8 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 //Complete clean
 #define clean_stepper_interrupt() {disable_stepper_interrupt();disable_stepper_timer();}
 
-#endif
 
 //---------------------------------------Control_loops_Milliseconds_Timers----------------------------------------------
-
-
-//Uncomment this line to provide Milliseconds timers for control loops
-#define HL_CONTROL_LOOP_TIMERS
-
-#ifdef HL_CONTROL_LOOP_TIMERS
 
 
 //Period macros
@@ -248,16 +256,8 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 
 #define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
 
-#endif
-
 
 //----------------------------------------------------Serial------------------------------------------------------------
-
-//Uncomment this line to provide Serial communication across the code
-#define HL_SERIAL
-
-
-#ifdef HL_SERIAL
 
 /* The function to call to initialise the serial at a given baudrate
  * void serial_begin(baudrate b);
@@ -301,6 +301,5 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 }*/
 #define serial_read() Serial.read()
 
-#endif
 
 #endif //HDWGGABSTRACTION_H

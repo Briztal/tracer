@@ -25,8 +25,8 @@
 
 #include "TreeInterface.h"
 #include "TreeInterfaceCommands.h"
-#include <MovementKernels/Kernel2/Movements/ComplexLinearMovement.h>
-#include <MovementKernels/MachineAbstraction.h>
+#include <StepperControl/Kernel2/Movements/ComplexLinearMovement.h>
+#include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <Core/EEPROMStorage.h>
 #include <interface.h>
@@ -332,13 +332,13 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[16] = 140;
 
 
-    MachineAbstraction::set_speed_group(0);
+    MachineInterface::set_speed_group(0);
 
-    MachineAbstraction::set_speed_for_group(0, 100);
+    MachineInterface::set_speed_for_group(0, 100);
 
-    MachineAbstraction::set_energy_density(2, 1);
+    MachineInterface::set_energy_density(2, 1);
 
-    ComplexLinearMovement::prepare_movement(coords);
+    MachineInterface::linear_movement(coords);
 
 
     coords[0] = 80;
@@ -359,15 +359,15 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[15] = 80;
     coords[16] = 120;
 
-    MachineAbstraction::set_speed_group(0);
+    MachineInterface::set_speed_group(0);
 
-    MachineAbstraction::set_speed_for_group(0, 500);
+    MachineInterface::set_speed_for_group(0, 500);
 
-    MachineAbstraction::set_energy_density(0, 2);
-    MachineAbstraction::set_energy_density(1, 0.2);
-    MachineAbstraction::set_energy_density(2, 0);
+    MachineInterface::set_energy_density(0, 2);
+    MachineInterface::set_energy_density(1, 0.2);
+    MachineInterface::set_energy_density(2, 0);
 
-    ComplexLinearMovement::prepare_movement(coords);
+    MachineInterface::linear_movement(coords);
 
 
     coords[0] = 20;
@@ -388,20 +388,20 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[15] = 90;
     coords[16] = 95;
 
-    MachineAbstraction::set_speed_group(0);
+    MachineInterface::set_speed_group(0);
 
-    MachineAbstraction::set_speed_for_group(0, 200);
+    MachineInterface::set_speed_for_group(0, 200);
 
-    MachineAbstraction::set_energy_density(0, 3);
-    MachineAbstraction::set_energy_density(1, 0.3);
-    MachineAbstraction::set_energy_density(2, 0.03);
+    MachineInterface::set_energy_density(0, 3);
+    MachineInterface::set_energy_density(1, 0.3);
+    MachineInterface::set_energy_density(2, 0.03);
 
-    ComplexLinearMovement::prepare_movement(coords);
+    MachineInterface::linear_movement(coords);
 
     coords[0] = 80;
     coords[1] = 120;
 
-    ComplexLinearMovement::prepare_movement(coords);
+    MachineInterface::linear_movement(coords);
 
 
     CI::echo("EXIT");

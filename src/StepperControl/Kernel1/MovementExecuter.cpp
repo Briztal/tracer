@@ -111,6 +111,6 @@ void MovementExecuter::process_next_move() {
 
 
 bool MovementExecuter::trajectory_move = false;
-Queue<unsigned char> MovementExecuter::movement_queue(MOTION_DATA_QUEUE_SIZE);
+Queue<unsigned char> MovementExecuter::movement_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
 #endif
