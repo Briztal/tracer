@@ -36,6 +36,8 @@ public:
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
 
+    static void display_distances();
+
 private:
 
     //The current positions of stepper motors
@@ -176,7 +178,7 @@ public :
      */
 
     //End distances update
-    static void update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
+    static void update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
 
     //End position update
     static void update_end_position(const float *const new_hl_position);
@@ -184,7 +186,9 @@ public :
     //Jerk position update
     static void update_jerk_position(const int32_t *const new_hl_position);
 
+    //Jerk offsets update
     static void update_jerk_offsets(const uint32_t *const new_jerk_offsets);
+
 
 private :
 
@@ -211,11 +215,11 @@ public :
     //The function to set the next regulation speed
     static void set_regulation_speed(uint8_t speed_group, float speed);
 
-    //The function to set the next regulation speed, and to enable the jerk flag for the next transition
-    static void set_regulation_speed_jerk(uint8_t speed_group, float new_speed);
+    //the function to compute the time for the first sub_movement of the routine
+    static float get_first_sub_movement_time(float movement_distance, const float *const stepper_distances);
 
-    //the function to compute the time for the current movement.
-    static float pre_process_speed(float movement_distance, const float *const stepper_distances);
+    //the function to compute the time for the current sub_movement.
+    static float get_sub_movement_time(float movement_distance, const float *const stepper_distances);
 
     //the function to update the current speed of the steppers, knowing the current movement time
     static void update_speeds(const float *const stepper_distances, float time);
@@ -224,10 +228,10 @@ public :
 private :
 
     //next_jerk_flag : true when the next sub_movement to pop will be after a jerk point
-    static bool next_jerk_flag;
+    //static bool next_jerk_flag;
 
     //jerk_flag : true when the current sub_movement is after a jerk point
-    static bool jerk_flag;
+    //static bool jerk_flag;
 
     //the regulation speed for the current movement
     static float next_regulation_speed;
@@ -249,7 +253,6 @@ private :
 
     //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
-
 
 
     //-------------------------------------------------Speed_Constants--------------------------------------------------

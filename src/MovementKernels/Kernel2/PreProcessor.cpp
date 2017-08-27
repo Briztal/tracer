@@ -25,9 +25,11 @@
 
 #include "PreProcessor.h"
 #include "RealTimeProcessor.h"
+#include "_kernel_2_data.h"
 
 #include <MovementKernels/MachineAbstraction.h>
 #include <Core/EEPROMStorage.h>
+#include <interface.h>
 
 #define DEFAULT_ABSOLUTE_INCREMENT (float) 0.01
 
@@ -38,10 +40,17 @@
  *
  */
 
-float PreProcessor::pre_process_increment_and_jerk(const float min, const float max,
-                                                   void (*trajectory_function)(float, float *),
-                                                   const uint8_t speed_group, bool jerk_checking,
-                                                   uint32_t *jerk_distances_offsets) {
+//bool PreProcessor::pre_process_increment_and_jerk(const float min, const float max, void (*trajectory_function)(float, float *), const uint8_t speed_group, bool jerk_checking, uint32_t *jerk_distances_offsets) {
+bool
+PreProcessor::pre_process_increment_and_jerk(k2_movement_data *current_movement, k2_movement_data *previous_movement,
+                                             bool jerk_checking) {
+
+    //cache vars
+    float min = current_movement->min, max = current_movement->max;
+    void (*trajectory_function)(float, float*) = current_movement->pre_process_trajectory_function;
+    uint8_t speed_group = current_movement->speed_group;
+
+    //---------------Increment-----------------
 
 
     float min_default_increment = (min < max) ? DEFAULT_ABSOLUTE_INCREMENT : -DEFAULT_ABSOLUTE_INCREMENT;
@@ -50,28 +59,69 @@ float PreProcessor::pre_process_increment_and_jerk(const float min, const float 
     float min_increment = extract_increment(trajectory_function, min, min_default_increment);
     float max_increment = extract_increment(trajectory_function, max, -min_default_increment);
 
+
+    //---------------Micro movement check-----------------
+
+    /* We must check if the movement is a micro movement. A movement is qualified by micro-movement when
+     *      its first sub-movement goes beyond its limit. It is not actually traceable, so we must ignore it.
+     */
+
+    //Verification
+    if (((min_increment > 0) && (min + min_increment > max)) || ((min_increment < 0) && (min + min_increment < max))) {
+
+        //Send an error message
+        CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
+
+        //ignore movement
+        return false;
+
+    }
+
+    //Update the new movement's increment
+    current_movement->increment = min_increment;
+
+
+    //---------------Jerk-----------------
+
     //Initialise an array for the jerk distances (initial and final)
     float jerk_distances[NB_STEPPERS];
 
     //If a jerk checking is required (not required for the first movement of the routine)
     if (jerk_checking) {
 
+        float t_min[NB_STEPPERS];
+
+
+        //Get the jerk position
+        get_stepper_position(trajectory_function, min, t_min);
+
+        //cache var for jerk pos
+        int32_t *jerk_pos = previous_movement->jerk_position;
+
+        //Convert to int32_t
+        for (uint8_t stepper = 0; stepper<NB_STEPPERS; stepper++) {
+            jerk_pos[stepper] = (int32_t) t_min[stepper];
+
+        }
+
+
         //Get the distances for the first sub_movement
         get_stepper_distances(min, min + min_increment, trajectory_function, jerk_distances);
 
         //get the correct jerk offsets for the current movement
-        get_jerk_offsets(jerk_distances, speed_group, jerk_distances_offsets);
+        get_jerk_offsets(jerk_distances, speed_group, previous_movement->jerk_offsets);
 
+        previous_movement->jerk_point = true;
     }
 
     //Get the distances for the first sub_movement
-    get_stepper_distances(min, min + min_increment, trajectory_function, jerk_distances);
+    get_stepper_distances(max, max -max_increment, trajectory_function, jerk_distances);
 
     //update the jerk_ratios for the last movement
     update_jerk_final_data(jerk_distances, speed_group);
 
 
-    return min_increment;
+    return true;
 
 }
 
@@ -90,7 +140,7 @@ void PreProcessor::verify_jerk_absorptions(uint32_t *enqueued_jerk_offsets, int3
 
         //get the absolute distance on the axis
         float dist = new_jerk_positions[stepper] - enqueued_jerk_positions[stepper];
-        if (dist<0) dist = -dist;
+        if (dist < 0) dist = -dist;
 
         //cache
         uint32_t jd = new_jerk_offsets[stepper];
@@ -329,8 +379,10 @@ uint32_t PreProcessor::get_max_dist(float *p0, float *p1) {
 }
 
 
+
+
 float t_fjr[NB_STEPPERS];
-static float *const final_jerk_ratios = t_fjr;
+float *const PreProcessor::final_jerk_ratios = t_fjr;
 
 
 #endif

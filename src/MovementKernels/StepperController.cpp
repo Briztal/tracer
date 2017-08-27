@@ -135,15 +135,16 @@ void StepperController::fastStep(sig_t id) {
 #ifdef position_log
 
 void StepperController::send_position() {
+
     float t[NB_STEPPERS];
+
 #define STEPPER(i, ...) \
-    t[i] = ((float)pos##i/(float)EEPROMStorage::steps[i]);
+    CI::echo("pos : "+String(i)+" "+String(pos##i));\
 
 #include <config.h>
 
 #undef STEPPER
 
-    CI::send_position(t);
 
 }
 

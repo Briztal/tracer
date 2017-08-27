@@ -315,24 +315,27 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     float coords[NB_AXIS]{0};
     coords[0] = 140;
     coords[1] = 140;
-    coords[2] = 140;
-    coords[3] = 140;
 
     /*
-    coords[4] = 140;
-    coords[5] = 140;
-    coords[6] = 140;
-    coords[7] = 140;
-    coords[8] = 140;
-    coords[9] = 140;
-    coords[10] = 140;
-    coords[11] = 140;
-    coords[12] = 140;
-    coords[13] = 140;
-    coords[14] = 140;
-    coords[15] = 140;
-    coords[16] = 140;
-     */
+
+coords[2] = 140;
+coords[3] = 140;
+
+/*
+coords[4] = 140;
+coords[5] = 140;
+coords[6] = 140;
+coords[7] = 140;
+coords[8] = 140;
+coords[9] = 140;
+coords[10] = 140;
+coords[11] = 140;
+coords[12] = 140;
+coords[13] = 140;
+coords[14] = 140;
+coords[15] = 140;
+coords[16] = 140;
+ */
 
 
     MachineAbstraction::set_speed_group(0);
@@ -346,24 +349,30 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
 
     coords[0] = 80;
     coords[1] = 120;
-    coords[2] = 80;
-    coords[3] = 120;
-    /*
-    coords[4] = 120;
-    coords[5] = 80;
-    coords[6] = 120;
-    coords[7] = 80;
-    coords[8] = 120;
-    coords[9] = 80;
-    coords[10] = 120;
-    coords[11] = 80;
-    coords[12] = 120;
-    coords[13] = 80;
-    coords[14] = 120;
-    coords[15] = 80;
-    coords[16] = 120;
-     */
 
+    /*
+
+coords[2] = 80;
+coords[3] = 120;
+
+
+/*
+coords[4] = 120;
+coords[5] = 80;
+coords[6] = 120;
+coords[7] = 80;
+coords[8] = 120;
+coords[9] = 80;
+coords[10] = 120;
+coords[11] = 80;
+coords[12] = 120;
+coords[13] = 80;
+coords[14] = 120;
+coords[15] = 80;
+coords[16] = 120;
+ */
+
+    /*
     MachineAbstraction::set_speed_group(0);
 
     MachineAbstraction::set_speed_for_group(0, 500);
@@ -373,27 +382,30 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     MachineAbstraction::set_energy_density(2, 0);
 
     ComplexLinearMovement::prepare_movement(coords);
-
+*/
 
     coords[0] = 20;
     coords[1] = 25;
-    coords[2] = 30;
-    coords[3] = 35;
+
     /*
-    coords[4] = 37.5;
-    coords[5] = 40;
-    coords[6] = 45;
-    coords[7] = 50;
-    coords[8] = 55;
-    coords[9] = 60;
-    coords[10] = 65;
-    coords[11] = 70;
-    coords[12] = 75;
-    coords[13] = 80;
-    coords[14] = 85;
-    coords[15] = 90;
-    coords[16] = 95;
-     */
+
+coords[2] = 30;
+coords[3] = 35;
+
+coords[4] = 37.5;
+coords[5] = 40;
+coords[6] = 45;
+coords[7] = 50;
+coords[8] = 55;
+coords[9] = 60;
+coords[10] = 65;
+coords[11] = 70;
+coords[12] = 75;
+coords[13] = 80;
+coords[14] = 85;
+coords[15] = 90;
+coords[16] = 95;
+ */
 
     MachineAbstraction::set_speed_group(0);
 
@@ -404,6 +416,12 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     MachineAbstraction::set_energy_density(2, 0.03);
 
     ComplexLinearMovement::prepare_movement(coords);
+
+    coords[0] = 80;
+    coords[1] = 120;
+
+    ComplexLinearMovement::prepare_movement(coords);
+
 
     CI::echo("EXIT");
 

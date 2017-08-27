@@ -39,9 +39,6 @@ void RealTimeProcessor::start() {
     memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
     memset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
 
-    //Initialise the last movement time
-    last_time = 0.01;
-
     //Pre compute the speed constants
     pre_compute_speed_constants();
 
@@ -88,14 +85,16 @@ void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
  *
  */
 
+/*
 void RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float speed) {
 
     //Program a jerk point
-    next_jerk_flag = true;
+    //next_jerk_flag = true;
 
     //Set the speed
     set_regulation_speed(speed_group, speed);
 }
+ */
 
 
 /*
@@ -165,10 +164,17 @@ void RealTimeProcessor::push_new_position() {
     push_new_position_2();
 }
 
+bool suus_process= false;
+bool last_one = false;
+
 void RealTimeProcessor::push_new_position_1() {
 
-    if ((!sub_movement_queue.available_spaces()) || (movement_processed))
+    if ((!sub_movement_queue.available_spaces()) || (movement_processed)) {
+        suus_process = false;
         return;
+    }
+
+    suus_process = true;
 
     //Stepper positions : the new position in the steppers system (translated by MachineAbstraction).
 
@@ -190,6 +196,9 @@ void RealTimeProcessor::push_new_position_1() {
         ((!positive_index_dir) && (local_index_candidate + increment < index_limit))) {
         movement_processed = true;
         local_index_candidate = index_limit;
+
+
+        last_one = true;
     }
 
 
@@ -211,6 +220,7 @@ void RealTimeProcessor::push_new_position_1() {
                                                                                            high_level_distances);
 
 
+
     //Translate the high level position into steppers position;
     MachineAbstraction::translate(position_data->candidate_high_level_positions,
                                   position_data->future_steppers_positions);
@@ -220,7 +230,7 @@ void RealTimeProcessor::push_new_position_1() {
 
 void RealTimeProcessor::push_new_position_2() {
 
-    if ((!sub_movement_queue.available_spaces()))
+    if (!suus_process)
         return;
 
 
@@ -235,6 +245,8 @@ void RealTimeProcessor::push_new_position_2() {
                                            &negative_signature, &max_axis, &max_distance);
 
 
+    last_one = true;
+
     //-----------------Validity_Verification----------------------------
 
 
@@ -246,9 +258,8 @@ void RealTimeProcessor::push_new_position_2() {
     }
 
     //If the maximal distance is below the lower limit :
-    if (up_check) {
+    if ((!movement_processed)&&up_check) {
         //CI::echo("REJECTED "+String(sub_movement_queue.available_elements()));
-        movement_processed = false;
         return;
     }
 
@@ -257,6 +268,7 @@ void RealTimeProcessor::push_new_position_2() {
         //CI::echo("LOWER_REJECTED");
         return;
     }
+
 
     //---------------------Movement_Enqueuing----------------------------
 
@@ -271,10 +283,10 @@ void RealTimeProcessor::push_new_position_2() {
     d->negative_signature = negative_signature;
     d->distance = position_data->movement_distance;
     d->speed = next_regulation_speed;
-    d->jerk_point = next_jerk_flag;
+    //d->jerk_point = next_jerk_flag;
 
     //A jerk point is punctual (no shit !), so when he has been enqueued, set the flag to false;
-    next_jerk_flag = false;
+    //next_jerk_flag = false;
 
     sub_movement_queue.push();
 
@@ -282,6 +294,7 @@ void RealTimeProcessor::push_new_position_2() {
 
     update_current_hl_position(position_data->candidate_high_level_positions);
 
+    last_one = false;
 }
 
 
@@ -298,11 +311,14 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
                                           float *const real_dists, sig_t *dir_dignature_p, uint8_t *max_axis_p,
                                           float *max_distance_p) {
 
+
     //Cache variable, to avoid pointer access.
     uint8_t max_int_dist = 0;
     float max_f_dist = 0;
     uint8_t max_axis = 0;
     sig_t dir_signature = 0;
+
+    bool distance_bound_error = false;
 
     //We must determine the distance for every stepper
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -329,13 +345,12 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
 
         //if the distance is greater than the limit : fail with true
         if (distance >= MAXIMUM_DISTANCE_LIMIT) {
-            return true;
+            distance_bound_error = true;
         }
 
         //persist distances
         real_dists[stepper] = distance;
         int_dists[stepper] = int_dist;
-
 
         //Update max dist
         if (int_dist > max_int_dist) {
@@ -350,8 +365,9 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
     *max_distance_p = max_f_dist;
     *dir_dignature_p = dir_signature;
 
+
     //No error
-    return false;
+    return distance_bound_error;
 }
 
 
@@ -431,7 +447,7 @@ void RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
 
 
 /*
- * update_end_distances : this function updates distances to end point and jerk point.
+ * update_end_jerk_distances : this function updates distances to end point and jerk point.
  *
  *  It takes in arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
  *
@@ -441,12 +457,12 @@ void RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
  *
  */
 
-void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
+void RealTimeProcessor::update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
 
 #define STEPPER(i, sig, ...)\
-    if (negative_signatures&sig) {end_distances[i] += elementary_dists[i];}\
-    else {end_distances[i] -= elementary_dists[i];}\
-
+    if (negative_signatures&sig) {end_distances[i] += elementary_dists[i]; jerk_distances[i] += elementary_dists[i];}\
+    else {end_distances[i] -= elementary_dists[i];jerk_distances[i] -= elementary_dists[i];}\
+    //CI::echo(String(i)+" "+String(end_distances[i]));
 
 #include "../../config.h"
 
@@ -457,8 +473,38 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
 
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 
+
+float RealTimeProcessor::get_first_sub_movement_time(float movement_distance, const float *const stepper_distances) {
+
+    //The regulation time, corresponding to the regulation speed;
+    float regulation_time = movement_distance / regulation_speed;
+
+    //The final time
+
+    float min_time = 0;
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+
+        float maximum_speed = EEPROMStorage::jerks[stepper] * EEPROMStorage::steps[stepper];
+
+        //update the minimum time :
+        //Formula : low_time_bound = stepper_distance / maximum_speed
+        float down_time = stepper_distances[stepper] / maximum_speed;
+
+        //update minimum time, as the maximum of the new time and the current min time :
+        min_time = (down_time < min_time) ? min_time : down_time;
+
+    }
+
+    float new_time = (regulation_time > min_time) ? regulation_time : min_time;
+
+    last_time = new_time;
+
+    return new_time;
+
+}
+
 /*
- * pre_process_speed : this function determines the correct time, for the movement passed in argument.
+ * get_sub_movement_time : this function determines the correct time, for the movement passed in argument.
  *
  *  The movement is passed in he form of :
  *      - movement distance : the high level distance
@@ -474,7 +520,7 @@ void RealTimeProcessor::update_end_distances(const sig_t negative_signatures, co
  *
  */
 
-float RealTimeProcessor::pre_process_speed(float movement_distance, const float *const stepper_distances) {
+float RealTimeProcessor::get_sub_movement_time(float movement_distance, const float *const stepper_distances) {
 
     //The regulation time, corresponding to the regulation speed;
     float regulation_time = movement_distance / regulation_speed;
@@ -482,104 +528,77 @@ float RealTimeProcessor::pre_process_speed(float movement_distance, const float 
     //The final time
     float new_time = 0;
 
-    if (!jerk_flag) {
+    float min_time = 0, max_time = 0;
+    bool first = true;
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
-        //Window computation variables
-        float min_time = 0, max_time = 0;
-        bool first = true;
+        //Get the speed on last movement, on stepper [stepper]
+        float act_speed = steppers_speeds[stepper];
 
-        //Get the time bounds for each stepper;
-        for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+        //Get the speed limit
+        //Formula : delta_speed = acceleration * steps * time; acceleration * steps is pre-computed (optimisation)
+        float max_delta_speed = delta_speed_constants[stepper] * last_time;
 
-            //Get the speed on last movement, on stepper [stepper]
-            float act_speed = steppers_speeds[stepper];
+        //if the current stepper can stop, no processing is required :
 
-            //Get the speed limit
-            //Formula : delta_speed = acceleration * steps * time; acceleration * steps is pre-computed (optimisation)
-            float max_delta_speed = delta_speed_constants[stepper] * last_time;
+        float s;
 
-            //if the current stepper can stop, no processing is required :
+        if ((s = act_speed - max_delta_speed) > 0) {
 
-            float s;
+            //update the maximum time, the new speed = act_speed - speed limit.
+            //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
+            float up_time = stepper_distances[stepper] / s;
 
-            if ((s = act_speed - max_delta_speed) > 0) {
+            //update maximum time, as the minimum of the new time and the current max time :
+            max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
 
-                //update the maximum time, the new speed = act_speed - speed limit.
-                //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
-                float up_time = stepper_distances[stepper] / s;
-
-                //update maximum time, as the minimum of the new time and the current max time :
-                max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
-
-                first = false;
-
-            }
-
-
-            float maximum_speed = act_speed + max_delta_speed;
-            float maximum_speed_bound = max_speed_constants[stepper];
-
-            if (maximum_speed > maximum_speed_bound) {
-                maximum_speed = maximum_speed_bound;
-            }
-
-            //update the minimum time :
-            //Formula : low_time_bound = stepper_distance / maximum_speed
-            float down_time = stepper_distances[stepper] / maximum_speed;
-
-            //update minimum time, as the maximum of the new time and the current min time :
-            min_time = (down_time < min_time) ? min_time : down_time;
-
+            first = false;
 
         }
 
-        /*
-         * A particular case we must care of, if when the bounds are inverted. It may result of :
-         *  - a fast direction variation in the current trajectory, that makes an axis decelerate too much
-         *      and another accelerating too much.
-         *  - a jerk point speed update, where the target speed makes a stepper overflow its limit.
-         *      As in jerk points, speed limits are not checked, it can happen.
-         *
-         * In this case, the deceleration is prioritised.
-         *
-         */
 
-        //If the bounds are inverted, decelerate in priority.
-        if ((!first) && (max_time < min_time)) {
-            max_time = min_time;
+        float maximum_speed = act_speed + max_delta_speed;
+        float maximum_speed_bound = max_speed_constants[stepper];
+
+        if (maximum_speed > maximum_speed_bound) {
+            maximum_speed = maximum_speed_bound;
         }
 
-        if ((!first) && (deceleration_required || (regulation_time > max_time))) {
-            //If the deceleration is too high, or if the regulation time is higher than the maximum time :
+        //update the minimum time :
+        //Formula : low_time_bound = stepper_distance / maximum_speed
+        float down_time = stepper_distances[stepper] / maximum_speed;
 
-            //Deceleration done
-            deceleration_required = false;
-
-            //choose the time corresponding to the maximum deceleration.
-            new_time = max_time;
-
-        } else if (regulation_time < min_time) {
-
-            //If the regulation time is lower than the min time :
-
-            //choose the time corresponding to the maximum acceleration.
-            new_time = min_time;
-
-        } else {
+        //update minimum time, as the maximum of the new time and the current min time :
+        min_time = (down_time < min_time) ? min_time : down_time;
 
 
-            //If the regulation time is in the time window :
+    }
+    if ((!first) && (max_time < min_time)) {
+        max_time = min_time;
+    }
+    if ((!first) && (deceleration_required || (regulation_time > max_time))) {
+        //If the deceleration is too high, or if the regulation time is higher than the maximum time :
 
-            //choose the regulation time.
-            new_time = regulation_time;
-        }
+        //Deceleration done
+        deceleration_required = false;
+
+        //choose the time corresponding to the maximum deceleration.
+        new_time = max_time;
+
+    } else if (regulation_time < min_time) {
+
+        //If the regulation time is lower than the min time :
+
+        //choose the time corresponding to the maximum acceleration.
+        new_time = min_time;
 
     } else {
 
-        //if the next point is a jerk point, no acceleration checking is required, only the maximum speed checking.
+
+        //If the regulation time is in the time window :
+
+        //choose the regulation time.
         new_time = regulation_time;
-
-
     }
 
 
@@ -600,7 +619,6 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
     //Only the inverse of time is used, computes now for optimisation purposes.
     float inv_time = 1 / time;
 
-
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         //set the current speed on the stepper [stepper]
 
@@ -617,13 +635,18 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
         uint32_t deceleration_distance = (uint32_t) (v * v * deceleration_constants[stepper]);
 
         //get the algebraic end distance.
-        int32_t end_distance = end_distances[stepper];
+        int32_t end_distance = end_distances[stepper], jerk_distance = jerk_distances[stepper];
 
         //get the absolute
         if (end_distance < 0) end_distance = -end_distance;
+        if (jerk_distance < 0) jerk_distance = -jerk_distance;
 
         //require a deceleration if the end distance on the stepper is below the deceleration_distance;
         if (deceleration_distance > (uint32_t) end_distance) {
+            deceleration_required = true;
+        }
+
+        if (deceleration_distance > (uint32_t) jerk_distance + jerk_offsets[stepper]) {
             deceleration_required = true;
         }
     }
@@ -695,7 +718,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
 
         *negative_signature = data->negative_signature;
         *distance = data->distance;
-        jerk_flag = data->jerk_point;
+        //jerk_flag = data->jerk_point;
         regulation_speed = data->speed;
 
         sub_movement_queue.discard();
@@ -704,6 +727,13 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
 
     }
 
+}
+
+
+void RealTimeProcessor::display_distances() {
+    for (int i = 0; i<NB_STEPPERS; i++) {
+        CI::echo(String(i)+" ed : "+String(end_distances[i])+" jd : "+String(jerk_distances[i]));
+    }
 }
 
 //-----------------------------------------Static declarations - definitions--------------------------------------------
@@ -754,16 +784,28 @@ int32_t *const m::end_distances = k2ted;
 int32_t k2tep[NB_STEPPERS]{0};
 int32_t *const m::end_position = k2tep;
 
+//The stepper jerk positions;
+int32_t k2jpt[NB_STEPPERS]{0};
+int32_t *const m::jerk_position = k2jpt;
+
+//the stepper jerk distances;
+int32_t k2jdt[NB_STEPPERS]{0};
+int32_t *const m::jerk_distances = k2jdt;
+
+//The stepper jerk offsets;
+uint32_t k2jot[NB_STEPPERS]{0};
+uint32_t *const m::jerk_offsets = k2jot;
+
 bool m::deceleration_required = false;
 
-bool m::jerk_flag = true;
+//bool m::jerk_flag = true;
 
 //Global speed
 float m::regulation_speed;
 float m::last_time;
 
 //next_speed parameters
-bool m::next_jerk_flag = false;
+//bool m::next_jerk_flag = false;
 float m::next_regulation_speed = 0;
 
 //Steppers speeds

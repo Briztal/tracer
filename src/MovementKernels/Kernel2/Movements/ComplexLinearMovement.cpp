@@ -38,8 +38,16 @@
 
 bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 
+
+
     //get the movement distances
     float distances[NB_AXIS];
+
+    MachineAbstraction::translate(destination, distances);
+
+    for (int i = 0; i<NB_STEPPERS; i++) {
+        CI::echo("dest : "+String(distances[i]));
+    }
 
     //extract the array case address (more efficient than by-object-push)
     k2_linear_data *d = linear_data_queue.get_push_ptr();
@@ -82,7 +90,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 
     //Enqueue the movement in the trajectory executer, and eventually start the movement routine and terminate
     if (ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, initialise_movement, finalise_movement,
-                                                get_real_time_position)) {
+                                                    get_position, get_real_time_position)) {
 
         //Push the local data
         linear_data_queue.push();

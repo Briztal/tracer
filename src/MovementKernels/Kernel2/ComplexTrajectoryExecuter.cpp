@@ -64,7 +64,7 @@ void ComplexTrajectoryExecuter::start() {
     final_sub_movement_started = false;
 
     //Initialise the RealTimeProcessor for the first movement
-    process_next_movement(true);
+    process_next_movement();
 
     //Set up the movement procedure
     prepare_first_sub_movement();
@@ -117,6 +117,10 @@ void ComplexTrajectoryExecuter::stop() {
     //Enable the movement enqueuing
     queue_lock_flag = false;
 
+    RealTimeProcessor::display_distances();
+
+    StepperController::send_position();
+
 }
 
 
@@ -143,6 +147,7 @@ bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
 
 bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*movement_initialisation)(),
                                                  void (*movement_finalisation)(),
+                                                 void(*pre_process_trajectory_function)(float, float *),
                                                  void(*trajectory_function)(float, float *)) {
 
     if (queue_lock_flag) {
@@ -152,95 +157,74 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 
         //Fail
         return false;
-
     }
 
-    //---------------Increment, Speed and Jerk-----------------
 
-    k2_movement_data *d = movement_data_queue.get_push_ptr(), *previous = movement_data_queue.read_pushed(
-            1), *previous_1 = movement_data_queue.read_pushed(2);
+    //---------------Initialisation-----------------
+
+    //Initialise movement containers
+    k2_movement_data *current_movement = movement_data_queue.get_push_ptr();
+    k2_movement_data *previous_movement = movement_data_queue.read_pushed(1);
 
     //Initialisation of speed variables
     float speed = MachineAbstraction::get_speed();
     uint8_t speed_group = MachineAbstraction::get_speed_group();
 
-    uint8_t elements = movement_data_queue.available_elements();
-    //we must check the jerk if the routine is started, or if movements are already present in the queue.
-    bool jerk_checking = (started) || (elements);
-
-    uint32_t *jerk_distances_offsets = (jerk_checking) ? previous->jerk_offsets : 0;
-
-    //Do all the pre-processing for the movement
-    float increment = PreProcessor::pre_process_increment_and_jerk(min, max, trajectory_function, speed_group,
-                                                                   jerk_checking, jerk_distances_offsets);
-
-    /* We must check if the movement is a micro movement. A movement is qualified by micro-movement when
-     *      its first sub-movement goes beyond its limit. It is not actually traceable, so we must ignore it.
-     */
-
-    //Micro movement check :
-    if (((increment > 0) && (min + increment > max)) || ((increment < 0) && (min + increment < max))) {
-
-        //Send an error message
-        CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
-
-        //ignore movement
-        return false;
-
-    }
-
-    //---------------Jerk adjusting----------------------
-
-
-    if (jerk_checking) {
-
-        //If the movement has been popped since the processing has started
-        if (!movement_data_queue.available_elements()) {
-
-            actualise_jerk_environment(previous->jerk_offsets, previous->jerk_position);
-        }
-    }
-
-    //we must adjust the jerk if the routine is started and if one movement is still in the queue of if it is not started and if two movements are still in the queue
-    bool jerk_modif = ((started && (elements) || ((!started) && (elements > 1))));
-
-    if (jerk_modif) {
-
-        PreProcessor::verify_jerk_absorptions(previous_1->jerk_offsets, previous_1->jerk_position, previous->jerk_offsets, previous->jerk_position);
-
-        if (started && (movement_data_queue.available_elements()<1)) {
-
-            actualise_jerk_environment(previous_1->jerk_offsets, previous_1->jerk_position);
-
-        }
-    }
-
-    //---------------Persisting in Queue-----------------
-
-
-    //Get the insertion adress on the queue (faster than push-by-object)
-
-    //Update the current case of the queue :
+    //---------------fill the current movement container-----------------
 
     //Speed vars
-    d->speed = speed;
-    d->speed_group = speed_group;
+    current_movement->speed = speed;
+    current_movement->speed_group = speed_group;
 
     //Trajectory vars
-    d->min = min;
-    d->max = max;
-    d->increment = increment;
-    d->trajectory_function = trajectory_function;
+    current_movement->min = min;
+    current_movement->max = max;
+    //current_movement->increment : will be determined by PreProcessor
+    current_movement->trajectory_function = trajectory_function;
+    current_movement->pre_process_trajectory_function = pre_process_trajectory_function;
 
     //Movement initialisation - finalisation
-    d->movement_initialisation = movement_initialisation;
-    d->movement_finalisation = movement_finalisation;
+    current_movement->movement_initialisation = movement_initialisation;
+    current_movement->movement_finalisation = movement_finalisation;
+    current_movement->jerk_point = false;
 
     //Get the current insertion position in the linear_powers storage
     float *tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.push_indice();
 
     //Get the action signature and fill the linear_powers storage.
-    d->action_signatures = MachineAbstraction::get_tools_data(tools_linear_powers);
+    current_movement->tools_signatures = MachineAbstraction::get_tools_data(tools_linear_powers);
+
+
+    //---------------Increment, Speed and Jerk-----------------
+
+    //we must check the jerk if the routine is started, or if movements are already present in the queue.
+    bool jerk_checking = (started) || (movement_data_queue.available_elements());
+
+    //Do all the pre-processing for the movement, and throw the eventual error
+    if (!PreProcessor::pre_process_increment_and_jerk(current_movement, previous_movement, jerk_checking)) {
+        return false;
+    }
+
+
+    //---------------Jerk adjusting----------------------
+
+    if (jerk_checking && previous_movement->jerk_point) {
+
+        //If the movement has been popped since the processing has started
+        if (!movement_data_queue.available_elements()) {
+
+            set_jerk_environment(previous_movement);
+
+        }
+    }
+
+
+    /*
+     * TODO JERK_PROPAGATION
+     *
+     */
+
+    //---------------Persisting in Queue-----------------
 
     //Push
     movement_data_queue.push();
@@ -249,23 +233,60 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 
     //Start the movement procedure if it is not already started.
     if (!started) {
-        CI::echo("STARTING");
         start();
+        CI::echo("STARTED");
     }
 
     return true;
 
 }
 
+
 /*
- * actualise_jerk_environment : this function actualises the jerk environment for the current move
+ * set_jerk_environment : this function actualises the jerk environment for the current move
  *      with the provided data.
+ *      
  */
-void ComplexTrajectoryExecuter::actualise_jerk_environment(uint32_t *jerk_offsets, int32_t *jerk_position) {
-    RealTimeProcessor::update_jerk_position(jerk_position);
-    RealTimeProcessor::update_jerk_offsets(jerk_offsets);
+
+void ComplexTrajectoryExecuter::update_movement_environment() {
+
+    k2_movement_data *movement = movement_data_queue.read();
+
+    //Update tool_environment
+    update_tools_data(movement);
+
+    RealTimeProcessor::display_distances();
+
+    //Jerk
+    if (movement->jerk_point) {
+        set_jerk_environment(movement);
+    }
+
+    //Movement switch
+    movement_switch_flag = false;
+
+    //Send position
+    RealTimeProcessor::send_position();
+
+    //leave a space for a future movement.
+    movement_data_queue.discard();
+
+    StepperController::send_position();
+
 }
 
+
+/*
+ * set_jerk_environment : this function actualises the jerk environment for the current move
+ *      with the provided data.
+ */
+
+void ComplexTrajectoryExecuter::set_jerk_environment(k2_movement_data *movement) {
+
+    RealTimeProcessor::update_jerk_position(movement->jerk_position);
+    RealTimeProcessor::update_jerk_offsets(movement->jerk_offsets);
+
+}
 
 
 /*
@@ -274,7 +295,7 @@ void ComplexTrajectoryExecuter::actualise_jerk_environment(uint32_t *jerk_offset
  *      - the movement;
  */
 
-void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
+void ComplexTrajectoryExecuter::process_next_movement() {
 
     if (movement_data_queue.available_elements()) {
 
@@ -291,17 +312,16 @@ void ComplexTrajectoryExecuter::process_next_movement(bool first_movement) {
         movement_finalisation = d->movement_finalisation;
 
         next_tools_powers_indice = movement_data_queue.pull_indice();
-        next_tools_signature = d->action_signatures;
 
         //Update the speed according to the movement type
-        if (first_movement) {
-            RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
-        } else {
-            RealTimeProcessor::set_regulation_speed_jerk(d->speed_group, d->speed);
-        }
+        RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
 
-        //leave a space for a future movement.
-        movement_data_queue.discard();
+
+        movement_switch_flag = true;
+
+        movement_switch_counter = RealTimeProcessor::elements();
+
+        //Don't discard the movement struct for instance, it will be done in update_movement_environment;
 
     }
 
@@ -320,8 +340,6 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
     //Push the first position;
     RealTimeProcessor::push_new_position();
 
-    //Process the first position :
-
     //start by initialising vars for processing
     uint8_t elementary_dists[NB_STEPPERS];
     float real_dists[NB_STEPPERS];
@@ -331,15 +349,18 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
     //pop the stored position
     RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signature, &distance);
 
+    //Update the movement environment
+    update_movement_environment();
+
+    //Update end distances with the computed distances.
+    RealTimeProcessor::update_end_jerk_distances(negative_signature, elementary_dists);
+
     //Process the signatures for the next movement
     process_signatures(elementary_dists, es0);
     is_es_0 = false;
 
-    //Update end distances with the computed distances.
-    RealTimeProcessor::update_end_distances(negative_signature, elementary_dists);
-
     //update the speeds
-    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
+    float time = RealTimeProcessor::get_first_sub_movement_time(distance, real_dists);
 
     RealTimeProcessor::update_speeds(real_dists, time);
 
@@ -351,9 +372,6 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 
     //Push as much sub_movements as possible.
     RealTimeProcessor::fill_sub_movement_queue();
-
-    //update the linear_powers now.
-    update_tools_data();
 
 }
 
@@ -404,7 +422,6 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
     //3us 4 steppers, 8us 17 stepper : 1.5 us + 0.37us per stepper
 
-
     uint8_t elementary_dists[NB_STEPPERS];
     float real_dists[NB_STEPPERS];
 
@@ -421,7 +438,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
 
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    RealTimeProcessor::update_end_distances(negative_signatures, elementary_dists);
+    RealTimeProcessor::update_end_jerk_distances(negative_signatures, elementary_dists);
 
     STEP_AND_WAIT;
 
@@ -436,7 +453,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
     //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
 
     //Step 4 : Update the speed distance with the new heuristic distances
-    float time = RealTimeProcessor::pre_process_speed(distance, real_dists);
+    float time = RealTimeProcessor::get_sub_movement_time(distance, real_dists);
 
     STEP_AND_WAIT;
 
@@ -497,6 +514,12 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
 
 sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
+    //If the sub_movement is the first of a new movement :
+    if (movement_switch_flag) {
+        if (!(movement_switch_counter--)) {
+            update_movement_environment();
+        }
+    }
 
     //Update the trajectory indice
     saved_trajectory_indice = trajectory_indice;
@@ -627,7 +650,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 //If another movement has been pushed just after stop_programmed was set (rare case) :
 
                 //Process the next movement
-                process_next_movement(false);
+                process_next_movement();
                 //if the routine will stop at the end of the current movement:
 
                 stop_programmed = false;
@@ -643,6 +666,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
                 stop();
 
                 CI::echo("STOPPED");
+
                 return;
 
             } else if (RealTimeProcessor::empty_queue) {
@@ -675,12 +699,8 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             if (movement_data_queue.available_elements()) {
                 //If another movement can be loaded :
 
-                movement_switch_flag = true;
-
-                movement_switch_counter = RealTimeProcessor::elements();
-
                 //Process the next movement
-                process_next_movement(false);
+                process_next_movement();
 
 
             } else {
@@ -709,7 +729,10 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
  *
  */
 
-void ComplexTrajectoryExecuter::update_tools_data() {
+void ComplexTrajectoryExecuter::update_tools_data(k2_movement_data *movement) {
+
+    //Cache for the tools signature
+    sig_t next_tools_signature = movement->tools_signatures;
 
     //determine the tools that must be stopped : those are present in the current signature and not in the next one.
     sig_t stop_signature = current_tools_signature & (~next_tools_signature);
@@ -748,20 +771,6 @@ void ComplexTrajectoryExecuter::stop_tools() {
  */
 
 void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) {
-
-    if (movement_switch_flag) {
-        if (!(movement_switch_counter--)) {
-
-            //Movement switch
-            movement_switch_flag = false;
-            update_tools_data();
-
-            //Send position
-            RealTimeProcessor::send_position();
-
-
-        }
-    }
 
     //Determine the current speed
     float speed = distance / time;
@@ -832,7 +841,6 @@ float *m::tools_linear_powers;
 
 uint8_t m::next_tools_powers_indice = 0;
 sig_t m::current_tools_signature = 0;
-sig_t m::next_tools_signature = 0;
 
 bool m::movement_switch_flag = false;
 uint8_t m::movement_switch_counter = 0;

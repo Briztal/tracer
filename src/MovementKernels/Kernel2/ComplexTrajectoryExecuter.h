@@ -120,7 +120,8 @@ public :
 
     //new movement enqueueing
     static bool enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
-                                 void (*trajectory_function)(float, float *));
+                                 void (*trajectory_function)(float, float *),
+                                 void (*pre_process_trajectory_function)(float, float *));
 
 
 private:
@@ -129,9 +130,13 @@ private:
     static void (*movement_finalisation)();
 
     //new movement processing
-    static void process_next_movement(bool first_movement);
+    static void process_next_movement();
 
-    static void actualise_jerk_environment(uint32_t *jerk_offsets, int32_t *jerk_position);
+    //Movement environment switching
+    static void update_movement_environment();
+
+    //Jerk environment switching
+    static void set_jerk_environment(k2_movement_data *movement);
 
     //next sub_movement processing
     static void prepare_next_sub_movement();
@@ -156,7 +161,6 @@ private :
 
     //--------------------------------------------------------Tools-----------------------------------------------------
 
-    //NOT WORKING YET
 
 public :
 
@@ -177,7 +181,6 @@ private:
     //The variables for action data update :
     static uint8_t next_tools_powers_indice;
     static sig_t current_tools_signature;
-    static sig_t next_tools_signature;
 
     //The flag for a movement speeds switch
     static bool movement_switch_flag;
@@ -189,8 +192,7 @@ private:
     static void (**tools_update_functions)(float);
 
     //the function to change the linear powers and functions
-    static void update_tools_data();
-
+    static void update_tools_data(k2_movement_data *movement);
 
     static void stop_tools();
 

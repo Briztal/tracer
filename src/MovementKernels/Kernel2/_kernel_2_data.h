@@ -61,11 +61,13 @@ typedef struct {
     void (*movement_initialisation)(); //16
     void (*movement_finalisation)(); //20
     void (*trajectory_function)(float, float *); //24
+    void (*pre_process_trajectory_function)(float, float *); //24
     float speed; //28
     uint8_t speed_group; //29
-    sig_t action_signatures; //30 -> 33
-    uint32_t jerk_offsets[NB_STEPPERS];
-    int32_t jerk_position[NB_STEPPERS];
+    sig_t tools_signatures; //30 -> 33
+    bool jerk_point = false;
+    uint32_t jerk_offsets[NB_STEPPERS]{0};
+    int32_t jerk_position[NB_STEPPERS]{0};
     //-----------end : 32 to 36 bytes----------
 } k2_movement_data;
 
@@ -84,7 +86,6 @@ typedef struct {
 typedef struct {
     float distance; //4
     float speed; //8
-    bool jerk_point; //9
     sig_t negative_signature; //10 -> 13
     //--------end : 12 to 16 bytes-------
 } k2_real_time_data;
