@@ -25,12 +25,15 @@
 #include "ComplexTrajectoryExecuter.h"
 #include "RealTimeProcessor.h"
 #include "PreProcessor.h"
-#include "_kernel_2_data.h"
 #include <interface.h>
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>
+#include <Kernel2.h>
 
+#define movement_data_t k2_movement_data
+
+#define Kernel Kernel2
 //------------------------------------------------movement_queue_management---------------------------------------------
 
 /*
@@ -115,7 +118,7 @@ void ComplexTrajectoryExecuter::stop() {
     started = false;
 
     //Enable the movement enqueuing
-    queue_lock_flag = false;
+    movement_queue_lock_flag = false;
 
     StepperController::send_position();
 
@@ -128,7 +131,7 @@ void ComplexTrajectoryExecuter::stop() {
  */
 
 bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
-    return queue_lock_flag;
+    return movement_queue_lock_flag;
 }
 
 
@@ -148,7 +151,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
                                                  void(*pre_process_trajectory_function)(float, float *),
                                                  void(*trajectory_function)(float, float *)) {
 
-    if (queue_lock_flag) {
+    if (movement_queue_lock_flag) {
 
         //Send an error message.
         CI::echo("ERROR : THE MOVEMENT QUEUE WAS LOCKED WHEN THE MOVEMENT WAS PUSHED. THE MOVEMENT WILL BE IGNORED.");
@@ -158,22 +161,13 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     }
 
 
-    //---------------Initialisation-----------------
+    //---------------Movement container pointers Initialisation-----------------
 
-    //Initialise movement containers
-    k2_movement_data *current_movement = movement_data_queue.get_push_ptr();
-    k2_movement_data *previous_movement = movement_data_queue.read_pushed(1);
-
-    //Initialisation of speed variables
-    float speed = MachineInterface::get_speed();
-    uint8_t speed_group = MachineInterface::get_speed_group();
+    movement_data_t *current_movement = movement_data_queue.get_push_ptr();
+    movement_data_t *previous_movement = movement_data_queue.read_pushed(1);
 
 
-    //---------------fill the current movement container-----------------
-
-    //Speed vars
-    current_movement->speed = speed;
-    current_movement->speed_group = speed_group;
+    //---------------kernel-invariant data-----------------
 
     //Trajectory vars
     current_movement->min = min;
@@ -187,6 +181,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     current_movement->movement_finalisation = movement_finalisation;
     current_movement->jerk_point = false;
 
+
     //Get the current insertion position in the linear_powers storage
     float *tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.push_indice();
 
@@ -194,14 +189,28 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     current_movement->tools_signatures = MachineInterface::get_tools_data(tools_linear_powers);
 
 
-    //---------------Increment, Speed and Jerk-----------------
+
+    //---------------Increment computing, kernel invariant-----------------
+
+    //The increment computer will determine the min and max increment.
+    if (!IncrementComputer::determine_increment(current_movement)) {
+        return false;
+    }
+
+    //---------------Kernel variable data-----------------
+
+    Kernel::initialise_movement_data(current_movement);
+
+
+    //---------------Speed and Jerk (kernel variable)-----------------
 
     //we must check the jerk if the routine is started, or if movements are already present in the queue.
     bool jerk_checking = (started) || (movement_data_queue.available_elements());
 
-    //Do all the pre-processing for the movement, and throw the eventual error
-    if (!PreProcessor::pre_process_increment_and_jerk(current_movement, previous_movement, jerk_checking)) {
-        return false;
+    if (jerk_checking) {
+
+        Kernel::compute_jerk_data(current_movement);
+
     }
 
 
@@ -242,49 +251,6 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 
 
 /*
- * set_jerk_environment : this function actualises the jerk environment for the current move
- *      with the provided data.
- *
- */
-
-void ComplexTrajectoryExecuter::update_movement_environment() {
-
-    k2_movement_data *movement = movement_data_queue.read();
-
-    //Update tool_environment
-    update_tools_data(movement);
-
-    //Jerk
-    if (movement->jerk_point) {
-        set_jerk_environment(movement);
-    }
-
-    //Movement switch
-    movement_switch_flag = false;
-
-    //Send position
-    RealTimeProcessor::send_position();
-
-    //leave a space for a future movement.
-    movement_data_queue.discard();
-
-}
-
-
-/*
- * set_jerk_environment : this function actualises the jerk environment for the current move
- *      with the provided data.
- */
-
-void ComplexTrajectoryExecuter::set_jerk_environment(k2_movement_data *movement) {
-
-    RealTimeProcessor::update_jerk_position(movement->jerk_position);
-    RealTimeProcessor::update_jerk_offsets(movement->jerk_offsets);
-
-}
-
-
-/*
  * process_next_movement : this function pops a movement from the movement queue, and initialises :
  *      - the real time processor;
  *      - the movement;
@@ -294,210 +260,73 @@ void ComplexTrajectoryExecuter::process_next_movement() {
 
     if (movement_data_queue.available_elements()) {
 
-        //Pull the next movement
-        k2_movement_data *d = movement_data_queue.read();
 
-        //Update the trajectory variables
-        RealTimeProcessor::initialise_movement(d->min, d->max, d->increment, d->trajectory_function);
+        //Pull the next movement
+        movement_data_t *movement_data = movement_data_queue.read();
 
         //Initialise the new movement
-        (*(d->movement_initialisation))();
+        (*(movement_data->movement_initialisation))();
 
-        //update the finalisation function
-        movement_finalisation = d->movement_finalisation;
+        //update the finalisation function.
+        movement_finalisation = movement_data->movement_finalisation;
 
+        //Update the tools indice.
         next_tools_powers_indice = movement_data_queue.pull_indice();
 
-        //Update the speed according to the movement type
-        RealTimeProcessor::set_regulation_speed(d->speed_group, d->speed);
-
-
+        //Enable the future movement switch.
         movement_switch_flag = true;
 
-        movement_switch_counter = RealTimeProcessor::elements();
+        //Trigger the kernel's movement update, and get the number of sub_movements to wait before switching.
+        movement_switch_counter = Kernel::update_current_movement(movement_data);
 
         //Don't discard the movement struct for instance, it will be done in update_movement_environment;
-
     }
 
 }
 
 
 /*
- * prepare_first_sub_movement : this function sets all variables up for the movement routine.
- *
- *  It processes the first sub_movement, and then fills the sub_movement queue;
+ * update_movement_environment : this function actualises the jerk environment for the current move
+ *      with the provided data.
  *
  */
 
-void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
+void ComplexTrajectoryExecuter::update_movement_environment() {
 
-    //Push the first position;
-    RealTimeProcessor::push_new_position();
+    movement_data_t *movement = movement_data_queue.read();
 
-    //start by initialising vars for processing
-    uint8_t elementary_dists[NB_STEPPERS];
-    float real_dists[NB_STEPPERS];
-    sig_t negative_signature = 0;
-    float distance = 0;
+    //Update tool_environment
+    update_tools_data(movement);
 
-    //pop the stored position
-    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signature, &distance);
+    Kernel::update_movement_environment(movement);
 
-    //Update the movement environment
-    update_movement_environment();
-
-    //Update end distances with the computed distances.
-    RealTimeProcessor::update_end_jerk_distances(negative_signature, elementary_dists);
-
-    //Process the signatures for the next movement
-    process_signatures(elementary_dists, es0);
-    is_es_0 = false;
-
-    //update the speeds
-    float time = RealTimeProcessor::get_first_sub_movement_time(distance, real_dists);
-
-    RealTimeProcessor::update_speeds(real_dists, time);
-
-    //detemine the first delay
-    delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_indice;
-
-    //save the the signature
-    saved_direction_sigature = negative_signature;
-
-    //Push as much sub_movements as possible.
-    RealTimeProcessor::fill_sub_movement_queue();
+    //leave a space for a future movement.
+    movement_data_queue.discard();
 
 }
+
 
 //----------------------------------------SUB_MOVEMENT_PRE_COMPUTATION--------------------------------------------------
 
 
-//The delay macros, used in the function below.
+void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
 
-#define WAIT\
-    while(!stepper_int_flag) {}\
-        stepper_int_flag_clear();
+    //Initialise the distances array we will give to the kernel.
+    uint8_t elementary_distances[NB_STEPPERS];
 
+    float time = 0;
 
-#define STEP_AND_WAIT \
-    {\
-        sig_t s_w_signature;\
-        s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice--]];\
-        StepperController::fastStep(s_w_signature);\
-    }\
-    WAIT
+    //Give the hand to the kernel who will compute the distances for the next movement.
+    Kernel::prepare_first_sub_movement(elementary_distances, &saved_direction_signature, &time);
 
+    //Process the signatures for the next movement.
+    process_signatures(elementary_distances, es0);
+    is_es_0 = false;
 
-/*
- * prepare_next_sub_movement : This function prepares the next sub_movement.
- *
- *  Steps to enqueue a sub movement :
- *      - Get the next distances > task given to the subclass
- *      - check if obtained distances are long enough
- *      - If true, enqueue the distance array
- *      - if not, discard the distance array and start with a new increment
- *
- * IMPORTANT : END_DISTANCE PROCESSING
- *
- *  It processes the next steps :
- *      - Process the next distances
- *      - Adjust the speed
- *      - set the new speed values
- *      - get a new distance array
- *      - if queue not empty, get one more new distance array
- *
- */
+    //detemine the first delay.
+    delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_index;
 
-void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
-
-    //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
-    disable_stepper_interrupt();
-
-
-    //3us 4 steppers, 8us 17 stepper : 1.5 us + 0.37us per stepper
-
-    uint8_t elementary_dists[NB_STEPPERS];
-    float real_dists[NB_STEPPERS];
-
-    //Step 0 : update signatures for the current prepare_movement;
-    sig_t *elementary_signatures = initialise_sub_movement();
-
-    sig_t negative_signatures = 0;
-    float distance = 0;
-
-
-    //Step 1 : Get a new position to reach
-    RealTimeProcessor::pop_next_position(elementary_dists, real_dists, &negative_signatures, &distance);
-    saved_direction_sigature = negative_signatures;
-
-
-    //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    RealTimeProcessor::update_end_jerk_distances(negative_signatures, elementary_dists);
-
-    STEP_AND_WAIT;
-
-    //3us 4 steppers, 9us 17 steppers : 1.15us + 0.46us per stepper
-
-    //Step 3 : Extract signatures from this distances array
-    process_signatures(elementary_dists, elementary_signatures);
-
-
-    STEP_AND_WAIT;
-
-    //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
-
-    //Step 4 : Update the speed distance with the new heuristic distances
-    float time = RealTimeProcessor::get_sub_movement_time(distance, real_dists);
-
-    STEP_AND_WAIT;
-
-    //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
-
-    //Step 5 : Update the speed distance with the new heuristic distances
-    RealTimeProcessor::update_speeds(real_dists, time);
-
-    //Step 6 : determine the delay time for the next sub_movement :
-    delay = ((float) 1000000 * time) / (float) trajectory_indice;
-
-    //Update tools powers
-    update_tools_powers(time, distance);
-
-    //If no more pre-process is required
-    if (RealTimeProcessor::movement_processed) goto end;
-
-    STEP_AND_WAIT;
-
-    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
-    //Step 7 : get a new position part 1
-    RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
-
-    STEP_AND_WAIT;
-
-    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
-    //get a new position part 2
-    RealTimeProcessor::push_new_position_2();
-
-    STEP_AND_WAIT;
-
-    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
-    //Step 8 : if the position queue is not full, get a new position part 1;
-    RealTimeProcessor::push_new_position_1();//8us
-
-    STEP_AND_WAIT;
-
-    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
-    //get a new position part 2
-    RealTimeProcessor::push_new_position_2();//5us
-
-    //Final steps :
-    end :
-
-    //Set the light interrupt function to give time to background processes
-    set_stepper_int_function(finish_sub_movement);
-
-    //Re-enable the stepper interrupt
-    enable_stepper_interrupt();
+    update_movement_environment();
 
 }
 
@@ -511,20 +340,27 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
     //If the sub_movement is the first of a new movement :
     if (movement_switch_flag) {
+
+        //If we must now change the movement environment :
         if (!(movement_switch_counter--)) {
+
+            //Update the movement environment.
             update_movement_environment();
+
+            //Disable the movement switch.
+            movement_switch_flag = false;
+
         }
     }
 
-    //Update the trajectory indice
-    saved_trajectory_indice = trajectory_indice;
+    //Update the trajectory index
+    saved_trajectory_index = trajectory_index;
 
     //Set the correct direction
-    StepperController::set_directions(saved_direction_sigature);
+    StepperController::set_directions(saved_direction_signature);
 
-    //update the interrupt period with the float delay, that is computed to provde the most accurate period.
+    //update the interrupt period with the float delay, that is computed to provide the most accurate period.
     set_stepper_int_period(delay);
-
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -534,6 +370,38 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
         saved_elementary_signatures = es0, is_es_0 = true;
         return es1;
     }
+
+}
+
+
+void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
+
+    //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
+    disable_stepper_interrupt();
+
+    //Initialise the distances array we will give to the kernel
+    uint8_t elementary_distances[NB_STEPPERS];
+
+    //update the current movement data, and get the correct signature container for the current sub_movement;
+    //3us 4 steppers, 8us 17 stepper : 1.5 us + 0.37us per stepper
+    sig_t *elementary_signatures = initialise_sub_movement();
+
+    float time = 0;
+
+    //Give the hand to the kernel who will compute the distances for the next movement.
+    Kernel::prepare_next_sub_movement(elementary_distances, &saved_direction_signature, &time);
+
+    //Compute the signatures corresponding to the distances given by the kernel.
+    process_signatures(elementary_distances, elementary_signatures);
+
+    //Determine the delay time for the next sub_movement :
+    delay = ((float) 1000000 * time) / (float) trajectory_index;
+
+    //Set the light interrupt function to give time to background processes
+    set_stepper_int_function(finish_sub_movement);
+
+    //Re-enable the stepper interrupt
+    enable_stepper_interrupt();
 }
 
 
@@ -575,7 +443,7 @@ void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dis
 #undef STEPPER
 
         if (end_move) {//if next_move is null
-            trajectory_indice = trajectory_indices[motion_depth - 1];
+            trajectory_index = trajectory_indices[motion_depth - 1];
             break;
         }
     }
@@ -621,19 +489,15 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
     disable_stepper_interrupt();
 
     //Get the correct signature
-    sig_t s_w_signature;
-
-    s_w_signature = saved_elementary_signatures[trajectory_array[saved_trajectory_indice]];
-
-    StepperController::fastStep(s_w_signature);
+    StepperController::fastStep(saved_elementary_signatures[trajectory_array[saved_trajectory_index]]);
 
     //If the current sub_movement is finished
-    if (!saved_trajectory_indice--) {
+    if (!saved_trajectory_index--) {
 
         //Position log
 #ifdef position_log
         if (!(k2_position_indice--)) {
-            RealTimeProcessor::send_position();
+            Kernel::send_position();
             k2_position_indice = 4;
         }
 #endif
@@ -655,7 +519,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             } else if (final_sub_movement_started) {
                 //if the final sub_movement is now executed :
 
-                RealTimeProcessor::send_position();
+                Kernel::send_position();
 
                 //Stop the routine
                 stop();
@@ -664,7 +528,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
                 return;
 
-            } else if (RealTimeProcessor::empty_queue) {
+            } else if (Kernel::available_sub_movements() == 0) {
 
                 //if the last position has just been popped :
 
@@ -679,12 +543,12 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
                 return;
 
-            } else if (RealTimeProcessor::elements() == 1) {
-                queue_lock_flag = true;
+            } else if (Kernel::available_sub_movements() == 1) {
+                movement_queue_lock_flag = true;
             }
 
 
-        } else if (RealTimeProcessor::movement_processed) {
+        } else if (Kernel::movement_processed()) {
 
             //If the movement pre-processing is finished :
 
@@ -724,7 +588,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
  *
  */
 
-void ComplexTrajectoryExecuter::update_tools_data(k2_movement_data *movement) {
+void ComplexTrajectoryExecuter::update_tools_data(movement_data_t *movement) {
 
     //Cache for the tools signature
     sig_t next_tools_signature = movement->tools_signatures;
@@ -765,10 +629,7 @@ void ComplexTrajectoryExecuter::stop_tools() {
  * update_tools_powers : this function updates the number of tools, and the action_update functions
  */
 
-void ComplexTrajectoryExecuter::update_tools_powers(float time, float distance) {
-
-    //Determine the current speed
-    float speed = distance / time;
+void ComplexTrajectoryExecuter::update_tools_powers(float speed) {//TODO PASS ONLY SPEED IN ARGUMENT
 
     //Update each tool power with the value 'speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {
@@ -789,10 +650,10 @@ bool m::started = false;
 
 bool m::stop_programmed = false;
 bool m::final_sub_movement_started = false;
-bool m::queue_lock_flag = false;
+bool m::movement_queue_lock_flag = false;
 
 
-Queue<k2_movement_data> m::movement_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
+Queue<movement_data_t> m::movement_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
 uint8_t ctraj[255] = {
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 5,
@@ -814,10 +675,10 @@ const uint8_t ctti[8]{0, 2, 6, 14, 30, 62, 126, 254};
 const uint8_t *const m::trajectory_indices = ctti;
 
 sig_t *m::saved_elementary_signatures = tces0;
-uint8_t m::saved_trajectory_indice;
-uint8_t m::trajectory_indice;
+uint8_t m::saved_trajectory_index;
+uint8_t m::trajectory_index;
 
-sig_t m::saved_direction_sigature;
+sig_t m::saved_direction_signature;
 
 void (*m::movement_finalisation)();
 

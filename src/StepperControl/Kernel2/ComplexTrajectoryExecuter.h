@@ -50,6 +50,13 @@ private:
     static Queue<k2_movement_data> movement_data_queue;
 
 
+    //The flag for a real-time movement switch
+    static bool movement_switch_flag;
+
+    //The number of sub_movements before the movement switch
+    static uint8_t movement_switch_counter;
+
+
     //-----------------------------------------------sub_movement_queue-------------------------------------------------
 
 public :
@@ -58,6 +65,14 @@ public :
     static bool started;
 
 
+//The signatures for the sub_movement that is currently executed
+static sig_t *saved_elementary_signatures;
+
+//the trajectory array : contains the signature order.
+static const uint8_t *const trajectory_array;
+
+//The trajectory indice (signature indice in the movement) for the current move and the next prepare_movement
+static uint8_t saved_trajectory_index;
 private :
 
     //the stop flag : enabled when all sub_movements have been processed
@@ -67,20 +82,17 @@ private :
     static bool final_sub_movement_started;
 
     //the queue lock flag :
-    static bool queue_lock_flag;
+    static bool movement_queue_lock_flag;
 
 
     //---------------------------------------------Real_Time_Movement_data----------------------------------------------
 
 private :
 
-    //The signatures for the sub_movement that is currently executed
-    static sig_t *saved_elementary_signatures;
-
     //The trajectory indice (signature indice in the movement) for the current move and the next prepare_movement
-    static uint8_t saved_trajectory_indice, trajectory_indice;
+    static uint8_t trajectory_index;
 
-    static sig_t saved_direction_sigature;
+    static sig_t saved_direction_signature;
 
     //The trajectory indices. Those are constant in the algorithm.
     static const uint8_t *const trajectory_indices;
@@ -89,9 +101,6 @@ private :
 
     //the delay for the next movement;
     static float delay;
-
-    //the trajectory array : contains the signature order.
-    static const uint8_t *const trajectory_array;
 
 
     //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
@@ -165,7 +174,7 @@ private :
 public :
 
     //The function to update the action variables
-    static void update_tools_powers(float time, float distance) ;
+    static void update_tools_powers(float current_speed) ;
 
 private:
 
@@ -180,13 +189,8 @@ private:
 
     //The variables for action data update :
     static uint8_t next_tools_powers_indice;
+
     static sig_t current_tools_signature;
-
-    //The flag for a movement speeds switch
-    static bool movement_switch_flag;
-
-    //The number of sub_movements before the movement switch
-    static uint8_t movement_switch_counter;
 
     //The function to update actions speed
     static void (**tools_update_functions)(float);
@@ -198,6 +202,21 @@ private:
 
 
 };
+
+
+//The delay macros, used in the function below.
+
+#define WAIT\
+    while(!stepper_int_flag) {}\
+        stepper_int_flag_clear();
+
+#define CTE ComplexTrajectoryExecuter
+
+#define STEP_AND_WAIT \
+    StepperController::fastStep(CTE::saved_elementary_signatures[CTE::trajectory_array[CTE::saved_trajectory_index--]]);\
+    WAIT
+
+
 
 #endif //TRACER_MOTIONEXECUTER_H
 

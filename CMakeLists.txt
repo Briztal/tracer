@@ -174,8 +174,8 @@ include_directories(${KP}/)
 
 add_library(kernels
 
-        ${KP}/MachineAbstraction.h
-        ${KP}/MachineAbstraction.cpp
+        ${KP}/MachineInterface.h
+        ${KP}/MachineInterface.cpp
         ${KP}/StepperController.h
         ${KP}/StepperController.cpp
 
@@ -245,7 +245,7 @@ add_library(kernel2
         ${K2MP}/ComplexLinearMovement.h
         ${K2MP}/ComplexLinearMovement.cpp
 
-        )
+        src/StepperControl/Kernel2/Kernel2.cpp src/StepperControl/Kernel2/Kernel2.h)
 #--------------------------------------------------LINK----------------------------------------------------------------
 
 target_link_libraries(core actions)

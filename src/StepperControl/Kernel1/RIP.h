@@ -1,5 +1,5 @@
 /*
-  RealTimeProcessor.h - Part of TRACER
+  RTP.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -27,14 +27,11 @@
 #include <DataStructures/Queue.h>
 #include "_kernel_2_data.h"
 
-class RealTimeProcessor {
+class RIP {
 
 public:
 
-    static void start();
-
     //--------------------------------------------current_stepper_positions---------------------------------------------
-
 
     static void display_distances();
 
@@ -70,8 +67,8 @@ private:
 
 public :
 
-    //A simple method to return the number of available_sub_movements currently in the sub_movement queue.
-    static uint8_t available_sub_movements() {
+    //A simple method to return the number of elements currently in the sub_movement queue.
+    static uint8_t elements() {
         return sub_movement_queue.available_elements();
     }
 
@@ -85,7 +82,6 @@ public :
                                     void (*trajectory_function)(float index, float *positions));
 
 private :
-
 
     //The movement index and its limit
     static float index, index_limit;
@@ -115,8 +111,6 @@ private :
 
 #define MAXIMUM_DISTANCE_LIMIT 14
 
-
-
     //function to get low level distances.
     static bool
     get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists, float *const real_dists,
@@ -126,6 +120,9 @@ private :
     //----------------------------------------Pre_Computed_Positions_storage--------------------------------------------
 
 public :
+
+    //empty_queue flag : true when the sub_movement queue is empty.
+    static bool empty_queue;
 
     //movement_processed flag, true when the current movement's last position have been processed
     static bool movement_processed;
@@ -215,87 +212,15 @@ public :
     //the function to compute the time for the first sub_movement of the routine
     static float get_first_sub_movement_time(float movement_distance, const float *const stepper_distances);
 
-    //the function to compute the time for the current sub_movement.
-    static float get_sub_movement_time(float movement_distance, const float *const stepper_distances);
-
-    //the function to update the current speed of the steppers, knowing the current movement time
-    static void update_speeds(const float *const stepper_distances, float time);
 
 
 private :
-
-    //next_jerk_flag : true when the next sub_movement to pop will be after a jerk point
-    //static bool next_jerk_flag;
-
-    //jerk_flag : true when the current sub_movement is after a jerk point
-    //static bool jerk_flag;
-
-    //the regulation speed for the current movement
-    static float next_regulation_speed;
-
-    //Deceleration Fields,  computed during the heuristic calls
-    static bool deceleration_required;
 
     //Current target speed
     static float regulation_speed;
 
-    //Previous sub_movement duration
-    static float last_time;
-
-    //Current speed of steppers
-    static float *const steppers_speeds;
-
-    //Current steppers deceleration distances
-    static uint32_t *const deceleration_distances;
-
     //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
-
-
-    //-------------------------------------------------Speed_Constants--------------------------------------------------
-
-
-private :
-
-    //The function to actualise the movement constants
-    static void pre_compute_speed_constants();
-
-    /*
-     * The array containing the deceleration constants : in the deceleration distance formula :
-     *      (((v * v) / (2 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]));
-     *
-     *  the denominator is constant. This array wil contain the float value
-     *      1.0 / (2.0 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]));
-     *
-     *      for each stepper.
-     */
-
-    static float *const deceleration_constants;
-
-
-    /*
-     * The array containing the delta speed constants : in the deceleration distance formula :
-     *      max_delta_speed = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * time;
-     *
-     *  the product of the two first terms is constant. This array wil contain the float value
-     *      EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]
-     *
-     *      for each stepper.
-     */
-
-    static float *const delta_speed_constants;
-
-    /*
-     * The array containing the maximum speed constants : in the deceleration distance formula :
-     *      max_speed = EEPROMStorage::speeds[stepper] * EEPROMStorage::steps[stepper] * time;
-     *
-     *  the product is constant. This array wil contain the float value
-     *      EEPROMStorage::speeds[stepper] * EEPROMStorage::steps[stepper]
-     *
-     *      for each stepper.
-     */
-
-    static float *const max_speed_constants;
 
 
 };

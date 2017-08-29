@@ -284,7 +284,7 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 #define serial_echo_str Serial.print
 
 
-/* The function to call to check if bytes are elements in the serial buffer
+/* The function to call to check if bytes are available_sub_movements in the serial buffer
  * bool serial_available(void)
  */
 /*inline static bool serial_available(void){
