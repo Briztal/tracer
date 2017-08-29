@@ -27,7 +27,7 @@
 
 #include "MovementExecuter.h"
 #include "TrajectoryExecuter.h"
-#include "LinearMovement/HomingMovement.h"
+#include "Movements/HomingMovement.h"
 #include "SpeedManager.h"
 /*
  * TODOs for a correct motion setup :

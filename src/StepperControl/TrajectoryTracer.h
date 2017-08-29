@@ -36,8 +36,8 @@
 #ifndef TRACER_TRAJECTORYEXECUTER_H
 #define TRACER_TRAJECTORYEXECUTER_H
 
-#include "_kernel_2_data.h"
-#include "../../DataStructures/Queue.h"
+#include "_kernels_data.h"
+#include <DataStructures/Queue.h>
 
 class ComplexTrajectoryExecuter {
 
@@ -143,9 +143,6 @@ private:
 
     //Movement environment switching
     static void update_movement_environment();
-
-    //Jerk environment switching
-    static void set_jerk_environment(k2_movement_data *movement);
 
     //next sub_movement processing
     static void prepare_next_sub_movement();

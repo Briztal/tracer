@@ -26,8 +26,7 @@
 
 #include <interface.h>
 #include <StepperControl/MachineInterface.h>
-#include <StepperControl/Kernel2/ComplexTrajectoryExecuter.h>
-#include <StepperControl/Kernel2/PreProcessor.h>
+#include <StepperControl/TrajectoryTracer.h>
 
 
 /*
@@ -81,6 +80,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 
     //Wait for the enqueuing to be authorised in ComplexTrajectoryExecuter.
     while(ComplexTrajectoryExecuter::enqueue_unauthorised());
+
 
     //Enqueue the movement in the trajectory executer, and eventually start the movement routine and terminate
     if (ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, initialise_movement, finalise_movement,

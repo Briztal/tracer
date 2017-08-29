@@ -25,7 +25,6 @@
 
 #include "TreeInterface.h"
 #include "TreeInterfaceCommands.h"
-#include <StepperControl/Kernel2/Movements/ComplexLinearMovement.h>
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <Core/EEPROMStorage.h>

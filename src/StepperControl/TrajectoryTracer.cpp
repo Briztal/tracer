@@ -22,14 +22,13 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "ComplexTrajectoryExecuter.h"
-#include "RealTimeProcessor.h"
-#include "PreProcessor.h"
+#include "TrajectoryTracer.h"
+#include "IncrementComputer.h"
 #include <interface.h>
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>
-#include <Kernel2.h>
+#include <StepperControl/Kernel2/Kernel2.h>
 
 #define movement_data_t k2_movement_data
 
@@ -60,7 +59,7 @@ void ComplexTrajectoryExecuter::start() {
 
     CI::echo("Movements procedure started.");
 
-    RealTimeProcessor::start();
+    Kernel::initialise_tracing_procedure();
 
     //Initialise the end booleans
     stop_programmed = false;
@@ -172,7 +171,6 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     //Trajectory vars
     current_movement->min = min;
     current_movement->max = max;
-    //current_movement->increment : will be determined by PreProcessor
     current_movement->trajectory_function = trajectory_function;
     current_movement->pre_process_trajectory_function = pre_process_trajectory_function;
 
@@ -193,9 +191,10 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
     //---------------Increment computing, kernel invariant-----------------
 
     //The increment computer will determine the min and max increment.
-    if (!IncrementComputer::determine_increment(current_movement)) {
+    if (!IncrementComputer::determine_increments(current_movement)) {
         return false;
     }
+
 
     //---------------Kernel variable data-----------------
 
@@ -209,7 +208,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 
     if (jerk_checking) {
 
-        Kernel::compute_jerk_data(current_movement);
+        Kernel::compute_jerk_data(current_movement, previous_movement);
 
     }
 
@@ -221,7 +220,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
         //If the movement has been popped since the processing has started
         if (!movement_data_queue.available_elements()) {
 
-            set_jerk_environment(previous_movement);
+            Kernel::update_jerk_environment(previous_movement);
 
         }
     }
@@ -233,6 +232,8 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
      */
 
     //---------------Persisting in Queue-----------------
+
+
 
     //Push
     movement_data_queue.push();
@@ -259,7 +260,6 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 void ComplexTrajectoryExecuter::process_next_movement() {
 
     if (movement_data_queue.available_elements()) {
-
 
         //Pull the next movement
         movement_data_t *movement_data = movement_data_queue.read();
@@ -302,6 +302,9 @@ void ComplexTrajectoryExecuter::update_movement_environment() {
 
     //leave a space for a future movement.
     movement_data_queue.discard();
+
+    //Disable the movement switch.
+    movement_switch_flag = false;
 
 }
 
@@ -346,9 +349,6 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 
             //Update the movement environment.
             update_movement_environment();
-
-            //Disable the movement switch.
-            movement_switch_flag = false;
 
         }
     }
@@ -425,7 +425,7 @@ void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dis
 
 #define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
-#include "../../config.h"
+#include <config.h>
 
 #undef STEPPER
 
@@ -438,7 +438,7 @@ void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dis
         //Step 2 : shift right and check if last enqueue_movement is reached
 #define STEPPER(i, signature, ...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
 
-#include "../../config.h"
+#include  <config.h>
 
 #undef STEPPER
 
@@ -494,6 +494,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
     //If the current sub_movement is finished
     if (!saved_trajectory_index--) {
 
+
         //Position log
 #ifdef position_log
         if (!(k2_position_indice--)) {
@@ -501,6 +502,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             k2_position_indice = 4;
         }
 #endif
+
 
         if (stop_programmed) {
             //if (false) {
@@ -569,6 +571,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
             }
         }
 
+
         //interrupt on the normal routine
         set_stepper_int_function(prepare_next_sub_movement);
 
@@ -629,7 +632,7 @@ void ComplexTrajectoryExecuter::stop_tools() {
  * update_tools_powers : this function updates the number of tools, and the action_update functions
  */
 
-void ComplexTrajectoryExecuter::update_tools_powers(float speed) {//TODO PASS ONLY SPEED IN ARGUMENT
+void ComplexTrajectoryExecuter::update_tools_powers(float speed) {
 
     //Update each tool power with the value 'speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {

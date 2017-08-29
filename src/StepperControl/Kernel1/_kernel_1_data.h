@@ -56,33 +56,9 @@ typedef struct{//TODO REORG
     //-------------4----------------32
     uint8_t processing_steps;//1
 
-} k1_movement_data_old;//36 bytes
+} k1_movement_data;//36 bytes
 
 
-
-typedef struct {
-    float min; //4
-    float max;//8
-    float increment; //12
-    void (*movement_initialisation)(); //16
-    void (*movement_finalisation)(); //20
-    void (*trajectory_function)(float, float *); //24
-    void (*pre_process_trajectory_function)(float, float *); //24
-
-    float ratio;//4
-    delay_t delay_numerator;//2
-    delay_t regulation_delay;//2
-    uint32_t jerk_distance_offset;
-    bool jerk_point;//1
-    float speed_factor;//2
-    sig_t tools_signatures; //30 -> 33
-
-    bool jerk_point = false;
-    uint32_t jerk_offsets[NB_STEPPERS]{0};
-    int32_t jerk_position[NB_STEPPERS]{0};
-    //-----------end : 32 to 36 bytes----------
-
-} k1_movement_data;
 
 typedef struct{
     float slopes[NB_STEPPERS];

@@ -27,7 +27,7 @@
 #include <StepperControl/Kernel1/SpeedPlanner.h>
 #include <StepperControl/Kernel1/SpeedManager.h>
 #include <StepperControl/StepperController.h>
-#include <StepperControl/Kernel1/OldTrajectoryExecuter.h>
+#include <StepperControl/Kernel1/TrajectoryExecuter.h>
 #include "LinearMovement.h"
 
 
@@ -40,7 +40,7 @@
  *
  */
 
-void LinearMovement::prepare_movement(const float *destinations_t) { //GO TO
+void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     //Distances array
 
@@ -161,7 +161,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     //Calculate and fill the speed data
     SpeedPlanner::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, dists, regulation_speed, PROCESSING_STEPS);
 
-    OldTrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
+    TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
 
     return max_axis;
 
@@ -196,11 +196,11 @@ void LinearMovement::enqueue_movement(uint32_t *dists) {
     //motion data setting
     set_motion_data(dists);
 
-    //Enqueue k1_movement_data
+    //Enqueue motion_data
     data_queue.push_object(data_to_fill);//TODO NON!
 
-    //Enqueue k1_movement_data
-    OldTrajectoryExecuter::enqueue_movement_data();
+    //Enqueue motion_data
+    TrajectoryExecuter::enqueue_movement_data();
 
 
 }
@@ -261,7 +261,7 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
     }
 
     //Fill beginning signatures
-    OldTrajectoryExecuter::fill_movement_data(true, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(true, elementary_dists, count, nsig);
 
     uint32_t last_pos_max = count*PROCESSING_STEPS;
 
@@ -275,7 +275,7 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
     }
 
     //Fill ending signatures
-    OldTrajectoryExecuter::fill_movement_data(false, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(false, elementary_dists, count, nsig);
 }
 
 void LinearMovement::initialise_motion() {

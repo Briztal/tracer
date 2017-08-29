@@ -47,12 +47,15 @@
 #ifndef TRACER_KERNEL2_H
 #define TRACER_KERNEL2_H
 
-
-#include "_kernel_2_data.h"
+#include <stdint.h>
+#include <StepperControl/_kernels_data.h>
 
 
 class Kernel2 {
 
+public :
+
+    static void initialise_tracing_procedure();
 
     //-----------------------------------------------Kernel status flags------------------------------------------------
 
@@ -73,7 +76,7 @@ public:
 
     static void initialise_movement_data(k2_movement_data *movement_data);
 
-    static void compute_jerk_data(k2_movement_data *current_movement);
+    static void compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement);
 
     //------------------------------------------------environment update------------------------------------------------
 

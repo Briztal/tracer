@@ -27,6 +27,7 @@
  */
 
 #include <config.h>
+#include <stdint.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -71,6 +72,8 @@ public:
     //The function to translate a high level position into stepper positions
     static void translate(const float *const hl_coordinates, float *const steppers_coordinates);
 
+    //The function to get stepper positions for a particular trajectory at a particular point.
+    static void get_stepper_positions_for(void (*trajectory_function)(float, float*), float point, float *steppers_positions);
 
     //-------------------------------------------------Speed_Management-------------------------------------------------
 

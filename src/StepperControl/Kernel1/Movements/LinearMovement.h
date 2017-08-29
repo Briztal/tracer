@@ -27,13 +27,13 @@
 
 #include <stdint.h>
 #include <DataStructures/Queue.h>
-#include "../_kernel_1_data.h"
+
 
 class LinearMovement {
 
 public :
 
-    static void prepare_movement(const float *destinations_t);
+    static void prepare_motion(const float *destinations_t);
 
 private :
 

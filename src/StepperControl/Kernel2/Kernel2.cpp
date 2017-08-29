@@ -25,12 +25,17 @@
 
 #include "Kernel2.h"
 #include "RealTimeProcessor.h"
-#include "ComplexTrajectoryExecuter.h"
+#include <StepperControl/TrajectoryTracer.h>
+#include "JerkPlanner.h"
 
 #include <StepperControl/StepperController.h>
 #include <hardware_language_abstraction.h>
 #include <StepperControl/MachineInterface.h>
 
+
+void Kernel2::initialise_tracing_procedure() {
+    RealTimeProcessor::start();
+}
 
 //-----------------------------------------------Kernel status flags------------------------------------------------
 
@@ -54,39 +59,42 @@ bool Kernel2::movement_processed() {
 
 
 /*
- * TODO
+ * initialise_movement_data : updates the kernel2 specific data in the provided movement container;
+ *
+ *  It initialises :
+ *      - the speed;
+ *      - the speed group;
  */
 
 void Kernel2::initialise_movement_data(k2_movement_data *movement_data) {
-    //Initialisation of speed variables
-    float speed = MachineInterface::get_speed();
-    uint8_t speed_group = MachineInterface::get_speed_group();
 
-    //Speed vars
-    movement_data->speed = speed;
-    movement_data->speed_group = speed_group;
+    //Initialisation of speed variables
+    movement_data->speed = MachineInterface::get_speed();
+    movement_data->speed_group = MachineInterface::get_speed_group();
+
 }
 
 /*
- * TODO
+ * compute_jerk_data : updates the previous movement's jerk data, according to the current movement.
+ *
+ *  This task is delegated to the JerkPlanner class, as the Jerk determination algorithm is a bit heavy;
  */
 
-void Kernel2::compute_jerk_data(k2_movement_data *current_movement)  {
+void Kernel2::compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement)  {
 
     //Do all the pre-processing for the movement, and throw the eventual error
-    PreProcessor::pre_process_increment_and_jerk(current_movement, previous_movement, jerk_checking);
-    //TODO PREVIOUS_MOVEMENT MANDATORY ?? DATA IS SAVED.
+    JerkPlanner::determine_jerk(current_movement, previous_movement);
 
 }
 
 /*
- * TODO
+ * update_current_movement : this function updates the movement that Kernel2 is currently pre-processing.
  */
 
 uint8_t Kernel2::update_current_movement(k2_movement_data *movement_data) {
 
     //Update the trajectory variables
-    RealTimeProcessor::initialise_movement(movement_data->min, movement_data->max, movement_data->increment, movement_data->trajectory_function);
+    RealTimeProcessor::initialise_movement(movement_data->min, movement_data->max, movement_data->min_increment, movement_data->trajectory_function);
 
     //Update the speed according to the movement type
     RealTimeProcessor::set_regulation_speed(movement_data->speed_group, movement_data->speed);
@@ -254,6 +262,8 @@ void Kernel2::prepare_next_sub_movement(uint8_t *elementary_distances, sig_t *ne
 void Kernel2::send_position() {
     RealTimeProcessor::send_position();
 }
+
+
 
 
 #endif

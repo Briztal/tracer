@@ -174,18 +174,24 @@ include_directories(${KP}/)
 
 add_library(kernels
 
+        ${KP}/_kernels_data.h
+
         ${KP}/MachineInterface.h
         ${KP}/MachineInterface.cpp
+        ${KP}/TrajectoryTracer.h
+        ${KP}/TrajectoryTracer.cpp
         ${KP}/StepperController.h
         ${KP}/StepperController.cpp
+        ${KP}/IncrementComputer.h
+        ${KP}/IncrementComputer.cpp
 
-        src/StepperControl/StepperKernel.cpp src/StepperControl/StepperKernel.h)
+        )
+
 
 #-------------------------------------------------KERNEL1---------------------------------------------------------------
 
-
 set(K1P "src/StepperControl/Kernel1")
-set(K1LP "src/StepperControl/Kernel1/LinearMovement")
+set(K1LP "src/StepperControl/Kernel1/Movements")
 set(K1NP "src/StepperControl/Kernel1/NonLinearMovements")
 
 include_directories(${K1P}/)
@@ -224,7 +230,6 @@ add_library(kernel1
 
 #-------------------------------------------------KERNEL2---------------------------------------------------------------
 
-
 set(K2P "src/StepperControl/Kernel2")
 set(K2MP "src/StepperControl/Kernel2/Movements")
 
@@ -233,19 +238,19 @@ include_directories(${K2P}/)
 add_library(kernel2
 
         #kernel2
-        ${K2P}/_kernel_2_data.h
-        ${K2P}/ComplexTrajectoryExecuter.h
-        ${K2P}/ComplexTrajectoryExecuter.cpp
+        ${K2P}/Kernel2.cpp
+        ${K2P}/Kernel2.h
         ${K2P}/RealTimeProcessor.h
         ${K2P}/RealTimeProcessor.cpp
-        ${K2P}/PreProcessor.h
-        ${K2P}/PreProcessor.cpp
+        ${K2P}/JerkPlanner.cpp
+        ${K2P}/JerkPlanner.h
 
         #movements
         ${K2MP}/ComplexLinearMovement.h
         ${K2MP}/ComplexLinearMovement.cpp
 
-        src/StepperControl/Kernel2/Kernel2.cpp src/StepperControl/Kernel2/Kernel2.h)
+        )
+
 #--------------------------------------------------LINK----------------------------------------------------------------
 
 target_link_libraries(core actions)

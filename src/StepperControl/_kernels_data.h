@@ -19,6 +19,7 @@
 */
 
 #include <config.h>
+#include <stdint.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -26,9 +27,15 @@
 #ifndef TRACER_COMPLEX_MOTION_DATA_H
 #define TRACER_COMPLEX_MOTION_DATA_H
 
-#include <stdint.h>
-#include <config.h>
-#include <wiring.h>
+
+//The distance bounds
+
+#define MINIMUM_DISTANCE_LIMIT 8
+
+#define DISTANCE_TARGET 11
+
+#define MAXIMUM_DISTANCE_LIMIT 14
+
 
 /*
  * The structures used to save and update information through the movement procedure of the kernel2.
@@ -44,8 +51,9 @@
 
 //---------------------------------------------------Kernel Structures--------------------------------------------------
 
+
 /*
- * k2_movement_data : this structure contains all data related to one movement :
+ * kernel_movement_data : this structure contains all data related to one movement :
  *  - the index variables : min, max, increment;
  *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
@@ -57,14 +65,31 @@
 typedef struct {
     float min; //4
     float max;//8
-    float increment; //12
+    float min_increment; //12
+    float max_increment; //12
     void (*movement_initialisation)(); //16
     void (*movement_finalisation)(); //20
     void (*trajectory_function)(float, float *); //24
     void (*pre_process_trajectory_function)(float, float *); //24
+    sig_t tools_signatures; //30 -> 33
+    //-----------end : 32 to 36 bytes----------
+} kernel_movement_data;
+
+
+/*
+ * k2_movement_data : this structure contains all data related to one movement :
+ *  - the index variables : min, max, increment;
+ *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
+ *  - the trajectory function, used continuously during the movement to get positions;
+ *  - The speed variables : the speed and the speed group,
+ *  - The tools signature, indicating tools enabled during this movement.
+ *
+ */
+
+typedef struct : kernel_movement_data{
+
     float speed; //28
     uint8_t speed_group; //29
-    sig_t tools_signatures; //30 -> 33
     bool jerk_point = false;
     uint32_t jerk_offsets[NB_STEPPERS]{0};
     int32_t jerk_position[NB_STEPPERS]{0};

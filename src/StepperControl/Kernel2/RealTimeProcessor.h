@@ -25,7 +25,7 @@
 #define TRACER_REAL_TIME_PROCESS_H
 
 #include <DataStructures/Queue.h>
-#include "_kernel_2_data.h"
+#include <StepperControl/_kernels_data.h>
 
 class RealTimeProcessor {
 
@@ -106,16 +106,6 @@ private :
     //---------------------------------------High_level_and_Low_level_distances-----------------------------------------
 
 private :
-
-    //The distance bounds
-
-#define MINIMUM_DISTANCE_LIMIT 8
-
-#define DISTANCE_TARGET 11
-
-#define MAXIMUM_DISTANCE_LIMIT 14
-
-
 
     //function to get low level distances.
     static bool

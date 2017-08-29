@@ -29,8 +29,8 @@
 #include "../../interface.h"
 #include "../../Core/EEPROMStorage.h"
 #include "StepperControl/MachineInterface.h"
-#include "ComplexTrajectoryExecuter.h"
-#include "_kernel_2_data.h"
+#include "StepperControl/TrajectoryTracer.h"
+#include "StepperControl/_kernels_data.h"
 
 
 void RealTimeProcessor::start() {
@@ -163,7 +163,6 @@ void RealTimeProcessor::push_new_position() {
 }
 
 bool suus_process= false;
-bool last_one = false;
 
 void RealTimeProcessor::push_new_position_1() {
 
@@ -194,9 +193,6 @@ void RealTimeProcessor::push_new_position_1() {
         ((!positive_index_dir) && (local_index_candidate + increment < index_limit))) {
         movement_processed = true;
         local_index_candidate = index_limit;
-
-
-        last_one = true;
     }
 
 
@@ -241,9 +237,6 @@ void RealTimeProcessor::push_new_position_2() {
     bool up_check = get_steppers_distances(current_stepper_positions, position_data->future_steppers_positions,
                                            position_data->elementary_dists, position_data->real_dists,
                                            &negative_signature, &max_axis, &max_distance);
-
-
-    last_one = true;
 
     //-----------------Validity_Verification----------------------------
 
@@ -292,7 +285,6 @@ void RealTimeProcessor::push_new_position_2() {
 
     update_current_hl_position(position_data->candidate_high_level_positions);
 
-    last_one = false;
 }
 
 

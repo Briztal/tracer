@@ -27,45 +27,29 @@
 
 
 #include <stdint.h>
+#include "_kernels_data.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef TRACER_INCREMENT_COMPUTER_H
 #define TRACER_INCREMENT_COMPUTER_H
 
-#include "_kernel_2_data.h"
 
 
-class PreProcessor {
+class IncrementComputer {
 
 public:
 
-    static bool pre_process_increment_and_jerk(k2_movement_data *current_movement, k2_movement_data *previous_movement,
-                                               bool jerk_checking);
+    static bool determine_increments(kernel_movement_data *movement);
 
-    static void
-    verify_jerk_absorptions(uint32_t *enqueued_jerk_offsets, int32_t *enqueued_jerk_positions,
-                            uint32_t *new_jerk_offsets,
-                            int32_t *new_jerk_positions);
+
 
 private :
-
-    static float *const final_jerk_ratios;
-
-
-    static void
-    get_jerk_offsets(float *initial_steps_distances, const uint8_t speed_group, uint32_t *jerk_distances_offsets);
 
     static float extract_increment(void (*get_position)(float, float *), float point, float incr);
 
     static uint32_t get_max_dist(float *p0, float *p1);
 
-    static void get_stepper_position(void (*get_position)(float, float *), float point, float *positions);
-
-    static void update_jerk_final_data(float *final_steps_distances, const uint8_t speed_group);
-
-    static void get_stepper_distances(const float p0, const float p1, void (*trajectory_function)(float, float *),
-                                      float *distances);
 
 
 };

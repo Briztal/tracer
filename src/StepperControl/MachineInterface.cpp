@@ -105,6 +105,25 @@ void MachineInterface::translate(const float *const hl_coordinates, float *const
 }
 
 
+/*
+ * get_stepper_positions_for : this function gets the stepper positions, for the provided point, according to
+ *      the provided trajectory_function (get_position).
+ *
+ */
+
+void MachineInterface::get_stepper_positions_for(void (*get_position)(float, float *), float point, float *positions) {
+
+    //Initialisa the local high level position array;
+    float hl_positions[NB_AXIS];
+
+    //Get the initial high level position
+    get_position(point, hl_positions);
+
+    //Translate it to obtain the initial stepper position
+    MachineInterface::translate(hl_positions, positions);
+}
+
+
 //---------------------------------------------------Speed_Management---------------------------------------------------
 
 /*
