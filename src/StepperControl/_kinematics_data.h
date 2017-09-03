@@ -92,6 +92,7 @@ typedef struct kernel_movement_data {
 
 typedef struct {
     uint8_t step_distances[NB_STEPPERS];
+    float f_step_distances[NB_STEPPERS];
     float future_steppers_positions[NB_STEPPERS];
     float candidate_high_level_positions[NB_AXIS];
 
@@ -100,7 +101,7 @@ typedef struct {
 
 
 
-//---------------------------------------------------Kernel1 Structures-------------------------------------------------
+//---------------------------------------------------KinematicsCore1 Structures-------------------------------------------------
 /*
  * Standard structures implementation for the kernel1
  */
@@ -130,9 +131,9 @@ typedef struct k1_movement_data : movement_data {//TODO REORG
 
 
 
-//---------------------------------------------------Kernel2 Structures-------------------------------------------------
+//---------------------------------------------------KinematicsCore2 Structures-------------------------------------------------
 /*
- * Standard structures implementation for the Kernel2
+ * Standard structures implementation for the KinematicsCore2
  *
  */
 
@@ -172,7 +173,6 @@ typedef struct k2_movement_data : movement_data {
 typedef struct k2_sub_movement_data : sub_movement_data {
 
     sig_t direction_signature;
-    float *f_step_distances;
     float index_candidate;
     float movement_distance;
     float regulation_speed;

@@ -7,7 +7,7 @@
 #include "TrajectoryTracer.h"
 #include <hardware_language_abstraction.h>
 #include <interface.h>
-#include <StepperControl/Kernel2/Kernel2.h>
+#include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 
 /*
  * initialise_movement : this function is called when the current movement is finished.
@@ -88,6 +88,7 @@ bool SubMovementManager::movement_processed() {
 void SubMovementManager::push_new_position() {
     sub_movement_data_t *sub_movement_data = sub_movement_queue.get_input_ptr();
 
+
     //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
     //get a new sub-movement
     bool b = compute_new_sub_movement(sub_movement_data);
@@ -95,6 +96,8 @@ void SubMovementManager::push_new_position() {
     //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
     //validate the sub-movement
     if (b) verify_sub_movement(sub_movement_data);
+
+
 }
 
 
@@ -127,7 +130,7 @@ bool SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
     get_new_position(local_index_candidate, sub_movement_data->candidate_high_level_positions);
 
     //Call the kernel, to fill the kernel-reserved part of the data.
-    Kernel::initialise_sub_movement(sub_movement_data);
+    Kinematics::initialise_sub_movement(sub_movement_data);
 
     return true;
 }
@@ -136,12 +139,15 @@ bool SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
 void SubMovementManager::verify_sub_movement(sub_movement_data_t *sub_movement_data) {
 
 
+
     //Get the steppers step_distances, high level step_distances, and the maximal stepper and distance
     float max_distance = get_steppers_distances(current_stepper_positions, sub_movement_data);
+
 
     //Distance Validity_Verification : fail if an error is detected
     if (distance_bounds_error(max_distance))
         return;
+
 
     //Now that validity checks are made, enqueue the sub_movement data
     sub_movement_queue.enqueue();
@@ -150,7 +156,7 @@ void SubMovementManager::verify_sub_movement(sub_movement_data_t *sub_movement_d
     index = sub_movement_data->index_candidate;
 
     //Update the kernel data
-    Kernel::accept_sub_movement(sub_movement_data);
+    Kinematics::accept_sub_movement(sub_movement_data);
 
 }
 
@@ -203,6 +209,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
     //We must determine the distance for every stepper
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
+
         //get destination and position
         float d = dest[stepper], p = pos[stepper];
 
@@ -214,6 +221,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
 
         uint8_t int_dist;
 
+
         //get absolute distance
         if (distance < 0) {
             distance = -distance;
@@ -222,6 +230,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
         } else {
             int_dist = (uint8_t) ((uint32_t) d - (uint32_t) p);
         }
+
 
         //persist step_distances
         real_dists[stepper] = distance;
@@ -232,6 +241,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
             max_int_dist = int_dist;
             max_f_dist = distance;
         }
+
     }
 
     //Save the signature

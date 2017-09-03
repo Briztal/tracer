@@ -19,7 +19,7 @@
 */
 
 /*
- * The Kernel2 class. This class's methods are called by TrajectoryExecuter, is this version of the kernel have been
+ * The KinematicsCore2 class. This class's methods are called by TrajectoryExecuter, is this version of the kernel have been
  *      chosen in your configuration file.
  *
  *
@@ -48,10 +48,10 @@
 #define TRACER_KERNEL2_H
 
 #include <stdint.h>
-#include <StepperControl/_kernels_data.h>
+#include <StepperControl/_kinematics_data.h>
 
 
-class Kernel2 {
+class KinematicsCore2 {
 
 
 

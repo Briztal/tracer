@@ -25,9 +25,9 @@
 #define TRACER_REAL_TIME_PROCESS_H
 
 #include <DataStructures/Queue.h>
-#include <StepperControl/_kernels_data.h>
+#include <StepperControl/_kinematics_data.h>
 
-class K2RealTimeProcessor {
+class K2Physics {
 
 public:
 
@@ -59,9 +59,6 @@ private :
 
     //Deceleration Fields,  computed during the heuristic calls
     static bool deceleration_required;
-
-    //Current target regulation_speed
-    static float regulation_speed;
 
     //Previous sub_movement duration
     static float last_time;

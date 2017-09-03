@@ -36,7 +36,7 @@
 #ifndef TRACER_TRAJECTORYEXECUTER_H
 #define TRACER_TRAJECTORYEXECUTER_H
 
-#include "_kernels_data.h"
+#include "_kinematics_data.h"
 #include <DataStructures/Queue.h>
 
 class TrajectoryTracer {

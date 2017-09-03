@@ -29,7 +29,7 @@
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>
-#include <StepperControl/Kernel2/Kernel2.h>
+#include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -57,13 +57,13 @@ void TrajectoryTracer::start() {
 
     CI::echo("Movements procedure started.");
 
-    Kernel::initialise_tracing_procedure();
+    Kinematics::initialise_tracing_procedure();
 
     //Initialise the end booleans
     stop_programmed = false;
     final_sub_movement_started = false;
 
-    //Initialise the K2RealTimeProcessor for the first movement
+    //Initialise the K2Physics for the first movement
     process_next_movement();
 
     update_real_time_movement_data();
@@ -198,9 +198,9 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
     }
 
 
-    //---------------Kernel variable data-----------------
+    //---------------Kinematics variable data-----------------
 
-    Kernel::initialise_movement_data(current_movement);
+    Kinematics::initialise_movement_data(current_movement);
 
 
     //---------------Speed and Jerk (kernel variable)-----------------
@@ -210,7 +210,7 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
 
     if (jerk_checking) {
 
-        Kernel::compute_jerk_data(current_movement, previous_movement);
+        Kinematics::compute_jerk_data(current_movement, previous_movement);
 
     }
 
@@ -222,7 +222,7 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
         //If the movement has been popped since the processing has started
         if (!movement_data_queue.available_elements()) {
 
-            Kernel::update_real_time_jerk_environment(previous_movement);
+            Kinematics::update_real_time_jerk_environment(previous_movement);
 
         }
     }
@@ -282,7 +282,7 @@ void TrajectoryTracer::process_next_movement() {
         movement_switch_counter = SubMovementManager::update_current_movement(movement_data);
 
         //Update now the pre_processing data, the real_time will be in the function below.
-        Kernel::update_pre_process_speed_data(movement_data);
+        Kinematics::update_pre_process_speed_data(movement_data);
 
         //Don't discard the movement struct for instance, it will be done in update_real_time_jerk_environment;
 
@@ -302,7 +302,7 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
     movement_data_t *movement_data = movement_data_queue.read_output();
 
-    //------Tools-----K2RealTimeProcessor-
+    //------Tools-----K2Physics-
 
     //Update tool_environment
     update_tools_data(movement_data);
@@ -315,7 +315,7 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
     //Jerk environment
 
-    Kernel::update_real_time_jerk_environment(movement_data);
+    Kinematics::update_real_time_jerk_environment(movement_data);
 
 
     //------Clean------
@@ -337,6 +337,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     //Push the first sub_movement (increment pre-processed to be correct)
     SubMovementManager::push_new_position();
 
+
     ///Step 1 : Get a new position to reach
     sub_movement_data_t *sub_movement_data = SubMovementManager::read_next_sub_movement();
 
@@ -346,13 +347,15 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     //Copy the direction signature in cache.
     saved_direction_signature = sub_movement_data->direction_signature;
 
+
     //Step 2 : Update the end_distances with this step_distances array and compute the heuristic step_distances to jerk/end points
     SubMovementManager::update_end_jerk_distances(saved_direction_signature, elementary_distances);
 
-    //-------------------Kernel call-------------------
+    //-------------------Kinematics call-------------------
 
     //Give the hand to the kernel who will compute the time for the sub-movement
-    float time = Kernel::compute_time_for_first_sub_movement(sub_movement_data);
+    float time = Kinematics::compute_time_for_first_sub_movement(sub_movement_data);
+
 
     //Compute the signatures for the next movement.
     process_signatures(elementary_distances, es0);
@@ -366,45 +369,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
 
     //Push as much sub_movements as possible.
     SubMovementManager::fill_sub_movement_queue();
-}
 
-
-/*
- * initialise_sub_movement : sets the delay, the trajectory indice, the steppers directions
- *      and returns the pointer to the elementary signatures processed before
- */
-
-sig_t *TrajectoryTracer::initialise_sub_movement() {
-
-    //If the sub_movement is the first of a new movement :
-    if (movement_switch_flag) {
-
-        //If we must now change the movement environment :
-        if (!(movement_switch_counter--)) {
-
-            //Update the movement environment.
-            update_real_time_movement_data();
-
-        }
-    }
-
-    //Update the trajectory index
-    saved_trajectory_index = trajectory_index;
-
-    //Set the correct direction
-    StepperController::set_directions(saved_direction_signature);
-
-    //update the interrupt period with the float delay, that is computed to provide the most accurate period.
-    set_stepper_int_period(delay);
-
-    //save the motion scheme computed previously, so that new values won't erase the current ones
-    if (is_es_0) {
-        saved_elementary_signatures = es1, is_es_0 = false;
-        return es0;
-    } else {
-        saved_elementary_signatures = es0, is_es_0 = true;
-        return es1;
-    }
 
 }
 
@@ -438,10 +403,10 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     STEP_AND_WAIT
 
 
-    //-------------------Kernel call-------------------
+    //-------------------Kinematics call-------------------
 
     //Give the hand to the kernel who will compute the time for the sub-movement
-    float time = Kernel::compute_time_for_sub_movement(sub_movement_data);
+    float time = Kinematics::compute_time_for_sub_movement(sub_movement_data);
 
     STEP_AND_WAIT
 
@@ -490,6 +455,47 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Re-enable the stepper interrupt
     enable_stepper_interrupt();
 }
+
+
+/*
+ * initialise_sub_movement : sets the delay, the trajectory indice, the steppers directions
+ *      and returns the pointer to the elementary signatures processed before
+ */
+
+sig_t *TrajectoryTracer::initialise_sub_movement() {
+
+    //If the sub_movement is the first of a new movement :
+    if (movement_switch_flag) {
+
+        //If we must now change the movement environment :
+        if (!(movement_switch_counter--)) {
+
+            //Update the movement environment.
+            update_real_time_movement_data();
+
+        }
+    }
+
+    //Update the trajectory index
+    saved_trajectory_index = trajectory_index;
+
+    //Set the correct direction
+    StepperController::set_directions(saved_direction_signature);
+
+    //update the interrupt period with the float delay, that is computed to provide the most accurate period.
+    set_stepper_int_period(delay);
+
+    //save the motion scheme computed previously, so that new values won't erase the current ones
+    if (is_es_0) {
+        saved_elementary_signatures = es1, is_es_0 = false;
+        return es0;
+    } else {
+        saved_elementary_signatures = es0, is_es_0 = true;
+        return es1;
+    }
+
+}
+
 
 
 /*
@@ -585,7 +591,7 @@ void TrajectoryTracer::finish_sub_movement() {
         //Position log
 #ifdef position_log
         if (!(k2_position_indice--)) {
-            Kernel::send_position();
+            Kinematics::send_position();
             k2_position_indice = 4;
         }
 #endif
@@ -608,7 +614,7 @@ void TrajectoryTracer::finish_sub_movement() {
             } else if (final_sub_movement_started) {
                 //if the final sub_movement is now executed :
 
-                Kernel::send_position();
+                Kinematics::send_position();
 
                 //Stop the routine
                 stop();

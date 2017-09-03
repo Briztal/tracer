@@ -22,7 +22,7 @@
 
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 1)
 
-#include "Kernel1.h"
+#include "KinematicsCore1.h"
 #include "K1RealTimeProcessor.h"
 
 #include <StepperControl/TrajectoryTracer.h>
@@ -31,19 +31,19 @@
 
 
 
-void Kernel1::initialise_tracing_procedure() {
+void KinematicsCore1::initialise_tracing_procedure() {
     //TODO
 }
 
 //-----------------------------------------------Kernel status flags------------------------------------------------
 
 //The function to call to verify that sub_movements are available in the queue.
-uint8_t Kernel1::available_sub_movements() {
+uint8_t KinematicsCore1::available_sub_movements() {
     //TODO
 }
 
 //The function to call to know if the current movement has been processed.
-bool Kernel1::movement_processed() {
+bool KinematicsCore1::movement_processed() {
     //TODO
 }
 
@@ -51,26 +51,26 @@ bool Kernel1::movement_processed() {
 //---------------------------------------------Current movement update----------------------------------------------
 
 
-uint8_t Kernel1::update_current_movement(k1_movement_data *movement_data) {
+uint8_t KinematicsCore1::update_current_movement(k1_movement_data *movement_data) {
     //TODO
 }
 
-void Kernel1::initialise_movement_data(k1_movement_data *movement_data) {
+void KinematicsCore1::initialise_movement_data(k1_movement_data *movement_data) {
     //TODO
 }
 
-void Kernel1::compute_jerk_data(const k1_movement_data *current_movement, k1_movement_data *previous_movement) {
+void KinematicsCore1::compute_jerk_data(const k1_movement_data *current_movement, k1_movement_data *previous_movement) {
     //TODO
 }
 
 //------------------------------------------------environment update------------------------------------------------
 
 
-void Kernel1::update_movement_environment(k1_movement_data *movement_data) {
+void KinematicsCore1::update_movement_environment(k1_movement_data *movement_data) {
     //TODO
 }
 
-void Kernel1::update_jerk_environment(k1_movement_data *movement_data) {
+void KinematicsCore1::update_jerk_environment(k1_movement_data *movement_data) {
     //TODO
 }
 
@@ -79,12 +79,12 @@ void Kernel1::update_jerk_environment(k1_movement_data *movement_data) {
 
 
 //The first sub_movement preparation, called at the beginning of the movement routine.
-void Kernel1::prepare_first_sub_movement(uint8_t *elementary_distances, sig_t *negative_signature, float *time) {
+void KinematicsCore1::prepare_first_sub_movement(uint8_t *elementary_distances, sig_t *negative_signature, float *time) {
     //TODO
 }
 
 //The sub_movement preparation function, called on interrupts.
-void Kernel1::prepare_next_sub_movement(uint8_t * elementary_distances, sig_t *negative_signatures, float *delay) {
+void KinematicsCore1::prepare_next_sub_movement(uint8_t * elementary_distances, sig_t *negative_signatures, float *delay) {
 
 
     *negative_signatures = position_processor(elementary_distances);//2*(NB_STEPPERS - 1) tics

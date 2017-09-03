@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <StepperControl/_kernels_data.h>
 
-class Kernel1 {
+class KinematicsCore1 {
 
 public :
 

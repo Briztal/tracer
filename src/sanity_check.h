@@ -39,19 +39,19 @@
 //NO verification required, this kernel works on every damn thing...
 
 #elif ((KERNEL == 1) || (KERNEL == 2))
-//Kernel1 and Kernel2 require a 32 bits processor with an FPU
+//KinematicsCore1 and KinematicsCoreV2 require a 32 bits processor with an FPU
 
 
 
 //FPU
 #ifndef HL_FPU_FLAG
-#error "Kernel1 requires an FPU, and your processor doesn't have one."
+#error "KinematicsCore1 requires an FPU, and your processor doesn't have one."
 #endif
 
 
 //FPU
 #ifndef HL_32BITS_FLAG
-#error "Kernel1 requires  a 32 bit processor. Your processor has a lower native type."
+#error "KinematicsCore1 requires  a 32 bit processor. Your processor has a lower native type."
 #endif
 
 #else

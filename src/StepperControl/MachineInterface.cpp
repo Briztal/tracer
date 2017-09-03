@@ -35,7 +35,7 @@
 #elif (KERNEL == 1)
 #include <LinearMovement.h>
 #elif (KERNEL == 2)
-#include <StepperControl/Kernel2/Movements/ComplexLinearMovement.h>
+#include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
 
 //------------------------------------------------------Movements-------------------------------------------------------

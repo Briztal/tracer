@@ -123,7 +123,7 @@ add_library(actions
         ${AP}/ContinuousActions.h
         ${AP}/ContinuousActions.cpp
 
-        src/StepperControl/Kernel2/Movements/ComplexLinearMovement.cpp src/StepperControl/Kernel2/Movements/ComplexLinearMovement.h)
+        src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h)
 
 #-------------------------------------------------ASSERV----------------------------------------------------------------
 
@@ -190,9 +190,9 @@ add_library(kernels
 
 #-------------------------------------------------KERNEL1---------------------------------------------------------------
 
-set(K1P "src/StepperControl/Kernel1")
-set(K1LP "src/StepperControl/Kernel1/Movements")
-set(K1NP "src/StepperControl/Kernel1/NonLinearMovements")
+set(K1P "src/StepperControl/KinematicsCore1")
+set(K1LP "src/StepperControl/KinematicsCore1/Movements")
+set(K1NP "src/StepperControl/KinematicsCore1/NonLinearMovements")
 
 include_directories(${K1P}/)
 include_directories(${K1LP}/)
@@ -218,14 +218,14 @@ add_library(kernel1
         ${K1LP}/LinearMovement.h
         ${K1LP}/LinearMovement.cpp
 
-        src/StepperControl/Kernel1/Kernel1.cpp
-        src/StepperControl/Kernel1/Kernel1.h)
+        src/StepperControl/KinematicsCore1/Kernel1.cpp
+        src/StepperControl/KinematicsCore1/Kernel1.h)
 
 
 #-------------------------------------------------KERNEL2---------------------------------------------------------------
 
-set(K2P "src/StepperControl/Kernel2")
-set(K2MP "src/StepperControl/Kernel2/Movements")
+set(K2P "src/StepperControl/KinematicsCore2")
+set(K2MP "src/StepperControl/KinematicsCore2/Movements")
 
 include_directories(${K2P}/)
 

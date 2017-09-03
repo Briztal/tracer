@@ -19,7 +19,7 @@
 */
 
 #include <config.h>
-#include <StepperControl/_kernels_data.h>
+#include <StepperControl/_kinematics_data.h>
 #include <DataStructures/Queue.h>
 #include "SqrtFastComputer.h"
 

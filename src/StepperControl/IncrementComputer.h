@@ -27,7 +27,7 @@
 
 
 #include <stdint.h>
-#include "_kernels_data.h"
+#include "_kinematics_data.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 

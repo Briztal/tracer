@@ -24,12 +24,12 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "K2RealTimeProcessor.h"
+#include "K2Physics.h"
 
 #include <hardware_language_abstraction.h>
 #include <Core/EEPROMStorage.h>
 
-void K2RealTimeProcessor::start() {
+void K2Physics::start() {
 
     //initialise speeds and step_distances to zeros.
     memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
@@ -45,14 +45,15 @@ void K2RealTimeProcessor::start() {
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 
 
-float K2RealTimeProcessor::get_first_sub_movement_time(sub_movement_data_t *sub_movement_data) {
+float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
     //Cache vars
     float *f_step_distances = sub_movement_data->f_step_distances;
     float movement_distance = sub_movement_data->movement_distance;
+    float speed = sub_movement_data->regulation_speed;
 
     //The regulation time, corresponding to the regulation regulation_speed;
-    float regulation_time = movement_distance / regulation_speed;
+    float regulation_time = movement_distance / speed;
 
     //The final time
 
@@ -95,13 +96,13 @@ float K2RealTimeProcessor::get_first_sub_movement_time(sub_movement_data_t *sub_
  *
  */
 
-float K2RealTimeProcessor::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
+float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
     //Cache vars
     float *f_step_distances = sub_movement_data->f_step_distances;
     float movement_distance = sub_movement_data->movement_distance;
-
     float speed = sub_movement_data->regulation_speed;
+
 
     //The regulation time, corresponding to the regulation regulation_speed;
     float regulation_time = movement_distance / speed;
@@ -195,7 +196,7 @@ float K2RealTimeProcessor::get_sub_movement_time(sub_movement_data_t *sub_moveme
  *
  */
 
-void K2RealTimeProcessor::update_speeds(sub_movement_data_t *sub_movement_data, float time) {
+void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time) {
 
     //Cache var for stepper distances
     const float *const f_stepper_distances = sub_movement_data->f_step_distances;
@@ -247,7 +248,7 @@ void K2RealTimeProcessor::update_speeds(sub_movement_data_t *sub_movement_data, 
  *
  */
 
-void K2RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
+void K2Physics::update_jerk_offsets(const uint32_t *const new_offsets) {
 
     memcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
 
@@ -256,7 +257,7 @@ void K2RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets)
 
 //---------------------------------------------------Speed_Constants----------------------------------------------------
 
-void K2RealTimeProcessor::pre_compute_speed_constants() {
+void K2Physics::pre_compute_speed_constants() {
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         float steps = EEPROMStorage::steps[stepper];
@@ -273,14 +274,13 @@ void K2RealTimeProcessor::pre_compute_speed_constants() {
 
 //Static declarations - definitions;
 
-#define m K2RealTimeProcessor
+#define m K2Physics
 
 bool m::deceleration_required = false;
 
 //bool m::jerk_flag = true;
 
 //Global regulation_speed
-float m::regulation_speed;
 float m::last_time;
 
 

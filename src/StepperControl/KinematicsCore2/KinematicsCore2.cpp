@@ -23,8 +23,8 @@
 
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
-#include "Kernel2.h"
-#include "K2RealTimeProcessor.h"
+#include "KinematicsCore2.h"
+#include "K2Physics.h"
 #include "JerkPlanner.h"
 
 #include <StepperControl/TrajectoryTracer.h>
@@ -32,8 +32,8 @@
 #include <StepperControl/StepperController.h>
 
 
-void Kernel2::initialise_tracing_procedure() {
-    K2RealTimeProcessor::start();
+void KinematicsCore2::initialise_tracing_procedure() {
+    K2Physics::start();
 }
 
 
@@ -48,7 +48,7 @@ void Kernel2::initialise_tracing_procedure() {
  *      - the regulation_speed group;
  */
 
-void Kernel2::initialise_movement_data(k2_movement_data *movement_data) {
+void KinematicsCore2::initialise_movement_data(k2_movement_data *movement_data) {
 
     //Initialisation of regulation_speed variables
     movement_data->speed = MachineInterface::get_speed();
@@ -62,7 +62,7 @@ void Kernel2::initialise_movement_data(k2_movement_data *movement_data) {
  *  This task is delegated to the JerkPlanner class, as the Jerk determination algorithm is a bit heavy;
  */
 
-void Kernel2::compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement) {
+void KinematicsCore2::compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement) {
 
     //Do all the pre-processing for the movement, and throw the eventual error
     JerkPlanner::determine_jerk(current_movement, previous_movement);
@@ -71,10 +71,10 @@ void Kernel2::compute_jerk_data(const k2_movement_data *current_movement, k2_mov
 
 
 /*
- * update_pre_process_speed_data : this function updates the movement that Kernel2 is currently pre-processing.
+ * update_pre_process_speed_data : this function updates the movement that KinematicsCore2 is currently pre-processing.
  */
 
-void Kernel2::update_pre_process_speed_data(k2_movement_data *movement_data) {
+void KinematicsCore2::update_pre_process_speed_data(k2_movement_data *movement_data) {
 
     //Set the regulation_speed group
     movement_speed_group = movement_data->speed_group;
@@ -88,11 +88,11 @@ void Kernel2::update_pre_process_speed_data(k2_movement_data *movement_data) {
 //------------------------------------------------Real-time data update------------------------------------------------
 
 
-void Kernel2::update_real_time_jerk_environment(k2_movement_data *movement_data) {
+void KinematicsCore2::update_real_time_jerk_environment(k2_movement_data *movement_data) {
 
     //Jerk
     if (movement_data->jerk_point) {
-        K2RealTimeProcessor::update_jerk_offsets(movement_data->jerk_offsets);
+        K2Physics::update_jerk_offsets(movement_data->jerk_offsets);
     }
 
 }
@@ -101,7 +101,7 @@ void Kernel2::update_real_time_jerk_environment(k2_movement_data *movement_data)
 //--------------------------------------------sub_movements preparation---------------------------------------------
 
 
-void Kernel2::initialise_sub_movement(k2_sub_movement_data *sub_movement_data) {
+void KinematicsCore2::initialise_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
     float high_level_distances[NB_AXIS];
     float *candidate = sub_movement_data->candidate_high_level_positions;
@@ -130,7 +130,7 @@ void Kernel2::initialise_sub_movement(k2_sub_movement_data *sub_movement_data) {
  * accept_sub_movement : updates the current high level position with the provided one.
  */
 
-void Kernel2::accept_sub_movement(sub_movement_data_t *sub_movement_data) {
+void KinematicsCore2::accept_sub_movement(sub_movement_data_t *sub_movement_data) {
 
     float *new_hl_position = sub_movement_data->candidate_high_level_positions;
 
@@ -145,15 +145,16 @@ void Kernel2::accept_sub_movement(sub_movement_data_t *sub_movement_data) {
  *  It processes the first sub_movement, and then fills the sub_movement queue;
  *
  */
-float Kernel2::compute_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data) {
+float KinematicsCore2::compute_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
 
 
     //Get the sub_movement time
-    float time = K2RealTimeProcessor::get_first_sub_movement_time(sub_movement_data);
+    float time = K2Physics::get_first_sub_movement_time(sub_movement_data);
 
+    CI::echo("ftime : "+String(time));
     //update the speeds
-    K2RealTimeProcessor::update_speeds(sub_movement_data, time);
+    K2Physics::update_speeds(sub_movement_data, time);
 
     //Update tools powers
     float current_speed = sub_movement_data->movement_distance / time;
@@ -186,20 +187,20 @@ float Kernel2::compute_time_for_first_sub_movement(k2_sub_movement_data *sub_mov
  */
 
 
-float Kernel2::compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_data) {
+float KinematicsCore2::compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
     STEP_AND_WAIT;
 
     //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
     //Step 3 : Update the regulation_speed movementDistance with the new heuristic step_distances
-    float time = K2RealTimeProcessor::get_sub_movement_time(sub_movement_data);
+    float time = K2Physics::get_sub_movement_time(sub_movement_data);
 
     STEP_AND_WAIT;
 
     //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
 
     //Step 4 : Update the steppers speeds
-    K2RealTimeProcessor::update_speeds(sub_movement_data, time);
+    K2Physics::update_speeds(sub_movement_data, time);
 
     //Update tools powers
     float current_speed = sub_movement_data->movement_distance / time;
@@ -221,7 +222,7 @@ float Kernel2::compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_
  *  Then, it sends it using the interface.
  *
  */
-void Kernel2::send_position() {
+void KinematicsCore2::send_position() {
 
     //Send the current high level position
     CI::send_position(current_hl_position);
@@ -234,14 +235,14 @@ void Kernel2::send_position() {
 
 //Positions
 float t_rl_pos[NB_AXIS]{0};
-float *const Kernel2::current_hl_position = t_rl_pos;
+float *const KinematicsCore2::current_hl_position = t_rl_pos;
 
 
 //Speed group for the current movement
-uint8_t Kernel2::movement_speed_group = 0;
+uint8_t KinematicsCore2::movement_speed_group = 0;
 
 //Regulation speed for the current movement
-float Kernel2::next_regulation_speed = 0;
+float KinematicsCore2::next_regulation_speed = 0;
 
 
 
