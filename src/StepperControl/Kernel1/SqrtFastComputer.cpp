@@ -27,11 +27,13 @@
  * It also sets correct variables for the fast algorithm.
  */
 
-void SqrtFastComputer::sqrt_slow(uint32_t distance_to_end) {
+uint16_t SqrtFastComputer::sqrt_slow(uint32_t distance_to_end) {
     primary = distance_to_end;
     square_root = (uint16_t) sqrt(distance_to_end);
     primary_sup = primary_increment = (uint16_t) (2 * square_root + 1);
     primary_inf = 1;
+
+    return square_root;
 }
 
 
@@ -41,7 +43,7 @@ void SqrtFastComputer::sqrt_slow(uint32_t distance_to_end) {
  * It calls _sqrt_fast in relative mode.
  */
 
-void SqrtFastComputer::sqrt_fast(uint32_t distance_to_end) {
+uint16_t SqrtFastComputer::sqrt_fast(uint32_t distance_to_end) {
 
     int32_t d = distance_to_end - primary;
 
@@ -49,6 +51,8 @@ void SqrtFastComputer::sqrt_fast(uint32_t distance_to_end) {
     if (!(positive_incr = d > 0)) d = -d;
 
     _sqrt_fast(positive_incr, (uint16_t) d);
+
+    return square_root;
 
 }
 
@@ -66,7 +70,7 @@ void SqrtFastComputer::sqrt_fast(uint32_t distance_to_end) {
  * The delay is set according to  : delay = delay_numerator/sqrt(primary)
  *
  */
-void SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
+uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
 
 #define switch_up primary_inf = 1, primary_increment+=2, primary_sup = primary_increment, square_root++;
 #define switch_down if(square_root) { primary_increment-=2, primary_inf=primary_increment, primary_sup=1, square_root--;}
@@ -103,7 +107,6 @@ void SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
 
             //last update, with the reduced increment
             primary_sup += incr, primary_inf -= incr;
-            return;
         } else {
             //If we need to decrement more than the speed distance : speed distance goes to zero (necessarily >= 0);
 
@@ -113,6 +116,8 @@ void SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
 
         }
     }
+
+    return square_root;
 
 #undef switch_down
 #undef switch_up

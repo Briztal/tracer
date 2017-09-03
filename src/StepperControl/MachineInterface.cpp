@@ -27,7 +27,7 @@
 #include <Arduino.h>
 #include "MachineInterface.h"
 #include "../Core/EEPROMStorage.h"
-#include <StepperControl/Kernel2/RealTimeProcessor.h>
+#include <StepperControl/Kernel2/K2RealTimeProcessor.h>
 #include <Actions/ContinuousActions.h>
 
 #if (KERNEL == 0)
@@ -82,7 +82,7 @@ void MachineInterface::update_position(const float *const new_position) {
     memcpy(current_position, new_position, sizeof(float) * NB_AXIS);
 
     //Update the low level's end point.
-    RealTimeProcessor::update_end_position(new_position);
+    K2RealTimeProcessor::update_end_position(new_position);
 
 }
 

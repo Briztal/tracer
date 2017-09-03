@@ -24,7 +24,7 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "RealTimeProcessor.h"
+#include "K2RealTimeProcessor.h"
 #include "../../Actions/ContinuousActions.h"
 #include "../../interface.h"
 #include "../../Core/EEPROMStorage.h"
@@ -33,7 +33,7 @@
 #include "StepperControl/_kernels_data.h"
 
 
-void RealTimeProcessor::start() {
+void K2RealTimeProcessor::start() {
 
     //initialise speeds and distances to zeros.
     memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
@@ -54,7 +54,7 @@ void RealTimeProcessor::start() {
  *  Then, it sends it using the interface.
  *
  */
-void RealTimeProcessor::send_position() {
+void K2RealTimeProcessor::send_position() {
 
     //Send the current high level position
     CI::send_position(current_hl_position);
@@ -68,10 +68,10 @@ void RealTimeProcessor::send_position() {
  * set_regulation_speed : this function updates the regulation speed,
  */
 
-void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
+void K2RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
 
     //Set the speed group
-    RealTimeProcessor::movement_speed_group = speed_group;
+    K2RealTimeProcessor::movement_speed_group = speed_group;
 
     //Set the speed
     next_regulation_speed = speed;
@@ -86,7 +86,7 @@ void RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
  */
 
 /*
-void RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float speed) {
+void K2RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float speed) {
 
     //Program a jerk point
     //next_jerk_flag = true;
@@ -108,7 +108,7 @@ void RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float spe
  */
 
 void
-RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*trajectory_function)(float, float *)) {
+K2RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*trajectory_function)(float, float *)) {
 
     //update trajectory extrmas, index, and increment
     index_limit = max;
@@ -127,7 +127,7 @@ RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*
 //-----------------------------------Intermediary_Positions_Pre_Computation---------------------------------------------
 
 
-void RealTimeProcessor::fill_sub_movement_queue() {
+void K2RealTimeProcessor::fill_sub_movement_queue() {
 
     while (sub_movement_queue.available_spaces() && !movement_processed) {
         push_new_position();
@@ -157,14 +157,14 @@ position_data_struct p = {};
 position_data_struct *position_data = &p;
 
 
-void RealTimeProcessor::push_new_position() {
+void K2RealTimeProcessor::push_new_position() {
     push_new_position_1();
     push_new_position_2();
 }
 
 bool suus_process= false;
 
-void RealTimeProcessor::push_new_position_1() {
+void K2RealTimeProcessor::push_new_position_1() {
 
     if ((!sub_movement_queue.available_spaces()) || (movement_processed)) {
         suus_process = false;
@@ -222,7 +222,7 @@ void RealTimeProcessor::push_new_position_1() {
 
 }
 
-void RealTimeProcessor::push_new_position_2() {
+void K2RealTimeProcessor::push_new_position_2() {
 
     if (!suus_process)
         return;
@@ -297,7 +297,7 @@ void RealTimeProcessor::push_new_position_2() {
  */
 
 bool
-RealTimeProcessor::get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists,
+K2RealTimeProcessor::get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists,
                                           float *const real_dists, sig_t *dir_dignature_p, uint8_t *max_axis_p,
                                           float *max_distance_p) {
 
@@ -364,7 +364,7 @@ RealTimeProcessor::get_steppers_distances(float *const pos, const float *const d
 /*
  * update_current_hl_position : updates the current high level position with the provided one.
  */
-void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
+void K2RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
 
     memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
 
@@ -377,7 +377,7 @@ void RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
  *
  */
 
-void RealTimeProcessor::update_end_position(const float *const new_hl_position) {
+void K2RealTimeProcessor::update_end_position(const float *const new_hl_position) {
 
     float stepper_end_position[NB_STEPPERS];
 
@@ -405,7 +405,7 @@ void RealTimeProcessor::update_end_position(const float *const new_hl_position) 
  *
  */
 
-void RealTimeProcessor::update_jerk_position(const int32_t *const new_stepper_position) {
+void K2RealTimeProcessor::update_jerk_position(const int32_t *const new_stepper_position) {
 
 
     if (ComplexTrajectoryExecuter::started) {
@@ -429,7 +429,7 @@ void RealTimeProcessor::update_jerk_position(const int32_t *const new_stepper_po
  *
  */
 
-void RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
+void K2RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
 
     memcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
 
@@ -447,12 +447,11 @@ void RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
  *
  */
 
-void RealTimeProcessor::update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
+void K2RealTimeProcessor::update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
 
 #define STEPPER(i, sig, ...)\
     if (negative_signatures&sig) {end_distances[i] += elementary_dists[i]; jerk_distances[i] += elementary_dists[i];}\
     else {end_distances[i] -= elementary_dists[i];jerk_distances[i] -= elementary_dists[i];}\
-    //CI::echo(String(i)+" "+String(end_distances[i]));
 
 #include "../../config.h"
 
@@ -464,7 +463,7 @@ void RealTimeProcessor::update_end_jerk_distances(const sig_t negative_signature
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 
 
-float RealTimeProcessor::get_first_sub_movement_time(float movement_distance, const float *const stepper_distances) {
+float K2RealTimeProcessor::get_first_sub_movement_time(float movement_distance, const float *const stepper_distances) {
 
     //The regulation time, corresponding to the regulation speed;
     float regulation_time = movement_distance / regulation_speed;
@@ -510,7 +509,7 @@ float RealTimeProcessor::get_first_sub_movement_time(float movement_distance, co
  *
  */
 
-float RealTimeProcessor::get_sub_movement_time(float movement_distance, const float *const stepper_distances) {
+float K2RealTimeProcessor::get_sub_movement_time(float movement_distance, const float *const stepper_distances) {
 
     //The regulation time, corresponding to the regulation speed;
     float regulation_time = movement_distance / regulation_speed;
@@ -604,7 +603,7 @@ float RealTimeProcessor::get_sub_movement_time(float movement_distance, const fl
  *
  */
 
-void RealTimeProcessor::update_speeds(const float *const stepper_distances, float time) {
+void K2RealTimeProcessor::update_speeds(const float *const stepper_distances, float time) {
 
     //Only the inverse of time is used, computes now for optimisation purposes.
     float inv_time = 1 / time;
@@ -645,7 +644,7 @@ void RealTimeProcessor::update_speeds(const float *const stepper_distances, floa
 
 //---------------------------------------------------Speed_Constants----------------------------------------------------
 
-void RealTimeProcessor::pre_compute_speed_constants() {
+void K2RealTimeProcessor::pre_compute_speed_constants() {
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         float steps = EEPROMStorage::steps[stepper];
@@ -673,7 +672,7 @@ void RealTimeProcessor::pre_compute_speed_constants() {
  * Costly operations : memcpys.
  */
 
-void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature,
+void K2RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature,
                                           float *distance) {
 
     uint8_t size = sub_movement_queue.available_elements();
@@ -715,7 +714,7 @@ void RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real
 }
 
 
-void RealTimeProcessor::display_distances() {
+void K2RealTimeProcessor::display_distances() {
     for (int i = 0; i<NB_STEPPERS; i++) {
         CI::echo(String(i)+" ed : "+String(end_distances[i])+" jd : "+String(jerk_distances[i]));
     }
@@ -725,7 +724,7 @@ void RealTimeProcessor::display_distances() {
 
 //Static declarations - definitions;
 
-#define m RealTimeProcessor
+#define m K2RealTimeProcessor
 
 //Current stepper position;
 float t_cur_pos[NB_STEPPERS]{0};

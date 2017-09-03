@@ -21,13 +21,13 @@
 
 #include <config.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
+#ifndef ENABLE_STEPPER_CONTROL
 
 #ifndef TRACER_TRAJECTORYEXECUTER_H
 #define TRACER_TRAJECTORYEXECUTER_H
 
 #include <hardware_language_abstraction.h>
-#include "motion_data.h"
+//#include "motion_data.h"
 #include <DataStructures/Queue.h>
 
 #define WAIT\
@@ -117,10 +117,10 @@ private :
     //-------------------------------------------Real_Time_Movement_Processors-------------------------------------------
 
 private:
+
     static sig_t (*position_processor)(uint8_t *);
 
     static void (*speed_processor)();
-
 
     //------------------------------------------------Movement_Procedure------------------------------------------------
 

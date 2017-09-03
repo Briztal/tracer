@@ -27,9 +27,11 @@
 
 class SqrtFastComputer {
 
-    void sqrt_slow(uint32_t distance_to_end);
+public :
 
-    void sqrt_fast(uint32_t distance_to_end);
+    uint16_t sqrt_slow(uint32_t primitive);
+
+    uint16_t sqrt_fast(uint32_t primitive);
 
     void print_data();
 
@@ -41,7 +43,7 @@ private :
     uint16_t square_root = 0;
     uint16_t primary_increment = 1;
 
-    void _sqrt_fast(bool dir, uint16_t increment);
+    uint16_t _sqrt_fast(bool dir, uint16_t increment);
 
 
 };

@@ -65,7 +65,7 @@ void ComplexTrajectoryExecuter::start() {
     stop_programmed = false;
     final_sub_movement_started = false;
 
-    //Initialise the RealTimeProcessor for the first movement
+    //Initialise the K2RealTimeProcessor for the first movement
     process_next_movement();
 
     //Set up the movement procedure
@@ -81,6 +81,7 @@ void ComplexTrajectoryExecuter::start() {
     enable_stepper_interrupt();
 
 }
+
 
 /*
  * stop : this function stops the movement procedure, by simply disabling the interrupt.

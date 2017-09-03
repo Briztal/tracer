@@ -109,7 +109,7 @@
  */
 
 #define B57560G1104F_SIZE 20
-#define B57560G1104F_TABLE{\
+#define B57560G1104F_TABLE {\
         {1, 821},\
         {54, 252},\
         {107, 207},\

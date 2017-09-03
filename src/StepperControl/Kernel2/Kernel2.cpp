@@ -24,7 +24,7 @@
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
 #include "Kernel2.h"
-#include "RealTimeProcessor.h"
+#include "K2RealTimeProcessor.h"
 #include <StepperControl/TrajectoryTracer.h>
 #include "JerkPlanner.h"
 
@@ -34,7 +34,7 @@
 
 
 void Kernel2::initialise_tracing_procedure() {
-    RealTimeProcessor::start();
+    K2RealTimeProcessor::start();
 }
 
 //-----------------------------------------------Kernel status flags------------------------------------------------
@@ -43,14 +43,14 @@ void Kernel2::initialise_tracing_procedure() {
 //The function to call to verify that sub_movements are available in the queue.
 uint8_t Kernel2::available_sub_movements() {
 
-    return RealTimeProcessor::available_sub_movements();
+    return K2RealTimeProcessor::available_sub_movements();
 
 }
 
 //The function to call to know if the current movement has been processed.
 bool Kernel2::movement_processed() {
 
-    return RealTimeProcessor::movement_processed;
+    return K2RealTimeProcessor::movement_processed;
 
 }
 
@@ -94,13 +94,13 @@ void Kernel2::compute_jerk_data(const k2_movement_data *current_movement, k2_mov
 uint8_t Kernel2::update_current_movement(k2_movement_data *movement_data) {
 
     //Update the trajectory variables
-    RealTimeProcessor::initialise_movement(movement_data->min, movement_data->max, movement_data->min_increment, movement_data->trajectory_function);
+    K2RealTimeProcessor::initialise_movement(movement_data->min, movement_data->max, movement_data->min_increment, movement_data->trajectory_function);
 
     //Update the speed according to the movement type
-    RealTimeProcessor::set_regulation_speed(movement_data->speed_group, movement_data->speed);
+    K2RealTimeProcessor::set_regulation_speed(movement_data->speed_group, movement_data->speed);
 
     //Return the number of sub_movements to wait before updating the movement environment
-    return RealTimeProcessor::available_sub_movements();
+    return K2RealTimeProcessor::available_sub_movements();
 
 }
 
@@ -117,7 +117,7 @@ void Kernel2::update_movement_environment(k2_movement_data *movement_data) {
     }
 
     //Send position
-    RealTimeProcessor::send_position();
+    K2RealTimeProcessor::send_position();
 
 }
 
@@ -128,8 +128,8 @@ void Kernel2::update_movement_environment(k2_movement_data *movement_data) {
 
 void Kernel2::update_jerk_environment(k2_movement_data *movement_data) {
 
-    RealTimeProcessor::update_jerk_position(movement_data->jerk_position);
-    RealTimeProcessor::update_jerk_offsets(movement_data->jerk_offsets);
+    K2RealTimeProcessor::update_jerk_position(movement_data->jerk_position);
+    K2RealTimeProcessor::update_jerk_offsets(movement_data->jerk_offsets);
 
 }
 
@@ -145,26 +145,26 @@ void Kernel2::update_jerk_environment(k2_movement_data *movement_data) {
  */
 void Kernel2::prepare_first_sub_movement(uint8_t *elementary_distances, sig_t *negative_signature, float *time) {
     //Push the first position;
-    RealTimeProcessor::push_new_position();
+    K2RealTimeProcessor::push_new_position();
 
     //start by initialising vars for processing
     float real_dists[NB_STEPPERS];
     float distance = 0;
 
     //pop the stored position
-    RealTimeProcessor::pop_next_position(elementary_distances, real_dists, negative_signature, &distance);
+    K2RealTimeProcessor::pop_next_position(elementary_distances, real_dists, negative_signature, &distance);
 
 
     //Update end distances with the computed distances.
-    RealTimeProcessor::update_end_jerk_distances(*negative_signature, elementary_distances);
+    K2RealTimeProcessor::update_end_jerk_distances(*negative_signature, elementary_distances);
 
     //update the speeds
-    *time = RealTimeProcessor::get_first_sub_movement_time(distance, real_dists);
+    *time = K2RealTimeProcessor::get_first_sub_movement_time(distance, real_dists);
 
-    RealTimeProcessor::update_speeds(real_dists, *time);
+    K2RealTimeProcessor::update_speeds(real_dists, *time);
 
     //Push as much sub_movements as possible.
-    RealTimeProcessor::fill_sub_movement_queue();
+    K2RealTimeProcessor::fill_sub_movement_queue();
 
 }
 
@@ -195,20 +195,21 @@ void Kernel2::prepare_next_sub_movement(uint8_t *elementary_distances, sig_t *ne
 
     float real_dists[NB_STEPPERS];
     float distance = 0;
+    
 
     //Step 1 : Get a new position to reach
-    RealTimeProcessor::pop_next_position(elementary_distances, real_dists, negative_signatures, &distance);
+    K2RealTimeProcessor::pop_next_position(elementary_distances, real_dists, negative_signatures, &distance);
 
 
     //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    RealTimeProcessor::update_end_jerk_distances(*negative_signatures, elementary_distances);
+    K2RealTimeProcessor::update_end_jerk_distances(*negative_signatures, elementary_distances);
 
     STEP_AND_WAIT;
 
     //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
 
     //Step 3 : Update the speed distance with the new heuristic distances
-    *time = RealTimeProcessor::get_sub_movement_time(distance, real_dists);
+    *time = K2RealTimeProcessor::get_sub_movement_time(distance, real_dists);
 
 
     STEP_AND_WAIT;
@@ -216,38 +217,38 @@ void Kernel2::prepare_next_sub_movement(uint8_t *elementary_distances, sig_t *ne
     //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
 
     //Step 4 : Update the steppers speeds
-    RealTimeProcessor::update_speeds(real_dists, *time);
+    K2RealTimeProcessor::update_speeds(real_dists, *time);
 
     //Update tools powers
     float current_speed = distance / *time;
     ComplexTrajectoryExecuter::update_tools_powers(current_speed);//TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
     //If no more pre-process is required
-    if (RealTimeProcessor::movement_processed) return;
+    if (K2RealTimeProcessor::movement_processed) return;
 
     STEP_AND_WAIT;
 
     //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
     //Step 7 : get a new position part 1
-    RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
+    K2RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
 
     STEP_AND_WAIT;
 
     //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
     //get a new position part 2
-    RealTimeProcessor::push_new_position_2();
+    K2RealTimeProcessor::push_new_position_2();
 
     STEP_AND_WAIT;
 
     //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
     //Step 8 : if the position queue is not full, get a new position part 1;
-    RealTimeProcessor::push_new_position_1();//8us
+    K2RealTimeProcessor::push_new_position_1();//8us
 
     STEP_AND_WAIT;
 
     //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
     //get a new position part 2
-    RealTimeProcessor::push_new_position_2();//5us
+    K2RealTimeProcessor::push_new_position_2();//5us
 
     return;
 }
@@ -260,7 +261,7 @@ void Kernel2::prepare_next_sub_movement(uint8_t *elementary_distances, sig_t *ne
 
 
 void Kernel2::send_position() {
-    RealTimeProcessor::send_position();
+    K2RealTimeProcessor::send_position();
 }
 
 

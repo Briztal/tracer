@@ -27,7 +27,7 @@
 #include <DataStructures/Queue.h>
 #include <StepperControl/_kernels_data.h>
 
-class RealTimeProcessor {
+class K2RealTimeProcessor {
 
 public:
 
@@ -37,6 +37,7 @@ public:
 
 
     static void display_distances();
+
 
 private:
 

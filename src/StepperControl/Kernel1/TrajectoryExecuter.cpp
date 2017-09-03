@@ -20,11 +20,11 @@
 
 #include <config.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
+#ifndef ENABLE_STEPPER_CONTROL
 
 #include "TrajectoryExecuter.h"
 #include "MovementExecuter.h"
-#include "SpeedManager.h"
+#include "K1RealTimeProcessor.h"
 #include "SpeedPlanner.h"
 #include <StepperControl/StepperController.h>
 
@@ -212,14 +212,14 @@ void TrajectoryExecuter::start() {
 
     //Speed update according to pre_processed_parameters
 
-    SpeedManager::init_speed_management(popped_data.regulation_delay, popped_data.delay_numerator,
+    K1RealTimeProcessor::init_speed_management(popped_data.regulation_delay, popped_data.delay_numerator,
                                         popped_data.speed_factor, popped_data.ratio, popped_data.processing_steps,
                                         popped_data.jerk_point, popped_data.jerk_distance_offset);
 
     (*popped_data.init_processor)();
 
     //Set number of tools in continuous modes, and set action functions related
-    SpeedManager::updateActions();
+    K1RealTimeProcessor::updateActions();
 
     set_stepper_int_function(prepare_next_sub_motion);
 
@@ -269,23 +269,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
     STEP_AND_WAIT
 
 
-    {
-        //TODO TESTER AVEC LE SHIFT SUR LA SIGNATURE DE DISTANCE ET VOIR SI C'EST PLUS EFFICACE
-
-
-#define STEPPER(i, sig, ...)\
-        if (negative_signatures&sig) {SpeedManager::end_distances[i] += elementary_dists[i];SpeedManager::jerk_distances[i] += elementary_dists[i];}\
-        else {SpeedManager::end_distances[i] -= elementary_dists[i];SpeedManager::jerk_distances[i] -= elementary_dists[i];}\
-
-#include <config.h>
-
-#undef STEPPER
-
-
-        SpeedManager::heuristic_end_distance();
-        SpeedManager::heuristic_jerk_distance();
-
-    }
+    K1RealTimeProcessor::update_end_jerk_distances();
 
 
     STEP_AND_WAIT;
@@ -335,16 +319,13 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
 
     STEP_AND_WAIT;
 
-
-    SpeedManager::regulate_speed();
-
-
+    K1RealTimeProcessor::regulate_speed();
 
     STEP_AND_WAIT;
 
-    if (SpeedManager::delay0_update_required) {
+    if (K1RealTimeProcessor::delay0_update_required) {
 
-        SpeedManager::update_delay_0();
+        K1RealTimeProcessor::update_delay_0();
 
         //Speed Setting
         (*speed_processor)();
@@ -353,7 +334,7 @@ void TrajectoryExecuter::prepare_next_sub_motion() {
         STEP_AND_WAIT;
 
         //Actions setting
-        SpeedManager::setActionsSpeeds();
+        K1RealTimeProcessor::setActionsSpeeds();
 
     }
 

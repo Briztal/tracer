@@ -21,11 +21,11 @@
 
 #include <config.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
+#ifndef ENABLE_STEPPER_CONTROL
 
 #include "SpeedPlanner.h"
 #include "TrajectoryExecuter.h"
-#include "SpeedManager.h"
+#include "K1RealTimeProcessor.h"
 #include <StepperControl/StepperController.h>
 #include <interface.h>
 #include <Core/EEPROMStorage.h>
@@ -346,11 +346,11 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
 
 
 
-            if ((TrajectoryExecuter::in_motion)&&(!SpeedManager::watch_for_jerk_point)) {
+            if ((TrajectoryExecuter::in_motion)&&(!K1RealTimeProcessor::watch_for_jerk_point)) {
 
-                //If the current prepare_movement is made without jerk point : notify SpeedManager to watch for jerk points
+                //If the current prepare_movement is made without jerk point : notify K1RealTimeProcessor to watch for jerk points
                 pull_jerk_point();
-                SpeedManager::speed_offset = tmp_jerk_distance_offset;
+                K1RealTimeProcessor::jerk_offset = tmp_jerk_distance_offset;
 
             } else {
 
@@ -406,11 +406,11 @@ void SpeedPlanner::push_jerk_point() {
 }
 
 /*
- * pull_jerk_point : this function updates SpeedManager's jerk_distance and speed_offset,
+ * pull_jerk_point : this function updates K1RealTimeProcessor's jerk_distance and jerk_offset,
  *
  *      according to previously enqueued data.
  *
- *      It is called by SpeedManager, before beginning a movement, when
+ *      It is called by K1RealTimeProcessor, before beginning a movement, when
  */
 
 void SpeedPlanner::pull_jerk_point() {
@@ -422,9 +422,9 @@ void SpeedPlanner::pull_jerk_point() {
     disable_stepper_interrupt();
 
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
-        SpeedManager::jerk_distances[axis] += enqueued_end_distances[pull_indice * NB_STEPPERS + axis];
+        K1RealTimeProcessor::jerk_distances[axis] += enqueued_end_distances[pull_indice * NB_STEPPERS + axis];
     }
-    SpeedManager::watch_for_jerk_point = true;
+    K1RealTimeProcessor::watch_for_jerk_point = true;
 
     enable_stepper_interrupt();
 

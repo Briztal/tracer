@@ -185,7 +185,7 @@ add_library(kernels
         ${KP}/IncrementComputer.h
         ${KP}/IncrementComputer.cpp
 
-        )
+        src/StepperControl/SubMovementManager.cpp src/StepperControl/SubMovementManager.h)
 
 
 #-------------------------------------------------KERNEL1---------------------------------------------------------------
@@ -201,21 +201,14 @@ include_directories(${K1NP}/)
 add_library(kernel1
 
         #general
-        ${K1P}/motion_data.h
         ${K1P}/mathProcess.hpp
         ${K1P}/mathProcess.cpp
-        ${K1P}/MovementExecuter.h
-        ${K1P}/MovementExecuter.cpp
-        ${K1P}/SpeedManager.h
-        ${K1P}/SpeedManager.cpp
+        ${K1P}/K1RealTimeProcessor.h
+        ${K1P}/K1RealTimeProcessor.cpp
         ${K1P}/SpeedPlanner.h
         ${K1P}/SpeedPlanner.cpp
-        ${K1P}/swap.hpp
-        ${K1P}/swap.cpp
         ${K1P}/TrajectoryExecuter.h
         ${K1P}/TrajectoryExecuter.cpp
-        ${K1P}/SpeedManager.h
-        ${K1P}/SpeedManager.cpp
         ${K1P}/SqrtFastComputer.h
         ${K1P}/SqrtFastComputer.cpp
 
@@ -225,7 +218,8 @@ add_library(kernel1
         ${K1LP}/LinearMovement.h
         ${K1LP}/LinearMovement.cpp
 
-        )
+        src/StepperControl/Kernel1/Kernel1.cpp
+        src/StepperControl/Kernel1/Kernel1.h)
 
 
 #-------------------------------------------------KERNEL2---------------------------------------------------------------
@@ -240,8 +234,8 @@ add_library(kernel2
         #kernel2
         ${K2P}/Kernel2.cpp
         ${K2P}/Kernel2.h
-        ${K2P}/RealTimeProcessor.h
-        ${K2P}/RealTimeProcessor.cpp
+        ${K2P}/K2RealTimeProcessor.h
+        ${K2P}/K2RealTimeProcessor.cpp
         ${K2P}/JerkPlanner.cpp
         ${K2P}/JerkPlanner.h
 

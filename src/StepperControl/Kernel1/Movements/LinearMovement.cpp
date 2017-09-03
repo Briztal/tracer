@@ -20,12 +20,12 @@
 
 #include <config.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
+#ifndef ENABLE_STEPPER_CONTROL
 
 #include <interface.h>
 #include <Core/EEPROMStorage.h>
 #include <StepperControl/Kernel1/SpeedPlanner.h>
-#include <StepperControl/Kernel1/SpeedManager.h>
+#include <StepperControl/Kernel1/K1RealTimeProcessor.h>
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Kernel1/TrajectoryExecuter.h>
 #include "LinearMovement.h"
@@ -111,7 +111,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             //Update end distances
             disable_stepper_interrupt()
 
-            SpeedManager::end_distances[axis] += distance;
+            K1RealTimeProcessor::end_distances[axis] += distance;
 
             enable_stepper_interrupt()
 
@@ -324,7 +324,7 @@ sig_t LinearMovement::process_position(uint8_t *elementary_dists) {//2n-2
  * The Speed processing function : it sets the period of the stepper interrupt
  */
 void LinearMovement::process_speed() {
-    set_stepper_int_period(SpeedManager::delay0);
+    set_stepper_int_period(K1RealTimeProcessor::delay0);
 }
 
 

@@ -62,7 +62,7 @@
  *
  */
 
-typedef struct {
+typedef struct kernel_movement_data {
     float min; //4
     float max;//8
     float min_increment; //12
@@ -76,6 +76,25 @@ typedef struct {
 } kernel_movement_data;
 
 
+
+typedef struct k1_movement_data : kernel_movement_data {//TODO REORG
+
+    void (*sub_move_init)(uint8_t);//2
+    //-------------4----------------24
+    //Speed
+    float ratio;//4
+    //-------------4----------------28
+    delay_t delay_numerator;//2
+    delay_t regulation_delay;//2
+    uint32_t jerk_distance_offset;
+    bool jerk_point;//1
+    //-------------4----------------
+    float speed_factor;//2
+    //-------------4----------------32
+
+} k1_movement_data;//36 bytes
+
+
 /*
  * k2_movement_data : this structure contains all data related to one movement :
  *  - the index variables : min, max, increment;
@@ -86,7 +105,7 @@ typedef struct {
  *
  */
 
-typedef struct : kernel_movement_data{
+typedef struct k2_movement_data : kernel_movement_data {
 
     float speed; //28
     uint8_t speed_group; //29
@@ -114,6 +133,14 @@ typedef struct {
     sig_t negative_signature; //10 -> 13
     //--------end : 12 to 16 bytes-------
 } k2_real_time_data;
+
+
+typedef struct {
+    float distance; //4
+    float speed; //8
+    sig_t negative_signature; //10 -> 13
+    //--------end : 12 to 16 bytes-------
+} k1_real_time_data;
 
 
 //-------------------------------------------------Movements Structures-------------------------------------------------

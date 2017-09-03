@@ -27,7 +27,6 @@
 #include "HomingMovement.h"
 #include "../../StepperController.h"
 #include "../SpeedPlanner.h"
-#include "../MovementExecuter.h"
 
 #define step 10
 
@@ -63,10 +62,10 @@ void HomingMovement::move() {
     float speed;
     uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
+        //speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
         d = (uint32_t) (1000000 / (speed * EEPROMStorage::steps[axis]));
         delays[axis] = delay;
-        delay = max(delay, d);
+        //delay = max(delay, d);
     }
 
     while (signature) {
@@ -106,7 +105,7 @@ uint32_t HomingMovement::getMaxDelay(sig_t signature, uint32_t *delays) {
     }
     for (; axis < NB_STEPPERS; axis++) {
         if (signature & (uint32_t) 1) {
-            delay = max(delay, delays[axis]);
+            //delay = max(delay, delays[axis]);
         }
         signature >>= 1;
     }
@@ -116,6 +115,7 @@ uint32_t HomingMovement::getMaxDelay(sig_t signature, uint32_t *delays) {
 sig_t HomingMovement::readEndStops() {
     sig_t signature = 0;
 
+    /*
 #define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
     if (!rel) {\
         if ((bool)digital_read(pinEndMin) == minValue) {\
@@ -126,6 +126,7 @@ sig_t HomingMovement::readEndStops() {
 #include "../../../config.h"
 
 #undef STEPPER
+     */
 
     return signature;
 

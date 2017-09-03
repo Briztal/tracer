@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
+#ifndef ENABLE_STEPPER_CONTROL
 
 #ifndef CODE_MOTIONND_H
 #define CODE_MOTIONND_H
