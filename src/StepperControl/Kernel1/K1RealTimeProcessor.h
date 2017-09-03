@@ -54,7 +54,7 @@ public :
      *      0   : positive direction (-> +)
      */
 
-    //End distances update
+    //End step_distances update
     static void update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
 
     //End position update
@@ -76,13 +76,13 @@ private :
     //The stepper end positions;
     static int32_t *const end_position;
 
-    //the stepper end distances;
+    //the stepper end step_distances;
     static int32_t *const end_distances;
 
     //The stepper jerk positions;
     static int32_t *const jerk_position;
 
-    //the stepper jerk distances;
+    //the stepper jerk step_distances;
     static int32_t *const jerk_distances;
 
     //The stepper jerk offset;
@@ -101,7 +101,7 @@ private:
     //The sub_movements queue
     static Queue<k1_real_time_data> sub_movement_queue;
 
-    //The arrays to store real and integer distances
+    //The arrays to store real and integer step_distances
     static float *sub_movement_real_distances;
     static uint8_t *sub_movement_int_distances;
 

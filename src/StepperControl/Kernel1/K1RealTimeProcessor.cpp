@@ -152,9 +152,9 @@ void K1RealTimeProcessor::regulate_speed(uint8_t elapsed_distance) {
         return;
 
     } else if (speed_regulation_enabled) {
-        //If speed still has to be modified :
+        //If regulation_speed still has to be modified :
 
-        //If we decelerated during the last sub_movement, we do not correct the speed for this one.
+        //If we decelerated during the last sub_movement, we do not correct the regulation_speed for this one.
         if (no_regulation_flag) {
 
             //disable the flag for the next sub_movement
@@ -166,7 +166,7 @@ void K1RealTimeProcessor::regulate_speed(uint8_t elapsed_distance) {
         bool low_speed = (delay0 > regulation_delay);
 
         //We must verify that the target hasn't been reached
-        //Reached when the speed is too high and has been increased before, or too low and has been decreased before
+        //Reached when the regulation_speed is too high and has been increased before, or too low and has been decreased before
         if (low_speed != speed_increasing) {
 
             //Set the delay to the target
@@ -177,22 +177,22 @@ void K1RealTimeProcessor::regulate_speed(uint8_t elapsed_distance) {
             return;
 
         } else if (low_speed) {
-            //if speed is still too low :
+            //if regulation_speed is still too low :
 
             //acceleration
             accelerate(elapsed_distance);
 
-            //mark the speed as increasing
+            //mark the regulation_speed as increasing
             speed_increasing = true;
 
             return;
         } else {
-            //if speed is still too high :
+            //if regulation_speed is still too high :
 
             //deceleration
             decelerate(elapsed_distance);
 
-            //mark the speed as decreasing
+            //mark the regulation_speed as decreasing
             speed_increasing = false;
 
             return;
@@ -248,7 +248,7 @@ float last_ratio;
  * init_speed_management : this function is called before a movement is actually executed.
  *
  *  It uses the 3 parameters pre-computed during the motion scheduling by SpeedPlanner::pre_set_speed_axis :
- *      - ratio : the distance ratio, used to adapt the speed management to one axis, in linear moves (1 for others);
+ *      - ratio : the distance ratio, used to adapt the regulation_speed management to one axis, in linear moves (1 for others);
  *      - tmp_delay_numerator : the new delay numerator;
  *      - tmp_regulation_delay : the new regulation delay;
  */
@@ -327,11 +327,11 @@ bool m::delay0_update_required;
 
 uint32_t m::jerk_offset;
 
-//End distances
+//End step_distances
 int32_t ted[NB_STEPPERS]{0};
 int32_t *const m::end_distances = ted;
 
-//jerk distances
+//jerk step_distances
 int32_t tjd[NB_STEPPERS]{0};
 int32_t *const m::jerk_distances = tjd;
 

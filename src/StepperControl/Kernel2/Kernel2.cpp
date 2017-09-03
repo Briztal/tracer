@@ -19,39 +19,21 @@
 */
 
 
-#include <config.h>
+#include <interface.h>
 
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
 #include "Kernel2.h"
 #include "K2RealTimeProcessor.h"
-#include <StepperControl/TrajectoryTracer.h>
 #include "JerkPlanner.h"
 
-#include <StepperControl/StepperController.h>
-#include <hardware_language_abstraction.h>
+#include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
 
 
 void Kernel2::initialise_tracing_procedure() {
     K2RealTimeProcessor::start();
-}
-
-//-----------------------------------------------Kernel status flags------------------------------------------------
-
-
-//The function to call to verify that sub_movements are available in the queue.
-uint8_t Kernel2::available_sub_movements() {
-
-    return K2RealTimeProcessor::available_sub_movements();
-
-}
-
-//The function to call to know if the current movement has been processed.
-bool Kernel2::movement_processed() {
-
-    return K2RealTimeProcessor::movement_processed;
-
 }
 
 
@@ -62,13 +44,13 @@ bool Kernel2::movement_processed() {
  * initialise_movement_data : updates the kernel2 specific data in the provided movement container;
  *
  *  It initialises :
- *      - the speed;
- *      - the speed group;
+ *      - the regulation_speed;
+ *      - the regulation_speed group;
  */
 
 void Kernel2::initialise_movement_data(k2_movement_data *movement_data) {
 
-    //Initialisation of speed variables
+    //Initialisation of regulation_speed variables
     movement_data->speed = MachineInterface::get_speed();
     movement_data->speed_group = MachineInterface::get_speed_group();
 
@@ -80,56 +62,38 @@ void Kernel2::initialise_movement_data(k2_movement_data *movement_data) {
  *  This task is delegated to the JerkPlanner class, as the Jerk determination algorithm is a bit heavy;
  */
 
-void Kernel2::compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement)  {
+void Kernel2::compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement) {
 
     //Do all the pre-processing for the movement, and throw the eventual error
     JerkPlanner::determine_jerk(current_movement, previous_movement);
 
 }
 
+
 /*
- * update_current_movement : this function updates the movement that Kernel2 is currently pre-processing.
+ * update_pre_process_speed_data : this function updates the movement that Kernel2 is currently pre-processing.
  */
 
-uint8_t Kernel2::update_current_movement(k2_movement_data *movement_data) {
+void Kernel2::update_pre_process_speed_data(k2_movement_data *movement_data) {
 
-    //Update the trajectory variables
-    K2RealTimeProcessor::initialise_movement(movement_data->min, movement_data->max, movement_data->min_increment, movement_data->trajectory_function);
+    //Set the regulation_speed group
+    movement_speed_group = movement_data->speed_group;
 
-    //Update the speed according to the movement type
-    K2RealTimeProcessor::set_regulation_speed(movement_data->speed_group, movement_data->speed);
-
-    //Return the number of sub_movements to wait before updating the movement environment
-    return K2RealTimeProcessor::available_sub_movements();
+    //Set the regulation_speed
+    next_regulation_speed = movement_data->speed;
 
 }
 
 
-//------------------------------------------------environment update------------------------------------------------
+//------------------------------------------------Real-time data update------------------------------------------------
 
 
-
-void Kernel2::update_movement_environment(k2_movement_data *movement_data) {
+void Kernel2::update_real_time_jerk_environment(k2_movement_data *movement_data) {
 
     //Jerk
     if (movement_data->jerk_point) {
-        update_jerk_environment(movement_data);
+        K2RealTimeProcessor::update_jerk_offsets(movement_data->jerk_offsets);
     }
-
-    //Send position
-    K2RealTimeProcessor::send_position();
-
-}
-
-/*
- * update_jerk_environment : this function actualises the jerk environment for the current move
- *      with the provided data.
- */
-
-void Kernel2::update_jerk_environment(k2_movement_data *movement_data) {
-
-    K2RealTimeProcessor::update_jerk_position(movement_data->jerk_position);
-    K2RealTimeProcessor::update_jerk_offsets(movement_data->jerk_offsets);
 
 }
 
@@ -137,132 +101,147 @@ void Kernel2::update_jerk_environment(k2_movement_data *movement_data) {
 //--------------------------------------------sub_movements preparation---------------------------------------------
 
 
-/*
- * prepare_first_sub_movement : this function sets all variables up for the movement routine.
- *
- *  It processes the first sub_movement, and then fills the sub_movement queue;
- *
- */
-void Kernel2::prepare_first_sub_movement(uint8_t *elementary_distances, sig_t *negative_signature, float *time) {
-    //Push the first position;
-    K2RealTimeProcessor::push_new_position();
+void Kernel2::initialise_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
-    //start by initialising vars for processing
-    float real_dists[NB_STEPPERS];
-    float distance = 0;
+    float high_level_distances[NB_AXIS];
+    float *candidate = sub_movement_data->candidate_high_level_positions;
+    float *current = current_hl_position;
 
-    //pop the stored position
-    K2RealTimeProcessor::pop_next_position(elementary_distances, real_dists, negative_signature, &distance);
+    //Compute the high level distances
+    for (uint8_t axis = 0; axis < NB_AXIS; axis++) {
+        high_level_distances[axis] = candidate[axis] - current[axis];
+    }
+
+    //Compute the movement distance for the current regulation_speed group
+    sub_movement_data->movement_distance = MachineInterface::get_movement_distance_for_group(movement_speed_group, high_level_distances);
 
 
-    //Update end distances with the computed distances.
-    K2RealTimeProcessor::update_end_jerk_distances(*negative_signature, elementary_distances);
+    //Translate the high level position into steppers position;
+    MachineInterface::translate(sub_movement_data->candidate_high_level_positions,
+                                sub_movement_data->future_steppers_positions);
 
-    //update the speeds
-    *time = K2RealTimeProcessor::get_first_sub_movement_time(distance, real_dists);
-
-    K2RealTimeProcessor::update_speeds(real_dists, *time);
-
-    //Push as much sub_movements as possible.
-    K2RealTimeProcessor::fill_sub_movement_queue();
+    //Update the regulation_speed for the real-time processor
+    sub_movement_data->regulation_speed = next_regulation_speed;
 
 }
 
 
 /*
- * prepare_next_sub_movement : This function prepares the next sub_movement.
+ * accept_sub_movement : updates the current high level position with the provided one.
+ */
+
+void Kernel2::accept_sub_movement(sub_movement_data_t *sub_movement_data) {
+
+    float *new_hl_position = sub_movement_data->candidate_high_level_positions;
+
+    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
+
+}
+
+
+/*
+ * compute_time_for_first_sub_movement : this function sets all variables up for the movement routine.
  *
- *  Steps to enqueue a sub movement :
- *      - Get the next distances > task given to the subclass
- *      - check if obtained distances are long enough
- *      - If true, enqueue the distance array
+ *  It processes the first sub_movement, and then fills the sub_movement queue;
+ *
+ */
+float Kernel2::compute_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data) {
+
+
+
+    //Get the sub_movement time
+    float time = K2RealTimeProcessor::get_first_sub_movement_time(sub_movement_data);
+
+    //update the speeds
+    K2RealTimeProcessor::update_speeds(sub_movement_data, time);
+
+    //Update tools powers
+    float current_speed = sub_movement_data->movement_distance / time;
+    TrajectoryTracer::update_tools_powers(current_speed);
+    //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
+
+    return time;
+
+}
+
+
+/*
+ * compute_time_for_sub_movement : This function prepares the next sub_movement.
+ *
+ *  Steps to enqueue_object a sub movement :
+ *      - Get the next step_distances > task given to the subclass
+ *      - check if obtained step_distances are long enough
+ *      - If true, dequeue the distance array
  *      - if not, discard the distance array and start with a new increment
  *
  * IMPORTANT : END_DISTANCE PROCESSING
  *
  *  It processes the next steps :
- *      - Process the next distances
- *      - Adjust the speed
- *      - set the new speed values
+ *      - Process the next step_distances
+ *      - Adjust the regulation_speed
+ *      - set the new regulation_speed values
  *      - get a new distance array
  *      - if queue not empty, get one more new distance array
  *
  */
 
-void Kernel2::prepare_next_sub_movement(uint8_t *elementary_distances, sig_t *negative_signatures, float *time) {
-    //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
-    disable_stepper_interrupt();
 
-    float real_dists[NB_STEPPERS];
-    float distance = 0;
-    
-
-    //Step 1 : Get a new position to reach
-    K2RealTimeProcessor::pop_next_position(elementary_distances, real_dists, negative_signatures, &distance);
-
-
-    //Step 2 : Update the end_distances with this distances array and compute the heuristic distances to jerk/end points
-    K2RealTimeProcessor::update_end_jerk_distances(*negative_signatures, elementary_distances);
+float Kernel2::compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
     STEP_AND_WAIT;
 
     //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
-
-    //Step 3 : Update the speed distance with the new heuristic distances
-    *time = K2RealTimeProcessor::get_sub_movement_time(distance, real_dists);
-
+    //Step 3 : Update the regulation_speed movementDistance with the new heuristic step_distances
+    float time = K2RealTimeProcessor::get_sub_movement_time(sub_movement_data);
 
     STEP_AND_WAIT;
 
     //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
 
     //Step 4 : Update the steppers speeds
-    K2RealTimeProcessor::update_speeds(real_dists, *time);
+    K2RealTimeProcessor::update_speeds(sub_movement_data, time);
 
     //Update tools powers
-    float current_speed = distance / *time;
-    ComplexTrajectoryExecuter::update_tools_powers(current_speed);//TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
+    float current_speed = sub_movement_data->movement_distance / time;
+    TrajectoryTracer::update_tools_powers(current_speed);
+    //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
-    //If no more pre-process is required
-    if (K2RealTimeProcessor::movement_processed) return;
-
-    STEP_AND_WAIT;
-
-    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
-    //Step 7 : get a new position part 1
-    K2RealTimeProcessor::push_new_position_1();//8us 4 steppers, 11us 17 steppers
-
-    STEP_AND_WAIT;
-
-    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
-    //get a new position part 2
-    K2RealTimeProcessor::push_new_position_2();
-
-    STEP_AND_WAIT;
-
-    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
-    //Step 8 : if the position queue is not full, get a new position part 1;
-    K2RealTimeProcessor::push_new_position_1();//8us
-
-    STEP_AND_WAIT;
-
-    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
-    //get a new position part 2
-    K2RealTimeProcessor::push_new_position_2();//5us
-
-    return;
+    return time;
 }
-
-
 
 
 //----------------------------------------------------positon log---------------------------------------------------
 
 
-
+/*
+ * send_position : this function sends the high level position to the controller.
+ *
+ *  It first inverts the current stepper positions, to obtain the high level position.
+ *
+ *  Then, it sends it using the interface.
+ *
+ */
 void Kernel2::send_position() {
-    K2RealTimeProcessor::send_position();
+
+    //Send the current high level position
+    CI::send_position(current_hl_position);
+    //StepperController::send_position();
+
+
 }
+
+//-----------------------------------------Static declarations - definitions--------------------------------------------
+
+//Positions
+float t_rl_pos[NB_AXIS]{0};
+float *const Kernel2::current_hl_position = t_rl_pos;
+
+
+//Speed group for the current movement
+uint8_t Kernel2::movement_speed_group = 0;
+
+//Regulation speed for the current movement
+float Kernel2::next_regulation_speed = 0;
 
 
 

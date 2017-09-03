@@ -31,5 +31,5 @@ A word about power regulation in continuous actions.
 
 When absolute mode is triggered for a specific action, the power will be maintained constant until you stop it, or until
 linear mode is triggered.
-When linear mode is triggered, the power delivered will be proportional to the global speed, according to the power ratio
+When linear mode is triggered, the power delivered will be proportional to the global regulation_speed, according to the power ratio
 you set. In linear mode, power will be enables as soon as motion starts

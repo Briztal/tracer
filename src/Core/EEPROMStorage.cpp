@@ -148,7 +148,7 @@ float EEPROMStorage::read(char *data, uint8_t size) {
                     return sizes[id];
                 case 1 ://steps
                     return steps[id];
-                case 2 ://speed
+                case 2 ://regulation_speed
                     return maximum_speeds[id];
                 case 3 ://acceleration
                     return accelerations[id];
@@ -277,7 +277,7 @@ float EEPROMStorage::write(char *data, uint8_t size) {
                     WRITE_RETURN(sizes[id], float);
                 case 1 ://steps
                     WRITE_RETURN(steps[id], float);
-                case 2 ://speed
+                case 2 ://regulation_speed
                     WRITE_RETURN(maximum_speeds[id], float);
                 case 3 ://acceleration
                     WRITE_RETURN(accelerations[id], float);
@@ -403,7 +403,7 @@ void EEPROMStorage::saveProfile() {
         write_stepper(indice, sizes[axis], steps[axis], maximum_speeds[axis], accelerations[axis], jerks[axis]);
     }
 
-    //Write speed groups
+    //Write regulation_speed groups
     for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
         write_float(indice, group_maximum_speeds[group]);
     }
@@ -747,7 +747,7 @@ void EEPROMStorage::send_structure() {
     //---------------------------------------------Steppers---------------------------------------------
 
     EEPROM_LOWER(STEPPER_CAT, steppers);
-    //For each Stepper, mark a case for the size, the number of steps per unit, and maximum speed and acceleration.
+    //For each Stepper, mark a case for the size, the number of steps per unit, and maximum regulation_speed and acceleration.
 #define STEPPER_DATA(indice, ...) EEPROM_LOWER(indice, indice);\
     EEPROM_LEAF(0, size);EEPROM_LEAF(1, steps);EEPROM_LEAF(2, max_speed);EEPROM_LEAF(3, max_acceleration);EEPROM_LEAF(3, max_jerk);\
     EEPROM_UPPER;
@@ -761,7 +761,7 @@ void EEPROMStorage::send_structure() {
     //---------------------------------------------Cartesian Groups---------------------------------------------
 
     EEPROM_LOWER(CARTESIAN_GROUP_CAT, speed_groups);
-    //For each group, mark a case for its maximum speed
+    //For each group, mark a case for its maximum regulation_speed
 #define CARTESIAN_GROUP(indice, ...) EEPROM_LOWER(indice, indice);\
     EEPROM_LEAF(0, max_speed);EEPROM_UPPER;
 
@@ -817,7 +817,7 @@ void EEPROMStorage::print_stored_data() {
         CI::echo("Stepper " + String(stepper));
         CI::echo("size : " + String(sizes[stepper]));
         CI::echo("steps : " + String(steps[stepper]));
-        CI::echo("max speed : " + String(maximum_speeds[stepper]));
+        CI::echo("max regulation_speed : " + String(maximum_speeds[stepper]));
         CI::echo("acceleration : " + String(accelerations[stepper]) + "\n");
         CI::echo("jerk : " + String(jerks[stepper]) + "\n");
     }
@@ -825,7 +825,7 @@ void EEPROMStorage::print_stored_data() {
     CI::echo("Speed Groups : ");
     for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
         CI::echo("Group " + String(group));
-        CI::echo("max speed : " + String(group_maximum_speeds[group]) + "\n");
+        CI::echo("max regulation_speed : " + String(group_maximum_speeds[group]) + "\n");
     }
 
 #endif

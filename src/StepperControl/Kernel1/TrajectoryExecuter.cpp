@@ -32,10 +32,10 @@
 
 /*
  * TODOs for a correct motion setup :
- *      set end distances
+ *      set end step_distances
  *      set first elementary_distances, calling TrajectoryExecuter::fill_movement_data(true,  ... );
  *      set last  elementary_distances, calling TrajectoryExecuter::push_first_sub_movement(false, ... );w
- *      set speed data, calling SpeedPlanner::pre_set_speed_axis(...);
+ *      set regulation_speed data, calling SpeedPlanner::pre_set_speed_axis(...);
  *      set processing functions, calling TrajectoryExecuter::fill_processors(...);
  *      call TrajectoryExecuter::enqueue_movement_data
  *
@@ -174,12 +174,12 @@ void TrajectoryExecuter::start() {
      *      Motion data :
      * - count : number of sub_movements;
      * - axis_signatures = the first elementary movement axis_signatures (pre_processed);
-     * - get_new_position, update_speed, functions used during movement initialise (depend on calling class);
+     * - initialise_sub_movement, update_speed, functions used during movement initialise (depend on calling class);
      * - step : the function used to step (depends on the calling class;
      *
      *      Speed data :
      * - delay_numerator : the fraction numerator in delay processing;
-     * - regulation_delay : the delay to reach, in speed regulation process
+     * - regulation_delay : the delay to reach, in regulation_speed regulation process
      * - ratio : the ratio speed_axis_dist(sqrt(sum(axis_dists^2)). Used.
      */
 
@@ -228,7 +228,7 @@ void TrajectoryExecuter::start() {
 }
 
 void TrajectoryExecuter::set_last_sub_motion() {//TODO END POSITION
-    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "prepare_next_sub_movement"
+    //Copy all axis_signatures in es0, and set is_es_0 so that es0 will be saved at the beginning of "compute_time_for_sub_movement"
     es0[0] = popped_data.final_signatures[0];
     es0[1] = popped_data.final_signatures[1];
     es0[2] = popped_data.final_signatures[2];

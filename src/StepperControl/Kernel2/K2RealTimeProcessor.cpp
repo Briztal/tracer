@@ -20,442 +20,24 @@
 
 
 
-#include <config.h>
+#include <StepperControl/SubMovementManager.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "K2RealTimeProcessor.h"
-#include "../../Actions/ContinuousActions.h"
-#include "../../interface.h"
-#include "../../Core/EEPROMStorage.h"
-#include "StepperControl/MachineInterface.h"
-#include "StepperControl/TrajectoryTracer.h"
-#include "StepperControl/_kernels_data.h"
 
+#include <hardware_language_abstraction.h>
+#include <Core/EEPROMStorage.h>
 
 void K2RealTimeProcessor::start() {
 
-    //initialise speeds and distances to zeros.
+    //initialise speeds and step_distances to zeros.
     memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
     memset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
 
-    //Pre compute the speed constants
+    //Pre compute the regulation_speed constants
     pre_compute_speed_constants();
 
-
-}
-
-
-/*
- * send_position : this function sends the high level position to the controller.
- *
- *  It first inverts the current stepper positions, to obtain the high level position.
- *
- *  Then, it sends it using the interface.
- *
- */
-void K2RealTimeProcessor::send_position() {
-
-    //Send the current high level position
-    CI::send_position(current_hl_position);
-    //StepperController::send_position();
-
-
-}
-
-
-/*
- * set_regulation_speed : this function updates the regulation speed,
- */
-
-void K2RealTimeProcessor::set_regulation_speed(uint8_t speed_group, float speed) {
-
-    //Set the speed group
-    K2RealTimeProcessor::movement_speed_group = speed_group;
-
-    //Set the speed
-    next_regulation_speed = speed;
-
-}
-
-
-/*
- * set_regulation_speed_jerk : this function updates the regulation speed,
- *      and marks that the next position to be pushed will be after a jerk point;
- *
- */
-
-/*
-void K2RealTimeProcessor::set_regulation_speed_jerk(uint8_t speed_group, float speed) {
-
-    //Program a jerk point
-    //next_jerk_flag = true;
-
-    //Set the speed
-    set_regulation_speed(speed_group, speed);
-}
- */
-
-
-/*
- * initialise_movement : this function is called when the current movement is finished.
- *
- *  Parameters passed update all variables used to compute positions :
- *      - min and max, the minimum and the maximum of index (beginning and ending of movement)
- *      - incr : the index increment for the first prepare_movement (pre computed and supposedly accurate)
- *      - trajectory_function : the function that actually computes stepper positions.
- *
- */
-
-void
-K2RealTimeProcessor::initialise_movement(float min, float max, float incr, void (*trajectory_function)(float, float *)) {
-
-    //update trajectory extrmas, index, and increment
-    index_limit = max;
-    index = min;
-    increment = incr;
-    positive_index_dir = incr > 0;
-
-    //update position provider
-    get_new_position = trajectory_function;
-
-    movement_processed = false;
-
-}
-
-
-//-----------------------------------Intermediary_Positions_Pre_Computation---------------------------------------------
-
-
-void K2RealTimeProcessor::fill_sub_movement_queue() {
-
-    while (sub_movement_queue.available_spaces() && !movement_processed) {
-        push_new_position();
-    }
-}
-
-/*
- * push_new_position_1 : this function gets the next position, defined by the image of index+increment
- *      by the trajectory function.
- *
- *      If the image is at a distance from the current position comprised on
- *          MINIMUM_DISTANCE_LIMIT and MAXIMUM_DISTANCE_LIMIT
- *
- *      Then the position is accepted and enqueued in the position queue.
- *
- *      If not, the position is discarded.
- *
- *      In all cases, the increment is updated to converge to the distance target.
- *
- *      Notes :
- *          - The distance is given by the maximum of all distances on each stepper.
- *          - The second criteria is (far) more restrictive than the first, but gives a better speed regulation
- *
- */
-
-position_data_struct p = {};
-position_data_struct *position_data = &p;
-
-
-void K2RealTimeProcessor::push_new_position() {
-    push_new_position_1();
-    push_new_position_2();
-}
-
-bool suus_process= false;
-
-void K2RealTimeProcessor::push_new_position_1() {
-
-    if ((!sub_movement_queue.available_spaces()) || (movement_processed)) {
-        suus_process = false;
-        return;
-    }
-
-    suus_process = true;
-
-    //Stepper positions : the new position in the steppers system (translated by MachineInterface).
-
-    //Stepper distances : As copying requires time, we directly put the temp distances in the final array.
-    uint8_t push_indice = sub_movement_queue.push_indice();
-    position_data->elementary_dists = sub_movement_int_distances + push_indice * NB_STEPPERS;
-    position_data->real_dists = sub_movement_real_distances + push_indice * NB_STEPPERS;
-
-    //The maximal stepper distance, and the maximum stepper
-
-
-    //------------------Distances_computing-----------------------------
-
-
-    //Get the new index candidate;
-    float local_index_candidate = index + increment;
-
-    if (((positive_index_dir) && (local_index_candidate + increment > index_limit)) ||
-        ((!positive_index_dir) && (local_index_candidate + increment < index_limit))) {
-        movement_processed = true;
-        local_index_candidate = index_limit;
-    }
-
-
-    //Get the new high level position;
-    get_new_position(local_index_candidate, position_data->candidate_high_level_positions);
-
-    position_data->index_candidate = local_index_candidate;
-
-
-    float high_level_distances[NB_AXIS];
-    float *candidate = position_data->candidate_high_level_positions;
-    float *current = current_hl_position;
-    for (uint8_t axis = 0; axis < NB_AXIS; axis++) {
-        high_level_distances[axis] = candidate[axis] - current[axis];
-    }
-
-    //Compute the movement distance for the current speed group
-    position_data->movement_distance = MachineInterface::get_movement_distance_for_group(movement_speed_group,
-                                                                                           high_level_distances);
-
-
-
-    //Translate the high level position into steppers position;
-    MachineInterface::translate(position_data->candidate_high_level_positions,
-                                  position_data->future_steppers_positions);
-
-
-}
-
-void K2RealTimeProcessor::push_new_position_2() {
-
-    if (!suus_process)
-        return;
-
-
-    uint8_t max_axis;
-    float max_distance;
-
-    sig_t negative_signature;
-
-    //Get the steppers distances, high level distances, and the maximal stepper and distance
-    bool up_check = get_steppers_distances(current_stepper_positions, position_data->future_steppers_positions,
-                                           position_data->elementary_dists, position_data->real_dists,
-                                           &negative_signature, &max_axis, &max_distance);
-
-    //-----------------Validity_Verification----------------------------
-
-
-    if (max_distance != DISTANCE_TARGET) {
-        //CI::echo("max dist : "+String(max_distance)+" "+String(DISTANCE_TARGET));
-        //Increment adjustment according to the target
-        increment = increment * (float) DISTANCE_TARGET / max_distance;
-
-    }
-
-    //If the maximal distance is below the lower limit :
-    if ((!movement_processed)&&up_check) {
-        //CI::echo("REJECTED "+String(sub_movement_queue.available_elements()));
-        return;
-    }
-
-    //If the maximal distance is below the lower limit :
-    if ((!movement_processed) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
-        //CI::echo("LOWER_REJECTED");
-        return;
-    }
-
-
-    //---------------------Movement_Enqueuing----------------------------
-
-    /*
-     * Now that validity checks are made, we can enqueue the sub_movement :
-     * As the distances are already in the array, all we need to do is to push the direction signature
-     *      and validate the candidate index.
-     */
-
-    k2_real_time_data *d = sub_movement_queue.get_push_ptr();
-
-    d->negative_signature = negative_signature;
-    d->distance = position_data->movement_distance;
-    d->speed = next_regulation_speed;
-    //d->jerk_point = next_jerk_flag;
-
-    //A jerk point is punctual (no shit !), so when he has been enqueued, set the flag to false;
-    //next_jerk_flag = false;
-
-    sub_movement_queue.push();
-
-    index = position_data->index_candidate;
-
-    update_current_hl_position(position_data->candidate_high_level_positions);
-
-}
-
-
-/*
- * get_steppers_distances : this function determines the distance between a position and a target, for all stepper.
- *
- * It also computes the direction signature, as distances are positive numbers, and saves the maximum stepper
- *      and the maximum distance.
- *
- */
-
-bool
-K2RealTimeProcessor::get_steppers_distances(float *const pos, const float *const dest, uint8_t *const int_dists,
-                                          float *const real_dists, sig_t *dir_dignature_p, uint8_t *max_axis_p,
-                                          float *max_distance_p) {
-
-
-    //Cache variable, to avoid pointer access.
-    uint8_t max_int_dist = 0;
-    float max_f_dist = 0;
-    uint8_t max_axis = 0;
-    sig_t dir_signature = 0;
-
-    bool distance_bound_error = false;
-
-    //We must determine the distance for every stepper
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-
-        //get destination and position
-        float d = dest[stepper], p = pos[stepper];
-
-        //update position with destination;
-        pos[stepper] = d;
-
-        //get the real distance
-        float distance = d - p;
-
-        uint8_t int_dist;
-
-        //get absolute distance
-        if (distance < 0) {
-            distance = -distance;
-            dir_signature |= axis_signatures[stepper];
-            int_dist = (uint8_t) ((uint32_t) p - (uint32_t) d);
-        } else {
-            int_dist = (uint8_t) ((uint32_t) d - (uint32_t) p);
-        }
-
-        //if the distance is greater than the limit : fail with true
-        if (distance >= MAXIMUM_DISTANCE_LIMIT) {
-            distance_bound_error = true;
-        }
-
-        //persist distances
-        real_dists[stepper] = distance;
-        int_dists[stepper] = int_dist;
-
-        //Update max dist
-        if (int_dist > max_int_dist) {
-            max_int_dist = int_dist;
-            max_f_dist = distance;
-            max_axis = stepper;
-        }
-    }
-
-    //Finally update all data
-    *max_axis_p = max_axis;
-    *max_distance_p = max_f_dist;
-    *dir_dignature_p = dir_signature;
-
-
-    //No error
-    return distance_bound_error;
-}
-
-
-/*
- * update_current_hl_position : updates the current high level position with the provided one.
- */
-void K2RealTimeProcessor::update_current_hl_position(float *new_hl_position) {
-
-    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
-
-}
-
-
-/*
- * update_end_position : this function updates the end point position.
- *
- *
- */
-
-void K2RealTimeProcessor::update_end_position(const float *const new_hl_position) {
-
-    float stepper_end_position[NB_STEPPERS];
-
-    MachineInterface::translate(new_hl_position, stepper_end_position);
-
-    if (ComplexTrajectoryExecuter::started) {
-        disable_stepper_interrupt();
-    }
-
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        int32_t d = (int32_t) stepper_end_position[stepper];
-        end_distances[stepper] += d - end_position[stepper];
-        end_position[stepper] = d;
-    }
-
-    if (ComplexTrajectoryExecuter::started) {
-        enable_stepper_interrupt()
-    }
-}
-
-
-
-/*
- * update_jerk_position : this function updates the jerk point position.
- *
- */
-
-void K2RealTimeProcessor::update_jerk_position(const int32_t *const new_stepper_position) {
-
-
-    if (ComplexTrajectoryExecuter::started) {
-        disable_stepper_interrupt();
-    }
-
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        int32_t d = (int32_t) new_stepper_position[stepper];
-        jerk_distances[stepper] += d - jerk_position[stepper];
-        jerk_position[stepper] = d;
-    }
-
-    if (ComplexTrajectoryExecuter::started) {
-        enable_stepper_interrupt()
-    }
-}
-
-
-/*
- * update_jerk_offsets : this function updates the jerk offsets
- *
- */
-
-void K2RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
-
-    memcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
-
-}
-
-
-/*
- * update_end_jerk_distances : this function updates distances to end point and jerk point.
- *
- *  It takes in arguments the absolute distances on each stepper of the next sub_movement, and their negative signature.
- *
- *      Reminder : the i_th bit of negative_signature is 1 if the distance on the i_th stepper is negative.
- *
- *  The global distance is given by the maximum of all distance on each stepper.
- *
- */
-
-void K2RealTimeProcessor::update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists) {
-
-#define STEPPER(i, sig, ...)\
-    if (negative_signatures&sig) {end_distances[i] += elementary_dists[i]; jerk_distances[i] += elementary_dists[i];}\
-    else {end_distances[i] -= elementary_dists[i];jerk_distances[i] -= elementary_dists[i];}\
-
-#include "../../config.h"
-
-#undef STEPPER
 
 }
 
@@ -463,9 +45,13 @@ void K2RealTimeProcessor::update_end_jerk_distances(const sig_t negative_signatu
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 
 
-float K2RealTimeProcessor::get_first_sub_movement_time(float movement_distance, const float *const stepper_distances) {
+float K2RealTimeProcessor::get_first_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
-    //The regulation time, corresponding to the regulation speed;
+    //Cache vars
+    float *f_step_distances = sub_movement_data->f_step_distances;
+    float movement_distance = sub_movement_data->movement_distance;
+
+    //The regulation time, corresponding to the regulation regulation_speed;
     float regulation_time = movement_distance / regulation_speed;
 
     //The final time
@@ -477,7 +63,7 @@ float K2RealTimeProcessor::get_first_sub_movement_time(float movement_distance, 
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
-        float down_time = stepper_distances[stepper] / maximum_speed;
+        float down_time = f_step_distances[stepper] / maximum_speed;
 
         //update minimum time, as the maximum of the new time and the current min time :
         min_time = (down_time < min_time) ? min_time : down_time;
@@ -497,7 +83,7 @@ float K2RealTimeProcessor::get_first_sub_movement_time(float movement_distance, 
  *
  *  The movement is passed in he form of :
  *      - movement distance : the high level distance
- *      - stepper_distances : the effective stepper distances of the current movement;
+ *      - stepper_distances : the effective stepper step_distances of the current movement;
  *
  *  It starts to determine the largest time window, at the current speeds. This window is the intersection of
  *      time windows for all steppers.
@@ -509,10 +95,16 @@ float K2RealTimeProcessor::get_first_sub_movement_time(float movement_distance, 
  *
  */
 
-float K2RealTimeProcessor::get_sub_movement_time(float movement_distance, const float *const stepper_distances) {
+float K2RealTimeProcessor::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
-    //The regulation time, corresponding to the regulation speed;
-    float regulation_time = movement_distance / regulation_speed;
+    //Cache vars
+    float *f_step_distances = sub_movement_data->f_step_distances;
+    float movement_distance = sub_movement_data->movement_distance;
+
+    float speed = sub_movement_data->regulation_speed;
+
+    //The regulation time, corresponding to the regulation regulation_speed;
+    float regulation_time = movement_distance / speed;
 
     //The final time
     float new_time = 0;
@@ -521,10 +113,10 @@ float K2RealTimeProcessor::get_sub_movement_time(float movement_distance, const 
     bool first = true;
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
-        //Get the speed on last movement, on stepper [stepper]
+        //Get the regulation_speed on last movement, on stepper [stepper]
         float act_speed = steppers_speeds[stepper];
 
-        //Get the speed limit
+        //Get the regulation_speed limit
         //Formula : delta_speed = acceleration * steps * time; acceleration * steps is pre-computed (optimisation)
         float max_delta_speed = delta_speed_constants[stepper] * last_time;
 
@@ -534,9 +126,9 @@ float K2RealTimeProcessor::get_sub_movement_time(float movement_distance, const 
 
         if ((s = act_speed - max_delta_speed) > 0) {
 
-            //update the maximum time, the new speed = act_speed - speed limit.
+            //update the maximum time, the new regulation_speed = act_speed - regulation_speed limit.
             //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
-            float up_time = stepper_distances[stepper] / s;
+            float up_time = f_step_distances[stepper] / s;
 
             //update maximum time, as the minimum of the new time and the current max time :
             max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
@@ -555,7 +147,7 @@ float K2RealTimeProcessor::get_sub_movement_time(float movement_distance, const 
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
-        float down_time = stepper_distances[stepper] / maximum_speed;
+        float down_time = f_step_distances[stepper] / maximum_speed;
 
         //update minimum time, as the maximum of the new time and the current min time :
         min_time = (down_time < min_time) ? min_time : down_time;
@@ -603,17 +195,25 @@ float K2RealTimeProcessor::get_sub_movement_time(float movement_distance, const 
  *
  */
 
-void K2RealTimeProcessor::update_speeds(const float *const stepper_distances, float time) {
+void K2RealTimeProcessor::update_speeds(sub_movement_data_t *sub_movement_data, float time) {
+
+    //Cache var for stepper distances
+    const float *const f_stepper_distances = sub_movement_data->f_step_distances;
+
 
     //Only the inverse of time is used, computes now for optimisation purposes.
     float inv_time = 1 / time;
+    
+    //Cache vars for end and jerk distances
+    int32_t *end_distances = SubMovementManager::end_distances;
+    int32_t *jerk_distances = SubMovementManager::jerk_distances;
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        //set the current speed on the stepper [stepper]
+        //set the current regulation_speed on the stepper [stepper]
 
-        //get the speed for the stepper
+        //get the regulation_speed for the stepper
         //Formula : v = d / t -> v = d * (1 / t).
-        float v = steppers_speeds[stepper] = stepper_distances[stepper] * inv_time;
+        float v = steppers_speeds[stepper] = f_stepper_distances[stepper] * inv_time;
 
         //If a deceleration is required, no need for deceleration_distance checking
         if (deceleration_required)
@@ -642,6 +242,18 @@ void K2RealTimeProcessor::update_speeds(const float *const stepper_distances, fl
 }
 
 
+/*
+ * update_jerk_offsets : this function updates the jerk offsets
+ *
+ */
+
+void K2RealTimeProcessor::update_jerk_offsets(const uint32_t *const new_offsets) {
+
+    memcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
+
+}
+
+
 //---------------------------------------------------Speed_Constants----------------------------------------------------
 
 void K2RealTimeProcessor::pre_compute_speed_constants() {
@@ -657,174 +269,49 @@ void K2RealTimeProcessor::pre_compute_speed_constants() {
 }
 
 
-
-//----------------------------------------------------pop---------------------------------------------------------------
-
-/*
- * pop_next_position : this function pops a previously enqueued position.
- *
- *      It returns an error if the queue is empty.
- *
- *  It copies the distances in the provided array, and returns the negative signature assaoiated with those distances.
- *
- * TIME OF EXECUTION : 2us with 4 steppers
- *
- * Costly operations : memcpys.
- */
-
-void K2RealTimeProcessor::pop_next_position(uint8_t *elementary_dists, float *real_dists, sig_t *negative_signature,
-                                          float *distance) {
-
-    uint8_t size = sub_movement_queue.available_elements();
-
-    if (!size) {
-
-        //if the queue is empty : error
-        CI::echo("ERROR : IN ComplexTrajectoryExecuter::pop_next_position : THE SUB_MOVEMENT QUEUE IS EMPTY");
-
-        return;
-
-    } else {
-
-        //Get the current sub movement index of the queue, for arrays indexation
-        uint8_t pull_index = sub_movement_queue.pull_indice();
-
-        //The pointer to the beginning of pre-processed elementary distances
-        uint8_t *e_ptr = sub_movement_int_distances + NB_STEPPERS * pull_index;
-        float *r_ptr = sub_movement_real_distances + NB_STEPPERS * pull_index;
-
-        //copy
-        memcpy(elementary_dists, e_ptr, NB_STEPPERS * sizeof(uint8_t));
-        memcpy(real_dists, r_ptr, NB_STEPPERS * sizeof(float));
-
-        //update the direction signature and the distance memorised in the queue.
-        k2_real_time_data *data = sub_movement_queue.read();
-
-        *negative_signature = data->negative_signature;
-        *distance = data->distance;
-        //jerk_flag = data->jerk_point;
-        regulation_speed = data->speed;
-
-        sub_movement_queue.discard();
-
-        return;
-
-    }
-
-}
-
-
-void K2RealTimeProcessor::display_distances() {
-    for (int i = 0; i<NB_STEPPERS; i++) {
-        CI::echo(String(i)+" ed : "+String(end_distances[i])+" jd : "+String(jerk_distances[i]));
-    }
-}
-
 //-----------------------------------------Static declarations - definitions--------------------------------------------
 
 //Static declarations - definitions;
 
 #define m K2RealTimeProcessor
 
-//Current stepper position;
-float t_cur_pos[NB_STEPPERS]{0};
-float *const m::current_stepper_positions = t_cur_pos;
-
-//Positions
-float t_rl_pos[NB_AXIS]{0};
-float *const m::current_hl_position = t_rl_pos;
-
-//movement data queue;
-Queue<k2_real_time_data> m::sub_movement_queue(MOVEMENT_DATA_QUEUE_SIZE);
-
-//the integer distances data
-uint8_t t_sm_d[MOVEMENT_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
-uint8_t *m::sub_movement_int_distances = t_sm_d;
-
-//the real distances data
-float t_sm_rd[MOVEMENT_DATA_QUEUE_SIZE * NB_STEPPERS]{0};
-float *m::sub_movement_real_distances = t_sm_rd;
-
-
-//Indexation variables
-float m::index_limit = 0, m::index = 0, m::increment = 0;
-bool m::positive_index_dir = false;
-
-//Speed group for the current movement
-uint8_t m::movement_speed_group = 0;
-
-//Trajectory function
-void (*m::get_new_position)(float, float *);
-
-//Queue state
-bool m::movement_processed = false;
-
-
-//End distances
-int32_t k2ted[NB_STEPPERS]{0};
-int32_t *const m::end_distances = k2ted;
-
-int32_t k2tep[NB_STEPPERS]{0};
-int32_t *const m::end_position = k2tep;
-
-//The stepper jerk positions;
-int32_t k2jpt[NB_STEPPERS]{0};
-int32_t *const m::jerk_position = k2jpt;
-
-//the stepper jerk distances;
-int32_t k2jdt[NB_STEPPERS]{0};
-int32_t *const m::jerk_distances = k2jdt;
-
-//The stepper jerk offsets;
-uint32_t k2jot[NB_STEPPERS]{0};
-uint32_t *const m::jerk_offsets = k2jot;
-
 bool m::deceleration_required = false;
 
 //bool m::jerk_flag = true;
 
-//Global speed
+//Global regulation_speed
 float m::regulation_speed;
 float m::last_time;
 
-//next_speed parameters
-//bool m::next_jerk_flag = false;
-float m::next_regulation_speed = 0;
 
 //Steppers speeds
 float t_st_spd[NB_STEPPERS];
 float *const m::steppers_speeds = t_st_spd;
 
-//Deceleration distances
+
+//Deceleration step_distances
 uint32_t t_dec_dst[NB_STEPPERS];
 uint32_t *const m::deceleration_distances = t_dec_dst;
 
-//Axis signatures
 
-#define STEPPER(i, sig, ...) sig,
-sig_t k2t_sig[NB_STEPPERS + 1]{
-
-#include "../../config.h"
-
-        0};
-
-#undef STEPPER
-
-const sig_t *const m::axis_signatures = k2t_sig;
-
-//Deceleration distances
+//Deceleration step_distances
 float t_dec_const[NB_STEPPERS];
 float *const m::deceleration_constants = t_dec_const;
 
 
-//Deceleration distances
+//Deceleration step_distances
 float t_dsp_const[NB_STEPPERS];
 float *const m::delta_speed_constants = t_dsp_const;
 
 
-//Deceleration distances
+//Deceleration step_distances
 float t_msp_const[NB_STEPPERS];
 float *const m::max_speed_constants = t_msp_const;
+
+
+//The stepper jerk offsets;
+uint32_t k2jot[NB_STEPPERS]{0};
+uint32_t *const m::jerk_offsets = k2jot;
 
 
 #undef m

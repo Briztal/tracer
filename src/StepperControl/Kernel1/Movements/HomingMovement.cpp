@@ -62,7 +62,7 @@ void HomingMovement::move() {
     float speed;
     uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        //speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
+        //regulation_speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
         d = (uint32_t) (1000000 / (speed * EEPROMStorage::steps[axis]));
         delays[axis] = delay;
         //delay = max(delay, d);

@@ -39,7 +39,7 @@ bool JerkPlanner::determine_jerk(const k2_movement_data *current_movement, k2_mo
     const float min_increment = current_movement->min_increment, max_increment = current_movement->max_increment;
     const uint8_t speed_group = current_movement->speed_group;
 
-    //Initialise an array for the jerk distances (initial and final)
+    //Initialise an array for the jerk step_distances (initial and final)
     float jerk_distances[NB_STEPPERS];
     float t_min[NB_STEPPERS];
 
@@ -57,7 +57,7 @@ bool JerkPlanner::determine_jerk(const k2_movement_data *current_movement, k2_mo
 
     }
 
-    //Get the distances for the first sub_movement
+    //Get the step_distances for the first sub_movement
     get_stepper_distances(min, min + min_increment, trajectory_function, jerk_distances);
 
     //get the correct jerk offsets for the current movement
@@ -65,7 +65,7 @@ bool JerkPlanner::determine_jerk(const k2_movement_data *current_movement, k2_mo
 
     previous_movement->jerk_point = true;
 
-    //Get the distances for the first sub_movement
+    //Get the step_distances for the first sub_movement
     get_stepper_distances(max, max - max_increment, trajectory_function, jerk_distances);
 
     //update the jerk_ratios for the last movement
@@ -128,7 +128,7 @@ void JerkPlanner::get_jerk_offsets(float *initial_steps_distances, const uint8_t
 
     float initial_jerk_ratios[NB_STEPPERS];
 
-    //-----------initial jerk ratios and minimum speed------------
+    //-----------initial jerk ratios and minimum regulation_speed------------
 
     //First, determine the inverse of th high level distance for the sub_movement.
     float distance_inverse = MachineInterface::get_movement_distance_for_group(speed_group, initial_steps_distances);
@@ -147,11 +147,11 @@ void JerkPlanner::get_jerk_offsets(float *initial_steps_distances, const uint8_t
         //extract the absolute difference
         if (algebric_difference < 0) algebric_difference = -algebric_difference;
 
-        //Get the maximum speed.
-        //Formula : speed < max_jerk(unit/s) / abs(final_ratio - initial_ratio)
+        //Get the maximum regulation_speed.
+        //Formula : regulation_speed < max_jerk(unit/s) / abs(final_ratio - initial_ratio)
         float max_speed = EEPROMStorage::jerks[stepper] * EEPROMStorage::steps[stepper] / algebric_difference;
 
-        //Update the maximum speed.
+        //Update the maximum regulation_speed.
         speed = (first) ? speed : ((speed < max_speed) ? speed : max_speed);
 
         //first stepper is done.
@@ -164,16 +164,16 @@ void JerkPlanner::get_jerk_offsets(float *initial_steps_distances, const uint8_t
 
     //-----------maximum stepper speeds------------
 
-    //Now that we know the maximum speed, we can determine the deceleration distances :
+    //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
-        //get the maximum speed on the current axis :
+        //get the maximum regulation_speed on the current axis :
         //Formula : max_stepper_speed = max_speed * stepper_distance / high_level_distance;
         float stepper_speed = speed * initial_jerk_ratios[stepper];
 
         //Get the deceleration distance offset :
-        //Formula : the deceleration distance for a stepper at the speed s (steps/s) is given by
+        //Formula : the deceleration distance for a stepper at the regulation_speed s (steps/s) is given by
         //      s * s / (2 * acceleration (steps/s^2))
         jerk_distances_offsets[stepper] = (uint32_t) (stepper_speed * stepper_speed /
                                                       (2 * EEPROMStorage::accelerations[stepper] *
@@ -198,7 +198,7 @@ void JerkPlanner::update_jerk_final_data(float *final_steps_distances, const uin
 
 
 /*
- * get_stepper_distances : this function gets the algebric distances on each stepper, between the two provided
+ * get_stepper_distances : this function gets the algebric step_distances on each stepper, between the two provided
  *      positions of the provided trajectory.
  */
 

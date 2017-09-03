@@ -85,10 +85,10 @@ public :
     //The function to set the current speed group
     static void set_speed_group(uint8_t speed_group);
 
-    //The function to get the current speed, for the current speed group.
+    //The function to get the current regulation_speed, for the current regulation_speed group.
     static float get_speed();
 
-    //The function to set the speed for the provided speed group.
+    //The function to set the regulation_speed for the provided regulation_speed group.
     static void set_speed_for_group(uint8_t speed_group, float new_speed);
 
     //function to compute the high level movement distance for a particular speed group.
@@ -97,7 +97,7 @@ public :
 
 private :
 
-    //The speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the speed group j. Compiler constant.
+    //The regulation_speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the regulation_speed group j. Compiler constant.
     static const int8_t *const speed_groups_indices;
 
     //the current target speeds, indexed on speed groups

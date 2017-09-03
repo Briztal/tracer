@@ -38,7 +38,7 @@ uint16_t SqrtFastComputer::sqrt_slow(uint32_t distance_to_end) {
 
 
 /*
- * sqrt_fast : this function sets speed distance, in absolute mode.
+ * sqrt_fast : this function sets regulation_speed distance, in absolute mode.
  *
  * It calls _sqrt_fast in relative mode.
  */
@@ -65,7 +65,7 @@ uint16_t SqrtFastComputer::sqrt_fast(uint32_t distance_to_end) {
  *
  * This algorithm is based on the formula n*n = 1 + 3 + 5 + ... + (2.n-1)
  *
- * When the square root is modfied, it sets delay0_update_required, so that delay (speed) will be modified aferwards.
+ * When the square root is modfied, it sets delay0_update_required, so that delay (regulation_speed) will be modified aferwards.
  *
  * The delay is set according to  : delay = delay_numerator/sqrt(primary)
  *
@@ -94,7 +94,7 @@ uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
         //An decrement is required :
 
         if (primary > incr) {
-            //If we need to decrement less than the speed distance
+            //If we need to decrement less than the regulation_speed distance
 
             //decrementing the distance
             primary -= incr;
@@ -108,7 +108,7 @@ uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
             //last update, with the reduced increment
             primary_sup += incr, primary_inf -= incr;
         } else {
-            //If we need to decrement more than the speed distance : speed distance goes to zero (necessarily >= 0);
+            //If we need to decrement more than the regulation_speed distance : regulation_speed distance goes to zero (necessarily >= 0);
 
             primary = 0;
             primary_inf = primary_sup = primary_increment = 1;

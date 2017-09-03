@@ -49,15 +49,21 @@
  */
 
 
-//---------------------------------------------------Kernel Structures--------------------------------------------------
+//-----------------------------------------------Stepper Standatd Structures---------------------------------------------
+/*
+ * The two structures below are the minimum of data required to make the TrajectoryTracer do its job.
+ *
+ *  Each Kernel will have its own structure, inherited of the stadard ones, adding the required data they need.
+ *
+ */
 
 
 /*
- * kernel_movement_data : this structure contains all data related to one movement :
+ * movement_data : this structure contains all data related to one movement :
  *  - the index variables : min, max, increment;
  *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
- *  - The speed variables : the speed and the speed group,
+ *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
  *  - The tools signature, indicating tools enabled during this movement.
  *
  */
@@ -73,11 +79,38 @@ typedef struct kernel_movement_data {
     void (*pre_process_trajectory_function)(float, float *); //24
     sig_t tools_signatures; //30 -> 33
     //-----------end : 32 to 36 bytes----------
-} kernel_movement_data;
+} movement_data;
+
+
+/*
+ * sub_movement_data : this structure contains all data related to one movement :
+ *  - step_distances : the step_distances of the sub_movement;
+ *  - future_steppers_positions
+ *  - The tools signature, indicating tools enabled during this movement.
+ *
+ */
+
+typedef struct {
+    uint8_t step_distances[NB_STEPPERS];
+    float future_steppers_positions[NB_STEPPERS];
+    float candidate_high_level_positions[NB_AXIS];
+
+} sub_movement_data;
 
 
 
-typedef struct k1_movement_data : kernel_movement_data {//TODO REORG
+
+//---------------------------------------------------Kernel1 Structures-------------------------------------------------
+/*
+ * Standard structures implementation for the kernel1
+ */
+
+
+/*
+ * TODO
+ */
+
+typedef struct k1_movement_data : movement_data {//TODO REORG
 
     void (*sub_move_init)(uint8_t);//2
     //-------------4----------------24
@@ -95,17 +128,26 @@ typedef struct k1_movement_data : kernel_movement_data {//TODO REORG
 } k1_movement_data;//36 bytes
 
 
+
+
+//---------------------------------------------------Kernel2 Structures-------------------------------------------------
+/*
+ * Standard structures implementation for the Kernel2
+ *
+ */
+
+
 /*
  * k2_movement_data : this structure contains all data related to one movement :
  *  - the index variables : min, max, increment;
  *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
- *  - The speed variables : the speed and the speed group,
+ *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
  *  - The tools signature, indicating tools enabled during this movement.
  *
  */
 
-typedef struct k2_movement_data : kernel_movement_data {
+typedef struct k2_movement_data : movement_data {
 
     float speed; //28
     uint8_t speed_group; //29
@@ -116,24 +158,39 @@ typedef struct k2_movement_data : kernel_movement_data {
 } k2_movement_data;
 
 
+
 /*
- * k2_real_time_data : this structure contains all data related to sub_movements :
- *  - the distance of the sub_movement
- *  - the speed of the sub_movement
- *  - if the starting point is a jerk point
- *  - the signature of the movement distances (1 for negative distance, 0 for positive)
- *
- * float and integer distances are also stored, in a separate queue.
+ * k2_movement_data : this structure contains all data related to one movement :
+ *  - the index variables : min, max, increment;
+ *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
+ *  - the trajectory function, used continuously during the movement to get positions;
+ *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
+ *  - The tools signature, indicating tools enabled during this movement.
  *
  */
 
-typedef struct {
-    float distance; //4
-    float speed; //8
-    sig_t negative_signature; //10 -> 13
-    //--------end : 12 to 16 bytes-------
-} k2_real_time_data;
+typedef struct k2_sub_movement_data : sub_movement_data {
 
+    sig_t direction_signature;
+    float *f_step_distances;
+    float index_candidate;
+    float movement_distance;
+    float regulation_speed;
+    //-----------end : 32 to 36 bytes----------
+} k2_sub_movement_data;
+
+
+
+/*
+ * k2_real_time_data : this structure contains all data related to sub_movements :
+ *  - the distance of the sub_movement
+ *  - the regulation_speed of the sub_movement
+ *  - if the starting point is a jerk point
+ *  - the signature of the movement step_distances (1 for negative distance, 0 for positive)
+ *
+ * float and integer step_distances are also stored, in a separate queue.
+ *
+ */
 
 typedef struct {
     float distance; //4
@@ -160,16 +217,6 @@ typedef struct {
     //--end : 4 * (NB_AXIS + NB_STEPPERS + 1) bytes--
 } k2_linear_data;
 
-
-typedef struct {
-    uint8_t *elementary_dists;
-    float *real_dists;
-    float index_candidate;
-    float movement_distance;
-    float future_steppers_positions[NB_STEPPERS];
-    float candidate_high_level_positions[NB_AXIS];
-
-} position_data_struct;
 
 #endif //TRACER_COMPLEX_MOTION_DATA_H
 

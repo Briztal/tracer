@@ -293,7 +293,7 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 #define serial_available() Serial.available()
 
 
-/* The function to call to read a byte from serial buffer
+/* The function to call to read_output a byte from serial buffer
  * char serial_read(void)
  */
 /*inline static char serial_read(){

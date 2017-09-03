@@ -38,7 +38,7 @@ int16_t ** Thermistors::therm_table = (int16_t **) arr;\
 
 /*
  * get_temperature : this function determines the temperature of a thermistor, given  :
- *      - a read value (most likely given by calling analogRead or equivalent)
+ *      - a read_output value (most likely given by calling analogRead or equivalent)
  *      - a lookup tabletable for the current thermistor
  *      - the lookup table size
  *      - the current index on the table
@@ -70,12 +70,12 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
 
     if (last_value == read_value) {
 
-        //if the current case is the read value
+        //if the current case is the read_output value
         return table[(index<<1)+1];
 
     } else if (last_value <read_value) {
 
-        //If the current case is lower than the read value : must iterate from index+1, in increasing order.
+        //If the current case is lower than the read_output value : must iterate from index+1, in increasing order.
         while(true) {
             //Increment the index
             index++;
@@ -91,14 +91,14 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
             last_value = value;
             value = table[index<<1];
 
-            //if the current case is the read value  2<<3+2
+            //if the current case is the read_output value  2<<3+2
             if (value == read_value) {
                 final_temp = table[(index<<1)+1];
                 goto clean_and_return;
             }
 
 
-            //if the current case is higher than the read value
+            //if the current case is higher than the read_output value
             if (value > read_value) {
 
                 //Not a value in the lookup table -> use an approximation
@@ -118,7 +118,7 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
             goto clean_and_return;
         }
 
-        //If the current case is higher than the read value : must iterate from index-1, in decresaing order.
+        //If the current case is higher than the read_output value : must iterate from index-1, in decresaing order.
         while(true) {
             //Increment the index
             index--;
@@ -133,13 +133,13 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
             last_value = value;
             value = table[index<<1];
 
-            //if the current case is the read value
+            //if the current case is the read_output value
             if (value == read_value) {
                 final_temp = table[(index<<1)+1];
                 goto clean_and_return;
             }
 
-            //if the current case is higher than the read value
+            //if the current case is higher than the read_output value
             if (value < read_value) {
 
                 //Not a value in the lookup table -> use an approximation

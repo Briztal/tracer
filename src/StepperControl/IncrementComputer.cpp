@@ -30,7 +30,7 @@
 #define DEFAULT_ABSOLUTE_INCREMENT (float) 0.01
 
 
-bool IncrementComputer::determine_increments(kernel_movement_data *movement) {
+bool IncrementComputer::determine_increments(movement_data *movement) {
 
     //Cache vars
     float min = movement->min, max = movement->max;
@@ -79,7 +79,7 @@ bool IncrementComputer::determine_increments(kernel_movement_data *movement) {
  *
  *  With these inputs, it extracts a value of increment that verifies the property below.
  *
- *  "The maximum distances on all steppers axis between the images of point and point+increment through the
+ *  "The maximum step_distances on all steppers axis between the images of point and point+increment through the
  *      trajectory function is target_distance"
  *
  *  Literally, this function is called during the scheduling of a movement, when the increment variable
@@ -128,7 +128,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
 
 /*
- * get_max_dists : this function gets the distances between the two provided stepper positions, p0 and p1.
+ * get_max_dists : this function gets the step_distances between the two provided stepper positions, p0 and p1.
  *
  *  For each stepper, it determines the real distance (float), and determines the absolute integer distance.
  *

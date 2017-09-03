@@ -47,7 +47,7 @@ int main() {
 
     while(true) {
         if (Serial.available()) {
-            Serial.println(Serial.read());
+            Serial.println(Serial.read_output());
         }
     }
      */

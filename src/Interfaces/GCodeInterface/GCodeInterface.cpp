@@ -63,7 +63,7 @@ void GCodeInterface::read_serial() {
             }
         } else {
 
-            //Append the read char to data_in
+            //Append the read_output char to data_in
             *(data_in++) = read_char;
             gcode_size++;
 

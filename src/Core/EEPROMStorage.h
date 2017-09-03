@@ -35,8 +35,8 @@
  *      - Control Loops (period_ms)
  *      - Continuous Actions (max)
  *      - Servo Actions(min and max)
- *      - Stepper Motors (sizes, steps/unit, speed, acceleration)
- *      - Cartesian Speed Groups (steps/mm, speed, acceleration ...)
+ *      - Stepper Motors (sizes, steps/unit, regulation_speed, acceleration)
+ *      - Cartesian Speed Groups (steps/mm, regulation_speed, acceleration ...)
  *      - Custom data you may have specified in your config.h
  */
 

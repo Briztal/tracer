@@ -39,11 +39,11 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 
 
 
-    //get the movement distances
+    //get the movement step_distances
     float distances[NB_AXIS];
 
-    //extract the array case address (more efficient than by-object-push)
-    k2_linear_data *d = linear_data_queue.get_push_ptr();
+    //extract the array case address (more efficient than by-object-enqueue)
+    k2_linear_data *d = linear_data_queue.get_input_ptr();
 
     //get the positions and slopes pointer;
     float *positions = d->offsets;
@@ -78,16 +78,16 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     pre_process_offsets = positions;
     pre_process_max_axis = max_axis;
 
-    //Wait for the enqueuing to be authorised in ComplexTrajectoryExecuter.
-    while(ComplexTrajectoryExecuter::enqueue_unauthorised());
+    //Wait for the enqueuing to be authorised in TrajectoryTracer.
+    while(TrajectoryTracer::enqueue_unauthorised());
 
 
     //Enqueue the movement in the trajectory executer, and eventually start the movement routine and terminate
-    if (ComplexTrajectoryExecuter::enqueue_movement(0, max_distance, initialise_movement, finalise_movement,
+    if (TrajectoryTracer::enqueue_movement(0, max_distance, initialise_movement, finalise_movement,
                                                     get_position, get_real_time_position)) {
 
         //Push the local data
-        linear_data_queue.push();
+        linear_data_queue.enqueue();
 
         MachineInterface::update_position(destination);
 
@@ -103,7 +103,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 //--------------------------------------------------Pre-Processing--------------------------------------------------
 
 /*
- * get_distances : this function computes the current move's distances.
+ * get_distances : this function computes the current move's step_distances.
  *
  * At the same time, it determines the maximum axis, and return "the current move is a null prepare_movement".
  *
@@ -217,7 +217,7 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
 void ComplexLinearMovement::initialise_movement() {
 
     //Get the address of the top element
-    k2_linear_data *d = linear_data_queue.read();
+    k2_linear_data *d = linear_data_queue.read_output();
 
     //Update all real-time data
     real_time_max_axis = d->max_axis;

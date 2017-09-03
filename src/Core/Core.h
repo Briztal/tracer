@@ -80,7 +80,7 @@
 
 #include <sanity_check.h>
 
-#include "../DataStructures/Queue.h"
+#include "DataStructures/Queue.h"
 
 class Core {
 

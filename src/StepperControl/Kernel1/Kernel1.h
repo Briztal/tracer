@@ -43,7 +43,7 @@ public:
     static uint8_t available_sub_movements();
 
     //The function to call to know if the current movement has been processed.
-    static bool movement_processed();
+    static bool movement_processed_flag();
 
 
     //---------------------------------------------Current movement update----------------------------------------------

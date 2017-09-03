@@ -20,12 +20,12 @@
 
 
 /*
- * ComplexTrajectoryExecuter : this class is in charge of the two following tasks :
+ * TrajectoryTracer : this class is in charge of the two following tasks :
  *
  *  - Managing the planned movement : it disposes of a movement queue containing all data related to any kind
- *      of movement, and provides functions to enqueue a movement.
+ *      of movement, and provides functions to dequeue a movement.
  *
- *  - Executing the movements : it executes the procedure to trace movement and to regulate speed, for each movement.
+ *  - Executing the movements : it executes the procedure to trace movement and to regulate regulation_speed, for each movement.
  *
  */
 
@@ -39,7 +39,7 @@
 #include "_kernels_data.h"
 #include <DataStructures/Queue.h>
 
-class ComplexTrajectoryExecuter {
+class TrajectoryTracer {
 
 
     //--------------------------------------------movement_queue_management---------------------------------------------
@@ -124,7 +124,7 @@ public :
     //movement routine interruption
     static void stop();
 
-    //The function to verify that the enqueueing is authorised. returns true if the push isn't unauthorised.
+    //The function to verify that the enqueueing is authorised. returns true if the enqueue isn't unauthorised.
     static bool enqueue_unauthorised();
 
     //new movement enqueueing
@@ -142,7 +142,7 @@ private:
     static void process_next_movement();
 
     //Movement environment switching
-    static void update_movement_environment();
+    static void update_real_time_movement_data();
 
     //next sub_movement processing
     static void prepare_next_sub_movement();
@@ -189,7 +189,7 @@ private:
 
     static sig_t current_tools_signature;
 
-    //The function to update actions speed
+    //The function to update actions regulation_speed
     static void (**tools_update_functions)(float);
 
     //the function to change the linear powers and functions
@@ -207,7 +207,7 @@ private:
     while(!stepper_int_flag) {}\
         stepper_int_flag_clear();
 
-#define CTE ComplexTrajectoryExecuter
+#define CTE TrajectoryTracer
 
 #define STEP_AND_WAIT \
     StepperController::fastStep(CTE::saved_elementary_signatures[CTE::trajectory_array[CTE::saved_trajectory_index--]]);\

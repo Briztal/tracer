@@ -24,15 +24,13 @@
 
 #include "TrajectoryTracer.h"
 #include "IncrementComputer.h"
+#include "SubMovementManager.h"
 #include <interface.h>
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Kernel2/Kernel2.h>
 
-#define movement_data_t k2_movement_data
-
-#define Kernel Kernel2
 //------------------------------------------------movement_queue_management---------------------------------------------
 
 /*
@@ -46,7 +44,7 @@
  *
  */
 
-void ComplexTrajectoryExecuter::start() {
+void TrajectoryTracer::start() {
 
     if (!movement_data_queue.available_elements()) {
         //If no movements are in the queue, no need to start.
@@ -67,6 +65,9 @@ void ComplexTrajectoryExecuter::start() {
 
     //Initialise the K2RealTimeProcessor for the first movement
     process_next_movement();
+
+    update_real_time_movement_data();
+
 
     //Set up the movement procedure
     prepare_first_sub_movement();
@@ -94,7 +95,7 @@ void ComplexTrajectoryExecuter::start() {
  *
  */
 
-void ComplexTrajectoryExecuter::stop() {
+void TrajectoryTracer::stop() {
 
     //Interrupt the movement routing, by stopping the interrupt sequence
     disable_stepper_interrupt()
@@ -130,7 +131,7 @@ void ComplexTrajectoryExecuter::stop() {
  *      It returns true if the queue is locked, and the enqueuing is not permitted.
  */
 
-bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
+bool TrajectoryTracer::enqueue_unauthorised() {
     return movement_queue_lock_flag;
 }
 
@@ -146,7 +147,7 @@ bool ComplexTrajectoryExecuter::enqueue_unauthorised() {
  *
  */
 
-bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*movement_initialisation)(),
+bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_initialisation)(),
                                                  void (*movement_finalisation)(),
                                                  void(*pre_process_trajectory_function)(float, float *),
                                                  void(*trajectory_function)(float, float *)) {
@@ -163,8 +164,8 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 
     //---------------Movement container pointers Initialisation-----------------
 
-    movement_data_t *current_movement = movement_data_queue.get_push_ptr();
-    movement_data_t *previous_movement = movement_data_queue.read_pushed(1);
+    movement_data_t *current_movement = movement_data_queue.get_input_ptr();
+    movement_data_t *previous_movement = movement_data_queue.read_input_ptr_offset(1);
 
 
     //---------------kernel-invariant data-----------------
@@ -221,7 +222,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
         //If the movement has been popped since the processing has started
         if (!movement_data_queue.available_elements()) {
 
-            Kernel::update_jerk_environment(previous_movement);
+            Kernel::update_real_time_jerk_environment(previous_movement);
 
         }
     }
@@ -237,7 +238,7 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
 
 
     //Push
-    movement_data_queue.push();
+    movement_data_queue.enqueue();
 
     CI::echo("ENQUEUED : " + String(movement_data_queue.available_elements()));
 
@@ -258,12 +259,12 @@ bool ComplexTrajectoryExecuter::enqueue_movement(float min, float max, void (*mo
  *      - the movement;
  */
 
-void ComplexTrajectoryExecuter::process_next_movement() {
+void TrajectoryTracer::process_next_movement() {
 
     if (movement_data_queue.available_elements()) {
 
         //Pull the next movement
-        movement_data_t *movement_data = movement_data_queue.read();
+        movement_data_t *movement_data = movement_data_queue.read_output();
 
         //Initialise the new movement
         (*(movement_data->movement_initialisation))();
@@ -278,33 +279,51 @@ void ComplexTrajectoryExecuter::process_next_movement() {
         movement_switch_flag = true;
 
         //Trigger the kernel's movement update, and get the number of sub_movements to wait before switching.
-        movement_switch_counter = Kernel::update_current_movement(movement_data);
+        movement_switch_counter = SubMovementManager::update_current_movement(movement_data);
 
-        //Don't discard the movement struct for instance, it will be done in update_movement_environment;
+        //Update now the pre_processing data, the real_time will be in the function below.
+        Kernel::update_pre_process_speed_data(movement_data);
+
+        //Don't discard the movement struct for instance, it will be done in update_real_time_jerk_environment;
+
+
     }
 
 }
 
 
 /*
- * update_movement_environment : this function actualises the jerk environment for the current move
+ * update_real_time_jerk_environment : this function actualises the jerk environment for the current move
  *      with the provided data.
  *
  */
 
-void ComplexTrajectoryExecuter::update_movement_environment() {
+void TrajectoryTracer::update_real_time_movement_data() {
 
-    movement_data_t *movement = movement_data_queue.read();
+    movement_data_t *movement_data = movement_data_queue.read_output();
+
+    //------Tools-----K2RealTimeProcessor-
 
     //Update tool_environment
-    update_tools_data(movement);
+    update_tools_data(movement_data);
 
-    Kernel::update_movement_environment(movement);
 
-    //leave a space for a future movement.
+    //------Jerk------
+
+    //Jerk positions
+    SubMovementManager::update_jerk_position(movement_data->jerk_position);
+
+    //Jerk environment
+
+    Kernel::update_real_time_jerk_environment(movement_data);
+
+
+    //------Clean------
+
+    //leave a space for a future movement_data.
     movement_data_queue.discard();
 
-    //Disable the movement switch.
+    //Disable the movement_data switch.
     movement_switch_flag = false;
 
 }
@@ -313,25 +332,40 @@ void ComplexTrajectoryExecuter::update_movement_environment() {
 //----------------------------------------SUB_MOVEMENT_PRE_COMPUTATION--------------------------------------------------
 
 
-void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
+void TrajectoryTracer::prepare_first_sub_movement() {
 
-    //Initialise the distances array we will give to the kernel.
-    uint8_t elementary_distances[NB_STEPPERS];
+    //Push the first sub_movement (increment pre-processed to be correct)
+    SubMovementManager::push_new_position();
 
-    float time = 0;
+    ///Step 1 : Get a new position to reach
+    sub_movement_data_t *sub_movement_data = SubMovementManager::read_next_sub_movement();
 
-    //Give the hand to the kernel who will compute the distances for the next movement.
-    Kernel::prepare_first_sub_movement(elementary_distances, &saved_direction_signature, &time);
+    //Initialise the step_distances array we will give to the kernel
+    uint8_t *elementary_distances = sub_movement_data->step_distances;
 
-    //Process the signatures for the next movement.
+    //Copy the direction signature in cache.
+    saved_direction_signature = sub_movement_data->direction_signature;
+
+    //Step 2 : Update the end_distances with this step_distances array and compute the heuristic step_distances to jerk/end points
+    SubMovementManager::update_end_jerk_distances(saved_direction_signature, elementary_distances);
+
+    //-------------------Kernel call-------------------
+
+    //Give the hand to the kernel who will compute the time for the sub-movement
+    float time = Kernel::compute_time_for_first_sub_movement(sub_movement_data);
+
+    //Compute the signatures for the next movement.
     process_signatures(elementary_distances, es0);
     is_es_0 = false;
 
-    //detemine the first delay.
-    delay = (uint32_t) ((float) 1000000 * time) / (uint32_t) trajectory_index;
+    //Determine the delay time for the next sub_movement :
+    delay = ((float) 1000000 * time) / (float) trajectory_index;
 
-    update_movement_environment();
+    //Discard the current sub_movement in the sub-movements queue.
+    SubMovementManager::discard();
 
+    //Push as much sub_movements as possible.
+    SubMovementManager::fill_sub_movement_queue();
 }
 
 
@@ -340,7 +374,7 @@ void ComplexTrajectoryExecuter::prepare_first_sub_movement() {
  *      and returns the pointer to the elementary signatures processed before
  */
 
-sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
+sig_t *TrajectoryTracer::initialise_sub_movement() {
 
     //If the sub_movement is the first of a new movement :
     if (movement_switch_flag) {
@@ -349,7 +383,7 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
         if (!(movement_switch_counter--)) {
 
             //Update the movement environment.
-            update_movement_environment();
+            update_real_time_movement_data();
 
         }
     }
@@ -375,29 +409,81 @@ sig_t *ComplexTrajectoryExecuter::initialise_sub_movement() {
 }
 
 
-void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
+void TrajectoryTracer::prepare_next_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
 
-    //Initialise the distances array we will give to the kernel
-    uint8_t elementary_distances[NB_STEPPERS];
+
+    //-------------------Initialisation-------------------
 
     //update the current movement data, and get the correct signature container for the current sub_movement;
     //3us 4 steppers, 8us 17 stepper : 1.5 us + 0.37us per stepper
-    sig_t *elementary_signatures = initialise_sub_movement();
+    sig_t *step_signatures = initialise_sub_movement();
 
-    float time = 0;
+    //Step 1 : Get a new position to reach
+    sub_movement_data_t *sub_movement_data = SubMovementManager::read_next_sub_movement();
 
-    //Give the hand to the kernel who will compute the distances for the next movement.
-    Kernel::prepare_next_sub_movement(elementary_distances, &saved_direction_signature, &time);
+    STEP_AND_WAIT
 
-    //Compute the signatures corresponding to the distances given by the kernel.
-    process_signatures(elementary_distances, elementary_signatures);
+    //Initialise the step_distances array we will give to the kernel
+    uint8_t *elementary_distances = sub_movement_data->step_distances;
+
+    //Copy the direction signature in cache.
+    saved_direction_signature = sub_movement_data->direction_signature;
+
+    //Step 2 : Update the end_distances with this step_distances array and compute the heuristic step_distances to jerk/end points
+    SubMovementManager::update_end_jerk_distances(saved_direction_signature, elementary_distances);
+
+    STEP_AND_WAIT
+
+
+    //-------------------Kernel call-------------------
+
+    //Give the hand to the kernel who will compute the time for the sub-movement
+    float time = Kernel::compute_time_for_sub_movement(sub_movement_data);
+
+    STEP_AND_WAIT
+
+
+    //-------------------Signature extraction-------------------
+
+    //Compute the step_signatures corresponding to the step_distances given by the kernel.
+    process_signatures(elementary_distances, step_signatures);
 
     //Determine the delay time for the next sub_movement :
     delay = ((float) 1000000 * time) / (float) trajectory_index;
 
+    //Discard the current sub_movement in the sub-movements queue.
+    SubMovementManager::discard();
+
+    //If no more pre-process is required
+    if (SubMovementManager::movement_processed()) {
+        goto exit;
+    }
+
+    STEP_AND_WAIT
+
+
+    //-------------------Sub-movements pre-computation-------------------
+
+    //Process a first movement for the one we made
+    SubMovementManager::push_new_position();
+
+    //If no more pre-process is required
+    if (SubMovementManager::movement_processed()) {
+        goto exit;
+    }
+
+    STEP_AND_WAIT
+
+    //Process a second movement, to fill the queue if needes
+    SubMovementManager::push_new_position();
+
+
+    //-------------------Exit-------------------
+
+    exit:
     //Set the light interrupt function to give time to background processes
     set_stepper_int_function(finish_sub_movement);
 
@@ -415,7 +501,7 @@ void ComplexTrajectoryExecuter::prepare_next_sub_movement() {
  *
  */
 
-void ComplexTrajectoryExecuter::process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures) {
+void TrajectoryTracer::process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures) {
     uint8_t motion_depth = 0;
     sig_t pre_signatures[8];
 
@@ -484,7 +570,7 @@ int k2_position_indice = 4;
  *
  */
 
-void ComplexTrajectoryExecuter::finish_sub_movement() {
+void TrajectoryTracer::finish_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
@@ -531,7 +617,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
                 return;
 
-            } else if (Kernel::available_sub_movements() == 0) {
+            } else if (SubMovementManager::available_sub_movements() == 0) {
 
                 //if the last position has just been popped :
 
@@ -546,12 +632,12 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
 
                 return;
 
-            } else if (Kernel::available_sub_movements() == 1) {
+            } else if (SubMovementManager::available_sub_movements() == 1) {
                 movement_queue_lock_flag = true;
             }
 
 
-        } else if (Kernel::movement_processed()) {
+        } else if (SubMovementManager::movement_processed()) {
 
             //If the movement pre-processing is finished :
 
@@ -592,7 +678,7 @@ void ComplexTrajectoryExecuter::finish_sub_movement() {
  *
  */
 
-void ComplexTrajectoryExecuter::update_tools_data(movement_data_t *movement) {
+void TrajectoryTracer::update_tools_data(movement_data_t *movement) {
 
     //Cache for the tools signature
     sig_t next_tools_signature = movement->tools_signatures;
@@ -618,9 +704,9 @@ void ComplexTrajectoryExecuter::update_tools_data(movement_data_t *movement) {
  * stop_tools : this function stops the currently enabled tools
  */
 
-void ComplexTrajectoryExecuter::stop_tools() {
+void TrajectoryTracer::stop_tools() {
 
-    //Update each tool power with the value 'speed * linear_power'
+    //Update each tool power with the value 'regulation_speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {
         (*tools_update_functions[action])(0);
     }
@@ -633,9 +719,9 @@ void ComplexTrajectoryExecuter::stop_tools() {
  * update_tools_powers : this function updates the number of tools, and the action_update functions
  */
 
-void ComplexTrajectoryExecuter::update_tools_powers(float speed) {
+void TrajectoryTracer::update_tools_powers(float speed) {
 
-    //Update each tool power with the value 'speed * linear_power'
+    //Update each tool power with the value 'regulation_speed * linear_power'
     for (uint8_t action = 0; action < tools_nb; action++) {
         (*tools_update_functions[action])(tools_linear_powers[action] * speed);
     }
@@ -645,7 +731,7 @@ void ComplexTrajectoryExecuter::update_tools_powers(float speed) {
 
 //-----------------------------------------Static declarations - definitions--------------------------------------------
 
-#define m ComplexTrajectoryExecuter
+#define m TrajectoryTracer
 
 //Acceleration Fields
 

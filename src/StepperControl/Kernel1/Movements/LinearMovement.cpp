@@ -46,7 +46,7 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     uint32_t absolute_distances[NB_STEPPERS]{0};
 
-    //Extract motion distances, and set greater axis to 0.
+    //Extract motion step_distances, and set greater axis to 0.
     uint8_t max_axis = setup_movement_data(destinations_t, absolute_distances);
 
     //null enqueue_movement, nothing to do.
@@ -70,10 +70,10 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 ----------------------------------------------------------------------------------------------------------------------*/
 /*
  * Parameter set function. It :
- * - extracts distances;
+ * - extracts step_distances;
  * - sets steppers directions
- * - converts distances to absolute values
- * - set speed according to the movement (movement dimensions and greater axis)
+ * - converts step_distances to absolute values
+ * - set regulation_speed according to the movement (movement dimensions and greater axis)
  */
 
 uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_t *absolute_distances) {
@@ -108,14 +108,14 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             //Update position
             SpeedPlanner::positions[axis] = steps_destination;
 
-            //Update end distances
+            //Update end step_distances
             disable_stepper_interrupt()
 
             K1RealTimeProcessor::end_distances[axis] += distance;
 
             enable_stepper_interrupt()
 
-            //Millimeter relative distances computation
+            //Millimeter relative step_distances computation
             float relative_distances_mm = distsmm[axis] = (float) distance / steps;
             sq_dist_sum += relative_distances_mm * relative_distances_mm;
             
@@ -150,15 +150,15 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
 
     data_to_fill.max_axis = max_axis;
 
-    //Local variable for speed datacomputation
+    //Local variable for regulation_speed datacomputation
     float sqrt_sq_dist_sum = (float) sqrt(sq_dist_sum);
     float distance_coefficient = distsmm[max_axis] / sqrt_sq_dist_sum;
 
 
-    //Get the adjusted regulation speed;
+    //Get the adjusted regulation regulation_speed;
     float regulation_speed = SpeedPlanner::get_adjusted_regulation_speed_linear(distsmm, sqrt_sq_dist_sum);
 
-    //Calculate and fill the speed data
+    //Calculate and fill the regulation_speed data
     SpeedPlanner::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, dists, regulation_speed, PROCESSING_STEPS);
 
     TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
@@ -233,7 +233,7 @@ void LinearMovement::set_position_data(uint32_t *dists) {
 /*
  * set_motion_data : this function fills movement data on the motion_data_to_fill
  *
- * It computes count, and the first elementary distances.
+ * It computes count, and the first elementary step_distances.
  *
  * Afterwards, it calls MotionExecuter::push_first_sub_movement, that hashes the first sub_movement, and fills data.
  */
@@ -247,8 +247,8 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
     const float *slopes = data_to_fill.slopes;
     uint8_t *const f_pos = data_to_fill.first_pos;
 
-    //Initial elementary distances
-    uint8_t elementary_dists[NB_STEPPERS];
+    //Initial elementary step_distances
+    uint8_t step_distances[NB_STEPPERS];
 
     for (uint16_t axis = 0; axis < NB_STEPPERS; axis++) {
         uint8_t p;
@@ -257,25 +257,25 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
         } else {
             p = (uint8_t) (slopes[axis] * PROCESSING_STEPS);
         }
-        f_pos[axis] = elementary_dists[axis] = p;
+        f_pos[axis] = step_distances[axis] = p;
     }
 
     //Fill beginning signatures
-    TrajectoryExecuter::fill_movement_data(true, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(true, step_distances, count, nsig);
 
     uint32_t last_pos_max = count*PROCESSING_STEPS;
 
-    //Initial elementary distances
+    //Initial elementary step_distances
     for (uint16_t axis = 0; axis < NB_STEPPERS; axis++) {
         if (axis==max_axis) {
-            elementary_dists[axis] = (uint8_t) (motion_dists[axis] - last_pos_max);
+            step_distances[axis] = (uint8_t) (motion_dists[axis] - last_pos_max);
         } else {
-            elementary_dists[axis] = (uint8_t) (motion_dists[axis] - (uint32_t)(slopes[axis] * last_pos_max));
+            step_distances[axis] = (uint8_t) (motion_dists[axis] - (uint32_t)(slopes[axis] * last_pos_max));
         }
     }
 
     //Fill ending signatures
-    TrajectoryExecuter::fill_movement_data(false, elementary_dists, count, nsig);
+    TrajectoryExecuter::fill_movement_data(false, step_distances, count, nsig);
 }
 
 void LinearMovement::initialise_motion() {
@@ -299,16 +299,16 @@ void LinearMovement::initialise_motion() {
  * Position processing function.
  * It takes 2*dimension-1 processing windows to determine all positions
  */
-sig_t LinearMovement::process_position(uint8_t *elementary_dists) {//2n-2
+sig_t LinearMovement::process_position(uint8_t *step_distances) {//2n-2
 
 
-    uint32_t i1 = (MR_positions[MR_max_axis] += (elementary_dists[MR_max_axis] = PROCESSING_STEPS));
+    uint32_t i1 = (MR_positions[MR_max_axis] += (step_distances[MR_max_axis] = PROCESSING_STEPS));
     uint32_t i2;
 
 #define STEPPER(i, ...) \
     if ((uint8_t)i!=MR_max_axis){\
         i2 = (uint32_t) (MR_slopes[i] * i1);\
-        MR_positions[i] += (elementary_dists[i] = (uint8_t) ((i2 - MR_positions[i])));\
+        MR_positions[i] += (step_distances[i] = (uint8_t) ((i2 - MR_positions[i])));\
     }\
 
 #include <config.h>

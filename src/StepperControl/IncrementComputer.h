@@ -40,7 +40,7 @@ class IncrementComputer {
 
 public:
 
-    static bool determine_increments(kernel_movement_data *movement);
+    static bool determine_increments(movement_data *movement);
 
 
 

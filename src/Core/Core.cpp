@@ -74,14 +74,14 @@ bool Core::add_external_task(void (*f)(char *, uint8_t), char *args, uint8_t siz
         return false;
     }
 
-    //Get the push indice for args
+    //Get the enqueue indice for args
     const uint8_t push_indice = external_tasks.push_indice();
 
 
     //Push the task function
-    void (**pf)(char *, uint8_t) = external_tasks.get_push_ptr();
+    void (**pf)(char *, uint8_t) = external_tasks.get_input_ptr();
     *pf = f;
-    external_tasks.push();
+    external_tasks.enqueue();
 
 
     //Get the args pointer
@@ -103,11 +103,11 @@ bool Core::process_external_task() {
         return false;
     }
 
-    //Get the pull indice for args
+    //Get the dequeue indice for args
     const uint8_t pull_indice = external_tasks.pull_indice();
 
     //Get the task
-    void (*f)(char *, uint8_t) = external_tasks.pull();
+    void (*f)(char *, uint8_t) = external_tasks.dequeue();
 
 
     //Get the args pointer
@@ -129,9 +129,9 @@ bool Core::add_internal_task(void (*f)()) {
         return false;
     }
 
-    void (**pf)() = internal_tasks.get_push_ptr();
+    void (**pf)() = internal_tasks.get_input_ptr();
     *pf = f;
-    external_tasks.push();
+    external_tasks.enqueue();
 
     return true;
 }
@@ -143,7 +143,7 @@ bool Core::process_internal_task() {
     }
 
     //Executing the task;
-    (*(internal_tasks.pull()))();
+    (*(internal_tasks.dequeue()))();
 
     return true;
 

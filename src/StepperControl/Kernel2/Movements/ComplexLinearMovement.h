@@ -47,7 +47,7 @@ private :
     static uint8_t pre_process_max_axis;
 
 
-    //distances computation
+    //step_distances computation
     static bool get_distances(float *position, const float *destination, float *distances, uint8_t *maximum_axis,
                               float *maximum_distance);
 

@@ -196,6 +196,12 @@ SERVO(2, servo3, 4, 0, 1)
 
 #define KERNEL 2
 
+#define movement_data_t k2_movement_data
+
+#define sub_movement_data_t k2_sub_movement_data
+
+#define Kernel Kernel2
+
 //-----------------------------------------------High Level Coordinate System-------------------------------------------
 
 /*

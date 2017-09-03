@@ -27,6 +27,12 @@ template<typename T>
 class Queue {
 
 
+    /*
+     * A macro to safely decrement an index :
+     *  - if the index is zero, it takes the maximal value;
+     *  - f not, it is decremented;
+     */
+
 #define SAFE_DECR(i)\
     if (i) {\
         i--;\
@@ -36,16 +42,28 @@ class Queue {
 
 
 public:
+
+    /*
+     * Constructor : it takes the buffer size in only argument.
+     */
+
     Queue(uint8_t size) :
             size(size), content(new T[size]), max_indice((const uint8_t) (size - 1)),
             spaces(size) {
     }
 
 
-    T pull() {
+    //---------------------------------------------------Dequeue--------------------------------------------------------
+
+    /*
+     * dequeue : this method reads the output element, discards and returns it.
+     *
+     */
+
+    T dequeue() {
 
 
-        T element = content[pull_index];
+        T element = content[output_index];
 
         discard();
 
@@ -53,16 +71,28 @@ public:
 
     }
 
-    T *read() {
 
-        return content + pull_index;
+    /*
+     * read_output : this method returns a pointer to the output element.
+     *
+     */
+
+    T *read_output() {
+
+        return content + output_index;
     }
+
+
+    /*
+     * discard : this method discards the output element
+     *
+     */
 
     void discard() {
 
         if (elements) {
 
-            SAFE_DECR(pull_index);
+            SAFE_DECR(output_index);
 
             elements--;
             spaces++;
@@ -70,27 +100,40 @@ public:
         }
     }
 
+    //---------------------------------------------------Enqueue--------------------------------------------------------
 
-    void push() {
+    /*
+     * enqueue_object : this method copies the element provided object to the current input case,
+     *      and updates the input index.
+     *
+     */
+
+    void enqueue_object(T element) {
 
         if (!spaces)
             return;
 
-        SAFE_DECR(push_index);
+        content[input_index] = element;
+
+        SAFE_DECR(input_index);
 
         elements++;
         spaces--;
 
     }
 
-    void push_object(T element) {
+
+    /*
+     * enqueue : this method updates the input index. The input case must have been filled before.
+     *
+     */
+
+    void enqueue() {
 
         if (!spaces)
             return;
 
-        content[push_index] = element;
-
-        SAFE_DECR(push_index);
+        SAFE_DECR(input_index);
 
         elements++;
         spaces--;
@@ -98,27 +141,47 @@ public:
     }
 
 
-    T *get_push_ptr() {
+    /*
+     * get_input_ptr : this method returns a pointer to the current input case
+     *
+     */
 
-        return content + push_index;
+    T *get_input_ptr() {
+
+        return content + input_index;
     }
 
 
-    T *read_pushed() {
-        if (push_index != max_indice) {
-            return content + push_index + 1;
+    /*
+     * read_previous_input_ptr : this method returns a pointer to the previous input case
+     *
+     */
+
+    T *read_previous_input_ptr() {
+        if (input_index != max_indice) {
+            return content + input_index + 1;
         } else {
             return content;
         }
     }
 
-    T *read_pushed(uint8_t i) {
-        if (push_index + i <=  max_indice) {
-            return content + push_index + i;
+
+    /*
+    * read_input_ptr_offset : this method returns a pointer to the case that was the input case [i] inputs ago.
+    *
+    */
+
+    T *read_input_ptr_offset(uint8_t i) {
+        if (input_index + i <=  max_indice) {
+            return content + input_index + i;
         } else {
-            return content + i - (max_indice - push_index) -1;
+            return content + i - (max_indice - input_index) -1;
         }
     }
+
+
+    //-------------------------------------------------Queue state------------------------------------------------------
+
 
     uint8_t available_spaces() {
         return spaces;
@@ -129,12 +192,16 @@ public:
     }
 
     const uint8_t pull_indice() {
-        return pull_index;
+        return output_index;
     }
 
     const uint8_t push_indice() {
-        return push_index;
+        return input_index;
     }
+
+
+    //------------------------------------------------Queue fields------------------------------------------------------
+
 
 private:
 
@@ -143,8 +210,8 @@ private:
 
     T *const content;
 
-    uint8_t pull_index = 0;
-    uint8_t push_index = 0;
+    uint8_t output_index = 0;
+    uint8_t input_index = 0;
 
     uint8_t elements = 0;
     uint8_t spaces;

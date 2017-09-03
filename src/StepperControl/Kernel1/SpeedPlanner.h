@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <config.h>
-#include "../../DataStructures/Queue.h"
+#include "DataStructures/Queue.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
 

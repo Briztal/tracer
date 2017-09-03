@@ -69,17 +69,17 @@ void SpeedPlanner::set_speed_group(uint8_t speed_group) {
 
 
 //TODO CHECK MAX_SPEED
-void SpeedPlanner::set_speed_for_group(uint8_t group_id, float speed) {
-    theorical_regulation_speeds[group_id] = speed;
+void SpeedPlanner::set_speed_for_group(uint8_t group_id, float regulation_speed) {
+    theorical_regulation_speeds[group_id] = regulation_speed;
 }
 
 
 /*
- * get_adjusted_regulation_speed_linear : this function calculates the real regulation speed, from the theoretical one.
+ * get_adjusted_regulation_speed_linear : this function calculates the real regulation regulation_speed, from the theoretical one.
  *
- *  It verifies that the speed on each axis does not overpasses the maximum speed on this axis.
+ *  It verifies that the regulation_speed on each axis does not overpasses the maximum regulation_speed on this axis.
  *
- *  If it does, it determines the ratio to reduce the speed, for each axis where the speed is too high.
+ *  If it does, it determines the ratio to reduce the regulation_speed, for each axis where the regulation_speed is too high.
  *
  *  It applies the maximum ratio.
  *
@@ -99,7 +99,7 @@ float SpeedPlanner::get_adjusted_regulation_speed_linear(float *const relative_d
 }
 
 float SpeedPlanner::get_regulation_speed(float *const relative_distsmm, const float sqrt_square_dist_sum) {
-    //Determination of the regulation speed
+    //Determination of the regulation regulation_speed
     sig_t group_signature = speed_groups_signatures[speed_group];
     float group_coeff = 0;
     float group_speed = theorical_regulation_speeds[speed_group];
@@ -113,7 +113,7 @@ float SpeedPlanner::get_regulation_speed(float *const relative_distsmm, const fl
 
 #undef STEPPER
 
-    if (group_coeff == 0) {//If no axis in the speed group has to enqueue_movement : find the first speed group with a moving axis.
+    if (group_coeff == 0) {//If no axis in the regulation_speed group has to enqueue_movement : find the first regulation_speed group with a moving axis.
         CI::echo("ERROR : THE SELECTED SPEED_GROUP DOESN'T COVER YOUR MOVEMENT : SELECTING ANOTHER");
         for (uint8_t group = 0; group < NB_CARTESIAN_GROUPS; group++) {
             if (group == speed_group) continue;
@@ -153,7 +153,7 @@ SpeedPlanner::verifiy_speed_limits(float *const relative_distsmm, const float sq
     /*
      * Formula :
      *
-     * The speed projected on a particular axis, which will enqueue_movement of [di] mm, is given by
+     * The regulation_speed projected on a particular axis, which will enqueue_movement of [di] mm, is given by
      *      Vi = theorical_regulation_speed*di/sqrt_square_dist_sum;
      */
 
@@ -161,13 +161,13 @@ SpeedPlanner::verifiy_speed_limits(float *const relative_distsmm, const float sq
 
     float r = 0;
     bool init = true;
-    float speed, tms;
+    float regulation_speed, tms;
 
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        //Maximum speed checking
+        //Maximum regulation_speed checking
         float dist = *(relative_distsmm + axis);
-        if ((speed = (abs(dist)) * scoeff) > (tms = EEPROMStorage::maximum_speeds[axis])) {//TODO RESTORE AXIS_t
-            r = (init) ? tms / speed : min(r, tms / speed);
+        if ((regulation_speed = (abs(dist)) * scoeff) > (tms = EEPROMStorage::maximum_speeds[axis])) {//TODO RESTORE AXIS_t
+            r = (init) ? tms / regulation_speed : min(r, tms / regulation_speed);
             init = false;
         }
     }
@@ -214,11 +214,11 @@ float SpeedPlanner::verify_acceleration_limits(float regulation_speed) {//TODO
  *
  *  new_axis is the axis that will be used for delay regulation.
  *
- *  distsmm contains distances each axis will enqueue_movement.
+ *  distsmm contains step_distances each axis will enqueue_movement.
  *
- *  sqrt_square_dist_sum is the square root of the sum of square distances.
+ *  sqrt_square_dist_sum is the square root of the sum of square step_distances.
  *
- *  It prepares the speed change, before the currently planned movement is really executed.
+ *  It prepares the regulation_speed change, before the currently planned movement is really executed.
  *
  *  -----------------------
  *
@@ -226,14 +226,14 @@ float SpeedPlanner::verify_acceleration_limits(float regulation_speed) {//TODO
  *      then it plans a deceleration point.
  *
  *
- *  After this, it adds the current motion distances to the future jerk point distances
+ *  After this, it adds the current motion step_distances to the future jerk point step_distances
  *
  *
  *  It then sets three parameters :
- *      - ratio : the distance ratio, used to adapt the speed management to one axis, in linear moves (1 for others);
- *      - tmp_delay_numerator : the numerator used during the delay computing : given d the speed distance square
+ *      - ratio : the distance ratio, used to adapt the regulation_speed management to one axis, in linear moves (1 for others);
+ *      - tmp_delay_numerator : the numerator used during the delay computing : given d the regulation_speed distance square
  *              root, the current delay is given by tmp_delay_numerator / d;
- *      - tmp_speed_numerator : the speed factor : given  d the speed distance square root, the current speed in mm/s
+ *      - tmp_speed_numerator : the regulation_speed factor : given  d the regulation_speed distance square root, the current regulation_speed in mm/s
  *              is given by d * tmp_speed_numerator
  *      - tmp_regulation_delay : the regulation delay that will be used during the movement we now plan.
  *
@@ -250,7 +250,7 @@ void SpeedPlanner::pre_set_speed_axis(uint8_t new_axis, float *relative_distsmm,
     //Verify the jerk limits for the current movement and add a jerk point before the current movement if necessary.
     verify_jerk_limits(relative_distsmm, sqrt_square_dist_sum, regulation_speed);
 
-    //Add the future movement distances to the current jerk distances
+    //Add the future movement step_distances to the current jerk step_distances
     add_jerk_distances(movement_distances);
 
     last_regulation_speed = regulation_speed;
@@ -273,7 +273,7 @@ void SpeedPlanner::pre_set_speed_axis(uint8_t new_axis, float *relative_distsmm,
 
 
 void SpeedPlanner::add_jerk_distances(int32_t *movement_distances) {
-    //push all distances, used to update the jerk point in real time
+    //push all step_distances, used to update the jerk point in real time
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
         next_jerk_distances[axis] += movement_distances[axis];
     }
@@ -281,10 +281,10 @@ void SpeedPlanner::add_jerk_distances(int32_t *movement_distances) {
 
 
 /*
- * get_jerk_offsets : this function check if the jerk caused by the new prepare_movement caracterised by the distances array
+ * get_jerk_offsets : this function check if the jerk caused by the new prepare_movement caracterised by the step_distances array
  *      does not exceeds limits on each axis.
  *
- * If the jerk on one axis exceeds the limit, it calculates the maximum speed that does not cause jerk excess,
+ * If the jerk on one axis exceeds the limit, it calculates the maximum regulation_speed that does not cause jerk excess,
  *      and plans a deceleration before the planned enqueue_movement.
  *
  */
@@ -294,7 +294,7 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
     /*
      * Formula :
      *
-     * The maximum (global) speed, to have the jerk on the axis k1_position_indice lesser than J is given by
+     * The maximum (global) regulation_speed, to have the jerk on the axis k1_position_indice lesser than J is given by
      *
      *      V = J / abs(d1[k1_position_indice]/D1 - d2[k1_position_indice]/D2)
      *
@@ -320,11 +320,11 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
             //Calculate the jerk ratio
             float jerk_ratio = relative_distsmm[axis] / sqrt_square_dist_sum;
 
-            //Calculate the maximum speed
+            //Calculate the maximum regulation_speed
             float v = EEPROMStorage::jerks[axis] / (jerk_ratio - dist_ratios[axis]);
             v = abs(v);
 
-            //Minimise the speed
+            //Minimise the regulation_speed
             if (v < jerk_speed) {
                 jerk_speed = v;
             }
@@ -397,7 +397,7 @@ void SpeedPlanner::push_jerk_point() {
     unsigned char push_id = speed_distances_offsets.push_indice();
     speed_distances_offsets.push_object(0);
 
-    //push all distances, used to update the jerk point in real time
+    //enqueue all step_distances, used to update the jerk point in real time
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
         enqueued_end_distances[push_id * NB_STEPPERS + axis] = next_jerk_distances[axis];
         next_jerk_distances[axis] = 0;
@@ -417,7 +417,7 @@ void SpeedPlanner::pull_jerk_point() {
 
     unsigned char pull_indice = speed_distances_offsets.pull_indice();
 
-    speed_distances_offsets.pull();
+    speed_distances_offsets.dequeue();
 
     disable_stepper_interrupt();
 

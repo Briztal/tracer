@@ -28,14 +28,14 @@
  *      - exact acceleration regulation in beginning and ending points, for each stepper;
  *      - real-time acceleration / deceleration regulation during movements;
  *      - exact jerk regulation for each stepper;
- *      - speed regulation by cartesian groups of the high level coordinates;
- *      - constant update of tools power, based on the current speed and their power density;
+ *      - regulation_speed regulation by cartesian groups of the high level coordinates;
+ *      - constant update of tools power, based on the current regulation_speed and their power density;
  *
  *
  *  The kernel class is in charge of :
  *      - the sub_movements pre-processing;
  *      - the sub_movements queue management
- *      - the speed and jerk regulation;
+ *      - the regulation_speed and jerk regulation;
  *      - the position log;
  *
  */
@@ -53,26 +53,25 @@
 
 class Kernel2 {
 
+
+
 public :
 
     static void initialise_tracing_procedure();
 
-    //-----------------------------------------------Kernel status flags------------------------------------------------
+    //-------------------------------------------Current high level position--------------------------------------------
 
-public:
+private :
 
-    //The function to call to verify that sub_movements are available in the queue.
-    static uint8_t available_sub_movements();
-
-    //The function to call to know if the current movement has been processed.
-    static bool movement_processed();
+    //The current position in the high level system.
+    static float *const current_hl_position;
 
 
     //---------------------------------------------Current movement update----------------------------------------------
 
 public:
 
-    static uint8_t update_current_movement(k2_movement_data *movement_data);
+    static void update_pre_process_speed_data(k2_movement_data *movement_data);
 
     static void initialise_movement_data(k2_movement_data *movement_data);
 
@@ -82,26 +81,44 @@ public:
 
 public :
 
-    static void update_movement_environment(k2_movement_data *movement_data);
+    static void update_real_time_jerk_environment(k2_movement_data *movement_data);
 
-    static void update_jerk_environment(k2_movement_data *movement_data);
+    //static void update_real_time_jerk_environment(k2_movement_data *movement_data);
 
 
     //--------------------------------------------sub_movements preparation---------------------------------------------
 
 public:
 
+    //The function to determine a new sub_movement
+    static void initialise_sub_movement(k2_sub_movement_data *sub_movement_data);
+
+    //The function to update the current variables according to the sub_movement data computed in the function above
+    static void accept_sub_movement(k2_sub_movement_data *sub_movement);
+
     //The first sub_movement preparation, called at the beginning of the movement routine.
-    static void prepare_first_sub_movement(uint8_t *elementary_distances, sig_t *negative_signature, float *time);
+    static float compute_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data);
 
     //The sub_movement preparation function, called on interrupts.
-    static void prepare_next_sub_movement(uint8_t * elementary_distances, sig_t *negative_signatures, float *delay);
+    static float compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_data);
+
+
+private:
+
+    //The regulation_speed group for the current movement
+    static uint8_t movement_speed_group;
+
+    //the regulation regulation_speed for the next movement
+    static float next_regulation_speed;
+
 
 
     //----------------------------------------------------positon log---------------------------------------------------
 
+
 public:
 
+    //The function to send the current position through the interface.
     static void send_position();
 
 

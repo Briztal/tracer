@@ -27,7 +27,7 @@
 #include <Arduino.h>
 #include "MachineInterface.h"
 #include "../Core/EEPROMStorage.h"
-#include <StepperControl/Kernel2/K2RealTimeProcessor.h>
+#include "SubMovementManager.h"
 #include <Actions/ContinuousActions.h>
 
 #if (KERNEL == 0)
@@ -82,7 +82,7 @@ void MachineInterface::update_position(const float *const new_position) {
     memcpy(current_position, new_position, sizeof(float) * NB_AXIS);
 
     //Update the low level's end point.
-    K2RealTimeProcessor::update_end_position(new_position);
+    SubMovementManager::update_end_position(new_position);
 
 }
 
@@ -127,7 +127,7 @@ void MachineInterface::get_stepper_positions_for(void (*get_position)(float, flo
 //---------------------------------------------------Speed_Management---------------------------------------------------
 
 /*
- * get_speed : this function returns the speed on the current speed group.
+ * get_speed : this function returns the regulation_speed on the current regulation_speed group.
  *
  */
 
@@ -137,7 +137,7 @@ float MachineInterface::get_speed() {
 
 
 /*
- * get_speed_group : this function provides the speed group to any external process.
+ * get_speed_group : this function provides the regulation_speed group to any external process.
  */
 
 uint8_t MachineInterface::get_speed_group() {
@@ -146,7 +146,7 @@ uint8_t MachineInterface::get_speed_group() {
 
 
 /*
- * set_speed_group : this function updates the current speed group with the value provided inargument.
+ * set_speed_group : this function updates the current regulation_speed group with the value provided inargument.
  */
 
 void MachineInterface::set_speed_group(uint8_t speed_group) {
@@ -155,17 +155,17 @@ void MachineInterface::set_speed_group(uint8_t speed_group) {
 
 
 /*
- * set_speed_for_group : this function updates the speed for the group provided in argument with the speed
- *      provided in argument, or with the maximum speed for this group if the speed is greater than the limit.
+ * set_speed_for_group : this function updates the regulation_speed for the group provided in argument with the regulation_speed
+ *      provided in argument, or with the maximum regulation_speed for this group if the regulation_speed is greater than the limit.
  *
  */
 
 void MachineInterface::set_speed_for_group(uint8_t speed_group, float new_speed) {
 
-    //Get the maximum speed for this group
+    //Get the maximum regulation_speed for this group
     float max_speed = max_speeds[speed_group];
 
-    //update speeds with the minimum of speed and the maximum speed
+    //update speeds with the minimum of regulation_speed and the maximum regulation_speed
     speeds[speed_group] = min(max_speed, new_speed);
 
 }
@@ -175,7 +175,7 @@ void MachineInterface::set_speed_for_group(uint8_t speed_group, float new_speed)
  * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument,
  *      in the cartesian group provided in argument.
  *
- *  The movement is provided in the form of its distances.
+ *  The movement is provided in the form of its step_distances.
  *
  *  The distance in the group is defined as the norm2 of the distance vector's projected
  *      in the concerned cartesian group
