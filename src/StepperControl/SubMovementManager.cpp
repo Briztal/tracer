@@ -46,6 +46,10 @@ void SubMovementManager::display_distances() {
     for (int i = 0; i < NB_STEPPERS; i++) {
         CI::echo(String(i) + " ed : " + String(end_distances[i]) + " jd : " + String(jerk_distances[i]));
     }
+
+    for (int i = 0; i < NB_STEPPERS; i++) {
+        CI::echo(String(i) + " ed : " + String(end_position[i]) + " jd : " + String(jerk_position[i]));
+    }
 }
 
 

@@ -27,6 +27,4 @@ float invert(int);
 
 int32_t fact(int n, int j);
 
-int angleFormat(int degrees);
-
 #endif //PROJECT_MATH_H

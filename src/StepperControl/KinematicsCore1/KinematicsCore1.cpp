@@ -29,6 +29,7 @@
 #include <hardware_language_abstraction.h>
 #include <StepperControl/StepperController.h>
 #include <interface.h>
+#include <Core/EEPROMStorage.h>
 
 void KinematicsCore1::initialise_tracing_procedure() {
     K1Physics::initialise_tracing_procedure();
@@ -43,6 +44,7 @@ void KinematicsCore1::initialise_tracing_procedure() {
 
 void KinematicsCore1::initialise_kinetics_data(k1_movement_data *movement_data) {
 
+    //TODO INLINE
     K1Physics::initialise_kinetics_data(movement_data);
 
 }
@@ -56,13 +58,17 @@ void KinematicsCore1::initialise_kinetics_data(k1_movement_data *movement_data) 
  */
 
 void KinematicsCore1::load_pre_process_kinetics_data(k1_movement_data *movement_data) {
+    //TODO INLINE
     K1Physics::load_pre_process_kinetics_data(movement_data);
 }
 
-void KinematicsCore1::compute_jerk_data(const k1_movement_data *current_movement, k1_movement_data *previous_movement) {
-    //TODO
-}
 
+void KinematicsCore1::compute_jerk_offsets(float speed, k1_movement_data *previous_movement) {
+
+    //TODO iNLINE
+    K1Physics::compute_jerk_offsets(speed, previous_movement);
+
+}
 
 //-------------------------------------------real_time_environment update-------------------------------------------
 
@@ -74,14 +80,20 @@ void KinematicsCore1::compute_jerk_data(const k1_movement_data *current_movement
 
 void KinematicsCore1::load_real_time_kinetics_data(k1_movement_data *movement_data) {
 
+    //TODO INLINE
+    //Load the kinetics data
     K1Physics::load_real_time_kinetics_data(movement_data);
 
+    //Load the jerk data
     K1Physics::load_real_time_jerk_data(movement_data);
 
 }
 
 
 void KinematicsCore1::load_real_time_jerk_data(k1_movement_data *movement_data) {
+
+    //TODO INLINE
+    K1Physics::load_real_time_jerk_data(movement_data);
 
 }
 
@@ -92,28 +104,12 @@ void KinematicsCore1::load_real_time_jerk_data(k1_movement_data *movement_data) 
 
 void KinematicsCore1::update_evolution_coefficient(float multiplier) {
 
+    //TODO INLINE
     K1Physics::update_evolution_coefficient(multiplier);
 }
 
-//----------------------------------------------jerk_environment update---------------------------------------------
-
-
-void update_real_time_jerk_environment(k2_movement_data *movement_data);
-
 
 //--------------------------------------------sub_movements preparation---------------------------------------------
-
-
-
-/*
- * TODO
- */
-
-void KinematicsCore1::initialise_sub_movement(k1_sub_movement_data *sub_movement_data) {
-
-    //Nothing to do here.
-
-}
 
 
 /*
@@ -130,8 +126,9 @@ void KinematicsCore1::accept_sub_movement(sub_movement_data_t *sub_movement_data
 
 
 //The first sub_movement preparation, called at the beginning of the movement routine.
-float KinematicsCore1::compute_time_for_first_sub_movement(k1_sub_movement_data *sub_movement_data) {
+float KinematicsCore1::compute_us_time_for_first_sub_movement(k1_sub_movement_data *sub_movement_data) {
 
+    //TODO INLINE
     return K1Physics::get_first_sub_movement_time(sub_movement_data);
 
 }
@@ -141,6 +138,8 @@ float KinematicsCore1::compute_time_for_first_sub_movement(k1_sub_movement_data 
 float KinematicsCore1::compute_us_time_for_sub_movement(k1_sub_movement_data *sub_movement_data) {
 
     K1Physics::update_heuristic_end_distance();
+
+    K1Physics::update_heuristic_jerk_distance();
 
     STEP_AND_WAIT;
 

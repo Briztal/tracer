@@ -31,6 +31,7 @@
 #include <StepperControl/StepperController.h>
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
+#include <StepperControl/JerkPlanner.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
@@ -203,17 +204,13 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
 
     Kinematics::initialise_kinetics_data(current_movement);
 
-
     //---------------Speed and Jerk (kernel variable)-----------------
 
     //we must check the jerk if the routine is started, or if movements are already present in the queue.
     bool jerk_checking = (started) || (movement_data_queue.available_elements());
 
-    if (jerk_checking) {
-
-        Kinematics::compute_jerk_data(current_movement, previous_movement);
-
-    }
+    //Control the jerk bounds if required, and initialise the jerk control for the next movement
+    JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
 
 
     //---------------Jerk adjusting----------------------
@@ -315,6 +312,8 @@ void TrajectoryTracer::update_real_time_movement_data() {
     //Jerk positions
     SubMovementManager::update_jerk_position(movement_data->jerk_position);
 
+    SubMovementManager::display_distances();
+
     //Jerk environment
 
     Kinematics::load_real_time_kinetics_data(movement_data);
@@ -356,7 +355,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     //-------------------Kinematics call-------------------
 
     //Give the hand to the kernel who will compute the sub_movement_time_us for the sub-movement
-    float sub_movement_time_us = Kinematics::compute_time_for_first_sub_movement(sub_movement_data);
+    float sub_movement_time_us = Kinematics::compute_us_time_for_first_sub_movement(sub_movement_data);
 
 
     //Compute the signatures for the next movement.

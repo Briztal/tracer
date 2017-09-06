@@ -75,17 +75,24 @@ public:
 
     static void initialise_kinetics_data(k2_movement_data *movement_data);
 
-    static void load_kinetics_data(k2_movement_data *movement_data);
+    static void load_pre_process_kinetics_data(k2_movement_data *movement_data);
 
-    static void compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement);
 
 
     //----------------------------------------------jerk_environment update---------------------------------------------
 
 public :
 
-    static void load_real_time_kinetics_data(k2_movement_data *movement_data);
+    static void compute_jerk_offsets(float speed, k2_movement_data *previous_movement);
 
+    //Function to update the real time jerk data
+    static void load_real_time_jerk_data(k2_movement_data *movement_data);
+
+
+    //In KinematicsCore2, there is no more information to load in real time than jerk.
+    static inline void load_real_time_kinetics_data(k2_movement_data *movement_data) {
+        load_real_time_jerk_data(movement_data);
+    }
 
     //--------------------------------------------sub_movements preparation---------------------------------------------
 
@@ -98,12 +105,13 @@ public:
     static void accept_sub_movement(k2_sub_movement_data *sub_movement);
 
     //The first sub_movement preparation, called at the beginning of the movement routine.
-    static float compute_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data);
+    static float compute_us_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data);
 
     //The sub_movement preparation function, called on interrupts.
-    static float compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_data);
+    static float compute_us_time_for_sub_movement(k2_sub_movement_data *sub_movement_data);
 
-
+    //The evloution factor update function;
+    static inline void update_evolution_coefficient(float) {};
 private:
 
     //The regulation_speed group for the current movement

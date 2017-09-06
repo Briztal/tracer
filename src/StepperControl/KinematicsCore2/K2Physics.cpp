@@ -30,6 +30,7 @@
 
 #include <hardware_language_abstraction.h>
 #include <Core/EEPROMStorage.h>
+#include <StepperControl/MachineInterface.h>
 
 void K2Physics::start() {
 
@@ -209,7 +210,7 @@ void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time
 
     //Only the inverse of time is used, computes now for optimisation purposes.
     float inv_time = 1 / time;
-    
+
     //Cache vars for end and jerk distances
     int32_t *end_distances = SubMovementManager::end_distances;
     int32_t *jerk_distances = SubMovementManager::jerk_distances;
@@ -245,6 +246,84 @@ void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time
             deceleration_required = true;
         }
     }
+}
+
+
+/*
+ * compute_jerk_offsets : this function computes the jerk offsets caused by the current movement, depending on the
+ *      previous movement's ending.
+ *
+ */
+
+void K2Physics::compute_jerk_offsets(float speed, k2_movement_data *previous_movement) {
+
+
+    //-----------maximum stepper speeds------------
+
+    //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
+
+    //Cache vars for offsets
+    uint32_t *jerk_distances_offsets = previous_movement->jerk_offsets;
+
+    //Cache var for final_jerk_ratios
+    float *final_jerk_ratios = previous_movement->final_jerk_ratios;
+
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+
+        //get the maximum regulation_speed on the current axis :
+        //Formula : max_stepper_speed = max_speed * stepper_distance / high_level_distance;
+        float stepper_speed = speed * final_jerk_ratios[stepper];
+
+        //Get the deceleration distance offset :
+        //Formula : the deceleration distance for a stepper at the regulation_speed s (steps/s) is given by
+        //      s * s / (2 * acceleration (steps/s^2))
+        jerk_distances_offsets[stepper] = (uint32_t) (stepper_speed * stepper_speed /
+                                                      (2 * EEPROMStorage::accelerations[stepper] *
+                                                       EEPROMStorage::steps[stepper]));
+
+    }
+
+
+}
+
+
+/*
+ * propagate_jerk : this function verifies on each axis that the new jerk parameters do not absorb
+ *      previous ones.
+ *
+ *  If they do, it replaces old ones with new ones.
+ *
+ */
+
+void K2Physics::propagate_jerk_offsets(const movement_data_t *current_movement, movement_data_t *previous_movement) {
+
+    //Cache pointers
+    const int32_t *current_jerk_pos = current_movement->jerk_position;
+    int32_t *previous_jerk_pos = previous_movement->jerk_position;
+    const uint32_t *current_jerk_offsets = current_movement->jerk_offsets;
+    uint32_t *previous_jerk_offsets = previous_movement->jerk_offsets;
+
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+
+        //get the absolute distance on the axis
+        int32_t dist = current_jerk_pos[stepper] - previous_jerk_pos[stepper];
+        if (dist < 0) dist = -dist;
+
+        //cache
+        uint32_t jd = current_jerk_offsets[stepper];
+
+        //If the new jerk absorbs the old one
+        if (previous_jerk_offsets[stepper] + dist < jd) {
+
+            //Replace old offsets
+            previous_jerk_offsets[stepper] = jd;
+
+            //Replace old position
+            previous_jerk_pos[stepper] = current_jerk_pos[stepper];
+        }
+
+    }
+
 }
 
 

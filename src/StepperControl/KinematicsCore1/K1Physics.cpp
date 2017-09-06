@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 1)
 
 #include <math.h>
 #include <WString.h>
@@ -98,7 +98,10 @@ void K1Physics::load_pre_process_kinetics_data(k1_movement_data *movement_data) 
 
 void K1Physics::load_real_time_jerk_data(k1_movement_data *movement_data) {
 
-    //TODO
+    watch_for_jerk_point = movement_data->jerk_point;
+
+    jerk_distance_offset = movement_data->jerk_distance_offset;
+
 }
 
 
@@ -112,7 +115,8 @@ void K1Physics::load_real_time_jerk_data(k1_movement_data *movement_data) {
  */
 void K1Physics::load_real_time_kinetics_data(k1_movement_data *movement_data) {
 
-
+    //Reference axis.
+    reference_axis = movement_data->reference_axis;
 
     //delay_us numerator;
     acceleration_delay_numerator = movement_data->acceleration_delay_numerator;
@@ -176,7 +180,7 @@ void K1Physics::update_evolution_coefficient(float multiplier) {
 
     evolution_coefficient *= multiplier;
 
-    regulation_sub_movement_time *=multiplier;
+    regulation_sub_movement_time *= multiplier;
 
     sub_movement_time *= multiplier;
 
@@ -209,11 +213,11 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
 
     //Get delay_us numerators
     float dn_acceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, min,
-                                                min + min_increment, &movement_data->acceleration_step);
-
+                                                min + min_increment, &movement_data->reference_axis,
+                                                &movement_data->acceleration_step);
 
     float dn_deceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, max,
-                                                max + max_increment, 0);
+                                                max + max_increment, 0, 0);
 
     //Save the acceleration delay_us numerators. The other is not used in real time.
     movement_data->acceleration_delay_numerator = dn_acceleration;
@@ -244,7 +248,8 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
  *
  */
 float
-K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), float p0, float p1, float *max_distance) {
+K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), float p0, float p1, uint8_t *sav_max_axis,
+                               float *sav_max_distance) {
 
     float t_point[NB_STEPPERS];
     float t_dist[NB_STEPPERS];
@@ -259,8 +264,9 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
     //extract the distances and get the maximal_axis.
     max_axis = get_distances(t_point, t_dist);
 
-    if (max_distance != 0) {
-        *max_distance = t_dist[max_axis];
+    if (sav_max_axis != 0) {
+        *sav_max_axis = max_axis;
+        *sav_max_distance = t_dist[max_axis];
     }
 
     //finally, compute the delay_us numerator.
@@ -288,7 +294,7 @@ float K1Physics::_get_delay_numerator(uint8_t axis, float distance) {
      *
      */
 
-    return (float) 1000000 * distance / ( sqrtf(2 * EEPROMStorage::steps[axis] * EEPROMStorage::accelerations[axis]));
+    return (float) 1000000 * distance / (sqrtf(2 * EEPROMStorage::steps[axis] * EEPROMStorage::accelerations[axis]));
 }
 
 
@@ -364,10 +370,11 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
 
     }
 
-    float min_time_us = (float)1000000 *min_time;
+    float min_time_us = (float) 1000000 * min_time;
 
 
-    sub_movement_time = (uint32_t) ((regulation_sub_movement_time > min_time_us) ? regulation_sub_movement_time : min_time_us);
+    sub_movement_time = (uint32_t) ((regulation_sub_movement_time > min_time_us) ? regulation_sub_movement_time
+                                                                                 : min_time_us);
 
     return sub_movement_time;
 
@@ -412,7 +419,8 @@ void K1Physics::get_sub_movement_time(movement_data_t *movement_data, uint8_t sp
 
     last_speed_group = speed_group;
 
-    movement_data->regulation_sub_movement_time = (uint32_t) ((float) 1000000 * hl_sub_movement_distance_current_speed_group / speed);
+    movement_data->regulation_sub_movement_time = (uint32_t) ((float) 1000000 *
+                                                              hl_sub_movement_distance_current_speed_group / speed);
 
 }
 
@@ -449,10 +457,7 @@ void K1Physics::update_heuristic_end_distance() {
 
 void K1Physics::update_heuristic_jerk_distance() {
 
-    int32_t td;
-    uint32_t distance = 0;
-    uint32_t dist = 0;
-
+/*
 #define STEPPER(i, ...) \
     td = SubMovementManager::jerk_distances[i];\
     distance=((uint32_t) (td<0) ? -td : td );\
@@ -461,23 +466,52 @@ void K1Physics::update_heuristic_jerk_distance() {
 #include <config.h>
 
 #undef STEPPER
+    */
 
-    offseted_heuristic_jerk_distance = dist + jerk_offset;
+    int32_t dist =  SubMovementManager::jerk_distances[reference_axis];
+    if (dist<0) dist = -dist;
+
+    offset_heuristic_jerk_distance = (uint32_t)dist + jerk_distance_offset;
+
 
 }
 
 
-/*
- * TODO
- */
+void K1Physics::compute_jerk_offsets(float speed, k1_movement_data *previous_movement) {
+
+    //-----------maximum stepper speeds------------
+
+    //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
+
+    //Cache var for the reference axis :
+    uint8_t ref_axis = previous_movement->reference_axis;
+
+    //Cache var for final_jerk_ratios
+    float *final_jerk_ratios = previous_movement->final_jerk_ratios;
+
+    //Determine the speed we must be at the end of the previous movement, on the reference axis
+    float stepper_speed = speed * final_jerk_ratios[ref_axis];
+
+    //Determine the offset on the deceleration distance
+    previous_movement->jerk_distance_offset = (uint32_t) (stepper_speed * stepper_speed /
+                                                          (2 * EEPROMStorage::accelerations[ref_axis] *
+                                                           EEPROMStorage::steps[ref_axis]));
+
+
+}
+
 
 bool K1Physics::regulate_speed() {
 
     //CI::echo("jerk : "+String(watch_for_jerk_point)+" - en : "+String(speed_regulation_enabled)+" - inc : "+String(speed_increasing_flag)+" - sub : "+String(sub_movement_time)+" - reg : "+String(regulation_sub_movement_time));
+    //CI::echo("jerk : "+String(watch_for_jerk_point) +" - jd : "+String(offset_heuristic_jerk_distance)+" of : "+String(jerk_distance_offset));
+
+    //CI::echo("acc : "+String(acceleration_speed_distance)+" - dec : "+String(deceleration_speed_distance));
+
     if (heuristic_end_distance < deceleration_speed_distance) {
         //If the machine must decelerate_of, due to the proximity of the end point :
 
-        CI::echo("END");
+
 
         //decelerate_of
         decelerate_to(heuristic_end_distance);
@@ -494,12 +528,11 @@ bool K1Physics::regulate_speed() {
         //The sub_movement time was updated.
         return true;
 
-    } else if ((watch_for_jerk_point) && (offseted_heuristic_jerk_distance < deceleration_speed_distance)) {
+    } else if ((watch_for_jerk_point) && (offset_heuristic_jerk_distance < deceleration_speed_distance)) {
         //If the machine must decelerate_of, due to the proximity of the jerk point :
 
-
         //decelerate_of
-        decelerate_to(offseted_heuristic_jerk_distance);
+        decelerate_to(offset_heuristic_jerk_distance);
 
         //Re-enable the regulation
         speed_regulation_enabled = true;
@@ -564,7 +597,6 @@ bool K1Physics::regulate_speed() {
         } else {
             //if regulation_speed is still too high :
 
-            CI::echo("DEC");
             //deceleration
             decelerate_of(acceleration_step);
 
@@ -627,7 +659,7 @@ void K1Physics::decelerate_of(float distance_step) {
  * update_acceleration_distances : this function updates the following variables, according to the current deceleration
  *  distances :
  *      - the acceleration distance;
- *      - the acceleration distance's square root;TODO REQUIRED ?
+ *      - the acceleration distance's square root;
  */
 
 void K1Physics::update_acceleration_distances() {
@@ -674,6 +706,8 @@ float K1Physics::get_sub_movement_time(bool update) {
 
 #define m K1Physics
 
+uint8_t m::reference_axis = 0;
+
 uint8_t m::last_speed_group = 0;
 
 float m::evolution_coefficient = 1;
@@ -686,13 +720,13 @@ float m::current_movement_first_sub_movement_hl_distances = 0;
 
 
 //The stepper jerk offset;
-uint32_t m::jerk_offset;
+uint32_t m::jerk_distance_offset;
 
 //The heuristic distance to the end point;
 uint32_t m::heuristic_end_distance;
 
 //The offseted heuristic distance to the next jerk point
-uint32_t m::offseted_heuristic_jerk_distance;
+uint32_t m::offset_heuristic_jerk_distance;
 
 //The jerk flag : if true, the jerk point proximity is checked in real time
 volatile bool m::watch_for_jerk_point;

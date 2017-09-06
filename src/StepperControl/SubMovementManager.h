@@ -14,8 +14,6 @@ class SubMovementManager {
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
 
-    static void display_distances();
-
 
 private:
 
@@ -44,6 +42,8 @@ public :
 
 
     //-----------------------------------------Current_Movement_Variables-----------------------------------------------
+
+    static void display_distances();
 
 public :
 

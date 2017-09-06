@@ -25,7 +25,6 @@
 
 #include "KinematicsCore2.h"
 #include "K2Physics.h"
-#include "JerkPlanner.h"
 
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/MachineInterface.h>
@@ -63,7 +62,7 @@ void KinematicsCore2::initialise_kinetics_data(k2_movement_data *movement_data) 
  * load_pre_rocess_kinetics_data : TODO
  */
 
-void KinematicsCore2::load_pre_rocess_kinetics_data(k2_movement_data *movement_data) {
+void KinematicsCore2::load_pre_process_kinetics_data(k2_movement_data *movement_data) {
 
     //Set the regulation_speed group
     movement_speed_group = movement_data->speed_group;
@@ -74,27 +73,22 @@ void KinematicsCore2::load_pre_rocess_kinetics_data(k2_movement_data *movement_d
 }
 
 
-/*
- * compute_jerk_data : updates the previous movement's jerk data, according to the current movement.
- *
- *  This task is delegated to the JerkPlanner class, as the Jerk determination algorithm is a bit heavy;
- */
 
-void KinematicsCore2::compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement) {
+//------------------------------------------------Real-time data update------------------------------------------------
 
-    //Do all the pre-processing for the movement, and throw the eventual error
-    JerkPlanner::determine_jerk(current_movement, previous_movement);
+
+void KinematicsCore2::compute_jerk_offsets(float speed, k2_movement_data *previous_movement) {
+
+    K2Physics::compute_jerk_offsets(speed, previous_movement);
 
 }
 
-
-//------------------------------------------------Real-time data update------------------------------------------------
 
 /*
  * TODO
  */
 
-void KinematicsCore2::load_real_time_kinetics_data(k2_movement_data *movement_data) {
+void KinematicsCore2::load_real_time_jerk_data(k2_movement_data *movement_data) {
 
     //Jerk
     if (movement_data->jerk_point) {
@@ -146,19 +140,18 @@ void KinematicsCore2::accept_sub_movement(sub_movement_data_t *sub_movement_data
 
 
 /*
- * compute_time_for_first_sub_movement : this function sets all variables up for the movement routine.
+ * compute_us_time_for_first_sub_movement : this function sets all variables up for the movement routine.
  *
  *  It processes the first sub_movement, and then fills the sub_movement queue;
  *
  */
-float KinematicsCore2::compute_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data) {
+float KinematicsCore2::compute_us_time_for_first_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
 
 
     //Get the sub_movement time
     float time = K2Physics::get_first_sub_movement_time(sub_movement_data);
 
-    CI::echo("ftime : "+String(time));
     //update the speeds
     K2Physics::update_speeds(sub_movement_data, time);
 

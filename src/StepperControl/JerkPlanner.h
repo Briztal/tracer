@@ -22,7 +22,7 @@
 
 #include <config.h>
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
+#ifdef ENABLE_STEPPER_CONTROL
 
 
 #ifndef TRACER_JERKPLANNER_H
@@ -36,23 +36,28 @@ class JerkPlanner {
 
 public :
 
-    static bool determine_jerk(const k2_movement_data *current_movement, k2_movement_data *previous_movement);
-
-    static void propagate_jerk(const k2_movement_data *current_movement, k2_movement_data *previous_movement);
-
+    static bool control_and_initialise_jerk(const movement_data_t *current_movement, movement_data_t *previous_movement,
+                                            bool jerk_control);
 
 private :
 
-    static float *const final_jerk_ratios;
-
-    static void get_jerk_offsets(float *initial_steps_distances, const uint8_t speed_group, uint32_t *jerk_distances_offsets);
-
-    static void update_jerk_final_data(float *final_steps_distances, const uint8_t speed_group);
 
     static void get_stepper_distances(const float p0, const float p1, void (*trajectory_function)(float, float *),
                                       float *distances);
-};
 
+    static void get_final_jerk_ratios(float *final_steps_distances, const uint8_t speed_group, float *final_jerk_ratios);
+
+    static float get_jerk_point_speed(const float *initial_steps_distances, const uint8_t speed_group,
+                                                   const float *final_jerk_ratios);
+
+    static float *const saved_final_stepper_positions;
+
+
+
+private:
+
+
+};
 
 
 #endif //TRACER_JERKPLANNER_H

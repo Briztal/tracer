@@ -51,7 +51,7 @@ public:
 
     static void load_pre_process_kinetics_data(k1_movement_data *movement_data);
 
-    static void compute_jerk_data(const k1_movement_data *current_movement, k1_movement_data *previous_movement);
+    static void compute_jerk_offsets(float speed, k1_movement_data *previous_movement);
 
 
     //-------------------------------------------real_time_environment update-------------------------------------------
@@ -67,16 +67,14 @@ public :
 
 public:
 
-    //TODO PROCESS POSITION
-
-    //The function to determine a new sub_movement
-    static void initialise_sub_movement(k1_sub_movement_data *sub_movement_data);
+    //The function to determine a new sub_movement : nothing particular to do.
+    static inline void initialise_sub_movement(k1_sub_movement_data *sub_movement_data) {};
 
     //The function to update the current variables according to the sub_movement data computed in the function above
     static void accept_sub_movement(k1_sub_movement_data *sub_movement);
 
     //The first sub_movement preparation, called at the beginning of the movement routine.
-    static float compute_time_for_first_sub_movement(k1_sub_movement_data *sub_movement_data);
+    static float compute_us_time_for_first_sub_movement(k1_sub_movement_data *sub_movement_data);
 
     //The sub_movement preparation function, called on interrupts.
     static float compute_us_time_for_sub_movement(k1_sub_movement_data *sub_movement_data);

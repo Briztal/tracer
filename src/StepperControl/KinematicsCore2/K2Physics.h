@@ -38,10 +38,7 @@ public:
 
     //------------------------------------------------Speed_Management--------------------------------------------------
 
-
 public :
-
-
 
     //the function to compute the time for the first sub_movement of the routine
     static float get_first_sub_movement_time(sub_movement_data_t *sub_movement_data);
@@ -52,11 +49,20 @@ public :
     //the function to update the current regulation_speed of the steppers, knowing the current movement time
     static void update_speeds(sub_movement_data_t *sub_movement_data, float time);
 
+
+    //--------------------------------------------------Jerk offsets----------------------------------------------------
+
+    //Jerk offsets computation
+    static void compute_jerk_offsets(float speed, k2_movement_data *previous_movement);
+
+    //Jerk offsets propagation
+    static void propagate_jerk_offsets(const k2_movement_data *current_movement, k2_movement_data *previous_movement);
+
     //Jerk offsets update
     static void update_jerk_offsets(const uint32_t *const new_jerk_offsets);
 
-private :
 
+private :
 
     //Deceleration Fields,  computed during the heuristic calls
     static bool deceleration_required;
@@ -73,8 +79,8 @@ private :
     //The stepper jerk offsets;
     static uint32_t *const jerk_offsets;
 
-    //-------------------------------------------------Speed_Constants--------------------------------------------------
 
+    //-------------------------------------------------Speed_Constants--------------------------------------------------
 
 private :
 

@@ -19,14 +19,17 @@
 */
 
 #include <config.h>
+
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL==1)
+
+#ifndef TRACER_REAL_TIME_PROCESS_H
+#define TRACER_REAL_TIME_PROCESS_H
+
+
 #include <StepperControl/_kinematics_data.h>
 #include <DataStructures/Queue.h>
 #include "SqrtFastComputer.h"
 
-#ifdef ENABLE_STEPPER_CONTROL
-
-#ifndef TRACER_REAL_TIME_PROCESS_H
-#define TRACER_REAL_TIME_PROCESS_H
 
 class K1Physics {
 
@@ -52,6 +55,8 @@ public :
 
 private :
 
+    static uint8_t reference_axis;
+
     static uint8_t last_speed_group;
 
     static float evolution_coefficient;
@@ -71,7 +76,7 @@ private:
 
     static uint8_t get_distances(const float *const t0, float *const t1);
 
-    static float get_delay_numerator(void (*trajectory_function)(float, float*), float p0, float p1, float *max_distance);
+    static float get_delay_numerator(void (*trajectory_function)(float, float*), float p0, float p1, uint8_t *max_axis, float *sav_max_distance);
 
     static float _get_delay_numerator(uint8_t axis, float distance);
 
@@ -89,29 +94,44 @@ private:
     static void get_sub_movement_time(movement_data_t *movement_data, uint8_t speed_group, float speed);
 
 
-    //-----------------------------------------------End jerk distances-------------------------------------------------
+    //-----------------------------------------------End distance-------------------------------------------------
 
 public :
 
     static void update_heuristic_end_distance();
 
-    static void update_heuristic_jerk_distance();
-
-    //The stepper jerk offset;
-    static uint32_t jerk_offset;
+private:
 
     //The heuristic distance to the end point;
     static uint32_t heuristic_end_distance;
 
-    //The offseted heuristic distance to the next jerk point
-    static uint32_t offseted_heuristic_jerk_distance;
+
+    //------------------------------------------------------Jerk--------------------------------------------------------
+
+public:
+
+    static void update_heuristic_jerk_distance();
+
+    //Jerk offsets computation
+    static void compute_jerk_offsets(float speed, k1_movement_data *previous_movement);
+
+    //Jerk offsets propagation
+    static void propagate_jerk_offsets(const movement_data_t *current_movement, movement_data_t *previous_movement) {};
+
+
+private:
+
+    //The stepper jerk offset;
+    static uint32_t jerk_distance_offset;
+
+    //The offset heuristic distance to the next jerk point
+    static uint32_t offset_heuristic_jerk_distance;
 
     //The jerk flag : if true, the jerk point proximity is checked in real time
     static volatile bool watch_for_jerk_point;
 
 
     //------------------------------------------------Speed_Management--------------------------------------------------
-
 
 public :
 

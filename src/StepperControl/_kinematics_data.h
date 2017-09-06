@@ -80,6 +80,8 @@ typedef struct kernel_movement_data {
     sig_t tools_signatures; //30 -> 33
     bool jerk_point = false;
     int32_t jerk_position[NB_STEPPERS]{0};
+    float final_jerk_ratios[NB_STEPPERS];
+    uint8_t speed_group; //29
     //-----------end : 32 to 36 bytes----------
 } movement_data;
 
@@ -116,7 +118,7 @@ typedef struct {
  */
 
 typedef struct k1_movement_data : movement_data {//TODO REORG
-
+    uint8_t reference_axis;
     float acceleration_delay_numerator;
     float dn_a_to_dn_d;
     float dn_d_to_dn_a;
@@ -159,7 +161,6 @@ typedef sub_movement_data k1_sub_movement_data;
 
 typedef struct k2_movement_data : movement_data {
     float speed; //28
-    uint8_t speed_group; //29
     uint32_t jerk_offsets[NB_STEPPERS]{0};
     //-----------end : 32 to 36 bytes----------
 } k2_movement_data;

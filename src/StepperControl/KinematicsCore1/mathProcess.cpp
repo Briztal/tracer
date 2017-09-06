@@ -91,17 +91,3 @@ int32_t fact(int n, int j) {
     else
         return n * fact(n - 1, j);
 }
-
-int angleFormat(int degrees) {
-    while (degrees>=360) {
-        degrees -= 360;
-
-    }
-    while (degrees<0){
-        degrees += 360;
-        return degrees;
-    }
-    return degrees;
-
-}
-
