@@ -19,7 +19,8 @@
 */
 
 #include <config.h>
-#ifdef ENABLE_STEPPER_CONTROL
+
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
 #ifndef TRACER_REAL_TIME_PROCESS_H
 #define TRACER_REAL_TIME_PROCESS_H

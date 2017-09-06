@@ -19,6 +19,12 @@
 */
 
 
+
+#include <config.h>
+
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
+
+
 #ifndef TRACER_JERKPLANNER_H
 #define TRACER_JERKPLANNER_H
 
@@ -50,3 +56,5 @@ private :
 
 
 #endif //TRACER_JERKPLANNER_H
+
+#endif

@@ -19,6 +19,12 @@
 */
 
 
+
+#include <config.h>
+
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
+
+
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/_kinematics_data.h>
 #include <Core/EEPROMStorage.h>
@@ -31,7 +37,6 @@
  *
  */
 
-//bool JerkPlanner::determine_jerk(const float min, const float max, void (*trajectory_function)(float, float *), const uint8_t speed_group, bool jerk_checking, uint32_t *jerk_distances_offsets) {
 bool JerkPlanner::determine_jerk(const k2_movement_data *current_movement, k2_movement_data *previous_movement) {
 
     //cache vars for min and max.
@@ -43,7 +48,7 @@ bool JerkPlanner::determine_jerk(const k2_movement_data *current_movement, k2_mo
     float jerk_distances[NB_STEPPERS];
     float t_min[NB_STEPPERS];
 
-    void (*trajectory_function)(float, float*) = current_movement->trajectory_function;
+    void (*trajectory_function)(float, float*) = current_movement->pre_process_trajectory_function;
 
     //Get the jerk position
     MachineInterface::get_stepper_positions_for(trajectory_function, min, t_min);
@@ -220,12 +225,8 @@ void JerkPlanner::get_stepper_distances(const float p0, const float p1, void (*t
 }
 
 
-
-
-
-
-
-
 float t_fjr[NB_STEPPERS];
 float *const JerkPlanner::final_jerk_ratios = t_fjr;
 
+
+#endif

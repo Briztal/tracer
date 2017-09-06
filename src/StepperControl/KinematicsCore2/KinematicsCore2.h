@@ -1,5 +1,5 @@
 /*
-  Kernel2.h - Part of TRACER
+  KinematicsCore2.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -41,6 +41,7 @@
  */
 
 #include <config.h>
+
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
 
@@ -59,6 +60,7 @@ public :
 
     static void initialise_tracing_procedure();
 
+
     //-------------------------------------------Current high level position--------------------------------------------
 
 private :
@@ -71,19 +73,18 @@ private :
 
 public:
 
-    static void update_pre_process_speed_data(k2_movement_data *movement_data);
+    static void initialise_kinetics_data(k2_movement_data *movement_data);
 
-    static void initialise_movement_data(k2_movement_data *movement_data);
+    static void load_kinetics_data(k2_movement_data *movement_data);
 
     static void compute_jerk_data(const k2_movement_data *current_movement, k2_movement_data *previous_movement);
 
-    //------------------------------------------------environment update------------------------------------------------
+
+    //----------------------------------------------jerk_environment update---------------------------------------------
 
 public :
 
-    static void update_real_time_jerk_environment(k2_movement_data *movement_data);
-
-    //static void update_real_time_jerk_environment(k2_movement_data *movement_data);
+    static void load_real_time_kinetics_data(k2_movement_data *movement_data);
 
 
     //--------------------------------------------sub_movements preparation---------------------------------------------
@@ -114,7 +115,6 @@ private:
 
 
     //----------------------------------------------------positon log---------------------------------------------------
-
 
 public:
 

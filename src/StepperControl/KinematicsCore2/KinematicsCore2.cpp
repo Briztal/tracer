@@ -1,5 +1,5 @@
 /*
-  Kernel2.cpp - Part of TRACER
+  KinematicsCore1.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -19,7 +19,7 @@
 */
 
 
-#include <interface.h>
+#include <config.h>
 
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
@@ -30,6 +30,8 @@
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
+#include <interface.h>
+
 
 
 void KinematicsCore2::initialise_tracing_procedure() {
@@ -48,13 +50,29 @@ void KinematicsCore2::initialise_tracing_procedure() {
  *      - the regulation_speed group;
  */
 
-void KinematicsCore2::initialise_movement_data(k2_movement_data *movement_data) {
+void KinematicsCore2::initialise_kinetics_data(k2_movement_data *movement_data) {
 
     //Initialisation of regulation_speed variables
     movement_data->speed = MachineInterface::get_speed();
     movement_data->speed_group = MachineInterface::get_speed_group();
 
 }
+
+
+/*
+ * load_pre_rocess_kinetics_data : TODO
+ */
+
+void KinematicsCore2::load_pre_rocess_kinetics_data(k2_movement_data *movement_data) {
+
+    //Set the regulation_speed group
+    movement_speed_group = movement_data->speed_group;
+
+    //Set the regulation_speed
+    next_regulation_speed = movement_data->speed;
+
+}
+
 
 /*
  * compute_jerk_data : updates the previous movement's jerk data, according to the current movement.
@@ -70,25 +88,13 @@ void KinematicsCore2::compute_jerk_data(const k2_movement_data *current_movement
 }
 
 
-/*
- * update_pre_process_speed_data : this function updates the movement that KinematicsCore2 is currently pre-processing.
- */
-
-void KinematicsCore2::update_pre_process_speed_data(k2_movement_data *movement_data) {
-
-    //Set the regulation_speed group
-    movement_speed_group = movement_data->speed_group;
-
-    //Set the regulation_speed
-    next_regulation_speed = movement_data->speed;
-
-}
-
-
 //------------------------------------------------Real-time data update------------------------------------------------
 
+/*
+ * TODO
+ */
 
-void KinematicsCore2::update_real_time_jerk_environment(k2_movement_data *movement_data) {
+void KinematicsCore2::load_real_time_kinetics_data(k2_movement_data *movement_data) {
 
     //Jerk
     if (movement_data->jerk_point) {
@@ -100,6 +106,10 @@ void KinematicsCore2::update_real_time_jerk_environment(k2_movement_data *moveme
 
 //--------------------------------------------sub_movements preparation---------------------------------------------
 
+
+/*
+ * TODO
+ */
 
 void KinematicsCore2::initialise_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
@@ -115,10 +125,6 @@ void KinematicsCore2::initialise_sub_movement(k2_sub_movement_data *sub_movement
     //Compute the movement distance for the current regulation_speed group
     sub_movement_data->movement_distance = MachineInterface::get_movement_distance_for_group(movement_speed_group, high_level_distances);
 
-
-    //Translate the high level position into steppers position;
-    MachineInterface::translate(sub_movement_data->candidate_high_level_positions,
-                                sub_movement_data->future_steppers_positions);
 
     //Update the regulation_speed for the real-time processor
     sub_movement_data->regulation_speed = next_regulation_speed;

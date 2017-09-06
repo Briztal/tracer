@@ -18,11 +18,13 @@
 
 */
 
+#include <config.h>
+
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
 
 #include <StepperControl/SubMovementManager.h>
 
-#ifdef ENABLE_STEPPER_CONTROL
 
 #include "K2Physics.h"
 
@@ -44,6 +46,9 @@ void K2Physics::start() {
 
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 
+/*
+ * TODO
+ */
 
 float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
@@ -90,7 +95,7 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
  *      time windows for all steppers.
  *
  *  Finally, the regulation time is determined, according to the following rule :
- *      - if the machine must decelerate, the chosen time is the upper bound of the determined window.
+ *      - if the machine must decelerate_of, the chosen time is the upper bound of the determined window.
  *      - if not, if the regulation time is outside of the regulation window, the new time is the corresponding bound;
  *      - if not, the current time is the regulation time.
  *

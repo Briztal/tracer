@@ -7,6 +7,7 @@
 #include "TrajectoryTracer.h"
 #include <hardware_language_abstraction.h>
 #include <interface.h>
+#include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 
 /*
@@ -19,7 +20,7 @@
  *
  */
 
-uint8_t SubMovementManager::update_current_movement(k2_movement_data *movement_data) {
+uint8_t SubMovementManager::update_current_movement(movement_data_t *movement_data) {
 
     //----------------Movement data initialisation-----------------------
 
@@ -129,6 +130,10 @@ bool SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
     //Get the high level position corresponding to the computed index
     get_new_position(local_index_candidate, sub_movement_data->candidate_high_level_positions);
 
+    //Translate the high level position into steppers position;
+    MachineInterface::translate(sub_movement_data->candidate_high_level_positions,
+                                sub_movement_data->future_steppers_positions);
+
     //Call the kernel, to fill the kernel-reserved part of the data.
     Kinematics::initialise_sub_movement(sub_movement_data);
 
@@ -167,7 +172,16 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
 
     //Increment adjustment according to the target
     if (max_distance != DISTANCE_TARGET) {
-        increment = increment * (float) DISTANCE_TARGET / max_distance;
+
+        //get the distance ratio
+        float ratio = (float) DISTANCE_TARGET / max_distance;
+
+        //Update the increment with the ratio;
+        increment *= ratio;
+
+        //Notify the KinematicsCore that the increment has been changed (not used in KinematicsCore2)
+        Kinematics::update_evolution_coefficient(ratio);
+
     }
 
     //If the maximal distance is below the lower limit :

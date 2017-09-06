@@ -194,13 +194,13 @@ SERVO(2, servo3, 4, 0, 1)
  *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.
  */
 
-#define KERNEL 2
+#define KERNEL 1
 
-#define movement_data_t k2_movement_data
+#define movement_data_t k1_movement_data
 
-#define sub_movement_data_t k2_sub_movement_data
+#define sub_movement_data_t k1_sub_movement_data
 
-#define Kinematics KinematicsCore2
+#define Kinematics KinematicsCore1
 
 //-----------------------------------------------High Level Coordinate System-------------------------------------------
 

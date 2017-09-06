@@ -21,57 +21,15 @@
 
 #include <config.h>
 
-#ifndef ENABLE_STEPPER_CONTROL
+#ifdef ENABLE_STEPPER_CONTROL
 
 #include "SpeedPlanner.h"
 #include "TrajectoryExecuter.h"
-#include "K1RealTimeProcessor.h"
+#include "K1Physics.h"
 #include <StepperControl/StepperController.h>
 #include <interface.h>
 #include <Core/EEPROMStorage.h>
 
-
-void SpeedPlanner::begin() {
-
-#define CARTESIAN_GROUP(i, s0, s1, s2, ms)\
-    theorical_regulation_speeds[i]= ms;\
-    speed_groups_signatures[i] = ((s0!=-1) ? 1<<s0 : 0)|((s1!=-1) ? 1<<s1: 0)|((s2!=-1) ? 1<<s2 : 0);
-
-
-#include <config.h>
-
-#undef CARTESIAN_GROUP
-
-    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        axis_signatures[axis] = (sig_t) (1 << axis);
-    }
-
-}
-
-void SpeedPlanner::send_position() {
-
-#ifdef position_log
-    StepperController::send_position();
-#else
-    CI::echo("POSITION");
-    float t[NB_STEPPERS];
-    for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        t[axis] = (SpeedPlanner::positions[axis] / EEPROMStorage::steps[axis]);
-    }
-    CI::send_position(t);
-#endif
-
-}
-
-void SpeedPlanner::set_speed_group(uint8_t speed_group) {
-    SpeedPlanner::speed_group = speed_group;
-}
-
-
-//TODO CHECK MAX_SPEED
-void SpeedPlanner::set_speed_for_group(uint8_t group_id, float regulation_speed) {
-    theorical_regulation_speeds[group_id] = regulation_speed;
-}
 
 
 /*
@@ -346,11 +304,11 @@ bool SpeedPlanner::verify_jerk_limits(float *relative_distsmm, float sqrt_square
 
 
 
-            if ((TrajectoryExecuter::in_motion)&&(!K1RealTimeProcessor::watch_for_jerk_point)) {
+            if ((TrajectoryExecuter::in_motion)&&(!K1Physics::watch_for_jerk_point)) {
 
-                //If the current prepare_movement is made without jerk point : notify K1RealTimeProcessor to watch for jerk points
+                //If the current prepare_movement is made without jerk point : notify K1Physics to watch for jerk points
                 pull_jerk_point();
-                K1RealTimeProcessor::jerk_offset = tmp_jerk_distance_offset;
+                K1Physics::jerk_offset = tmp_jerk_distance_offset;
 
             } else {
 
@@ -406,11 +364,11 @@ void SpeedPlanner::push_jerk_point() {
 }
 
 /*
- * pull_jerk_point : this function updates K1RealTimeProcessor's jerk_distance and jerk_offset,
+ * pull_jerk_point : this function updates K1Physics's jerk_distance and jerk_offset,
  *
  *      according to previously enqueued data.
  *
- *      It is called by K1RealTimeProcessor, before beginning a movement, when
+ *      It is called by K1Physics, before beginning a movement, when
  */
 
 void SpeedPlanner::pull_jerk_point() {
@@ -422,9 +380,9 @@ void SpeedPlanner::pull_jerk_point() {
     disable_stepper_interrupt();
 
     for (unsigned char axis = 0; axis < NB_STEPPERS; axis++) {
-        K1RealTimeProcessor::jerk_distances[axis] += enqueued_end_distances[pull_indice * NB_STEPPERS + axis];
+        K1Physics::jerk_distances[axis] += enqueued_end_distances[pull_indice * NB_STEPPERS + axis];
     }
-    K1RealTimeProcessor::watch_for_jerk_point = true;
+    K1Physics::watch_for_jerk_point = true;
 
     enable_stepper_interrupt();
 

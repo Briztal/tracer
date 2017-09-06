@@ -78,6 +78,8 @@ typedef struct kernel_movement_data {
     void (*trajectory_function)(float, float *); //24
     void (*pre_process_trajectory_function)(float, float *); //24
     sig_t tools_signatures; //30 -> 33
+    bool jerk_point = false;
+    int32_t jerk_position[NB_STEPPERS]{0};
     //-----------end : 32 to 36 bytes----------
 } movement_data;
 
@@ -95,6 +97,8 @@ typedef struct {
     float f_step_distances[NB_STEPPERS];
     float future_steppers_positions[NB_STEPPERS];
     float candidate_high_level_positions[NB_AXIS];
+    sig_t direction_signature;
+    float index_candidate;
 
 } sub_movement_data;
 
@@ -113,21 +117,26 @@ typedef struct {
 
 typedef struct k1_movement_data : movement_data {//TODO REORG
 
-    void (*sub_move_init)(uint8_t);//2
-    //-------------4----------------24
-    //Speed
-    float ratio;//4
-    //-------------4----------------28
-    delay_t delay_numerator;//2
-    delay_t regulation_delay;//2
-    uint32_t jerk_distance_offset;
-    bool jerk_point;//1
-    //-------------4----------------
-    float speed_factor;//2
-    //-------------4----------------32
+    float acceleration_delay_numerator;
+    float dn_a_to_dn_d;
+    float dn_d_to_dn_a;
+    float acceleration_step;
+    float first_sub_movement_hl_distance_current_speed_group;
+    float first_sub_movement_hl_distance_last_speed_group;
+    delay_t regulation_sub_movement_time;
 
+    float ratio;
+    uint32_t jerk_distance_offset;
+    bool jerk_point;
+    float speed_factor;
 } k1_movement_data;//36 bytes
 
+
+/*
+ * k1_sub_movement_data : no real time information added.
+ */
+
+typedef sub_movement_data k1_sub_movement_data;
 
 
 
@@ -149,12 +158,9 @@ typedef struct k1_movement_data : movement_data {//TODO REORG
  */
 
 typedef struct k2_movement_data : movement_data {
-
     float speed; //28
     uint8_t speed_group; //29
-    bool jerk_point = false;
     uint32_t jerk_offsets[NB_STEPPERS]{0};
-    int32_t jerk_position[NB_STEPPERS]{0};
     //-----------end : 32 to 36 bytes----------
 } k2_movement_data;
 
@@ -172,32 +178,11 @@ typedef struct k2_movement_data : movement_data {
 
 typedef struct k2_sub_movement_data : sub_movement_data {
 
-    sig_t direction_signature;
-    float index_candidate;
     float movement_distance;
     float regulation_speed;
     //-----------end : 32 to 36 bytes----------
 } k2_sub_movement_data;
 
-
-
-/*
- * k2_real_time_data : this structure contains all data related to sub_movements :
- *  - the distance of the sub_movement
- *  - the regulation_speed of the sub_movement
- *  - if the starting point is a jerk point
- *  - the signature of the movement step_distances (1 for negative distance, 0 for positive)
- *
- * float and integer step_distances are also stored, in a separate queue.
- *
- */
-
-typedef struct {
-    float distance; //4
-    float speed; //8
-    sig_t negative_signature; //10 -> 13
-    //--------end : 12 to 16 bytes-------
-} k1_real_time_data;
 
 
 //-------------------------------------------------Movements Structures-------------------------------------------------

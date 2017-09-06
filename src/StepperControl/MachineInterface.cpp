@@ -33,7 +33,7 @@
 #if (KERNEL == 0)
 #include <LinearMovement.h>
 #elif (KERNEL == 1)
-#include <LinearMovement.h>
+#include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #elif (KERNEL == 2)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
@@ -50,7 +50,7 @@ void MachineInterface::linear_movement(float *destination) {
 #if (KERNEL == 0)
     LinearMovement::prepare_movement(destination);
 #elif (KERNEL == 1)
-    LinearMovement::prepare_movement(destination);
+    ComplexLinearMovement::prepare_movement(destination);
 #elif (KERNEL == 2)
     ComplexLinearMovement::prepare_movement(destination);
 #endif

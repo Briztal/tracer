@@ -29,6 +29,7 @@
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>
+#include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 
 //------------------------------------------------movement_queue_management---------------------------------------------
@@ -200,7 +201,7 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
 
     //---------------Kinematics variable data-----------------
 
-    Kinematics::initialise_movement_data(current_movement);
+    Kinematics::initialise_kinetics_data(current_movement);
 
 
     //---------------Speed and Jerk (kernel variable)-----------------
@@ -222,7 +223,8 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
         //If the movement has been popped since the processing has started
         if (!movement_data_queue.available_elements()) {
 
-            Kinematics::update_real_time_jerk_environment(previous_movement);
+            //Load only the jerk data
+            Kinematics::load_real_time_jerk_data(previous_movement);
 
         }
     }
@@ -282,7 +284,7 @@ void TrajectoryTracer::process_next_movement() {
         movement_switch_counter = SubMovementManager::update_current_movement(movement_data);
 
         //Update now the pre_processing data, the real_time will be in the function below.
-        Kinematics::update_pre_process_speed_data(movement_data);
+        Kinematics::load_pre_process_kinetics_data(movement_data);
 
         //Don't discard the movement struct for instance, it will be done in update_real_time_jerk_environment;
 
@@ -315,7 +317,7 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
     //Jerk environment
 
-    Kinematics::update_real_time_jerk_environment(movement_data);
+    Kinematics::load_real_time_kinetics_data(movement_data);
 
 
     //------Clean------

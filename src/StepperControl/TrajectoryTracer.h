@@ -47,7 +47,7 @@ class TrajectoryTracer {
 
 private:
 
-    static Queue<k2_movement_data> movement_data_queue;
+    static Queue<movement_data_t> movement_data_queue;
 
 
     //The flag for a real-time movement switch
@@ -193,7 +193,7 @@ private:
     static void (**tools_update_functions)(float);
 
     //the function to change the linear powers and functions
-    static void update_tools_data(k2_movement_data *movement);
+    static void update_tools_data(movement_data_t *movement);
 
     static void stop_tools();
 
