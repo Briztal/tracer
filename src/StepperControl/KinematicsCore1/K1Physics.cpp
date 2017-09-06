@@ -32,6 +32,7 @@
 #include <Core/EEPROMStorage.h>
 #include "K1Physics.h"
 #include <StepperControl/SubMovementManager.h>
+#include <StepperControl/_kinematics_data.h>
 #include "mathProcess.hpp"
 
 
@@ -57,18 +58,18 @@ void K1Physics::initialise_tracing_procedure() {
 
 /*
  * initialise_kinetics_data : this function determines all kinetics data required by the kinetics regulation, namely :
- *      - delay numerators (acceleration, deceleration);
- *      - conversion ratios for delay numerators (both ways);
+ *      - delay_us numerators (acceleration, deceleration);
+ *      - conversion ratios for delay_us numerators (both ways);
  *      - regulation_sub_movement_time;
  *
  */
 
 void K1Physics::initialise_kinetics_data(k1_movement_data *movement_data) {
 
-    //Extract delay numerators and the conversion ratios;
+    //Extract delay_us numerators and the conversion ratios;
     get_delay_numerator_data(movement_data);
 
-    //compute the regulation delay;
+    //compute the regulation delay_us;
     get_sub_movement_time(movement_data, MachineInterface::get_speed_group(), MachineInterface::get_speed());
 
 }
@@ -103,15 +104,17 @@ void K1Physics::load_real_time_jerk_data(k1_movement_data *movement_data) {
 
 /*
  * load_real_time_kinetics_data : this function updates the real time data, namely :
- *      - the acceleration delay numerator;
+ *      - the acceleration delay_us numerator;
  *      - the acceleration/deceleration translation coefficients;
- *      - the regulation delay;
- *      - the current delay;
+ *      - the regulation delay_us;
+ *      - the current delay_us;
  *
  */
 void K1Physics::load_real_time_kinetics_data(k1_movement_data *movement_data) {
 
-    //delay numerator;
+
+
+    //delay_us numerator;
     acceleration_delay_numerator = movement_data->acceleration_delay_numerator;
 
     //Translation coefficients
@@ -121,14 +124,21 @@ void K1Physics::load_real_time_kinetics_data(k1_movement_data *movement_data) {
     //Regulation time
     regulation_sub_movement_time = movement_data->regulation_sub_movement_time;
 
+
+
     //acceleration_step
     acceleration_step = movement_data->acceleration_step;
 
-    //If we are at the first movement, we do not need to convert the current delay.
+    //If we are at the first movement, we do not need to convert the current delay_us.
     if (first_movement) {
         first_movement = false;
         return;
     }
+
+    //Update the flags :
+    speed_increasing_flag = sub_movement_time > regulation_sub_movement_time;
+
+    speed_regulation_enabled = true;
 
     //Update the current time
     /*
@@ -158,13 +168,19 @@ void K1Physics::load_real_time_kinetics_data(k1_movement_data *movement_data) {
     float last_sub_movement_hl_distance = saved_evolution_coefficient * first_sub_movement_distance;
 
     //Update the regulation time;
-    regulation_sub_movement_time *= (new_sub_movement_hl_distance / last_sub_movement_hl_distance);
+    sub_movement_time *= (new_sub_movement_hl_distance / last_sub_movement_hl_distance);
 
 }
 
 void K1Physics::update_evolution_coefficient(float multiplier) {
 
     evolution_coefficient *= multiplier;
+
+    regulation_sub_movement_time *=multiplier;
+
+    sub_movement_time *= multiplier;
+
+    acceleration_delay_numerator *= multiplier;
 
 }
 
@@ -176,8 +192,8 @@ void K1Physics::update_evolution_coefficient(float multiplier) {
 
 /*
  * get_delay_numerator_data : this function determines :
- *      - the acceleration delay numerator;
- *      - the deceleration delay numerator;
+ *      - the acceleration delay_us numerator;
+ *      - the deceleration delay_us numerator;
  *      - the square ratios, used to determine one speed distance from the other.
  */
 
@@ -191,13 +207,15 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
     float min = movement_data->min, max = movement_data->max;
     float min_increment = movement_data->min_increment, max_increment = movement_data->max_increment;
 
-    //Get delay numerators
+    //Get delay_us numerators
     float dn_acceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, min,
                                                 min + min_increment, &movement_data->acceleration_step);
+
+
     float dn_deceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, max,
                                                 max + max_increment, 0);
 
-    //Save the acceleration delay numerators. The other is not used in real time.
+    //Save the acceleration delay_us numerators. The other is not used in real time.
     movement_data->acceleration_delay_numerator = dn_acceleration;
 
 
@@ -222,7 +240,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
 
 
 /*
- * get_delay_numerator : this function computes the delay numerator for a couple of points and a trajectory function.
+ * get_delay_numerator : this function computes the delay_us numerator for a couple of points and a trajectory function.
  *
  */
 float
@@ -245,16 +263,16 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
         *max_distance = t_dist[max_axis];
     }
 
-    //finally, compute the delay numerator.
+    //finally, compute the delay_us numerator.
     return _get_delay_numerator(max_axis, t_dist[max_axis]);
 }
 
 
 /*
- * _get_delay_numerator : this function computes (litteraly this time) the delay numerator, for a particular axis.
+ * _get_delay_numerator : this function computes (litteraly this time) the delay_us numerator, for a particular axis.
  *
- *  The delay resulting from the division of this delay numerator by the acceleration distance
- *      is the delay for the SUB_MOVEMENT and not for the tic. That's why the distance in steps is
+ *  The delay_us resulting from the division of this delay_us numerator by the acceleration distance
+ *      is the delay_us for the SUB_MOVEMENT and not for the tic. That's why the distance in steps is
  *      appearing in the formula.
  *
  */
@@ -263,14 +281,14 @@ float K1Physics::_get_delay_numerator(uint8_t axis, float distance) {
 
     /*
      * FORMULA : D = 10^6 * distance / (steps * sqrt(2 * acceleration)) with :
-     *      - D : the delay numerator;
+     *      - D : the delay_us numerator;
      *      - distance (steps) : the distance on the axis;
      *      - steps (steps/unit) : the steps per unit of axis;
      *      - acceleration (unit / s^2) : the acceleration on the axis.
      *
      */
 
-    return (float) 1000000 * distance / (EEPROMStorage::steps[axis] * sqrtf(2 * EEPROMStorage::accelerations[axis]));
+    return (float) 1000000 * distance / ( sqrtf(2 * EEPROMStorage::steps[axis] * EEPROMStorage::accelerations[axis]));
 }
 
 
@@ -324,6 +342,9 @@ uint8_t K1Physics::get_distances(const float *const t0, float *const t1) {
 
 float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
+
+
+
     //Cache vars
     float *f_step_distances = sub_movement_data->f_step_distances;
 
@@ -343,9 +364,12 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
 
     }
 
-    float new_time = (regulation_sub_movement_time > min_time) ? regulation_sub_movement_time : min_time;
+    float min_time_us = (float)1000000 *min_time;
 
-    return new_time;
+
+    sub_movement_time = (uint32_t) ((regulation_sub_movement_time > min_time_us) ? regulation_sub_movement_time : min_time_us);
+
+    return sub_movement_time;
 
 }
 
@@ -357,7 +381,7 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
  *
  */
 
-float K1Physics::get_sub_movement_time(movement_data_t *movement_data, uint8_t speed_group, float speed) {
+void K1Physics::get_sub_movement_time(movement_data_t *movement_data, uint8_t speed_group, float speed) {
 
     float t_point[NB_STEPPERS];
     float t_dist[NB_STEPPERS];
@@ -388,7 +412,7 @@ float K1Physics::get_sub_movement_time(movement_data_t *movement_data, uint8_t s
 
     last_speed_group = speed_group;
 
-    return (float) 1000000 * hl_sub_movement_distance_current_speed_group / speed;
+    movement_data->regulation_sub_movement_time = (uint32_t) ((float) 1000000 * hl_sub_movement_distance_current_speed_group / speed);
 
 }
 
@@ -449,8 +473,11 @@ void K1Physics::update_heuristic_jerk_distance() {
 
 bool K1Physics::regulate_speed() {
 
+    //CI::echo("jerk : "+String(watch_for_jerk_point)+" - en : "+String(speed_regulation_enabled)+" - inc : "+String(speed_increasing_flag)+" - sub : "+String(sub_movement_time)+" - reg : "+String(regulation_sub_movement_time));
     if (heuristic_end_distance < deceleration_speed_distance) {
         //If the machine must decelerate_of, due to the proximity of the end point :
+
+        CI::echo("END");
 
         //decelerate_of
         decelerate_to(heuristic_end_distance);
@@ -469,6 +496,7 @@ bool K1Physics::regulate_speed() {
 
     } else if ((watch_for_jerk_point) && (offseted_heuristic_jerk_distance < deceleration_speed_distance)) {
         //If the machine must decelerate_of, due to the proximity of the jerk point :
+
 
         //decelerate_of
         decelerate_to(offseted_heuristic_jerk_distance);
@@ -501,21 +529,28 @@ bool K1Physics::regulate_speed() {
 
         bool low_speed = (sub_movement_time > regulation_sub_movement_time);
 
+
         //We must verify that the target hasn't been reached
         //Reached when the regulation_speed is too high and has been increased before, or too low and has been decreased before
         if (low_speed != speed_increasing_flag) {
 
-            //Set the delay to the target
+            //Set the delay_us to the target
             sub_movement_time = regulation_sub_movement_time;
+
+            //Updating the acceleration distance;
+            acceleration_speed_distance_sqrt = (uint16_t) (acceleration_delay_numerator / sub_movement_time);
+            acceleration_speed_distance = acceleration_speed_distance_sqrt * acceleration_speed_distance_sqrt;
+            update_deceleration_distances();
 
             //mark the target as reached
             speed_regulation_enabled = false;
 
             //The sub_movement time was updated.
-            return true;
+            return false;
 
         } else if (low_speed) {
             //if regulation_speed is still too low :
+
 
             //acceleration
             accelerate_of(acceleration_step);
@@ -529,6 +564,7 @@ bool K1Physics::regulate_speed() {
         } else {
             //if regulation_speed is still too high :
 
+            CI::echo("DEC");
             //deceleration
             decelerate_of(acceleration_step);
 
@@ -567,8 +603,10 @@ void K1Physics::decelerate_to(uint32_t deceleration_distance) {
  */
 
 void K1Physics::accelerate_of(float distance_step) {
+
     acceleration_speed_distance += distance_step;
     update_deceleration_distances();
+
 }
 
 
@@ -614,15 +652,18 @@ void K1Physics::update_deceleration_distances() {
 
 
 /*
- * update_sub_movement_time : this function updates the sub_movement time.
+ * get_sub_movement_time : this function updates the sub_movement time.
  *
  *  FORMULA : sub_movement_time = acceleration_delay_numerator / sqrt(acceleration_speed_distance)
  *
  */
-float K1Physics::update_sub_movement_time() {
+float K1Physics::get_sub_movement_time(bool update) {
 
-    //Update the sub movement time;
-    sub_movement_time = (delay_t) (acceleration_delay_numerator * invert(acceleration_speed_distance_sqrt));
+    if (update) {
+        //Update the sub movement time;
+        sub_movement_time = (delay_t) (acceleration_delay_numerator * invert(acceleration_speed_distance_sqrt));
+
+    }
 
     //Return the sub_movement time;
     return sub_movement_time;

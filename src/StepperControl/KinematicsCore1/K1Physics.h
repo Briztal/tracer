@@ -86,7 +86,7 @@ public :
 private:
 
     //The function to pre-compute a movement'ssub_movement time.
-    static float get_sub_movement_time(movement_data_t *movement_data, uint8_t speed_group, float speed);
+    static void get_sub_movement_time(movement_data_t *movement_data, uint8_t speed_group, float speed);
 
 
     //-----------------------------------------------End jerk distances-------------------------------------------------
@@ -117,7 +117,7 @@ public :
 
     static bool regulate_speed();
 
-    static float update_sub_movement_time();
+    static float get_sub_movement_time(bool update);
 
 
 private:

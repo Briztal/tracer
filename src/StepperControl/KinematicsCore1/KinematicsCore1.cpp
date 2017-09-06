@@ -138,25 +138,30 @@ float KinematicsCore1::compute_time_for_first_sub_movement(k1_sub_movement_data 
 
 
 //The sub_movement preparation function, called on interrupts.
-float KinematicsCore1::compute_time_for_sub_movement(k1_sub_movement_data *sub_movement_data) {
+float KinematicsCore1::compute_us_time_for_sub_movement(k1_sub_movement_data *sub_movement_data) {
 
-
-    bool speed_modification_flag = K1Physics::regulate_speed();
+    K1Physics::update_heuristic_end_distance();
 
     STEP_AND_WAIT;
 
-    if (speed_modification_flag) {
+    bool acceleration_flag = K1Physics::regulate_speed();
 
-        sub_movement_time = K1Physics::update_sub_movement_time();
+    STEP_AND_WAIT;
+
+    float new_sub_movement_time = K1Physics::get_sub_movement_time(acceleration_flag);
+
+    if (new_sub_movement_time != sub_movement_time) {
 
         //STEP_AND_WAIT;
 
         //Actions setting
         //K1Physics::setActionsSpeeds(); TODO
 
+        sub_movement_time = new_sub_movement_time;
+
     }
 
-    return sub_movement_time;
+    return new_sub_movement_time;
 }
 
 

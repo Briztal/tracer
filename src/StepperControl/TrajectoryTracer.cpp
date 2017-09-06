@@ -74,7 +74,7 @@ void TrajectoryTracer::start() {
     prepare_first_sub_movement();
 
     //Setup properly the interrupt procedure;
-    setup_stepper_interrupt(prepare_next_sub_movement, (uint32_t) delay);
+    setup_stepper_interrupt(prepare_next_sub_movement, (uint32_t) delay_us);
 
     //Mark the movement procedure as started
     started = true;
@@ -101,10 +101,10 @@ void TrajectoryTracer::stop() {
     //Interrupt the movement routing, by stopping the interrupt sequence
     disable_stepper_interrupt()
 
-    //Get the half of the delay period
-    uint32_t half_delay = (uint32_t) (delay / 2);
+    //Get the half of the delay_us period
+    uint32_t half_delay = (uint32_t) (delay_us / 2);
 
-    //Wait the half of the delay period
+    //Wait the half of the delay_us period
     delay_us(half_delay);
 
     //re-disable the movement routine, prevents the case where the previous disable occurred just before the interrupt.
@@ -344,33 +344,35 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     sub_movement_data_t *sub_movement_data = SubMovementManager::read_next_sub_movement();
 
     //Initialise the step_distances array we will give to the kernel
-    uint8_t *elementary_distances = sub_movement_data->step_distances;
+    uint8_t *sub_movement_distances = sub_movement_data->step_distances;
 
     //Copy the direction signature in cache.
     saved_direction_signature = sub_movement_data->direction_signature;
 
 
     //Step 2 : Update the end_distances with this step_distances array and compute the heuristic step_distances to jerk/end points
-    SubMovementManager::update_end_jerk_distances(saved_direction_signature, elementary_distances);
+    SubMovementManager::update_end_jerk_distances(saved_direction_signature, sub_movement_distances);
 
     //-------------------Kinematics call-------------------
 
-    //Give the hand to the kernel who will compute the time for the sub-movement
-    float time = Kinematics::compute_time_for_first_sub_movement(sub_movement_data);
+    //Give the hand to the kernel who will compute the sub_movement_time_us for the sub-movement
+    float sub_movement_time_us = Kinematics::compute_time_for_first_sub_movement(sub_movement_data);
 
 
     //Compute the signatures for the next movement.
-    process_signatures(elementary_distances, es0);
+    process_signatures(sub_movement_distances, es0);
     is_es_0 = false;
 
-    //Determine the delay time for the next sub_movement :
-    delay = ((float) 1000000 * time) / (float) trajectory_index;
+    //Determine the delay_us sub_movement_time_us for the next sub_movement :
+    delay_us = (sub_movement_time_us) / (float) trajectory_index;
+
 
     //Discard the current sub_movement in the sub-movements queue.
     SubMovementManager::discard();
 
     //Push as much sub_movements as possible.
     SubMovementManager::fill_sub_movement_queue();
+
 
 
 }
@@ -407,8 +409,9 @@ void TrajectoryTracer::prepare_next_sub_movement() {
 
     //-------------------Kinematics call-------------------
 
-    //Give the hand to the kernel who will compute the time for the sub-movement
-    float time = Kinematics::compute_time_for_sub_movement(sub_movement_data);
+    //Give the hand to the kernel who will compute the time_us for the sub-movement
+    float time_us = Kinematics::compute_us_time_for_sub_movement(sub_movement_data);
+
 
     STEP_AND_WAIT
 
@@ -418,8 +421,8 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Compute the step_signatures corresponding to the step_distances given by the kernel.
     process_signatures(elementary_distances, step_signatures);
 
-    //Determine the delay time for the next sub_movement :
-    delay = ((float) 1000000 * time) / (float) trajectory_index;
+    //Determine the delay_us time_us for the next sub_movement :
+    delay_us = time_us / (float) trajectory_index;
 
     //Discard the current sub_movement in the sub-movements queue.
     SubMovementManager::discard();
@@ -451,7 +454,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //-------------------Exit-------------------
 
     exit:
-    //Set the light interrupt function to give time to background processes
+    //Set the light interrupt function to give time_us to background processes
     set_stepper_int_function(finish_sub_movement);
 
     //Re-enable the stepper interrupt
@@ -460,7 +463,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
 
 
 /*
- * initialise_sub_movement : sets the delay, the trajectory indice, the steppers directions
+ * initialise_sub_movement : sets the delay_us, the trajectory indice, the steppers directions
  *      and returns the pointer to the elementary signatures processed before
  */
 
@@ -484,8 +487,8 @@ sig_t *TrajectoryTracer::initialise_sub_movement() {
     //Set the correct direction
     StepperController::set_directions(saved_direction_signature);
 
-    //update the interrupt period with the float delay, that is computed to provide the most accurate period.
-    set_stepper_int_period(delay);
+    //update the interrupt period with the float delay_us, that is computed to provide the most accurate period.
+    set_stepper_int_period(delay_us);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones
     if (is_es_0) {
@@ -780,7 +783,7 @@ sig_t m::saved_direction_signature;
 
 void (*m::movement_finalisation)();
 
-float m::delay = 0;
+float m::delay_us = 0;
 
 uint8_t m::tools_nb;
 

@@ -26,7 +26,7 @@
  *
  * This file is made for : Arduino Mega - atmega2560.
  *
- * Here are defined all function related to the hardware (serial, I2C, delay etc...)
+ * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
  * Those will depend on the processor and the toolchain you use
  *
@@ -103,7 +103,7 @@ void hl_begin();
 
 //----------------------------------------------------Delay-------------------------------------------------------------
 
-//Uncomment this line to provide delay support across LowLevel
+//Uncomment this line to provide delay_us support across LowLevel
 
 /* The function to call to wait for a specified number of milliseconds
  *  void delay_ms(uint16_t time_ms);

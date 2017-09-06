@@ -167,7 +167,7 @@ float KinematicsCore2::compute_time_for_first_sub_movement(k2_sub_movement_data 
     TrajectoryTracer::update_tools_powers(current_speed);
     //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
-    return time;
+    return (float)1000000 * time;
 
 }
 
@@ -193,7 +193,7 @@ float KinematicsCore2::compute_time_for_first_sub_movement(k2_sub_movement_data 
  */
 
 
-float KinematicsCore2::compute_time_for_sub_movement(k2_sub_movement_data *sub_movement_data) {
+float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
     STEP_AND_WAIT;
 
@@ -213,7 +213,7 @@ float KinematicsCore2::compute_time_for_sub_movement(k2_sub_movement_data *sub_m
     TrajectoryTracer::update_tools_powers(current_speed);
     //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
-    return time;
+    return (float)1000000 * time;
 }
 
 

@@ -79,7 +79,7 @@ public:
     static float compute_time_for_first_sub_movement(k1_sub_movement_data *sub_movement_data);
 
     //The sub_movement preparation function, called on interrupts.
-    static float compute_time_for_sub_movement(k1_sub_movement_data *sub_movement_data);
+    static float compute_us_time_for_sub_movement(k1_sub_movement_data *sub_movement_data);
 
     //The evloution factor update function;
     static void update_evolution_coefficient(float multiplier);

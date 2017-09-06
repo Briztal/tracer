@@ -171,7 +171,7 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
     float up_error = (max_distance >= MAXIMUM_DISTANCE_LIMIT);
 
     //Increment adjustment according to the target
-    if (max_distance != DISTANCE_TARGET) {
+    if ((uint16_t)max_distance != (uint16_t)DISTANCE_TARGET) {
 
         //get the distance ratio
         float ratio = (float) DISTANCE_TARGET / max_distance;

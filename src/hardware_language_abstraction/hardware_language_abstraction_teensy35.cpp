@@ -26,7 +26,7 @@
  *
  * This file is made for : teensy35
  *
- * Here are defined all function related to the hardware (serial, I2C, delay etc...)
+ * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
  * Those will depend on the processor and the toolchain you use
  *

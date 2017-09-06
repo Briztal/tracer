@@ -65,9 +65,9 @@ uint16_t SqrtFastComputer::sqrt_fast(uint32_t distance_to_end) {
  *
  * This algorithm is based on the formula n*n = 1 + 3 + 5 + ... + (2.n-1)
  *
- * When the square root is modfied, it sets sub_movement_time_update_flag, so that delay (regulation_speed) will be modified aferwards.
+ * When the square root is modfied, it sets sub_movement_time_update_flag, so that delay_us (regulation_speed) will be modified aferwards.
  *
- * The delay is set according to  : delay = delay_numerator/sqrt(primary)
+ * The delay_us is set according to  : delay_us = delay_numerator/sqrt(primary)
  *
  */
 uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {

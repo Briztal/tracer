@@ -34,7 +34,7 @@ int main() {
         digitalWrite(13, b);
         Serial.println("BITE");
         b = !b;
-        delay(1000);
+        delay_us(1000);
     }
 
 }

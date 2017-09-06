@@ -99,8 +99,8 @@ private :
 
 private :
 
-    //the delay for the next movement;
-    static float delay;
+    //the delay_us for the next movement;
+    static float delay_us;
 
 
     //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
@@ -201,7 +201,7 @@ private:
 };
 
 
-//The delay macros, used in the function below.
+//The delay_us macros, used in the function below.
 
 #define WAIT\
     while(!stepper_int_flag) {}\
