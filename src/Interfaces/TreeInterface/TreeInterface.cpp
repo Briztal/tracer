@@ -1,5 +1,5 @@
 /*
-  CommandInterface.cpp - Part of TRACER
+  TreeInterface.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,7 +18,7 @@
 
 */
 
-#include "../../config.h"
+#include <config.h>
 #ifdef ENABLE_TREE_INTERFACE
 
 #include "TreeInterface.h"

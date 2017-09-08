@@ -51,7 +51,7 @@ void GCodeInterface::read_serial() {
         if ((read_char == 10) || (read_char == 13)) {
 
             //If a char has effectively been received
-            if (gcode_size) {
+            if (command_size) {
 
 
                 //Parse the GCode
@@ -65,14 +65,14 @@ void GCodeInterface::read_serial() {
 
             //Append the read_output char to data_in
             *(data_in++) = read_char;
-            gcode_size++;
+            command_size++;
 
         }
     }
 }
 
 void GCodeInterface::reset() {
-    gcode_size = 0;
+    command_size = 0;
     data_in = data_in_0;
 }
 
@@ -80,9 +80,9 @@ void GCodeInterface::reset() {
 bool GCodeInterface::parse() {
 
     init_parsing();
-    
+
     char command_name[GCODE_MAX_DEPTH];
-    
+
     char c;
     float value;
 
@@ -91,7 +91,7 @@ bool GCodeInterface::parse() {
         return false;
 
 
-    while (gcode_size) {
+    while (command_size) {
         //Get next word and analyse_parameter, if it fails, return false;
         get_parameter(&c, &value);
         analyse_parameter(c, value);
@@ -125,7 +125,7 @@ void GCodeInterface::init_parsing() {
 
 unsigned char GCodeInterface::get_command(char *command) {
     do {
-        if (!gcode_size--) {
+        if (!command_size--) {
             return 0;
         }
     } while ((*command = *(data_in++)) == ' ');
@@ -135,7 +135,7 @@ unsigned char GCodeInterface::get_command(char *command) {
 
 
     char t;
-    while ((gcode_size--) && ((t = *(data_in++)) != ' ')) {
+    while ((command_size--) && ((t = *(data_in++)) != ' ')) {
         *(command++) = t;
         size++;
     }
@@ -144,14 +144,14 @@ unsigned char GCodeInterface::get_command(char *command) {
 
 bool GCodeInterface::get_parameter(char *id, float *value) {
     do {
-        if (!gcode_size--) {
+        if (!command_size--) {
             return false;
         }
     } while ((*id = *(data_in++)) == ' ');
 
     char t;
     String strValue = "";
-    while ((gcode_size--) && ((t = *(data_in++)) != ' ')) {
+    while ((command_size--) && ((t = *(data_in++)) != ' ')) {
         strValue += t;
     }
     if (!strValue.length()) {
@@ -288,7 +288,7 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
 #define m GCodeInterface
 
 
-unsigned char m::gcode_size;
+unsigned char m::command_size;
 
 char tdatain[PACKET_SIZE];
 char *m::data_in = tdatain;

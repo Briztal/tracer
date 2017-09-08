@@ -20,7 +20,6 @@
 
 
 #include <config.h>
-
 #ifdef ENABLE_TREE_INTERFACE
 
 #include "TreeInterface.h"

@@ -19,21 +19,30 @@
 
 //####################################################Interface#########################################################
 
-//Uncomment this line to enable the command interface.
-#define ENABLE_TREE_INTERFACE
+
+//Uncomment this line to enable the terminal interface.
+#define ENABLE_TERMINAL_INTERFACE
+
+//Uncomment this line to enable the tree interface.
+//#define ENABLE_TREE_INTERFACE
 
 //Uncomment this line to enable the gcode interface.
 //#define ENABLE_GCODE_INTERFACE
 
+
 //You must define the main command Interface. You must uncomment only one of lines below
-#define MAIN_CI_TREE
+//#define MAIN_CI_TREE
 //#define MAIN_CI_GCODE
+#define MAIN_CI_TERMINAL
 
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
 
 //The maximum size of a data in one message
 #define PACKET_SIZE 200
+
+//The maximum size of a data in one word of data (for TerminalInterface)
+#define WORD_MAX_SIZE 50
 
 //######################################################Core############################################################
 
@@ -49,6 +58,10 @@
 
 #ifdef ADD_PERMANENT_TASK
 
+#ifdef ENABLE_TERMINAL_INTERFACE
+ADD_PERMANENT_TASK(UI::read_serial)
+#endif
+
 #ifdef ENABLE_TREE_INTERFACE
 ADD_PERMANENT_TASK(TI::read_serial)
 #endif
@@ -56,6 +69,7 @@ ADD_PERMANENT_TASK(TI::read_serial)
 #ifdef ENABLE_GCODE_INTERFACE
 ADD_PERMANENT_TASK(GI::read_serial)
 #endif
+
 
 #endif
 

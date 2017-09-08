@@ -1,5 +1,5 @@
 /*
-  interface_config.h - Part of TRACER
+  tree_interface_config.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 

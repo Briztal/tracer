@@ -92,6 +92,13 @@ include_directories(${IP}/)
 
 add_library(interface
 
+        #TerminalInterface
+        ${IP}/TerminalInterface/TerminalInterface.h
+        ${IP}/TerminalInterface/TerminalInterface.cpp
+        ${IP}/TerminalInterface/TerminalInterfaceCommands.h
+        ${IP}/TerminalInterface/TerminalInterfaceCommands.cpp
+        ${IP}/TerminalInterface/terminal_interface_config.h
+
         #TreeInterface
         ${IP}/TreeInterface/TreeInterface.h
         ${IP}/TreeInterface/TreeInterface.cpp
@@ -184,6 +191,8 @@ add_library(kernels
         ${KP}/StepperController.cpp
         ${KP}/IncrementComputer.h
         ${KP}/IncrementComputer.cpp
+        ${KP}/JerkPlanner.cpp
+        ${KP}/JerkPlanner.h
 
         src/StepperControl/SubMovementManager.cpp src/StepperControl/SubMovementManager.h)
 
@@ -216,8 +225,7 @@ add_library(kernel1
         ${K1LP}/LinearMovement.h
         ${K1LP}/LinearMovement.cpp
 
-        src/StepperControl/KinematicsCore1/KinematicsCore1.cpp
-        src/StepperControl/KinematicsCore1/KinematicsCore1.h)
+        )
 
 
 #-------------------------------------------------KERNEL2---------------------------------------------------------------
@@ -234,8 +242,7 @@ add_library(kernel2
         ${K2P}/KinematicsCore2.h
         ${K2P}/K2Physics.h
         ${K2P}/K2Physics.cpp
-        ${K2P}/JerkPlanner.cpp
-        ${K2P}/JerkPlanner.h
+
 
         #movements
         ${K2MP}/ComplexLinearMovement.h

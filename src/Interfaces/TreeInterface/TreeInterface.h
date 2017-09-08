@@ -1,5 +1,5 @@
 /*
-  CommandInterface.h - Part of TRACER
+  TreeInterface.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 

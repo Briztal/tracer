@@ -46,7 +46,7 @@ private :
 
 private :
 
-    static unsigned char gcode_size;
+    static unsigned char command_size;
     static char *data_in;
     static char *const data_in_0;
 

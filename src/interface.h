@@ -21,7 +21,22 @@
 #include "config.h"
 
 
+
+#ifdef MAIN_CI_TERMINAL
+#if defined(MAIN_CI_GCODE) || defined(MAIN_CI_TREE)
+#error "You have two main interfaces selected. Please disable one."
+#endif
+#ifdef ENABLE_TERMINAL_INTERFACE
+#define CI UI
+#else
+#error "Your main interface (the TreeInterface) is not enabled."
+#endif
+#endif
+
 #ifdef MAIN_CI_GCODE
+#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TREE)
+#error "You have two main interfaces selected. Please disable one."
+#endif
 #ifdef ENABLE_GCODE_INTERFACE
 #define CI GI
 #else
@@ -30,6 +45,9 @@
 #endif
 
 #ifdef MAIN_CI_TREE
+#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TERMINAL)
+#error "You have two main interfaces selected. Please disable one."
+#endif
 #ifdef ENABLE_TREE_INTERFACE
 #define CI TI
 #else
@@ -37,5 +55,7 @@
 #endif
 #endif
 
-#include "Interfaces/GCodeInterface/GCodeInterface.h"
-#include "Interfaces/TreeInterface/TreeInterface.h"
+
+#include <Interfaces/TerminalInterface/TerminalInterface.h>
+#include <Interfaces/GCodeInterface/GCodeInterface.h>
+#include <Interfaces/TreeInterface/TreeInterface.h>
