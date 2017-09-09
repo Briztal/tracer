@@ -1,5 +1,6 @@
 //TODO MAKE AN STRUCT-TREE VERSION OF
 
+//TODO EEPROM FLAH IN HL_ABSTRACTION
 
 //TODO External Interrupts in hlabstraction
 //TODO Setup des PIDs

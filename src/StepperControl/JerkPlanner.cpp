@@ -100,8 +100,6 @@ bool JerkPlanner::control_and_initialise_jerk(const movement_data_t *current_mov
 
 float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, const uint8_t speed_group, const float *final_jerk_ratios) {
 
-    float initial_jerk_ratios[NB_STEPPERS];
-
     //First, determine the inverse of th high level distance for the sub_movement.
     float distance_inverse = (float) 1 / MachineInterface::get_movement_distance_for_group(speed_group, initial_steps_distances);
 
@@ -128,9 +126,6 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
 
         //first stepper is done.
         first = false;
-
-        //Save the jerk distance.
-        initial_jerk_ratios[stepper] = initial_jerk_ratio;
 
     }
 

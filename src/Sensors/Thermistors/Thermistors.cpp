@@ -58,15 +58,13 @@ int16_t ** Thermistors::therm_table = (int16_t **) arr;\
 #define index_t uint8_t
 #define temp_t int16_t
 
-#include "../../interface.h"
-
 int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *const table, const index_t size, index_t *v_index) {
     index_t index = *v_index;
 
 
     read_t value, last_value = value = table[index<<1];
 
-    temp_t final_temp, temp, last_temp;
+    temp_t final_temp;
 
     if (last_value == read_value) {
 

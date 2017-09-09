@@ -24,7 +24,7 @@
 /*
  * The Board Abstraction file.
  *
- * This file is made for : Arduino Mega - atmega2560.
+ * This file is made for : teensy35.
  *
  * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *

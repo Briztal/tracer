@@ -136,8 +136,6 @@ void StepperController::fastStep(sig_t id) {
 
 void StepperController::send_position() {
 
-    float t[NB_STEPPERS];
-
 #define STEPPER(i, ...) \
     CI::echo("pos : "+String(i)+" "+String(pos##i));\
 
