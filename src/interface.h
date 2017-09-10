@@ -29,7 +29,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 #define CI UI
 #else
-#error "Your main interface (the TreeInterface) is not enabled."
+#error "Your main interface (the TerminalInterface) is not enabled."
 #endif
 #endif
 

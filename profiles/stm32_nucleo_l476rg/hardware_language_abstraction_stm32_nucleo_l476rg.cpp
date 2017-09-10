@@ -18,8 +18,7 @@
 
 */
 
-#include "kinetis.h"
-#include "hardware_language_abstraction_teensy35.h"
+#include "hardware_language_abstraction_stm32_nucleo_l476rg.h"
 
 /*
  * The Board Abstraction file.
@@ -53,9 +52,9 @@
 
 void hl_begin() {
 
-    init_stepper_interrupt();
+    //TODO init_stepper_interrupt();
 
-    init_loop_interrupts();
+    //TODO init_loop_interrupts();
 
 }
 
@@ -79,7 +78,7 @@ void set_stepper_int_function(void (*f)()) {
 
 void setup_stepper_interrupt(void (*function)(void), uint32_t period_us) {
 
-    cli();
+   //TODO DISABLE INTERRRUPTS
 
     set_stepper_int_period(period_us);
 
@@ -89,14 +88,14 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us) {
 
     enable_stepper_timer();
 
-    sei();
+    //TODO ENABLE INTERRUPTS
 }
 
 
 //Implementation of interrupt function, calling trigger function
 
 void pit0_isr() {
-    PIT_TFLG0 = 1;
+    //TODO DISABLE STEPPER FLAG PIT_TFLG0 = 1;
     (*us_function)();
 }
 
@@ -130,9 +129,9 @@ void set_loop_function_2(void (*f)()) {
 
 void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms) {
 
-    cli();
+    //TODO DISABLE INTERRUPTS();
 
-    set_loop_int_period_0(period_ms);
+    //set_loop_int_period_0(period_ms);
 
     set_loop_function_0(function);
 
@@ -140,15 +139,15 @@ void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms) {
 
     enable_loop_timer_0();
 
-    sei();
+    //TODO ENABLE INTERRUPTSsei();
 
 }
 
 void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms) {
 
-    cli();
+    //TODO DISBALE INTERRUPTScli();
 
-    set_loop_int_period_1(period_ms);
+    //set_loop_int_period_1(period_ms);
 
     set_loop_function_1(function);
 
@@ -156,15 +155,15 @@ void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms) {
 
     enable_loop_timer_1();
 
-    sei();
+    //TODO ENABLE INTERRUPTSsei();
 
 }
 
 void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms) {
 
-    cli();
+    //TODO DISBALE INTERRUPTScli();
 
-    set_loop_int_period_2(period_ms);
+    //set_loop_int_period_2(period_ms);
 
     set_loop_function_2(function);
 
@@ -172,7 +171,7 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms) {
 
     enable_loop_timer_2();
 
-    sei();
+    //TODO ENABLE INTERRUPTSsei();
 
 }
 
@@ -180,17 +179,17 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms) {
 //Implementation of interrupt functions, calling trigger functions
 
 void pit1_isr() {
-    PIT_TFLG1 = 1;
+    //TODO CLEAR FLGPIT_TFLG1 = 1;
     (*t0_function)();
 }
 
 void pit2_isr() {
-    PIT_TFLG2 = 1;
+    //TODO INTERRUPT FLAGPIT_TFLG2 = 1;
     (*t1_function)();
 }
 
 void pit3_isr() {
-    PIT_TFLG3 = 1;
+    //TODO CLEAR INTERRUPT FLAGPIT_TFLG3 = 1;
     (*t2_function)();
 }
 

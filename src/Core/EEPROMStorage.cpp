@@ -202,7 +202,7 @@ float EEPROMStorage::write(char *data, uint8_t size) {
 
     char t[4];
 
-    /*for (int k1_position_indice = 0; k1_position_indice<4; k1_position_indice++)CI::echo(String((uint8_t)data[k1_position_indice]));return 0;*/
+    /*for (int k1_position_indice = 0; k1_position_indice<4; k1_position_indice++)CI::echo(str((uint8_t)data[k1_position_indice]));return 0;*/
 #define WRITE_RETURN(var, type)  for (int i = 0; i<4; i++)t[i] = data[i];return (var = (type)(*(float*)t));
 
     if (!(size--)) return 0;
@@ -814,18 +814,18 @@ void EEPROMStorage::print_stored_data() {
 #ifdef ENABLE_STEPPER_CONTROL
     CI::echo("Stepper Motors : ");
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        CI::echo("Stepper " + String(stepper));
-        CI::echo("size : " + String(sizes[stepper]));
-        CI::echo("steps : " + String(steps[stepper]));
-        CI::echo("max regulation_speed : " + String(maximum_speeds[stepper]));
-        CI::echo("acceleration : " + String(accelerations[stepper]) + "\n");
-        CI::echo("jerk : " + String(jerks[stepper]) + "\n");
+        CI::echo("Stepper " + str(stepper));
+        CI::echo("size : " + str(sizes[stepper]));
+        CI::echo("steps : " + str(steps[stepper]));
+        CI::echo("max regulation_speed : " + str(maximum_speeds[stepper]));
+        CI::echo("acceleration : " + str(accelerations[stepper]) + "\n");
+        CI::echo("jerk : " + str(jerks[stepper]) + "\n");
     }
 
     CI::echo("Speed Groups : ");
     for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
-        CI::echo("Group " + String(group));
-        CI::echo("max regulation_speed : " + String(group_maximum_speeds[group]) + "\n");
+        CI::echo("Group " + str(group));
+        CI::echo("max regulation_speed : " + str(group_maximum_speeds[group]) + "\n");
     }
 
 #endif
@@ -835,17 +835,17 @@ void EEPROMStorage::print_stored_data() {
     //PIDs
     CI::echo("PIDS : ");
     for (int pid = 0; pid < NB_PIDS; pid++) {
-        CI::echo("PID " + String(pid));
-        CI::echo("kp : " + String(kps[pid]));
-        CI::echo("ki : " + String(kis[pid]));
-        CI::echo("kd : " + String(kds[pid]) + "\n");
+        CI::echo("PID " + str(pid));
+        CI::echo("kp : " + str(kps[pid]));
+        CI::echo("ki : " + str(kis[pid]));
+        CI::echo("kd : " + str(kds[pid]) + "\n");
     }
 
     //Control Loops
     CI::echo("Control Loops : ");
     for (int loop = 0; loop < NB_LOOPS; loop++) {
-        CI::echo("Loop " + String(loop));
-        CI::echo("period (ms) : " + String(loop_periods[loop]) + "\n");
+        CI::echo("Loop " + str(loop));
+        CI::echo("period (ms) : " + str(loop_periods[loop]) + "\n");
     }
 
 #endif
@@ -853,26 +853,26 @@ void EEPROMStorage::print_stored_data() {
     //Continuous Actions
     CI::echo("Continuous Actions : ");
     for (int continuous = 0; continuous < NB_CONTINUOUS; continuous++) {
-        CI::echo("Continuous " + String(continuous));
-        CI::echo("maximum : " + String(continuous_max[continuous]) + "\n");
+        CI::echo("Continuous " + str(continuous));
+        CI::echo("maximum : " + str(continuous_max[continuous]) + "\n");
     }
 
     //Servo Actions
     CI::echo("Servo Actions : ");
     for (int servo = 0; servo < NB_SERVOS; servo++) {
-        CI::echo("Loop " + String(servo));
-        CI::echo("minimum : " + String(servos_min[servo]));
-        CI::echo("maximum : " + String(servos_max[servo]) + "\n");
+        CI::echo("Loop " + str(servo));
+        CI::echo("minimum : " + str(servos_min[servo]));
+        CI::echo("maximum : " + str(servos_max[servo]) + "\n");
     }
 
     //Custom Data
     CI::echo("Custom Data : ");
     //Custom data
-#define EEPROM_BOOL(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_CHAR(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_INT(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_LONG(name, default_value) CI::echo(String(#name)+" : "+String(name));
-#define EEPROM_FLOAT(name, default_value) CI::echo(String(#name)+" : "+String(name));
+#define EEPROM_BOOL(name, default_value) CI::echo(str(#name)+" : "+str(name));
+#define EEPROM_CHAR(name, default_value) CI::echo(str(#name)+" : "+str(name));
+#define EEPROM_INT(name, default_value) CI::echo(str(#name)+" : "+str(name));
+#define EEPROM_LONG(name, default_value) CI::echo(str(#name)+" : "+str(name));
+#define EEPROM_FLOAT(name, default_value) CI::echo(str(#name)+" : "+str(name));
 
 #include "../config.h"
 

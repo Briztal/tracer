@@ -239,7 +239,7 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
     //Push
     movement_data_queue.enqueue();
 
-    CI::echo("ENQUEUED : " + String(movement_data_queue.available_elements()));
+    CI::echo("ENQUEUED : " + str(movement_data_queue.available_elements()));
 
     //Start the movement procedure if it is not already started.
     if (!started) {

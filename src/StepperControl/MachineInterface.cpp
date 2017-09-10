@@ -24,11 +24,11 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include <stdint.h>
-#include <Arduino.h>
 #include "MachineInterface.h"
 #include "../Core/EEPROMStorage.h"
 #include "SubMovementManager.h"
 #include <Actions/ContinuousActions.h>
+#include <hardware_language_abstraction.h>
 
 #if (KERNEL == 0)
 #include <LinearMovement.h>
@@ -209,7 +209,7 @@ float MachineInterface::get_movement_distance_for_group(uint8_t speed_group, con
     }
 
     //compute the square root and return it.
-    float f = sqrtf(square_dist_sum);
+    float f = sqrt_float(square_dist_sum);
 
     return f;
 }

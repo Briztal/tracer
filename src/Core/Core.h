@@ -78,9 +78,9 @@
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
-#include <sanity_check.h>
+#include "../sanity_check.h"
 
-#include "DataStructures/Queue.h"
+#include "../DataStructures/Queue.h"
 
 class Core {
 

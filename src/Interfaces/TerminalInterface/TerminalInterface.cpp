@@ -35,14 +35,10 @@
 void UI::begin() {
 
     //Initialise the serial
-    serial_begin(BAUDRATE);
+    terminal_interface_link_t::begin();
 
     //Wait for the serial to  correctly initialise
     delay_ms(10);
-
-    //Turn on the led
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
 
     //Setup a correct command environment
     reset();
@@ -236,7 +232,7 @@ void TerminalInterface::fail_log() {
         if (!strcmp(#name, word_buffer_0)) {\
             get_next_word();\
             log_message = "";\
-            syntax_command+=String(#name)+" ";
+            syntax_command+=str(#name)+" ";
 
     //If the current word matched the new name, the function ha failed : show the syntax description.
 #define CREATE_LEAF(name, function, description, syntax);\

@@ -44,11 +44,11 @@ uint8_t SubMovementManager::update_current_movement(movement_data_t *movement_da
 
 void SubMovementManager::display_distances() {
     for (int i = 0; i < NB_STEPPERS; i++) {
-        CI::echo(String(i) + " ed : " + String(end_distances[i]) + " jd : " + String(jerk_distances[i]));
+        CI::echo(str(i) + " ed : " + str(end_distances[i]) + " jd : " + str(jerk_distances[i]));
     }
 
     for (int i = 0; i < NB_STEPPERS; i++) {
-        CI::echo(String(i) + " ed : " + String(end_position[i]) + " jd : " + String(jerk_position[i]));
+        CI::echo(str(i) + " ed : " + str(end_position[i]) + " jd : " + str(jerk_position[i]));
     }
 }
 

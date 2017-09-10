@@ -89,7 +89,7 @@ void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
 
-    delay(50);
+    delay_ms(50);
 
 
     if (!size) return;

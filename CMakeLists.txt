@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(clion)
+project(TRACER)
 
 include(CMakeListsPrivate.txt)
 
@@ -50,6 +50,5 @@ add_custom_target(
     COMMAND ${PLATFORMIO_CMD} -f -c clion init --ide clion
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
 
 add_subdirectory(src)

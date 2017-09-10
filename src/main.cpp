@@ -17,28 +17,8 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "Arduino.h"
 #include "Core/Core.h"
 
-#include <usb_serial.h>
-
-/*
-int main() {
-    Serial.begin(38400);
-    while(!Serial);
-    bool b = true;
-
-    pinMode(13, OUTPUT);
-    while(true)
-    {
-        digitalWrite(13, b);
-        Serial.println("BITE");
-        b = !b;
-        delay_us(1000);
-    }
-
-}
- */
 
 int main() {
 

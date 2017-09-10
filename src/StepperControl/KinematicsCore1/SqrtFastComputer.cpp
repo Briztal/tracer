@@ -20,6 +20,7 @@
 
 #include "SqrtFastComputer.h"
 #include "../../interface.h"
+#include <hardware_language_abstraction.h>
 
 /*
  * sqrt_slow : this function updates the speed_distances, and its square root, with a call to sqrt.
@@ -29,7 +30,7 @@
 
 uint16_t SqrtFastComputer::sqrt_slow(uint32_t distance_to_end) {
     primary = distance_to_end;
-    square_root = (uint16_t) sqrt(distance_to_end);
+    square_root = (uint16_t) sqrt_long(distance_to_end);
     primary_sup = primary_increment = (uint16_t) (2 * square_root + 1);
     primary_inf = 1;
 
@@ -126,6 +127,6 @@ uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
 
 
 void SqrtFastComputer::print_data() {
-    CI::echo("sd : " + String(primary));
-    CI::echo("de : " + String(square_root));
+    CI::echo("sd : " + str(primary));
+    CI::echo("de : " + str(square_root));
 }

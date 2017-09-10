@@ -31,8 +31,11 @@
 #define BEGIN_CHAR (char)-1
 
 void TI::begin() {
+
     tree_interface_link_t::begin();
+
     initialise_aliases();
+
     *data_out_0 = BEGIN_CHAR;
 
 }
@@ -115,6 +118,7 @@ void TI::prepare_EEPROM_packet() {
  *
  * It sets the command id bytes, and initialises the data_out size.
  */
+
 void TI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
     data_out = data_out_0 + 2;
     data_out_size = command_id_size + (uint8_t) 1;
@@ -265,7 +269,6 @@ void TI::send_packet() {
     }
     tree_interface_link_t::send_byte((char) 0);
 
-    digitalWrite(13, (uint8_t) !digitalRead(13));
 
 }
 

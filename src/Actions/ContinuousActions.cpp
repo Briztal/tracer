@@ -37,10 +37,8 @@ void ContinuousActions::set_power##i (float f) {\
         stop_##i();\
         return;\
     }\
-    if (f<=max)\
-        analog_write(pin,  f * ((float) 255.0 / (float) max));\
-    else \
-        analog_write(pin, 255);\
+    if (f<=max){analog_write(pin,  f * ((float) 255.0 / (float) max));}\
+    else{analog_write(pin, 255);}\
 }\
 void ContinuousActions::stop_##i() {\
     analog_write(pin,0);\

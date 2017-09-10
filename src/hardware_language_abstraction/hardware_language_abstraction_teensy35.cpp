@@ -24,7 +24,7 @@
 /*
  * The Board Abstraction file.
  *
- * This file is made for : stm32 nucleo l476rg
+ * This file is made for : teensy35
  *
  * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
@@ -39,13 +39,13 @@
 
 //Initialisation function : sets the correct priotity, and disables the timer and interrupt
 
-#define init_stepper_interrupt() {\
+#define init_stepper_interrupt() {SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\
     NVIC_SET_PRIORITY(IRQ_PIT_CH0, 0);NVIC_ENABLE_IRQ(IRQ_PIT_CH0); clean_stepper_interrupt();}
 
 
 //Initialisation function : set the correct priorities, enable interrupts, and disables timers and interrupts
 
-#define init_loop_interrupts() {\
+#define init_loop_interrupts() {SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\
     NVIC_SET_PRIORITY(IRQ_PIT_CH1, 16);NVIC_ENABLE_IRQ(IRQ_PIT_CH1);\
     NVIC_SET_PRIORITY(IRQ_PIT_CH2, 32);NVIC_ENABLE_IRQ(IRQ_PIT_CH2);\
     NVIC_SET_PRIORITY(IRQ_PIT_CH3, 48);NVIC_ENABLE_IRQ(IRQ_PIT_CH3);\

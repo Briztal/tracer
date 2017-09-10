@@ -24,7 +24,7 @@
 /*
  * The Board Abstraction file.
  *
- * This file is made for : stm32 nucleo l476rg.
+ * This file is made for : teensy35.
  *
  * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
@@ -40,9 +40,9 @@
 /*
  * Include here all libraries related to the board itself
  */
-#include <stdint.h>
-#include <targets/TARGET_STM/TARGET_STM32L4/TARGET_STM32L476xG/device/stm32l476xx.h>
-#include <mbed.h>
+#include "Arduino.h"
+#include "EEPROM.h"
+
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
 
@@ -66,42 +66,46 @@
 
 #define HL_DELAY_FLAG
 
-#define HL_EEPROM_FLAG
-
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
 void hl_begin();
 
-
 //----------------------------------------------------STRING------------------------------------------------------------
 
-#include <string>
+#define string_t String
 
-#define string_t std::string
+#define str(t) String(t)
 
-#define str std::to_string
+#define str_to_float(s) s.toFloat();
 
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
-#define EEPROM_read(i) 0
+#define EEPROM_read(i) EEPROM.read(i)
 
-#define EEPROM_write(i, byte)
-
+#define EEPROM_write(i, byte) EEPROM.write(i, byte)
 
 //-----------------------------------------------------IO--------------------------------------------------------------
 
-#define digital_write(i, v)
+#define digital_write(i, v) digitalWriteFast(i, v)
 
-#define digital_read(i)
+#define digital_read(i) digitalReadFast(i)
 
-#define analog_read(i)
+#define analog_read(i) analoglRead(i)
 
-#define analog_write(i, v)
+#define analog_write(i, v) analogWrite(i, v)
 
-#define pin_mode(i, mode)
+#define pin_mode_output(i) pinMode(i, OUTPUT);
 
+
+//-----------------------------------------------------MATH-------------------------------------------------------------
+
+#define sqrt_float(f) sqrtf(f)
+#define sqrt_long(l) sqrtf(l)
+
+#define min(a,b) (((a)<(b)) ? (a) : (b))
+#define max(a,b) (((a)<(b)) ? (b) : (a))
 
 //--------------------------------------------------INTERRUPTS----------------------------------------------------------
 
@@ -120,7 +124,7 @@ void hl_begin();
 /* The function to call to wait for a specified number of milliseconds
  *  void delay_ms(uint16_t time_ms);
  *//*
-inline static void delay_ms(uint16_t time_ms){
+static inline static void delay_ms(uint16_t time_ms){
 
 }*/
 #define delay_ms(ms) delay(ms)
@@ -129,19 +133,14 @@ inline static void delay_ms(uint16_t time_ms){
 /* The function to call wait for a specified number of microseconds
  * void delay_us(uint16_t time_us);
  */
-/*inline static void delay_us(uint16_t time_us){
+/*static inline static void delay_us(uint16_t time_us){
 
 }*/
 #define delay_us(us) delayMicroseconds(us)
 
-
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
-//For the stepper interrupt, the TIM2 (32 bis is used)
-
-#define F_BUS 48000000
-
-//The basic unit of the implemented timer is 1 us.
+//The frequency of the timer :
 #define STEPPER_TIMER_FREQUENCY (float) 1000000.0
 
 #define STEPPER_TIMER_TICS_PER_UNIT ((float) ((float) F_BUS / STEPPER_TIMER_FREQUENCY ))
@@ -150,28 +149,28 @@ inline static void delay_ms(uint16_t time_ms){
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
-     {TIM2.ARR = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
+     {PIT_LDVAL0 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
         STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
 
 //Enabling interrupt
-#define enable_stepper_interrupt() {TIM2.DIER |= (uit32_t)64;} //1<<6
+#define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
 
 
 //Disabling interrupt
-#define disable_stepper_interrupt() {DIER &= ~(uint32_t)64;} //1<<6
+#define disable_stepper_interrupt() PIT_TCTRL0 &= 5;
 
 
 //Enabling timer
-#define enable_stepper_timer() {TIM2.CR1 |= (uint32_t)1;}
+#define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
 
 
 //Disabling timer
-#define disable_stepper_timer() {TIM2.CR1 &= ((uint32_t)((uint16_t)~(uint16_t)1));}
+#define disable_stepper_timer() PIT_TCTRL0 &= 6;
 
 
 //Flag management
-#define stepper_int_flag (TIM2.SR & (uint32_t) 64)
-#define stepper_int_flag_clear() {TIM2.SR &= (uint32_t)~(uint32_t)64};
+#define stepper_int_flag PIT_TFLG0
+#define stepper_int_flag_clear() PIT_TFLG0 = PIT_TFLG_TIF;
 
 
 //Function setting
@@ -190,7 +189,6 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 
 //Period macros
-
 
 #define MS_TICS_PER_MS (uint32_t) (F_BUS / 1000)
 
@@ -214,38 +212,38 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 //Enabling loop interrupts
 
-#define enable_loop_interrupt_0()
+#define enable_loop_interrupt_0() PIT_TCTRL1 |= PIT_TCTRL_TIE;
 
-#define enable_loop_interrupt_1()
+#define enable_loop_interrupt_1() PIT_TCTRL2 |= PIT_TCTRL_TIE;
 
-#define enable_loop_interrupt_2()
+#define enable_loop_interrupt_2() PIT_TCTRL3 |= PIT_TCTRL_TIE;
 
 
 //Disabling loops interrupts
 
-#define disable_loop_interrupt_0()
+#define disable_loop_interrupt_0() PIT_TCTRL1 &= 5;
 
-#define disable_loop_interrupt_1()
+#define disable_loop_interrupt_1() PIT_TCTRL2 &= 5;
 
-#define disable_loop_interrupt_2()
+#define disable_loop_interrupt_2() PIT_TCTRL3 &= 5;
 
 
 //Enabling loop timers
 
-#define enable_loop_timer_0()
+#define enable_loop_timer_0() PIT_TCTRL1 |= PIT_TCTRL_TEN;
 
-#define enable_loop_timer_1()
+#define enable_loop_timer_1() PIT_TCTRL2 |= PIT_TCTRL_TEN;
 
-#define enable_loop_timer_2()
+#define enable_loop_timer_2() PIT_TCTRL3 |= PIT_TCTRL_TEN;
 
 
 //Disabling loop timers
 
-#define disable_loop_timer_0()
+#define disable_loop_timer_0() PIT_TCTRL1 &= 6;
 
-#define disable_loop_timer_1()
+#define disable_loop_timer_1() PIT_TCTRL2 &= 6;
 
-#define disable_loop_timer_2()
+#define disable_loop_timer_2() PIT_TCTRL3 &= 6;
 
 
 //Function setting
@@ -275,49 +273,48 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 #define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
 
 
-//----------------------------------------------------Serial------------------------------------------------------------
+//------------------------------------------------PHYSICAL LINKS--------------------------------------------------------
 
-/* The function to call to initialise the serial at a given baudrate
- * void serial_begin(baudrate b);
- */
-/*inline static void serial_begin(baudrate b){
-
-}*/
-#define serial_begin(b) Serial.begin(b)
-
-/* The function to call to send_packet a byte on the serial
- * void serial_send_byte(char c);
- */
-/*inline static void serial_echo_byte(char c){
-
-}*/
-#define serial_echo_byte(c) Serial.print(c)
-
-/* The function to call to send_packet a zero terminated (char *) on the serial
- * void serial_echo_str(char *s);
- */
-/*inline static void serial_echo_str(char *s){
-
-}*/
-#define serial_echo_str Serial.print
+class serial {
+public:
+    static inline void begin() {Serial.begin(115200);}
+    static inline void send_byte(char c) {Serial.print(c);}
+    static inline void send_str(string_t c) {Serial.print(c);}
+    static inline int available() {return Serial.available();}
+    static inline char read() {return (char)Serial.read();}
+};
 
 
-/* The function to call to check if bytes are available_sub_movements in the serial buffer
- * bool serial_available(void)
- */
-/*inline static bool serial_available(void){
+class serial1 {
+public:
+    static inline void begin() {Serial1.begin(115200);}
+    static inline void send_byte(char c) {Serial1.print(c);}
+    static inline void send_str(string_t c) {Serial1.print(c);}
+    static inline int available() {return Serial1.available();}
+    static inline char read() {return (char)Serial1.read();}
+};
 
-}*/
-#define serial_available() Serial.available()
 
 
-/* The function to call to read_output a byte from serial buffer
- * char serial_read(void)
- */
-/*inline static char serial_read(){
+class serial2 {
+public:
+    static inline void begin() {Serial2.begin(115200);}
+    static inline void send_byte(char c) {Serial2.print(c);}
+    static inline void send_str(string_t c) {Serial2.print(c);}
+    static inline int available() {return Serial2.available();}
+    static inline char read() {return (char)Serial2.read();}
+};
 
-}*/
-#define serial_read() Serial.read()
+
+
+class serial3 {
+public:
+    static inline void begin() {Serial3.begin(115200);}
+    static inline void send_byte(char c) {Serial3.print(c);}
+    static inline void send_str(string_t c) {Serial3.print(c);}
+    static inline int available() {return Serial3.available();}
+    static inline char read() {return (char)Serial3.read();}
+};
 
 
 #endif //HDWGGABSTRACTION_H

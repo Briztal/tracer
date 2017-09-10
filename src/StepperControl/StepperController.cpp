@@ -89,7 +89,7 @@ void StepperController::set_directions(sig_t negative_signatures) {
 void StepperController::begin() {
 
 #define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
-    pinMode(pinPower, OUTPUT);pinMode(pinDir, OUTPUT);pinMode(pinStep, OUTPUT);\
+    pin_mode_output(pinPower);pin_mode_output(pinDir);pin_mode_output(pinStep);\
 
 #include <config.h>
 
@@ -137,7 +137,7 @@ void StepperController::fastStep(sig_t id) {
 void StepperController::send_position() {
 
 #define STEPPER(i, ...) \
-    CI::echo("pos : "+String(i)+" "+String(pos##i));\
+    CI::echo("pos : "+str(i)+" "+str(pos##i));\
 
 #include <config.h>
 

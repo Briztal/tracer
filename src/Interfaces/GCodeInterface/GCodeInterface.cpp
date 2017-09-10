@@ -26,12 +26,10 @@
 
 
 void GI::begin() {
-    serial_begin(BAUDRATE);
+    gcode_interface_link_t::begin();
 
     delay_ms(100);
 
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
 }
 
 
@@ -156,7 +154,7 @@ bool GCodeInterface::get_parameter(char *id, float *value) {
     if (!strValue.length()) {
         *value = 0;
     } else {
-        *value = strValue.toFloat();
+        *value = str_to_float(strValue);
     }
     return true;
 }

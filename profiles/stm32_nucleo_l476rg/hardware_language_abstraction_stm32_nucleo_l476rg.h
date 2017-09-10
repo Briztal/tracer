@@ -41,8 +41,10 @@
  * Include here all libraries related to the board itself
  */
 #include <stdint.h>
+#include <string>
+#include <strings.h>
+#include <stdlib.h>
 #include <targets/TARGET_STM/TARGET_STM32L4/TARGET_STM32L476xG/device/stm32l476xx.h>
-#include <mbed.h>
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
 
@@ -71,16 +73,17 @@
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
+
 void hl_begin();
 
 
 //----------------------------------------------------STRING------------------------------------------------------------
 
-#include <string>
-
 #define string_t std::string
 
-#define str std::to_string
+#define str(t) (std::string) ""
+
+#define str_to_float(s) 0
 
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
@@ -100,8 +103,17 @@ void hl_begin();
 
 #define analog_write(i, v)
 
-#define pin_mode(i, mode)
+#define pin_mode_output(i)
 
+
+//-----------------------------------------------------MATH-------------------------------------------------------------
+
+
+#define sqrt_float(f) 1
+#define sqrt_long(l) 1
+
+#define min(a,b) (((a)<(b)) ? (a) : (b))
+#define max(a,b) (((a)<(b)) ? (b) : (a))
 
 //--------------------------------------------------INTERRUPTS----------------------------------------------------------
 
@@ -123,7 +135,7 @@ void hl_begin();
 inline static void delay_ms(uint16_t time_ms){
 
 }*/
-#define delay_ms(ms) delay(ms)
+#define delay_ms(ms)
 
 
 /* The function to call wait for a specified number of microseconds
@@ -132,7 +144,7 @@ inline static void delay_ms(uint16_t time_ms){
 /*inline static void delay_us(uint16_t time_us){
 
 }*/
-#define delay_us(us) delayMicroseconds(us)
+#define delay_us(us)
 
 
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
@@ -150,28 +162,28 @@ inline static void delay_ms(uint16_t time_ms){
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
-     {TIM2.ARR = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
+     {TIM2->ARR = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
         STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
 
 //Enabling interrupt
-#define enable_stepper_interrupt() {TIM2.DIER |= (uit32_t)64;} //1<<6
+#define enable_stepper_interrupt() {TIM2->DIER |= (uint32_t)64;} //1<<6
 
 
 //Disabling interrupt
-#define disable_stepper_interrupt() {DIER &= ~(uint32_t)64;} //1<<6
+#define disable_stepper_interrupt() {TIM2->DIER &= ~(uint32_t)64;} //1<<6
 
 
 //Enabling timer
-#define enable_stepper_timer() {TIM2.CR1 |= (uint32_t)1;}
+#define enable_stepper_timer() {TIM2->CR1 |= (uint32_t)1;}
 
 
 //Disabling timer
-#define disable_stepper_timer() {TIM2.CR1 &= ((uint32_t)((uint16_t)~(uint16_t)1));}
+#define disable_stepper_timer() {TIM2->CR1 &= ((uint32_t)((uint16_t)~(uint16_t)1));}
 
 
 //Flag management
-#define stepper_int_flag (TIM2.SR & (uint32_t) 64)
-#define stepper_int_flag_clear() {TIM2.SR &= (uint32_t)~(uint32_t)64};
+#define stepper_int_flag (TIM2->SR & (uint32_t) 64)
+#define stepper_int_flag_clear() {TIM2->SR &= (uint32_t)~(uint32_t)64;};
 
 
 //Function setting
@@ -277,47 +289,13 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 
 //----------------------------------------------------Serial------------------------------------------------------------
 
-/* The function to call to initialise the serial at a given baudrate
- * void serial_begin(baudrate b);
- */
-/*inline static void serial_begin(baudrate b){
 
-}*/
-#define serial_begin(b) Serial.begin(b)
-
-/* The function to call to send_packet a byte on the serial
- * void serial_send_byte(char c);
- */
-/*inline static void serial_echo_byte(char c){
-
-}*/
-#define serial_echo_byte(c) Serial.print(c)
-
-/* The function to call to send_packet a zero terminated (char *) on the serial
- * void serial_echo_str(char *s);
- */
-/*inline static void serial_echo_str(char *s){
-
-}*/
-#define serial_echo_str Serial.print
-
-
-/* The function to call to check if bytes are available_sub_movements in the serial buffer
- * bool serial_available(void)
- */
-/*inline static bool serial_available(void){
-
-}*/
-#define serial_available() Serial.available()
-
-
-/* The function to call to read_output a byte from serial buffer
- * char serial_read(void)
- */
-/*inline static char serial_read(){
-
-}*/
-#define serial_read() Serial.read()
-
-
+class serial {
+public:
+    static inline void begin() {}
+    static inline void send_byte(char c) {}
+    static inline void send_str(string_t c) {}
+    static inline int available() {return 0;}
+    static inline char read() {return 1;}
+};
 #endif //HDWGGABSTRACTION_H
