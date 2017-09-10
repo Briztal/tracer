@@ -24,7 +24,7 @@
 /*
  * The Board Abstraction file.
  *
- * This file is made for : teensy35.
+ * This file is made for : stm32 nucleo l476rg.
  *
  * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
@@ -43,6 +43,7 @@
 
 #include "Arduino.h"
 #include "EEPROM.h"
+
 
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
@@ -66,6 +67,8 @@
 #define HL_INTERRUPTS_FLAG
 
 #define HL_DELAY_FLAG
+
+#define HL_EEPROM_FLAG
 
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
@@ -124,7 +127,11 @@ inline static void delay_ms(uint16_t time_ms){
 
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
-//The frequency of the timer :
+//For the stepper interrupt, the TIM2 (32 bis is used)
+
+#define F_BUS 48000000
+
+//The basic unit of the implemented timer is 1 us.
 #define STEPPER_TIMER_FREQUENCY (float) 1000000.0
 
 #define STEPPER_TIMER_TICS_PER_UNIT ((float) ((float) F_BUS / STEPPER_TIMER_FREQUENCY ))
@@ -133,7 +140,7 @@ inline static void delay_ms(uint16_t time_ms){
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
-     {PIT_LDVAL0 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
+     {TIM2 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
         STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
 
 //Enabling interrupt
@@ -173,6 +180,7 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 
 //Period macros
+
 
 #define MS_TICS_PER_MS (uint32_t) (F_BUS / 1000)
 

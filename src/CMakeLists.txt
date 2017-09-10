@@ -26,7 +26,8 @@ include_directories(${HP}/)
 
 add_library(hardware
 
-        ${HP}/hardware_language_abstraction_teensy35.cpp
+        ${HP}/hardware_language_abstraction_stm32_nucleo_l476rg.h
+        ${HP}/hardware_language_abstraction_stm32_nucleo_l476rg.cpp
 
        )
 
