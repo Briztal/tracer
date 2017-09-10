@@ -21,7 +21,7 @@
 #ifndef CODE_SETTINGSPROFILEN_H
 #define CODE_SETTINGSPROFILEN_H
 
-#include <avr/io.h>
+#include <stdint.h>
 #include "../config.h"
 
 /*

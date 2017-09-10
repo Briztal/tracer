@@ -24,7 +24,6 @@
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 1)
 
 #include <math.h>
-#include <WString.h>
 #include <Actions/ContinuousActions.h>
 #include <hardware_language_abstraction.h>
 #include <interface.h>

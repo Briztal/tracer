@@ -23,7 +23,6 @@
 #include "GCodeInterface.h"
 #include "GCodeInterfaceCommands.h"
 #include "../../hardware_language_abstraction.h"
-#include "../../Core/MachineControllerSystem.h"
 
 
 void GI::begin() {
@@ -36,16 +35,16 @@ void GI::begin() {
 }
 
 
-void GCodeInterface::echo(const String msg) {
-    serial_echo_str(msg+"\n");
+void GCodeInterface::echo(const string_t msg) {
+    gcode_interface_link_t::send_str(msg+"\n");
 }
 
 void GCodeInterface::read_serial() {
 
-    while(serial_available()) {
+    while(gcode_interface_link_t::available()) {
 
         //Read the serial
-        char read_char = (char)serial_read();
+        char read_char = gcode_interface_link_t::read();
 
         //If the recieved char is a line feed or a carriage return
         if ((read_char == 10) || (read_char == 13)) {
@@ -91,7 +90,7 @@ bool GCodeInterface::parse() {
         return false;
 
 
-    while (command_size) {
+    while (command_size) {//TODO WAT ??
         //Get next word and analyse_parameter, if it fails, return false;
         get_parameter(&c, &value);
         analyse_parameter(c, value);
@@ -150,7 +149,7 @@ bool GCodeInterface::get_parameter(char *id, float *value) {
     } while ((*id = *(data_in++)) == ' ');
 
     char t;
-    String strValue = "";
+    string_t strValue = "";
     while ((command_size--) && ((t = *(data_in++)) != ' ')) {
         strValue += t;
     }
@@ -290,9 +289,9 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
 
 unsigned char m::command_size;
 
-char tdatain[PACKET_SIZE];
-char *m::data_in = tdatain;
-char *const m::data_in_0 = tdatain;
+char tdatain_gcode[PACKET_SIZE];
+char *m::data_in = tdatain_gcode;
+char *const m::data_in_0 = tdatain_gcode;
 
 
 float tcurve[MAX_CURVE_POINTS][NB_STEPPERS];

@@ -40,10 +40,9 @@
 /*
  * Include here all libraries related to the board itself
  */
-
-#include "Arduino.h"
-#include "EEPROM.h"
-
+#include <stdint.h>
+#include <targets/TARGET_STM/TARGET_STM32L4/TARGET_STM32L476xG/device/stm32l476xx.h>
+#include <mbed.h>
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
 
@@ -74,23 +73,34 @@
 
 void hl_begin();
 
+
+//----------------------------------------------------STRING------------------------------------------------------------
+
+#include <string>
+
+#define string_t std::string
+
+#define str std::to_string
+
+
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
-#define EEPROM_read(i) EEPROM.read(i)
+#define EEPROM_read(i) 0
 
-#define EEPROM_write(i, byte) EEPROM.write(i, byte)
+#define EEPROM_write(i, byte)
+
 
 //-----------------------------------------------------IO--------------------------------------------------------------
 
-#define digital_write(i, v) digitalWriteFast(i, v)
+#define digital_write(i, v)
 
-#define digital_read(i) digitalReadFast(i)
+#define digital_read(i)
 
-#define analog_read(i) analoglRead(i)
+#define analog_read(i)
 
-#define analog_write(i, v) analogWrite(i, v)
+#define analog_write(i, v)
 
-#define pin_mode(i, mode) pinMode(i, mode)
+#define pin_mode(i, mode)
 
 
 //--------------------------------------------------INTERRUPTS----------------------------------------------------------
@@ -124,6 +134,7 @@ inline static void delay_ms(uint16_t time_ms){
 }*/
 #define delay_us(us) delayMicroseconds(us)
 
+
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
 //For the stepper interrupt, the TIM2 (32 bis is used)
@@ -139,28 +150,28 @@ inline static void delay_ms(uint16_t time_ms){
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
-     {TIM2 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
+     {TIM2.ARR = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
         STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
 
 //Enabling interrupt
-#define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
+#define enable_stepper_interrupt() {TIM2.DIER |= (uit32_t)64;} //1<<6
 
 
 //Disabling interrupt
-#define disable_stepper_interrupt() PIT_TCTRL0 &= 5;
+#define disable_stepper_interrupt() {DIER &= ~(uint32_t)64;} //1<<6
 
 
 //Enabling timer
-#define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
+#define enable_stepper_timer() {TIM2.CR1 |= (uint32_t)1;}
 
 
 //Disabling timer
-#define disable_stepper_timer() PIT_TCTRL0 &= 6;
+#define disable_stepper_timer() {TIM2.CR1 &= ((uint32_t)((uint16_t)~(uint16_t)1));}
 
 
 //Flag management
-#define stepper_int_flag PIT_TFLG0
-#define stepper_int_flag_clear() PIT_TFLG0 = PIT_TFLG_TIF;
+#define stepper_int_flag (TIM2.SR & (uint32_t) 64)
+#define stepper_int_flag_clear() {TIM2.SR &= (uint32_t)~(uint32_t)64};
 
 
 //Function setting
@@ -203,38 +214,38 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 //Enabling loop interrupts
 
-#define enable_loop_interrupt_0() PIT_TCTRL1 |= PIT_TCTRL_TIE;
+#define enable_loop_interrupt_0()
 
-#define enable_loop_interrupt_1() PIT_TCTRL2 |= PIT_TCTRL_TIE;
+#define enable_loop_interrupt_1()
 
-#define enable_loop_interrupt_2() PIT_TCTRL3 |= PIT_TCTRL_TIE;
+#define enable_loop_interrupt_2()
 
 
 //Disabling loops interrupts
 
-#define disable_loop_interrupt_0() PIT_TCTRL1 &= 5;
+#define disable_loop_interrupt_0()
 
-#define disable_loop_interrupt_1() PIT_TCTRL2 &= 5;
+#define disable_loop_interrupt_1()
 
-#define disable_loop_interrupt_2() PIT_TCTRL3 &= 5;
+#define disable_loop_interrupt_2()
 
 
 //Enabling loop timers
 
-#define enable_loop_timer_0() PIT_TCTRL1 |= PIT_TCTRL_TEN;
+#define enable_loop_timer_0()
 
-#define enable_loop_timer_1() PIT_TCTRL2 |= PIT_TCTRL_TEN;
+#define enable_loop_timer_1()
 
-#define enable_loop_timer_2() PIT_TCTRL3 |= PIT_TCTRL_TEN;
+#define enable_loop_timer_2()
 
 
 //Disabling loop timers
 
-#define disable_loop_timer_0() PIT_TCTRL1 &= 6;
+#define disable_loop_timer_0()
 
-#define disable_loop_timer_1() PIT_TCTRL2 &= 6;
+#define disable_loop_timer_1()
 
-#define disable_loop_timer_2() PIT_TCTRL3 &= 6;
+#define disable_loop_timer_2()
 
 
 //Function setting

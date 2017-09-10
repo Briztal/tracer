@@ -81,9 +81,12 @@ bool Asserv::active_##indice = false;
 
 #include "../interface.h"
 
+
 void Asserv::init_loop_0() {
     reset_pid_0();
 }
+
+#include <string>
 
 void Asserv::trigger_0() {
 
@@ -93,7 +96,6 @@ void Asserv::trigger_0() {
 
     float p = get_pid_0(error);
 
-    CI::echo("hotend "+String(p, 1));
 
     enable_loop_interrupt_0();
 }
@@ -110,7 +112,8 @@ void Asserv::trigger_1() {
 
     float p = get_pid_1(error);
 
-    CI::echo("hotbed "+String(p, 1));
+
+    CI::echo("hotbed "+str(p));
 
     enable_loop_interrupt_0();
 }

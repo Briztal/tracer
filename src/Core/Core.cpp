@@ -22,13 +22,21 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-
 #include "Core.h"
 #include "../interface.h"
 #include "EEPROMStorage.h"
 #include "../StepperControl/StepperController.h"
 
 void Core::begin() {
+
+    /*Serial s = Serial(PA_2, PA_3, 115200);
+
+    while(true) {
+        s.printf("SUUS\n");
+        HAL_Delay(1000);
+    }*/
+
+    return;
 
     hl_begin();
 

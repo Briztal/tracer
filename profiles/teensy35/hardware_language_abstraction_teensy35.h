@@ -40,7 +40,6 @@
 /*
  * Include here all libraries related to the board itself
  */
-
 #include "Arduino.h"
 #include "EEPROM.h"
 
@@ -71,6 +70,12 @@
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
 void hl_begin();
+
+//----------------------------------------------------STRING------------------------------------------------------------
+
+#define string_t String
+
+#define str String
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
@@ -108,7 +113,7 @@ void hl_begin();
 /* The function to call to wait for a specified number of milliseconds
  *  void delay_ms(uint16_t time_ms);
  *//*
-inline static void delay_ms(uint16_t time_ms){
+static inline static void delay_ms(uint16_t time_ms){
 
 }*/
 #define delay_ms(ms) delay(ms)
@@ -117,7 +122,7 @@ inline static void delay_ms(uint16_t time_ms){
 /* The function to call wait for a specified number of microseconds
  * void delay_us(uint16_t time_us);
  */
-/*inline static void delay_us(uint16_t time_us){
+/*static inline static void delay_us(uint16_t time_us){
 
 }*/
 #define delay_us(us) delayMicroseconds(us)
@@ -257,49 +262,48 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 #define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
 
 
-//----------------------------------------------------Serial------------------------------------------------------------
+//------------------------------------------------PHYSICAL LINKS--------------------------------------------------------
 
-/* The function to call to initialise the serial at a given baudrate
- * void serial_begin(baudrate b);
- */
-/*inline static void serial_begin(baudrate b){
-
-}*/
-#define serial_begin(b) Serial.begin(b)
-
-/* The function to call to send_packet a byte on the serial
- * void serial_send_byte(char c);
- */
-/*inline static void serial_echo_byte(char c){
-
-}*/
-#define serial_echo_byte(c) Serial.print(c)
-
-/* The function to call to send_packet a zero terminated (char *) on the serial
- * void serial_echo_str(char *s);
- */
-/*inline static void serial_echo_str(char *s){
-
-}*/
-#define serial_echo_str Serial.print
+class serial {
+public:
+    static inline void begin() {Serial.begin(115200);}
+    static inline void send_byte(char c) {Serial.print(c);}
+    static inline void send_str(string_t c) {Serial.print(c);}
+    static inline int available() {return Serial.available();}
+    static inline char read() {return (char)Serial.read();}
+};
 
 
-/* The function to call to check if bytes are available_sub_movements in the serial buffer
- * bool serial_available(void)
- */
-/*inline static bool serial_available(void){
+class serial1 {
+public:
+    static inline void begin() {Serial1.begin(115200);}
+    static inline void send_byte(char c) {Serial1.print(c);}
+    static inline void send_str(string_t c) {Serial1.print(c);}
+    static inline int available() {return Serial1.available();}
+    static inline char read() {return (char)Serial1.read();}
+};
 
-}*/
-#define serial_available() Serial.available()
 
 
-/* The function to call to read_output a byte from serial buffer
- * char serial_read(void)
- */
-/*inline static char serial_read(){
+class serial2 {
+public:
+    static inline void begin() {Serial2.begin(115200);}
+    static inline void send_byte(char c) {Serial2.print(c);}
+    static inline void send_str(string_t c) {Serial2.print(c);}
+    static inline int available() {return Serial2.available();}
+    static inline char read() {return (char)Serial2.read();}
+};
 
-}*/
-#define serial_read() Serial.read()
+
+
+class serial3 {
+public:
+    static inline void begin() {Serial3.begin(115200);}
+    static inline void send_byte(char c) {Serial3.print(c);}
+    static inline void send_str(string_t c) {Serial3.print(c);}
+    static inline int available() {return Serial3.available();}
+    static inline char read() {return (char)Serial3.read();}
+};
 
 
 #endif //HDWGGABSTRACTION_H

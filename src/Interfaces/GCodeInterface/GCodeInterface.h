@@ -24,15 +24,10 @@
 #ifndef GCODEINTERFACE
 #define GCODEINTERFACE
 
-#include "../../hardware_language_abstraction.h"
-#if !defined(HL_SERIAL)
-#error CommandInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
-#endif
-
-
 #include "GCommand.h"
 #include "../../config.h"
 #include "gcode_interface_config.h"
+#include <hardware_language_abstraction.h>
 
 
 #define GI GCodeInterface
@@ -91,7 +86,7 @@ private :
 
 public :
 
-    static void echo(const String msg);
+    static void echo(const string_t msg);
 
     static void send_position(float*){}
 

@@ -46,6 +46,7 @@ void UI::begin() {
 
     //Setup a correct command environment
     reset();
+
 }
 
 
@@ -54,8 +55,8 @@ void UI::begin() {
  *
  */
 
-void TerminalInterface::echo(const String msg) {
-    serial_echo_str(msg + "\n");
+void TerminalInterface::echo(const string_t msg) {
+    terminal_interface_link_t::send_str(msg + "\n");
 }
 
 /*
@@ -65,10 +66,10 @@ void TerminalInterface::echo(const String msg) {
 
 void TerminalInterface::read_serial() {
 
-    while (serial_available()) {
+    while (terminal_interface_link_t::available()) {
 
         //Read the serial
-        char read_char = (char) serial_read();
+        char read_char = terminal_interface_link_t::read();
 
         //If the recieved char is a line feed or a carriage return
         if ((read_char == 10) || (read_char == 13)) {
@@ -162,7 +163,7 @@ void TerminalInterface::execute() {
     *data_in = 0;
 
     //Display the revieved command
-    echo("\n"+String(SOFTWARE_NAME)+"> "+String(data_in_0));
+    echo("\n"+str(SOFTWARE_NAME)+"> "+str(data_in_0));
 
     //Setup and save the message state
     data_in = data_in_0;
@@ -224,14 +225,14 @@ void TerminalInterface::fail_log() {
     get_next_word();
 
     //The log message
-    String log_message = "";
+    string_t log_message = "";
 
     //The command part
-    String syntax_command = "";
+    string_t syntax_command = "";
 
     //If the current word matched the new name, then reset the log message, and add the name to the syntax command.
 #define GO_LOWER(name, description)\
-        log_message+=String(#name) +"\t\t : "+String(#description)+"\n";\
+        log_message+=str(#name) +"\t\t : "+str(#description)+"\n";\
         if (!strcmp(#name, word_buffer_0)) {\
             get_next_word();\
             log_message = "";\
@@ -239,9 +240,9 @@ void TerminalInterface::fail_log() {
 
     //If the current word matched the new name, the function ha failed : show the syntax description.
 #define CREATE_LEAF(name, function, description, syntax);\
-    log_message+=String(#name) +"\t\t : "+String(#description)+"\n";\
+    log_message+=str(#name) +"\t\t : "+str(#description)+"\n";\
     if (!strcmp(#name, word_buffer_0)) {\
-        echo(String("Usage : ")+syntax_command+""+String(#name)+" "+String(#syntax));\
+        echo(str("Usage : ")+syntax_command+""+str(#name)+" "+str(#syntax));\
         return;\
     }
 
@@ -263,20 +264,15 @@ void TerminalInterface::fail_log() {
 
 
 
-
-
-
-
-
 #define m TerminalInterface
 
 
 unsigned char m::command_size = 0;
 unsigned char m::saved_command_size = 0;
 
-char tdatain[PACKET_SIZE];
-char *m::data_in = tdatain;
-char *const m::data_in_0 = tdatain;
+char tdatain_terminal[PACKET_SIZE];
+char *m::data_in = tdatain_terminal;
+char *const m::data_in_0 = tdatain_terminal;
 
 
 char twrd[WORD_MAX_SIZE];

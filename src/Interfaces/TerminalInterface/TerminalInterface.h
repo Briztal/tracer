@@ -91,7 +91,7 @@ private :
 public :
 
     //Function to send a string over the serial.
-    static void echo(const String msg);
+    static void echo(const string_t msg);
 
     //Function to send the stepper position over the serial.
     static void send_position(float *) {}

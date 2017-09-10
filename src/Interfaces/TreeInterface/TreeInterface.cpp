@@ -19,21 +19,21 @@
 */
 
 #include <config.h>
+
 #ifdef ENABLE_TREE_INTERFACE
 
 #include "TreeInterface.h"
 #include "../../Core/Core.h"
 #include "TreeInterfaceCommands.h"
+#include <hardware_language_abstraction.h>
 
 #define BEGIN_BYTE (uint8_t)255
 #define BEGIN_CHAR (char)-1
 
 void TI::begin() {
-    serial_begin(BAUDRATE);
+    tree_interface_link_t::begin();
     initialise_aliases();
     *data_out_0 = BEGIN_CHAR;
-    pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
 
 }
 
@@ -70,9 +70,9 @@ void TI::initialise_aliases() {
  * The command id is the following : 0 (system canal) - 6 (echo canal);
  */
 
-void TI::echo(const String msg) {
+void TI::echo(const string_t msg) {
 
-    prepare_data_out("\0\6",2);
+    prepare_data_out("\0\6", 2);
     add_string_out(msg.c_str());
     send_packet();
 }
@@ -86,7 +86,7 @@ void TI::echo(const String msg) {
  */
 void TI::send_position(float *t) {
     prepare_data_out("\0\5\1", 3);
-    for (uint8_t i = 0; i<NB_AXIS; i++) {
+    for (uint8_t i = 0; i < NB_AXIS; i++) {
         add_float_out(t[i]);
     }
     send_packet();
@@ -116,11 +116,11 @@ void TI::prepare_EEPROM_packet() {
  * It sets the command id bytes, and initialises the data_out size.
  */
 void TI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
-    data_out = data_out_0+2;
+    data_out = data_out_0 + 2;
     data_out_size = command_id_size + (uint8_t) 1;
 
     //Write the command id
-    for (;command_id_size--;) {
+    for (; command_id_size--;) {
         *(data_out++) = (*(command_id++));
     }
 
@@ -137,14 +137,14 @@ void TI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
 void TI::add_char_out(char data) {
 
     uint8_t space_count = 0;
-    if (data_out_size  >= PACKET_SIZE) return;
+    if (data_out_size >= PACKET_SIZE) return;
 
     //Checking
     if (data == BEGIN_CHAR) {
         *data_out++ = data, space_count++;
     }
     *data_out++ = data, space_count++;
-    data_out_size ++;
+    data_out_size++;
 }
 
 void TI::add_int_out(int data) {
@@ -202,7 +202,7 @@ void TI::add_int32_t_out(int32_t data) {
     uint8_t space_count = 0;
     if (data_out_size + 4 >= PACKET_SIZE) return;
 
-    
+
     //Checking on 4 bytes
     if (*t == BEGIN_CHAR) {
         *data_out++ = *t, space_count++;
@@ -257,15 +257,15 @@ void TI::send_packet() {
 
     uint8_t size = data_out_size;
 
-    *size_ptr = (char)(size-1);
+    *size_ptr = (char) (size - 1);
     //serial_echo_byte((char)(size));
     char *ptr = data_out_0;
-        for (size+=1;size--;) {
-        serial_echo_byte(*ptr++);
+    for (size += 1; size--;) {
+        tree_interface_link_t::send_byte(*ptr++);
     }
-    serial_echo_byte((char)0);
+    tree_interface_link_t::send_byte((char) 0);
 
-    digitalWrite(13, (uint8_t)!digitalRead(13));
+    digitalWrite(13, (uint8_t) !digitalRead(13));
 
 }
 
@@ -275,7 +275,7 @@ void TI::enqueue(char *command, uint8_t size) {
 
     size--;
 
-#define GO_LOWER(c,name)\
+#define GO_LOWER(c, name)\
     case c :\
         b = *(++command);\
         size--;\
@@ -295,7 +295,7 @@ void TI::enqueue(char *command, uint8_t size) {
     break;
 
     switch (b) {
-        case 0 : 
+        case 0 :
             command++;
 
             TreeInterfaceCommands::system_canal_function(command, size);
@@ -315,15 +315,15 @@ void TI::enqueue(char *command, uint8_t size) {
 void TI::read_serial() {
 
     char r;
-    while (serial_available()) {
-        r = (char) serial_read();
+    while (tree_interface_link_t::available()) {
+        r = tree_interface_link_t::read();
         if (first_detected) {
             if (r == BEGIN_CHAR) {//Second time begin byte is detected : not a begin symbol.
                 first_detected = false;
                 in_data_remaining--;
             } else {//Not a double beginning byte -> begining symbol
                 flush();
-                if (r<PACKET_SIZE) {
+                if (r < PACKET_SIZE) {
                     packet_began = true;
                     in_data_size = in_data_remaining = (uint8_t) r;
                 }
@@ -437,11 +437,11 @@ char t_data_in[PACKET_SIZE];
 char *TI::data_in = t_data_in;
 char *const TI::data_in_0 = t_data_in;
 
-char dout[PACKET_SIZE+2];
+char dout[PACKET_SIZE + 2];
 char *TI::data_out = dout;
 char *const TI::data_out_0 = dout;
 uint8_t TI::data_out_size;
-char *const TI::size_ptr = dout+1;
+char *const TI::size_ptr = dout + 1;
 
 
 #endif

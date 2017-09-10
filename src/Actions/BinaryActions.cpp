@@ -26,10 +26,10 @@
 
 #define BINARY(i, name, pin, ev) \
 void BinaryActions::enable##i() {\
-    digitalWriteFast(pin, ev);\
+    digital_write(pin, ev);\
 }\
 void BinaryActions::disable##i() {\
-    digitalWriteFast(pin, !ev);\
+    digital_write(pin, !ev);\
 }
 
 

@@ -58,7 +58,7 @@ public :
     static void send_packet();
 
     //System commands aliases
-    static void echo(String msg);
+    static void echo(string_t msg);
 
     static void send_position(float *t);
 
@@ -96,6 +96,7 @@ public :
     //----------------------------------------Emission and Reception data fields----------------------------------------
 
 private:
+
 
     /*
      * For input, and output data, a fixed space is allocated, to store the current data.

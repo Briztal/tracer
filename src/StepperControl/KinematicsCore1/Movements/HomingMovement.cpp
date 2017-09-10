@@ -55,7 +55,7 @@ void HomingMovement::move() {
 
 
     uint32_t delay = 100;//TODO AJUSTER LE DELAY EN FONCTION DE LA VITESSE DES AXES RESTANTS
-    uint32_t timeline = micros();
+    //uint32_t timeline = micros();
 
     uint32_t delays[NB_STEPPERS];
     float speed;
@@ -67,6 +67,7 @@ void HomingMovement::move() {
         //delay_us = max(delay_us, d);
     }
 
+    /*
     while (signature) {
         for (int s = 0; s < step - 1; s++) {
             StepperController::fastStep(signature);
@@ -81,6 +82,7 @@ void HomingMovement::move() {
         timeline += delay;
         while (micros() < timeline) {}
     }
+     */
 
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
         //SpeedPlanner::positions[axis] = 0;
