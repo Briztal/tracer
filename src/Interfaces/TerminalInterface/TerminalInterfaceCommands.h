@@ -37,7 +37,7 @@ class TerminalInterfaceCommands {
 
 public:
 
-#define GO_UPPER
+#define GO_UPPER(...)
 
 #define GO_LOWER(...)
 

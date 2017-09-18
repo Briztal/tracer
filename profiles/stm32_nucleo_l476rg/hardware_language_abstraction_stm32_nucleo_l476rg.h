@@ -88,10 +88,11 @@ void hl_begin();
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
-#define EEPROM_read(i) 0
+#define EEPROM_read(i) (*(uint8_t *)(DATA_E2_ADDR+i))
 
-#define EEPROM_write(i, byte)
+#define EEPROM_write(i, byte) *(uint8_t *)(DATA_E2_ADDR+i) = byte;
 
+//TODO INITIALISE / UNLOCK EEPROM ??
 
 //-----------------------------------------------------IO--------------------------------------------------------------
 
@@ -200,91 +201,166 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 //---------------------------------------Control_loops_Milliseconds_Timers----------------------------------------------
 
+/*
+ * The STM32 L053R8 has 16 bits timers : TIM1 TIM8 TIM3 TIM4 TIM6 TIM7.
+ *
+ *  All can be configured to use a custom 16-bits prescaler. We will use this prescaller, to count one milisecond,
+ *      and set the auto-reload value to the loop period.
+ */
 
-//Period macros
+//First, we will alias timers used for different loops :
+#define L0_TIMER TIM6
+#define L1_TIMER TIM7
+#define L2_TIMER TIM3
+#define L3_TIMER TIM4
+#define L4_TIMER TIM15
+#define L5_TIMER TIM16
+#define L6_TIMER TIM17
+#define L7_TIMER TIM1
+#define L8_TIMER TIM8
 
+#define F_BUS 48000000
 
+//48000 tics for a millisecond
 #define MS_TICS_PER_MS (uint32_t) (F_BUS / 1000)
 
-#define MS_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / MS_TICS_PER_MS)
+
+//The timer counts in milliseconds.
+#define MS_TIMER_MAX_PERIOD (uint32_t) (UINT16_MAX)
 
 
-//Loops periods settings
+/*
+ * Loops periods settings :
+ *  The base unit for the period computation will be the uint32_t.
+ */
+#define SET_PERIOD_16_BITS(TIMER, period_ms)\
+     {TIMER->ARR = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+        MS_TIMER_MAX_PERIOD :  (uint16_t) ((MS_TICS_PER_MS) * (uint16_t)period_ms - 1);};
+#define ENABLE_INTERRUPT(TIMER) {TIMER->DIER |= TIM_DIER_TIE;} //1<<6
+#define DISABLE_INTERRUPT(TIMER) {TIMER->DIER &= ~TIM_DIER_TIE;} //1<<6
+#define ENABLE_TIMER(TIMER) {TIMER->CR1 |= TIM_CR1_CEN;}
+#define DISABLE_TIMER(TIMER) {TIMER->CR1 &= ~TIM_CR1_CEN}
+#define GET_INTERRUPT_FLAG(TIMER) (TIMER->SR & TIM_SR_TIF)
+#define CLEAR_INTERRUPT_FLAG(TIMER) {TIMER->SR &= ~TIM_SR_TIF};
 
-#define set_loop_int_period_0(period_ms)\
-     {PIT_LDVAL1 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
-        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
 
-#define set_loop_int_period_1(period_ms)\
-     {PIT_LDVAL2 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
-        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
-
-#define set_loop_int_period_2(period_ms)\
-     {PIT_LDVAL3 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
-        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
+//Set the loop period
+#define set_loop_int_period_0(period_ms) SET_PERIOD_16_BITS(L0_TIMER, period_ms)
+#define set_loop_int_period_1(period_ms) SET_PERIOD_16_BITS(L1_TIMER, period_ms)
+#define set_loop_int_period_2(period_ms) SET_PERIOD_16_BITS(L2_TIMER, period_ms)
+#define set_loop_int_period_3(period_ms) SET_PERIOD_16_BITS(L3_TIMER, period_ms)
+#define set_loop_int_period_4(period_ms) SET_PERIOD_16_BITS(L4_TIMER, period_ms)
+#define set_loop_int_period_5(period_ms) SET_PERIOD_16_BITS(L5_TIMER, period_ms)
+#define set_loop_int_period_6(period_ms) SET_PERIOD_16_BITS(L6_TIMER, period_ms)
+#define set_loop_int_period_7(period_ms) SET_PERIOD_16_BITS(L7_TIMER, period_ms)
+#define set_loop_int_period_8(period_ms) SET_PERIOD_16_BITS(L8_TIMER, period_ms)
 
 
 //Enabling loop interrupts
-
-#define enable_loop_interrupt_0()
-
-#define enable_loop_interrupt_1()
-
-#define enable_loop_interrupt_2()
-
+#define enable_loop_interrupt_0() ENABLE_INTERRUPT(L0_TIMER)
+#define enable_loop_interrupt_1() ENABLE_INTERRUPT(L1_TIMER)
+#define enable_loop_interrupt_2() ENABLE_INTERRUPT(L2_TIMER)
+#define enable_loop_interrupt_3() ENABLE_INTERRUPT(L3_TIMER)
+#define enable_loop_interrupt_4() ENABLE_INTERRUPT(L4_TIMER)
+#define enable_loop_interrupt_5() ENABLE_INTERRUPT(L5_TIMER)
+#define enable_loop_interrupt_6() ENABLE_INTERRUPT(L6_TIMER)
+#define enable_loop_interrupt_7() ENABLE_INTERRUPT(L7_TIMER)
+#define enable_loop_interrupt_8() ENABLE_INTERRUPT(L8_TIMER)
 
 //Disabling loops interrupts
-
-#define disable_loop_interrupt_0()
-
-#define disable_loop_interrupt_1()
-
-#define disable_loop_interrupt_2()
+#define disable_loop_interrupt_0() DISABLE_INTERRUPT(L0_TIMER)
+#define disable_loop_interrupt_1() DISABLE_INTERRUPT(L1_TIMER)
+#define disable_loop_interrupt_2() DISABLE_INTERRUPT(L2_TIMER)
+#define disable_loop_interrupt_3() DISABLE_INTERRUPT(L3_TIMER)
+#define disable_loop_interrupt_4() DISABLE_INTERRUPT(L0_TIMER)
+#define disable_loop_interrupt_5() DISABLE_INTERRUPT(L1_TIMER)
+#define disable_loop_interrupt_6() DISABLE_INTERRUPT(L2_TIMER)
+#define disable_loop_interrupt_7() DISABLE_INTERRUPT(L3_TIMER)
+#define disable_loop_interrupt_8() DISABLE_INTERRUPT(L3_TIMER)
 
 
 //Enabling loop timers
+#define enable_loop_timer_0() ENABLE_TIMER(L0_TIMER)
+#define enable_loop_timer_1() ENABLE_TIMER(L1_TIMER)
+#define enable_loop_timer_2() ENABLE_TIMER(L2_TIMER)
+#define enable_loop_timer_3() ENABLE_TIMER(L3_TIMER)
+#define enable_loop_timer_4() ENABLE_TIMER(L4_TIMER)
+#define enable_loop_timer_5() ENABLE_TIMER(L5_TIMER)
+#define enable_loop_timer_6() ENABLE_TIMER(L6_TIMER)
+#define enable_loop_timer_7() ENABLE_TIMER(L7_TIMER)
+#define enable_loop_timer_8() ENABLE_TIMER(L8_TIMER)
 
-#define enable_loop_timer_0()
 
-#define enable_loop_timer_1()
+//Disabling loops timers
+#define disable_loop_timer_0() DISABLE_TIMER(L0_TIMER)
+#define disable_loop_timer_1() DISABLE_TIMER(L1_TIMER)
+#define disable_loop_timer_2() DISABLE_TIMER(L2_TIMER)
+#define disable_loop_timer_3() DISABLE_TIMER(L3_TIMER)
+#define disable_loop_timer_4() DISABLE_TIMER(L4_TIMER)
+#define disable_loop_timer_5() DISABLE_TIMER(L5_TIMER)
+#define disable_loop_timer_6() DISABLE_TIMER(L6_TIMER)
+#define disable_loop_timer_7() DISABLE_TIMER(L7_TIMER)
+#define disable_loop_timer_8() DISABLE_TIMER(L8_TIMER)
 
-#define enable_loop_timer_2()
+
+//Disabling loops timers
+#define get_loop_int_flag_0() GET_INTERRUPT_FLAG(L0_TIMER)
+#define get_loop_int_flag_1() GET_INTERRUPT_FLAG(L1_TIMER)
+#define get_loop_int_flag_2() GET_INTERRUPT_FLAG(L2_TIMER)
+#define get_loop_int_flag_3() GET_INTERRUPT_FLAG(L3_TIMER)
+#define get_loop_int_flag_4() GET_INTERRUPT_FLAG(L4_TIMER)
+#define get_loop_int_flag_5() GET_INTERRUPT_FLAG(L5_TIMER)
+#define get_loop_int_flag_6() GET_INTERRUPT_FLAG(L6_TIMER)
+#define get_loop_int_flag_7() GET_INTERRUPT_FLAG(L7_TIMER)
+#define get_loop_int_flag_8() GET_INTERRUPT_FLAG(L8_TIMER)
 
 
-//Disabling loop timers
-
-#define disable_loop_timer_0()
-
-#define disable_loop_timer_1()
-
-#define disable_loop_timer_2()
+//Disabling loops timers
+#define clear_loop_int_flag_0() CLEAR_INTERRUPT_FLAG(L0_TIMER)
+#define clear_loop_int_flag_1() CLEAR_INTERRUPT_FLAG(L1_TIMER)
+#define clear_loop_int_flag_2() CLEAR_INTERRUPT_FLAG(L2_TIMER)
+#define clear_loop_int_flag_3() CLEAR_INTERRUPT_FLAG(L3_TIMER)
+#define clear_loop_int_flag_4() CLEAR_INTERRUPT_FLAG(L4_TIMER)
+#define clear_loop_int_flag_5() CLEAR_INTERRUPT_FLAG(L5_TIMER)
+#define clear_loop_int_flag_6() CLEAR_INTERRUPT_FLAG(L6_TIMER)
+#define clear_loop_int_flag_7() CLEAR_INTERRUPT_FLAG(L7_TIMER)
+#define clear_loop_int_flag_8() CLEAR_INTERRUPT_FLAG(L8_TIMER)
 
 
 //Function setting
-
 void set_loop_function_0(void (*f)());
-
 void set_loop_function_1(void (*f)());
-
 void set_loop_function_2(void (*f)());
+void set_loop_function_3(void (*f)());
+void set_loop_function_4(void (*f)());
+void set_loop_function_5(void (*f)());
+void set_loop_function_6(void (*f)());
+void set_loop_function_7(void (*f)());
+void set_loop_function_8(void (*f)());
 
 
 // Complete setups (long)
-
 void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms);
-
 void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms);
-
 void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
+void setup_loop_interrupt_3(void (*function)(void), uint32_t period_ms);
+void setup_loop_interrupt_4(void (*function)(void), uint32_t period_ms);
+void setup_loop_interrupt_5(void (*function)(void), uint32_t period_ms);
+void setup_loop_interrupt_6(void (*function)(void), uint32_t period_ms);
+void setup_loop_interrupt_7(void (*function)(void), uint32_t period_ms);
+void setup_loop_interrupt_8(void (*function)(void), uint32_t period_ms);
 
 
 //Complete cleans : disables timers and interrupts
-
 #define clean_loop_interrupt_0() {disable_loop_timer_0(); disable_loop_interrupt_0();};
-
 #define clean_loop_interrupt_1() {disable_loop_timer_1(); disable_loop_interrupt_1();};
-
 #define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
+#define clean_loop_interrupt_3() {disable_loop_timer_3(); disable_loop_interrupt_3();};
+#define clean_loop_interrupt_4() {disable_loop_timer_4(); disable_loop_interrupt_4();};
+#define clean_loop_interrupt_5() {disable_loop_timer_5(); disable_loop_interrupt_5();};
+#define clean_loop_interrupt_6() {disable_loop_timer_6(); disable_loop_interrupt_6();};
+#define clean_loop_interrupt_7() {disable_loop_timer_7(); disable_loop_interrupt_7();};
+#define clean_loop_interrupt_8() {disable_loop_timer_8(); disable_loop_interrupt_8();};
 
 
 //----------------------------------------------------Serial------------------------------------------------------------

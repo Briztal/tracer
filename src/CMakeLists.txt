@@ -12,6 +12,12 @@ include_directories(${CP}/)
 
 add_library(core
 
+        config.h
+        parameters_indices.h
+        hardware_language_abstraction.h
+        interface.h
+        sanity_check.h
+
         ${CP}/Core.h
         ${CP}/Core.cpp
         ${CP}/EEPROMStorage.h
@@ -26,11 +32,9 @@ include_directories(${HP}/)
 
 add_library(hardware
 
-        #${HP}/hardware_language_abstraction_teensy35.h
-        #${HP}/hardware_language_abstraction_teensy35.cpp
+        ${HP}/hardware_language_abstraction_teensy35.h
+        ${HP}/hardware_language_abstraction_teensy35.cpp
 
-        ${HP}/hardware_language_abstraction_stm32_nucleo_l476rg.h
-        ${HP}/hardware_language_abstraction_stm32_nucleo_l476rg.cpp
 
         )
 
@@ -40,6 +44,14 @@ set(IP "Interfaces")
 include_directories(${IP}/)
 
 add_library(interface
+
+        #LCDInterface
+        ${IP}/LCDInterface/LCDInterface.h
+        ${IP}/LCDInterface/LCDInterface.cpp
+        ${IP}/LCDInterface/LCDNode.h
+        ${IP}/LCDInterface/LCDNode.cpp
+        ${IP}/LCDInterface/lcd_interface_config.h
+
 
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
@@ -62,7 +74,7 @@ add_library(interface
         ${IP}/GCodeInterface/GCodeInterfaceCommands.cpp
         ${IP}/GCodeInterface/gcode_interface_config.h
 
-        )
+        Interfaces/TerminalInterface/TerminalNode.cpp Interfaces/TerminalInterface/TerminalNode.h)
 
 #-------------------------------------------------ACTIONS---------------------------------------------------------------
 
@@ -79,7 +91,7 @@ add_library(actions
         ${AP}/ContinuousActions.h
         ${AP}/ContinuousActions.cpp
 
-        StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h)
+        )
 
 #-------------------------------------------------ASSERV----------------------------------------------------------------
 
@@ -120,7 +132,7 @@ add_library(datastructures
         ${DP}/Queue.h
         ${DP}/Queue.cpp
 
-        )
+        DataStructures/Node.cpp DataStructures/Node.h)
 
 #-------------------------------------------------KERNELS---------------------------------------------------------------
 

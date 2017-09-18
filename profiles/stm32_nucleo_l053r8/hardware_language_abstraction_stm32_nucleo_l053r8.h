@@ -24,9 +24,9 @@
 /*
  * The Board Abstraction file.
  *
- * This file is made for : teensy35.
+ * This file is made for : stm32 nucleo l476rg.
  *
- * Here are defined all function related to the hardware (serial, I2C, delay_us etc...), and toolchain
+ * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
  * Those will depend on the processor and the toolchain you use
  *
@@ -40,12 +40,11 @@
 /*
  * Include here all libraries related to the board itself
  */
-
-#define USB_HID
-
-#include "Arduino.h"
-#include "EEPROM.h"
-
+#include <stdint.h>
+#include <string>
+#include <strings.h>
+#include <stdlib.h>
+#include <targets/TARGET_STM/TARGET_STM32L4/TARGET_STM32L476xG/device/stm32l053xx.h>
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
 
@@ -74,40 +73,44 @@
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
+
 void hl_begin();
+
 
 //----------------------------------------------------STRING------------------------------------------------------------
 
-#define string_t String
+#define string_t std::string
 
-#define str(t) String(t)
+#define str(t) (std::string) ""
 
-#define str_to_float(s) s.toFloat();
+#define str_to_float(s) 0
 
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
-#define EEPROM_read(i) EEPROM.read(i)
+#define EEPROM_read(i) 0
 
-#define EEPROM_write(i, byte) EEPROM.write(i, byte)
+#define EEPROM_write(i, byte)
+
 
 //-----------------------------------------------------IO--------------------------------------------------------------
 
-#define digital_write(i, v) digitalWriteFast(i, v)
+#define digital_write(i, v)
 
-#define digital_read(i) digitalReadFast(i)
+#define digital_read(i)
 
-#define analog_read(i) analoglRead(i)
+#define analog_read(i)
 
-#define analog_write(i, v) analogWrite(i, v)
+#define analog_write(i, v)
 
-#define pin_mode_output(i) pinMode(i, OUTPUT);
+#define pin_mode_output(i)
 
 
 //-----------------------------------------------------MATH-------------------------------------------------------------
 
-#define sqrt_float(f) sqrtf(f)
-#define sqrt_long(l) sqrtf(l)
+
+#define sqrt_float(f) 1
+#define sqrt_long(l) 1
 
 #define min(a,b) (((a)<(b)) ? (a) : (b))
 #define max(a,b) (((a)<(b)) ? (b) : (a))
@@ -129,23 +132,28 @@ void hl_begin();
 /* The function to call to wait for a specified number of milliseconds
  *  void delay_ms(uint16_t time_ms);
  *//*
-static inline static void delay_ms(uint16_t time_ms){
+inline static void delay_ms(uint16_t time_ms){
 
 }*/
-#define delay_ms(ms) delay(ms)
+#define delay_ms(ms)
 
 
 /* The function to call wait for a specified number of microseconds
  * void delay_us(uint16_t time_us);
  */
-/*static inline static void delay_us(uint16_t time_us){
+/*inline static void delay_us(uint16_t time_us){
 
 }*/
-#define delay_us(us) delayMicroseconds(us)
+#define delay_us(us)
+
 
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
-//The frequency of the timer :
+//For the stepper interrupt, the TIM2 (32 bis is used)
+
+#define F_BUS 48000000
+
+//The basic unit of the implemented timer is 1 us.
 #define STEPPER_TIMER_FREQUENCY (float) 1000000.0
 
 #define STEPPER_TIMER_TICS_PER_UNIT ((float) ((float) F_BUS / STEPPER_TIMER_FREQUENCY ))
@@ -154,28 +162,28 @@ static inline static void delay_ms(uint16_t time_ms){
 
 //Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define set_stepper_int_period(period_timer_unit)\
-     {PIT_LDVAL0 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
+     {TIM2->ARR = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
         STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
 
 //Enabling interrupt
-#define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
+#define enable_stepper_interrupt() {TIM2->DIER |= (uint32_t)64;} //1<<6
 
 
 //Disabling interrupt
-#define disable_stepper_interrupt() PIT_TCTRL0 &= 5;
+#define disable_stepper_interrupt() {TIM2->DIER &= ~(uint32_t)64;} //1<<6
 
 
 //Enabling timer
-#define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
+#define enable_stepper_timer() {TIM2->CR1 |= (uint32_t)1;}
 
 
 //Disabling timer
-#define disable_stepper_timer() PIT_TCTRL0 &= 6;
+#define disable_stepper_timer() {TIM2->CR1 &= ((uint32_t)((uint16_t)~(uint16_t)1));}
 
 
 //Flag management
-#define stepper_int_flag PIT_TFLG0
-#define stepper_int_flag_clear() PIT_TFLG0 = PIT_TFLG_TIF;
+#define stepper_int_flag (TIM2->SR & (uint32_t) 64)
+#define stepper_int_flag_clear() {TIM2->SR &= (uint32_t)~(uint32_t)64;};
 
 
 //Function setting
@@ -192,9 +200,9 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 //---------------------------------------Control_loops_Milliseconds_Timers----------------------------------------------
 
-#define NB_CONTROL_LOOP_TIMERS 3
 
 //Period macros
+
 
 #define MS_TICS_PER_MS (uint32_t) (F_BUS / 1000)
 
@@ -202,85 +210,92 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 
 //Loops periods settings
-#define SET_LOOP_PERIOD(i, period_ms)\
-     {PIT_LDVAL##i = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+
+#define set_loop_int_period_0(period_ms)\
+     {PIT_LDVAL1 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
         MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
 
-#define ENABLE_LOOP_INTERRUPT(i) PIT_TCTRL##i |= PIT_TCTRL_TIE;
-#define DISABLE_LOOP_INTERRUPT(i) PIT_TCTRL##i &= 5;
-#define ENABLE_LOOP_TIMER(i) PIT_TCTRL##i |= PIT_TCTRL_TEN;
-#define DISABLE_LOOP_TIMER(i) PIT_TCTRL##i &= 6;
-#define CLEAN_LOOP_INTERRUPT(i) {disable_loop_timer_##i(); disable_loop_interrupt_##i();};
+#define set_loop_int_period_1(period_ms)\
+     {PIT_LDVAL2 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
 
-
-#define set_loop_int_period_0(period_ms) SET_LOOP_PERIOD(1, period_ms)
-#define set_loop_int_period_1(period_ms) SET_LOOP_PERIOD(2, period_ms)
-#define set_loop_int_period_2(period_ms) SET_LOOP_PERIOD(3, period_ms)
+#define set_loop_int_period_2(period_ms)\
+     {PIT_LDVAL3 = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
+        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
 
 
 //Enabling loop interrupts
-#define enable_loop_interrupt_0() ENABLE_LOOP_INTERRUPT(1)
-#define enable_loop_interrupt_1() ENABLE_LOOP_INTERRUPT(2)
-#define enable_loop_interrupt_2() ENABLE_LOOP_INTERRUPT(3)
+
+#define enable_loop_interrupt_0()
+
+#define enable_loop_interrupt_1()
+
+#define enable_loop_interrupt_2()
 
 
 //Disabling loops interrupts
-#define disable_loop_interrupt_0() DISABLE_LOOP_INTERRUPT(1)
-#define disable_loop_interrupt_1() DISABLE_LOOP_INTERRUPT(2)
-#define disable_loop_interrupt_2() DISABLE_LOOP_INTERRUPT(3)
+
+#define disable_loop_interrupt_0()
+
+#define disable_loop_interrupt_1()
+
+#define disable_loop_interrupt_2()
 
 
 //Enabling loop timers
-#define enable_loop_timer_0() ENABLE_LOOP_TIMER(1)
-#define enable_loop_timer_1() ENABLE_LOOP_TIMER(2)
-#define enable_loop_timer_2() ENABLE_LOOP_TIMER(3)
+
+#define enable_loop_timer_0()
+
+#define enable_loop_timer_1()
+
+#define enable_loop_timer_2()
 
 
 //Disabling loop timers
-#define disable_loop_timer_0() DISABLE_LOOP_TIMER(1)
-#define disable_loop_timer_1() DISABLE_LOOP_TIMER(2)
-#define disable_loop_timer_2() DISABLE_LOOP_TIMER(3)
+
+#define disable_loop_timer_0()
+
+#define disable_loop_timer_1()
+
+#define disable_loop_timer_2()
 
 
 //Function setting
+
 void set_loop_function_0(void (*f)());
+
 void set_loop_function_1(void (*f)());
+
 void set_loop_function_2(void (*f)());
 
 
 // Complete setups (long)
+
 void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms);
+
 void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms);
+
 void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 
 
 //Complete cleans : disables timers and interrupts
-#define clean_loop_interrupt_0() CLEAN_LOOP_INTERRUPT(0)
-#define clean_loop_interrupt_1() CLEAN_LOOP_INTERRUPT(1)
-#define clean_loop_interrupt_2() CLEAN_LOOP_INTERRUPT(2)
+
+#define clean_loop_interrupt_0() {disable_loop_timer_0(); disable_loop_interrupt_0();};
+
+#define clean_loop_interrupt_1() {disable_loop_timer_1(); disable_loop_interrupt_1();};
+
+#define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
 
 
-//------------------------------------------------PHYSICAL LINKS--------------------------------------------------------
+//----------------------------------------------------Serial------------------------------------------------------------
 
-//As we will create an adapter for serials, we will use a template, to simplify the code.
-#define SERIAL_CLASS_ADAPTER(name, serial)\
-class name {\
-public:\
-    static inline void begin() {serial.begin(115200);}\
-    static inline void send_byte(char c) {serial.print(c);}\
-    static inline void send_str(string_t c) {serial.print(c);}\
-    static inline int available() {return serial.available();}\
-    static inline char read() {return (char)serial.read();}\
+
+class serial {
+public:
+    static inline void begin() {}
+    static inline void send_byte(char c) {}
+    static inline void send_str(string_t c) {}
+    static inline int available() {return 0;}
+    static inline char read() {return 1;}
 };
-
-/*
- * We define here 4 serial adapters : the usb serial and serial 1, 2 and 3.
- */
-
-SERIAL_CLASS_ADAPTER(usb_serial, Serial)
-SERIAL_CLASS_ADAPTER(serial1, Serial1)
-SERIAL_CLASS_ADAPTER(serial2, Serial2)
-SERIAL_CLASS_ADAPTER(serial3, Serial3)
-
-
 #endif //HDWGGABSTRACTION_H

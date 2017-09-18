@@ -18,13 +18,12 @@
 
 */
 
-#include "kinetis.h"
-#include "hardware_language_abstraction_teensy35.h"
+#include "hardware_language_abstraction_stm32_nucleo_l476rg.h"
 
 /*
  * The Board Abstraction file.
  *
- * This file is made for : teensy35
+ * This file is made for : stm32 nucleo l476rg
  *
  * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *
@@ -39,13 +38,13 @@
 
 //Initialisation function : sets the correct priotity, and disables the timer and interrupt
 
-#define init_stepper_interrupt() {SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\
+#define init_stepper_interrupt() {\
     NVIC_SET_PRIORITY(IRQ_PIT_CH0, 0);NVIC_ENABLE_IRQ(IRQ_PIT_CH0); clean_stepper_interrupt();}
 
 
 //Initialisation function : set the correct priorities, enable interrupts, and disables timers and interrupts
 
-#define init_loop_interrupts() {SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\
+#define init_loop_interrupts() {\
     NVIC_SET_PRIORITY(IRQ_PIT_CH1, 16);NVIC_ENABLE_IRQ(IRQ_PIT_CH1);\
     NVIC_SET_PRIORITY(IRQ_PIT_CH2, 32);NVIC_ENABLE_IRQ(IRQ_PIT_CH2);\
     NVIC_SET_PRIORITY(IRQ_PIT_CH3, 48);NVIC_ENABLE_IRQ(IRQ_PIT_CH3);\
@@ -53,9 +52,9 @@
 
 void hl_begin() {
 
-    init_stepper_interrupt();
+    //TODO init_stepper_interrupt();
 
-    init_loop_interrupts();
+    //TODO init_loop_interrupts();
 
 }
 
@@ -79,7 +78,7 @@ void set_stepper_int_function(void (*f)()) {
 
 void setup_stepper_interrupt(void (*function)(void), uint32_t period_us) {
 
-    cli();
+   //TODO DISABLE INTERRRUPTS
 
     set_stepper_int_period(period_us);
 
@@ -89,45 +88,109 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us) {
 
     enable_stepper_timer();
 
-    sei();
+    //TODO ENABLE INTERRUPTS
 }
 
 
 //Implementation of interrupt function, calling trigger function
 
 void pit0_isr() {
-    PIT_TFLG0 = 1;
+    //TODO DISABLE STEPPER FLAG PIT_TFLG0 = 1;
     (*us_function)();
 }
 
 //--------------------------------Control_loops_Milliseconds_Timer_Interrupt--------------------------------------------
 
-#define CONTROL_LOOP_CODE(loop_indice, timer_indice)\
-/*Trigger functions*/\
-void (*t##loop_indice##_function)(void);\
-/*Complete setup functions : sets period and function, and enable interrupts and timers.*/\
-void setup_loop_interrupt_##loop_indice(void (*function)(void), uint32_t period_ms) {\
-    cli();\
-    set_loop_int_period_##loop_indice(period_ms);\
-    set_loop_function_##loop_indice(function);\
-    enable_loop_interrupt_##loop_indice();\
-    enable_loop_timer_##loop_indice();\
-    sei();\
-}\
-/*//Function setting*/\
-void set_loop_function_##loop_indice(void (*f)()) {\
-    t##loop_indice##_function = f;\
-}\
-/*Implementation of interrupt functions, calling trigger functions*/\
-void pit##timer_indice##_isr() {\
-    PIT_TFLG##timer_indice = 1;\
-    (*t##loop_indice##_function)();\
-}\
+//Trigger functions
+
+void (*t0_function)(void);
+
+void (*t1_function)(void);
+
+void (*t2_function)(void);
 
 
-CONTROL_LOOP_CODE(0, 1)
-CONTROL_LOOP_CODE(1, 2)
-CONTROL_LOOP_CODE(2, 3)
+//Function setting
 
+void set_loop_function_0(void (*f)()) {
+    t0_function = f;
+}
+
+void set_loop_function_1(void (*f)()) {
+    t1_function = f;
+}
+
+void set_loop_function_2(void (*f)()) {
+    t2_function = f;
+}
+
+
+//Complete setup functions : sets period and function, and enable interrupts and timers.
+
+void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms) {
+
+    //TODO DISABLE INTERRUPTS();
+
+    //set_loop_int_period_0(period_ms);
+
+    set_loop_function_0(function);
+
+    enable_loop_interrupt_0();
+
+    enable_loop_timer_0();
+
+    //TODO ENABLE INTERRUPTSsei();
+
+}
+
+void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms) {
+
+    //TODO DISBALE INTERRUPTScli();
+
+    //set_loop_int_period_1(period_ms);
+
+    set_loop_function_1(function);
+
+    enable_loop_interrupt_1();
+
+    enable_loop_timer_1();
+
+    //TODO ENABLE INTERRUPTSsei();
+
+}
+
+void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms) {
+
+    //TODO DISBALE INTERRUPTScli();
+
+    //set_loop_int_period_2(period_ms);
+
+    set_loop_function_2(function);
+
+    enable_loop_interrupt_2();
+
+    enable_loop_timer_2();
+
+    //TODO ENABLE INTERRUPTSsei();
+
+}
+
+
+//Implementation of interrupt functions, calling trigger functions
+
+void pit1_isr() {
+    //TODO CLEAR FLGPIT_TFLG1 = 1;
+    (*t0_function)();
+}
+
+void pit2_isr() {
+    //TODO INTERRUPT FLAGPIT_TFLG2 = 1;
+    (*t1_function)();
+}
+
+void pit3_isr() {
+    //TODO CLEAR INTERRUPT FLAGPIT_TFLG3 = 1;
+    (*t2_function)();
+}
 
 

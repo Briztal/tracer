@@ -21,18 +21,67 @@
 #include "hardware_language_abstraction.h"
 #include <config.h>
 
-//Control Interface checking
+/*
+ * Control Interface checking.
+ *  We must check that only one interface is the main one, and that the main interface is enabled.
+ *
+ */
 
-#if defined(MAIN_CI_TREE) && defined(MAIN_CI_GCODE)
-#error : "There can be only one main interface. Please enable only one."
+#ifdef MAIN_CI_TERMINAL
+#if defined(MAIN_CI_GCODE) || defined(MAIN_CI_TREE)
+#error "You have two main interfaces selected. Please disable one."
+#endif
+#ifndef ENABLE_TERMINAL_INTERFACE
+#error "Your main interface (the TerminalInterface) is not enabled."
+#endif
+#endif
+
+#ifdef MAIN_CI_GCODE
+#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TREE)
+#error "You have two main interfaces selected. Please disable one."
+#endif
+#ifndef ENABLE_GCODE_INTERFACE
+#error "Your main interface (the GCodeInterface) is not enabled."
+#endif
+#endif
+
+#ifdef MAIN_CI_TREE
+#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TERMINAL)
+#error "You have two main interfaces selected. Please disable one."
+#endif
+#ifndef ENABLE_TREE_INTERFACE
+#error "Your main interface (the TreeInterface) is not enabled."
+#endif
 #endif
 
 
-//Stepper Control Kernel checking
+/*
+ * Control loops checking.
+ *  We must verify that there are enough timers for the required control loops number
+ *
+ */
+
+#if (NB_CONTROL_LOOP_TIMERS < NB_LOOPS)
+#error You have required too much control loops (NB_LOOPS) in your configuration file. Your board supports at most NB_CONTROL_LOOP_TIMERS loops.
+#endif
+
+
+/*
+ * Stepper Control Kernel checking.
+ *  we must check the following flags :
+ *      - EEPROM for all kernels
+ *      - FPU for Kernel2
+ *      - 32 bits for kernel2
+ */
+
 #ifdef ENABLE_STEPPER_CONTROL
 
 #ifndef KERNEL
 #error "The Kernel version is not defined in your config.h"
+#endif
+
+#ifndef HL_EEPROM_FLAG
+#error "KinematicsCores require the EEPROM support, and you board doesn't support it."
 #endif
 
 #if (KERNEL == 0)
@@ -41,17 +90,14 @@
 #elif ((KERNEL == 1) || (KERNEL == 2))
 //KinematicsCore1 and KinematicsCoreV2 require a 32 bits processor with an FPU
 
-
-
 //FPU
 #ifndef HL_FPU_FLAG
-#error "KinematicsCore1 requires an FPU, and your processor doesn't have one."
+#error "KinematicsCore2 requires an FPU, and your processor doesn't have one."
 #endif
 
-
-//FPU
+//32 Bits
 #ifndef HL_32BITS_FLAG
-#error "KinematicsCore1 requires  a 32 bit processor. Your processor has a lower native type."
+#error "KinematicsCore2 requires  a 32 bit processor. Your processor has a lower native type."
 #endif
 
 #else

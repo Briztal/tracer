@@ -75,7 +75,10 @@ void hl_begin();
 
 #define string_t String
 
-#define str String
+#define str(t) String(t)
+
+#define str_to_float(s) s.toFloat();
+
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
 
@@ -93,8 +96,16 @@ void hl_begin();
 
 #define analog_write(i, v) analogWrite(i, v)
 
-#define pin_mode(i, mode) pinMode(i, mode)
+#define pin_mode_output(i) pinMode(i, OUTPUT);
 
+
+//-----------------------------------------------------MATH-------------------------------------------------------------
+
+#define sqrt_float(f) sqrtf(f)
+#define sqrt_long(l) sqrtf(l)
+
+#define min(a,b) (((a)<(b)) ? (a) : (b))
+#define max(a,b) (((a)<(b)) ? (b) : (a))
 
 //--------------------------------------------------INTERRUPTS----------------------------------------------------------
 

@@ -22,12 +22,12 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-
 #ifndef CODE_TERMINAL_INTERFACE
 #define CODE_TERMINAL_INTERFACE
 
 #include <hardware_language_abstraction.h>
 #include "terminal_interface_config.h"
+#include "TerminalNode.h"
 
 
 #define UI TerminalInterface
@@ -64,25 +64,55 @@ private :
     static char *data_in;
     static char *const data_in_0;
 
-    //--------------------------------------Command processing----------------------------------
-
 
 private :
 
-    //Function to parse and execute the recieved command.
-    static void execute();
+    static void prepare_execution();
 
-    //Function to show a log message if the parsing command didn't complete.
-    static void fail_log();
+    //--------------------------------------Command processing with tree style----------------------------------
+
+
+private:
+
+    static TerminalNode *command_tree;
+
+    static String *tree_summary;
+
+    //Function to generate the tree used to parse commands
+    static TerminalNode *generate_tree();
+
+    static uint8_t get_sub_nodes_nb(uint16_t command_index);
+
+    static String *build_tree_summary();
+
+
+    //Function to parse and execute the received command
+    static void execute_tree_style();
+
+    //Function to show a log message if the execution failed.
+    static void log_tree_style(TerminalNode *log_node, bool log_args);
+
+    //--------------------------------------Command processing with progmem style----------------------------------
+
+private :
+
+    //Function to parse and execute the received command.
+    static void execute_progmem_style();
+
+    //Function to show a log message if the execution failed.
+    static void fail_log_progmem_style();
+
+
+    //--------------------------------------Words extraction----------------------------------
+
+private :
 
     //Function to extract next word of the command.
     static unsigned char get_next_word();
 
 
-private :
-
     //The word buffer.
-    static char * word_buffer;
+    static char *word_buffer;
     static char *const word_buffer_0;
 
 

@@ -21,7 +21,7 @@
 
 #define MONITOR_CANAL
 
-#define MAX_DEPTH 3
+#define MAX_DEPTH 5
 
 #define SOFTWARE_NAME "tracer"
 
@@ -37,15 +37,14 @@
 #endif
 
 //Insert your tree here
-
-CREATE_LEAF(log, action, a simple log, )
+CREATE_LEAF(log, action, a simple log, i)
 CREATE_LEAF(ex, home, home the machine, <dir>)
 GO_LOWER(move, move the machine)
 CREATE_LEAF(line, line, draw a line to the specified coordinates, <coordinates>)
-GO_UPPER
+GO_UPPER()
 GO_LOWER(setup, setup the machine)
 CREATE_LEAF(speed, speed, set the speed, <value>)
-GO_UPPER
+GO_UPPER()
 
 #undef GO_LOWER
 #undef GO_UPPER

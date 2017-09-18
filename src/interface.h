@@ -18,44 +18,30 @@
 
 */
 
+/*
+ * This files simplifies the interface manipulation : it includes the correct files, and defines a macro for the main
+ *  interface.
+ */
+
 #include "config.h"
 
-
-
-#ifdef MAIN_CI_TERMINAL
-#if defined(MAIN_CI_GCODE) || defined(MAIN_CI_TREE)
-#error "You have two main interfaces selected. Please disable one."
-#endif
 #ifdef ENABLE_TERMINAL_INTERFACE
-#define CI UI
-#else
-#error "Your main interface (the TerminalInterface) is not enabled."
-#endif
-#endif
-
-#ifdef MAIN_CI_GCODE
-#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TREE)
-#error "You have two main interfaces selected. Please disable one."
-#endif
-#ifdef ENABLE_GCODE_INTERFACE
-#define CI GI
-#else
-#error "Your main interface (the GCodeInterface) is not enabled."
-#endif
-#endif
-
-#ifdef MAIN_CI_TREE
-#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TERMINAL)
-#error "You have two main interfaces selected. Please disable one."
-#endif
-#ifdef ENABLE_TREE_INTERFACE
-#define CI TI
-#else
-#error "Your main interface (the TreeInterface) is not enabled."
-#endif
-#endif
-
-
 #include <Interfaces/TerminalInterface/TerminalInterface.h>
+#ifdef MAIN_CI_TERMINAL
+#define CI UI
+#endif
+#endif
+
+#ifdef ENABLE_GCODE_INTERFACE
 #include <Interfaces/GCodeInterface/GCodeInterface.h>
+#ifdef MAIN_CI_GCODE
+#define CI GI
+#endif
+#endif
+
+#ifdef ENABLE_TREE_INTERFACE
 #include <Interfaces/TreeInterface/TreeInterface.h>
+#ifdef MAIN_CI_TREE
+#define CI TI
+#endif
+#endif
