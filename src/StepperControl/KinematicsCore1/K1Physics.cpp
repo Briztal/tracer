@@ -28,7 +28,7 @@
 #include <hardware_language_abstraction.h>
 #include <interface.h>
 #include <StepperControl/MachineInterface.h>
-#include <Core/EEPROMStorage.h>
+#include <EEPROMStorage/EEPROMStorage.h>
 #include "K1Physics.h"
 #include <StepperControl/SubMovementManager.h>
 #include <StepperControl/_kinematics_data.h>

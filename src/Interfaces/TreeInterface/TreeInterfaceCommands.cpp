@@ -27,7 +27,7 @@
 #include "TreeInterfaceCommands.h"
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
-#include <Core/EEPROMStorage.h>
+#include <EEPROMStorage/EEPROMStorage.h>
 #include <interface.h>
 
 
@@ -312,6 +312,20 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 void TreeInterfaceCommands::action(char *, uint8_t) {
 
     float coords[NB_AXIS]{0};
+
+    coords[2] = 250;
+
+
+
+    MachineInterface::set_speed_group(0);
+
+    MachineInterface::set_speed_for_group(0, 400);
+
+    MachineInterface::set_energy_density(2, 1);
+
+    MachineInterface::linear_movement(coords);
+
+
     coords[0] = 140;
     coords[1] = 140;
     coords[2] = 140;
@@ -321,19 +335,11 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[6] = 140;
     coords[7] = 140;
     coords[8] = 140;
-    coords[9] = 140;
-    coords[10] = 140;
-    coords[11] = 140;
-    coords[12] = 140;
-    coords[13] = 140;
-    coords[14] = 140;
-    coords[15] = 140;
-    coords[16] = 140;
 
 
     MachineInterface::set_speed_group(0);
 
-    MachineInterface::set_speed_for_group(0, 100);
+    MachineInterface::set_speed_for_group(0, 800);
 
     MachineInterface::set_energy_density(2, 1);
 
@@ -349,18 +355,10 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[6] = 120;
     coords[7] = 80;
     coords[8] = 120;
-    coords[9] = 80;
-    coords[10] = 120;
-    coords[11] = 80;
-    coords[12] = 120;
-    coords[13] = 80;
-    coords[14] = 120;
-    coords[15] = 80;
-    coords[16] = 120;
 
     MachineInterface::set_speed_group(0);
 
-    MachineInterface::set_speed_for_group(0, 500);
+    MachineInterface::set_speed_for_group(0, 800);
 
     MachineInterface::set_energy_density(0, 2);
     MachineInterface::set_energy_density(1, 0.2);
@@ -378,18 +376,10 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
     coords[6] = 45;
     coords[7] = 50;
     coords[8] = 55;
-    coords[9] = 60;
-    coords[10] = 65;
-    coords[11] = 70;
-    coords[12] = 75;
-    coords[13] = 80;
-    coords[14] = 85;
-    coords[15] = 90;
-    coords[16] = 95;
 
     MachineInterface::set_speed_group(0);
 
-    MachineInterface::set_speed_for_group(0, 200);
+    MachineInterface::set_speed_for_group(0, 800);
 
     MachineInterface::set_energy_density(0, 3);
     MachineInterface::set_energy_density(1, 0.3);

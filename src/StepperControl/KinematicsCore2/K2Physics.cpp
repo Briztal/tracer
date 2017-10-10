@@ -29,7 +29,7 @@
 #include "K2Physics.h"
 
 #include <hardware_language_abstraction.h>
-#include <Core/EEPROMStorage.h>
+#include <EEPROMStorage/EEPROMStorage.h>
 #include <StepperControl/MachineInterface.h>
 
 void K2Physics::start() {

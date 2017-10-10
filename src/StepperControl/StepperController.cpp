@@ -26,8 +26,23 @@
 
 #include "StepperController.h"
 #include "../interface.h"
-#include "../Core/EEPROMStorage.h"
+#include <EEPROMStorage/EEPROMStorage.h>
 
+
+
+void StepperController::begin() {
+
+#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
+    pin_mode_output(pinPower);pin_mode_output(pinDir);pin_mode_output(pinStep);\
+digital_write(pinPower, LOW);\
+
+#include <config.h>
+
+#undef STEPPER
+
+    //enable(0);
+
+}
 
 void StepperController::enable(sig_t signature) {
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
@@ -35,7 +50,9 @@ void StepperController::enable(sig_t signature) {
         digital_write(pinPower, LOW);\
     } else {\
         digital_write(pinPower, HIGH);\
-    }
+    }\
+    digital_write(pinPower, LOW);\
+
 
 #include <config.h>
 
@@ -86,18 +103,6 @@ void StepperController::set_directions(sig_t negative_signatures) {
 
 }
 
-void StepperController::begin() {
-
-#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
-    pin_mode_output(pinPower);pin_mode_output(pinDir);pin_mode_output(pinStep);\
-
-#include <config.h>
-
-#undef STEPPER
-
-    enable(0);
-
-}
 
 
 void StepperController::fastStep(sig_t id) {
@@ -106,26 +111,43 @@ void StepperController::fastStep(sig_t id) {
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
         if (id&sig) {\
-            pos##i += incr##i;\
             digital_write(pinStep, HIGH);\
+        }
+
+#include <config.h>
+
+#undef STEPPER
+
+    delay_us(1);
+
+#define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
+        if (id&sig) {\
+            pos##i += incr##i;\
             digital_write(pinStep, LOW);\
         }
 
 #include <config.h>
 
 #undef STEPPER
+
 
 #else
 
-#define STEPPER(k1_position_indice, sig, rel, pinStep, pd, dp,  pp, ve, pmi, vi, pma, va)\
+    #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
         if (id&sig) {\
             digital_write(pinStep, HIGH);\
-            digital_write(pinStep, LOW);\
         }
 
 #include <config.h>
 
 #undef STEPPER
+
+    delay_us(2);
+
+#define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
+        if (id&sig) {\
+            digital_write(pinStep, LOW);\
+        }
 
 #endif
 

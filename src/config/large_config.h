@@ -21,25 +21,25 @@
 
 
 //Uncomment this line to enable the terminal interface.
-#define ENABLE_TERMINAL_INTERFACE
-#define terminal_interface_link_t usb_serial
+//#define ENABLE_TERMINAL_INTERFACE
+//#define terminal_interface_link_t usb_serial
 
 //Uncomment this line to enable the tree interface.
-//#define ENABLE_TREE_INTERFACE
-//#define tree_interface_link_t usb_serial
+#define ENABLE_TREE_INTERFACE
+#define tree_interface_link_t usb_serial
 
 //Uncomment this line to enable the gcode interface.
 //#define ENABLE_GCODE_INTERFACE
 //#define gcode_interface_link_t usb_serial
 
-#define ENABLE_LCD_INTERFACE
-#define lcd_interface_link_t usb_serial
+//#define ENABLE_LCD_INTERFACE
+//#define lcd_interface_link_t usb_serial
 
 
 //You must define the main command Interface. You must uncomment only one of lines below
-//#define MAIN_CI_TREE
+#define MAIN_CI_TREE
 //#define MAIN_CI_GCODE
-#define MAIN_CI_TERMINAL
+//#define MAIN_CI_TERMINAL
 
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
@@ -282,16 +282,16 @@ AXIS(   16,  '0')
 
 //TODO DOC
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
-STEPPER(0,  1,      0,      54,     55,     LOW,    38,     LOW,    3,      HIGH,   2,      HIGH)
-STEPPER(1,  2,      0,      60,     61,     LOW,    56,     LOW,    14,     HIGH,   1,      HIGH)
-STEPPER(2,  4,      0,      46,     48,     LOW,    62,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(3,  8,      1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(4,  16,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(5,  32,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(6,  64,     1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(7,  128,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(8,  256,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(9,  512,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(0,  1,      0,      0,      1,      LOW,    2,      LOW,    3,      HIGH,   4,      HIGH)
+STEPPER(1,  2,      0,      5,      6,      LOW,    7,      LOW,    8,      HIGH,   9,      HIGH)
+STEPPER(2,  4,      0,      10,     11,     LOW,    12,     LOW,    13,     HIGH,   14,     HIGH)
+STEPPER(3,  8,      1,      15,     16,     LOW,    17,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(4,  16,     1,      20,     21,     LOW,    22,     LOW,    23,     HIGH,   24,     HIGH)
+STEPPER(5,  32,     1,      25,     26,     LOW,    27,     LOW,    28,     HIGH,   29,     HIGH)
+STEPPER(6,  64,     1,      30,     31,     LOW,    32,     LOW,    33,     HIGH,   34,     HIGH)
+STEPPER(7,  128,    1,      35,     36,     LOW,    37,     LOW,    38,     HIGH,   39,     HIGH)
+STEPPER(8,  256,    1,      40,     41,     LOW,    42,     LOW,    43,     HIGH,   44,     HIGH)
+STEPPER(9,  512,    1,      45,     46,     LOW,    47,     LOW,    48,     HIGH,   49,     HIGH)
 STEPPER(10,  1024,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(11,  2048,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
 STEPPER(12,  4096,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)

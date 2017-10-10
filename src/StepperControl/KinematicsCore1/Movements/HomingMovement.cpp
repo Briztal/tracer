@@ -23,7 +23,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "../../../config.h"
-#include "../../../Core/EEPROMStorage.h"
+#include "EEPROMStorage/EEPROMStorage.h"
 #include "HomingMovement.h"
 #include "../../StepperController.h"
 

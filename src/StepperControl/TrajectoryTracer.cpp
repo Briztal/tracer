@@ -61,6 +61,8 @@ void TrajectoryTracer::start() {
 
     Kinematics::initialise_tracing_procedure();
 
+    StepperController::enable(65535);
+
     //Initialise the end booleans
     stop_programmed = false;
     final_sub_movement_started = false;

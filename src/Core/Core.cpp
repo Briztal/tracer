@@ -24,12 +24,14 @@
 
 #include "Core.h"
 #include "../interface.h"
-#include "EEPROMStorage.h"
+#include "EEPROMStorage/EEPROMStorage.h"
 #include "../StepperControl/StepperController.h"
 
 void Core::begin() {
 
+
     hl_begin();
+
 
 #ifdef ENABLE_GCODE_INTERFACE
     GI::begin();
@@ -53,6 +55,8 @@ void Core::begin() {
         while(external_tasks.available_elements()){PROCESS_INTERNAL_TASKS;process_external_task();}
 
 void Core::run() {
+
+
     //Loop will run all permanent, with temporary tasks in between.
 
 #define ADD_PERMANENT_TASK(function_name) \

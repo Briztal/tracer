@@ -51,4 +51,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_subdirectory(src)
+add_executable(${PROJECT_NAME} ${SRC_LIST} src/EEPROMStorage/_eeprom_storage_data.h)

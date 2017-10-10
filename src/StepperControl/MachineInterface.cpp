@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 #include "MachineInterface.h"
-#include "../Core/EEPROMStorage.h"
+#include "EEPROMStorage/EEPROMStorage.h"
 #include "SubMovementManager.h"
 #include <Actions/ContinuousActions.h>
 #include <hardware_language_abstraction.h>

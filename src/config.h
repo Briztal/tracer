@@ -18,5 +18,5 @@
 
 */
 
-#include "config/large_config.h"
+#include "config/small_config.h"
 

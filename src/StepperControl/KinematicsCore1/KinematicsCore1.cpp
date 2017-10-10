@@ -29,7 +29,7 @@
 #include <hardware_language_abstraction.h>
 #include <StepperControl/StepperController.h>
 #include <interface.h>
-#include <Core/EEPROMStorage.h>
+#include <EEPROMStorage/EEPROMStorage.h>
 
 void KinematicsCore1::initialise_tracing_procedure() {
     K1Physics::initialise_tracing_procedure();

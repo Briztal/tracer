@@ -20,10 +20,25 @@ add_library(core
 
         ${CP}/Core.h
         ${CP}/Core.cpp
-        ${CP}/EEPROMStorage.h
-        ${CP}/EEPROMStorage.cpp
 
         )
+
+
+
+
+set(EEP "EEPROMStorage")
+
+include_directories(${EEP}/)
+
+add_library(core
+
+
+        ${EEP}/EEPROMStorage.h
+        ${EEP}/EEPROMStorage.cpp
+        ${EEP}/_eeprom_storage_data.cpp
+
+        )
+
 
 
 set(HP hardware_language_abstraction)

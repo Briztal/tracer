@@ -26,7 +26,7 @@
 #include "TerminalInterface.h"
 #include "TerminalInterfaceCommands.h"
 #include "../../hardware_language_abstraction.h"
-#include "TerminalNode.h"
+#include "DataStructures/Node.h"
 
 
 /*
@@ -168,16 +168,16 @@ unsigned char TerminalInterface::get_next_word() {
 
 //-----------------------------------------------Tree execution and log-------------------------------------------------
 
-TerminalNode *TerminalInterface::generate_tree() {
+Node *TerminalInterface::generate_tree() {
     uint16_t command_counter = 0;
 
     uint8_t root_sons_nb = get_sub_nodes_nb(command_counter++);
 
-    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"),  new String("none"), 0);
+    Node *root = new Node(new String("root"), root_sons_nb, new String("root"),  new String("none"), 0);
 
     //Initialise the current tree and the history.
-    TerminalNode *current_tree = root;
-    TerminalNode *tree_history[MAX_DEPTH];
+    Node *current_tree = root;
+    Node *tree_history[MAX_DEPTH];
 
     //Initialise the indices history
     uint8_t indices_history[MAX_DEPTH];
@@ -201,7 +201,7 @@ TerminalNode *TerminalInterface::generate_tree() {
     current_index = 0;\
     tree_history[depth] = current_tree;\
     tmp_nb = get_sub_nodes_nb(command_counter++);\
-    current_tree = new TerminalNode(new String(#name), tmp_nb, new String(#desc), new String(""), 0);\
+    current_tree = new Node(new String(#name), tmp_nb, new String(#desc), new String(""), 0);\
     depth++;
 
 
@@ -232,7 +232,7 @@ TerminalNode *TerminalInterface::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc, args)\
-    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::function);\
+    current_tree->sub_nodes[current_index++] = new Node(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::function);\
     command_counter++;
 
 #include "terminal_interface_config.h"
@@ -331,10 +331,10 @@ void TerminalInterface::execute_tree_style() {
     prepare_execution();
 
     //Initialise the current current_node to the root;
-    TerminalNode *current_node = command_tree;
-    TerminalNode *current_sub_node;
+    Node *current_node = command_tree;
+    Node *current_sub_node;
 
-    TerminalNode **sub_nodes = current_node->sub_nodes;
+    Node **sub_nodes = current_node->sub_nodes;
     //get the first word
     get_next_word();
 
@@ -380,7 +380,7 @@ void TerminalInterface::execute_tree_style() {
 }
 
 
-void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
+void TerminalInterface::log_tree_style(Node *log_node, bool log_args) {
 
     if (log_args) {
 
@@ -396,7 +396,7 @@ void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
 
         //Fill it with the name and description of direct sub_nodes
         for (int i = 0; i < log_node->sub_nodes_nb; i++) {
-            TerminalNode * t = log_node->sub_nodes[i];
+            Node * t = log_node->sub_nodes[i];
             s += *t->name + "\t\t : " + *t->desc_log + "\n";
         }
 
@@ -537,7 +537,7 @@ String *m::tree_summary = m::build_tree_summary();
 //Create the command tree summary
 
 //Build the command tree
-TerminalNode *m::command_tree = m::generate_tree();
+Node *m::command_tree = m::generate_tree();
 
 
 #undef m

@@ -27,7 +27,7 @@
 
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/_kinematics_data.h>
-#include <Core/EEPROMStorage.h>
+#include <EEPROMStorage/EEPROMStorage.h>
 #include "JerkPlanner.h"
 
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>

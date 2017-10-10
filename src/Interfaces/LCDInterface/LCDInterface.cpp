@@ -18,6 +18,9 @@
 
 */
 
+#include <config.h>
+
+#ifdef ENABLE_LCD_INTERFACE
 #include "LCDInterface.h"
 #include <hardware_language_abstraction.h>
 
@@ -148,6 +151,4 @@ void EmbeddedInterface::select_root() {
 
 }
 
-
-}
-
+#endif

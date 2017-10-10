@@ -27,7 +27,7 @@
 
 #include <hardware_language_abstraction.h>
 #include "terminal_interface_config.h"
-#include "TerminalNode.h"
+#include "DataStructures/Node.h"
 
 
 #define UI TerminalInterface
@@ -74,12 +74,12 @@ private :
 
 private:
 
-    static TerminalNode *command_tree;
+    static Node *command_tree;
 
     static String *tree_summary;
 
     //Function to generate the tree used to parse commands
-    static TerminalNode *generate_tree();
+    static Node *generate_tree();
 
     static uint8_t get_sub_nodes_nb(uint16_t command_index);
 
@@ -90,7 +90,7 @@ private:
     static void execute_tree_style();
 
     //Function to show a log message if the execution failed.
-    static void log_tree_style(TerminalNode *log_node, bool log_args);
+    static void log_tree_style(Node *log_node, bool log_args);
 
     //--------------------------------------Command processing with progmem style----------------------------------
 

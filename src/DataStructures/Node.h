@@ -27,19 +27,20 @@
 #include <hardware_language_abstraction.h>
 class Node {
 
-public:
-
-    Node(string_t name, uint8_t sub_nodes_nb);
-
 
 public:
 
-    const char *name;
-
-    const uint8_t sub_nones_nb;
+    Node(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log, bool (*f)(char*, uint8_t));
 
     Node **sub_nodes;
 
+    const String *name;
+
+    bool (*function)(char*, uint8_t);
+
+    const string_t *desc_log;
+    const string_t *args_log;
+    const uint8_t sub_nodes_nb;
 };
 
 
