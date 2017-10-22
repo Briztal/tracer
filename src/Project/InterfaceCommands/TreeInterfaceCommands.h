@@ -29,13 +29,11 @@
 
 class TreeInterfaceCommands {
 
-#define TI_STD_ARGS char *dptr, uint8_t size
 
 #ifdef ENABLE_TREE_INTERFACE
 
     public:
-
-    static void system_canal_function(TI_STD_ARGS);
+    static bool system_canal_function(void *);
 
 #define GO_UPPER
 

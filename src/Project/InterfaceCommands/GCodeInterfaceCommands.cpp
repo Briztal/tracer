@@ -1,4 +1,4 @@
-#include "../../config.h"
+#include "config.h"
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterfaceCommands.h"

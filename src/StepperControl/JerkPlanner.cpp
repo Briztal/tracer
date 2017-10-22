@@ -87,7 +87,7 @@ bool JerkPlanner::control_and_initialise_jerk(const movement_data_t *current_mov
 
     }
 
-    //Anyway, initialise the jerk control for the next movement
+    //Anyway, init the jerk control for the next movement
 
     //Get the step_distances for the last sub_movement
     get_stepper_distances(max, max - max_increment, trajectory_function, saved_final_stepper_positions);
@@ -119,7 +119,8 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
 
         //Get the maximum regulation_speed.
         //Formula : regulation_speed < max_jerk(unit/s) / abs(final_ratio - initial_ratio)
-        float max_speed = EEPROMStorage::jerks[stepper] * EEPROMStorage::steps[stepper] / algebric_difference;
+        stepper_data_t *data = EEPROMStorage::steppers_data+stepper;
+        float max_speed = data->jerk * data->steps / algebric_difference;
 
         //Update the maximum regulation_speed.
         speed = (first) ? speed : ((speed < max_speed) ? speed : max_speed);

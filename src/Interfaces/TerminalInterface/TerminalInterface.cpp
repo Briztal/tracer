@@ -19,30 +19,34 @@
 */
 
 #include <config.h>
+#include <TaskScheduler/TaskScheduler.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 
 #include "TerminalInterface.h"
-#include "TerminalInterfaceCommands.h"
+#include <interface.h>
+#include <Project/InterfaceCommands/_interface_data.h>
+#include "Project/InterfaceCommands/TerminalInterfaceCommands.h"
 #include "../../hardware_language_abstraction.h"
 #include "DataStructures/Node.h"
 
 
 /*
- * begin : this function initialises the serial, and sets up the command processing environment.
+ * init : this function initialises the serial, and sets up the command processing environment.
  *
  */
-void UI::begin() {
+void UI::init() {
 
     pinMode(13, OUTPUT);
+
     digitalWriteFast(13, HIGH);
     //digitalWrite(13, !digitalRead(13));
 
     //Initialise the serial
     terminal_interface_link_t::begin();
 
-    //Wait for the serial to  correctly initialise
+    //Wait for the serial to  correctly init
     delay_ms(100);
 
     //Setup a correct command environment
@@ -89,6 +93,9 @@ void TerminalInterface::read_serial() {
                 //Reset the data_in
                 reset();
 
+                if (!TaskScheduler::spaces())
+                    return;
+
             }
 
         } else {
@@ -116,13 +123,15 @@ void TerminalInterface::prepare_execution() {
     *data_in = 0;
 
     //Display the revieved command
-    echo("\n" + str(SOFTWARE_NAME) + "> " + str(data_in_0));
+    echo("\n" + str(PROJECT_NAME) + "> " + str(data_in_0));
 
     //Setup and save the message state
     data_in = data_in_0;
     saved_command_size = command_size;
 
 }
+
+
 /*
  * get_next_word : this function extracts the next word of the recieved command, and saves it in word_buffer.
  *
@@ -232,10 +241,10 @@ Node *TerminalInterface::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc, args)\
-    current_tree->sub_nodes[current_index++] = new Node(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::function);\
+    current_tree->sub_nodes[current_index++] = new Node(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::_##function);\
     command_counter++;
 
-#include "terminal_interface_config.h"
+#include "Project/Config/terminal_interface_config.h"
 
 #undef GO_LOWER
 
@@ -314,7 +323,7 @@ String * TerminalInterface::build_tree_summary() {
 
 #define CREATE_LEAF(...) s->append((char)1);
 
-#include "terminal_interface_config.h"
+#include "Project/Config/terminal_interface_config.h"
 
 #undef GO_UPPER
 
@@ -351,27 +360,49 @@ void TerminalInterface::execute_tree_style() {
         //If the current word matches the current_node's name
         if (!strcmp(c, word_buffer_0)) {
 
+
             //Go to the lower level
             get_next_word();
 
-            //Re-initialise the current data
+            //Re-init the current data
             current_node = current_sub_node;
             sub_nodes = current_node->sub_nodes;
 
-            //if the new node is a leaf, execute its function
-            if (!current_node->sub_nodes_nb) {
-
-                //If the function fails,
-                if (!current_node->function(data_in, command_size)) {
-
-                    //Log for the current node : log the node's args
-                    log_tree_style(current_node, true);
-                }
+            //if the new node is not a leaf, check sub nodes
+            if (current_node->sub_nodes_nb) {
 
                 //check the new node
                 goto node_check;
+
+            } else {
+
+                //If the function fails,
+                //if (!current_node->function(data_in, command_size)) {
+
+                if (arguments_storage.available_spaces()) {
+
+                    uint8_t index = arguments_storage.insert_argument(data_in, command_size);
+
+                    //Create a struct in the heap to contain argument-related data.
+                    terminal_interface_data_t *data = new terminal_interface_data_t();
+                    data->node = current_node;
+                    data->arguments_index = index;
+
+                    //Create a task in the stack to contain task data
+                    task_t t = task_t();
+                    t.type = 0;
+                    t.args = (void *)data;
+                    t.task = current_node->function;
+
+                    //Schedule the tasl
+                    TaskScheduler::add_task(t);
+
+                }
+
             }
+
         }
+
     }
 
     //If the current node didn't contain the required command : log the node's content
@@ -379,19 +410,30 @@ void TerminalInterface::execute_tree_style() {
 
 }
 
+char *TerminalInterface::get_arguments(uint8_t task_index, uint8_t *size) {
+    return arguments_storage.get_argument(task_index, size);
+}
 
+
+//TODO COMMENT
+void TerminalInterface::validate_task(uint8_t task_index) {
+    arguments_storage.remove_argument(task_index);
+}
+
+
+//TODO COMMENT
 void TerminalInterface::log_tree_style(Node *log_node, bool log_args) {
 
     if (log_args) {
 
         //If the args parsing failed, display the correct syntax for args
-        echo("Usage : " + *log_node->name + " " + *log_node->args_log);\
+        echo("Usage : " + *log_node->name + " " + *log_node->args_log);
 
     } else {
 
         //If the command parsing failes, display the last correct node's content.
 
-        //initialise an empty string
+        //init an empty string
         String s = "";
 
         //Fill it with the name and description of direct sub_nodes
@@ -407,114 +449,6 @@ void TerminalInterface::log_tree_style(Node *log_node, bool log_args) {
 
 }
 
-//---------------------------------------------Prog_mem execution and log-----------------------------------------------
-
-/*
- * execute_progmem_style : this function parses the received command, and if the parsing leads to an existing function,
- *      executes this function.
- *
- *  If not, the fail_log_progmem_style function is called, so that a relevant log message is displayed.
- *
- */
-
-void TerminalInterface::execute_progmem_style() {
-
-    prepare_execution();
-
-    //Get the first word
-    get_next_word();
-
-    //If the current word matched the new name, then go to the lower level
-#define GO_LOWER(name, description)\
-    if (!strcmp(#name, word_buffer_0)) {\
-        get_next_word();
-
-    //If the current word matched the new name, then execute_progmem_style the associated function. If the function fails, fail.
-#define CREATE_LEAF(name, function, description, syntax)\
-    if (!strcmp(#name, word_buffer_0)) {\
-        if (!TerminalInterfaceCommands::function(data_in, command_size)) {fail_log_progmem_style();}\
-        return;\
-    } else
-
-    //if all sub_nodes have been checked and no one was relevant, fail.
-#define GO_UPPER()\
-    fail_log_progmem_style();\
-    return;\
-    }
-
-#include "terminal_interface_config.h"
-
-#undef GO_UPPER
-#undef GO_LOWER
-#undef CREATE_LEAF
-
-    //If no function was triggered at the first stage, fail.
-    fail_log_progmem_style();
-
-}
-
-
-/*
- * fail_log_progmem_style : this function computes the log message to display after a command's parsing failure.
- *
- *  It starts to restore the command's environment, and computes the log message, fllowing a similar algorithm than
- *      the one used to process the command.
- *
- *  This function is not included in the parsing, because it is very unoptimised, process-greedy, and not required
- *      if the command was correctly formatted.
- *
- *  If and only if the command contains an error, that prevents its parsing, this function will be called.
- *
- */
-
-
-void TerminalInterface::fail_log_progmem_style() {
-
-    //Restore the previous message state
-    command_size = saved_command_size;
-    data_in = data_in_0;
-
-    //get the first word
-    get_next_word();
-
-    //The log message
-    string_t log_message = "";
-
-    //The command part
-    string_t syntax_command = "";
-
-    //If the current word matched the new name, then reset the log message, and add the name to the syntax command.
-#define GO_LOWER(name, description)\
-        log_message+=str(#name) +"\t\t : "+str(#description)+"\n";\
-        if (!strcmp(#name, word_buffer_0)) {\
-            get_next_word();\
-            log_message = "";\
-            syntax_command+=str(#name)+" ";
-
-    //If the current word matched the new name, the function ha failed : show the syntax description.
-#define CREATE_LEAF(name, function, description, syntax);\
-    log_message+=str(#name) +"\t\t : "+str(#description)+"\n";\
-    if (!strcmp(#name, word_buffer_0)) {\
-        echo(str("Usage : ")+syntax_command+""+str(#name)+" "+str(#syntax));\
-        return;\
-    }
-
-    //if all sub_nodes have been checked and no one was relevant, display the parent node content message.
-#define GO_UPPER()\
-    echo(log_message);\
-    return;\
-    }
-
-#include "terminal_interface_config.h"
-
-#undef GO_UPPER
-#undef GO_LOWER
-#undef CREATE_LEAF
-
-    echo(log_message);
-
-}
-
 
 #define m TerminalInterface
 
@@ -522,14 +456,15 @@ void TerminalInterface::fail_log_progmem_style() {
 unsigned char m::command_size = 0;
 unsigned char m::saved_command_size = 0;
 
-char tdatain_terminal[PACKET_SIZE];
+char tdatain_terminal[MAX_COMMAND_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
-
-char twrd[WORD_MAX_SIZE];
+char twrd[MAX_WORD_SIZE];
 char *m::word_buffer = twrd;
 char *const m::word_buffer_0 = twrd;
+
+ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_ARGS_SIZE, NB_PENDING_COMMANDS);
 
 
 String *m::tree_summary = m::build_tree_summary();

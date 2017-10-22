@@ -19,7 +19,7 @@
 */
 
 /*
-#include "../config.h"
+#include "../config_files.h"
 #include "../parser_config.h"
 
 #ifndef CODE_GCOMMAND_H

@@ -25,7 +25,7 @@
  *
  * It contains everything required to setup a control loop system.
  *
- * First, you can setup multiple PIDs, in the config file.
+ * First, you can setup multiple PIDs, in the config_files file.
  *
  * These PIDs can be fed with any value you desire, but two categories are made for it in this class :
  *

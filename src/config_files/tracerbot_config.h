@@ -21,12 +21,12 @@
 
 
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
-//#define terminal_interface_link_t usb_serial
+#define ENABLE_TERMINAL_INTERFACE
+#define terminal_interface_link_t usb_serial
 
 //Uncomment this line to enable the tree interface.
-#define ENABLE_TREE_INTERFACE
-#define tree_interface_link_t usb_serial
+//#define ENABLE_TREE_INTERFACE
+//#define tree_interface_link_t usb_serial
 
 //Uncomment this line to enable the gcode interface.
 //#define ENABLE_GCODE_INTERFACE
@@ -37,9 +37,9 @@
 
 
 //You must define the main command Interface. You must uncomment only one of lines below
-#define MAIN_CI_TREE
+//#define MAIN_CI_TREE
 //#define MAIN_CI_GCODE
-//#define MAIN_CI_TERMINAL
+#define MAIN_CI_TERMINAL
 
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
@@ -48,39 +48,35 @@
 #define PACKET_SIZE 200
 
 //The maximum size of a data in one word of data (for TerminalInterface)
-#define WORD_MAX_SIZE 50
+#define MAX_WORD_SIZE 50
 
-//######################################################Core############################################################
+//######################################################TaskScheduler############################################################
+
+//The following line defines the task pool size
+#define TASK_POOL_SIZE 20
+
+#define NB_TASK_SEQUENCES 3
 
 /*
- * This section defines how many tasks can be memorised by the core.
+ * The following block defines the number of task sequences, their ID, their name and their size
  */
 
-/* The permanent task list
- * You can here define the main loop of the Core.
- * ADD_PERMANENT TASK is used in Core to write automatically the loop function.
- * Add this macro with a void ()(void), and it will be executed.
- */
+//TASK_SEQUENCE(id, size)
+#ifdef TASK_SEQUENCE
 
-#ifdef ADD_PERMANENT_TASK
-
-#ifdef ENABLE_TERMINAL_INTERFACE
-ADD_PERMANENT_TASK(UI::read_serial)
-#endif
-
-#ifdef ENABLE_TREE_INTERFACE
-ADD_PERMANENT_TASK(TI::read_serial)
-#endif
-
-#ifdef ENABLE_GCODE_INTERFACE
-ADD_PERMANENT_TASK(GI::read_serial)
-#endif
-
+TASK_SEQUENCE(0, 20)
+TASK_SEQUENCE(1, 10)
+TASK_SEQUENCE(2, 10)
 
 #endif
 
-//The number of punctual tasks
-#define MAX_TASKS 10
+#define NON_SEQUENTIAL 255
+
+//Aliases for sequences ids
+#define MOVEMENT_SEQUENCE 0
+#define EEPROM_SEQUENCE 1
+#define VARIOUS_SEQUENCE 2
+
 
 //######################################################SENSORS#########################################################
 
@@ -205,10 +201,10 @@ SERVO(2, servo3, 4, 0, 1)
 //###########################################STEPPER_CONTROLLER_SETTINGS###############################################
 
 #ifdef ENABLE_STEPPER_CONTROL
-//------------------------------------------------------Kernel Version--------------------------------------------------
+//-------------------------------------------------Kinematics TaskScheduler  Version---------------------------------------------
 
 /*
- * The version of the Stepper Control Kernel you want to use. You have 3 versions available :
+ * The version of the Stepper Control Kinematics TaskScheduler you want to use. You have 3 versions available :
  *  - 0 : KERNEL0, a basic kernel for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
  *  - 1 : KERNEL1, a faster kernel for 32 bits processors with FPU, for cartesian-by-group machines. Only lines available.
  *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.
@@ -221,6 +217,37 @@ SERVO(2, servo3, 4, 0, 1)
 #define sub_movement_data_t k1_sub_movement_data
 
 #define Kinematics KinematicsCore1
+
+//-------------------------------------------------------Command System-------------------------------------------------
+
+/*
+ * The Control coordinate system is an abstraction layer, over the high level coordinate system, made to ease
+ *  the control of the machine. As high level axis can be numerous, this system allows you divide your axis in groups,
+ *  for example, and to control them in groups.
+ *
+ *  To configure you layer of abstraction, you may require some persistent parameters, that will be saved in the
+ *      EEPROM.
+ *
+ *  To create a persistent variable, you may use the following command :
+ *
+ *  COORD_INTERFACE_VARIABLE(name, default)
+ *
+ *  It will create a float, named "name", with the default value "default".
+ *
+ */
+
+#ifdef COORD_INTERFACE_VARIABLE
+
+COORD_INTERFACE_VARIABLE(x0_offset, 10)
+COORD_INTERFACE_VARIABLE(x1_offset, 230)
+COORD_INTERFACE_VARIABLE(y0_offset, 10)
+COORD_INTERFACE_VARIABLE(y1_offset, 230)
+COORD_INTERFACE_VARIABLE(z_offset, 10)
+COORD_INTERFACE_VARIABLE(x_max_sum, 400)
+COORD_INTERFACE_VARIABLE(y_max_sum, 400)
+
+#endif
+
 
 //-----------------------------------------------High Level Coordinate System-------------------------------------------
 
@@ -236,7 +263,7 @@ SERVO(2, servo3, 4, 0, 1)
  */
 
 //Number of axis in the high level coordinates system
-#define NB_AXIS 17
+#define NB_AXIS 9
 
 //Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
 #ifdef AXIS
@@ -244,23 +271,15 @@ SERVO(2, servo3, 4, 0, 1)
 //AXIS(i, j, si, st, sp, a)
 
 //      id, letter,)
-AXIS(   0,  '0')
-AXIS(   1,  '0')
-AXIS(   2,  '0')
-AXIS(   3,  '0')
-AXIS(   4,  '0')
-AXIS(   5,  '0')
-AXIS(   6,  '0')
-AXIS(   7,  '0')
-AXIS(   8,  '0')
-AXIS(   9,  '0')
-AXIS(   10,  '0')
-AXIS(   11,  '0')
-AXIS(   12,  '0')
-AXIS(   13,  '0')
-AXIS(   14,  '0')
-AXIS(   15,  '0')
-AXIS(   16,  '0')
+AXIS(   0,  'V')
+AXIS(   1,  'W')
+AXIS(   2,  'X')
+AXIS(   3,  'Y')
+AXIS(   4,  'Z')
+AXIS(   5,  'A')
+AXIS(   6,  'B')
+AXIS(   7,  'C')
+AXIS(   8,  'D')
 
 #endif
 
@@ -272,7 +291,7 @@ AXIS(   16,  '0')
  */
 
 //Number of stepper motors, must be set accordingly to the next lines
-#define NB_STEPPERS 17
+#define NB_STEPPERS 9
 
 //Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters//TODO DOC
 
@@ -282,23 +301,15 @@ AXIS(   16,  '0')
 
 //TODO DOC
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
-STEPPER(0,  1,      0,      0,      1,      LOW,    2,      LOW,    3,      HIGH,   4,      HIGH)
-STEPPER(1,  2,      0,      5,      6,      LOW,    7,      LOW,    8,      HIGH,   9,      HIGH)
-STEPPER(2,  4,      0,      10,     11,     LOW,    12,     LOW,    13,     HIGH,   14,     HIGH)
-STEPPER(3,  8,      1,      15,     16,     LOW,    17,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(4,  16,     1,      20,     21,     LOW,    22,     LOW,    23,     HIGH,   24,     HIGH)
-STEPPER(5,  32,     1,      25,     26,     LOW,    27,     LOW,    28,     HIGH,   29,     HIGH)
-STEPPER(6,  64,     1,      30,     31,     LOW,    32,     LOW,    33,     HIGH,   34,     HIGH)
-STEPPER(7,  128,    1,      35,     36,     LOW,    37,     LOW,    38,     HIGH,   39,     HIGH)
-STEPPER(8,  256,    1,      40,     41,     LOW,    42,     LOW,    43,     HIGH,   44,     HIGH)
-STEPPER(9,  512,    1,      45,     46,     LOW,    47,     LOW,    48,     HIGH,   49,     HIGH)
-STEPPER(10,  1024,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(11,  2048,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(12,  4096,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(13,  8192,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(14,  16384,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(15,  32768,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
-STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     HIGH,   19,     HIGH)
+STEPPER(0,  1,      0,      0,      1,      LOW,    2,      LOW,    3,      HIGH,   0,      HIGH)
+STEPPER(1,  2,      0,      4,      5,      LOW,    6,      LOW,    7,      HIGH,   0,      HIGH)
+STEPPER(2,  4,      0,      8,      9,      LOW,    10,     LOW,    11,     HIGH,   0,      HIGH)
+STEPPER(3,  8,      0,      13,     14,     LOW,    15,     LOW,    16,     HIGH,   0,      HIGH)
+STEPPER(4,  16,     0,      17,     18,     LOW,    19,     LOW,    20,     HIGH,   0,      HIGH)
+STEPPER(5,  32,     1,      21,     22,     LOW,    23,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(6,  64,     1,      24,     25,     LOW,    26,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(7,  128,    1,      27,     28,     LOW,    29,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(8,  256,    1,      30,     31,     LOW,    32,     LOW,    0,      HIGH,   0,      HIGH)
 
 #endif
 
@@ -310,25 +321,18 @@ STEPPER(16,  65536,    1,      26,     28,     LOW,    24,     LOW,    18,     H
 
 //STEPPER_DATA(i, j, si, st, sp, a)
 
+#define TEMP_ACC 16000
 //TODO REMOVE SIZE
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
-STEPPER_DATA(   0,  '0',    170,    80.16,  500.,   1350.,      20.)
-STEPPER_DATA(   1,  '1',    170.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   2,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   3,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   4,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   5,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   6,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   7,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   8,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   9,  '3',    150.,   80.16,  500.,   1200.,      20.)
-STEPPER_DATA(   10,  '3',    150.,   80.16,  500.,  1200.,      20.)
-STEPPER_DATA(   11,  '3',    150.,   80.16,  500.,  1200.,      20.)
-STEPPER_DATA(   12,  '3',    150.,   80.16,  500.,  1200.,      20.)
-STEPPER_DATA(   13,  '3',    150.,   80.16,  500.,  1200.,      20.)
-STEPPER_DATA(   14,  '3',    150.,   80.16,  500.,  1200.,      20.)
-STEPPER_DATA(   15,  '3',    150.,   80.16,  500.,  1200.,      20.)
-STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,  1200.,      20.)
+STEPPER_DATA(   0,  '0',    170,    80.16,  1000,    1000,      20.)
+STEPPER_DATA(   1,  '1',    170.,   80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   2,  '3',    150.,   80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   3,  '3',    150.,   80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   4,  '3',    150.,   80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   5,  '3',    150.,   80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   6,  '3',    150.,   80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   7,  '3',    150.,   80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   8,  '3',    150.,   80.16,  1000.,   1000.,      20.)
 
 
 #endif
@@ -336,17 +340,27 @@ STEPPER_DATA(   16,  '3',    150.,   80.16,  500.,  1200.,      20.)
 //-----------------------------------------------------CARTESIAN_GROUPS-------------------------------------------------
 
 //TODO DOC
-#define NB_CARTESIAN_GROUPS 6
+#define NB_CARTESIAN_GROUPS 8
 
 #ifdef CARTESIAN_GROUP
 
 //              id,     a0      a1      a2      maxSpeed
-CARTESIAN_GROUP(0,      0,      1,      2,      500     )
-CARTESIAN_GROUP(1,      3,      -1,     -1,     500     )
-CARTESIAN_GROUP(2,      6,      7,      8,     500     )
-CARTESIAN_GROUP(3,      9,      10,     11,     500     )
-CARTESIAN_GROUP(4,      12,     13,     14,     500     )
-CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
+//Carriage 0
+CARTESIAN_GROUP(0,      0,      2,      4,      1000     )
+//Carriage 1
+CARTESIAN_GROUP(1,      1,      2,      4,     1000     )
+//Carriage 2
+CARTESIAN_GROUP(2,      1,      3,      4,     1000     )
+//Carriage 3
+CARTESIAN_GROUP(3,      0,      3,      4,     1000     )
+//Extruder 0
+CARTESIAN_GROUP(4,      5,      -1,     -1,     1000     )
+//Extruder 1
+CARTESIAN_GROUP(5,      6,      -1,     -1,     1000     )
+//Extruder 2
+CARTESIAN_GROUP(6,      7,      -1,     -1,     1000     )
+//Extruder 3
+CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 #endif
 
@@ -387,12 +401,13 @@ CARTESIAN_GROUP(5,      15,     16,     -1,     500     )
 
 //###############################################EEPROM SETTINGS########################################################
 
+
 /* EEPROM custom data definition : for each variable you need to save in EEPROM, write one of the following lines
  *
  * EEPROM_BOOL(name, default_value)
- * EEPROM_CHAR(name, default_value)
- * EEPROM_INT(name, default_value)
- * EEPROM_LONG(name, default_value)
+ * EEPROM_INT8(name, default_value)
+ * EEPROM_INT16(name, default_value)
+ * EEPROM_INT32(name, default_value)
  * EEPROM_FLOAT(name, default_value)
  *
  * Each one of these functions will create a variable of the specified type with the name provided

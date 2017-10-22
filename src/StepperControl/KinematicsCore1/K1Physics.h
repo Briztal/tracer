@@ -78,7 +78,7 @@ private:
 
     static float get_delay_numerator(void (*trajectory_function)(float, float*), float p0, float p1, uint8_t *max_axis, float *sav_max_distance);
 
-    static float _get_delay_numerator(uint8_t axis, float distance);
+    static float _get_delay_numerator(uint8_t stepper, float distance);
 
 
     //---------------------------------------------Movement initialisation----------------------------------------------

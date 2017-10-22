@@ -17,13 +17,13 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "Core/Core.h"
+#include "TaskScheduler/TaskScheduler.h"
 
 
 int main() {
 
     /*
-     * Serial.begin(115200);
+     * Serial.init(115200);
 
     while(true) {
         if (Serial.available()) {
@@ -31,24 +31,23 @@ int main() {
         }
     }
      */
-    Core::begin();
+    TaskScheduler::init();
 
-    while(true)
-    {
-        Core::run();
+    while(true) {
+        TaskScheduler::run();
     }
 
 }
 
 /*
-#include "Core/Core.h"
+#include "TaskScheduler/TaskScheduler.h"
 
 void setup() {
-    Core::begin();
+    TaskScheduler::init();
 }
 
 void loop() {
-    Core::run();
+    TaskScheduler::run();
 
 }
  */

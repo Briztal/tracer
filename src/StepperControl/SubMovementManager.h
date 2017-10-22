@@ -47,7 +47,7 @@ public :
 
 public :
 
-    //The function to initialise all movement variables, during the movement change.
+    //The function to init all movement variables, during the movement change.
     static uint8_t update_current_movement(movement_data_t *sub_movement_data);
 
 

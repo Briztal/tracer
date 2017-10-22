@@ -91,7 +91,7 @@ public :
     static void send_position(float*){}
 
 
-    static void begin();
+    static void init();
 
     static void read_serial();
 };

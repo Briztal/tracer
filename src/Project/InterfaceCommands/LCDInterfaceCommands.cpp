@@ -30,7 +30,6 @@
 #include <Core/EEPROMStorage.h>
 #include <interface.h>
 
-
 //---------------------------------------------------Custom functions---------------------------------------------------
 
 bool LCDInterfaceCommands::action(char *, uint8_t) {
@@ -39,6 +38,7 @@ bool LCDInterfaceCommands::action(char *, uint8_t) {
     return true;
 
 }
+
 
 bool LCDInterfaceCommands::home(char *, uint8_t) {
 
@@ -53,8 +53,8 @@ bool LCDInterfaceCommands::line(char *, uint8_t) {
     UI::echo("line");
     return true;
 
-
 }
+
 
 bool LCDInterfaceCommands::speed(char *, uint8_t) {
 

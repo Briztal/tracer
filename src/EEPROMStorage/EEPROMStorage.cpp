@@ -19,494 +19,229 @@
 */
 
 #include "EEPROMStorage.h"
-#include "../config.h"
-#include "../interface.h"
-#include "../config.h"
-#include "../hardware_language_abstraction.h"
+#include <config.h>
 #include "../Actions/ContinuousActions.h"
 
+
 /*
- * Structure sub_canals :
- *      0 : PIDs
- *          indice :
- *              0 : kp
- *              1 : ki
- *              2 : kd
- *      1 : Loops
- *          indice :
- *              period_ms
- *      2 : Continuous Actions
- *          indice
- *              maximum
- *      3 : Servo Actions
- *          indice
- *              minimum
- *              maximum
- *      4 : steppers
- *          indice
- *              0 : size
- *              1 : steps
- *              2 : max_speeds
- *              3 : acceleration
- *      5 : speed_groups
- *          indice
- *              max_speed
- *      6 : custom_parameters;
- *          k1_position_indice : parameter k1_position_indice;
+ * init : this function initialises properly the EEPROM cache :
+ *  It reads the profile saved in the EEPROM, and if it is corrupted, resets the default profile.
+ *
  */
 
-
-#define PID_CAT (uint8_t) 0
-#define LOOP_CAT (uint8_t) 1
-#define CONTINUOUS_CAT (uint8_t) 2
-#define SERVO_CAT (uint8_t) 3
-#define STEPPER_CAT (uint8_t) 4
-#define CARTESIAN_GROUP_CAT (uint8_t) 5
-#define CUSTOM_CAT (uint8_t) 6
-
-
-void EEPROMStorage::begin() {
-    setDefaultProfile();
-    saveProfile();
+void EEPROMStorage::init() {
+    set_default_profile();
+    write_profile();
 
     /*
-    if (!extractProfile()) {
+    if (!extract_profile()) {
         setDefaultProfile();
-        saveProfile();
+        write_profile();
     }*/
 
 }
 
 
-float EEPROMStorage::read(char *data, uint8_t size) {
-    if (!(size--)) return 0;
-    uint8_t c = (uint8_t)*(data++), id;
+/*
+ * read_data : this function reads the data at index [index] in the EEPROM.
+ *
+ */
 
-    switch (c) {
+void EEPROMStorage::read_data(uint16_t *index, size_t size, uint8_t *data) {
 
-#ifdef ENABLE_ASSERV
-
-        case PID_CAT :
-            if (size < 2) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_PIDS) return 0;
-            switch (*(data)) {
-                case 0 ://kp
-                    return kps[id];
-                case 1 ://ki
-                    return kis[id];
-                case 2 ://kd
-                    return kds[id];
-                default:
-                    return 0;
-            }
-
-        case LOOP_CAT :
-            if (size < 2) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_LOOPS) return 0;
-            switch (*(data)) {
-                case 0 ://period
-                    return loop_periods[id];
-                default:
-                    return 0;
-            }
-
-#endif
-
-        case CONTINUOUS_CAT :
-            if (size < 2) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_CONTINUOUS) return 0;
-            switch (*(data)) {
-                case 0 ://size
-                    return continuous_max[id];
-                default:
-                    return 0;
-            }
-
-        case SERVO_CAT :
-            if (size < 2) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_SERVOS) return 0;
-            switch (*(data)) {
-                case 0 ://size
-                    return servos_min[id];
-                case 1 ://size
-                    return servos_max[id];
-                default:
-                    return 0;
-            }
-
-#ifdef ENABLE_STEPPER_CONTROL
-        case STEPPER_CAT :
-            if (size < 2) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_STEPPERS) return 0;
-            switch (*(data)) {
-                case 0 ://size
-                    return sizes[id];
-                case 1 ://steps
-                    return steps[id];
-                case 2 ://regulation_speed
-                    return maximum_speeds[id];
-                case 3 ://acceleration
-                    return accelerations[id];
-                case 4 ://acceleration
-                    return jerks[id];
-                default:
-                    return 0;
-            }
-
-        case CARTESIAN_GROUP_CAT :
-            if (size < 2) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_CARTESIAN_GROUPS) return 0;
-            switch (*(data)) {
-                case 0 ://size
-                    return group_maximum_speeds[id];
-                default:
-                    return 0;
-            }
-#endif
-
-        case CUSTOM_CAT :
-            id  = (uint8_t)*(data++);
-
-
-#define EEPROM_FLOAT(name, default_val) if (!(id--)) return (float)name;
-
-#define EEPROM_CHAR(name, default_val) EEPROM_FLOAT(name, default_val);
-
-#define EEPROM_INT(name, default_val) EEPROM_FLOAT(name, default_val);
-
-#define EEPROM_LONG(name, default_val) EEPROM_FLOAT(name, default_val);
-
-#define EEPROM_BOOL(name, default_val) EEPROM_FLOAT(name, default_val);
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-        default:
-            return 0;
+    for (uint16_t i = 0; i<size; i++) {
+        data[i] = EEPROM_read(*(index++));
     }
 }
 
 
-float EEPROMStorage::write(char *data, uint8_t size) {
+/*
+ * write_data : this function writes the data at index [index] in the EEPROM.
+ *
+ */
 
-    char t[4];
+void EEPROMStorage::write_data(uint16_t *index, size_t size, uint8_t *const data) {
 
-    /*for (int k1_position_indice = 0; k1_position_indice<4; k1_position_indice++)CI::echo(str((uint8_t)data[k1_position_indice]));return 0;*/
-#define WRITE_RETURN(var, type)  for (int i = 0; i<4; i++)t[i] = data[i];return (var = (type)(*(float*)t));
-
-    if (!(size--)) return 0;
-    uint8_t c = (uint8_t)*(data++), id;
-
-    switch (c) {
-
-#ifdef ENABLE_ASSERV
-
-        case PID_CAT :
-
-            if (size < 6) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_PIDS) return 0;
-
-            switch (*(data++)) {
-                case 0 ://kp
-                    WRITE_RETURN(kps[id], float);
-                case 1 ://ki
-                    WRITE_RETURN(kis[id], float);
-                case 2 ://kd
-                    WRITE_RETURN(kds[id], float);
-                default:
-                    return 0;
-            }
-
-        case LOOP_CAT :
-            if (size < 6) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_LOOPS) return 0;
-            switch (*(data)) {
-                case 0 ://period
-                    WRITE_RETURN(loop_periods[id], uint16_t);
-                default:
-                    return 0;
-            }
-
-#endif
-
-        case CONTINUOUS_CAT :
-            if (size < 6) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_CONTINUOUS) return 0;
-            switch (*(data)) {
-                case 0 ://max
-                    WRITE_RETURN(continuous_max[id], float);
-                default:
-                    return 0;
-            }
-
-        case SERVO_CAT :
-            if (size < 6) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_SERVOS) return 0;
-            switch (*(data)) {
-                case 0 ://min
-                    WRITE_RETURN(servos_min[id], float);
-                case 1 ://max
-                    WRITE_RETURN(servos_max[id], float);
-                default:
-                    return 0;
-            }
-
-#ifdef ENABLE_STEPPER_CONTROL
-
-        case STEPPER_CAT :
-            if (size < 6) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_STEPPERS) return 0;
-            switch (*(data)) {
-                case 0 ://size
-                    WRITE_RETURN(sizes[id], float);
-                case 1 ://steps
-                    WRITE_RETURN(steps[id], float);
-                case 2 ://regulation_speed
-                    WRITE_RETURN(maximum_speeds[id], float);
-                case 3 ://acceleration
-                    WRITE_RETURN(accelerations[id], float);
-                case 4 ://acceleration
-                    WRITE_RETURN(jerks[id], float);
-                default:
-                    return 0;
-            }
-
-        case CARTESIAN_GROUP_CAT :
-            if (size < 6) return 0;
-            id = (uint8_t)*(data++);
-            if (id>=NB_CARTESIAN_GROUPS) return 0;
-            switch (*(data)) {
-                case 0 ://size
-                    WRITE_RETURN(group_maximum_speeds[id], float);
-                default:
-                    return 0;
-            }
-
-#endif
-
-        case CUSTOM_CAT :
-            id  = (uint8_t)*(data++);
-
-
-#define EEPROM_FLOAT(name, default_val) if (!(id--)) WRITE_RETURN(name, float);
-
-#define EEPROM_CHAR(name, default_val) if (!(id--)) WRITE_RETURN(name, char);
-
-#define EEPROM_INT(name, default_val) if (!(id--)) WRITE_RETURN(name, int);
-
-#define EEPROM_LONG(name, default_val) if (!(id--)) WRITE_RETURN(name, int32_t);
-
-#define EEPROM_BOOL(name, default_val) if (!(id--)) WRITE_RETURN(name, bool);
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-        default:
-            return 0;
+    for (uint16_t i = 0; i<size; i++) {
+        EEPROM_write(*(index++), data[i]);
     }
 }
 
-bool EEPROMStorage::extractProfile() {
+
+/*
+ * extract_profile : this function reads the entire profile in the EEPROM.
+ * 
+ *  Returns true if the profile was correctly read, returns false otherwise.
+ *  
+ */
+
+bool EEPROMStorage::extract_profile() {
     //SAVE MARK CHECK
     if ((EEPROM_read(0) != 79) || (EEPROM_read(1) != 97))
         return false;
     if (EEPROM_read(EEPROM_read(2)) != 239)
         return false;
 
-    int vi = 3;
-    int *indice = &vi;
+    uint16_t vi = 3;
+    uint16_t *index = &vi;
 
 #ifdef ENABLE_STEPPER_CONTROL
-    for (uint8_t id = 0; id < NB_STEPPERS; id++)
-        read_stepper(indice, id, sizes, steps, maximum_speeds, accelerations, jerks);
 
-    for (uint8_t id = 0; id < NB_CARTESIAN_GROUPS; id++)
-        group_maximum_speeds[id] = read_float(indice);
-
-#endif
-
-
-#ifdef ENABLE_ASSERV
-    //Read PIDs
-    for (uint8_t id = 0; id < NB_PIDS; id++)
-        read_pid(indice, id, kps, kis, kds);
-
-    //Read Control Loops
-    for (uint8_t id = 0; id < NB_LOOPS; id++)
-        loop_periods[id] = (uint16_t) read_int(indice);
-
-#endif
-
-    //Write Continuous Actions maximums :
-    for (uint8_t continuous = 0; continuous<NB_CONTINUOUS; continuous++) {
-        continuous_max[continuous] = read_float(indice);
-    }
-
-    //Write Servo Actions minimums and maximums :
-    for (uint8_t servo = 0; servo<NB_SERVOS; servo++) {
-        servos_min[servo] = read_float(indice);
-        servos_max[servo] = read_float(indice);
-    }
-
-#define EEPROM_BOOL(name, default_val) name = (bool) read_char(indice);
-
-#define EEPROM_CHAR(name, default_val) name = read_char(indice);
-
-#define EEPROM_INT(name, default_val) name = read_int(indice);
-
-#define EEPROM_LONG(name, default_val) name = read_int32_t(indice);
-
-#define EEPROM_FLOAT(name, default_val) name = read_float(indice);
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-    return true;
-}
-
-void EEPROMStorage::saveProfile() {
-    //SAVE MARK (two symetrical primes happy numbers)
-    EEPROM_write(0, 79);
-    EEPROM_write(1, 97);
-    int vi = 3;
-    int *indice = &vi;
-
-#ifdef ENABLE_STEPPER_CONTROL
-    //Write axis
-    for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        write_stepper(indice, sizes[axis], steps[axis], maximum_speeds[axis], accelerations[axis], jerks[axis]);
-    }
+    //Write stepper data
+    read_data(index, NB_STEPPERS * sizeof(stepper_data_t), (uint8_t*)steppers_data);
 
     //Write regulation_speed groups
-    for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
-        write_float(indice, group_maximum_speeds[group]);
-    }
+    read_data(index, NB_CARTESIAN_GROUPS * sizeof(float), (uint8_t*)group_maximum_speeds);
+
+    read_data(index, sizeof(coordinate_interface_data_t), (uint8_t*)&coordinate_interface_data);
+
 #endif
 
 #ifdef ENABLE_ASSERV
     //Write PIDs
-    for (uint8_t  pid = 0; pid < NB_PIDS; pid++) {
-        write_pid(indice, kps[pid], kis[pid], kds[pid]);
-    }
+    read_data(index, NB_PIDS * sizeof(pid_data_t), (uint8_t*)pids_data);
 
     //Write Periods
-    for (uint8_t  loop = 0; loop < NB_LOOPS; loop++) {
-        write_int(indice, (int) loop_periods[loop]);
-    }
+    read_data(index, NB_LOOPS * sizeof(uint16_t), (uint8_t*)loop_periods);
 
 #endif
 
     //Write Continuous Actions maximums :
-    for (uint8_t continuous = 0; continuous<NB_CONTINUOUS; continuous++) {
-        write_float(indice, continuous_max[continuous]);
-    }
+    read_data(index, NB_CONTINUOUS * sizeof(continuous_data_t), (uint8_t*)continuous_data);
+
 
     //Write Servo Actions minimums and maximums :
-    for (uint8_t servo = 0; servo<NB_SERVOS; servo++) {
-        write_float(indice, servos_min[servo]);
-        write_float(indice, servos_max[servo]);
-    }
+    read_data(index, NB_SERVOS * sizeof(servo_data_t), (uint8_t*)servos_data);
 
 
-#define EEPROM_BOOL(name, default_val) write_char(indice, (char) name);
+    //Write the custom data;
+    read_data(index, sizeof(custom_data_t), (uint8_t*)&custom_data);
 
-#define EEPROM_CHAR(name, default_val) write_char(indice, name);
 
-#define EEPROM_INT(name, default_val) write_int(indice, name);
+    return true;
+}
 
-#define EEPROM_LONG(name, default_val) write_int32_t(indice, name);
 
-#define EEPROM_FLOAT(name, default_val) write_float(indice, name);
+/*
+ * write_profile : this function writes the current profile in memory.
+ *
+ */
 
-#include "../config.h"
+void EEPROMStorage::write_profile() {
 
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
+    //SAVE MARK (two symetrical primes happy numbers)
+    EEPROM_write(0, 79);
+    EEPROM_write(1, 97);
+
+    uint16_t vi = 3;
+    uint16_t *index = &vi;
+
+#ifdef ENABLE_STEPPER_CONTROL
+
+    //Write stepper data
+    write_data(index, NB_STEPPERS * sizeof(stepper_data_t), (uint8_t*) steppers_data);
+
+    //Write regulation_speed groups
+    write_data(index, NB_CARTESIAN_GROUPS * sizeof(float), (uint8_t*) group_maximum_speeds);
+
+    //Write the custom data;
+    write_data(index, sizeof(coordinate_interface_data_t), (uint8_t*)&coordinate_interface_data);
+
+#endif
+
+#ifdef ENABLE_ASSERV
+
+    //Write PIDs
+    write_data(index, NB_PIDS * sizeof(pid_data_t), (uint8_t*) pids_data);
+
+    //Write Periods
+    write_data(index, NB_LOOPS * sizeof(uint16_t), (uint8_t*) loop_periods);
+
+#endif
+
+    //Write Continuous Actions maximums :
+    write_data(index, NB_CONTINUOUS * sizeof(continuous_data_t), (uint8_t*) continuous_data);
+
+
+    //Write Servo Actions minimums and maximums :
+    write_data(index, NB_SERVOS * sizeof(servo_data_t), (uint8_t*) servos_data);
+
+
+    //Write the custom data;
+    write_data(index, sizeof(custom_data_t), (uint8_t*)&custom_data);
 
 
     //END MARK : the last happy number inferior to 255
-    EEPROM_write(*indice, 239);
+    EEPROM_write(*index, 239);
 
-    //Print data size for size check : the "indice" indexed value must equal 239
-    EEPROM_write(2, (uint8_t) *indice);
+    //Print data size for size check : the "index" indexed value must equal 239
+    EEPROM_write(2, (uint8_t) *index);
 }
 
-void EEPROMStorage::setDefaultProfile() {
+
+/*
+ * set_default_profile : this function writes the default profile in the EEPROM.
+ *
+ */
+
+void EEPROMStorage::set_default_profile() {
 
     //---------------------------------------------Steppers---------------------------------------------
 
 #ifdef ENABLE_STEPPER_CONTROL
+    
+    
 
     //Set default steppers data
-#define STEPPER_DATA(i, j, size, v_steps, speed, acceleration, jerk)\
-    sizes[i] = size;\
-    steps[i] = v_steps;\
-    maximum_speeds[i] = speed;\
-    accelerations[i] = acceleration;\
-    jerks[i] = jerk;
 
-#include "../config.h"
+    stepper_data_t *step_p;
+
+#define STEPPER_DATA(i, j, d_size, d_steps, d_speed, d_acc, d_jerk)\
+    step_p = steppers_data+i;\
+    step_p->size = d_size;\
+    step_p->steps = d_steps;\
+    step_p->maximum_speed = d_speed;\
+    step_p->acceleration = d_acc;\
+    step_p->jerk = d_jerk;
+
+#include <config.h>
 
 #undef STEPPER_DATA
 
+    
     //Set default group steppers_speeds
 #define CARTESIAN_GROUP(i, m0, m1, m2, s)\
     group_maximum_speeds[i] = s;
 
-#include "../config.h"
+#include <config.h>
 
 #undef CARTESIAN_GROUP
 
 #endif
 
+    
     //---------------------------------------------Asserv---------------------------------------------
-
+    
 #ifdef ENABLE_ASSERV
 
     //PIDs kp, ki, kd
-#define PID(i, name, kp, ki, kd)\
-    kps[i] = kp;\
-    kis[i] = ki;\
-    kds[i] = kd;
+    pid_data_t *pid_p;
 
-#include "../config.h"
+#define PID(i, name, d_kp, d_ki, d_kd)\
+    pid_p = pids_data+i;\
+    pid_p->kp = d_kp;\
+    pid_p->ki = d_ki;\
+    pid_p->kd = d_kd;
+
+#include <config.h>
 
 #undef PID
 
     //Control loops periods
-#define  LOOP_FUNCTION(indice, name, period_ms)\
-    loop_periods[indice] = period_ms;
+#define  LOOP_FUNCTION(index, name, period_ms)\
+    loop_periods[index] = period_ms;
 
-#include "../config.h"
+#include <config.h>
 
 #undef LOOP_FUNCTION
 
@@ -517,439 +252,70 @@ void EEPROMStorage::setDefaultProfile() {
 
     //Continuous max
 #define CONTINUOUS(i, name, powerPin, maxValue)\
-    continuous_max[i] = maxValue;
+    (continuous_data+i)->max = maxValue;
 
-#include "../config.h"
+#include <config.h>
 
 #undef CONTINUOUS
 
     //Servo min and max
-#define SERVO(i, name, dataPin, minValue, maxValue)\
-    servos_min[i] = minValue; servos_max[i] = maxValue;
+    
+    servo_data_t *servo_p;
 
-#include "../config.h"
+#define SERVO(i, name, dataPin, minValue, maxValue)\
+    servo_p = servos_data+i;\
+    servo_p->min = minValue;\
+    servo_p->max = maxValue;
+
+#include <config.h>
 
 #undef SERVO
 
 
     //---------------------------------------------Custom---------------------------------------------
 
-#define EEPROM_BOOL(name, default_val) name = default_val;
-
-#define EEPROM_CHAR(name, default_val) name = default_val;
-
-#define EEPROM_INT(name, default_val) name = default_val;
-
-#define EEPROM_LONG(name, default_val) name = default_val;
-
-#define EEPROM_FLOAT(name, default_val) name = default_val;
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
+    custom_data = custom_data_t();
 
 }
 
-//##################################################DATA_WRITE_METHODS##################################################
-
-#ifdef ENABLE_STEPPER_CONTROL
-
-void EEPROMStorage::read_stepper(int *indice, uint8_t axis_nb, float *size, float *steps, float *mspeed,
-                                 float *acceleration, float *jerk) {
-    *(size + axis_nb) = read_float(indice);
-    *(steps + axis_nb) = read_float(indice);
-    *(mspeed + axis_nb) = read_float(indice);
-    *(acceleration + axis_nb) = read_float(indice);
-    *(jerk + axis_nb) = read_float(indice);
-}
-
-void EEPROMStorage::write_stepper(int *indice, float size, float steps, float mspeed, float acceleration, float jerk) {
-    write_float(indice, size);
-    write_float(indice, steps);
-    write_float(indice, mspeed);
-    write_float(indice, acceleration);
-    write_float(indice, jerk);
-}
-
-#endif
-
-#ifdef ENABLE_ASSERV
-
-void EEPROMStorage::read_pid(int *indice, uint8_t pid_nb, float *kps, float *kis, float *kds) {
-    *(kps + pid_nb) = read_float(indice);
-    *(kis + pid_nb) = read_float(indice);
-    *(kds + pid_nb) = read_float(indice);
-}
-
-void EEPROMStorage::write_pid(int *indice, float kp, float ki, float kd) {
-    write_float(indice, kp);
-    write_float(indice, ki);
-    write_float(indice, kd);
-}
-
-#endif
-
-//###############################################PRIMITIVE_WRITE_METHODS################################################
-
-char EEPROMStorage::read_char(int *indice) {
-    return (char) EEPROM_read((*indice)++);
-}
-
-int EEPROMStorage::read_int(int *indice) {
-    uint8_t t[2];
-    for (int i = 0; i < 2; i++) {
-        t[i] = EEPROM_read((*indice)++);
-    }
-    return *(int *) t;
-}
-
-int32_t EEPROMStorage::read_int32_t(int *indice) {
-    uint8_t t[4];
-    for (int i = 0; i < 4; i++) {
-        t[i] = EEPROM_read((*indice)++);
-    }
-    return *(int32_t *) t;
-}
-
-float EEPROMStorage::read_float(int *indice) {
-    uint8_t t[4];
-    for (int i = 0; i < 4; i++) {
-        t[i] = EEPROM_read((*indice)++);
-    }
-    return *(float *) t;
-}
-
-void EEPROMStorage::write_char(int *indice, char value) {
-    EEPROM_write((*indice)++, (uint8_t) value);
-}
-
-void EEPROMStorage::write_int(int *indice, int value) {
-    uint8_t *t = (uint8_t *) &value;
-    for (int i = 0; i < 2; i++)
-        EEPROM_write((*indice)++, t[i]);
-}
-
-void EEPROMStorage::write_int32_t(int *indice, int32_t value) {
-    uint8_t *t = (uint8_t *) &value;
-    for (int i = 0; i < 4; i++)
-        EEPROM_write((*indice)++, t[i]);
-}
-
-void EEPROMStorage::write_float(int *indice, float value) {
-    uint8_t *t = (uint8_t *) &value;
-    for (int i = 0; i < 4; i++)
-        EEPROM_write((*indice)++, t[i]);
-}
-
-
-#ifdef ENABLE_TREE_INTERFACE
-
-void EEPROMStorage::send_structure() {
-    /*
-     * Syntax :
-     * reset_tree (beginning) :         0;
-     * confirm_tree (end) :             1;
-     * go_upper :                       2;
-     * go_lower(k1_position_indice, name) :              3, k1_position_indice, name
-     * create_leaf(k1_position_indice, name) :           4, k1_position_indice, name
-     */
-
-    TI::prepare_EEPROM_packet();\
-    TI::add_char_out(0);\
-    TI::add_char_out(0);\
-    TI::send_packet();
-
-#define EEPROM_UPPER\
-    TI::prepare_EEPROM_packet();\
-    TI::add_char_out(0);\
-    TI::add_char_out(2);\
-    TI::send_packet();
-
-#define EEPROM_LOWER(i, name)\
-    TI::prepare_EEPROM_packet();\
-    TI::add_char_out(0);\
-    TI::add_char_out(3);\
-    TI::add_char_out(i);\
-    TI::add_string_out(#name);\
-    TI::send_packet();
-
-#define EEPROM_LEAF(i, name)\
-    TI::prepare_EEPROM_packet();\
-    TI::add_char_out(0);\
-    TI::add_char_out(4);\
-    TI::add_char_out(i);\
-    TI::add_string_out(#name);\
-    TI::send_packet();
-
-
-#ifdef ENABLE_ASSERV
-
-    //---------------------------------------------PIDs---------------------------------------------
-
-    EEPROM_LOWER(PID_CAT, pids);
-
-    //For each PID, mark a case for kp, ki, and kd.
-#define PID(i, ...)\
-    EEPROM_LOWER(i, i);EEPROM_LEAF(0, kp);EEPROM_LEAF(1, ki);EEPROM_LEAF(2, kd);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef PID
-
-    EEPROM_UPPER;
-
-    //---------------------------------------------Control loops---------------------------------------------
-
-    EEPROM_LOWER(LOOP_CAT, loops);
-    //For each Control loop, mark a case for the period.
-#define LOOP_FUNCTION(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, period);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef LOOP_FUNCTION
-
-    EEPROM_UPPER;
-
-#endif
-
-    //---------------------------------------------Continuous Actions---------------------------------------------
-
-    EEPROM_LOWER(CONTINUOUS_CAT, binaries);
-    //For each Continuous Action, mark a case for the maximum value.
-#define CONTINUOUS(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, max_value);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef CONTINUOUS
-
-
-    EEPROM_UPPER;
-
-    //---------------------------------------------Servo Actions---------------------------------------------
-    EEPROM_LOWER(SERVO_CAT, continuous);
-    //For each Servo Action, mark a case for the minimum and maximum values.
-#define SERVO(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, min_value);EEPROM_LEAF(1, max_value);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef SERVO
-
-    EEPROM_UPPER;
-
-
-#ifdef ENABLE_STEPPER_CONTROL
-
-    //---------------------------------------------Steppers---------------------------------------------
-
-    EEPROM_LOWER(STEPPER_CAT, steppers);
-    //For each Stepper, mark a case for the size, the number of steps per unit, and maximum regulation_speed and acceleration.
-#define STEPPER_DATA(indice, ...) EEPROM_LOWER(indice, indice);\
-    EEPROM_LEAF(0, size);EEPROM_LEAF(1, steps);EEPROM_LEAF(2, max_speed);EEPROM_LEAF(3, max_acceleration);EEPROM_LEAF(3, max_jerk);\
-    EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef STEPPER_DATA
-
-    EEPROM_UPPER;
-
-    //---------------------------------------------Cartesian Groups---------------------------------------------
-
-    EEPROM_LOWER(CARTESIAN_GROUP_CAT, speed_groups);
-    //For each group, mark a case for its maximum regulation_speed
-#define CARTESIAN_GROUP(indice, ...) EEPROM_LOWER(indice, indice);\
-    EEPROM_LEAF(0, max_speed);EEPROM_UPPER;
-
-#include "../config.h"
-
-#undef CARTESIAN_GROUP
-
-    EEPROM_UPPER;
-
-#endif
-
-    //---------------------------------------------Custom parameters---------------------------------------------
-    EEPROM_LOWER(CUSTOM_CAT, custom);
-
-    int custom_indice = 0;
-    //Mark a case for each custom parameter
-#define EEPROM_FLOAT(name, v) EEPROM_LEAF(custom_indice, name);custom_indice++;
-#define EEPROM_BOOL(n, v) EEPROM_FLOAT(n,v)
-#define EEPROM_CHAR(n, v) EEPROM_FLOAT(n,v)
-#define EEPROM_INT(n, v) EEPROM_FLOAT(n,v)
-#define EEPROM_LONG(n, v) EEPROM_FLOAT(n,v)
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-    EEPROM_UPPER;
-
-#undef EEPROM_UPPER
-#undef EEPROM_LOWER
-#undef EEPROM_LEAF
-
-    //Confirm and fetch the transmitted tree
-    TI::prepare_EEPROM_packet();\
-    TI::add_char_out(0);\
-    TI::add_char_out(1);\
-    TI::send_packet();
-
-}
-
-
-
-void EEPROMStorage::print_stored_data() {
-
-    //Stepper motors
-#ifdef ENABLE_STEPPER_CONTROL
-    CI::echo("Stepper Motors : ");
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        CI::echo("Stepper " + str(stepper));
-        CI::echo("size : " + str(sizes[stepper]));
-        CI::echo("steps : " + str(steps[stepper]));
-        CI::echo("max regulation_speed : " + str(maximum_speeds[stepper]));
-        CI::echo("acceleration : " + str(accelerations[stepper]) + "\n");
-        CI::echo("jerk : " + str(jerks[stepper]) + "\n");
-    }
-
-    CI::echo("Speed Groups : ");
-    for (int group = 0; group < NB_CARTESIAN_GROUPS; group++) {
-        CI::echo("Group " + str(group));
-        CI::echo("max regulation_speed : " + str(group_maximum_speeds[group]) + "\n");
-    }
-
-#endif
-
-#ifdef ENABLE_ASSERV
-
-    //PIDs
-    CI::echo("PIDS : ");
-    for (int pid = 0; pid < NB_PIDS; pid++) {
-        CI::echo("PID " + str(pid));
-        CI::echo("kp : " + str(kps[pid]));
-        CI::echo("ki : " + str(kis[pid]));
-        CI::echo("kd : " + str(kds[pid]) + "\n");
-    }
-
-    //Control Loops
-    CI::echo("Control Loops : ");
-    for (int loop = 0; loop < NB_LOOPS; loop++) {
-        CI::echo("Loop " + str(loop));
-        CI::echo("period (ms) : " + str(loop_periods[loop]) + "\n");
-    }
-
-#endif
-
-    //Continuous Actions
-    CI::echo("Continuous Actions : ");
-    for (int continuous = 0; continuous < NB_CONTINUOUS; continuous++) {
-        CI::echo("Continuous " + str(continuous));
-        CI::echo("maximum : " + str(continuous_max[continuous]) + "\n");
-    }
-
-    //Servo Actions
-    CI::echo("Servo Actions : ");
-    for (int servo = 0; servo < NB_SERVOS; servo++) {
-        CI::echo("Loop " + str(servo));
-        CI::echo("minimum : " + str(servos_min[servo]));
-        CI::echo("maximum : " + str(servos_max[servo]) + "\n");
-    }
-
-    //Custom Data
-    CI::echo("Custom Data : ");
-    //Custom data
-#define EEPROM_BOOL(name, default_value) CI::echo(str(#name)+" : "+str(name));
-#define EEPROM_CHAR(name, default_value) CI::echo(str(#name)+" : "+str(name));
-#define EEPROM_INT(name, default_value) CI::echo(str(#name)+" : "+str(name));
-#define EEPROM_LONG(name, default_value) CI::echo(str(#name)+" : "+str(name));
-#define EEPROM_FLOAT(name, default_value) CI::echo(str(#name)+" : "+str(name));
-
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
-
-    CI::echo(" ");
-
-}
-
-
-#endif
 
 #define m EEPROMStorage
 
+
 #ifdef ENABLE_STEPPER_CONTROL
 
-//Steppers definitions :
-float ts[NB_STEPPERS];
-float tstt[NB_STEPPERS];
-float ms[NB_STEPPERS];
-float ta[NB_STEPPERS];
-float tj[NB_STEPPERS];
+//Steppers :
+stepper_data_t tsdt[NB_STEPPERS];
+stepper_data_t *const m::steppers_data = tsdt;
 
-
-float *const m::sizes = ts;
-float *const m::steps = tstt;
-float *const m::maximum_speeds = ms;
-float *const m::accelerations = ta;
-float *const m::jerks = tj;
-
+//Cartesian groups
 float gms[NB_CARTESIAN_GROUPS];
 float *const m::group_maximum_speeds = gms;
 
+//Coordinates Abstraction
+coordinate_interface_data_t m::coordinate_interface_data = coordinate_interface_data_t();
 #endif
+
 
 #ifdef ENABLE_ASSERV
 
-//PIDs definitions :
-float tkps[NB_PIDS];
-float tkis[NB_PIDS];
-float tkds[NB_PIDS];
+//PIDs :
+pid_data_t tpdt[NB_PIDS];
+pid_data_t *const m::pids_data = tpdt;
 
-float *const m::kps = tkps;
-float *const m::kis = tkis;
-float *const m::kds = tkds;
-
+//Loops
 uint16_t tlp[NB_LOOPS];
 uint16_t *const m::loop_periods = tlp;
-
 
 #endif
 
 //Actions
-float tcnt[NB_CONTINUOUS];
-float *const m::continuous_max = tcnt;
+continuous_data_t tcnt[NB_CONTINUOUS];
+continuous_data_t *const m::continuous_data = tcnt;
 
-float tsmi[NB_SERVOS];
-float tsma[NB_SERVOS];
-float *const m::servos_min = tsmi;
-float *const m::servos_max = tsma;
+servo_data_t tserdt[NB_SERVOS];
+servo_data_t *const m::servos_data = tserdt;
 
-//Custom Parameters Definition
-#define EEPROM_BOOL(name, default_value) bool m::name;
-#define EEPROM_CHAR(name, default_value) char m::name;
-#define EEPROM_INT(name, default_value) int m::name;
-#define EEPROM_LONG(name, default_value) int32_t m::name;
-#define EEPROM_FLOAT(name, default_value) float m::name;
+custom_data_t m::custom_data = custom_data_t();
 
-#include "../config.h"
-
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
 

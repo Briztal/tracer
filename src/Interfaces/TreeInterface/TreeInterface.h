@@ -31,7 +31,7 @@
 
 #define TI TreeInterface
 
-#include "tree_interface_config.h"
+#include "Project/Config/tree_interface_config.h"
 
 
 
@@ -39,16 +39,16 @@
 
 /*
  * The TreeInterface class is in charge of receiving data from the outside, and to decode them, according to
- *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config file).
+ *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config_files file).
  *
- * When it received a command, it enqueues it in Core's external_tasks queue.
+ * When it received a command, it enqueues it in TaskScheduler's external_tasks queue.
  */
 
 class TreeInterface {
 
 public :
 
-    static void begin();
+    static void init();
 
     static void initialise_aliases();
 
@@ -151,7 +151,7 @@ private:
     static void send_##name();
 
 
-#include "tree_interface_config.h"
+#include "Project/Config/tree_interface_config.h"
 
 
 };

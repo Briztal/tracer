@@ -18,13 +18,20 @@
 
 */
 
+//The maximal size of a command (id + arguments)
+#define MAX_COMMAND_SIZE 100
 
-#define MONITOR_CANAL
+//The maximal size of a word
+#define MAX_WORD_SIZE 20
 
+//The maximal size of the argument part
+#define MAX_ARGS_SIZE 50
+
+//The maximum depth of the tree. //TODO DETERMINE THE MAXIMUM DEPTH WITH AN ALGORITHM
 #define MAX_DEPTH 5
 
-#define SOFTWARE_NAME "tracer"
-
+//The number of commands that can be received and stored before execution;
+#define NB_PENDING_COMMANDS 10
 
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)
 
@@ -37,7 +44,8 @@
 #endif
 
 //Insert your tree here
-CREATE_LEAF(log, action, a simple log, i)
+CREATE_LEAF(demo, action, a simple demo with all axis, i)
+CREATE_LEAF(stress, stress, a repetitive command to show the kinetics limits, i)
 CREATE_LEAF(ex, home, home the machine, <dir>)
 GO_LOWER(move, move the machine)
 CREATE_LEAF(line, line, draw a line to the specified coordinates, <coordinates>)

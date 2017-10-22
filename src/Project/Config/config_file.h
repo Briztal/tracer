@@ -1,4 +1,5 @@
-//TODO METTRE DES UNDEFS
+//A string naming your project
+#define PROJECT_NAME "TRACER"
 
 ///######################################################PARTS##########################################################
 
@@ -21,12 +22,12 @@
 
 
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
-//#define terminal_interface_link_t usb_serial
+#define ENABLE_TERMINAL_INTERFACE
+#define terminal_interface_link_t usb_serial
 
 //Uncomment this line to enable the tree interface.
-#define ENABLE_TREE_INTERFACE
-#define tree_interface_link_t usb_serial
+//#define ENABLE_TREE_INTERFACE
+//#define tree_interface_link_t usb_serial
 
 //Uncomment this line to enable the gcode interface.
 //#define ENABLE_GCODE_INTERFACE
@@ -37,50 +38,41 @@
 
 
 //You must define the main command Interface. You must uncomment only one of lines below
-#define MAIN_CI_TREE
+//#define MAIN_CI_TREE
 //#define MAIN_CI_GCODE
-//#define MAIN_CI_TERMINAL
+#define MAIN_CI_TERMINAL
 
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
 
-//The maximum size of a data in one message
-#define PACKET_SIZE 200
 
-//The maximum size of a data in one word of data (for TerminalInterface)
-#define WORD_MAX_SIZE 50
+//######################################################TaskScheduler############################################################
 
-//######################################################Core############################################################
+//The following line defines the task pool size
+#define TASK_POOL_SIZE 20
+
+#define NB_TASK_SEQUENCES 3
 
 /*
- * This section defines how many tasks can be memorised by the core.
+ * The following block defines the number of task sequences, their ID, their name and their size
  */
 
-/* The permanent task list
- * You can here define the main loop of the Core.
- * ADD_PERMANENT TASK is used in Core to write automatically the loop function.
- * Add this macro with a void ()(void), and it will be executed.
- */
+//TASK_SEQUENCE(id, size)
+#ifdef TASK_SEQUENCE
 
-#ifdef ADD_PERMANENT_TASK
-
-#ifdef ENABLE_TERMINAL_INTERFACE
-ADD_PERMANENT_TASK(UI::read_serial)
-#endif
-
-#ifdef ENABLE_TREE_INTERFACE
-ADD_PERMANENT_TASK(TI::read_serial)
-#endif
-
-#ifdef ENABLE_GCODE_INTERFACE
-ADD_PERMANENT_TASK(GI::read_serial)
-#endif
-
+TASK_SEQUENCE(0, 20)
+TASK_SEQUENCE(1, 10)
+TASK_SEQUENCE(2, 10)
 
 #endif
 
-//The number of punctual tasks
-#define MAX_TASKS 10
+#define NON_SEQUENTIAL 255
+
+//Aliases for sequences ids
+#define MOVEMENT_SEQUENCE 0
+#define EEPROM_SEQUENCE 1
+#define VARIOUS_SEQUENCE 2
+
 
 //######################################################SENSORS#########################################################
 
@@ -205,10 +197,10 @@ SERVO(2, servo3, 4, 0, 1)
 //###########################################STEPPER_CONTROLLER_SETTINGS###############################################
 
 #ifdef ENABLE_STEPPER_CONTROL
-//-------------------------------------------------Kinematics Core  Version---------------------------------------------
+//-------------------------------------------------Kinematics TaskScheduler  Version---------------------------------------------
 
 /*
- * The version of the Stepper Control Kinematics Core you want to use. You have 3 versions available :
+ * The version of the Stepper Control Kinematics TaskScheduler you want to use. You have 3 versions available :
  *  - 0 : KERNEL0, a basic kernel for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
  *  - 1 : KERNEL1, a faster kernel for 32 bits processors with FPU, for cartesian-by-group machines. Only lines available.
  *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.
@@ -234,20 +226,21 @@ SERVO(2, servo3, 4, 0, 1)
  *
  *  To create a persistent variable, you may use the following command :
  *
- *  CREATE_PERSISTENT_ABSTRACTION_VARIABLE(name, default)
+ *  COORD_INTERFACE_VARIABLE(name, default)
  *
  *  It will create a float, named "name", with the default value "default".
  *
  */
 
-#ifdef CREATE_PERSISTENT_VARIABLE
+#ifdef COORD_INTERFACE_VARIABLE
 
-CREATE_PERSISTENT_VARIABLE(x0_offset, 0)
-CREATE_PERSISTENT_VARIABLE(x1_offset, 0)
-CREATE_PERSISTENT_VARIABLE(y0_offset, 0)
-CREATE_PERSISTENT_VARIABLE(y1_offset, 0)
-CREATE_PERSISTENT_VARIABLE(x01_min_dist, 0)
-CREATE_PERSISTENT_VARIABLE(y01_min_dist, 0)
+COORD_INTERFACE_VARIABLE(x0_offset, 10)
+COORD_INTERFACE_VARIABLE(x1_offset, 230)
+COORD_INTERFACE_VARIABLE(y0_offset, 10)
+COORD_INTERFACE_VARIABLE(y1_offset, 230)
+COORD_INTERFACE_VARIABLE(z_offset, 10)
+COORD_INTERFACE_VARIABLE(x_max_sum, 400)
+COORD_INTERFACE_VARIABLE(y_max_sum, 400)
 
 #endif
 
@@ -324,12 +317,13 @@ STEPPER(8,  256,    1,      30,     31,     LOW,    32,     LOW,    0,      HIGH
 
 //STEPPER_DATA(i, j, si, st, sp, a)
 
+#define TEMP_ACC 16000
 //TODO REMOVE SIZE
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
-STEPPER_DATA(   0,  '0',    170,    80.16,  1000,   2000.,      20.)
-STEPPER_DATA(   1,  '1',    170.,   80.16,  1000.,   2000.,      20.)
-STEPPER_DATA(   2,  '3',    150.,   80.16,  1000.,   2000.,      20.)
-STEPPER_DATA(   3,  '3',    150.,   80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   0,  '0',    170,    80.16,  1000,    1000,      20.)
+STEPPER_DATA(   1,  '1',    170.,   80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   2,  '3',    150.,   80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   3,  '3',    150.,   80.16,  1000.,   1000,      20.)
 STEPPER_DATA(   4,  '3',    150.,   80.16,  1000.,   1000.,      20.)
 STEPPER_DATA(   5,  '3',    150.,   80.16,  1000.,   1000.,      20.)
 STEPPER_DATA(   6,  '3',    150.,   80.16,  1000.,   1000.,      20.)
@@ -342,15 +336,27 @@ STEPPER_DATA(   8,  '3',    150.,   80.16,  1000.,   1000.,      20.)
 //-----------------------------------------------------CARTESIAN_GROUPS-------------------------------------------------
 
 //TODO DOC
-#define NB_CARTESIAN_GROUPS 4
+#define NB_CARTESIAN_GROUPS 8
 
 #ifdef CARTESIAN_GROUP
 
 //              id,     a0      a1      a2      maxSpeed
-CARTESIAN_GROUP(0,      0,      1,      2,      1000     )
-CARTESIAN_GROUP(1,      3,      4,     5,     1000     )
-CARTESIAN_GROUP(2,      6,      7,      8,     1000     )
-CARTESIAN_GROUP(3,      9,      -1,     -1,     1000     )
+//Carriage 0
+CARTESIAN_GROUP(0,      0,      2,      4,      1000     )
+//Carriage 1
+CARTESIAN_GROUP(1,      1,      2,      4,     1000     )
+//Carriage 2
+CARTESIAN_GROUP(2,      1,      3,      4,     1000     )
+//Carriage 3
+CARTESIAN_GROUP(3,      0,      3,      4,     1000     )
+//Extruder 0
+CARTESIAN_GROUP(4,      5,      -1,     -1,     1000     )
+//Extruder 1
+CARTESIAN_GROUP(5,      6,      -1,     -1,     1000     )
+//Extruder 2
+CARTESIAN_GROUP(6,      7,      -1,     -1,     1000     )
+//Extruder 3
+CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 #endif
 
@@ -391,12 +397,13 @@ CARTESIAN_GROUP(3,      9,      -1,     -1,     1000     )
 
 //###############################################EEPROM SETTINGS########################################################
 
+
 /* EEPROM custom data definition : for each variable you need to save in EEPROM, write one of the following lines
  *
  * EEPROM_BOOL(name, default_value)
- * EEPROM_CHAR(name, default_value)
- * EEPROM_INT(name, default_value)
- * EEPROM_LONG(name, default_value)
+ * EEPROM_INT8(name, default_value)
+ * EEPROM_INT16(name, default_value)
+ * EEPROM_INT32(name, default_value)
  * EEPROM_FLOAT(name, default_value)
  *
  * Each one of these functions will create a variable of the specified type with the name provided

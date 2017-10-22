@@ -62,7 +62,7 @@ private:
 public :
 
     //The state of the movement routine;
-    static bool started;
+    static volatile bool started;
 
 
 //The signatures for the sub_movement that is currently executed
@@ -158,10 +158,10 @@ private :
     //Signatures processing
     static void process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures);
 
-    //Method to initialise a sub_movement
+    //Method to init a sub_movement
     static sig_t *initialise_sub_movement();
 
-    //Method to initialise the first sub movement of the movement procedure
+    //Method to init the first sub movement of the movement procedure
     static void prepare_first_sub_movement();
 
 

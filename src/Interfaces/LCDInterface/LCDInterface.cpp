@@ -26,15 +26,15 @@
 
 
 /*
- * begin : this function initialises the interface.
+ * init : this function initialises the interface.
  *
  *  It starts by initialising the physical link, and then sets up interrupts, for the human control of the display.
  *
  */
 
-void EmbeddedInterface::begin() {
+void EmbeddedInterface::init() {
 
-    lcd_interface_link_t::begin();
+    lcd_interface_link_t::init();
 
     //TODO SETUP INTERRUPTS
 

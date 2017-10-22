@@ -47,7 +47,7 @@ void HomingMovement::move() {
             StepperController::setDir##i(false);\
         }
 
-#include "../../../config.h"
+#include "../../../config_files.h"
 
 #undef STEPPER
 
@@ -62,7 +62,7 @@ void HomingMovement::move() {
     uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
         //regulation_speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
-        d = (uint32_t) (1000000 / (speed * EEPROMStorage::steps[axis]));
+        d = (uint32_t) (1000000 / (speed * EEPROMStorage::steppers_data[axis].steps));
         delays[axis] = delay;
         //delay_us = max(delay_us, d);
     }
@@ -124,7 +124,7 @@ sig_t HomingMovement::readEndStops() {
         }\
     }
 
-#include "../../../config.h"
+#include "../../../config_files.h"
 
 #undef STEPPER
      */

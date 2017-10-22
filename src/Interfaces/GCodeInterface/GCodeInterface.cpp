@@ -57,6 +57,9 @@ void GCodeInterface::read_serial() {
                 //Reset the data_in
                 reset();
 
+                if (!TaskScheduler::spaces())
+                    return;
+
             }
         } else {
 

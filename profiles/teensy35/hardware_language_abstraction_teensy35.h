@@ -71,13 +71,14 @@
 
 void hl_begin();
 
+
 //----------------------------------------------------STRING------------------------------------------------------------
 
 #define string_t String
 
 #define str(t) String(t)
 
-#define str_to_float(s) s.toFloat();
+#define str_to_float(s) s.toFloat()
 
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
@@ -85,6 +86,11 @@ void hl_begin();
 #define EEPROM_read(i) EEPROM.read(i)
 
 #define EEPROM_write(i, byte) EEPROM.write(i, byte)
+
+#define EEPROM_t uint8_t
+
+#define EEPROM_sizeof(x) sizeof(x) / sizeof(eeprom_t)
+
 
 //-----------------------------------------------------IO--------------------------------------------------------------
 
@@ -96,7 +102,7 @@ void hl_begin();
 
 #define analog_write(i, v) analogWrite(i, v)
 
-#define pin_mode_output(i) pinMode(i, OUTPUT);
+#define pin_mode_output(i) pinMode(i, OUTPUT)
 
 
 //-----------------------------------------------------MATH-------------------------------------------------------------
@@ -114,7 +120,7 @@ void hl_begin();
  */
 #define attach_interrupt(pin, port, mode) attachInterrupt(pin, port, mode)
 
-#define detach_interrupt(pin) detachInterrupt(pin);
+#define detach_interrupt(pin) detachInterrupt(pin)
 
 
 //----------------------------------------------------Delay-------------------------------------------------------------
@@ -239,11 +245,11 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 
 //Disabling loop timers
 
-#define disable_loop_timer_0() PIT_TCTRL1 &= 6;
+#define disable_loop_timer_0() PIT_TCTRL1 &= 6
 
-#define disable_loop_timer_1() PIT_TCTRL2 &= 6;
+#define disable_loop_timer_1() PIT_TCTRL2 &= 6
 
-#define disable_loop_timer_2() PIT_TCTRL3 &= 6;
+#define disable_loop_timer_2() PIT_TCTRL3 &= 6
 
 
 //Function setting
@@ -266,11 +272,11 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 
 //Complete cleans : disables timers and interrupts
 
-#define clean_loop_interrupt_0() {disable_loop_timer_0(); disable_loop_interrupt_0();};
+#define clean_loop_interrupt_0() {disable_loop_timer_0(); disable_loop_interrupt_0();}
 
-#define clean_loop_interrupt_1() {disable_loop_timer_1(); disable_loop_interrupt_1();};
+#define clean_loop_interrupt_1() {disable_loop_timer_1(); disable_loop_interrupt_1();}
 
-#define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();};
+#define clean_loop_interrupt_2() {disable_loop_timer_2(); disable_loop_interrupt_2();}
 
 
 //------------------------------------------------PHYSICAL LINKS--------------------------------------------------------

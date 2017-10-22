@@ -30,20 +30,36 @@
 
 
 
-void StepperController::begin() {
+//-------------------------------------------------------Initialisation--------------------------------------------------
+
+/*
+ * init : this function initialises pins for stepper management
+ */
+void StepperController::init() {
 
 #define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
     pin_mode_output(pinPower);pin_mode_output(pinDir);pin_mode_output(pinStep);\
-digital_write(pinPower, LOW);\
+
 
 #include <config.h>
 
 #undef STEPPER
 
-    //enable(0);
+    disable();
 
 }
 
+
+//---------------------------------------------------------Power--------------------------------------------------------
+
+/*
+ * enable : this function enables a specific group of steppers, and disables others.
+ *
+ *  The argument is a signature, where the i-th bit means :
+ *      - 1 : enable the i-th stepper
+ *      - 0 : disable the i-th stepper
+ *
+ */
 void StepperController::enable(sig_t signature) {
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
     if (signature&sig) {\
@@ -51,7 +67,6 @@ void StepperController::enable(sig_t signature) {
     } else {\
         digital_write(pinPower, HIGH);\
     }\
-    digital_write(pinPower, LOW);\
 
 
 #include <config.h>
@@ -59,6 +74,57 @@ void StepperController::enable(sig_t signature) {
 #undef STEPPER
 
 }
+
+
+/*
+ * enable : this function enables all steppers
+ *
+ */
+
+void StepperController::enable() {
+
+
+#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ...) \
+    digital_write(pinPower, LOW);\
+
+#include <config.h>
+
+#undef STEPPER
+
+
+}
+
+
+/*
+ * disable : this function enables all steppers
+ *
+ */
+
+void StepperController::disable() {
+
+
+#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
+    digital_write(pinPower, HIGH);\
+
+
+#include <config.h>
+
+#undef STEPPER
+
+}
+
+
+//-------------------------------------------------------Direction------------------------------------------------------
+
+
+/*
+ * set_directions : this function sets direction for all steppers.
+ *
+ *  The argument is a signature, where the i-th bit means :
+ *      - 1 : negative direction for the i-th stepper
+ *      - 0 : positive direction for the i-th stepper
+ *
+ */
 
 void StepperController::set_directions(sig_t negative_signatures) {
 
@@ -104,6 +170,16 @@ void StepperController::set_directions(sig_t negative_signatures) {
 }
 
 
+//----------------------------------------------------------Step--------------------------------------------------------
+
+/*
+ * fastStep : this function steps a specific group of stepper.
+ *
+ * The argument is a signature, where the i-th bit means :
+ *      - 1 : the i-th stepper must step;
+ *      - 0 : the i-th stepper must not step.
+ */
+
 
 void StepperController::fastStep(sig_t id) {
 
@@ -133,7 +209,7 @@ void StepperController::fastStep(sig_t id) {
 
 #else
 
-    #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
+#define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
         if (id&sig) {\
             digital_write(pinStep, HIGH);\
         }
@@ -154,12 +230,16 @@ void StepperController::fastStep(sig_t id) {
 }
 
 
+//--------------------------------------------------------Position------------------------------------------------------
+
+
 #ifdef position_log
 
 void StepperController::send_position() {
 
 #define STEPPER(i, ...) \
     CI::echo("pos : "+str(i)+" "+str(pos##i));\
+
 
 #include <config.h>
 
@@ -170,9 +250,13 @@ void StepperController::send_position() {
 
 #endif
 
+
+//-------------------------------------------Static declarations - definitions------------------------------------------
+
 #define m StepperController
 
 sig_t m::direction_signature = 0;
+
 
 #undef STEPPER
 

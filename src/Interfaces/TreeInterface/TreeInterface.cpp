@@ -23,14 +23,14 @@
 #ifdef ENABLE_TREE_INTERFACE
 
 #include "TreeInterface.h"
-#include "../../Core/Core.h"
+#include "TaskScheduler/TaskScheduler.h"
 #include "TreeInterfaceCommands.h"
 #include <hardware_language_abstraction.h>
 
 #define BEGIN_BYTE (uint8_t)255
 #define BEGIN_CHAR (char)-1
 
-void TI::begin() {
+void TI::init() {
 
     tree_interface_link_t::begin();
 
@@ -114,7 +114,7 @@ void TI::prepare_EEPROM_packet() {
 //--------------------------------------------------Packet Emission-----------------------------------------------------
 
 /*
- * prepare_data_out : the function to initialise a the next outgoing packet.
+ * prepare_data_out : the function to init a the next outgoing packet.
  *
  * It sets the command id bytes, and initialises the data_out size.
  */
@@ -288,7 +288,7 @@ void TI::enqueue(char *command, uint8_t size) {
 #define CREATE_LEAF(c, fname)\
     case c :\
         ++command;/*Removing last command byte*/\
-        Core::add_external_task(TreeInterfaceCommands::fname, command, size);/*Enqueue the correct task*/\
+        TaskScheduler::add_procedure(TreeInterfaceCommands::fname, 0);/*Enqueue the correct task*/\
         return;
 
 #define GO_UPPER\
@@ -321,7 +321,7 @@ void TI::read_serial() {
     while (tree_interface_link_t::available()) {
         r = tree_interface_link_t::read();
         if (first_detected) {
-            if (r == BEGIN_CHAR) {//Second time begin byte is detected : not a begin symbol.
+            if (r == BEGIN_CHAR) {//Second time init byte is detected : not a init symbol.
                 first_detected = false;
                 in_data_remaining--;
             } else {//Not a double beginning byte -> begining symbol
@@ -330,22 +330,29 @@ void TI::read_serial() {
                     packet_began = true;
                     in_data_size = in_data_remaining = (uint8_t) r;
                 }
-                return;
+                continue;
             }
         } else if (r == BEGIN_CHAR) {
 
-
             first_detected = true;
-            return;
+
+            continue;
         }
 
         if (packet_began) {
             if (in_data_remaining-- != 0) {
                 *(data_in++) = r;
             } else {
+
                 enqueue(data_in_0, in_data_size);
+
                 flush();
-                return;
+
+                if (!TaskScheduler::spaces())
+                    return;
+
+                continue;
+
             }
         }
     }

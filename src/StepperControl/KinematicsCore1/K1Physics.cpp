@@ -76,7 +76,7 @@ void K1Physics::initialise_kinetics_data(k1_movement_data *movement_data) {
 /*
  * load_pre_process_kinetics_data : this function loads a new movement.
  *
- *  It must save the evolution factor, and initialise the new evolution factor to 1;
+ *  It must save the evolution factor, and init the new evolution factor to 1;
  *
  *  It also must save the first sub movement distance in the
  */
@@ -282,18 +282,20 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
  *
  */
 
-float K1Physics::_get_delay_numerator(uint8_t axis, float distance) {
+float K1Physics::_get_delay_numerator(uint8_t stepper, float distance) {
 
     /*
      * FORMULA : D = 10^6 * distance / (steps * sqrt(2 * acceleration)) with :
      *      - D : the delay_us numerator;
-     *      - distance (steps) : the distance on the axis;
-     *      - steps (steps/unit) : the steps per unit of axis;
-     *      - acceleration (unit / s^2) : the acceleration on the axis.
+     *      - distance (steps) : the distance on the stepper;
+     *      - steps (steps/unit) : the steps per unit of stepper;
+     *      - acceleration (unit / s^2) : the acceleration on the stepper.
      *
      */
 
-    return (float) 1000000 * distance / (sqrtf(2 * EEPROMStorage::steps[axis] * EEPROMStorage::accelerations[axis]));
+    stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
+
+    return (float) 1000000 * distance / (sqrtf(2 * data->steps * data->acceleration));
 }
 
 
@@ -358,7 +360,8 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
-        float maximum_speed = EEPROMStorage::jerks[stepper] * EEPROMStorage::steps[stepper];
+        stepper_data_t *data = EEPROMStorage::steppers_data+stepper;
+        float maximum_speed = data->steps * data->jerk;
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
@@ -462,15 +465,15 @@ void K1Physics::update_heuristic_jerk_distance() {
     distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 
-#include <config.h>
+#include <config_files.h>
 
 #undef STEPPER
     */
 
-    int32_t dist =  SubMovementManager::jerk_distances[reference_axis];
-    if (dist<0) dist = -dist;
+    int32_t dist = SubMovementManager::jerk_distances[reference_axis];
+    if (dist < 0) dist = -dist;
 
-    offset_heuristic_jerk_distance = (uint32_t)dist + jerk_distance_offset;
+    offset_heuristic_jerk_distance = (uint32_t) dist + jerk_distance_offset;
 
 
 }
@@ -483,18 +486,18 @@ void K1Physics::compute_jerk_offsets(float speed, k1_movement_data *previous_mov
     //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
 
     //Cache var for the reference axis :
-    uint8_t ref_axis = previous_movement->reference_axis;
+    uint8_t ref_stepper = previous_movement->reference_axis;
 
     //Cache var for final_jerk_ratios
     float *final_jerk_ratios = previous_movement->final_jerk_ratios;
 
     //Determine the speed we must be at the end of the previous movement, on the reference axis
-    float stepper_speed = speed * final_jerk_ratios[ref_axis];
+    float stepper_speed = speed * final_jerk_ratios[ref_stepper];
 
     //Determine the offset on the deceleration distance
-    previous_movement->jerk_distance_offset = (uint32_t) (stepper_speed * stepper_speed /
-                                                          (2 * EEPROMStorage::accelerations[ref_axis] *
-                                                           EEPROMStorage::steps[ref_axis]));
+    stepper_data_t *data = EEPROMStorage::steppers_data+ref_stepper;
+    previous_movement->jerk_distance_offset = (uint32_t)
+            (stepper_speed * stepper_speed / (2 * data->steps * data->acceleration));
 
 
 }

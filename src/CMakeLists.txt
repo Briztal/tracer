@@ -3,16 +3,50 @@
 
 include_directories()
 
+#------------------------------------------------PROJECT----------------------------------------------------------------
+
+
+set(PCP "Project/Config")
+
+include_directories(${PCP}/)
+
+add_library(project_config
+
+        ${PCP}/lcd_interface_config.h
+        ${PCP}/terminal_interface_config.h
+        ${PCP}/tree_interface_config.h
+        ${PCP}/gcode_interface_config.h
+        ${PCP}/geometry.h
+
+        )
+
+
+set(PIP "Project/Interfaces")
+
+include_directories(${PIP}/)
+
+add_library(project_interfaces
+
+        ${PP}/TerminalInterface/_interface_data.h
+        ${PP}/TerminalInterface/TerminalInterfaceCommands.h
+        ${PP}/TerminalInterface/TerminalInterfaceCommands.cpp
+        ${PP}/TreeInterface/TreeInterfaceCommands.h
+        ${PP}/TreeInterface/TreeInterfaceCommands.cpp
+        ${PP}/GCodeInterface/GCodeInterfaceCommands.h
+        ${PP}/GCodeInterface/GCodeInterfaceCommands.cpp
+
+        )
+
 
 #--------------------------------------------------CORE-----------------------------------------------------------------
 
-set(CP "Core")
+set(CP "TaskScheduler")
 
 include_directories(${CP}/)
 
 add_library(core
 
-        config.h
+        config_files .h
         parameters_indices.h
         hardware_language_abstraction.h
         interface.h
@@ -22,8 +56,6 @@ add_library(core
         ${CP}/Core.cpp
 
         )
-
-
 
 
 set(EEP "EEPROMStorage")
@@ -65,29 +97,19 @@ add_library(interface
         ${IP}/LCDInterface/LCDInterface.cpp
         ${IP}/LCDInterface/LCDNode.h
         ${IP}/LCDInterface/LCDNode.cpp
-        ${IP}/LCDInterface/lcd_interface_config.h
 
 
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
         ${IP}/TerminalInterface/TerminalInterface.cpp
-        ${IP}/TerminalInterface/TerminalInterfaceCommands.h
-        ${IP}/TerminalInterface/TerminalInterfaceCommands.cpp
-        ${IP}/TerminalInterface/terminal_interface_config.h
 
         #TreeInterface
         ${IP}/TreeInterface/TreeInterface.h
         ${IP}/TreeInterface/TreeInterface.cpp
-        ${IP}/TreeInterface/TreeInterfaceCommands.h
-        ${IP}/TreeInterface/TreeInterfaceCommands.cpp
-        ${IP}/TreeInterface/tree_interface_config.h
 
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
         ${IP}/GCodeInterface/GCodeInterface.cpp
-        ${IP}/GCodeInterface/GCodeInterfaceCommands.h
-        ${IP}/GCodeInterface/GCodeInterfaceCommands.cpp
-        ${IP}/GCodeInterface/gcode_interface_config.h
 
         Interfaces/TerminalInterface/TerminalNode.cpp Interfaces/TerminalInterface/TerminalNode.h)
 
@@ -111,7 +133,7 @@ add_library(actions
 #-------------------------------------------------ASSERV----------------------------------------------------------------
 
 
-set(AsP "Core")
+set(AsP "TaskScheduler")
 
 include_directories(${AsP}/)
 

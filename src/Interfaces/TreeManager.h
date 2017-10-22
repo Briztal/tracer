@@ -47,7 +47,7 @@ public:
     void edit_choice_tree_labels(uint8_t choice, String *name, String *desc, String *args);
 
     //Method to edit the functions of the choice tree.
-    void edit_choice_tree_functions(bool (*f_next)(char*, uint8_t), bool (*f_back)(char*, uint8_t), bool (*f_abort)(char*, uint8_t));
+    void edit_choice_tree_functions(bool (*f_next)(void *), bool (*f_back)(void *), bool (*f_abort)(void *));
 
     //----------------------------------------------------Tree data-----------------------------------------------------
 

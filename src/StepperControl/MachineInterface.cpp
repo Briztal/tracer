@@ -34,6 +34,8 @@
 #include <LinearMovement.h>
 #elif (KERNEL == 1)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
+#include <Project/Config/geometry.h>
+
 #elif (KERNEL == 2)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
@@ -93,15 +95,14 @@ void MachineInterface::update_position(const float *const new_position) {
  * translate : this function translates a position expressed in the high level coordinate system into
  *      its image, in the stepper coordinate system.
  *
+ *  The procedure depends on the machine it runs for, so it simply calls an inline function in Project/geometry.h.
+ *
  */
 
 void MachineInterface::translate(const float *const hl_coordinates, float *const steppers_coordinates) {
 
-    //0.8 us
-    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        steppers_coordinates[axis] = (EEPROMStorage::steps[axis] * hl_coordinates[axis]);
+    geometry_translate(hl_coordinates, steppers_coordinates);
 
-    }
 }
 
 

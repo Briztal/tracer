@@ -51,7 +51,7 @@
     NVIC_SET_PRIORITY(IRQ_PIT_CH3, 48);NVIC_ENABLE_IRQ(IRQ_PIT_CH3);\
     clean_loop_interrupt_0();clean_loop_interrupt_1();clean_loop_interrupt_2();}
 
-void hl_begin() {
+void hl_init() {
 
     init_stepper_interrupt();
 

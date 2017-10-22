@@ -31,7 +31,7 @@ public:
 #define SERVO(k1_position_indice, name, pin, min, max) \
     static void set##k1_position_indice(float f);
 
-#include "../config.h"
+#include "../config_files.h"
 #undef SERVO
 
 private:
@@ -39,10 +39,10 @@ private:
 #define SERVO(k1_position_indice, name, pin, min, max) \
     static Servo* servo##k1_position_indice;
 
-#include "../config.h"
+#include "../config_files.h"
 #undef SERVO
 
-    void begin();
+    void init();
 };
 
 */

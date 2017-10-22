@@ -1,5 +1,5 @@
 /*
-  Core.h - Part of TRACER
+  TaskScheduler.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -32,7 +32,7 @@
 
 
 /*
- * Core Structure :
+ * TaskScheduler Structure :
  *
  * Main thread: Task manager. Runs basic tasks, like
  * - Communication Interface
@@ -50,10 +50,10 @@
 
 
 /*
- * The Machine Core.
+ * The Machine TaskScheduler.
  *
- * The Core is in charge of :
- * - setting up all used modules, in begin function;
+ * The TaskScheduler is in charge of :
+ * - setting up all used modules, in init function;
  * - processing tasks, provided internally, or coming from any interface;
  *
  * Tasks are stored using 3 Queues :
@@ -78,36 +78,53 @@
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
-#include "../sanity_check.h"
+#include <sanity_check.h>
 
-#include "../DataStructures/Queue.h"
+#include <DataStructures/Queue.h>
+#include "_task_scheduler_data.h"
 
-class Core {
+class TaskScheduler {
 
 public:
 
+    static void init();
+
     static void run();
 
-    static void begin();
+    static uint8_t add_prioritary_procedure(bool (*f)(void *));
 
-    static bool add_external_task(void (*f)(char *, uint8_t), char *args, uint8_t size);
+    static uint8_t add_procedure(bool (*f)(void *), uint8_t type);
 
-    static bool add_internal_task(void (*f)());
+    static void add_task(task_t task);
+
+    static const uint8_t spaces();
 
 private:
 
-    static bool process_external_task();
+    //The primary task pool
+    static task_t *const task_pool;
 
-    static Queue<void(*)(char *, uint8_t)> external_tasks;
+    //The number of tasks stored in the task pool
+    static uint8_t pool_task_nb;
 
-    static char *external_args;
+    //The number of tasks stored in the task pool
+    static uint8_t pool_task_spaces;
 
-    static Queue<void(*)()> internal_tasks;
+    //Task sequences
+    static Queue<task_t> **const task_sequences;
 
-    static bool process_internal_task();
+    //First tasks flags
+    static bool *const dispatch_enabled;
 
+    static void process_task_pool();
+
+    static void process_task_sequences();
+
+    static bool process_task(task_t *task);
+
+    static uint8_t shift(boolean shift_enabled, task_t *task, uint8_t insert_index);
+
+    static void process_task_sequences_singular();
 };
-
-
 
 #endif //PROJECT_SYSTEM_H

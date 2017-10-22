@@ -30,28 +30,60 @@
 class StepperController {
 
 
-#ifdef position_log
-    public:
-        static void send_position();
+public:
 
-#endif
+    //Initialise pins
+    static void init();
+
+
+    //-------------------------------------------------------Power------------------------------------------------------
 
 public:
 
-    static void set_directions(sig_t negative_signatures);
-
-    static void begin();
-
+    //Enable a specific group of steppers, and disable the others.
     static void enable(sig_t signature);
 
-    static void fastStep(sig_t id);
+    //Enable all steppers
+    static void enable();
+
+    //Disable all steppers
+    static void disable();
+
+
+    //----------------------------------------------------Directions----------------------------------------------------
+
+public:
+
+    //Set the directions of all steppers, according to signatures
+    static void set_directions(sig_t negative_signatures);
 
 private:
 
+    //The current direction signature
     static sig_t direction_signature;
 
+
+    //--------------------------------------------------------Step------------------------------------------------------
+
+public:
+
+    //Step a specific group of steppers
+    static void fastStep(sig_t id);
+
+
+    //----------------------------------------------------Position log--------------------------------------------------
+
+    //Only if the position log is enabled
 #ifdef position_log
 
+public:
+
+    //Send the position through the main interface
+    static void send_position();
+
+private:
+
+    //Increment and position for every stepper
 #define STEPPER(i, ...) \
     static int32_t incr##i;\
     public:static int32_t pos##i;\

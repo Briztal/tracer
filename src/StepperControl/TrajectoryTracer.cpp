@@ -61,7 +61,7 @@ void TrajectoryTracer::start() {
 
     Kinematics::initialise_tracing_procedure();
 
-    StepperController::enable(65535);
+    StepperController::enable();
 
     //Initialise the end booleans
     stop_programmed = false;
@@ -121,6 +121,8 @@ void TrajectoryTracer::stop() {
 
     //Mark the movement routine as stopped
     started = false;
+
+    CI::echo("STOPED");
 
     //Enable the movement enqueuing
     movement_queue_lock_flag = false;
@@ -211,7 +213,7 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
     //we must check the jerk if the routine is started, or if movements are already present in the queue.
     bool jerk_checking = (started) || (movement_data_queue.available_elements());
 
-    //Control the jerk bounds if required, and initialise the jerk control for the next movement
+    //Control the jerk bounds if required, and init the jerk control for the next movement
     JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
 
 
@@ -569,7 +571,7 @@ int k2_position_indice = 4;
  *  This procedure comprises the following steps :
  *      - change the trajectory function;
  *      - change the trajectory variables (min, max, index)
- *      - initialise the new movement
+ *      - init the new movement
  *
  *
  *
@@ -747,7 +749,7 @@ void TrajectoryTracer::update_tools_powers(float speed) {
 
 //Acceleration Fields
 
-bool m::started = false;
+volatile bool m::started = false;
 
 
 bool m::stop_programmed = false;

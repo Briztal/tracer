@@ -26,7 +26,8 @@
 #define CODE_TERMINAL_INTERFACE
 
 #include <hardware_language_abstraction.h>
-#include "terminal_interface_config.h"
+#include <DataStructures/ArgumentsContainer.h>
+#include "Project/Config/terminal_interface_config.h"
 #include "DataStructures/Node.h"
 
 
@@ -39,7 +40,7 @@ class TerminalInterface {
 public :
 
     //The initialisation function.
-    static void begin();
+    static void init();
 
 
     //--------------------------------------Serial read --------------------------------------
@@ -55,7 +56,6 @@ private :
     //Function to reset the command reception environment.
     static void reset();
 
-
     //The command size, and a saving variable.
     static unsigned char command_size;
     static unsigned char saved_command_size;
@@ -65,12 +65,16 @@ private :
     static char *const data_in_0;
 
 
+    static ArgumentsContainer arguments_storage;
+
+
+
 private :
 
     static void prepare_execution();
 
-    //--------------------------------------Command processing with tree style----------------------------------
 
+    //--------------------------------------Command processing with tree style----------------------------------
 
 private:
 
@@ -85,23 +89,22 @@ private:
 
     static String *build_tree_summary();
 
-
     //Function to parse and execute the received command
     static void execute_tree_style();
 
+
+    //---------------------------------Functions called by TerminalInterfaceCommands------------------------------
+
+public :
+
+    //Mark a task as executed
+    static char *get_arguments(uint8_t task_index, uint8_t *size);
+
+    //Mark a task as executed
+    static void validate_task(uint8_t task_index);
+
     //Function to show a log message if the execution failed.
     static void log_tree_style(Node *log_node, bool log_args);
-
-    //--------------------------------------Command processing with progmem style----------------------------------
-
-private :
-
-    //Function to parse and execute the received command.
-    static void execute_progmem_style();
-
-    //Function to show a log message if the execution failed.
-    static void fail_log_progmem_style();
-
 
     //--------------------------------------Words extraction----------------------------------
 
@@ -109,7 +112,6 @@ private :
 
     //Function to extract next word of the command.
     static unsigned char get_next_word();
-
 
     //The word buffer.
     static char *word_buffer;

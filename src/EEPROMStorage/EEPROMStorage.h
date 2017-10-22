@@ -22,7 +22,9 @@
 #define CODE_SETTINGSPROFILEN_H
 
 #include <stdint.h>
-#include "../config.h"
+#include <config.h>
+#include "_eeprom_storage_data.h"
+#include <hardware_language_abstraction.h>
 
 
 
@@ -39,7 +41,7 @@
  *      - Servo Actions(min and max)
  *      - Stepper Motors (sizes, steps/unit, regulation_speed, acceleration)
  *      - Cartesian Speed Groups (steps/mm, regulation_speed, acceleration ...)
- *      - Custom data you may have specified in your config.h
+ *      - Custom data you may have specified in your config_files.h
  */
 
 class EEPROMStorage {
@@ -47,14 +49,34 @@ class EEPROMStorage {
 
 public :
 
-    static float read(char *data, uint8_t size);
+    static void init();
 
-    static float write(char *data, uint8_t size);
+    //----------------------------------------------EEPROM methods------------------------------------------------------
 
-    static void setDefaultProfile();
+public :
 
-    static void saveProfile();
+    //Save the profile in the EEPROM
+    static void write_profile();
 
+
+    //Reset to the default profile, and save in the EEPROM
+    static void set_default_profile();
+
+
+private :
+
+    //Read the profile from the EEPROM
+    static bool extract_profile();
+
+
+    //Write data in the EEPROM
+    static void read_data(uint16_t * index, size_t size, uint8_t *data);
+
+    //Read data in the EEPROM
+    static void write_data(uint16_t * index, size_t size, uint8_t *const data);
+
+
+    //-------------------------------------------Stepper control data---------------------------------------------------
 
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -62,92 +84,48 @@ public :
 public :
 
     //Stepper motors data
-    static float *const sizes;
-    static float *const steps;
-    static float *const maximum_speeds;
-    static float *const accelerations;
-    static float *const jerks;
+    static stepper_data_t *const steppers_data;
 
+    //Group speeds
     static float *const group_maximum_speeds;
 
-
-private:
-
-    static void read_stepper(int *indice, uint8_t axis_nb, float *size, float *steps, float *mspeed,
-                             float *acceleration, float *jerk);
-
-    static void write_stepper(int *indice, float size, float steps, float mspeed, float accceleration, float jerk);
+    //Coordinate interface structure
+    static coordinate_interface_data_t coordinate_interface_data;
 
 #endif
+
+
+    //---------------------------------------------Closed loops data----------------------------------------------------
 
 #ifdef ENABLE_ASSERV
 
 public :
 
     //PID data
-    static float *const kps;
-    static float *const kis;
-    static float *const kds;
+    static pid_data_t *const pids_data;
 
     //Control loops data
     static uint16_t *const loop_periods;
 
-private :
-
-    static void write_pid(int *indice, float kp, float ki, float kd);
-
-    static void read_pid(int *indice, uint8_t pid_nb, float *kps, float *kis, float *kds);
-
 #endif
 
-//Actions
 
-public :
-    static float *const continuous_max;
-    static float *const servos_min;
-    static float *const servos_max;
+    //--------------------------------------------------Actions---------------------------------------------------------
 
 public :
 
-    //Custom data
-#define EEPROM_BOOL(name, default_value) static bool name;
-#define EEPROM_CHAR(name, default_value) static char name;
-#define EEPROM_INT(name, default_value) static int name;
-#define EEPROM_LONG(name, default_value) static int32_t name;
-#define EEPROM_FLOAT(name, default_value) static float name;
+    //Continuous actions
+    static continuous_data_t *const continuous_data;
 
-#include "../config.h"
+    //Servo actions
+    static servo_data_t *const servos_data;
 
 
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
+    //------------------------------------------------Custom data-------------------------------------------------------
 
 public :
+    static custom_data_t custom_data;
 
-    static void begin();
-
-    static void print_stored_data();
-
-    static void send_structure();
-
-private :
-
-    static bool extractProfile();
-
-    //Primitive data methods
-
-    static void write_char(int *indice, char value);
-    static void write_int(int *indice, int value);
-    static void write_int32_t(int *indice, int32_t value);
-    static void write_float(int *indice, float value);
-
-    static char read_char(int *indice);
-    static int read_int(int *indice);
-    static int32_t read_int32_t(int *indice);
-    static float read_float(int *indice);
 
 };
 

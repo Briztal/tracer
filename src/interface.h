@@ -18,6 +18,9 @@
 
 */
 
+#ifndef TRACER_INTERFACES
+#define TRACER_INTERFACES
+
 /*
  * This files simplifies the interface manipulation : it includes the correct files, and defines a macro for the main
  *  interface.
@@ -44,4 +47,11 @@
 #ifdef MAIN_CI_TREE
 #define CI TI
 #endif
+#endif
+
+
+void initialise_interfaces();
+
+void read_interfaces();
+
 #endif

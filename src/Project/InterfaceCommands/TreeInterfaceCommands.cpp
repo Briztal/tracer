@@ -29,6 +29,7 @@
 #include <Actions/ContinuousActions.h>
 #include <EEPROMStorage/EEPROMStorage.h>
 #include <interface.h>
+#include <StepperControl/Machine.h>
 
 
 //#define EEPROM_SUBCANAL 1
@@ -42,7 +43,7 @@
 #ifdef MONITOR_CANAL
 
 
-void TreeInterfaceCommands::system_canal_function(char *data, uint8_t size) {
+bool TreeInterfaceCommands::system_canal_function(void *) {
 
     if (!(size--)) return;
     char sub_canal = *(data++);
@@ -106,7 +107,7 @@ void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
             TI::add_char_out(indice); TI::add_string_out(#name); TI::add_float_out(min) ;\
             TI::add_float_out(max); TI::add_string_out(#unit);TI::send_packet();
 
-#include "../../config.h"
+#include <config.h>
 
 #undef EXTERNAL_PARAMETER
 
@@ -123,7 +124,9 @@ void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
 void TreeInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
-
+    
+    pid_data_t *pid_p;
+    
     if (!size) return;
     char sub_canal = *data;
     int pi;
@@ -134,14 +137,13 @@ void TreeInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
              * Packet Structure : indice, name, min, max, unit
              */
 
-            pi = 0;
-
-#define PID(i, name, kp, ki, kd)\
+#define PID(i, name, ...)\
+            pid_p = EEPROMStorage::pids_data+i;\
             TI::prepare_system_packet();TI::add_char_out(PID_SUBCANAL);TI::add_char_out(0);\
-            TI::add_char_out(i); TI::add_string_out(#name); TI::add_float_out(EEPROMStorage::kps[pi]);\
-            TI::add_float_out(EEPROMStorage::kis[pi]); TI::add_float_out(EEPROMStorage::kds[pi]);TI::send_packet();
+            TI::add_char_out(i); TI::add_string_out(#name); TI::add_float_out(pid_p->kp);\
+            TI::add_float_out(pid_p->ki); TI::add_float_out(pid_p->kd);TI::send_packet();
 
-#include "../../config.h"
+#include <config.h>
 
 #undef PID
             break;
@@ -171,7 +173,7 @@ void TreeInterfaceCommands::loop_system_canal(char *data, uint8_t size) {
             TI::add_char_out(indice); TI::add_string_out(#name); TI::add_int_out(period_ms);\
             TI::send_packet();
 
-#include "../../config.h"
+#include <config.h>
 
 #undef LOOP_FUNCTION
 
@@ -206,7 +208,7 @@ void TreeInterfaceCommands::actions_system_canal(char *data, uint8_t size) {
             TI::send_packet();\
 
 
-#include "../../config.h"
+#include <config.h>
 
 #undef BINARY
 #undef CONTINUOUS
@@ -235,7 +237,7 @@ void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
             TI::prepare_system_packet();TI::add_char_out(STEPPER_SUBCANAL);TI::add_char_out(0);TI::add_char_out(0);\
             TI::add_char_out(i);TI::add_char_out(j);TI::send_packet();
 
-#include "../../config.h"
+#include <config.h>
 
 #undef STEPPER_DATA
 
@@ -245,7 +247,7 @@ void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
             TI::add_char_out(i);TI::add_char_out(group_size);if (s0!=-1) TI::add_char_out(s0);\
             if (s1!=-1) TI::add_char_out(s1);if (s2!=-1) TI::add_char_out(s2);TI::send_packet();
 
-#include "../../config.h"
+#include <config.h>
 
 #undef CARTESIAN_GROUP
 
@@ -263,6 +265,7 @@ void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
 
 void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
 
+    /* TODO
     if (!size--) return;
     char sub_canal = *(data++);
     float f;
@@ -289,7 +292,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
             return;
 
         case 3 : //Save profile
-            EEPROMStorage::saveProfile();
+            EEPROMStorage::write_profile();
             TI::prepare_EEPROM_packet();
             TI::add_char_out(3);
             TI::add_float_out(0);
@@ -297,7 +300,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
             return;
 
         case 4 : //Restore default profile;
-            EEPROMStorage::setDefaultProfile();
+            EEPROMStorage::set_default_profile();
             TI::prepare_EEPROM_packet();
             TI::add_char_out(4);
             TI::add_float_out(0);
@@ -306,92 +309,33 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
             return;
     }
 
+     */
 }
 
 
 void TreeInterfaceCommands::action(char *, uint8_t) {
 
-    float coords[NB_AXIS]{0};
-
-    coords[2] = 250;
 
 
+    Machine::line_to(0, 50, 50, 0, 150);
+    Machine::line_to(0, 100, 100, 0, 150);
 
-    MachineInterface::set_speed_group(0);
+    Machine::home_carriages(100);
 
-    MachineInterface::set_speed_for_group(0, 400);
+    Machine::line_to(1, 50, 50, 0, 150);
+    Machine::line_to(1, 100, 100, 0, 150);
 
-    MachineInterface::set_energy_density(2, 1);
+    Machine::home_carriages(100);
 
-    MachineInterface::linear_movement(coords);
+    Machine::line_to(2, 50, 50, 0, 150);
+    Machine::line_to(2, 100, 100, 0, 150);
 
+    Machine::home_carriages(100);
 
-    coords[0] = 140;
-    coords[1] = 140;
-    coords[2] = 140;
-    coords[3] = 140;
-    coords[4] = 140;
-    coords[5] = 140;
-    coords[6] = 140;
-    coords[7] = 140;
-    coords[8] = 140;
+    Machine::line_to(3, 50, 50, 0, 150);
+    Machine::line_to(3, 100, 100, 0, 150);
 
-
-    MachineInterface::set_speed_group(0);
-
-    MachineInterface::set_speed_for_group(0, 800);
-
-    MachineInterface::set_energy_density(2, 1);
-
-    MachineInterface::linear_movement(coords);
-
-
-    coords[0] = 80;
-    coords[1] = 120;
-    coords[2] = 80;
-    coords[3] = 120;
-    coords[4] = 120;
-    coords[5] = 80;
-    coords[6] = 120;
-    coords[7] = 80;
-    coords[8] = 120;
-
-    MachineInterface::set_speed_group(0);
-
-    MachineInterface::set_speed_for_group(0, 800);
-
-    MachineInterface::set_energy_density(0, 2);
-    MachineInterface::set_energy_density(1, 0.2);
-    MachineInterface::set_energy_density(2, 0);
-
-    MachineInterface::linear_movement(coords);
-
-
-    coords[0] = 20;
-    coords[1] = 25;
-    coords[2] = 30;
-    coords[3] = 35;
-    coords[4] = 37.5;
-    coords[5] = 40;
-    coords[6] = 45;
-    coords[7] = 50;
-    coords[8] = 55;
-
-    MachineInterface::set_speed_group(0);
-
-    MachineInterface::set_speed_for_group(0, 800);
-
-    MachineInterface::set_energy_density(0, 3);
-    MachineInterface::set_energy_density(1, 0.3);
-    MachineInterface::set_energy_density(2, 0.03);
-
-    MachineInterface::linear_movement(coords);
-
-    coords[0] = 80;
-    coords[1] = 120;
-
-    MachineInterface::linear_movement(coords);
-
+    Machine::home_carriages(100);
 
     CI::echo("EXIT");
 

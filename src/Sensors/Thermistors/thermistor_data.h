@@ -44,7 +44,7 @@
  *      KTY82-210 Thermistor (Philips)              |       KTY82210
  *
  *
- * You must write a line like the following in your config.h to enable a particular thermistor, named [NAME] :
+ * You must write a line like the following in your config_files.h to enable a particular thermistor, named [NAME] :
  *
  * THEMRISTOR([indice], [NAME]_TABLE, [NAME]_SIZE)
  *      where indice is the thermistor indice, and [NAME] is the thermistor name
