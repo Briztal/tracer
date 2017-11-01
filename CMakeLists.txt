@@ -51,4 +51,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} src/EEPROMStorage/_eeprom_storage_data.h src/EEPROMStorage/EEPROMInterface.cpp src/EEPROMStorage/EEPROMInterface.h src/StepperControl/Machine.cpp src/StepperControl/Machine.h src/TaskScheduler/_task_scheduler_data.h src/interfaces.cpp src/Project/Config/geometry.h src/DataStructures/ArgumentsContainer.cpp src/DataStructures/ArgumentsContainer.h src/Project/InterfaceCommands/_interface_data.h)
+add_executable(${PROJECT_NAME} ${SRC_LIST} src/EEPROMStorage/_eeprom_storage_data.h src/EEPROMStorage/EEPROMInterface.cpp src/EEPROMStorage/EEPROMInterface.h src/StepperControl/Machine.cpp src/StepperControl/Machine.h src/TaskScheduler/_task_scheduler_data.h src/interfaces.cpp src/Project/Config/geometry.h src/DataStructures/ArgumentsContainer.cpp src/DataStructures/ArgumentsContainer.h src/Project/InterfaceCommands/_interface_data.h src/EEPROMStorage/EEPROMNode.cpp src/EEPROMStorage/EEPROMNode.h src/DataStructures/StringParser.cpp src/DataStructures/StringParser.h src/TaskScheduler/task_state_t.h src/Sensors/Thermistors/thermistor_data.h)

@@ -27,7 +27,6 @@
 #include <hardware_language_abstraction.h>
 
 
-
 /*
  * The EEPROM Storage Class
  *
@@ -105,7 +104,7 @@ public :
     static pid_data_t *const pids_data;
 
     //Control loops data
-    static uint16_t *const loop_periods;
+    static float *const loop_periods;
 
 #endif
 

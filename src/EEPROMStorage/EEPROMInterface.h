@@ -1,30 +1,53 @@
-//
-// Created by root on 10/10/17.
-//
+/*
+  EEPROMInterface.h - Part of TRACER
 
-#ifdef suus
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #ifndef TRACER_EEPROMINTERFACE_H
 #define TRACER_EEPROMINTERFACE_H
 
 
+#include <cstdint>
+#include <Interfaces/TerminalInterface/TerminalNode.h>
+#include "EEPROMNode.h"
+
 class EEPROMInterface {
 
-    static float read(int8_t *data, uint8_t size);
-
-    static float write(int8_t *data, uint8_t size);
+public:
 
     static void print_stored_data();
 
-    static void send_structure();
+    static EEPROMNode *build_tree();
 
-    static void read_data(uint16_t *indice, uint16_t size, void *data);
+    static bool read_data_by_string(char *id_string, uint8_t size, float *f);
 
-    static void write_data(uint16_t *indice, uint16_t size, void *data);
+    static void write_data_by_string(char *id_string, uint8_t size, float value);
 
+
+private:
+
+    static EEPROMNode *eeprom_tree;
+
+    static bool search_tree_by_string(char *id_string, uint8_t size, float **data);
+
+    static void search_log(EEPROMNode *node);
 };
 
 
 #endif //TRACER_EEPROMINTERFACE_H
 
-#endif

@@ -84,8 +84,9 @@ void StepperController::enable(sig_t signature) {
 void StepperController::enable() {
 
 
-#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ...) \
+#define STEPPER(i, sig, rel, ps, pd, dp,  pinPower, ...) \
     digital_write(pinPower, LOW);\
+    digital_write(13, LOW);
 
 #include <config.h>
 
@@ -103,7 +104,7 @@ void StepperController::enable() {
 void StepperController::disable() {
 
 
-#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pd, dp,  pinPower, ...) \
     digital_write(pinPower, HIGH);\
 
 

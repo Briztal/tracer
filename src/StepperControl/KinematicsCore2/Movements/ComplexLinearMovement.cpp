@@ -22,6 +22,7 @@
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
+
 #include "ComplexLinearMovement.h"
 
 #include <interface.h>
@@ -30,12 +31,12 @@
 
 
 /*
- * prepare_movement : this function takes a destination position in argument and prepares a linear movement,
+ * plan_movement : this function takes a destination position in argument and prepares a linear movement,
  *      from the current position to the given destination, if the required movement is not a null movement.
  *
  */
 
-bool ComplexLinearMovement::prepare_movement(const float *const destination) {
+task_state_t ComplexLinearMovement::plan_movement(const float *const destination) {
 
 
 
@@ -63,8 +64,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
         //Send an error message.
         CI::echo("ERROR : THE MACHINE IS ALREADY AT ITS DESTINATION POSITION THE MOVEMENT WILL BE IGNORED.");
 
-        //Fail
-        return false;
+        return complete;
 
     }
 
@@ -79,23 +79,26 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
     pre_process_max_axis = max_axis;
 
     //Wait for the enqueuing to be authorised in TrajectoryTracer.
-    while(TrajectoryTracer::enqueue_unauthorised());
+    while (TrajectoryTracer::enqueue_unauthorised());
 
 
-    //Enqueue the movement in the trajectory executer, and eventually start the movement routine and terminate
-    if (TrajectoryTracer::enqueue_movement(0, max_distance, initialise_movement, finalise_movement,
-                                                    get_position, get_real_time_position)) {
+    //The state of the enqueue must be saved, as in determies if the task must be reprogrammed
+    task_state_t enqueue_state = TrajectoryTracer::enqueue_movement(0, max_distance, initialise_movement,
+                                                                    finalise_movement, get_position,
+                                                                    get_real_time_position);
+
+    //If the enqueue has complete,
+    if (enqueue_state == complete) {
 
         //Push the local data
         linear_data_queue.enqueue();
 
+        //Update the final position
         MachineInterface::update_position(destination);
-
-        return true;
 
     }
 
-    return false;
+    return enqueue_state;
 
 }
 
@@ -105,7 +108,7 @@ bool ComplexLinearMovement::prepare_movement(const float *const destination) {
 /*
  * get_distances : this function computes the current move's step_distances.
  *
- * At the same time, it determines the maximum axis, and return "the current move is a null prepare_movement".
+ * At the same time, it determines the maximum axis, and return "the current move is a null plan_movement".
  *
  */
 

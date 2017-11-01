@@ -44,11 +44,9 @@ typedef struct pid_data_t {
 #endif
 
 
-
 typedef struct continuous_data_t {
     float max;
 } continuous_data_t;
-
 
 
 typedef struct servo_data_t {
@@ -59,21 +57,12 @@ typedef struct servo_data_t {
 
 //Custom Variables
 
-//Custom data
-#define EEPROM_BOOL(name, default_value) static bool name;
-#define EEPROM_CHAR(name, default_value) static char name;
-#define EEPROM_INT(name, default_value) static int name;
-#define EEPROM_LONG(name, default_value) static int32_t name;
-#define EEPROM_FLOAT(name, default_value) static float name;
+#define EEPROM_VARIABLE(name, default_value) float name = default_value;
 
 typedef struct custom_data_t {
 #include "../config.h"
 } custom_data_t;
 
-#undef EEPROM_BOOL
-#undef EEPROM_CHAR
-#undef EEPROM_INT
-#undef EEPROM_LONG
-#undef EEPROM_FLOAT
+#undef EEPROM_VARIABLE
 
 #endif //TRACER_EEPROM_STORAGE_DATA_H

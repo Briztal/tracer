@@ -19,22 +19,37 @@
 */
 
 #include "Thermistors.h"
+#include <hardware_language_abstraction.h>
+#include <interface.h>
 
-#define THERMISTOR(i, tab, size)\
-const int16_t therm_table_##i[size][2] = tab;\
-int16_t Thermistors::get_temperature_##i(const int16_t read_value) {\
-    return get_temperature(read_value, (const int16_t *)therm_table_##i, therm_size_##i, index_##i);\
+void Thermistors::init() {
+
+#define THERMISTOR(i, pin, tab, size)\
+    pin_mode_input(pin);
+
+#include <config.h>
+
+#undef THERMISTOR
+
+}
+
+#define THERMISTOR(i, pin, tab, size)\
+const float therm_table_##i[size][2] = tab;\
+float Thermistors::get_temperature_##i(const int16_t read_value) {\
+    return get_temperature(read_value, (const float *)therm_table_##i, therm_size_##i, index_##i);\
+}\
+float Thermistors::get_temperature_##i() {\
+    int16_t read_value = (int16_t)analog_read(pin);\
+    return get_temperature_##i(read_value);\
 }\
 uint8_t tttidx##i = 0;\
 uint8_t *Thermistors::index_##i = &tttidx##i;\
 const uint8_t Thermistors::therm_size_##i = size;
 
-#include "../../config.h"
+#include <config.h>
 
 #undef THERMISTOR
 
-const int16_t arr[2][2] = {{1,2},{3,4}};/* tab;*/\
-int16_t ** Thermistors::therm_table = (int16_t **) arr;\
 
 /*
  * get_temperature : this function determines the temperature of a thermistor, given  :
@@ -54,17 +69,13 @@ int16_t ** Thermistors::therm_table = (int16_t **) arr;\
  *
  */
 
-#define read_t int16_t
-#define index_t uint8_t
-#define temp_t int16_t
 
-int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *const table, const index_t size, index_t *v_index) {
-    index_t index = *v_index;
+float Thermistors::get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index) {
+    uint8_t index = *v_index;
 
+    int16_t value, last_value = value = (int16_t) table[index << 1];
 
-    read_t value, last_value = value = table[index<<1];
-
-    temp_t final_temp;
+    float final_temp;
 
     if (last_value == read_value) {
 
@@ -87,7 +98,7 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
 
             //Update value and last_value
             last_value = value;
-            value = table[index<<1];
+            value = (int16_t) table[index << 1];
 
             //if the current case is the read_output value  2<<3+2
             if (value == read_value) {
@@ -129,7 +140,7 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
 
             //Update value and last_value
             last_value = value;
-            value = table[index<<1];
+            value = (int16_t) table[index << 1];
 
             //if the current case is the read_output value
             if (value == read_value) {
@@ -162,7 +173,7 @@ int16_t Thermistors::get_temperature(const read_t read_value, const int16_t *con
  *  this function retrieves y the ordinate of P.
  */
 
-int16_t Thermistors::linear_approximation(const int16_t x0, const int16_t x1, const int16_t x, const int16_t y0, const int16_t y1) {
-    return y0 + (int16_t) ((float)(x-x0)*(float)(y1-y0)/float(x1-x0));
+float Thermistors::linear_approximation(const int16_t x0, const int16_t x1, const int16_t x, const float y0, const float y1) {
+    return y0 + ((float)(x-x0)*(y1-y0)/float(x1-x0));
 }
 

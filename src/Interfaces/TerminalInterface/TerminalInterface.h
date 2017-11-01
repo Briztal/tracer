@@ -28,7 +28,7 @@
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
 #include "Project/Config/terminal_interface_config.h"
-#include "DataStructures/Node.h"
+#include "TerminalNode.h"
 
 
 #define UI TerminalInterface
@@ -43,11 +43,11 @@ public :
     static void init();
 
 
-    //--------------------------------------Serial read --------------------------------------
+    //--------------------------------------Serial read_integer --------------------------------------
 
 public :
 
-    //Function to read the received data over the serial.
+    //Function to read_integer the received data over the serial.
     static void read_serial();
 
 
@@ -58,15 +58,12 @@ private :
 
     //The command size, and a saving variable.
     static unsigned char command_size;
-    static unsigned char saved_command_size;
 
     //The input data buffer.
     static char *data_in;
     static char *const data_in_0;
 
-
     static ArgumentsContainer arguments_storage;
-
 
 
 private :
@@ -78,12 +75,12 @@ private :
 
 private:
 
-    static Node *command_tree;
+    static TerminalNode *command_tree;
 
     static String *tree_summary;
 
     //Function to generate the tree used to parse commands
-    static Node *generate_tree();
+    static TerminalNode *generate_tree();
 
     static uint8_t get_sub_nodes_nb(uint16_t command_index);
 
@@ -104,19 +101,7 @@ public :
     static void validate_task(uint8_t task_index);
 
     //Function to show a log message if the execution failed.
-    static void log_tree_style(Node *log_node, bool log_args);
-
-    //--------------------------------------Words extraction----------------------------------
-
-private :
-
-    //Function to extract next word of the command.
-    static unsigned char get_next_word();
-
-    //The word buffer.
-    static char *word_buffer;
-    static char *const word_buffer_0;
-
+    static void log_tree_style(TerminalNode *log_node, bool log_args);
 
     //------------------------------------Standard functions-----------------------------
 

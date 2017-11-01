@@ -82,7 +82,7 @@ void hl_init();
 
 #define str(t) String(t)
 
-#define str_to_float(s) s.toFloat();
+#define str_to_float(s) strtof(s, NULL);
 
 
 //----------------------------------------------------EEPROM------------------------------------------------------------
@@ -97,14 +97,17 @@ void hl_init();
 
 #define digital_read(i) digitalReadFast(i)
 
-#define analog_read(i) analoglRead(i)
+#define analog_read(i) analogRead(i)
 
 #define analog_write(i, v) analogWrite(i, v)
+
+#define pin_mode_input(i) pinMode(i, INPUT);
 
 #define pin_mode_output(i) pinMode(i, OUTPUT);
 
 
 //-----------------------------------------------------MATH-------------------------------------------------------------
+
 
 #define sqrt_float(f) sqrtf(f)
 #define sqrt_long(l) sqrtf(l)

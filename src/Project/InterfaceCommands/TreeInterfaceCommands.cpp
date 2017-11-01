@@ -276,7 +276,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
             return;
 
         case 1 : //Read case
-            f = EEPROMStorage::read(data, size);
+            f = EEPROMStorage::read_integer(data, size);
             TI::prepare_EEPROM_packet();
             TI::add_char_out(1);
             TI::add_float_out(f);
@@ -344,7 +344,7 @@ void TreeInterfaceCommands::action(char *, uint8_t) {
 
 void TreeInterfaceCommands::home(char *, uint8_t) {
 
-    //HomingMovement::prepare_movement();
+    //HomingMovement::plan_movement();
 
 }
 

@@ -15,7 +15,7 @@
  *
  *  Parameters passed update all variables used to compute positions :
  *      - min and max, the minimum and the maximum of index (beginning and ending of movement)
- *      - incr : the index increment for the first prepare_movement (pre computed and supposedly accurate)
+ *      - incr : the index increment for the first plan_movement (pre computed and supposedly accurate)
  *      - trajectory_function : the function that actually computes stepper positions.
  *
  */

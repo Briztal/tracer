@@ -78,10 +78,12 @@
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
+
 #include <sanity_check.h>
 
 #include <DataStructures/Queue.h>
 #include "_task_scheduler_data.h"
+
 
 class TaskScheduler {
 
@@ -91,9 +93,9 @@ public:
 
     static void run();
 
-    static uint8_t add_prioritary_procedure(bool (*f)(void *));
+    static uint8_t add_prioritary_procedure(task_state_t (*f)(void *));
 
-    static uint8_t add_procedure(bool (*f)(void *), uint8_t type);
+    static uint8_t add_procedure(task_state_t (*f)(void *), uint8_t type);
 
     static void add_task(task_t task);
 

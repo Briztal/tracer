@@ -27,6 +27,7 @@
 
 
 #include <DataStructures/Queue.h>
+#include <TaskScheduler/task_state_t.h>
 #include "StepperControl/_kinematics_data.h"
 
 class ComplexLinearMovement {
@@ -36,7 +37,7 @@ class ComplexLinearMovement {
 public:
 
     //The function to call to trace a line from the current position to the destination provided in argument.
-    static bool prepare_movement(const float *const destination);
+    static task_state_t plan_movement(const float *const destination);
 
 
 private :

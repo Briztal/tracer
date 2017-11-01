@@ -37,7 +37,7 @@ private:
     uint8_t nb_args;
 
     //The actual arguments container.
-    char *args;
+    char *arguments;
 
     //The number of spaces available in the container.
     uint8_t nb_spaces;

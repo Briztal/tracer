@@ -71,7 +71,7 @@ void EEPROMStorage::write_data(uint16_t *index, size_t size, uint8_t *const data
 /*
  * extract_profile : this function reads the entire profile in the EEPROM.
  * 
- *  Returns true if the profile was correctly read, returns false otherwise.
+ *  Returns true if the profile was correctly read_integer, returns false otherwise.
  *  
  */
 
@@ -271,7 +271,6 @@ void EEPROMStorage::set_default_profile() {
 
 #undef SERVO
 
-
     //---------------------------------------------Custom---------------------------------------------
 
     custom_data = custom_data_t();
@@ -304,8 +303,8 @@ pid_data_t tpdt[NB_PIDS];
 pid_data_t *const m::pids_data = tpdt;
 
 //Loops
-uint16_t tlp[NB_LOOPS];
-uint16_t *const m::loop_periods = tlp;
+float tlp[NB_LOOPS];
+float *const m::loop_periods = tlp;
 
 #endif
 

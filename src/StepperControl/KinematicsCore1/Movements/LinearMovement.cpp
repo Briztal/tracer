@@ -55,7 +55,7 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     //Move choice : a m
     if (absolute_distances[max_axis] < PROCESSING_STEPS) {
-        //max distance < steps per elementary-prepare_movement -> only one micro enqueue_movement
+        //max distance < steps per elementary-plan_movement -> only one micro enqueue_movement
         //TODO micro_move(absolute_distances);
     } else {
         //A enqueue_movement is indexed on an int value -> max distance must not be > INT_OVF

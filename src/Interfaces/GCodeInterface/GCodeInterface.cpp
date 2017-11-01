@@ -42,9 +42,9 @@ void GCodeInterface::read_serial() {
     while(gcode_interface_link_t::available()) {
 
         //Read the serial
-        char read_char = gcode_interface_link_t::read();
+        char read_char = gcode_interface_link_t::read_integer();
 
-        //If the recieved char is a line feed or a carriage return
+        //If the recieved char is a line feed or a carriage_id return
         if ((read_char == 10) || (read_char == 13)) {
 
             //If a char has effectively been received

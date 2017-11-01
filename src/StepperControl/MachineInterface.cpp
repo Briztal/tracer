@@ -35,6 +35,7 @@
 #elif (KERNEL == 1)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #include <Project/Config/geometry.h>
+#include <TaskScheduler/task_state_t.h>
 
 #elif (KERNEL == 2)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
@@ -47,14 +48,14 @@
  *      realised by the selected kernel.
  */
 
-void MachineInterface::linear_movement(float *destination) {
+task_state_t MachineInterface::linear_movement(float *destination) {
 
 #if (KERNEL == 0)
-    LinearMovement::prepare_movement(destination);
+    return LinearMovement::plan_movement(destination);
 #elif (KERNEL == 1)
-    ComplexLinearMovement::prepare_movement(destination);
+    return ComplexLinearMovement::plan_movement(destination);
 #elif (KERNEL == 2)
-    ComplexLinearMovement::prepare_movement(destination);
+    return ComplexLinearMovement::plan_movement(destination);
 #endif
 
 }
@@ -161,13 +162,22 @@ void MachineInterface::set_speed_group(uint8_t speed_group) {
  *
  */
 
-void MachineInterface::set_speed_for_group(uint8_t speed_group, float new_speed) {
+task_state_t MachineInterface::set_speed_for_group(uint8_t speed_group, float new_speed) {
+
+    //If the current speed if the new speed, nothing to change.
+    if (speeds[speed_group] == new_speed) {
+        return null_task;
+    }
 
     //Get the maximum regulation_speed for this group
     float max_speed = max_speeds[speed_group];
 
+
     //update speeds with the minimum of regulation_speed and the maximum regulation_speed
     speeds[speed_group] = min(max_speed, new_speed);
+
+    //Task completed
+    return complete;
 
 }
 
@@ -303,7 +313,15 @@ float t_hl_pos[NB_AXIS]{0};
 float *m::current_position = t_hl_pos;
 
 //Speeds
-float t_speeds[NB_CARTESIAN_GROUPS];
+float t_speeds[NB_CARTESIAN_GROUPS+1] = {
+
+#define CARTESIAN_GROUP(...) 100,
+
+#include <config.h>
+
+#undef CARTESIAN_GROUP
+        //end the array
+        0};
 float *const m::speeds = t_speeds;
 
 uint8_t m::speed_group;

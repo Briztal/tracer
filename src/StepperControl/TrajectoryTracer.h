@@ -38,6 +38,7 @@
 
 #include "_kinematics_data.h"
 #include <DataStructures/Queue.h>
+#include <TaskScheduler/task_state_t.h>
 
 class TrajectoryTracer {
 
@@ -71,7 +72,7 @@ static sig_t *saved_elementary_signatures;
 //the trajectory array : contains the signature order.
 static const uint8_t *const trajectory_array;
 
-//The trajectory indice (signature indice in the movement) for the current move and the next prepare_movement
+//The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
 static uint8_t saved_trajectory_index;
 private :
 
@@ -89,7 +90,7 @@ private :
 
 private :
 
-    //The trajectory indice (signature indice in the movement) for the current move and the next prepare_movement
+    //The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
     static uint8_t trajectory_index;
 
     static sig_t saved_direction_signature;
@@ -128,9 +129,9 @@ public :
     static bool enqueue_unauthorised();
 
     //new movement enqueueing
-    static bool enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
-                                 void (*trajectory_function)(float, float *),
-                                 void (*pre_process_trajectory_function)(float, float *));
+    static task_state_t enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
+                                         void (*trajectory_function)(float, float *),
+                                         void (*pre_process_trajectory_function)(float, float *));
 
 
 private:

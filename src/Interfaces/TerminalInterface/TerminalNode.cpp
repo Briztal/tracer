@@ -18,13 +18,12 @@
 
 */
 
-#include "Node.h"
+#include "TerminalNode.h"
 
-Node::Node(string_t * name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log, bool (*f)(void *)) :
+TerminalNode::TerminalNode(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log,
+                           task_state_t (*f)(void *)) :
+        sub_nodes_nb(sub_nodes_nb), name(name), args_log(args_log), desc_log(desc_log), function(f) {
 
-        sub_nodes_nb(sub_nodes_nb), name(name), args_log(args_log), desc_log(desc_log), function(f)
-
-{
-    sub_nodes = (Node **) malloc(sub_nodes_nb * sizeof(Node *));
+    sub_nodes = (TerminalNode **) malloc(sub_nodes_nb * sizeof(TerminalNode *));
 
 }

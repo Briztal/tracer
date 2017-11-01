@@ -28,6 +28,7 @@
 
 #include <config.h>
 #include <stdint.h>
+#include <TaskScheduler/task_state_t.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -42,7 +43,7 @@ class MachineInterface {
 public:
 
     //The basic linear movement, from the current position to the destination position.
-    static void linear_movement(float *destination);
+    static task_state_t linear_movement(float *destination);
 
     //If the selected kernel is kernel2, then we must register other movements.
     //TODO
@@ -89,7 +90,7 @@ public :
     static float get_speed();
 
     //The function to set the regulation_speed for the provided regulation_speed group.
-    static void set_speed_for_group(uint8_t speed_group, float new_speed);
+    static task_state_t set_speed_for_group(uint8_t speed_group, float new_speed);
 
     //function to compute the high level movement distance for a particular speed group.
     static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);

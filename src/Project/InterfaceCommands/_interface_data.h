@@ -3,11 +3,11 @@
 #define TRACER_INTERFACE_DATA_H
 
 #include <stdint.h>
-#include <DataStructures/Node.h>
+#include <Interfaces/TerminalInterface/TerminalNode.h>
 
 typedef struct terminal_interface_data_t {
     uint8_t arguments_index;
-    Node * node;
+    TerminalNode * node;
 } interface_data_t;
 
 

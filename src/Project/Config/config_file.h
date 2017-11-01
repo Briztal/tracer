@@ -88,7 +88,11 @@ TASK_SEQUENCE(2, 10)
 
 #ifdef THERMISTOR
 
-THERMISTOR(0, B57540G0104F000_TABLE, B57540G0104F000_SIZE)
+THERMISTOR(0,   23,     SEMITEC_100_47_TABLE,  SEMITEC_100_47_SIZE)
+THERMISTOR(1,   22,     SEMITEC_100_47_TABLE,  SEMITEC_100_47_SIZE)
+THERMISTOR(2,   21,     SEMITEC_100_47_TABLE,  SEMITEC_100_47_SIZE)
+THERMISTOR(3,   20,     SEMITEC_100_47_TABLE,  SEMITEC_100_47_SIZE)
+THERMISTOR(4,   19,     BED100K_TABLE,  BED100K_SIZE)
 
 #endif
 
@@ -169,13 +173,16 @@ BINARY(1, binary2, 9, 1)
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
 
-#define NB_CONTINUOUS 3
+#define NB_CONTINUOUS 6
 
 #ifdef CONTINUOUS
 
-CONTINUOUS(0, continuous1, 8, 600)
-CONTINUOUS(1, continuous2, 8, 600)
-CONTINUOUS(2, continuous3, 8, 600)
+CONTINUOUS(0,   hotend0,  2,    100)
+CONTINUOUS(1,   hotend1,  3,    100)
+CONTINUOUS(2,   hotend2,  4,    100)
+CONTINUOUS(3,   hotend3,  5,    100)
+CONTINUOUS(4,   hotbed,   6,    100)
+CONTINUOUS(5,   cooling,  A26,  100)
 
 #endif
 
@@ -184,12 +191,10 @@ CONTINUOUS(2, continuous3, 8, 600)
  * SERVO(i, name, dataPin, minValue, maxValue)
  */
 
-#define NB_SERVOS 3
+#define NB_SERVOS 0
 #ifdef SERVO
 
-SERVO(0, servo, 4, 0, 1)
-SERVO(1, servo2, 4, 0, 1)
-SERVO(2, servo3, 4, 0, 1)
+//SERVO(0, servo, 4, 0, 1)
 
 #endif
 
@@ -293,31 +298,28 @@ AXIS(   8,  'D')
 
 #ifdef STEPPER
 
-//#define STEPPER(i, j, r, sig, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
+//#define STEPPER(i, sig, r, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
 
 //TODO DOC
+
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
-STEPPER(0,  1,      0,      0,      1,      LOW,    2,      LOW,    3,      HIGH,   0,      HIGH)
-STEPPER(1,  2,      0,      4,      5,      LOW,    6,      LOW,    7,      HIGH,   0,      HIGH)
-STEPPER(2,  4,      0,      8,      9,      LOW,    10,     LOW,    11,     HIGH,   0,      HIGH)
-STEPPER(3,  8,      0,      13,     14,     LOW,    15,     LOW,    16,     HIGH,   0,      HIGH)
-STEPPER(4,  16,     0,      17,     18,     LOW,    19,     LOW,    20,     HIGH,   0,      HIGH)
-STEPPER(5,  32,     1,      21,     22,     LOW,    23,     LOW,    0,      HIGH,   0,      HIGH)
-STEPPER(6,  64,     1,      24,     25,     LOW,    26,     LOW,    0,      HIGH,   0,      HIGH)
-STEPPER(7,  128,    1,      27,     28,     LOW,    29,     LOW,    0,      HIGH,   0,      HIGH)
-STEPPER(8,  256,    1,      30,     31,     LOW,    32,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(0,  1,      0,      7,      8,      LOW,    9,      LOW,    A21,    HIGH,   0,      HIGH)
+STEPPER(1,  2,      0,      10,     11,     LOW,    12,     LOW,    A22,    HIGH,   0,      HIGH)
+STEPPER(2,  4,      0,      18,     17,     LOW,    16,     LOW,    A10,    HIGH,   0,      HIGH)
+STEPPER(3,  8,      0,      15,     14,     LOW,    13,     LOW,    A11,    HIGH,   0,      HIGH)
+STEPPER(4,  16,     0,      24,     25,     LOW,    26,     LOW,    A25,    HIGH,   0,      HIGH)
+STEPPER(5,  32,     1,      27,     28,     LOW,    29,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(6,  64,     1,      30,     31,     LOW,    32,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(7,  128,    1,      39,     38,     LOW,    37,     LOW,    0,      HIGH,   0,      HIGH)
+STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH,   0,      HIGH)
 
 #endif
 
 
-/*
- *
- */
 #ifdef STEPPER_DATA
 
 //STEPPER_DATA(i, j, si, st, sp, a)
 
-#define TEMP_ACC 16000
 //TODO REMOVE SIZE
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
 STEPPER_DATA(   0,  '0',    170,    80.16,  1000,    1000,      20.)
@@ -411,8 +413,8 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
  */
 
 
-#if defined(EEPROM_BOOL) && defined(EEPROM_CHAR) && defined(EEPROM_INT) && defined(EEPROM_LONG) && defined(EEPROM_FLOAT)
+#if defined(EEPROM_VARIABLE)
 
-EEPROM_FLOAT(maximum_speed, 500);
+EEPROM_VARIABLE(maximum_speed, 500);
 
 #endif

@@ -22,7 +22,7 @@
 #define TRACER_TREEMANAGER_H
 
 
-#include <DataStructures/Node.h>
+#include <Interfaces/TerminalInterface/TerminalNode.h>
 
 class TreeManager {
 
@@ -30,7 +30,7 @@ class TreeManager {
 
 public:
 
-    TreeManager(Node *default_tree);
+    TreeManager(TerminalNode *default_tree);
 
 
     //---------------------------------------------------Constructor----------------------------------------------------
@@ -47,21 +47,21 @@ public:
     void edit_choice_tree_labels(uint8_t choice, String *name, String *desc, String *args);
 
     //Method to edit the functions of the choice tree.
-    void edit_choice_tree_functions(bool (*f_next)(void *), bool (*f_back)(void *), bool (*f_abort)(void *));
+    void edit_choice_tree_functions(task_state_t (*f_next)(void *), task_state_t (*f_back)(void *), task_state_t (*f_abort)(void *));
 
     //----------------------------------------------------Tree data-----------------------------------------------------
 
 public:
 
-    const Node* get_current_tree();
+    const TerminalNode* get_current_tree();
 
 private:
 
-    Node *default_tree;
+    TerminalNode *default_tree;
 
-    Node *current_tree;
+    TerminalNode *current_tree;
 
-    Node *choice_tree;
+    TerminalNode *choice_tree;
 
 
     //-------------------------------------------------Tree generation--------------------------------------------------

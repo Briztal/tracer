@@ -27,9 +27,10 @@
 #include "TerminalInterface.h"
 #include <interface.h>
 #include <Project/InterfaceCommands/_interface_data.h>
+#include <DataStructures/StringParser.h>
 #include "Project/InterfaceCommands/TerminalInterfaceCommands.h"
 #include "../../hardware_language_abstraction.h"
-#include "DataStructures/Node.h"
+#include "TerminalNode.h"
 
 
 /*
@@ -37,11 +38,6 @@
  *
  */
 void UI::init() {
-
-    pinMode(13, OUTPUT);
-
-    digitalWriteFast(13, HIGH);
-    //digitalWrite(13, !digitalRead(13));
 
     //Initialise the serial
     terminal_interface_link_t::begin();
@@ -72,16 +68,12 @@ void TerminalInterface::echo(const string_t msg) {
 
 void TerminalInterface::read_serial() {
 
-
-    pinMode(13, OUTPUT);
-    digitalWriteFast(13, HIGH);
-
     while (terminal_interface_link_t::available()) {
 
         //Read the serial
         char read_char = terminal_interface_link_t::read();
 
-        //If the recieved char is a line feed or a carriage return
+        //If the recieved char is a line feed or a carriage_id return
         if ((read_char == 10) || (read_char == 13)) {
 
             //If a char has effectively been received
@@ -102,6 +94,7 @@ void TerminalInterface::read_serial() {
 
             //Append the read_output char to data_in
             *(data_in++) = read_char;
+
             command_size++;
         }
     }
@@ -119,7 +112,7 @@ void TerminalInterface::reset() {
 
 
 void TerminalInterface::prepare_execution() {
-    //Mark the end of the the recieved command
+    //Mark the end of the the received command
     *data_in = 0;
 
     //Display the revieved command
@@ -127,66 +120,22 @@ void TerminalInterface::prepare_execution() {
 
     //Setup and save the message state
     data_in = data_in_0;
-    saved_command_size = command_size;
 
 }
 
-
-/*
- * get_next_word : this function extracts the next word of the recieved command, and saves it in word_buffer.
- *
- */
-
-unsigned char TerminalInterface::get_next_word() {
-
-    word_buffer = word_buffer_0;
-
-    do {
-        //Stop the iteration if no more chars are available
-        if (!command_size--) {
-            *word_buffer = 0;
-            return 0;
-        }
-        //copy the current char and re-iterate if it is a space.
-    } while ((*word_buffer = *(data_in++)) == ' ');
-
-    //One non-space char has been added, so increment the size and the word buffer
-    unsigned char size = 1;
-    word_buffer++;
-
-    //local for the current char
-    char t;
-
-    //While there still are chars to process, and that the current char is not a space
-    while ((command_size) && ((t = *(data_in++)) != ' ')) {
-
-        //Append the char to the current word
-        *(word_buffer++) = t;
-
-        //Increment the size
-        size++;
-
-        command_size--;
-    }
-
-    //Mark the end of the word, for strcmp.
-    *word_buffer = 0;
-
-    return size;
-}
 
 //-----------------------------------------------Tree execution and log-------------------------------------------------
 
-Node *TerminalInterface::generate_tree() {
+TerminalNode *TerminalInterface::generate_tree() {
     uint16_t command_counter = 0;
 
     uint8_t root_sons_nb = get_sub_nodes_nb(command_counter++);
 
-    Node *root = new Node(new String("root"), root_sons_nb, new String("root"),  new String("none"), 0);
+    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"),  new String("none"), 0);
 
     //Initialise the current tree and the history.
-    Node *current_tree = root;
-    Node *tree_history[MAX_DEPTH];
+    TerminalNode *current_tree = root;
+    TerminalNode *tree_history[MAX_DEPTH];
 
     //Initialise the indices history
     uint8_t indices_history[MAX_DEPTH];
@@ -210,7 +159,7 @@ Node *TerminalInterface::generate_tree() {
     current_index = 0;\
     tree_history[depth] = current_tree;\
     tmp_nb = get_sub_nodes_nb(command_counter++);\
-    current_tree = new Node(new String(#name), tmp_nb, new String(#desc), new String(""), 0);\
+    current_tree = new TerminalNode(new String(#name), tmp_nb, new String(#desc), new String(""), 0);\
     depth++;
 
 
@@ -241,7 +190,7 @@ Node *TerminalInterface::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc, args)\
-    current_tree->sub_nodes[current_index++] = new Node(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::_##function);\
+    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::_##function);\
     command_counter++;
 
 #include "Project/Config/terminal_interface_config.h"
@@ -340,12 +289,13 @@ void TerminalInterface::execute_tree_style() {
     prepare_execution();
 
     //Initialise the current current_node to the root;
-    Node *current_node = command_tree;
-    Node *current_sub_node;
+    TerminalNode *current_node = command_tree;
+    TerminalNode *current_sub_node;
 
-    Node **sub_nodes = current_node->sub_nodes;
+    TerminalNode **sub_nodes = current_node->sub_nodes;
+
     //get the first word
-    get_next_word();
+    StringParser::get_next_word(&data_in, &command_size);
 
     uint8_t i;
 
@@ -358,11 +308,7 @@ void TerminalInterface::execute_tree_style() {
         const char* c = (*current_sub_node->name).c_str();
 
         //If the current word matches the current_node's name
-        if (!strcmp(c, word_buffer_0)) {
-
-
-            //Go to the lower level
-            get_next_word();
+        if (!strcmp(c, StringParser::word_buffer_0)) {
 
             //Re-init the current data
             current_node = current_sub_node;
@@ -370,6 +316,9 @@ void TerminalInterface::execute_tree_style() {
 
             //if the new node is not a leaf, check sub nodes
             if (current_node->sub_nodes_nb) {
+
+                //Go to the lower level
+                StringParser::get_next_word(&data_in, &command_size);
 
                 //check the new node
                 goto node_check;
@@ -394,7 +343,7 @@ void TerminalInterface::execute_tree_style() {
                     t.args = (void *)data;
                     t.task = current_node->function;
 
-                    //Schedule the tasl
+                    //Schedule the task
                     TaskScheduler::add_task(t);
 
                 }
@@ -422,11 +371,11 @@ void TerminalInterface::validate_task(uint8_t task_index) {
 
 
 //TODO COMMENT
-void TerminalInterface::log_tree_style(Node *log_node, bool log_args) {
+void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
 
     if (log_args) {
 
-        //If the args parsing failed, display the correct syntax for args
+        //If the arguments parsing failed, display the correct syntax for arguments
         echo("Usage : " + *log_node->name + " " + *log_node->args_log);
 
     } else {
@@ -438,7 +387,7 @@ void TerminalInterface::log_tree_style(Node *log_node, bool log_args) {
 
         //Fill it with the name and description of direct sub_nodes
         for (int i = 0; i < log_node->sub_nodes_nb; i++) {
-            Node * t = log_node->sub_nodes[i];
+            TerminalNode * t = log_node->sub_nodes[i];
             s += *t->name + "\t\t : " + *t->desc_log + "\n";
         }
 
@@ -454,15 +403,10 @@ void TerminalInterface::log_tree_style(Node *log_node, bool log_args) {
 
 
 unsigned char m::command_size = 0;
-unsigned char m::saved_command_size = 0;
 
 char tdatain_terminal[MAX_COMMAND_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
-
-char twrd[MAX_WORD_SIZE];
-char *m::word_buffer = twrd;
-char *const m::word_buffer_0 = twrd;
 
 ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_ARGS_SIZE, NB_PENDING_COMMANDS);
 
@@ -472,7 +416,7 @@ String *m::tree_summary = m::build_tree_summary();
 //Create the command tree summary
 
 //Build the command tree
-Node *m::command_tree = m::generate_tree();
+TerminalNode *m::command_tree = m::generate_tree();
 
 
 #undef m

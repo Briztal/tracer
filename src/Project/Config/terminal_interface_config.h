@@ -22,7 +22,7 @@
 #define MAX_COMMAND_SIZE 100
 
 //The maximal size of a word
-#define MAX_WORD_SIZE 20
+#define MAX_WORD_SIZE 40
 
 //The maximal size of the argument part
 #define MAX_ARGS_SIZE 50
@@ -43,16 +43,38 @@
 #define ALLOW_MULTIPLICITY(c, name)
 #endif
 
-//Insert your tree here
-CREATE_LEAF(demo, action, a simple demo with all axis, i)
-CREATE_LEAF(stress, stress, a repetitive command to show the kinetics limits, i)
-CREATE_LEAF(ex, home, home the machine, <dir>)
+
+//EEPROM
+GO_LOWER(eeprom, move the machine)
+CREATE_LEAF(read, eeprom_read, read a parameter in the EEPROM, eeprom_path)
+CREATE_LEAF(write, eeprom_write, write a parameter in the EEPROM, eeprom_path)
+CREATE_LEAF(reset, eeprom_reset, resets the EEPROM to its default state, none)
+CREATE_LEAF(print, eeprom_print, print the content of the EEPROM, none)
+GO_UPPER()
+
+//Movement
 GO_LOWER(move, move the machine)
-CREATE_LEAF(line, line, draw a line to the specified coordinates, <coordinates>)
+CREATE_LEAF(home, move_home, homes the machine using endstops, none)
+CREATE_LEAF(zero, move_zero, go to zero coordinates for all carriages, none)
+CREATE_LEAF(to, line_to, draw a line with the current carriage to the specified coordinates, x - y - z)
+CREATE_LEAF(of, line_of, draw a line with the current carriage to the specified offsets, x - y - z)
 GO_UPPER()
-GO_LOWER(setup, setup the machine)
-CREATE_LEAF(speed, speed, set the speed, <value>)
+
+//Setup
+GO_LOWER(set, setup machine parameters)
+CREATE_LEAF(carriage, set_carriage, set the current carriage and its speed, carriage_id - speed)
+CREATE_LEAF(speed, set_speed, set the speed for the specified carriage, carriage_id - value)
 GO_UPPER()
+
+//test
+GO_LOWER(test, various tests)
+CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed, none)
+CREATE_LEAF(temp, temp_test, reads temps on every thermistor, none)
+CREATE_LEAF(heater, heater_test, enables and disables every heaters, none)
+GO_UPPER()
+
+
+CREATE_LEAF(demo, action, a simple demo with all axis, i)
 
 #undef GO_LOWER
 #undef GO_UPPER

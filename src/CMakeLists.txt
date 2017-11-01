@@ -169,7 +169,7 @@ add_library(datastructures
         ${DP}/Queue.h
         ${DP}/Queue.cpp
 
-        DataStructures/Node.cpp DataStructures/Node.h)
+        Interfaces/TerminalInterface/TerminalNode.cpp Interfaces/TerminalInterface/TerminalNode.h)
 
 #-------------------------------------------------KERNELS---------------------------------------------------------------
 

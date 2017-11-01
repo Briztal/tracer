@@ -18,6 +18,7 @@
 PONEY
 */
 
+#include <Sensors/Thermistors/Thermistors.h>
 #include "../config.h"
 
 #ifdef ENABLE_STEPPER_CONTROL
@@ -44,6 +45,8 @@ void TaskScheduler::init() {
     hl_init();
 
     initialise_interfaces();
+
+    Thermistors::init();
 
 #ifdef ENABLE_STEPPER_CONTROL
     EEPROMStorage::init();
@@ -95,7 +98,7 @@ void TaskScheduler::add_task(task_t task) {
  *
  */
 
-uint8_t TaskScheduler::add_procedure(bool (*f)(void *), uint8_t type) {
+uint8_t TaskScheduler::add_procedure(task_state_t (*f)(void *), uint8_t type) {
 
     //Insert the task only if spaces are available
     if (pool_task_spaces) {
@@ -122,7 +125,7 @@ uint8_t TaskScheduler::add_procedure(bool (*f)(void *), uint8_t type) {
  *
  */
 
-uint8_t TaskScheduler::add_prioritary_procedure(bool (*f)(void *)) {
+uint8_t TaskScheduler::add_prioritary_procedure(task_state_t (*f)(void *)) {
 
     //Insert the task only if spaces are available
     if (pool_task_spaces) {
@@ -263,8 +266,6 @@ void TaskScheduler::process_task_pool() {
 
     pool_task_spaces = (uint8_t) TASK_POOL_SIZE - pool_task_nb;
 
-    delay(1000);
-
 }
 
 
@@ -379,8 +380,8 @@ void TaskScheduler::process_task_sequences_singular() {
 
 bool TaskScheduler::process_task(task_t *task) {
 
-    //call the function of the task by pointer, and provide the arguments of the task.
-    return (*(task->task))(task->args);
+    //call the function of the task by pointer, and provide the arguments of the task. return false if the task must be reprogrammed
+    return ((*(task->task))(task->args) != reprogram) ;
 
 }
 

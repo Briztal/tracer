@@ -24,6 +24,7 @@
 
 
 #include <cstdint>
+#include <TaskScheduler/task_state_t.h>
 
 class Machine {
 
@@ -34,26 +35,40 @@ public:
 
     static void disable_stepper_power();
 
+
     //-----------------------------------------------Movement-----------------------------------------------------------
 
 public:
 
     static void set_current_mode(uint8_t mode);
 
-    static void home_carriages(float speed);
+    static task_state_t zero_carriages();
 
-    static void line_to(uint8_t carriage, float x, float y, float z, float speed);
+    static task_state_t line_to(float x, float y, float z);
+
+    static task_state_t line_of(float x, float y, float z);
+
+    static task_state_t set_carriage(uint8_t carriage_id);
+
+    static task_state_t set_speed_for_carriage(uint8_t carriage_id, float speed);
+
+    static task_state_t set_carriage_and_speed(uint8_t carriage, float speed);
 
 
 private:
 
+    static float *const machine_coords;
+
     static uint8_t mode;
+
+    static uint8_t carriage_id;
 
     static float *const position;
 
-    static void mode_0(uint8_t carriage, float x, float y, float z, float speed);
+    static task_state_t mode_0(float x, float y, float z);
 
     static void sanity_check(float *hl_coords);
+
 };
 
 

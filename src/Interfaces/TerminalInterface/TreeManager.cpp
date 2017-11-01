@@ -26,15 +26,15 @@
  *
  */
 
-TreeManager::TreeManager(Node *default_tree) : current_tree(default_tree), default_tree(default_tree) {
+TreeManager::TreeManager(TerminalNode *default_tree) : current_tree(default_tree), default_tree(default_tree) {
 
 
     //building the choice tree
-    choice_tree = new Node(new String(), 3, new String(), new String(), 0);
+    choice_tree = new TerminalNode(new String(), 3, new String(), new String(), 0);
 
     //Assigning the sub nodes
     for (uint8_t i = 0; i < 3; i++) {
-        choice_tree->sub_nodes[0] = new Node(new String(), 3, new String(), new String(), 0);
+        choice_tree->sub_nodes[0] = new TerminalNode(new String(), 3, new String(), new String(), 0);
     }
 
 }
@@ -44,7 +44,7 @@ TreeManager::TreeManager(Node *default_tree) : current_tree(default_tree), defau
  *
  */
 
-const Node *TreeManager::get_current_tree() {
+const TerminalNode *TreeManager::get_current_tree() {
     return current_tree;
 }
 
@@ -72,7 +72,7 @@ void TreeManager::select_choice_tree() {
 
 
 /*
- * edit_choice_labels : this function sets the name, the description and the args of the choice node, after
+ * edit_choice_labels : this function sets the name, the description and the arguments of the choice node, after
  *  deleting old ones.
  *
  */
@@ -83,7 +83,7 @@ void TreeManager::edit_choice_tree_labels(uint8_t choice, String *name, String *
         return;
 
     //Cache var
-    Node *n = choice_tree->sub_nodes[choice];
+    TerminalNode *n = choice_tree->sub_nodes[choice];
 
     //Clean the old Strings
     delete n->name;
@@ -103,8 +103,8 @@ void TreeManager::edit_choice_tree_labels(uint8_t choice, String *name, String *
  *
  */
 
-void TreeManager::edit_choice_tree_functions(bool (*f_next)(void *), bool (*f_back)(void *),
-                                             bool (*f_abort)(void *)) {
+void TreeManager::edit_choice_tree_functions(task_state_t (*f_next)(void *), task_state_t (*f_back)(void *),
+                                             task_state_t (*f_abort)(void *)) {
 
     choice_tree[0].function = f_next;
     choice_tree[1].function = f_back;

@@ -4,29 +4,35 @@
 
 
 #include <stdint.h>
-
-class Thermistors {
 #include "thermistor_data.h"
 
-#define THERMISTOR(i, tab, size)\
+
+class Thermistors {
+
+public :
+    static void init();
+
+#define THERMISTOR(i, pin, tab, size)\
 public:\
-    static int16_t get_temperature_##i(const int16_t read_value);\
+    static float get_temperature_##i(const int16_t read_value);\
+    static float get_temperature_##i();\
 private:\
     static const uint8_t therm_size_##i;\
     static uint8_t *index_##i;
 
 #include "../../config.h"
 
+
+
 #undef THERMISTOR
 
 private:
 
-    static int16_t ** therm_table;
+    static float ** therm_table;
 
+    static float get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index);
 
-    static int16_t get_temperature(const int16_t read_value, const int16_t *const table, const uint8_t size, uint8_t *v_index);
-
-    static int16_t linear_approximation(const int16_t x0, const int16_t x1, const int16_t x,  const int16_t y0, const int16_t y1);
+    static float linear_approximation(const int16_t x0, const int16_t x1, const int16_t x,  const float y0, const float y1);
 
 };
 

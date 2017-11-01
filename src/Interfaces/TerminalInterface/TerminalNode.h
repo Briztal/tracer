@@ -25,18 +25,20 @@
 #define TRACER_NODE_H
 
 #include <hardware_language_abstraction.h>
-class Node {
+#include <TaskScheduler/task_state_t.h>
+
+class TerminalNode {
 
 
 public:
 
-    Node(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log, bool (*f)(void *));
+    TerminalNode(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log, task_state_t (*f)(void *));
 
-    Node **sub_nodes;
+    TerminalNode **sub_nodes;
 
     const String *name;
 
-    bool (*function)(void *);
+    task_state_t (*function)(void *);
 
     const string_t *desc_log;
     const string_t *args_log;

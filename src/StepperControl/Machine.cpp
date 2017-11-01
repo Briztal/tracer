@@ -32,7 +32,7 @@
 
 void Machine::disable_stepper_power() {
 
-    while(TrajectoryTracer::started);
+    while (TrajectoryTracer::started);
     StepperController::disable();
 
 }
@@ -58,10 +58,20 @@ void Machine::disable_stepper_power() {
  *  Coordinates structure : 0   1   2   3   4   5   6   7   8
 *                           X0  X1  Y0  Y1  Z   E0  E1  E2  E3
  *
+ *  1 endstop per X_ Y_ Z.
+ *
+ *  1 Hotend per carriage_id, 1 thermistor per carriage_id
+ *
+ *  1 Hotbed, with 1 thermistor
+ *
+ *  1 permanent ventilation per Hotend
+ *
+ *  1 power-adjustable print-ventilation per carriage_id.
+ *
  */
 
 
-void Machine::home_carriages(float speed) {
+task_state_t Machine::zero_carriages() {
 
     position[0] = position[1] = position[2] = position[3] = 0;
 
@@ -71,43 +81,94 @@ void Machine::home_carriages(float speed) {
 
     //MachineInterface::set_speed_for_group(0, speed);
 
-    MachineInterface::linear_movement(position);
+    return MachineInterface::linear_movement(position);
 
 }
 
 
+//TODO MAKE AN ENUM WITH MODES
 void Machine::set_current_mode(uint8_t new_mode) {
     mode = new_mode;
 }
 
-void Machine::line_to(uint8_t carriage, float x, float y, float z, float speed) {
+task_state_t Machine::line_to(float x, float y, float z) {
 
+    //Initialise a state
+    task_state_t state = complete;
+
+    //Try to move to the specified position
     switch (mode) {
         case 0:
-            mode_0(carriage, x, y, z, speed);
-            break;
+            state = mode_0(x, y, z);
         default:
             break;
     }
+
+    if (state == complete) {
+
+        //Update the local coords
+        machine_coords[0] = x;
+        machine_coords[1] = y;
+        machine_coords[2] = z;
+
+    }
+
+    return state;
+
+}
+
+
+task_state_t Machine::line_of(float x, float y, float z) {
+
+    //Cache the coords
+    float coords[4];
+    memcpy(coords, machine_coords, 4 * sizeof(float));
+
+    //Update the local coords
+    coords[0] += x;
+    coords[1] += y;
+    coords[2] += z;
+
+    //Initialise a state
+    task_state_t state = complete;
+
+    //Try to move to the specified position
+    switch (mode) {
+        case 0:
+            state = mode_0(coords[0], coords[1], coords[2]);
+        default:
+            break;
+    }
+
+
+
+    if (state == complete) {
+
+        //Save coords
+        memcpy(machine_coords, coords, 4 * sizeof(float));
+
+    }
+
+    return state;
+
 }
 
 
 /*
- * mode_0 : single carriage mode.
+ * mode_0 : single carriage_id mode    CI::echo("complete : "+String(state == complete));
+.
  *
- *  In this mode, every carriage can be moved independently.
+ *  In this mode, every carriage_id can be moved independently.
  *
  */
 
-void Machine::mode_0(uint8_t carriage, float x, float y, float z, float speed) {
+task_state_t Machine::mode_0(float x, float y, float z) {
 
+    MachineInterface::set_speed_group(carriage_id);
 
     bool x0, y0;
 
-    MachineInterface::set_speed_group(carriage);
-    MachineInterface::set_speed_for_group(carriage, speed);
-
-    switch (carriage) {
+    switch (carriage_id) {
         case 0:
             x0 = y0 = true;
             break;
@@ -123,8 +184,9 @@ void Machine::mode_0(uint8_t carriage, float x, float y, float z, float speed) {
             y0 = false;
             break;
         default:
-            return;
+            return invalid_arguments;
     }
+
 
     if (x0) {
         position[0] = EEPROMStorage::coordinate_interface_data.x0_offset + x;
@@ -140,15 +202,15 @@ void Machine::mode_0(uint8_t carriage, float x, float y, float z, float speed) {
 
     position[4] = EEPROMStorage::coordinate_interface_data.z_offset - z;
 
+    //TODO SANITY CHECK
     //sanity_check(position);
 
-    for (uint8_t i = 0; i<NB_AXIS; i++) {
-        CI::echo(String(i)+" "+String(position[i]));
+    for (uint8_t i = 0; i < NB_AXIS; i++) {
+        CI::echo(String(i) + " " + String(position[i]));
     }
 
-    MachineInterface::linear_movement(position);
+    return MachineInterface::linear_movement(position);
 
-    CI::echo("BITE");
 
 }
 
@@ -160,13 +222,14 @@ void Machine::mode_0(uint8_t carriage, float x, float y, float z, float speed) {
  *      carriages allows them not to be in contact.
  *
  */
+
 void Machine::sanity_check(float *position) {
 
     //First, we must check that coordinates on moving axis are not negative :
-    float * f;
-    for (int axis = 0; axis<5; axis++) {
+    float *f;
+    for (int axis = 0; axis < 5; axis++) {
         f = position + axis;
-        if (*f<0) *f = 0;
+        if (*f < 0) *f = 0;
     }
 
     /* Now we must check that the distance between carriages are sufficient to avoid contact. As opposed axis
@@ -185,7 +248,7 @@ void Machine::sanity_check(float *position) {
         float tmp = position[1] -= difference;
 
         //If x1 becomes negative, zero x1 and offset x0 of the remaining distance
-        if (tmp<0) {
+        if (tmp < 0) {
             position[0] += tmp;
             position[1] = 0;
         }
@@ -203,17 +266,79 @@ void Machine::sanity_check(float *position) {
         float tmp = position[3] -= difference;
 
         //If x1 becomes negative, zero x1 and offset x0 of the remaining distance
-        if (tmp<0) {
+        if (tmp < 0) {
             position[2] += tmp;
             position[3] = 0;
         }
     }
 
+}
+
+
+task_state_t Machine::set_speed_for_carriage(uint8_t carriage_id, float speed) {
+
+    return MachineInterface::set_speed_for_group(carriage_id, speed);
 
 }
 
 
-uint8_t Machine::mode;
+task_state_t Machine::set_carriage(uint8_t carriage) {
+
+    //Nothing to do if the carriage id the current one.
+    if (carriage == carriage_id) {
+        return null_task;
+    }
+
+    switch (mode) {
+        case 0:
+            //4 carriage mode
+            if (carriage > 3) {
+                return invalid_arguments;
+            }
+            break;
+        case 1 :
+            //2 carriages mode
+            if (carriage > 1) {
+                return invalid_arguments;
+            }
+            break;
+        case 2:
+            //1 carriages mode : always zero.
+            if (carriage) {
+                return invalid_arguments;
+            }
+            break;
+        default:
+            //Never happens
+            return complete;
+    }
+
+    //If valid arguments :
+    carriage_id = carriage;
+
+    return complete;
+
+}
+
+task_state_t Machine::set_carriage_and_speed(uint8_t carriage, float speed) {
+
+    task_state_t state = set_carriage(carriage);
+
+    if (state == complete) {
+        state = set_speed_for_carriage(carriage_id, speed);
+    }
+
+    return state;
+
+}
+
+
+uint8_t Machine::mode = 0;
+
+uint8_t Machine::carriage_id = 0;
 
 float tmpos[NB_AXIS];
 float *const Machine::position = tmpos;
+
+float t_mch_crd[4]{0};
+float *const Machine::machine_coords = t_mch_crd;

@@ -48,6 +48,8 @@
 
 void TrajectoryTracer::start() {
 
+    disable_stepper_interrupt();
+
     if (!movement_data_queue.available_elements()) {
         //If no movements are in the queue, no need to start.
 
@@ -63,6 +65,7 @@ void TrajectoryTracer::start() {
 
     StepperController::enable();
 
+
     //Initialise the end booleans
     stop_programmed = false;
     final_sub_movement_started = false;
@@ -72,7 +75,6 @@ void TrajectoryTracer::start() {
 
     update_real_time_movement_data();
 
-
     //Set up the movement procedure
     prepare_first_sub_movement();
 
@@ -81,6 +83,7 @@ void TrajectoryTracer::start() {
 
     //Mark the movement procedure as started
     started = true;
+
 
     //Start the interrupt sequence.
     enable_stepper_interrupt();
@@ -153,10 +156,20 @@ bool TrajectoryTracer::enqueue_unauthorised() {
  *
  */
 
-bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_initialisation)(),
+task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_initialisation)(),
                                                  void (*movement_finalisation)(),
                                                  void(*pre_process_trajectory_function)(float, float *),
                                                  void(*trajectory_function)(float, float *)) {
+
+
+    if (!movement_data_queue.available_spaces()) {
+        //If no more space is available in the data queue, reprogram the task
+
+        CI::echo("NO SPACE LEFT");
+
+        return reprogram;
+
+    }
 
     if (movement_queue_lock_flag) {
 
@@ -164,7 +177,7 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
         CI::echo("ERROR : THE MOVEMENT QUEUE WAS LOCKED WHEN THE MOVEMENT WAS PUSHED. THE MOVEMENT WILL BE IGNORED.");
 
         //Fail
-        return false;
+        return reprogram;
     }
 
 
@@ -200,7 +213,10 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
 
     //The increment computer will determine the min and max increment.
     if (!IncrementComputer::determine_increments(current_movement)) {
-        return false;
+
+        //If the increment computer detects a micro movement, the machine will not move; complete.
+        return complete;
+
     }
 
 
@@ -247,11 +263,14 @@ bool TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_in
 
     //Start the movement procedure if it is not already started.
     if (!started) {
+
         start();
+
         CI::echo("STARTED");
+
     }
 
-    return true;
+    return complete;
 
 }
 
@@ -376,8 +395,6 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     //Push as much sub_movements as possible.
     SubMovementManager::fill_sub_movement_queue();
 
-
-
 }
 
 
@@ -385,7 +402,6 @@ void TrajectoryTracer::prepare_next_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow)
     disable_stepper_interrupt();
-
 
     //-------------------Initialisation-------------------
 
@@ -507,7 +523,7 @@ sig_t *TrajectoryTracer::initialise_sub_movement() {
 
 
 /*
- * process_signatures : this function pre_processes a prepare_movement that will be executed later.
+ * process_signatures : this function pre_processes a plan_movement that will be executed later.
  *
  *  It determines the signatures of the movement.
  *

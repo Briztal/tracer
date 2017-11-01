@@ -29,6 +29,8 @@
 
 #include <stdint.h>
 #include "_interface_data.h"
+#include "interface.h"
+#include <TaskScheduler/TaskScheduler.h>
 
 class TerminalInterfaceCommands {
 
@@ -50,21 +52,22 @@ public:
      *  - 1 : argument error. A message with the correct syntax will be displayed.
      *  - 2 and upper. : correct execution.
      */\
-    static uint8_t name(uint8_t arguments_index);\
+    static task_state_t name(uint8_t arguments_index);\
     /*
      * Then, we will declare and implement a pre_processor that eases your work.
      *   It starts by calling your implementation, passing only the argument index.
      *   If your command does not succeeds, it logs the syntax informato
      * arguments storage.
      */\
-    static bool _##name(void *ptr) {\
+    static task_state_t _##name(void *ptr) {\
         terminal_interface_data_t *data = (terminal_interface_data_t*) ptr;\
-        uint8_t b = name(data->arguments_index);\
-        if (b == 1) {\
+        task_state_t b = name(data->arguments_index);\
+        if (b == invalid_arguments) {\
             TerminalInterface::log_tree_style(data->node, true);\
         }\
-        if (b==0) return false;/*reprogram the task*/\
-        else {TerminalInterface::validate_task(data->arguments_index);return true;}/*remove the arguments, and do not reprogram the task*/\
+        /*remove the arguments, and do not reprogram the task*/\
+        if (b == complete) {TerminalInterface::validate_task(data->arguments_index);}\
+        return b;\
     }
 
 #define CREATE_CALLABLE_LEAF(i, name, ...)\
@@ -96,6 +99,12 @@ public:
 
 
 //Below is a macro that simplifies the recuperation of argument pointer and size.
-#define GET_ARGS(index, ptr, size) ptr = TerminalInterface::get_arguments(index, &size);
+#define GET_ARGS(index, ptr, size) uint8_t size; char *ptr = TerminalInterface::get_arguments(index, &size);
+
+#define GET_NB_WORDS(ptr, size) StringParser::get_words_nb(args, size)
+
+#define GET_NEXT_WORD(args, size) StringParser::get_next_word(&args, &size);
+
+#define WORD StringParser::word_buffer_0
 
 #endif //TRACER_TREEINTERFACECOMMANDS_H
