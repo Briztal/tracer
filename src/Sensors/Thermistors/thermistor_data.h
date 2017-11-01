@@ -31,49 +31,45 @@
 /*
  * This file contains all data related to thermistors.
  *
- * I got this data from the reprap.org page dedicated to thermistors :
- *
- * http://reprap.org/wiki/Thermistor
- *
+ * All data in this file is extracted from the file thermistor_data.h in Marlin, all credits go to authors ! :-)
+ * *
  * It comprises lookup table for each thermistor that the code can deal with, and the table size for each one.
  *
  * You may use macros provided here to populate the thermistor section of you configuration file.
  *
- * To do so, you may use the next abbreviation table
- *
- *
+ * To do so, you may use the next names
  *
  *  4,7K Pullup :
  *
- *  100k bed thermistor                             BED100K_SIZE            BED100K_TABLE
- *  mendel-parts MENDEL_                            MENDEL_SIZE             MENDEL_TABLE
- *  10k thermistor T10K_                            T10K_SIZE               T10K_TABLE
- *  200k ATC Semitec 204GT-2                        SEMITEC_200_47_SIZE     SEMITEC_200_47_TABLE
- *  100k ATC Semitec 104GT-2                        SEMITEC_100_47_SIZE     SEMITEC_100_47_TABLE
- *  100k Epcos thermistor                           EPCOS100_47_SIZE        EPCOS100_47_TABLE
- *  100k Honeywell 135-104LAG-J01                   HLAG100_SIZE            HLAG100_TABLE
- *  100k GE Sensing AL03006-58.2K-97-G1             GE100_SIZE              GE100_TABLE
- *  100k Honeywell 135-104LAF-J01                   HLAF100_SIZE            HLAF100_TABLE
- *  100k RS thermistor 198-961                      RS100_SIZE              RS100_TABLE
- *  QU-BD silicone bed QWG-104F-3950 thermistor     QUBD_SIZE               QUBD_TABLE
- *  Hisens thermistor B25/50 =3950 +/-1%            HISENS_SIZE             HISENS_TABLE
- *  PT100 with INA826 amp on Ultimaker v2.0         INA826_SIZE             INA826_TABLE
- *  Maker's Tool Works Kapton Bed Thermistor        KAPTON_SIZE             KAPTON_TABLE
- *  100k 0603 SMD Vishay NTCS0603E3104FXT           VISH100_SIZE            VISH100_TABLE
- *  bqh2 stock thermistor                           BQH2_SIZE               BQH2_TABLE
+ *  100k bed thermistor                             BED100K
+ *  mendel-parts MENDEL_                            MENDEL
+ *  10k thermistor T10K_                            T10K
+ *  200k ATC Semitec 204GT-2                        SEMITEC_200_47
+ *  100k ATC Semitec 104GT-2                        SEMITEC_100_47
+ *  100k Epcos thermistor                           EPCOS100_47
+ *  100k Honeywell 135-104LAG-J01                   HLAG100
+ *  100k GE Sensing AL03006-58.2K-97-G1             GE100
+ *  100k Honeywell 135-104LAF-J01                   HLAF100
+ *  100k RS thermistor 198-961                      RS100
+ *  QU-BD silicone bed QWG-104F-3950 thermistor     QUBD
+ *  Hisens thermistor B25/50 =3950 +/-1%            HISENS
+ *  PT100 with INA826 amp on Ultimaker v2.0         INA826
+ *  Maker's Tool Works Kapton Bed Thermistor        KAPTON
+ *  100k 0603 SMD Vishay NTCS0603E3104FXT           VISH100
+ *  bqh2 stock thermistor                           BQH2
  *
  *  1K Pullup :
  *
- *  100k EPCOS 1K                                   EPCOS100_1K_SIZE        EPCOS100_1K_TABLE {\
- *  200k ATC Semitec 204GT-2                        SEMITEC_200_1K_SIZE     SEMITEC_200_1K_TABLE
- *  100k ATC Semitec 104GT-2                        SEMITEC_100_1K_SIZE     SEMITEC_100_1K_TABLE
+ *  100k EPCOS 1K                                   EPCOS100_1K
+ *  200k ATC Semitec 204GT-2                        SEMITEC_200
+ *  100k ATC Semitec 104GT-2                        SEMITEC_100
 
  *
  *
  * You must write a line like the following in your config_files.h to enable a particular thermistor, named [NAME] :
  *
- * THEMRISTOR([indice], [NAME]_TABLE, [NAME]_SIZE)
- *      where indice is the thermistor indice, and [NAME] is the thermistor name
+ * THEMRISTOR(index,  pin, NAME)
+ *      where index is the thermistor index, pin is the pin it will read, and NAME is the thermistor name
  *
  */
 
