@@ -42,9 +42,9 @@
 #endif
 #endif
 
-#ifdef ENABLE_TREE_INTERFACE
-#include <Interfaces/TreeInterface/TreeInterface.h>
-#ifdef MAIN_CI_TREE
+#ifdef ENABLE_PROGRAM_INTERFACE
+#include <Interfaces/ProgramInterface/ProgramInterface.h>
+#ifdef MAIN_CI_PROGRAM
 #define CI TI
 #endif
 #endif

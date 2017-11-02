@@ -19,7 +19,7 @@
 */
 
 #include <EEPROM.h>
-#include <EEPROMStorage/EEPROMStorage.h>
+#include <EEPROM/EEPROMStorage.h>
 #include "Machine.h"
 #include "MachineInterface.h"
 #include "StepperController.h"

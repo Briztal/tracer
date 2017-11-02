@@ -125,7 +125,7 @@ public :
     //movement routine interruption
     static void stop();
 
-    //The function to verify that the enqueueing is authorised. returns true if the enqueue isn't unauthorised.
+    //The function to verify that the enqueueing is authorised. returns true if the process isn't unauthorised.
     static bool enqueue_unauthorised();
 
     //new movement enqueueing

@@ -25,7 +25,7 @@ PONEY
 
 #include "TaskScheduler.h"
 #include "../interface.h"
-#include "EEPROMStorage/EEPROMStorage.h"
+#include "EEPROM/EEPROMStorage.h"
 #include "../StepperControl/StepperController.h"
 
 
@@ -38,7 +38,6 @@ PONEY
  *  Finally, it initialises the stepper control module.
  *
  */
-
 
 void TaskScheduler::init() {
 

@@ -20,19 +20,20 @@
 
 #include <config.h>
 
-#ifdef ENABLE_TREE_INTERFACE
+#ifdef ENABLE_PROGRAM_INTERFACE
 
-#include "TreeInterface.h"
+#include "ProgramInterface.h"
 #include "TaskScheduler/TaskScheduler.h"
-#include "TreeInterfaceCommands.h"
 #include <hardware_language_abstraction.h>
+#include <Project/InterfaceCommands/ProgramInterfaceCommands.h>
+#include <Project/InterfaceCommands/_interface_data.h>
 
 #define BEGIN_BYTE (uint8_t)255
 #define BEGIN_CHAR (char)-1
 
 void TI::init() {
 
-    tree_interface_link_t::begin();
+    program_interface_link_t::begin();
 
     initialise_aliases();
 
@@ -62,7 +63,7 @@ void TI::initialise_aliases() {
     name##_id[indice+1] = 0;\
     name##_size = indice+(uint8_t)1;
 
-#include "tree_interface_config.h"
+#include <Project/Config/program_interface_config.h>
 
 }
 
@@ -141,7 +142,8 @@ void TI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
 void TI::add_char_out(char data) {
 
     uint8_t space_count = 0;
-    if (data_out_size >= PACKET_SIZE) return;
+    if (data_out_size >= MAX_COMMAND_SIZE
+) return;
 
     //Checking
     if (data == BEGIN_CHAR) {
@@ -155,7 +157,8 @@ void TI::add_int_out(int data) {
 
     char *t = (char *) &data;
     uint8_t space_count = 0;
-    if (data_out_size + 2 >= PACKET_SIZE) return;
+    if (data_out_size + 2 >= MAX_COMMAND_SIZE
+) return;
 
     //Checking on 2 bytes
     if (*t == BEGIN_CHAR) {
@@ -174,7 +177,8 @@ void TI::add_int_out(int data) {
 void TI::add_float_out(float data) {
     char *t = (char *) &data;
     uint8_t space_count = 0;
-    if (data_out_size + 4 >= PACKET_SIZE) return;
+    if (data_out_size + 4 >= MAX_COMMAND_SIZE
+) return;
 
     //Checking on 4 bytes
     if (*t == BEGIN_CHAR) {
@@ -204,7 +208,8 @@ void TI::add_float_out(float data) {
 void TI::add_int32_t_out(int32_t data) {
     char *t = (char *) &data;
     uint8_t space_count = 0;
-    if (data_out_size + 4 >= PACKET_SIZE) return;
+    if (data_out_size + 4 >= MAX_COMMAND_SIZE
+) return;
 
 
     //Checking on 4 bytes
@@ -239,7 +244,8 @@ void TI::add_string_out(const char *data) {
     uint8_t space_count = 0;
     char *size_ptr = data_out++;
     data_out_size++;
-    uint8_t data_out_space = (uint8_t) (PACKET_SIZE) - data_out_size;
+    uint8_t data_out_space = (uint8_t) (MAX_COMMAND_SIZE
+) - data_out_size;
     for (; data_out_space; data_out_space--, space_count++) {
         if (!(c = *data++))
             break;
@@ -249,6 +255,31 @@ void TI::add_string_out(const char *data) {
     data_out_size += space_count;
 
 }
+
+
+//---------------------------------Functions called by TerminalInterfaceCommands------------------------------
+
+
+/*
+ * get_arguments : returns a pointer to the beginning of the required argument
+ *
+ */
+
+char *ProgramInterface::get_arguments(uint8_t task_index, uint8_t *size) {
+    return arguments_storage.get_argument(task_index, size);
+}
+
+
+/*
+ * validate_task : removes the argument related to the task
+ *
+ */
+
+void ProgramInterface::validate_task(uint8_t task_index) {
+    arguments_storage.remove_argument(task_index);
+}
+
+
 
 /*
  * send_packet : sends the packet in memory.
@@ -265,14 +296,14 @@ void TI::send_packet() {
     //serial_echo_byte((char)(size));
     char *ptr = data_out_0;
     for (size += 1; size--;) {
-        tree_interface_link_t::send_byte(*ptr++);
+        program_interface_link_t::send_byte(*ptr++);
     }
-    tree_interface_link_t::send_byte((char) 0);
+    program_interface_link_t::send_byte((char) 0);
 
 
 }
 
-void TI::enqueue(char *command, uint8_t size) {
+void TI::process(char *command, uint8_t size) {
 
     char b = *command;
 
@@ -288,7 +319,7 @@ void TI::enqueue(char *command, uint8_t size) {
 #define CREATE_LEAF(c, fname)\
     case c :\
         ++command;/*Removing last command byte*/\
-        TaskScheduler::add_procedure(TreeInterfaceCommands::fname, 0);/*Enqueue the correct task*/\
+        add_task(ProgramInterfaceCommands::_##fname, command, size);/*Enqueue the correct task*/\
         return;
 
 #define GO_UPPER\
@@ -301,10 +332,11 @@ void TI::enqueue(char *command, uint8_t size) {
         case 0 :
             command++;
 
-            TreeInterfaceCommands::system_canal_function(command, size);
+            ProgramInterfaceCommands::system_canal_function(command, size);
+
             return;
 
-#include "tree_interface_config.h"
+#include <Project/Config/program_interface_config.h>
 
         default:
             return;
@@ -313,41 +345,127 @@ void TI::enqueue(char *command, uint8_t size) {
 
 }
 
+
+/*
+ * add_task : this function sends a task to the scheduler :
+ *
+ *  It starts by creating the struct to contain args data, then it saves it.
+ *
+ *  Finally, it sends the task to task to the scheduler.
+ *
+ */
+
+void TI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
+    //If the function fails,
+    //if (!current_node->function(data_in, command_size)) {
+
+    if (arguments_storage.available_spaces()) {
+
+        uint8_t index = arguments_storage.insert_argument(command, size);
+
+        //Create a struct in the heap to contain argument-related data.
+        program_interface_data_t *data = new program_interface_data_t();
+        data->arguments_index = index;
+
+        //Create a task in the stack to contain task data
+        task_t t = task_t();
+        t.type = 0;
+        t.args = (void *)data;
+        t.task = task;
+
+        //Schedule the task
+        TaskScheduler::add_task(t);
+
+    }
+}
+
 //---------------------------------------------------Reception----------------------------------------------------------
 
-void TI::read_serial() {
+
+/*
+ * read_data : this function reads data on the communication layer.
+ *
+ *  If data is available, it reads it one char at time.
+ *
+ *  It must verify the special case, where the char BEGIN_CHAR appears alone (not followed by any other BEGIN_CHAR).
+ *
+ *      This case marks the beginning of a command
+ *
+ */
+void TI::read_data() {
 
     char r;
-    while (tree_interface_link_t::available()) {
-        r = tree_interface_link_t::read();
+
+    while (program_interface_link_t::available()) {
+
+        r = program_interface_link_t::read();
+
+        TI::echo("SUUS "+String((uint8_t)r));
+
         if (first_detected) {
-            if (r == BEGIN_CHAR) {//Second time init byte is detected : not a init symbol.
+            //If a BEGIN_CHAR has just been detected :
+
+            if (r == BEGIN_CHAR) {
+                //Second time init byte is detected : not a init symbol.
+
+                //Clear the flag
                 first_detected = false;
+
+                //Decrease the number of remaining chars, for the BEGIN_CHAR duplication
                 in_data_remaining--;
-            } else {//Not a double beginning byte -> begining symbol
-                flush();
-                if (r < PACKET_SIZE) {
-                    packet_began = true;
+
+            } else {
+                //Not a double beginning byte -> beginning symbol
+
+                //Flush data, and prepare to receive the command?
+                reset_input_data();
+
+                //If the command size is lesser than the maximal value, validate the receiving state
+                if (r < MAX_COMMAND_SIZE) {
+
+                    //Set the parsing flag
+                    parsing_began = true;
+
+                    //save the command size
                     in_data_size = in_data_remaining = (uint8_t) r;
                 }
-                continue;
-            }
-        } else if (r == BEGIN_CHAR) {
 
+                //Go to the next char
+                continue;
+
+            }
+
+
+        } else if (r == BEGIN_CHAR) {
+            //If the last char was not a BEGIN_CHAR (case behind)
+
+            //Set the flag
             first_detected = true;
 
+            //Go to the next char
             continue;
         }
 
-        if (packet_began) {
+        //If the parsing is enabled, add the char to the input data :
+        if (parsing_began) {
+
+            //If the last char hasn't been processed
             if (in_data_remaining-- != 0) {
+
+                //Add data
                 *(data_in++) = r;
+
             } else {
 
-                enqueue(data_in_0, in_data_size);
+                //If the last char has been processed
 
-                flush();
+                //process the input data
+                process(data_in_0, in_data_size);
 
+                //Reset the input data
+                reset_input_data();
+
+                //Stop if no tasks spaces are available in the scheduler.
                 if (!TaskScheduler::spaces())
                     return;
 
@@ -358,15 +476,29 @@ void TI::read_serial() {
     }
 }
 
-void TI::flush() {
+
+/*
+ * reset_input_data : resets the input_data.
+ *
+ */
+void TI::reset_input_data() {
     first_detected = false;
-    packet_began = false;
+    parsing_began = false;
     in_data_remaining = 0;
     data_in = data_in_0;
 }
 
 
-void TI::send_tree_structure() {
+/*
+ * send_tree_structure : This function send the command structure to the listener.
+ *
+ *  This interface connects with a program that must adapt its behaviour to the command structure.
+ *
+ *  We use a basic protocol (commands listed below) to make him acknowledge the command structure.
+ *
+ */
+
+task_state_t TI::send_tree_structure() {
 
     /*
      * Syntax :
@@ -417,13 +549,18 @@ void TI::send_tree_structure() {
     add_string_out(#name);\
     send_packet();
 
-#include "tree_interface_config.h"
+#include <Project/Config/program_interface_config.h>
 
 
     prepare_structure_packet();
     add_char_out(1);
     send_packet();
+
+
+    return complete;
 }
+
+
 
 
 #define GO_UPPER
@@ -434,20 +571,23 @@ void TI::send_tree_structure() {
     char *const TI::name##_id = tmp##name;\
 
 
-#include "tree_interface_config.h"
+#include <Project/Config/program_interface_config.h>
 
 
-bool TI::packet_began = false;
+bool TI::parsing_began = false;
 bool TI::first_detected = false;
 uint8_t TI::in_data_remaining = 0;
 uint8_t TI::in_data_size = 0;
 
+ArgumentsContainer TI::arguments_storage = ArgumentsContainer(MAX_COMMAND_SIZE, NB_PENDING_COMMANDS);
 
-char t_data_in[PACKET_SIZE];
+
+char t_data_in[MAX_COMMAND_SIZE];
 char *TI::data_in = t_data_in;
 char *const TI::data_in_0 = t_data_in;
 
-char dout[PACKET_SIZE + 2];
+char dout[MAX_COMMAND_SIZE
+ + 2];
 char *TI::data_out = dout;
 char *const TI::data_out_0 = dout;
 uint8_t TI::data_out_size;

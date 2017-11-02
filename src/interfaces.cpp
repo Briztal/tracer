@@ -13,7 +13,7 @@ void initialise_interfaces() {
     GI::init();
 #endif
 
-#ifdef ENABLE_TREE_INTERFACE
+#ifdef ENABLE_PROGRAM_INTERFACE
     TI::init();
 #endif
 
@@ -35,8 +35,8 @@ void read_interfaces() {
     if (!TaskScheduler::spaces())
         return;
 
-#ifdef ENABLE_TREE_INTERFACE
-    TI::read_serial();
+#ifdef ENABLE_PROGRAM_INTERFACE
+    TI::read_data();
 #endif
 
     if (!TaskScheduler::spaces())

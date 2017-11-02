@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <config.h>
-#include <EEPROMStorage/EEPROMStorage.h>
+#include <EEPROM/EEPROMStorage.h>
 
 inline void geometry_translate(const float *const hl_coordinates, float *const steppers_coordinates) {
 

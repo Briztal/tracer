@@ -94,7 +94,7 @@ private:
 
 public :
 
-    //Mark a task as executed
+    //Get a paricular argument in the storage
     static char *get_arguments(uint8_t task_index, uint8_t *size);
 
     //Mark a task as executed
@@ -102,6 +102,7 @@ public :
 
     //Function to show a log message if the execution failed.
     static void log_tree_style(TerminalNode *log_node, bool log_args);
+
 
     //------------------------------------Standard functions-----------------------------
 

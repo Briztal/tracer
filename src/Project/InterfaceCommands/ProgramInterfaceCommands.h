@@ -1,5 +1,5 @@
 /*
-  TerminalInterfaceCommands.h - Part of TRACER
+  TreeInterfaceCommands.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -19,29 +19,44 @@
 */
 
 #include <config.h>
-
-#ifdef ENABLE_TERMINAL_INTERFACE
-
+#ifdef ENABLE_PROGRAM_INTERFACE
 
 #ifndef TRACER_TREEINTERFACECOMMANDS_H
 #define TRACER_TREEINTERFACECOMMANDS_H
 
 
 #include <stdint.h>
-#include "_interface_data.h"
-#include "interface.h"
-#include <TaskScheduler/TaskScheduler.h>
+#include <TaskScheduler/task_state_t.h>
+#include <Project/InterfaceCommands/_interface_data.h>
 
-class TerminalInterfaceCommands {
+class ProgramInterfaceCommands {
 
 
-    //-----------------------------------------------Custom functions---------------------------------------------------
-
+    //The system canal
 public:
 
-#define GO_UPPER(...)
+    static task_state_t system_canal_function(char *command, uint8_t size);
 
-#define GO_LOWER(...)
+    static task_state_t parameters_system_canal(char *command, uint8_t size);
+
+    static task_state_t pid_system_canal(char *command, uint8_t size);
+
+    static task_state_t loop_system_canal(char *command, uint8_t size);
+
+    static task_state_t actions_system_canal(char *command, uint8_t size);
+
+    static task_state_t steppers_system_canal(char *command, uint8_t size);
+
+    static task_state_t EEPROM_system_canal(char *command, uint8_t size);
+
+
+
+    //User methods
+
+
+#define GO_UPPER
+
+#define GO_LOWER(i, name)
 
 #define CREATE_LEAF(i, name, ...)\
     /*
@@ -60,50 +75,30 @@ public:
      * arguments storage.
      */\
     static task_state_t _##name(void *ptr) {\
-        terminal_interface_data_t *data = (terminal_interface_data_t*) ptr;\
+        program_interface_data_t *data = (program_interface_data_t*) ptr;\
         task_state_t b = name(data->arguments_index);\
-        if (b == invalid_arguments) {\
-            TerminalInterface::log_tree_style(data->node, true);\
-        }\
         /*remove the arguments, and do not reprogram the task*/\
-        if (b == complete) {TerminalInterface::validate_task(data->arguments_index);}\
+        if (b == complete) {ProgramInterface::validate_task(data->arguments_index);}\
         return b;\
     }
 
-#define CREATE_CALLABLE_LEAF(i, name, ...)\
+#define CREATE_CALLABLE_LEAF(i, name)\
     CREATE_LEAF(i, name)
 
-#include <Project/Config/terminal_interface_config.h>
+#include <Project/Config/program_interface_config.h>
 
 #undef GO_UPPER
 #undef GO_LOWER
 #undef CREATE_LEAF
 #undef CREATE_CALLABLE_LEAF
 
-#endif
+
 
 
 };
 
-//There, are defined 3 macros, that simplify your work with return codes :
-
-//Return without error
-#define RETURN_NO_ERROR return 2;
-
-//Return with error argument
-#define RETURN_ARGUMENT_ERROR return 1;
-
-//Return with no space in task pool
-#define RETURN_TASK_POOL_FULL return 0;
-
-
-//Below is a macro that simplifies the recuperation of argument pointer and size.
-#define GET_ARGS(index, ptr, size) uint8_t size; char *ptr = TerminalInterface::get_arguments(index, &size);
-
-#define GET_NB_WORDS(ptr, size) StringParser::get_words_nb(args, size)
-
-#define GET_NEXT_WORD(args, size) StringParser::get_next_word(&args, &size);
-
-#define WORD StringParser::word_buffer_0
 
 #endif //TRACER_TREEINTERFACECOMMANDS_H
+
+
+#endif

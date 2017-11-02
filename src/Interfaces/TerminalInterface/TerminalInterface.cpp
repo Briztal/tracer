@@ -62,7 +62,7 @@ void TerminalInterface::echo(const string_t msg) {
 }
 
 /*
- * read_serial : this function reads and saved the serial available data.
+ * read_data : this function reads and saved the serial available data.
  *
  */
 
@@ -359,18 +359,40 @@ void TerminalInterface::execute_tree_style() {
 
 }
 
+
+//---------------------------------Functions called by TerminalInterfaceCommands------------------------------
+
+
+
+/*
+ * get_arguments : returns a pointer to the beginning of the required argument
+ *
+ */
+
 char *TerminalInterface::get_arguments(uint8_t task_index, uint8_t *size) {
     return arguments_storage.get_argument(task_index, size);
 }
 
+/*
+ * validate_task : removes the argument related to the task
+ *
+ */
 
-//TODO COMMENT
 void TerminalInterface::validate_task(uint8_t task_index) {
     arguments_storage.remove_argument(task_index);
 }
 
 
-//TODO COMMENT
+
+/*
+ * log_tree_style : displays a message, after a parsing or execution problem.
+ *
+ *  If the problem comes from the parsing (log_args = false), it will display the node's children.
+ *
+ *  If it comes from the execution (log_args = true), then it will display the node's args.
+ *
+ */
+
 void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
 
     if (log_args) {
@@ -397,6 +419,8 @@ void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
     }
 
 }
+
+//---------------------------------Static declarations / definitions------------------------------
 
 
 #define m TerminalInterface

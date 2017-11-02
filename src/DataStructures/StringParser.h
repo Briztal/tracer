@@ -5,7 +5,6 @@
 #ifndef TRACER_STRINGPARSER_H
 #define TRACER_STRINGPARSER_H
 
-
 class StringParser {
 
 

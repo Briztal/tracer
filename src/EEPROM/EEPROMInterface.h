@@ -38,6 +38,13 @@ public:
 
     static void write_data_by_string(char *id_string, uint8_t size, float value);
 
+#ifdef ENABLE_PROGRAM_INTERFACE
+
+    //Send the structure of the EEPROM through the ProcessInterface
+    static void send_structure();
+
+#endif
+
 
 private:
 

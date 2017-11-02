@@ -436,7 +436,7 @@ void EEPROMInterface::write_data_by_string(char *id_string, uint8_t size, float 
 }
 
 
-#ifdef ENABLE_TREE_INTERFACE
+#ifdef ENABLE_PROGRAM_INTERFACE
 
 void EEPROMInterface::send_structure() {
     /*

@@ -23,7 +23,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "../../../config.h"
-#include "EEPROMStorage/EEPROMStorage.h"
+#include "EEPROM/EEPROMStorage.h"
 #include "HomingMovement.h"
 #include "../../StepperController.h"
 
@@ -61,7 +61,7 @@ void HomingMovement::move() {
     float speed;
     uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        //regulation_speed = min(EEPROMStorage::maximum_speeds[axis], EEPROMStorage::accelerations[axis] * (float)0.05);
+        //regulation_speed = min(EEPROM::maximum_speeds[axis], EEPROM::accelerations[axis] * (float)0.05);
         d = (uint32_t) (1000000 / (speed * EEPROMStorage::steppers_data[axis].steps));
         delays[axis] = delay;
         //delay_us = max(delay_us, d);

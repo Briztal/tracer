@@ -21,9 +21,6 @@
 //The maximal size of a command (id + arguments)
 #define MAX_COMMAND_SIZE 100
 
-//The maximal size of a word
-#define MAX_WORD_SIZE 40
-
 //The maximal size of the argument part
 #define MAX_ARGS_SIZE 50
 

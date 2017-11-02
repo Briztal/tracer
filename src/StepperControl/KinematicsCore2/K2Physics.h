@@ -89,10 +89,10 @@ private :
 
     /*
      * The array containing the deceleration constants : in the deceleration distance formula :
-     *      (((v * v) / (2 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]));
+     *      (((v * v) / (2 * EEPROM::accelerations[stepper] * EEPROM::steps[stepper]));
      *
      *  the denominator is constant. This array wil contain the float value
-     *      1.0 / (2.0 * EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]));
+     *      1.0 / (2.0 * EEPROM::accelerations[stepper] * EEPROM::steps[stepper]));
      *
      *      for each stepper.
      */
@@ -102,10 +102,10 @@ private :
 
     /*
      * The array containing the delta regulation_speed constants : in the deceleration distance formula :
-     *      max_delta_speed = EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper] * time;
+     *      max_delta_speed = EEPROM::accelerations[stepper] * EEPROM::steps[stepper] * time;
      *
      *  the product of the two first terms is constant. This array wil contain the float value
-     *      EEPROMStorage::accelerations[stepper] * EEPROMStorage::steps[stepper]
+     *      EEPROM::accelerations[stepper] * EEPROM::steps[stepper]
      *
      *      for each stepper.
      */
@@ -114,10 +114,10 @@ private :
 
     /*
      * The array containing the maximum regulation_speed constants : in the deceleration distance formula :
-     *      max_speed = EEPROMStorage::speeds[stepper] * EEPROMStorage::steps[stepper] * time;
+     *      max_speed = EEPROM::speeds[stepper] * EEPROM::steps[stepper] * time;
      *
      *  the product is constant. This array wil contain the float value
-     *      EEPROMStorage::speeds[stepper] * EEPROMStorage::steps[stepper]
+     *      EEPROM::speeds[stepper] * EEPROM::steps[stepper]
      *
      *      for each stepper.
      */

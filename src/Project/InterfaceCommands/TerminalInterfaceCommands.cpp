@@ -28,11 +28,11 @@
 #include "_interface_data.h"
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
-#include <EEPROMStorage/EEPROMStorage.h>
+#include <EEPROM/EEPROMStorage.h>
 #include <interface.h>
 #include <StepperControl/Machine.h>
 #include <TaskScheduler/TaskScheduler.h>
-#include <EEPROMStorage/EEPROMInterface.h>
+#include <EEPROM/EEPROMInterface.h>
 #include <DataStructures/StringParser.h>
 #include <StepperControl/StepperController.h>
 #include <Sensors/Thermistors/Thermistors.h>

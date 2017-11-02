@@ -61,7 +61,6 @@ public :
     //Reset to the default profile, and save in the EEPROM
     static void set_default_profile();
 
-
 private :
 
     //Read the profile from the EEPROM

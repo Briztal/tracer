@@ -123,6 +123,10 @@
 
 #define MAX_DEPTH 3
 
+#define MAX_COMMAND_SIZE 100
+
+#define NB_PENDING_COMMANDS 10
+
 
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)
 

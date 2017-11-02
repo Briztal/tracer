@@ -8,7 +8,11 @@
 typedef struct terminal_interface_data_t {
     uint8_t arguments_index;
     TerminalNode * node;
-} interface_data_t;
+} terminal_interface_data_t;
+
+typedef struct program_interface_data_t {
+    uint8_t arguments_index;
+} program_interface_data_t;
 
 
 #endif

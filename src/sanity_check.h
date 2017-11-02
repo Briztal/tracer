@@ -28,7 +28,7 @@
  */
 
 #ifdef MAIN_CI_TERMINAL
-#if defined(MAIN_CI_GCODE) || defined(MAIN_CI_TREE)
+#if defined(MAIN_CI_GCODE) || defined(MAIN_CI_PROGRAM)
 #error "You have two main interfaces selected. Please disable one."
 #endif
 #ifndef ENABLE_TERMINAL_INTERFACE
@@ -37,7 +37,7 @@
 #endif
 
 #ifdef MAIN_CI_GCODE
-#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TREE)
+#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_PROGRAM)
 #error "You have two main interfaces selected. Please disable one."
 #endif
 #ifndef ENABLE_GCODE_INTERFACE
@@ -45,11 +45,11 @@
 #endif
 #endif
 
-#ifdef MAIN_CI_TREE
+#ifdef MAIN_CI_PROGRAM
 #if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TERMINAL)
 #error "You have two main interfaces selected. Please disable one."
 #endif
-#ifndef ENABLE_TREE_INTERFACE
+#ifndef ENABLE_PROGRAM_INTERFACE
 #error "Your main interface (the TreeInterface) is not enabled."
 #endif
 #endif

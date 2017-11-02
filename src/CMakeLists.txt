@@ -30,8 +30,8 @@ add_library(project_interfaces
         ${PP}/TerminalInterface/_interface_data.h
         ${PP}/TerminalInterface/TerminalInterfaceCommands.h
         ${PP}/TerminalInterface/TerminalInterfaceCommands.cpp
-        ${PP}/TreeInterface/TreeInterfaceCommands.h
-        ${PP}/TreeInterface/TreeInterfaceCommands.cpp
+        ${PP}/TreeInterface/ProgramInterfaceCommands.h
+        ${PP}/TreeInterface/ProgramInterfaceCommands.cpp
         ${PP}/GCodeInterface/GCodeInterfaceCommands.h
         ${PP}/GCodeInterface/GCodeInterfaceCommands.cpp
 
@@ -58,7 +58,7 @@ add_library(core
         )
 
 
-set(EEP "EEPROMStorage")
+set(EEP "EEPROM")
 
 include_directories(${EEP}/)
 
@@ -103,9 +103,9 @@ add_library(interface
         ${IP}/TerminalInterface/TerminalInterface.h
         ${IP}/TerminalInterface/TerminalInterface.cpp
 
-        #TreeInterface
-        ${IP}/TreeInterface/TreeInterface.h
-        ${IP}/TreeInterface/TreeInterface.cpp
+        #ProgramInterface
+        ${IP}/TreeInterface/ProgramInterface.h
+        ${IP}/TreeInterface/ProgramInterface.cpp
 
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h

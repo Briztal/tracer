@@ -158,7 +158,7 @@ void SubMovementManager::verify_sub_movement(sub_movement_data_t *sub_movement_d
         return;
 
 
-    //Now that validity checks are made, enqueue the sub_movement data
+    //Now that validity checks are made, process the sub_movement data
     sub_movement_queue.enqueue();
 
     //Update the index

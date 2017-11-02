@@ -20,16 +20,18 @@
 
 
 #include <config.h>
-#ifdef ENABLE_TREE_INTERFACE
+#ifdef ENABLE_PROGRAM_INTERFACE
 
 
-#include "TreeInterface.h"
-#include "TreeInterfaceCommands.h"
+#include <Interfaces/ProgramInterface/ProgramInterface.h>
+#include "ProgramInterfaceCommands.h"
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
-#include <EEPROMStorage/EEPROMStorage.h>
+#include <EEPROM/EEPROMStorage.h>
 #include <interface.h>
 #include <StepperControl/Machine.h>
+#include <EEPROM/_eeprom_storage_data.h>
+#include <EEPROM/EEPROMInterface.h>
 
 
 //#define EEPROM_SUBCANAL 1
@@ -39,61 +41,51 @@
 #define STEPPER_SUBCANAL 5
 #define PARAMETER_SUBCANAL 7
 
+task_state_t ProgramInterfaceCommands::system_canal_function(char *data, uint8_t size) {
 
-#ifdef MONITOR_CANAL
+    CI::echo("data "+String(size));
 
 
-bool TreeInterfaceCommands::system_canal_function(void *) {
 
-    if (!(size--)) return;
+    if (!(size--)) return invalid_arguments;
+
     char sub_canal = *(data++);
 
     switch (sub_canal) {
         case 0 :
-            TI::send_tree_structure();
-            break;
+            return TI::send_tree_structure();
         case 1 :
-            EEPROM_system_canal(data, size);
-            break;
+            return EEPROM_system_canal(data, size);
         case 2 :
-            pid_system_canal(data, size);
-            break;
+            return pid_system_canal(data, size);
         case 3 :
-            loop_system_canal(data, size);
-            break;
+            return loop_system_canal(data, size);
         case 4 :
-            actions_system_canal(data, size);
-            break;
+            return actions_system_canal(data, size);
         case 5 :
-            steppers_system_canal(data, size);
-            break;
+            return steppers_system_canal(data, size);
         case 6 ://ECHO. DO NOTHING
-            //echo_system_canal(data, size);
-            break;
+            return complete;//echo_system_canal(data, size);
         case 7 :
-            parameters_system_canal(data, size);
-            break;
-
+            return parameters_system_canal(data, size);
         default:
-            break;
+            return invalid_arguments;
     }
-    return;
 }
-
-#endif
 
 
 //------------------------------------------------CANAL PROCESS FUNCTIONS-----------------------------------------------
 
 
-void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
+task_state_t ProgramInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
+
 
 #ifdef ENABLE_ASSERV
 
     delay_ms(50);
 
+    if (!size) return invalid_arguments;
 
-    if (!size) return;
     char sub_canal = *data;
 
     switch (sub_canal) {
@@ -111,23 +103,31 @@ void TreeInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
 
 #undef EXTERNAL_PARAMETER
 
-            break;
+            return complete;
         default:
-            break;
+            return invalid_arguments;
     }
+
+
+#else
+
+    return complete;
+
 
 #endif
 
 }
 
 
-void TreeInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
+task_state_t ProgramInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
+
+
 
 #ifdef ENABLE_ASSERV
     
     pid_data_t *pid_p;
     
-    if (!size) return;
+    if (!size) return invalid_arguments;
     char sub_canal = *data;
     int pi;
     switch (sub_canal) {
@@ -146,20 +146,24 @@ void TreeInterfaceCommands::pid_system_canal(char *data, uint8_t size) {
 #include <config.h>
 
 #undef PID
-            break;
+            return complete;
         default:
-            break;
+            return invalid_arguments;
     }
+
+#else
+
+    return complete;
 
 #endif
 }
 
 
-void TreeInterfaceCommands::loop_system_canal(char *data, uint8_t size) {
+task_state_t ProgramInterfaceCommands::loop_system_canal(char *data, uint8_t size) {
 
 #ifdef ENABLE_ASSERV
 
-    if (!size) return;
+    if (!size) return invalid_arguments;
     char sub_canal = *data;
 
     switch (sub_canal) {
@@ -177,18 +181,23 @@ void TreeInterfaceCommands::loop_system_canal(char *data, uint8_t size) {
 
 #undef LOOP_FUNCTION
 
-            break;
+
+            return complete;
         default:
-            break;
+            return invalid_arguments;
     }
+
+#else
+
+    return complete;
 
 #endif
 
 }
 
-void TreeInterfaceCommands::actions_system_canal(char *data, uint8_t size) {
+task_state_t ProgramInterfaceCommands::actions_system_canal(char *data, uint8_t size) {
 
-    if (!size) return;
+    if (!size) return invalid_arguments;
     char sub_canal = *data;
 
     switch (sub_canal) {
@@ -213,18 +222,26 @@ void TreeInterfaceCommands::actions_system_canal(char *data, uint8_t size) {
 #undef BINARY
 #undef CONTINUOUS
 #undef SERVO
-            break;
+            return complete;
         default:
-            break;
+            return invalid_arguments;
     }
+
+#else
+
+    return complete;
+
+#endif
 }
 
 
-void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
+task_state_t ProgramInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
+
+
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-    if (!size) return;
+    if (!size) return invalid_arguments;
 
     char sub_canal = *data;
 
@@ -251,45 +268,45 @@ void TreeInterfaceCommands::steppers_system_canal(char *data, uint8_t size) {
 
 #undef CARTESIAN_GROUP
 
-        case 1 :
-            break;
-
+            return complete;
         default:
-            break;
+            return invalid_arguments;
     }
 
-#endif
+#else
 
+    return complete;
+
+#endif
 }
 
 
-void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
-
-    /* TODO
-    if (!size--) return;
+task_state_t ProgramInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
+    
+    if (!size--) return invalid_arguments;
     char sub_canal = *(data++);
     float f;
     switch (sub_canal) {
 
         case 0 : //The initialisation case : send the EEPROM_structure
-            EEPROMStorage::send_structure();
-            return;
+            EEPROMInterface::send_structure();
+            return complete;
 
         case 1 : //Read case
-            f = EEPROMStorage::read_integer(data, size);
+            f = 0;//EEPROM::read_integer(data, size);
             TI::prepare_EEPROM_packet();
             TI::add_char_out(1);
             TI::add_float_out(f);
             TI::send_packet();
-            return;
+            return complete;
 
         case 2 : //Write case
-            f = EEPROMStorage::write(data, size);
+            f = 0;//EEPROMInterface::write(data, size);
             TI::prepare_EEPROM_packet();
             TI::add_char_out(2);
             TI::add_float_out(f);
             TI::send_packet();
-            return;
+            return complete;
 
         case 3 : //Save profile
             EEPROMStorage::write_profile();
@@ -297,7 +314,7 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
             TI::add_char_out(3);
             TI::add_float_out(0);
             TI::send_packet();
-            return;
+            return complete;
 
         case 4 : //Restore default profile;
             EEPROMStorage::set_default_profile();
@@ -306,47 +323,66 @@ void TreeInterfaceCommands::EEPROM_system_canal(char *data, uint8_t size) {
             TI::add_float_out(0);
             TI::send_packet();
         default:
-            return;
+            return invalid_arguments;
     }
 
-     */
+    
 }
 
 
-void TreeInterfaceCommands::action(char *, uint8_t) {
+task_state_t ProgramInterfaceCommands::action(uint8_t args_index) {
 
+    Machine::set_speed_for_carriage(0, 150);
+    Machine::set_carriage(0);
+    Machine::line_to(50, 50, 0);
+    Machine::line_to(100, 100, 0);
 
+    Machine::zero_carriages();
 
-    Machine::line_to(0, 50, 50, 0, 150);
-    Machine::line_to(0, 100, 100, 0, 150);
+    Machine::set_speed_for_carriage(1, 150);
+    Machine::set_carriage(1);
+    Machine::line_to(50, 50, 0);
+    Machine::line_to(100, 100, 0);
 
-    Machine::home_carriages(100);
+    Machine::zero_carriages();
 
-    Machine::line_to(1, 50, 50, 0, 150);
-    Machine::line_to(1, 100, 100, 0, 150);
+    Machine::set_speed_for_carriage(2, 150);
+    Machine::set_carriage(2);
+    Machine::line_to(50, 50, 0);
+    Machine::line_to(100, 100, 0);
 
-    Machine::home_carriages(100);
+    Machine::zero_carriages();
 
-    Machine::line_to(2, 50, 50, 0, 150);
-    Machine::line_to(2, 100, 100, 0, 150);
+    Machine::set_speed_for_carriage(3, 150);
+    Machine::set_carriage(3);
+    Machine::line_to(50, 50, 0);
+    Machine::set_carriage(0);
+    Machine::line_to(100, 100, 0);
 
-    Machine::home_carriages(100);
+    Machine::zero_carriages();
 
-    Machine::line_to(3, 50, 50, 0, 150);
-    Machine::line_to(3, 100, 100, 0, 150);
+    float position[NB_AXIS]{0};
+    position[0] = 500;
+    position[1] = 500;
+    position[2] = 500;
+    position[3] = 500;
 
-    Machine::home_carriages(100);
+    MachineInterface::set_speed_group(0);
+    MachineInterface::set_speed_for_group(0, 200);
+
+    MachineInterface::linear_movement(position);
 
     CI::echo("EXIT");
 
+    return complete;
 
 }
 
-void TreeInterfaceCommands::home(char *, uint8_t) {
+task_state_t ProgramInterfaceCommands::home(uint8_t args_index) {
 
     //HomingMovement::plan_movement();
 
+    return complete;
 }
 
-#endif
 

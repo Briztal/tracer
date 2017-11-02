@@ -18,56 +18,66 @@
 
 */
 
-#include "../../config.h"
-#ifdef ENABLE_TREE_INTERFACE
+#include <config.h>
+#ifdef ENABLE_PROGRAM_INTERFACE
 
-#include "../../hardware_language_abstraction.h"
+#include <hardware_language_abstraction.h>
+#include <DataStructures/ArgumentsContainer.h>
+#include <TaskScheduler/task_state_t.h>
+
 #if !defined(HL_SERIAL_FLAG)
-#error TreeInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
+#error ProgramInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
 #endif
 
 #ifndef CINTERFACE
 #define CINTERFACE
 
-#define TI TreeInterface
+#define TI ProgramInterface
 
-#include "Project/Config/tree_interface_config.h"
+#include "Project/Config/program_interface_config.h"
 
 
 
 //TODO POTENTIAL LOSS OF PACKETS : The data size transmitted is not the real size, but the size with BEGIN_BYTES doubled
 
 /*
- * The TreeInterface class is in charge of receiving data from the outside, and to decode them, according to
+ * The ProgramInterface class is in charge of receiving data from the outside, and to decode them, according to
  *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config_files file).
  *
  * When it received a command, it enqueues it in TaskScheduler's external_tasks queue.
  */
 
-class TreeInterface {
+class ProgramInterface {
 
 public :
 
+    //Initialise the interface
     static void init();
 
+    //Initialise the command aliases
     static void initialise_aliases();
 
-    static void read_serial();
+    //read data on the communication layer
+    static void read_data();
 
     //Message emission
     static void send_packet();
 
-    //System commands aliases
-    static void echo(string_t msg);
-
-    static void send_position(float *t);
-
     //Tree Structure update
-    static void send_tree_structure();
+    static task_state_t send_tree_structure();
+
+    //Add a task : create the struct to contain args data, save it, and send to task to the scheduler.
+    static void add_task(task_state_t (*task)(void *), char *command, uint8_t size);
+
+
+    //------------------------------------------------Packet Preparation------------------------------------------------
+
+public :
 
     //System packet preparation
     static void prepare_system_packet();
 
+    //EEPROM packet preparation
     static void prepare_EEPROM_packet();
 
 private :
@@ -75,23 +85,52 @@ private :
     static void prepare_structure_packet();
 
 
-    //-------------------------------------------------Emission methods-------------------------------------------------
+    //---------------------------------------------System commands aliases----------------------------------------------
+
 public :
-    //Outgoing data reseet;
+
+    //display data
+    static void echo(string_t msg);
+
+    //send the position
+    static void send_position(float *t);
+
+
+    //-------------------------------------------------Emission methods-------------------------------------------------
+
+public :
+    //Outgoing data reset;
     static void prepare_data_out(const char *command_id, uint8_t command_id_size);
 
 
-    //Methods to add data to the current outgoing message
+    //Methods to append data to the current output message
 
+    //Append a char
     static void add_char_out(char data);
 
+    //Append an int
     static void add_int_out(int data);
 
+    //Append a long
     static void add_int32_t_out(int32_t data);
 
+    //Append an float
     static void add_float_out(float data);
 
+    //Append an String
     static void add_string_out(const char *data);
+
+
+    //---------------------------------Functions called by ProgramInterfaceCommands------------------------------
+
+public :
+
+    //Get a particular argument in the storage
+    static char *get_arguments(uint8_t task_index, uint8_t *size);
+
+    //Mark a task as executed
+    static void validate_task(uint8_t task_index);
+
 
     //----------------------------------------Emission and Reception data fields----------------------------------------
 
@@ -126,17 +165,22 @@ private:
     static char *const data_in_0;
 
 
-    static bool packet_began;
+    //Flag set if a command is being parsed.
+    static bool parsing_began;
+
+    //Flag set if a BEGIN_CHAR has just been detected
     static bool first_detected;
+
     static uint8_t in_data_remaining;
     static uint8_t in_data_size;
 
+    static ArgumentsContainer arguments_storage;
 
     //Reset incomming data, to receive new packets properly
-    static void flush();
+    static void reset_input_data();
 
     //Incomming message processing
-    static void enqueue(char *command, uint8_t size);
+    static void process(char *command, uint8_t size);
 
 
     //Command aliases
@@ -151,7 +195,7 @@ private:
     static void send_##name();
 
 
-#include "Project/Config/tree_interface_config.h"
+#include <Project/Config/program_interface_config.h>
 
 
 };

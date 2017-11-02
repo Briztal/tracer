@@ -26,7 +26,7 @@
 
 #include "StepperController.h"
 #include "../interface.h"
-#include <EEPROMStorage/EEPROMStorage.h>
+#include <EEPROM/EEPROMStorage.h>
 
 
 
