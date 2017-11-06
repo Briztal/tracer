@@ -29,7 +29,7 @@ A task is a simple struct, containing :
 
 The type of the task determines how it will be executed.
     - A task with the type 255 is executed as soon as possible.
-    - A task with the type !=255 (between 0 and 254) belongs to a task queue, and musn't be executed while takss of the
+    - A task with the type !=255 (between 0 and 254) belongs to a task sequence, and musn't be executed while takss of the
         same type, received before, have not been executed.
 
 //TODO ARGUMENTS
@@ -65,7 +65,7 @@ Task pool :
         | 1  2  3  4  5  6  _  _  _  _  _  _  |
 
         In the example below, the scheduler tries to process tasks 1, 2, and 3, but those are currently un-executable (
-            they may require some currently unavailable space in the movement queue, for example).
+            they may require some currently unavailable space in the movement sequence, for example).
             The scheduler then executes the task 4, with success.
 
         | 1  2  3  _  5  6  _  _  _  _  _  _  |
@@ -78,11 +78,11 @@ Task pool :
             and after tasks < i.
 
 
-When the scheduler receives a task with a non-255 type it enqueues it in the appropriate queue.
+When the scheduler receives a task with a non-255 type it enqueues it in the appropriate sequence.
 
-Task Queue :
+Task Sequence :
 
-    A task queue is (literally) a queue of task. The only thing the Scheduler can do, is processing the first task.
+    A task sequence is (literally) a sequence of task. The only thing the Scheduler can do, is processing the first task.
 
     This structure is ordered, this means tasks will be executed in the order they were added.
 
@@ -92,10 +92,10 @@ III - Execution algorithm
 For executing its tasks, the scheduler process like the following :
     - if tasks can be added, parse data on interfaces -> tasks are added to the task pool.
     - Process all possible tasks in the task pool -> tasks may be added to
-    - For each task queue :
+    - For each task sequence :
         1 pop the first task;
-        2 if the task can be processed, process it. If not, go to the next queue;
-        3 if the queue is not empty, go to step 1.
+        2 if the task can be processed, process it. If not, go to the next sequence;
+        3 if the sequence is not empty, go to step 1.
 
 
 
@@ -109,9 +109,9 @@ As you can guess, this problem cannot be solved without implementing some securi
 
 0 - only type-255 tasks can generate new tasks.
 
-1 - during its execution, a type-255 task can lock a particular queue, preventing any adding for this queue.
+1 - during its execution, a type-255 task can lock a particular sequence, preventing any adding for this sequence.
 
-2 - at the beginning of its execution, a type-255 task must verify that every queue it may enqueue tasks is not locked,
+2 - at the beginning of its execution, a type-255 task must verify that every sequence it may enqueue tasks is not locked,
     and have enough space to contain all tasks the function wants to enqueue.
     If not, the function locks all queues where it has to enqueue tasks, and fails.
 
@@ -124,7 +124,7 @@ As you can guess, this problem cannot be solved without implementing some securi
 Let's illustrate it with an example :
 
 The task pool contains 7 type-255 tasks and no space : 
-    - tasks 0, 1 and 5 are native type255 tasks : they do not add tasks to any queue
+    - tasks 0, 1 and 5 are native type255 tasks : they do not add tasks to any sequence
     - task 4 must add another type-255 in the task pool.
     - task 2 adds two tasks, a type-0 and a type-1.
     - task 3 adds a type-1 task;
@@ -141,19 +141,19 @@ ROUND 0 :
 
     First, the scheduler will process the task pool :
     - tasks 0 and 1 are executed. 
-    - task 2 must add a type-1 task, but no spaces are left in the queue 1.
+    - task 2 must add a type-1 task, but no spaces are left in the sequence 1.
         -> queues 0 and 1 are locked, and task 2 doesn't complete.
-    - task 3 doesn't complete, because it must add a type-1 task, and queue 1 is locked.
+    - task 3 doesn't complete, because it must add a type-1 task, and sequence 1 is locked.
     - task 4 doesn't complete, because the task pool has no spaces left.
     - task 5 completes.
-    - task 6 doesn't complete, because the queue 0 is locked.
+    - task 6 doesn't complete, because the sequence 0 is locked.
 
     - end of processing : Scheduler unlocks both queues.
 
     SCHEDULER STATE :
     TASK_POOL | 2(0, 1)  3(1)  4(255) 6(0) _  _  _ |   ##  QUEUE_0 : 2 spaces left  ##  QUEUE_1 : 0 spaces left
 
-    Then, the scheduler processes queues. Let's say, for the example, that it processes 2 task in the queue 1
+    Then, the scheduler processes queues. Let's say, for the example, that it processes 2 task in the sequence 1
 
     SCHEDULER STATE :
     TASK_POOL | 2(0, 1)  3(1)  4(255) 6(0) _  _  _ |   ##  QUEUE_0 : 2 spaces left  ##  QUEUE_1 : 2 spaces left
@@ -166,15 +166,15 @@ ROUND 1 :
     SCHEDULER STATE :
     TASK_POOL | 3(1)  4(255) 6(0) _  _  _  _ |   ##  QUEUE_0 : 1 space left  ##  QUEUE_1 : 1 space left
 
-    - task 3 can be executed, as queue 1 has 1 space left
+    - task 3 can be executed, as sequence 1 has 1 space left
 
-    - task 4 can be executed, as 4 spaces are available in the task pool.
+    - task 4 can be executed, as 4 available_spaces are available in the task pool.
         -> task 7 is added
 
     SCHEDULER STATE :
     TASK_POOL | 6(0) 7() _  _  _  _  _ |   ##  QUEUE_0 : 1 space left  ##  QUEUE_1 : 0 space left
 
-    - task 6 can be executed, as 1 space is left in the queue 0;
+    - task 6 can be executed, as 1 space is left in the sequence 0;
 
     - task 7 can be executed.
 
@@ -188,8 +188,8 @@ ROUND 1 :
 GOOD PRACTICES :
 
 When you implement tasks for an interface (in [interface]Commands.cpp) :
-    - If you function plans a/some type-non255 task/s, always verify that the corresponding queue does have to required
-        number of spaces. If not, never forget to lock very queue related to your function.
+    - If you function plans a/some type-non255 task/s, always verify that the corresponding sequence does have to required
+        number of spaces. If not, never forget to lock very sequence related to your function.
     - Some functions plan tasks by themselves (Stepper movements plan for example). When you use them, systematically
         check the return value : if it returns "reprogram", your function must stop, eventually lock the appropriate
-        queue, and return the same state.
+        sequence, and return the same state.

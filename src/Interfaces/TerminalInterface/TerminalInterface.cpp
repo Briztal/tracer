@@ -37,7 +37,7 @@
  * init : this function initialises the serial, and sets up the command processing environment.
  *
  */
-void UI::init() {
+void TerminalInterface::init() {
 
     //Initialise the serial
     terminal_interface_link_t::begin();
@@ -85,7 +85,7 @@ void TerminalInterface::read_serial() {
                 //Reset the data_in
                 reset();
 
-                if (!TaskScheduler::spaces())
+                if (!TaskScheduler::available_spaces(255))
                     return;
 
             }

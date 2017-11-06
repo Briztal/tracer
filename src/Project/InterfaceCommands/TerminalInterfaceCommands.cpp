@@ -40,34 +40,34 @@
 
 task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
-    Machine::set_speed_for_carriage(0, 150);
-    Machine::set_carriage(0);
-    Machine::line_to(50, 50, 0);
-    Machine::line_to(100, 100, 0);
+    Machine::speed_set_scheduled(0, 150);
+    Machine::carriage_set_scheduled(0);
+    Machine::line_to_scheduled(50, 50, 0);
+    Machine::line_to_scheduled(100, 100, 0);
 
-    Machine::zero_carriages();
+    Machine::carriages_reset_scheduled();
 
-    Machine::set_speed_for_carriage(1, 150);
-    Machine::set_carriage(1);
-    Machine::line_to(50, 50, 0);
-    Machine::line_to(100, 100, 0);
+    Machine::speed_set_scheduled(1, 150);
+    Machine::carriage_set_scheduled(1);
+    Machine::line_to_scheduled(50, 50, 0);
+    Machine::line_to_scheduled(100, 100, 0);
 
-    Machine::zero_carriages();
+    Machine::carriages_reset_scheduled();
 
-    Machine::set_speed_for_carriage(2, 150);
-    Machine::set_carriage(2);
-    Machine::line_to(50, 50, 0);
-    Machine::line_to(100, 100, 0);
+    Machine::speed_set_scheduled(2, 150);
+    Machine::carriage_set_scheduled(2);
+    Machine::line_to_scheduled(50, 50, 0);
+    Machine::line_to_scheduled(100, 100, 0);
 
-    Machine::zero_carriages();
+    Machine::carriages_reset_scheduled();
 
-    Machine::set_speed_for_carriage(3, 150);
-    Machine::set_carriage(3);
-    Machine::line_to(50, 50, 0);
-    Machine::set_carriage(0);
-    Machine::line_to(100, 100, 0);
+    Machine::speed_set_scheduled(3, 150);
+    Machine::carriage_set_scheduled(3);
+    Machine::line_to_scheduled(50, 50, 0);
+    Machine::carriage_set_scheduled(0);
+    Machine::line_to_scheduled(100, 100, 0);
 
-    Machine::zero_carriages();
+    Machine::carriages_reset_scheduled();
 
     float position[NB_AXIS]{0};
     position[0] = 500;
@@ -139,6 +139,7 @@ task_state_t TerminalInterfaceCommands::eeprom_reset(uint8_t args_index) {
 
 }
 
+
 task_state_t TerminalInterfaceCommands::eeprom_print(uint8_t args_index) {
 
     EEPROMInterface::print_stored_data();
@@ -148,6 +149,32 @@ task_state_t TerminalInterfaceCommands::eeprom_print(uint8_t args_index) {
 }
 
 //-------------------------------------------------------Movement-------------------------------------------------------
+
+/*
+ * IMPORTANT :
+ *
+ *      All tasks below are tasks of type 0, and must be executed at the order they were received.
+ *
+ *      We will implement security mechanisms described in the Scheduler help file.
+ *
+ *
+ *      The macro below will be used to verify that [tasks_nb] tasks of type 0 can be executed, and return "reprogram"
+ *          if not.
+ */
+
+#define FAIL_IF_CANT_SCHEDULE(nb)\
+    {\
+        bool executable = true;\
+        /*This task requires the schedule of 1 task of type 0.*/\
+        REQUIRE_SCHEDULE(0, 1, executable);\
+        /*If the task is not executable :*/\
+        if (!executable) {\
+            /*Lock the sequence 0*/\
+            LOCK_SEQUENCE(0)\
+            /*Schedule a re-execution*/\
+            return reprogram;\
+        }\
+    }\
 
 
 task_state_t TerminalInterfaceCommands::move_home(uint8_t args_index) {
@@ -161,49 +188,22 @@ task_state_t TerminalInterfaceCommands::move_home(uint8_t args_index) {
 
 task_state_t TerminalInterfaceCommands::move_zero(uint8_t args_index) {
 
-    CI::echo("Reseting carriages");
+    //This task requires the schedule of one type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
 
-    Machine::zero_carriages();
+    //Schedule a reset of the carriages
+    Machine::carriages_reset_scheduled();
 
     return complete;
 
 
 }
 
-task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
-
-    //Declare args, size, and give them the correct value
-    GET_ARGS(args_index, args, size);
-
-    if (GET_NB_WORDS(args, size) != 2) {
-        return invalid_arguments;
-    }
-
-    //Extract carriage_id id
-    GET_NEXT_WORD(args, size);
-    uint8_t carriage_id = (uint8_t) str_to_float(WORD);
-
-    //Extract carriage_id id
-    GET_NEXT_WORD(args, size);
-    float speed = str_to_float(WORD);
-
-    task_state_t state = Machine::set_carriage_and_speed(carriage_id, speed);
-
-
-
-    if (state == complete) {
-
-        CI::echo("Carriage modified. Moving carriages to zero...");
-
-        Machine::zero_carriages();
-    }
-
-    return state;
-
-}
-
 
 task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
+
+    //This task requires the schedule of one type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
 
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
@@ -224,14 +224,17 @@ task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
     GET_NEXT_WORD(args, size);
     float z = str_to_float(WORD);
 
-    //Draw a line to the specified coordinates with the specified carriage_id
-    return Machine::line_to(x, y, z);
+    //Schedule a line to the specified coordinates with the specified carriage_id
+    return Machine::line_to_scheduled(x, y, z);
 
 }
 
 
 task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
 
+    //This task requires the schedule of one type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
@@ -251,8 +254,8 @@ task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
     GET_NEXT_WORD(args, size);
     float z = str_to_float(WORD);
 
-    //Draw a line to the specified coordinates with the specified carriage_id
-    return Machine::line_of(x, y, z);
+    //Schedule a line to the specified coordinates with the specified carriage_id
+    return Machine::line_of_scheduled(x, y, z);
 
 }
 
@@ -276,22 +279,53 @@ task_state_t TerminalInterfaceCommands::set_speed(uint8_t args_index) {
     float speed = str_to_float(WORD);
 
     CI::echo("Setting the carriage_id "+String(carriage_id)+" to "+String(speed)+".");
-    Machine::set_speed_for_carriage(carriage_id, speed);
+    Machine::speed_set_scheduled(carriage_id, speed);
 
     return complete;
 
 }
 
 
+task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(2);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    if (GET_NB_WORDS(args, size) != 2) {
+        return invalid_arguments;
+    }
+
+    //Extract carriage_id id
+    GET_NEXT_WORD(args, size);
+    uint8_t carriage_id = (uint8_t) str_to_float(WORD);
+
+    //Extract carriage_id id
+    GET_NEXT_WORD(args, size);
+    float speed = str_to_float(WORD);
+
+
+    task_state_t state = Machine::carriage_speed_set_scheduled(carriage_id, speed);
+
+    if (state == complete) {
+
+        CI::echo("Carriage modified. Moving carriages to zero...");
+
+        Machine::carriages_reset_scheduled();
+    }
+
+    return state;
+
+}
+
+//---------------------------------------------------------Tests--------------------------------------------------------
+
+
 task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
 
 
-
-    while(true) {
-        //digital_write(15, LOW);
-        //digital_write(14, LOW);
-        digital_write(13, LOW);
-    }
 
 }
 

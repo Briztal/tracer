@@ -56,36 +56,62 @@ void TaskScheduler::init() {
 }
 
 
-//---------------------------------------------------Task Management----------------------------------------------------
 
 
-/*
- * spaces : this function returns the number of spaces available in the task pool.
- *
- */
+//--------------------------------------------------Type Verification---------------------------------------------------
 
-const uint8_t TaskScheduler::spaces() {
-    return pool_task_spaces;
+bool TaskScheduler::check_sequence_type(uint8_t type) {
+
+    if (type == 255) {
+        return true;
+    } else {
+        return (type<NB_TASK_SEQUENCES);
+    }
 }
 
 
+//---------------------------------------------------Task Management----------------------------------------------------
+
 /*
- * add_task : this function adds a task in the taks pool.
+ * schedule_task : this function adds a task in the taks pool.
  *
  */
 
 void TaskScheduler::add_task(task_t task) {
 
-    //Insert the task only if spaces are available
+    //Insert the task only if available_spaces are available
     if (pool_task_spaces) {
 
         //copy the task
         task_pool[pool_task_nb] = task;
 
-        //Increase the number of task in the queue
+        //Increase the number of task in the pool
         pool_task_nb++;
 
-        //Decrease the number of spaces in the queue
+        //Decrease the number of available_spaces in the pool
+        pool_task_spaces--;
+
+    }
+}
+
+
+void TaskScheduler::schedule_task(task_state_t (*f)(void *), void *args, uint8_t type) {
+
+    //Insert the task only if available_spaces are available
+    if (pool_task_spaces) {
+
+        task_t task = task_t();
+        task.task = f;
+        task.args = args;
+        task.type = type;
+
+        //copy the task
+        task_pool[pool_task_nb] = task;
+
+        //Increase the number of task in the pool
+        pool_task_nb++;
+
+        //Decrease the number of available_spaces in the pool
         pool_task_spaces--;
 
     }
@@ -99,18 +125,18 @@ void TaskScheduler::add_task(task_t task) {
 
 uint8_t TaskScheduler::add_procedure(task_state_t (*f)(void *), uint8_t type) {
 
-    //Insert the task only if spaces are available
-    if (pool_task_spaces) {
+    //Insert the task only if available_spaces are available
+    if (check_sequence_type(type) && pool_task_spaces) {
 
         //copy the task
         task_pool[pool_task_nb].task = f;
         task_pool[pool_task_nb].args = 0;
         task_pool[pool_task_nb].type = type;
 
-        //Increase the number of task in the queue
+        //Increase the number of task in the pool
         pool_task_nb++;
 
-        //Decrease the number of spaces in the queue
+        //Decrease the number of available_spaces in the pool
         pool_task_spaces--;
 
     }
@@ -126,7 +152,7 @@ uint8_t TaskScheduler::add_procedure(task_state_t (*f)(void *), uint8_t type) {
 
 uint8_t TaskScheduler::add_prioritary_procedure(task_state_t (*f)(void *)) {
 
-    //Insert the task only if spaces are available
+    //Insert the task only if available_spaces are available
     if (pool_task_spaces) {
 
         //copy the task
@@ -134,10 +160,10 @@ uint8_t TaskScheduler::add_prioritary_procedure(task_state_t (*f)(void *)) {
         task_pool[pool_task_nb].args = 0;
         task_pool[pool_task_nb].type = 255;
 
-        //Increase the number of task in the queue
+        //Increase the number of task in the pool
         pool_task_nb++;
 
-        //Decrease the number of spaces in the queue
+        //Decrease the number of available_spaces in the pool
         pool_task_spaces--;
 
     }
@@ -145,10 +171,78 @@ uint8_t TaskScheduler::add_prioritary_procedure(task_state_t (*f)(void *)) {
     return pool_task_spaces;
 }
 
+
+/*
+ * spaces : this function returns the number of available_spaces available in the task pool.
+ *
+ */
+
+const uint8_t TaskScheduler::available_spaces(uint8_t type) {
+
+    //If the type is not allocated, return zero
+    if (!check_sequence_type(type))
+        return 0;
+
+    if (type == 255) {
+
+        //If the type corresponds to the task pool : return the number of spaces of the pool
+        return pool_task_spaces;
+
+    } else {
+
+        //If the type corresponds to a sequence, return the number of spaces in the concerned sequence.
+        return task_sequences[type]->available_spaces();
+
+    }
+}
+
+
+/*
+ * lock_sequence : this function locks a specified sequence.
+ * 
+ */
+
+void TaskScheduler::lock_sequence(uint8_t type) {
+
+    //If the type is not allocated, do nothing
+    if (!check_sequence_type(type))
+        return;
+
+
+    if (type != 255) {
+
+        //Set the lock of the concerned sequence.
+        queues_locked[type] = true;
+
+    }
+
+}
+
+
+/*
+ * is_sequence_locked : this function returns true if the specified sequence is locked, and false if not.
+ * 
+ */
+
+bool TaskScheduler::is_sequence_locked(uint8_t type) {
+
+    //If the type is not allocated, the queue is locked by default.
+    if (!check_sequence_type(type))
+        return true;
+
+    if (type == 255) {
+
+        return false;
+    }
+
+    return !queues_locked[type];
+}
+
+
 //---------------------------------------------------Task Execution----------------------------------------------------
 
 /*
- * run : this function executes all available tasks in the queue, while maintaining the order for non-non-sequential tasks;
+ * run : this function executes all available tasks in the pool, while maintaining the order for non-non-sequential tasks;
  *
  *  It starts by reading interfaces, and filling the task pool with incoming tasks;
  *
@@ -185,7 +279,7 @@ void TaskScheduler::process_task_pool() {
 
     //Reset the first-task flags
     for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
-        dispatch_enabled[i] = true;
+        queues_locked[i] = true;
     }
 
     //Initialise an insertion index;
@@ -199,68 +293,23 @@ void TaskScheduler::process_task_pool() {
 
         //Fist, cache the task pointer and the task's type.
         task_t *task = task_pool + task_index;
-        uint8_t type = task->type;
 
-        //If it is a non-sequential task, then try to process it.
-        if (type == 255) {
+        /* If the task fails to execute (must be called later), then shift it at the insertion position.
+         * This removes empty available_spaces in the pool, and saved the order.*/
+        if (!process_task(task)) {
 
-            /* If the task fails to execute (must be called later), then shift it at the insertion position.
-             * This removes empty spaces in the pool, and saved the order.*/
-            if (!process_task(task)) {
-
-                //Shift the task to the insertion position
-                insert_index = shift(shift_enabled, task, insert_index);
-
-            } else {
-
-                //If the task succeeds, it leaves an empty space in the pool. Enable the shift.
-                shift_enabled = true;
-            }
+            //Shift the task to the insertion position
+            insert_index = shift(shift_enabled, task, insert_index);
 
         } else {
 
-            //If the task is not a non-sequential task, then a dispatch in the appropriate sequence will be attempted.
-            Queue<task_t> *sequence = task_sequences[type];
-
-            /* If the current task is the first task of this type encountered during this process and
-                the sequence is not full anymore, re-insertion is allowed */
-            if (dispatch_enabled[type]) {
-
-                if (sequence->available_spaces()) {
-
-                    //Dispatch
-                    *(sequence->get_input_ptr()) = *task;
-
-                    sequence->enqueue();
-
-                    //Enable the shifting, as a space is now present in the pool.
-                    shift_enabled = true;
-
-                    //DO NOT MOVE THE INSERTION INDEX, AS THE TASK IS NOT IN THE POOL ANYMORE
-
-
-                } else {
-
-                    //If No spaces are still available, disable the dispatch
-                    dispatch_enabled[type] = false;
-
-                    //Shift the task to the insertion position
-                    insert_index = shift(shift_enabled, task, insert_index);
-
-                }
-
-            } else {
-
-                //If the dispatch is disabled, shift the task to the insertion position
-                insert_index = shift(shift_enabled, task, insert_index);
-
-            }
-
+            //If the task succeeds, it leaves an empty space in the pool. Enable the shift.
+            shift_enabled = true;
         }
 
     }
 
-    //Update the number of task, in the queue, that is now equal to the insertion index.
+    //Update the number of task, in the pool, that is now equal to the insertion index.
     pool_task_nb = insert_index;
 
     pool_task_spaces = (uint8_t) TASK_POOL_SIZE - pool_task_nb;
@@ -415,7 +464,7 @@ uint8_t m::pool_task_spaces = TASK_POOL_SIZE;
 
 //Sequences lock counters definition
 bool t_ftflg[NB_TASK_SEQUENCES]{0};
-bool *const m::dispatch_enabled = t_ftflg;
+bool *const m::queues_locked = t_ftflg;
 
 //task sequences declaration
 Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];

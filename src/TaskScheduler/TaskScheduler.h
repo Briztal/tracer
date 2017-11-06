@@ -84,22 +84,46 @@
 #include <DataStructures/Queue.h>
 #include "_task_scheduler_data.h"
 
+//All files that include this library may requrie the generation of a scheduler.
+#include "scheduler_generation.h"
 
 class TaskScheduler {
 
 public:
 
+    //Initialise TRACER's enabled modules.
     static void init();
 
+
+private:
+
+    //Verify that a type exists
+    static bool check_sequence_type(uint8_t type);
+
+
+public:
+
+    //Start the scheduling - execution.
     static void run();
 
-    static uint8_t add_prioritary_procedure(task_state_t (*f)(void *));
+    //Schedule a task.
+    static void add_task(task_t task);
+    static void schedule_task(task_state_t (*f)(void *), void *args, uint8_t type);
 
+    //Schedule a no-arguments task.
     static uint8_t add_procedure(task_state_t (*f)(void *), uint8_t type);
 
-    static void add_task(task_t task);
+    //Schedule a no-arguments task of type 255.
+    static uint8_t add_prioritary_procedure(task_state_t (*f)(void *));
 
-    static const uint8_t spaces();
+    //Returns the number of type-[type] tasks that can be scheduled.
+    static const uint8_t available_spaces(uint8_t type);
+
+    //Lock the specified sequence
+    static void lock_sequence(uint8_t type);
+
+    //get the state of a sequence
+    static bool is_sequence_locked(uint8_t type);
 
 private:
 
@@ -116,7 +140,7 @@ private:
     static Queue<task_t> **const task_sequences;
 
     //First tasks flags
-    static bool *const dispatch_enabled;
+    static bool *const queues_locked;
 
     static void process_task_pool();
 
@@ -127,6 +151,43 @@ private:
     static uint8_t shift(boolean shift_enabled, task_t *task, uint8_t insert_index);
 
     static void process_task_sequences_singular();
+
+
 };
+
+
+
+//TODO MACRO FOR CHECKING SPACES FOR A CERTAIN TYPE,
+//TODO MACRO FOR VERIFYING THE LOCKING_STATE OF A CERTAIN TYPE (MERGE WITH THE MACRO UPPER ?)
+
+/*
+ * REQUIRE_SCHEDULE : This macro shall be used in your tasks, to verify that [task_nb] tasks of type [type]
+ *      can be scheduled.
+ *
+ *      If they can't, result_variable will be set to false.
+ *
+ */
+#define REQUIRE_SCHEDULE(tasks_type, tasks_nb, result_variable) \
+    {\
+        if(result_variable) {\
+            if (TaskScheduler::is_sequence_locked(tasks_type)) {\
+                result_variable = false;\
+            } else {\
+                if (TaskScheduler::available_spaces(tasks_type) < tasks_nb) {\
+                    result_variable = false;\
+                }\
+            }\
+        }\
+    }
+
+
+/*
+ * LOCK_SEQUENCE : This macro shall be used in your tasks to lock a given task_sequence.
+ */
+#define LOCK_SEQUENCE(type) \
+    {\
+        TaskScheduler::lock_sequence(type);\
+    }
+
 
 #endif //PROJECT_SYSTEM_H

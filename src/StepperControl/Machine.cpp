@@ -25,6 +25,7 @@
 #include "StepperController.h"
 #include "TrajectoryTracer.h"
 #include <interface.h>
+#include <TaskScheduler/TaskScheduler.h>
 
 
 
@@ -71,7 +72,7 @@ void Machine::disable_stepper_power() {
  */
 
 
-task_state_t Machine::zero_carriages() {
+task_state_t Machine::carriages_reset() {
 
     position[0] = position[1] = position[2] = position[3] = 0;
 
@@ -86,10 +87,6 @@ task_state_t Machine::zero_carriages() {
 }
 
 
-//TODO MAKE AN ENUM WITH MODES
-void Machine::set_current_mode(uint8_t new_mode) {
-    mode = new_mode;
-}
 
 task_state_t Machine::line_to(float x, float y, float z) {
 
@@ -140,8 +137,6 @@ task_state_t Machine::line_of(float x, float y, float z) {
             break;
     }
 
-
-
     if (state == complete) {
 
         //Save coords
@@ -153,6 +148,7 @@ task_state_t Machine::line_of(float x, float y, float z) {
 
 }
 
+//---------------------------------------------------Movement planners--------------------------------------------------
 
 /*
  * mode_0 : single carriage_id mode    CI::echo("complete : "+String(state == complete));
@@ -275,14 +271,23 @@ void Machine::sanity_check(float *position) {
 }
 
 
-task_state_t Machine::set_speed_for_carriage(uint8_t carriage_id, float speed) {
+//-----------------------------------------------------setup planners---------------------------------------------------
 
+
+
+task_state_t Machine::speed_set(uint8_t carriage_id, float speed) {
+
+    //TODO VERIFY CARRIAGE AND SPEED BOUNDS
+
+    //Set the speed
     return MachineInterface::set_speed_for_group(carriage_id, speed);
 
 }
 
 
-task_state_t Machine::set_carriage(uint8_t carriage) {
+
+task_state_t Machine::carriage_set(uint8_t carriage) {
+
 
     //Nothing to do if the carriage id the current one.
     if (carriage == carriage_id) {
@@ -320,12 +325,13 @@ task_state_t Machine::set_carriage(uint8_t carriage) {
 
 }
 
-task_state_t Machine::set_carriage_and_speed(uint8_t carriage, float speed) {
 
-    task_state_t state = set_carriage(carriage);
+task_state_t Machine::carriage_speed_set(uint8_t carriage_id, float speed) {
+
+    task_state_t state = carriage_set(carriage_id);
 
     if (state == complete) {
-        state = set_speed_for_carriage(carriage_id, speed);
+        state = speed_set(carriage_id, speed);
     }
 
     return state;

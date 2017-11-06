@@ -374,7 +374,7 @@ void TI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
         t.task = task;
 
         //Schedule the task
-        TaskScheduler::add_task(t);
+        TaskScheduler::schedule_task(t);
 
     }
 }
@@ -465,8 +465,8 @@ void TI::read_data() {
                 //Reset the input data
                 reset_input_data();
 
-                //Stop if no tasks spaces are available in the scheduler.
-                if (!TaskScheduler::spaces())
+                //Stop if no tasks available_spaces are available in the scheduler.
+                if (!TaskScheduler::available_spaces())
                     return;
 
                 continue;

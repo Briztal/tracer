@@ -25,6 +25,9 @@
 
 #include <cstdint>
 #include <TaskScheduler/task_state_t.h>
+#include <TaskScheduler/TaskScheduler.h>
+
+
 
 class Machine {
 
@@ -38,21 +41,40 @@ public:
 
     //-----------------------------------------------Movement-----------------------------------------------------------
 
+
+    //Task interfaces :
+
 public:
 
-    static void set_current_mode(uint8_t mode);
+    static task_state_t carriages_reset();
 
-    static task_state_t zero_carriages();
+    GENERATE_SCHEDULER(carriages_reset, 0);
+
 
     static task_state_t line_to(float x, float y, float z);
 
+    GENERATE_SCHEDULER(line_to, 3, float, x, float, y, float, z);
+
+
     static task_state_t line_of(float x, float y, float z);
 
-    static task_state_t set_carriage(uint8_t carriage_id);
+    GENERATE_SCHEDULER(line_of, 3, float, x, float, y, float, z);
 
-    static task_state_t set_speed_for_carriage(uint8_t carriage_id, float speed);
 
-    static task_state_t set_carriage_and_speed(uint8_t carriage, float speed);
+    static task_state_t carriage_set(uint8_t carriage_id);
+
+    GENERATE_SCHEDULER(carriage_set, 1, uint8_t, carriage_id);
+
+
+    static task_state_t speed_set(uint8_t carriage_id, float speed);
+
+    GENERATE_SCHEDULER(speed_set, 2, uint8_t, carriage_id, float, speed);
+
+
+    static task_state_t carriage_speed_set(uint8_t carriage, float speed);
+
+    GENERATE_SCHEDULER(carriage_speed_set, 2, uint8_t, carriage_id, float, speed);
+
 
 
 private:

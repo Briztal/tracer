@@ -25,21 +25,21 @@ void initialise_interfaces() {
 
 void read_interfaces() {
 
-    if (!TaskScheduler::spaces())
+    if (!TaskScheduler::available_spaces(0))
         return;
 
 #ifdef ENABLE_TERMINAL_INTERFACE
     UI::read_serial();
 #endif
 
-    if (!TaskScheduler::spaces())
+    if (!TaskScheduler::available_spaces(0))
         return;
 
 #ifdef ENABLE_PROGRAM_INTERFACE
     TI::read_data();
 #endif
 
-    if (!TaskScheduler::spaces())
+    if (!TaskScheduler::available_spaces(0))
         return;
 
 #ifdef ENABLE_GCODE_INTERFACE

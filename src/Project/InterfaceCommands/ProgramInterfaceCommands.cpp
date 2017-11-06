@@ -226,12 +226,6 @@ task_state_t ProgramInterfaceCommands::actions_system_canal(char *data, uint8_t 
         default:
             return invalid_arguments;
     }
-
-#else
-
-    return complete;
-
-#endif
 }
 
 
@@ -385,4 +379,5 @@ task_state_t ProgramInterfaceCommands::home(uint8_t args_index) {
     return complete;
 }
 
+#endif
 
