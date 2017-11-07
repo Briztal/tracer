@@ -274,7 +274,7 @@ uint8_t MachineInterface::set_tools_updating_function(sig_t tools_signature, voi
 
 #define CONTINUOUS(i, name, pin, max) \
     if (tools_signature&((sig_t)1<<i)) {\
-        updating_functions[id++] = ContinuousActions::set_power##i;\
+        updating_functions[id++] = ContinuousActions::set_power_##i;\
     }
 
 #include <config.h>

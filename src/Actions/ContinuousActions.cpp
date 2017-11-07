@@ -32,16 +32,22 @@ void ContinuousActions::begin() {
 }
 
 #define CONTINUOUS(i, name, pin, max) \
-void ContinuousActions::set_power##i (float f) {\
-    if (f<=0){\
+void ContinuousActions::set_power_##i (float f) {\
+    uint8_t power = f * ((float) 255.0 / (float) max);\
+    if (power<=0){\
         stop_##i();\
         return;\
     }\
-    if (f<=max){analog_write(pin,  f * ((float) 255.0 / (float) max));}\
+    states[i] = true;\
+    if (power<=255){analog_write(pin, power);}\
     else{analog_write(pin, 255);}\
+}\
+bool ContinuousActions::get_state_##i () {\
+    return states[i];\
 }\
 void ContinuousActions::stop_##i() {\
     analog_write(pin,0);\
+    states[i] = false;\
 }
 
 
@@ -49,3 +55,49 @@ void ContinuousActions::stop_##i() {\
 
 #undef CONTINUOUS
 
+
+
+
+void ContinuousActions::set_power(uint8_t action, float power) {
+
+#define CONTINUOUS(i, ...) case i: set_power_##i(power);break;
+
+    switch (action) {
+
+#include <config.h>
+
+#undef CONTINUOUS
+
+        default:
+            break;
+    }
+
+}
+
+bool ContinuousActions::get_state(uint8_t action) {
+
+    if (action >= NB_CONTINUOUS)
+        return 0;
+
+    return states[action];
+
+}
+
+void ContinuousActions::stop(uint8_t action) {
+
+#define CONTINUOUS(i, ...) case i: stop_##i();break;
+
+    switch (action) {
+
+#include <config.h>
+
+#undef CONTINUOUS
+
+        default:
+            break;
+    }
+}
+
+
+bool t_b_cont[NB_CONTINUOUS];
+bool *const ContinuousActions::states = t_b_cont;

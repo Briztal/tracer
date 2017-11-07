@@ -96,7 +96,7 @@ TASK_SEQUENCE(2, 10)
 
 #ifdef THERMISTOR
 
-THERMISTOR(0,   23,     SEMITEC_100_47)
+THERMISTOR(0,   A26,    SEMITEC_100_47)
 THERMISTOR(1,   22,     SEMITEC_100_47)
 THERMISTOR(2,   21,     SEMITEC_100_47)
 THERMISTOR(3,   20,     SEMITEC_100_47)
@@ -190,7 +190,7 @@ CONTINUOUS(1,   hotend1,  3,    100)
 CONTINUOUS(2,   hotend2,  4,    100)
 CONTINUOUS(3,   hotend3,  5,    100)
 CONTINUOUS(4,   hotbed,   6,    100)
-CONTINUOUS(5,   cooling,  A26,  100)
+CONTINUOUS(5,   cooling,  23,  100)
 
 #endif
 

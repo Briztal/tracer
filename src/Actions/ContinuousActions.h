@@ -30,14 +30,23 @@ public:
 
     static void begin();
 
+    static void set_power(uint8_t action, float power);
+
+    static bool get_state(uint8_t action);
+
+    static void stop(uint8_t action);
+
 #define CONTINUOUS(i, name, pin, max) \
-    static void set_power##i(float f);\
+    static void set_power_##i(float f);\
+    static bool get_state_##i();\
     static void stop_##i();
 
 #include <config.h>
 
 #undef CONTINUOUS
 
+private:
+    static bool *const states;
 };
 
 

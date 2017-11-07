@@ -26,6 +26,7 @@
 #include "TrajectoryTracer.h"
 #include <interface.h>
 #include <TaskScheduler/TaskScheduler.h>
+#include <Actions/ContinuousActions.h>
 
 
 
@@ -85,7 +86,6 @@ task_state_t Machine::carriages_reset() {
     return MachineInterface::linear_movement(position);
 
 }
-
 
 
 task_state_t Machine::line_to(float x, float y, float z) {
@@ -271,7 +271,7 @@ void Machine::sanity_check(float *position) {
 }
 
 
-//-----------------------------------------------------setup planners---------------------------------------------------
+//-----------------------------------------------------setup---------------------------------------------------
 
 
 
@@ -285,8 +285,7 @@ task_state_t Machine::speed_set(uint8_t carriage_id, float speed) {
 }
 
 
-
-task_state_t Machine::carriage_set(uint8_t carriage) {
+task_state_t Machine::extruder_set(uint8_t carriage) {
 
 
     //Nothing to do if the carriage id the current one.
@@ -326,9 +325,9 @@ task_state_t Machine::carriage_set(uint8_t carriage) {
 }
 
 
-task_state_t Machine::carriage_speed_set(uint8_t carriage_id, float speed) {
+task_state_t Machine::extruder_speed_set(uint8_t carriage_id, float speed) {
 
-    task_state_t state = carriage_set(carriage_id);
+    task_state_t state = extruder_set(carriage_id);
 
     if (state == complete) {
         state = speed_set(carriage_id, speed);
@@ -339,9 +338,128 @@ task_state_t Machine::carriage_speed_set(uint8_t carriage_id, float speed) {
 }
 
 
+//-------------------------------Hotends-------------------------------
+
+task_state_t Machine::set_hotend_temperature(uint8_t hotend, float temp) {
+    if (hotend > 3) {
+        return invalid_arguments;
+    }
+
+    //TODO SET TARGET
+
+    return complete;
+}
+
+task_state_t Machine::get_hotend_temperature(uint8_t hotend) {
+
+    return complete;
+
+}
+
+task_state_t Machine::set_hotend_state(uint8_t hotend, bool state) {
+
+    return complete;
+
+    //TODO ENABLE - DISABLE LOOP
+
+}
+
+
+task_state_t Machine::get_hotend_state(uint8_t hotend) {
+
+    return complete;
+
+}
+
+
+//-------------------------------Hotbed-------------------------------
+
+
+task_state_t Machine::set_hotbed_temperature(float temp) {
+
+    //TODO SET TARGET
+
+    return complete;
+
+}
+
+task_state_t Machine::get_hotbed_temperature() {
+
+    return complete;
+
+}
+
+task_state_t Machine::set_hotbed_state(bool state) {
+
+    return complete;
+
+    //TODO ENABLE - DISABLE LOOP
+
+}
+
+
+task_state_t Machine::get_hotbed_state() {
+
+    return complete;
+}
+
+
+//-------------------------------Cooling-------------------------------
+
+
+task_state_t Machine::set_cooling_power(float power) {
+
+    //Minor the power;
+    if (power < 0)
+        power = 0;
+
+    //Major the power;
+    if (power > 100)
+        power = 100;
+
+    //Save the power
+    cooling_power = power;
+
+    //Complete
+    return complete;
+
+}
+
+task_state_t Machine::get_cooling_power() {
+
+    CI::echo(cooling_power);
+
+    return complete;
+}
+
+task_state_t Machine::set_cooling_state(bool state) {
+
+    if (state)
+        ContinuousActions::set_power_5(cooling_power);
+    else
+        ContinuousActions::stop_0();
+
+    return complete;
+
+}
+
+task_state_t Machine::get_cooling_state() {
+
+    if (ContinuousActions::get_state_5())
+        CI::echo("1");
+    else
+        CI::echo("0");
+
+    return complete;
+
+}
+
+
 uint8_t Machine::mode = 0;
 
 uint8_t Machine::carriage_id = 0;
+
+float Machine::cooling_power = 100;
 
 float tmpos[NB_AXIS];
 float *const Machine::position = tmpos;

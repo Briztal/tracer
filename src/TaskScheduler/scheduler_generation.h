@@ -21,33 +21,97 @@
 /*
  * This file contains macro used in generation of scheduler functions / structure for a precise function.
  *
- * It eases your developpement by //TODO TUTORIAL / DOC
+ * It eases your development the following way :
+ *
+ *  Say that we have a function like below, that you may want to schedule  :
+ *
+ *  task_state_t function(uint8_t var_0, float var_1, long var_2) {
+ *      //SOME OPERATIONS
+ *  }
+ *
+ *  Normally, to schedule a this function, you would need :
+ *      - A structure to contain data (var_0, 1 and 2), from the moment you schedule the function
+ *          to the moment it is effectively executed;
+ *      - A scheduler, taking the same arguments than your function, that would put those into
+ *          an instance of the struct, and schedule the unpacker (below);
+ *      - An unpacker, that would unpack arguments, and execute the desired function, with extracted args.
+ *
+ *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
+ *
+ *  The only thing you have to do is to call the macro GENERATE_SCHEDULERn with the arguments like below :
+ *
+ *      GENERATE_SCHEDULER(function_name, nb_args, type_0, variable_0, ..., type_[nb_args], variable_[nb_args])
+ *
+ *  To keep up with our example, to generate the scheduling structure for "function", you would write :
+ *
+ *      GENERATE_SCHEDULER(function, 3, uint8_t, var_0, float, var_1, long, var_2)
+ *
  *
  */
-/* Scheduler :
 
- struct definition :
-    type + " " + var + ";" + ...
-
-
- signature :
-
- type + " " + var + ", "+ ... + PAS DE VIRGULE A LA FIN
-
-
- struct fill :
-
-    "data->"+ var + " = " + var + "; "
+//----------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------WARNING--------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------MACRO_CODE_BELOW---------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------MODIFY_AT_YOUR_OWN_RISKS----------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 
 
- struct extraction :
 
-  'data->" + var + ", "+ ... + PAS DE VIRGULE A LA FIN
+/*
+ * Four text processors are required to generate properly the structure :
+
+ signature : this will be the signature of the scheduler (the unpacker takes a void *,  as it extracts data.
+
+    we need to convert (type_0, var_0, ..., type_n, var_n) to :
+
+        (type_0 var_0, ... , type_n var_n)  //<-- no comma at the end
+
+
+
+ struct declaration : this text will declare the content of the structure, according to provided types and variables.
+
+    we need to convert (type_0, var_0, ..., type_n, var_n) to :
+
+        type_0 var_0; ... ; type_n var_n;
+
+
+
+ struct fill : this text effectively inserts text to a container struct, using a pointer to the struct named "data".
+
+    we need to convert (type_0, var_0, ..., type_n, var_n) to :
+
+        data->var_0 = var_0; ... ; data->var_n = var_n;
+
+
+
+ struct extraction : this text provides arguments to the scheduled function, extracting it of the struct
+
+    we need to convert (type_0, var_0, ..., type_n, var_n) to :
+
+        (data->var_0, ... , data->var_n)  //<-- no comma at the end
+
 
  */
 
 
-//Simili recursive macros
+/*
+ *
+ * The real difficulty in this generation, is that it must adapt to "any" number of arguments.
+ *
+ * As macro cannot be recursive, we won't be able to adapt to any number, but we can simulate this adaptation :
+ *
+ *  We will define two macros REC_N and RECP_N, for each number of argument we will support
+ *      (N will be in [|0; MAX_NB_ARGS|])
+ *
+ *  These macros are a simulation of a N degree recursion of a provided macro MACRO.
+ *      As macros will process data based on couples (type, variable), it accepts another macro, CAT,
+ *      that will be used to extract data from couples (type, variable).
+ *
+ *      //TODO COMMENT REC AND RECP
+ *
+ */
 
 #define REC_0(MACRO, CAT, ...)
 #define REC_1(MACRO, CAT, t0, v0) MACRO(CAT(t0, v0) , )
@@ -74,7 +138,13 @@
 #define RECP_10(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), CAT(t9, v9))))))))))
 
 
-//Concatenation macros
+/*
+ * Concatenation macros
+ *
+ *  Below are defined macro that will be used as the CAT macro used in REC_ and RECP_
+ *  //TODO DOC
+ *
+ */
 
 #define SPACE_CAT(t, v) t v
 #define STRUCT_FILL_CAT(t, v) data->v = v

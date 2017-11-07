@@ -41,30 +41,30 @@
 task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
     Machine::speed_set_scheduled(0, 150);
-    Machine::carriage_set_scheduled(0);
+    Machine::extruder_set_scheduled(0);
     Machine::line_to_scheduled(50, 50, 0);
     Machine::line_to_scheduled(100, 100, 0);
 
     Machine::carriages_reset_scheduled();
 
     Machine::speed_set_scheduled(1, 150);
-    Machine::carriage_set_scheduled(1);
+    Machine::extruder_set_scheduled(1);
     Machine::line_to_scheduled(50, 50, 0);
     Machine::line_to_scheduled(100, 100, 0);
 
     Machine::carriages_reset_scheduled();
 
     Machine::speed_set_scheduled(2, 150);
-    Machine::carriage_set_scheduled(2);
+    Machine::extruder_set_scheduled(2);
     Machine::line_to_scheduled(50, 50, 0);
     Machine::line_to_scheduled(100, 100, 0);
 
     Machine::carriages_reset_scheduled();
 
     Machine::speed_set_scheduled(3, 150);
-    Machine::carriage_set_scheduled(3);
+    Machine::extruder_set_scheduled(3);
     Machine::line_to_scheduled(50, 50, 0);
-    Machine::carriage_set_scheduled(0);
+    Machine::extruder_set_scheduled(0);
     Machine::line_to_scheduled(100, 100, 0);
 
     Machine::carriages_reset_scheduled();
@@ -307,7 +307,7 @@ task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
     float speed = str_to_float(WORD);
 
 
-    task_state_t state = Machine::carriage_speed_set_scheduled(carriage_id, speed);
+    task_state_t state = Machine::extruder_speed_set_scheduled(carriage_id, speed);
 
     if (state == complete) {
 
@@ -347,23 +347,23 @@ task_state_t TerminalInterfaceCommands::temp_test(uint8_t args_index) {
 task_state_t TerminalInterfaceCommands::heater_test(uint8_t args_index) {
 
     CI::echo("SUUS");
-    ContinuousActions::set_power0(100);
-    ContinuousActions::set_power1(100);
-    ContinuousActions::set_power2(100);
-    ContinuousActions::set_power3(100);
-    ContinuousActions::set_power4(100);
-    ContinuousActions::set_power5(100);
+    ContinuousActions::set_power_0(100);
+    ContinuousActions::set_power_1(100);
+    ContinuousActions::set_power_2(100);
+    ContinuousActions::set_power_3(100);
+    ContinuousActions::set_power_4(100);
+    ContinuousActions::set_power_5(100);
 
     CI::echo("ENBALE");
 
     delay(100000);
 
-    ContinuousActions::set_power0(0);
-    ContinuousActions::set_power1(0);
-    ContinuousActions::set_power2(0);
-    ContinuousActions::set_power3(0);
-    ContinuousActions::set_power4(0);
-    ContinuousActions::set_power5(0);
+    ContinuousActions::set_power_0(0);
+    ContinuousActions::set_power_1(0);
+    ContinuousActions::set_power_2(0);
+    ContinuousActions::set_power_3(0);
+    ContinuousActions::set_power_4(0);
+    ContinuousActions::set_power_5(0);
 
     CI::echo("OFF");
 
