@@ -46,17 +46,17 @@ public:
 
     static task_state_t carriages_reset();
 
-GENERATE_SCHEDULER(carriages_reset, 0);
+GENERATE_SCHEDULER(carriages_reset);
 
 
     static task_state_t line_to(float x, float y, float z);
 
-GENERATE_SCHEDULER(line_to, 3, float, x, float, y, float, z);
+GENERATE_SCHEDULER(line_to, float, x, float, y, float, z);
 
 
     static task_state_t line_of(float x, float y, float z);
 
-GENERATE_SCHEDULER(line_of, 3, float, x, float, y, float, z);
+GENERATE_SCHEDULER(line_of, float, x, float, y, float, z);
 
 
     //-------------------------------Setup-------------------------------

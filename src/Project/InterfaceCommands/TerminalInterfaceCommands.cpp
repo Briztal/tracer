@@ -40,45 +40,6 @@
 
 task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
-    Machine::speed_set_scheduled(0, 150);
-    Machine::extruder_set_scheduled(0);
-    Machine::line_to_scheduled(50, 50, 0);
-    Machine::line_to_scheduled(100, 100, 0);
-
-    Machine::carriages_reset_scheduled();
-
-    Machine::speed_set_scheduled(1, 150);
-    Machine::extruder_set_scheduled(1);
-    Machine::line_to_scheduled(50, 50, 0);
-    Machine::line_to_scheduled(100, 100, 0);
-
-    Machine::carriages_reset_scheduled();
-
-    Machine::speed_set_scheduled(2, 150);
-    Machine::extruder_set_scheduled(2);
-    Machine::line_to_scheduled(50, 50, 0);
-    Machine::line_to_scheduled(100, 100, 0);
-
-    Machine::carriages_reset_scheduled();
-
-    Machine::speed_set_scheduled(3, 150);
-    Machine::extruder_set_scheduled(3);
-    Machine::line_to_scheduled(50, 50, 0);
-    Machine::extruder_set_scheduled(0);
-    Machine::line_to_scheduled(100, 100, 0);
-
-    Machine::carriages_reset_scheduled();
-
-    float position[NB_AXIS]{0};
-    position[0] = 500;
-    position[1] = 500;
-    position[2] = 500;
-    position[3] = 500;
-
-    MachineInterface::set_speed_group(0);
-    MachineInterface::set_speed_for_group(0, 200);
-
-    MachineInterface::linear_movement(position);
 
     CI::echo("EXIT");
 
@@ -325,6 +286,9 @@ task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
 
 task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
 
+    CI::echo("EXIT");
+
+    return complete;
 
 
 }

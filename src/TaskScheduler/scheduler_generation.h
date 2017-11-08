@@ -113,6 +113,25 @@
  *
  */
 
+
+/*
+ * Arguments counters macros
+ *
+ */
+
+#define REC_F(...) NB_ARGS_(__VA_ARGS__,REC_FIRST_PART())
+#define RECP_F(...) NB_ARGS_(__VA_ARGS__,RECP_FIRST_PART())
+
+//TODO VIRER ????
+
+#define NB_ARGS_(...) SELECT_NUMBER(__VA_ARGS__)
+
+#define SELECT_NUMBER(_1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,N,...) N
+
+#define RECP_FIRST_PART() RECP_10, RECP_10, RECP_9, RECP_9, RECP_8, RECP_8, RECP_7, RECP_7, RECP_6, RECP_6, RECP_5, RECP_5, RECP_4, RECP_4, RECP_3, RECP_3, RECP_2, RECP_2, RECP_1, RECP_1, RECP_0, RECP_0
+#define REC_FIRST_PART() REC_10, REC_10, REC_9, REC_9, REC_8, REC_8, REC_7, REC_7, REC_6, REC_6, REC_5, REC_5, REC_4, REC_4, REC_3, REC_3, REC_2, REC_2, REC_1, REC_1, REC_0, REC_0
+
+
 #define REC_0(MACRO, CAT, ...)
 #define REC_1(MACRO, CAT, t0, v0) MACRO(CAT(t0, v0) , )
 #define REC_2(MACRO, CAT, t0, v0, t1, v1) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), ))
@@ -124,6 +143,7 @@
 #define REC_8(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), ))))))))
 #define REC_9(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), )))))))))
 #define REC_10(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), MACRO(CAT(t9, v9), ))))))))))
+
 
 #define RECP_0(MACRO, CAT, ...)
 #define RECP_1(MACRO, CAT, t0, v0) CAT(t0, v0)
@@ -137,22 +157,6 @@
 #define RECP_9(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), CAT(t8, v8)))))))))
 #define RECP_10(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), CAT(t9, v9))))))))))
 
-
-
-/*
- * Arguments counters macros
- *
- */
-
-#define NB_ARGS(...) NB_ARGS_(__VA_ARGS__,FIRST_PART())
-
-//TODO VIRER ????
-
-#define NB_ARGS_(...) SELECT_NUMBER(__VA_ARGS__)
-
-#define SELECT_NUMBER(_1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,N,...) N
-
-#define FIRST_PART() 10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0, 0
 
 
 /*
@@ -184,7 +188,7 @@
 
 //Implementations macros
 
-#define GENERATE_STRUCT(name, struct_data) typedef struct name##_struct_t { struct_data } name##struct_t ;
+#define GENERATE_STRUCT(name, struct_data) typedef struct name##_struct_t { struct_data } name##_struct_t ;
 
 #define GENERATE_PACKER(name, signature, struct_fill)\
 static task_state_t name##_scheduled signature { \
@@ -236,4 +240,35 @@ static task_state_t _##name(void *d) {\
 
 #define GENERATE_SCHEDULER(name, nb_args, ...)\
     _GENERATE_SCHEDULER(name, GET_SIGNATURE(nb_args, __VA_ARGS__), DEFINE_STRUCT(nb_args, __VA_ARGS__), FILL_STRUCT(nb_args, __VA_ARGS__), EXTRACT_STRUCT(nb_args, __VA_ARGS__))
+
+
+//Implementation macro
+
+#define _GENERATE_SCHEDULER_(name, signature, struct_data, struct_fill, struct_extraction)\
+    private:\
+    GENERATE_STRUCT(name, struct_data);\
+    GENERATE_UNPACKER(name, struct_extraction);\
+    public:\
+    GENERATE_PACKER(name, signature, struct_fill);
+
+
+//Utility macros
+
+#define GET_SIGNATURE_(...) (RECP_F(__VA_ARGS__) (TO_COMMA, SPACE_CAT, __VA_ARGS__))
+
+#define DEFINE_STRUCT_(...)  REC_F(__VA_ARGS__) (TO_SEMICOLON, SPACE_CAT, __VA_ARGS__)
+
+#define FILL_STRUCT_(...)  REC_F(__VA_ARGS__) (TO_SEMICOLON, STRUCT_FILL_CAT, __VA_ARGS__)
+
+#define EXTRACT_STRUCT_(...) (RECP_F(__VA_ARGS__) (TO_COMMA, STRUCT_EXTRACT_CAT, __VA_ARGS__))
+
+
+
+
+//Scheduler generation macro
+
+#define GENERATE_SCHEDULER_(name, ...)\
+    _GENERATE_SCHEDULER_(name, GET_SIGNATURE_(__VA_ARGS__), DEFINE_STRUCT_(__VA_ARGS__), FILL_STRUCT_(__VA_ARGS__), EXTRACT_STRUCT_(__VA_ARGS__))
+
+
 
