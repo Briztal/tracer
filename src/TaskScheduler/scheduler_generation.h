@@ -138,6 +138,23 @@
 #define RECP_10(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), CAT(t9, v9))))))))))
 
 
+
+/*
+ * Arguments counters macros
+ *
+ */
+
+#define NB_ARGS(...) NB_ARGS_(__VA_ARGS__,FIRST_PART())
+
+//TODO VIRER ????
+
+#define NB_ARGS_(...) SELECT_NUMBER(__VA_ARGS__)
+
+#define SELECT_NUMBER(_1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,N,...) N
+
+#define FIRST_PART() 10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0, 0
+
+
 /*
  * Concatenation macros
  *
