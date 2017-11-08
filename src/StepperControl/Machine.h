@@ -60,6 +60,11 @@ GENERATE_SCHEDULER(line_of, 1, float, x, float, y, float, z);
 
     //-------------------------------Setup-------------------------------
 
+    static task_state_t disable_steppers();
+
+GENERATE_SCHEDULER(disable_steppers, 1);
+
+
     static task_state_t extruder_set(uint8_t carriage);
 
 GENERATE_SCHEDULER(extruder_set, 1, uint8_t, carriage);

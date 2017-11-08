@@ -40,11 +40,11 @@
  *
  *  The only thing you have to do is to call the macro GENERATE_SCHEDULERn with the arguments like below :
  *
- *      GENERATE_SCHEDULER(function_name, nb_args, type_0, variable_0, ..., type_[nb_args], variable_[nb_args])
+ *      GENERATE_SCHEDULER(function_name, task_type, type_0, variable_0, ..., type_[nb_args], variable_[nb_args])
  *
- *  To keep up with our example, to generate the scheduling structure for "function", you would write :
+ *  To keep up with our example, to generate the scheduling structure for "function" with the type 1, you would write :
  *
- *      GENERATE_SCHEDULER(function, 3, uint8_t, var_0, float, var_1, long, var_2)
+ *      GENERATE_SCHEDULER(function, 1, uint8_t, var_0, float, var_1, long, var_2)
  *
  *
  */

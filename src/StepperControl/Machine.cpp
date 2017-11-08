@@ -273,6 +273,14 @@ void Machine::sanity_check(float *position) {
 
 //-----------------------------------------------------setup---------------------------------------------------
 
+task_state_t Machine::disable_steppers() {
+
+    //Disable all steppers
+    StepperController::disable();
+
+    //Complete
+    return complete;
+}
 
 
 task_state_t Machine::speed_set(uint8_t carriage_id, float speed) {
@@ -466,3 +474,4 @@ float *const Machine::position = tmpos;
 
 float t_mch_crd[4]{0};
 float *const Machine::machine_coords = t_mch_crd;
+
