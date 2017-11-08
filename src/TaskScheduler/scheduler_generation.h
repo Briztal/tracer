@@ -102,95 +102,111 @@
  *
  * As macro cannot be recursive, we won't be able to adapt to any number, but we can simulate this adaptation :
  *
- *  We will define two macros REC_N and RECP_N, for each number of argument we will support
+ *  We will define two macros SEMICOLON_N and COMMA_N, for each number of argument we will support
  *      (N will be in [|0; MAX_NB_ARGS|])
  *
  *  These macros are a simulation of a N degree recursion of a provided macro MACRO.
  *      As macros will process data based on couples (type, variable), it accepts another macro, CAT,
  *      that will be used to extract data from couples (type, variable).
  *
- *      //TODO COMMENT REC AND RECP
- *
  */
 
 
 /*
- * Arguments counters macros
+ * Macros SEMICOLON_F and COMMA_F, defined below are meant to write the name  the function corresponding 
+ *  to the number of arguments provided;
+ *
+ *  They will write one of the SEMICOLON_[i] or COMMA_[i] functions.
  *
  */
 
-#define REC_F(...) NB_ARGS_(__VA_ARGS__,REC_FIRST_PART())
-#define RECP_F(...) NB_ARGS_(__VA_ARGS__,RECP_FIRST_PART())
+#define SEMICOLON_F(...) REC_FUNCTION(__VA_ARGS__, SEMICOLON_FIRST_PART())
+#define COMMA_F(...) REC_FUNCTION(__VA_ARGS__, COMMA_FIRST_PART())
 
-//TODO VIRER ????
-
-#define NB_ARGS_(...) SELECT_NUMBER(__VA_ARGS__)
+#define REC_FUNCTION(...) SELECT_NUMBER(__VA_ARGS__)
 
 #define SELECT_NUMBER(_1, _2, _3, _4, _5, _6, _7, _8, _9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,N,...) N
 
-#define RECP_FIRST_PART() RECP_10, RECP_10, RECP_9, RECP_9, RECP_8, RECP_8, RECP_7, RECP_7, RECP_6, RECP_6, RECP_5, RECP_5, RECP_4, RECP_4, RECP_3, RECP_3, RECP_2, RECP_2, RECP_1, RECP_1, RECP_0, RECP_0
-#define REC_FIRST_PART() REC_10, REC_10, REC_9, REC_9, REC_8, REC_8, REC_7, REC_7, REC_6, REC_6, REC_5, REC_5, REC_4, REC_4, REC_3, REC_3, REC_2, REC_2, REC_1, REC_1, REC_0, REC_0
+#define COMMA_FIRST_PART() COMMA_10, COMMA_10, COMMA_9, COMMA_9, COMMA_8, COMMA_8, COMMA_7, COMMA_7, COMMA_6, COMMA_6, COMMA_5, COMMA_5, COMMA_4, COMMA_4, COMMA_3, COMMA_3, COMMA_2, COMMA_2, COMMA_1, COMMA_1, COMMA_0, COMMA_0
+#define SEMICOLON_FIRST_PART() SEMICOLON_10, SEMICOLON_10, SEMICOLON_9, SEMICOLON_9, SEMICOLON_8, SEMICOLON_8, SEMICOLON_7, SEMICOLON_7, SEMICOLON_6, SEMICOLON_6, SEMICOLON_5, SEMICOLON_5, SEMICOLON_4, SEMICOLON_4, SEMICOLON_3, SEMICOLON_3, SEMICOLON_2, SEMICOLON_2, SEMICOLON_1, SEMICOLON_1, SEMICOLON_0, SEMICOLON_0
 
 
-#define REC_0(MACRO, CAT, ...)
-#define REC_1(MACRO, CAT, t0, v0) MACRO(CAT(t0, v0) , )
-#define REC_2(MACRO, CAT, t0, v0, t1, v1) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), ))
-#define REC_3(MACRO, CAT, t0, v0, t1, v1, t2, v2) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), )))
-#define REC_4(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), ))))
-#define REC_5(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), )))))
-#define REC_6(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), ))))))
-#define REC_7(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), )))))))
-#define REC_8(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), ))))))))
-#define REC_9(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), )))))))))
-#define REC_10(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) MACRO(CAT(t0, v0) , MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), MACRO(CAT(t9, v9), ))))))))))
+/*
+ * Function_like macros defined below do the following :
+ *  - SEMICOLON_I : concatenate the i couples of (type_i, value_i) to CAT(type_0, value_0); ...; CAT(type_I, value_I);
+ *  - COMMA_I : concatenate the i couples of (type_i, value_i) to CAT(type_0, value_0), ..., CAT(type_I, value_I)
+ *
+ * CAT is a macro provided in arguments, meant to process (type_n, variable_n) to a particular text.
+ *
+ */
+
+#define SEMICOLON_0(CAT, ...)
+#define SEMICOLON_1(CAT, t0, v0) TO_S(CAT(t0, v0) , )
+#define SEMICOLON_2(CAT, t0, v0, t1, v1) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), ))
+#define SEMICOLON_3(CAT, t0, v0, t1, v1, t2, v2) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), )))
+#define SEMICOLON_4(CAT, t0, v0, t1, v1, t2, v2, t3, v3) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), ))))
+#define SEMICOLON_5(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), TO_S(CAT(t4, v4), )))))
+#define SEMICOLON_6(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), TO_S(CAT(t4, v4), TO_S(CAT(t5, v5), ))))))
+#define SEMICOLON_7(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), TO_S(CAT(t4, v4), TO_S(CAT(t5, v5), TO_S(CAT(t6, v6), )))))))
+#define SEMICOLON_8(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), TO_S(CAT(t4, v4), TO_S(CAT(t5, v5), TO_S(CAT(t6, v6), TO_S(CAT(t7, v7), ))))))))
+#define SEMICOLON_9(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), TO_S(CAT(t4, v4), TO_S(CAT(t5, v5), TO_S(CAT(t6, v6), TO_S(CAT(t7, v7), TO_S(CAT(t8, v8), )))))))))
+#define SEMICOLON_10(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) TO_S(CAT(t0, v0) , TO_S(CAT(t1, v1), TO_S(CAT(t2, v2), TO_S(CAT(t3, v3), TO_S(CAT(t4, v4), TO_S(CAT(t5, v5), TO_S(CAT(t6, v6), TO_S(CAT(t7, v7), TO_S(CAT(t8, v8), TO_S(CAT(t9, v9), ))))))))))
 
 
-#define RECP_0(MACRO, CAT, ...)
-#define RECP_1(MACRO, CAT, t0, v0) CAT(t0, v0)
-#define RECP_2(MACRO, CAT, t0, v0, t1, v1) MACRO(CAT(t0, v0), CAT(t1, v1))
-#define RECP_3(MACRO, CAT, t0, v0, t1, v1, t2, v2) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), CAT(t2, v2)))
-#define RECP_4(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), CAT(t3, v3))))
-#define RECP_5(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), CAT(t4, v4)))))
-#define RECP_6(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), CAT(t5, v5))))))
-#define RECP_7(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), CAT(t6, v6)))))))
-#define RECP_8(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), CAT(t7, v7))))))))
-#define RECP_9(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), CAT(t8, v8)))))))))
-#define RECP_10(MACRO, CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) MACRO(CAT(t0, v0), MACRO(CAT(t1, v1), MACRO(CAT(t2, v2), MACRO(CAT(t3, v3), MACRO(CAT(t4, v4), MACRO(CAT(t5, v5), MACRO(CAT(t6, v6), MACRO(CAT(t7, v7), MACRO(CAT(t8, v8), CAT(t9, v9))))))))))
-
+#define COMMA_0(CAT, ...)
+#define COMMA_1(CAT, t0, v0) CAT(t0, v0)
+#define COMMA_2(CAT, t0, v0, t1, v1) TO_C(CAT(t0, v0), CAT(t1, v1))
+#define COMMA_3(CAT, t0, v0, t1, v1, t2, v2) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), CAT(t2, v2)))
+#define COMMA_4(CAT, t0, v0, t1, v1, t2, v2, t3, v3) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), CAT(t3, v3))))
+#define COMMA_5(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), TO_C(CAT(t3, v3), CAT(t4, v4)))))
+#define COMMA_6(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), TO_C(CAT(t3, v3), TO_C(CAT(t4, v4), CAT(t5, v5))))))
+#define COMMA_7(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), TO_C(CAT(t3, v3), TO_C(CAT(t4, v4), TO_C(CAT(t5, v5), CAT(t6, v6)))))))
+#define COMMA_8(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), TO_C(CAT(t3, v3), TO_C(CAT(t4, v4), TO_C(CAT(t5, v5), TO_C(CAT(t6, v6), CAT(t7, v7))))))))
+#define COMMA_9(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), TO_C(CAT(t3, v3), TO_C(CAT(t4, v4), TO_C(CAT(t5, v5), TO_C(CAT(t6, v6), TO_C(CAT(t7, v7), CAT(t8, v8)))))))))
+#define COMMA_10(CAT, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5, t6, v6, t7, v7, t8, v8, t9, v9) TO_C(CAT(t0, v0), TO_C(CAT(t1, v1), TO_C(CAT(t2, v2), TO_C(CAT(t3, v3), TO_C(CAT(t4, v4), TO_C(CAT(t5, v5), TO_C(CAT(t6, v6), TO_C(CAT(t7, v7), TO_C(CAT(t8, v8), CAT(t9, v9))))))))))
 
 
 /*
  * Concatenation macros
  *
- *  Below are defined macro that will be used as the CAT macro used in REC_ and RECP_
- *  //TODO DOC
+ *  Below are defined macro that will be used as the CAT macro used in COMMA_I and SEMICOLON_I
  *
  */
 
+//SPACE_CAT concatenates t, a space and v.
 #define SPACE_CAT(t, v) t v
+
+//STRUCT_FILL_CAT uses v for a struct assignment.
 #define STRUCT_FILL_CAT(t, v) data->v = v
+
+//STRUCT_EXTRACT_CAT uses v for a struct extraction.
 #define STRUCT_EXTRACT_CAT(t, v) data->v
 
-#define TO_COMMA(x, y) x , y
-#define TO_SEMICOLON(x, y) x ; y
 
 
-//Utility macros
-
-#define GET_SIGNATURE(nb_args, ...) (RECP_ ## nb_args(TO_COMMA, SPACE_CAT, __VA_ARGS__))
-
-#define DEFINE_STRUCT(nb_args, ...) REC_ ## nb_args(TO_SEMICOLON, SPACE_CAT, __VA_ARGS__)
-
-#define FILL_STRUCT(nb_args, ...) REC_ ## nb_args(TO_SEMICOLON, STRUCT_FILL_CAT, __VA_ARGS__)
-
-#define EXTRACT_STRUCT(nb_args, ...) (RECP_ ## nb_args(TO_COMMA, STRUCT_EXTRACT_CAT, __VA_ARGS__))
+/*
+ * Comma and semicolon concatenation :
+ */
+#define TO_C(x, y) x , y
+#define TO_S(x, y) x ; y
 
 
-//Implementations macros
+/*
+ * Implementations macros
+ *
+ * The macros defined below will :
+ *
+ *  - generate the structure
+ *
+ *  - generate the packer
+ *
+ *  - generate the unpacker
+ *
+ */
 
 #define GENERATE_STRUCT(name, struct_data) typedef struct name##_struct_t { struct_data } name##_struct_t ;
 
-#define GENERATE_PACKER(name, signature, struct_fill)\
+#define GENERATE_PACKER(name, type,  signature, struct_fill)\
 static task_state_t name##_scheduled signature { \
     \
     /*Create the data in the heap*/\
@@ -200,7 +216,7 @@ static task_state_t name##_scheduled signature { \
     struct_fill\
     \
     /*Schedule the task*/\
-    TaskScheduler::schedule_task(_##name, (void *) data, 0);\
+    TaskScheduler::schedule_task(_##name, (void *) data, type);\
     \
     /*Complete*/\
     return complete;\
@@ -226,49 +242,57 @@ static task_state_t _##name(void *d) {\
 }
 
 
-//Implementation macro
 
-#define _GENERATE_SCHEDULER(name, signature, struct_data, struct_fill, struct_extraction)\
+/*
+ * Generator macro :
+ *
+ *  This macro used the three macros defines upper.
+ *
+ */
+#define GENERATE_SCHEDULER_(name, type, signature, struct_data, struct_fill, struct_extraction)\
     private:\
     GENERATE_STRUCT(name, struct_data);\
     GENERATE_UNPACKER(name, struct_extraction);\
     public:\
-    GENERATE_PACKER(name, signature, struct_fill);
+    GENERATE_PACKER(name, type, signature, struct_fill);
 
 
-//Scheduler generation macro
+/*
+ * String processing macros :
+ *
+ *  Macros defined below generate the code required to
+ *      - get the signature;
+ *      - define the structure;
+ *      - fill the structure;
+ *      - read data from the structure;
+ *
+ *  from arguments.
+ *
+ */
 
-#define GENERATE_SCHEDULER(name, nb_args, ...)\
-    _GENERATE_SCHEDULER(name, GET_SIGNATURE(nb_args, __VA_ARGS__), DEFINE_STRUCT(nb_args, __VA_ARGS__), FILL_STRUCT(nb_args, __VA_ARGS__), EXTRACT_STRUCT(nb_args, __VA_ARGS__))
+#define GET_SIGNATURE_(...) (COMMA_F(__VA_ARGS__) (SPACE_CAT, __VA_ARGS__))
 
+#define DEFINE_STRUCT_(...)  SEMICOLON_F(__VA_ARGS__) (SPACE_CAT, __VA_ARGS__)
 
-//Implementation macro
+#define FILL_STRUCT_(...)  SEMICOLON_F(__VA_ARGS__) (STRUCT_FILL_CAT, __VA_ARGS__)
 
-#define _GENERATE_SCHEDULER_(name, signature, struct_data, struct_fill, struct_extraction)\
-    private:\
-    GENERATE_STRUCT(name, struct_data);\
-    GENERATE_UNPACKER(name, struct_extraction);\
-    public:\
-    GENERATE_PACKER(name, signature, struct_fill);
-
-
-//Utility macros
-
-#define GET_SIGNATURE_(...) (RECP_F(__VA_ARGS__) (TO_COMMA, SPACE_CAT, __VA_ARGS__))
-
-#define DEFINE_STRUCT_(...)  REC_F(__VA_ARGS__) (TO_SEMICOLON, SPACE_CAT, __VA_ARGS__)
-
-#define FILL_STRUCT_(...)  REC_F(__VA_ARGS__) (TO_SEMICOLON, STRUCT_FILL_CAT, __VA_ARGS__)
-
-#define EXTRACT_STRUCT_(...) (RECP_F(__VA_ARGS__) (TO_COMMA, STRUCT_EXTRACT_CAT, __VA_ARGS__))
+#define EXTRACT_STRUCT_(...) (COMMA_F(__VA_ARGS__) (STRUCT_EXTRACT_CAT, __VA_ARGS__))
 
 
 
 
-//Scheduler generation macro
+/*
+ * Scheduler generation macro :
+ *
+ * This macro is the one taht is used by the programmer, to schedule a function, taking some args.
+ *
+ *  It calls the pre-generation macro, passing the code generated using the four macros upper.
+ *
+ */
 
-#define GENERATE_SCHEDULER_(name, ...)\
-    _GENERATE_SCHEDULER_(name, GET_SIGNATURE_(__VA_ARGS__), DEFINE_STRUCT_(__VA_ARGS__), FILL_STRUCT_(__VA_ARGS__), EXTRACT_STRUCT_(__VA_ARGS__))
+
+#define GENERATE_SCHEDULER(name, type, ...)\
+    GENERATE_SCHEDULER_(name, type, GET_SIGNATURE_(__VA_ARGS__), DEFINE_STRUCT_(__VA_ARGS__), FILL_STRUCT_(__VA_ARGS__), EXTRACT_STRUCT_(__VA_ARGS__))
 
 
 

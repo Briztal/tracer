@@ -37,7 +37,6 @@ public:
 
     static void disable_stepper_power();
 
-
     //Task interfaces :
 
 public:
@@ -46,17 +45,17 @@ public:
 
     static task_state_t carriages_reset();
 
-GENERATE_SCHEDULER(carriages_reset);
+GENERATE_SCHEDULER(carriages_reset, 1);
 
 
     static task_state_t line_to(float x, float y, float z);
 
-GENERATE_SCHEDULER(line_to, float, x, float, y, float, z);
+GENERATE_SCHEDULER(line_to, 1, float, x, float, y, float, z);
 
 
     static task_state_t line_of(float x, float y, float z);
 
-GENERATE_SCHEDULER(line_of, float, x, float, y, float, z);
+GENERATE_SCHEDULER(line_of, 1, float, x, float, y, float, z);
 
 
     //-------------------------------Setup-------------------------------
@@ -68,12 +67,12 @@ GENERATE_SCHEDULER(extruder_set, 1, uint8_t, carriage);
 
     static task_state_t speed_set(uint8_t carriage, float speed);
 
-GENERATE_SCHEDULER(speed_set, 2, uint8_t, carriage, float, speed);
+GENERATE_SCHEDULER(speed_set, 1, uint8_t, carriage, float, speed);
 
 
     static task_state_t extruder_speed_set(uint8_t carriage, float speed);
 
-GENERATE_SCHEDULER(extruder_speed_set, 2, uint8_t, carriage, float, speed);
+GENERATE_SCHEDULER(extruder_speed_set, 1, uint8_t, carriage, float, speed);
 
 
     //-------------------------------Hotends-------------------------------
@@ -83,7 +82,7 @@ GENERATE_SCHEDULER(extruder_speed_set, 2, uint8_t, carriage, float, speed);
 
     static task_state_t set_hotend_temperature(uint8_t hotend, float temp);
 
-GENERATE_SCHEDULER(set_hotend_temperature, 2, uint8_t, hotend, float, temp);
+GENERATE_SCHEDULER(set_hotend_temperature, 1, uint8_t, hotend, float, temp);
 
 
     static task_state_t get_hotend_temperature(uint8_t hotend);
@@ -94,7 +93,7 @@ GENERATE_SCHEDULER(get_hotend_temperature, 1, uint8_t, hotend);
 
     static task_state_t set_hotend_state(uint8_t hotend, bool state);
 
-GENERATE_SCHEDULER(set_hotend_state, 2, uint8_t, hotend, bool, state);
+GENERATE_SCHEDULER(set_hotend_state, 1, uint8_t, hotend, bool, state);
 
 
     static task_state_t get_hotend_state(uint8_t hotend);
@@ -113,7 +112,7 @@ GENERATE_SCHEDULER(set_hotbed_temperature, 1, float, temp);
 
     static task_state_t get_hotbed_temperature();
 
-GENERATE_SCHEDULER(get_hotbed_temperature, 0);
+GENERATE_SCHEDULER(get_hotbed_temperature, 1);
 
 
     //enable - disable hotbed
@@ -125,7 +124,7 @@ GENERATE_SCHEDULER(set_hotbed_state, 1, bool, state);
 
     static task_state_t get_hotbed_state();
 
-GENERATE_SCHEDULER(get_hotbed_state, 0);
+GENERATE_SCHEDULER(get_hotbed_state, 1);
 
     //-------------------------------Cooling-------------------------------
 
@@ -139,7 +138,7 @@ GENERATE_SCHEDULER(set_cooling_power, 1, float, temp);
 
     static task_state_t get_cooling_power();
 
-GENERATE_SCHEDULER(get_cooling_power, 0);
+GENERATE_SCHEDULER(get_cooling_power, 1);
 
 
     //enable - disable hotbed
@@ -151,9 +150,7 @@ GENERATE_SCHEDULER(set_cooling_state, 1, bool, state);
 
     static task_state_t get_cooling_state();
 
-GENERATE_SCHEDULER(get_cooling_state, 0);
-
-
+GENERATE_SCHEDULER(get_cooling_state, 1);
 
 
 
