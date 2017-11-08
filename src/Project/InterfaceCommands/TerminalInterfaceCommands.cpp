@@ -30,7 +30,7 @@
 #include <Actions/ContinuousActions.h>
 #include <EEPROM/EEPROMStorage.h>
 #include <interface.h>
-#include <StepperControl/Machine.h>
+#include <Project/Machine.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <EEPROM/EEPROMInterface.h>
 #include <DataStructures/StringParser.h>

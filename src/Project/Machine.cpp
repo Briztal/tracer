@@ -21,9 +21,9 @@
 #include <EEPROM.h>
 #include <EEPROM/EEPROMStorage.h>
 #include "Machine.h"
-#include "MachineInterface.h"
-#include "StepperController.h"
-#include "TrajectoryTracer.h"
+#include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
+#include <StepperControl/TrajectoryTracer.h>
 #include <interface.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <Actions/ContinuousActions.h>
