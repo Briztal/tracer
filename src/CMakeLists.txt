@@ -6,6 +6,22 @@ include_directories()
 #------------------------------------------------PROJECT----------------------------------------------------------------
 
 
+set(PP "Project")
+
+include_directories(${PC}/)
+
+add_library(project
+
+        ${PP}/Machine.h
+        ${PP}/Machine.h
+
+
+        )
+
+
+#--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
+
+
 set(PCP "Project/Config")
 
 include_directories(${PCP}/)
@@ -18,7 +34,10 @@ add_library(project_config
         ${PCP}/gcode_interface_config.h
         ${PCP}/geometry.h
 
+
         )
+
+#------------------------------------------PROJECT INTERFACES-----------------------------------------------------------
 
 
 set(PIP "Project/Interfaces")
@@ -38,22 +57,32 @@ add_library(project_interfaces
         )
 
 
-#--------------------------------------------------CORE-----------------------------------------------------------------
+#--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
+
+
+add_library(tracer_config
+
+        src/config.h
+        src/parameters_indices.h
+        src/hardware_language_abstraction.h
+        src/interface.h
+        src/sanity_check.h
+
+        )
+
+#-----------------------------------------------SCHEDULER---------------------------------------------------------------
 
 set(CP "TaskScheduler")
 
-include_directories(${CP}/)
+include_directories(${TP}/)
 
-add_library(core
+add_library(scheduler
 
-        config_files .h
-        parameters_indices.h
-        hardware_language_abstraction.h
-        interface.h
-        sanity_check.h
-
-        ${CP}/Core.h
-        ${CP}/Core.cpp
+        ${TP}/TaskScheduler.h
+        ${TP}/TaskScheduler.cpp
+        ${TP}/scheduler_generation.h
+        ${TP}/_task_scheduler_data.h
+        ${TP}/_task_state.h
 
         )
 
@@ -64,13 +93,15 @@ include_directories(${EEP}/)
 
 add_library(core
 
-
         ${EEP}/EEPROMStorage.h
         ${EEP}/EEPROMStorage.cpp
-        ${EEP}/_eeprom_storage_data.cpp
+        ${EEP}/EEPROMNode.h
+        ${EEP}/EEPROMNode.cpp
+        ${EEP}/EEPROMInterface.h
+        ${EEP}/EEPROMInterface.cpp
+        ${EEP}/_eeprom_storage_data.h
 
         )
-
 
 
 set(HP hardware_language_abstraction)
@@ -102,6 +133,8 @@ add_library(interface
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
         ${IP}/TerminalInterface/TerminalInterface.cpp
+        Interfaces/TerminalInterface/TerminalNode.cpp
+        Interfaces/TerminalInterface/TerminalNode.h
 
         #ProgramInterface
         ${IP}/TreeInterface/ProgramInterface.h
@@ -110,8 +143,7 @@ add_library(interface
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
         ${IP}/GCodeInterface/GCodeInterface.cpp
-
-        Interfaces/TerminalInterface/TerminalNode.cpp Interfaces/TerminalInterface/TerminalNode.h)
+        )
 
 #-------------------------------------------------ACTIONS---------------------------------------------------------------
 
@@ -168,6 +200,13 @@ add_library(datastructures
 
         ${DP}/Queue.h
         ${DP}/Queue.cpp
+
+        ${DP}/ArgumentsContainer.h
+        ${DP}/ArgumentsContainer.cpp
+
+        ${DP}/StringParser.h
+        ${DP}/StringParser.cpp
+
 
         Interfaces/TerminalInterface/TerminalNode.cpp Interfaces/TerminalInterface/TerminalNode.h)
 
@@ -269,4 +308,6 @@ target_link_libraries(kernels datastructures)
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
 
-add_executable(TRACER main.cpp)
+add_executable(TRACER src/main.cpp)
+
+

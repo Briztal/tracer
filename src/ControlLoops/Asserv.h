@@ -55,7 +55,7 @@ class Asserv {
 
 #define EXTERNAL_PARAMETER(i, name, min, max, unit)\
     public:\
-    static void set_##name##_setpoint();\
+    static void set_##name##_target();\
     private:\
     static float setpoint_##name;\
     static float feedback_##name;\
@@ -78,9 +78,10 @@ class Asserv {
 
 private:
 
-#define PID(i, name, kp, ki, kd)\
-    static float last_##i;\
+    static float pids_last_##i;\
     static float sum_##i;\
+
+#define PID(i, name, kp, ki, kd)\
     static float get_pid_##i(float error);\
     static void reset_pid_##i();
 
