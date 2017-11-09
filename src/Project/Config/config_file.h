@@ -136,9 +136,12 @@ EXTERNAL_PARAMETER(1, temp_hotbed, 0, 300, degree)
 
 #ifdef PID
 
-PID(0, hotend, 1, 0, 0)
+PID(0, hotend_0, 1, 0, 0)
+PID(1, hotend_1, 1, 0, 0)
+PID(2, hotend_2, 1, 0, 0)
+PID(3, hotend_3, 1, 0, 0)
+PID(4, hotbed, 1, 1, 0)
 
-PID(1, hotbed, 1, 1, 0)
 #endif
 
 
@@ -151,8 +154,7 @@ PID(1, hotbed, 1, 1, 0)
 
 #ifdef LOOP_FUNCTION
 
-LOOP_FUNCTION(0, temps, 10);
-LOOP_FUNCTION(1, ts,    105);
+LOOP_FUNCTION(0, temperature, 10);
 
 #endif
 

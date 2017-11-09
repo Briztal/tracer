@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
+
 project(TRACER)
 
 include(CMakeListsPrivate.txt)
@@ -52,4 +53,4 @@ add_custom_target(
 )
 
 
-include(src/CMakeLists.txt)
+add_subdirectory(src)

@@ -36,7 +36,7 @@
  *
  */
 
-class Asserv {
+//class ExternalParameters {
 
     //------------------------------------------------External Parameters-----------------------------------------------
 
@@ -53,6 +53,8 @@ class Asserv {
      *      and to actually determine and update the feedback.
      */
 
+    /*
+
 #define EXTERNAL_PARAMETER(i, name, min, max, unit)\
     public:\
     static void set_##name##_target();\
@@ -65,54 +67,8 @@ class Asserv {
 
 #undef EXTERNAL_PARAMETER
 
-    //--------------------------------------------------------PID-------------------------------------------------------
-
-    /*
-     * PIDs compute a value with an input.
-     *
-     * This value is based on the input, the input's sum, and the input's variation.
-     *  More litteraly, it verifies the following equation :
-     *      output = kp * input + ki * sum + kd * variation
-     *
      */
-
-private:
-
-    static float pids_last_##i;\
-    static float sum_##i;\
-
-#define PID(i, name, kp, ki, kd)\
-    static float get_pid_##i(float error);\
-    static void reset_pid_##i();
-
-#include "../config.h"
-
-#undef PID
-
-    //---------------------------------------------------Loop Functions-------------------------------------------------
-
-    /*
-     * Loop functions are routines that are called regularly with interrupts.
-     *
-     * They are defined by the function they call and the period related.
-     *
-     */
-
-#define LOOP_FUNCTION(indice, name, period_ms) \
-public:\
-    static void enable_##indice();\
-    static void disable_##indice();\
-    static bool is_active_##indice();\
-private:\
-    static void init_loop_##indice();\
-    static void trigger_##indice();\
-    static bool active_##indice;
-
-#include "../config.h"
-
-#undef LOOP_FUNCTION
-
-};
+//};
 
 
 #endif //TRACER_ASSERV_H

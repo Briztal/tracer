@@ -1,5 +1,5 @@
 /*
-  Asserv.cpp - Part of TRACER
+  ExternalParameters.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,22 +18,24 @@
 
 */
 
-#include "Asserv.h"
+/*
+
+#include "ExternalParameters.h"
 
 //------------------------------------------------------PID-------------------------------------------------------------
 
 #define PID(i, name, kp, ki, kd)\
-float Asserv::get_pid_##i(float error) {\
+float ExternalParameters::get_pid_##i(float error) {\
     sum_##i+=error;\
     float ret = kp*error+ki*sum_##i+kp*(error-last_##i);\
     last_##i = error;\
     return ret;\
 }\
-void Asserv::reset_pid_##i() {\
+void ExternalParameters::reset_pid_##i() {\
     sum_##i=0;last_##i = 0;\
 }\
-float Asserv::sum_##i;\
-float Asserv::last_##i;
+float ExternalParameters::sum_##i;\
+float ExternalParameters::last_##i;
 
 #include "../config.h"
 
@@ -44,24 +46,6 @@ float Asserv::last_##i;
 
 
 
-//--------------------------------------------------Loop functions------------------------------------------------------
-
-
-#define LOOP_FUNCTION(indice, name, period_ms) \
-    void Asserv::enable_##indice(){\
-        init_loop_##indice();\
-        setup_loop_interrupt_##indice(trigger_##indice, period_ms);\
-        active_##indice=true;\
-    }\
-    void Asserv::disable_##indice(){\
-        disable_loop_interrupt_##indice();\
-        active_##indice=false;\
-    };\
-    bool Asserv::is_active_##indice() {\
-        return active_##indice;\
-    }
-
-
 #include "../hardware_language_abstraction.h"
 #include "../config.h"
 
@@ -70,7 +54,7 @@ float Asserv::last_##i;
 //-----------------------------------------------DECLARATIONS-----------------------------------------------------------
 
 #define LOOP_FUNCTION(indice, name, period_ms) \
-bool Asserv::active_##indice = false;
+bool ExternalParameters::active_##indice = false;
 #include "../config.h"
 
 #undef LOOP_FUNCTION
@@ -78,46 +62,4 @@ bool Asserv::active_##indice = false;
 //---------------------------------------------TRIGGER_FUNCTIONS--------------------------------------------------------
 
 
-
-#include "../interface.h"
-
-
-void Asserv::init_loop_0() {
-    reset_pid_0();
-}
-
-#include <string>
-
-void Asserv::trigger_0() {
-
-    disable_loop_interrupt_0();
-
-    float error = 0.1;
-
-    float p = get_pid_0(error);
-
-
-    enable_loop_interrupt_0();
-}
-
-void Asserv::init_loop_1() {
-    reset_pid_1();
-}
-
-void Asserv::trigger_1() {
-
-    disable_loop_interrupt_0();
-
-    float error = 0.1;
-
-    float p = get_pid_1(error);
-
-
-    CI::echo("hotbed "+str(p));
-
-    enable_loop_interrupt_0();
-}
-
-
-
-
+ */

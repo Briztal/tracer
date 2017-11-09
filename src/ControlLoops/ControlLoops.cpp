@@ -1,5 +1,5 @@
 /*
-  PID.cpp - Part of TRACER
+  ControlLoops.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -19,29 +19,34 @@
 */
 
 #include "PID.h"
+#include "ControlLoops.h"
 
-#define PID(i, name, kp, ki, kd)\
-/*compute_ function : computes the output for a particular error*/\
-float PID::compute_##name(float error) {\
-    float s = (sums[i]+=error), l = lasts[i];\
-    float ret = kp * error + ki * s + kp * (error - l);\
-    lasts[i] = error;\
-    return ret;\
-}\
-/*reset function : resets the sum and last to zero*/\
-void PID::reset_##name() {\
-    sums[i] = 0;\
-    lasts[i] = 0;\
+#include <interface.h>
+
+void ControlLoops::initialisation_function_temperature() {
+    PID::reset_hotend_0();
+    PID::reset_hotend_1();
+    PID::reset_hotend_2();
+    PID::reset_hotend_3();
+    PID::reset_hotbed();
 }
 
-#include <config.h>
 
-#undef PID
+void ControlLoops::loop_function_temperature() {
 
-//Sums
-float t_pid_sums[NB_PIDS];
-float *const PID::sums = t_pid_sums;
+    disable_loop_interrupt_0();
 
-//Lasts
-float t_pid_lasts[NB_PIDS];
-float *const PID::lasts = t_pid_lasts;
+    float error = 0.1;
+
+    float p = PID::compute_hotend_0(error);
+
+    CI::echo("hotend "+str(p));
+
+    enable_loop_interrupt_0();
+
+}
+
+void ControlLoops::finalisation_function_temperature() {}
+
+
+

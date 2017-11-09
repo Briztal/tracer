@@ -214,7 +214,7 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 #define ENABLE_LOOP_TIMER(i) PIT_TCTRL##i |= PIT_TCTRL_TEN;
 #define DISABLE_LOOP_TIMER(i) PIT_TCTRL##i &= 6;
 #define CLEAN_LOOP_INTERRUPT(i) {disable_loop_timer_##i(); disable_loop_interrupt_##i();};
-
+#define IS_LOOP_ENABLED(i)  ((PIT_TCTRL##i & PIT_TCTRL_TIE)&(PIT_TCTRL##i & PIT_TCTRL_TEN))
 
 #define set_loop_int_period_0(period_ms) SET_LOOP_PERIOD(1, period_ms)
 #define set_loop_int_period_1(period_ms) SET_LOOP_PERIOD(2, period_ms)
@@ -232,6 +232,11 @@ void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
 #define disable_loop_interrupt_1() DISABLE_LOOP_INTERRUPT(2)
 #define disable_loop_interrupt_2() DISABLE_LOOP_INTERRUPT(3)
 
+
+//Loops states
+#define is_loop_enabled_0() IS_LOOP_ENABLED(0)
+#define is_loop_enabled_1() IS_LOOP_ENABLED(1)
+#define is_loop_enabled_2() IS_LOOP_ENABLED(2)
 
 //Enabling loop timers
 #define enable_loop_timer_0() ENABLE_LOOP_TIMER(1)

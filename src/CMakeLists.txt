@@ -13,7 +13,7 @@ include_directories(${PC}/)
 add_library(project
 
         ${PP}/Machine.h
-        ${PP}/Machine.h
+        ${PP}/Machine.cpp
 
 
         )
@@ -28,31 +28,32 @@ include_directories(${PCP}/)
 
 add_library(project_config
 
+        ${PCP}/config_file.h
         ${PCP}/lcd_interface_config.h
         ${PCP}/terminal_interface_config.h
-        ${PCP}/tree_interface_config.h
+        ${PCP}/program_interface_config.h
         ${PCP}/gcode_interface_config.h
         ${PCP}/geometry.h
+        ${PCP}/dumb.c
 
 
         )
 
-#------------------------------------------PROJECT INTERFACES-----------------------------------------------------------
+#--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
 
 
-set(PIP "Project/Interfaces")
+set(PIP "Project/InterfaceCommands")
 
 include_directories(${PIP}/)
 
 add_library(project_interfaces
 
-        ${PP}/TerminalInterface/_interface_data.h
-        ${PP}/TerminalInterface/TerminalInterfaceCommands.h
-        ${PP}/TerminalInterface/TerminalInterfaceCommands.cpp
-        ${PP}/TreeInterface/ProgramInterfaceCommands.h
-        ${PP}/TreeInterface/ProgramInterfaceCommands.cpp
-        ${PP}/GCodeInterface/GCodeInterfaceCommands.h
-        ${PP}/GCodeInterface/GCodeInterfaceCommands.cpp
+        ${PIP}/TerminalInterfaceCommands.h
+        ${PIP}/TerminalInterfaceCommands.cpp
+        ${PIP}/ProgramInterfaceCommands.h
+        ${PIP}/ProgramInterfaceCommands.cpp
+        ${PIP}/GCodeInterfaceCommands.h
+        ${PIP}/GCodeInterfaceCommands.cpp
 
         )
 
@@ -62,17 +63,18 @@ add_library(project_interfaces
 
 add_library(tracer_config
 
-        src/config.h
-        src/parameters_indices.h
-        src/hardware_language_abstraction.h
-        src/interface.h
-        src/sanity_check.h
+        config.h
+        parameters_indices.h
+        hardware_language_abstraction.h
+        interface.h
+        interfaces.cpp
+        sanity_check.h
 
         )
 
 #-----------------------------------------------SCHEDULER---------------------------------------------------------------
 
-set(CP "TaskScheduler")
+set(TP "TaskScheduler")
 
 include_directories(${TP}/)
 
@@ -82,7 +84,7 @@ add_library(scheduler
         ${TP}/TaskScheduler.cpp
         ${TP}/scheduler_generation.h
         ${TP}/_task_scheduler_data.h
-        ${TP}/_task_state.h
+        ${TP}/task_state_t.h
 
         )
 
@@ -126,9 +128,6 @@ add_library(interface
         #LCDInterface
         ${IP}/LCDInterface/LCDInterface.h
         ${IP}/LCDInterface/LCDInterface.cpp
-        ${IP}/LCDInterface/LCDNode.h
-        ${IP}/LCDInterface/LCDNode.cpp
-
 
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
@@ -137,8 +136,8 @@ add_library(interface
         Interfaces/TerminalInterface/TerminalNode.h
 
         #ProgramInterface
-        ${IP}/TreeInterface/ProgramInterface.h
-        ${IP}/TreeInterface/ProgramInterface.cpp
+        ${IP}/ProgramInterface/ProgramInterface.h
+        ${IP}/ProgramInterface/ProgramInterface.cpp
 
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
@@ -160,21 +159,21 @@ add_library(actions
         ${AP}/ContinuousActions.h
         ${AP}/ContinuousActions.cpp
 
-        )
+        Project/Config/dumb.c)
 
-#-------------------------------------------------ASSERV----------------------------------------------------------------
+#---------------------------------------------Control Loops-------------------------------------------------------------
 
 
-set(AsP "TaskScheduler")
+set(CLP "ControlLoops")
 
-include_directories(${AsP}/)
+include_directories(${CLP}/)
 
 add_library(asserv
 
-        ${AsP}/Asserv.h
-        ${AsP}/Asserv.cpp
+        ${CLP}/PID.h
+        ${CLP}/PID.cpp
 
-        )
+        ControlLoops/ControlLoops.cpp ControlLoops/ControlLoops.h)
 
 
 #-------------------------------------------------SENSORS---------------------------------------------------------------
@@ -308,6 +307,6 @@ target_link_libraries(kernels datastructures)
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
 
-add_executable(TRACER src/main.cpp)
+add_executable(TRACER main.cpp)
 
 
