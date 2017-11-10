@@ -298,11 +298,11 @@ task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
 
 task_state_t TerminalInterfaceCommands::temp_test(uint8_t args_index) {
 
-    CI::echo("t0 : "+String(Thermistors::get_temperature_0(), 5));
-    CI::echo("t1 : "+String(Thermistors::get_temperature_1(), 5));
-    CI::echo("t2 : "+String(Thermistors::get_temperature_2(), 5));
-    CI::echo("t3 : "+String(Thermistors::get_temperature_3(), 5));
-    CI::echo("t4 : "+String(Thermistors::get_temperature_4(), 5));
+    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(), 5));
+    CI::echo("t1 : "+String(Thermistors::get_temperature_hotend_1(), 5));
+    CI::echo("t2 : "+String(Thermistors::get_temperature_hotend_2(), 5));
+    CI::echo("t3 : "+String(Thermistors::get_temperature_hotend_3(), 5));
+    CI::echo("t4 : "+String(Thermistors::get_temperature_hotbed(), 5));
 
     return complete;
 }

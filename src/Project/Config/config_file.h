@@ -96,11 +96,11 @@ TASK_SEQUENCE(2, 10)
 
 #ifdef THERMISTOR
 
-THERMISTOR(0,   A26,    SEMITEC_100_47)
-THERMISTOR(1,   22,     SEMITEC_100_47)
-THERMISTOR(2,   21,     SEMITEC_100_47)
-THERMISTOR(3,   20,     SEMITEC_100_47)
-THERMISTOR(4,   19,     BED100K)
+THERMISTOR(0, hotend_0, A26,    SEMITEC_100_47)
+THERMISTOR(1, hotend_1, 22,     SEMITEC_100_47)
+THERMISTOR(2, hotend_2, 21,     SEMITEC_100_47)
+THERMISTOR(3, hotend_3, 20,     SEMITEC_100_47)
+THERMISTOR(4, hotbed,   19,     BED100K)
 
 #endif
 
@@ -172,8 +172,6 @@ LOOP_FUNCTION(0, temperature, 10);
 
 #ifdef BINARY
 
-BINARY(0, binary, 9, 1)
-BINARY(1, binary2, 9, 1)
 
 #endif
 
@@ -187,12 +185,12 @@ BINARY(1, binary2, 9, 1)
 
 #ifdef CONTINUOUS
 
-CONTINUOUS(0,   hotend0,  2,    100)
-CONTINUOUS(1,   hotend1,  3,    100)
-CONTINUOUS(2,   hotend2,  4,    100)
-CONTINUOUS(3,   hotend3,  5,    100)
-CONTINUOUS(4,   hotbed,   6,    100)
-CONTINUOUS(5,   cooling,  23,  100)
+CONTINUOUS(0,   hotend_0,   2,      100)
+CONTINUOUS(1,   hotend_1,   3,      100)
+CONTINUOUS(2,   hotend_2,   4,      100)
+CONTINUOUS(3,   hotend_3,   5,      100)
+CONTINUOUS(4,   hotbed,     6,      100)
+CONTINUOUS(5,   cooling,    23,     100)
 
 #endif
 

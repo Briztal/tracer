@@ -16,7 +16,7 @@ add_library(project
         ${PP}/Machine.cpp
 
 
-        )
+        Project/TempControl.cpp Project/TempControl.h)
 
 
 #--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
@@ -35,7 +35,6 @@ add_library(project_config
         ${PCP}/gcode_interface_config.h
         ${PCP}/geometry.h
         ${PCP}/dumb.c
-
 
         )
 
@@ -142,6 +141,7 @@ add_library(interface
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
         ${IP}/GCodeInterface/GCodeInterface.cpp
+
         )
 
 #-------------------------------------------------ACTIONS---------------------------------------------------------------
@@ -159,7 +159,7 @@ add_library(actions
         ${AP}/ContinuousActions.h
         ${AP}/ContinuousActions.cpp
 
-        Project/Config/dumb.c)
+        )
 
 #---------------------------------------------Control Loops-------------------------------------------------------------
 
@@ -173,7 +173,10 @@ add_library(asserv
         ${CLP}/PID.h
         ${CLP}/PID.cpp
 
-        ControlLoops/ControlLoops.cpp ControlLoops/ControlLoops.h)
+        ${CLP}/ControlLoops.cpp
+        ${CLP}/ControlLoops.h
+
+        )
 
 
 #-------------------------------------------------SENSORS---------------------------------------------------------------
@@ -206,8 +209,8 @@ add_library(datastructures
         ${DP}/StringParser.h
         ${DP}/StringParser.cpp
 
+        )
 
-        Interfaces/TerminalInterface/TerminalNode.cpp Interfaces/TerminalInterface/TerminalNode.h)
 
 #-------------------------------------------------KERNELS---------------------------------------------------------------
 
@@ -230,7 +233,8 @@ add_library(kernels
         ${KP}/JerkPlanner.cpp
         ${KP}/JerkPlanner.h
 
-        StepperControl/SubMovementManager.cpp StepperControl/SubMovementManager.h)
+        ${KP}/SubMovementManager.cpp
+        ${KP}/SubMovementManager.h)
 
 
 #-------------------------------------------------KERNEL1---------------------------------------------------------------

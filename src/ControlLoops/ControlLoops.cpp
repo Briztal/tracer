@@ -22,30 +22,48 @@
 #include "ControlLoops.h"
 
 #include <interface.h>
+#include <Project/TempControl.h>
+
+
+/*
+ * initialisation_function_temperature : The function called when the regulation is enabled.
+ *
+ * It calls the inline function TempControl::regulation_init().
+
+ *
+ */
 
 void ControlLoops::initialisation_function_temperature() {
-    PID::reset_hotend_0();
-    PID::reset_hotend_1();
-    PID::reset_hotend_2();
-    PID::reset_hotend_3();
-    PID::reset_hotbed();
+
+    TempControl::regulation_init();
+
 }
 
+
+/*
+ * loop_function_temperature : The function called when the interrupt occurs.
+ *
+ * It calls the inline function TempControl::temperature_regulation().
+ *
+ */
 
 void ControlLoops::loop_function_temperature() {
 
     disable_loop_interrupt_0();
 
-    float error = 0.1;
-
-    float p = PID::compute_hotend_0(error);
-
-    CI::echo("hotend "+str(p));
+    TempControl::temperature_regulation();
 
     enable_loop_interrupt_0();
 
 }
 
+
+/*
+ * finalisation_function_temperature : The function called when the regulation is disabled.
+ *
+ * It does nothing.
+ *
+ */
 void ControlLoops::finalisation_function_temperature() {}
 
 

@@ -24,7 +24,7 @@
 
 void Thermistors::init() {
 
-#define THERMISTOR(i, pin, ...)\
+#define THERMISTOR(i, name, pin, ...)\
     pin_mode_input(pin);
 
 #include <config.h>
@@ -33,7 +33,7 @@ void Thermistors::init() {
 
 }
 
-#define THERMISTOR(i, pin, name)\
+#define THERMISTOR(i, name, pin, type)\
 /* Variable for the i-th index
  */\
 uint8_t tttidx##i = 0;\
@@ -42,12 +42,12 @@ uint8_t *Thermistors::index_##i = &tttidx##i;\
 /*
  * Variable for the i-th size
  */\
-const uint8_t Thermistors::therm_size_##i = name##_SIZE;\
+const uint8_t Thermistors::therm_size_##i = type##_SIZE;\
 \
 /*
  * Lookup table for the i-th thermistor
  */\
-const float therm_table_##i[name##_SIZE][2] = name##_TABLE;\
+const float therm_table_##i[type##_SIZE][2] = type##_TABLE;\
 \
 /*
  * get_temperature_[indice] : gets the temperature corresponding to a particular reading
@@ -55,7 +55,7 @@ const float therm_table_##i[name##_SIZE][2] = name##_TABLE;\
  *  It calls the function get_temperature with the parameters related to the thermistor [indice]
  *
  */\
-float Thermistors::get_temperature_##i(const int16_t read_value) {\
+float Thermistors::get_temperature_##name(const int16_t read_value) {\
     return get_temperature(read_value, (const float *)therm_table_##i, therm_size_##i, index_##i);\
 }\
 \
@@ -65,9 +65,9 @@ float Thermistors::get_temperature_##i(const int16_t read_value) {\
  * It calls get_temperature_[indice] with the value read on the pin.
  *
  */\
-float Thermistors::get_temperature_##i() {\
+float Thermistors::get_temperature_##name() {\
     int16_t read_value = (int16_t)analog_read(pin);\
-    return get_temperature_##i(read_value);\
+    return get_temperature_##name(read_value);\
 }\
 
 #include <config.h>

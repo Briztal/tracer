@@ -21,6 +21,7 @@
 #ifndef TRACER_PIDS_H
 #define TRACER_PIDS_H
 
+#include <stdint.h>
 
 class PID {
 
@@ -36,6 +37,17 @@ class PID {
 
 public:
 
+    //Compute a particular PID result for an error at a given time.
+    static float compute(uint8_t pid, float error);
+
+    //Reset a particular PID.
+    static void reset(uint8_t pid);
+
+    //Reset every PID.
+    static void reset_all();
+
+
+
 #define PID(i, name, kp, ki, kd)\
     /*compute function*/\
     static float compute_##name(float error);\
@@ -48,9 +60,11 @@ public:
 
 private:
 
+    //Array for last measured errors.
     static float *const lasts;
-    static float *const sums;
 
+    //Array for sums.
+    static float *const sums;
 
 };
 

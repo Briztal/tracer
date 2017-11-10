@@ -12,10 +12,10 @@ class Thermistors {
 public :
     static void init();
 
-#define THERMISTOR(i, pin, name)\
+#define THERMISTOR(i, name, pin, type)\
 public:\
-    static float get_temperature_##i(const int16_t read_value);\
-    static float get_temperature_##i();\
+    static float get_temperature_##name(const int16_t read_value);\
+    static float get_temperature_##name();\
 private:\
     static const uint8_t therm_size_##i;\
     static uint8_t *index_##i;

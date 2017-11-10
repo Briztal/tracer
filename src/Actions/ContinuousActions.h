@@ -18,6 +18,11 @@
 
 */
 
+/*
+ * TODO DOC : difference btwn an action and a PWM : Power abstraction layer (simple linear correspondance)
+ */
+
+
 #ifndef CODE_CONTINUOUSACTIONS_H
 #define CODE_CONTINUOUSACTIONS_H
 
@@ -28,12 +33,16 @@ class ContinuousActions {
 
 public:
 
-    static void begin();
+    //initialise all PWMs
+    static void init();
 
+    //Set an action's power
     static void set_power(uint8_t action, float power);
 
+    //get an action's state
     static bool get_state(uint8_t action);
 
+    //stop an acion.
     static void stop(uint8_t action);
 
 #define CONTINUOUS(i, name, pin, max) \
@@ -46,6 +55,8 @@ public:
 #undef CONTINUOUS
 
 private:
+
+    //PWMs states
     static bool *const states;
 };
 
