@@ -369,7 +369,7 @@ void TI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
 
         //Create a task in the stack to contain task data
         task_t t = task_t();
-        t.type = 0;
+        t.type = 255;
         t.args = (void *)data;
         t.task = task;
 

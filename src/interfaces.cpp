@@ -43,7 +43,7 @@ void read_interfaces() {
         return;
 
 #ifdef ENABLE_GCODE_INTERFACE
-    GI::read_serial();
+    GI::read_data();
 #endif
 
 }

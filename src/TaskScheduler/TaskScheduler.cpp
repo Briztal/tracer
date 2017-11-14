@@ -294,7 +294,7 @@ void TaskScheduler::process_task_pool() {
         //Fist, cache the task pointer and the task's type.
         task_t *task = task_pool + task_index;
 
-        /* If the task fails to execute (must be called later), then shift it at the insertion position.
+        /* If the task fails to analyse_command (must be called later), then shift it at the insertion position.
          * This removes empty available_spaces in the pool, and saved the order.*/
         if (!process_task(task)) {
 
@@ -411,7 +411,7 @@ void TaskScheduler::process_task_sequences_singular() {
 
             } else {
 
-                /* If the output task fails to execute (must be called later), then stop the process for the sequence,
+                /* If the output task fails to analyse_command (must be called later), then stop the process for the sequence,
                  * as the execution order must be respected */
 
                 break;

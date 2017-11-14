@@ -325,9 +325,6 @@ void TerminalInterface::execute_tree_style() {
 
             } else {
 
-                //If the function fails,
-                //if (!current_node->function(data_in, command_size)) {
-
                 if (arguments_storage.available_spaces()) {
 
                     uint8_t index = arguments_storage.insert_argument(data_in, command_size);
@@ -339,7 +336,7 @@ void TerminalInterface::execute_tree_style() {
 
                     //Create a task in the stack to contain task data
                     task_t t = task_t();
-                    t.type = 0;
+                    t.type = 255;
                     t.args = (void *)data;
                     t.task = current_node->function;
 

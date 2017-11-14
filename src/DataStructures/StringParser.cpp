@@ -9,7 +9,7 @@
  *
  */
 
-unsigned char StringParser::get_words_nb(char *data_in, uint8_t string_size) {
+uint8_t StringParser::get_words_nb(char *data_in, uint8_t string_size) {
 
     //If the string is empty, return zero.
     if (!string_size)
@@ -57,7 +57,7 @@ unsigned char StringParser::get_words_nb(char *data_in, uint8_t string_size) {
  *
  */
 
-unsigned char StringParser::get_next_word(char **data_in_p, uint8_t *command_size_p) {
+uint8_t StringParser::get_next_word(char **data_in_p, uint8_t *command_size_p) {
 
     char *data_in = *data_in_p;
 

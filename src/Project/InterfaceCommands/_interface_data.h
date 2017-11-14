@@ -14,5 +14,10 @@ typedef struct program_interface_data_t {
     uint8_t arguments_index;
 } program_interface_data_t;
 
+typedef struct gcode_interface_data_t {
+    uint8_t arguments_index;
+} gcode_interface_data_t;
+
+
 
 #endif

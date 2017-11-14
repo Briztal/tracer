@@ -34,7 +34,7 @@
  *          to the moment it is effectively executed;
  *      - A scheduler, taking the same arguments than your function, that would put those into
  *          an instance of the struct, and schedule the unpacker (below);
- *      - An unpacker, that would unpack arguments, and execute the desired function, with extracted args.
+ *      - An unpacker, that would unpack arguments, and analyse_command the desired function, with extracted args.
  *
  *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
  *
@@ -229,7 +229,7 @@ static task_state_t _##name(void *d) {\
     /*Cast the data*/\
     name##_struct_t *data = (name##_struct_t *) d;\
     \
-    /*Extract the data and execute the function*/\
+    /*Extract the data and analyse_command the function*/\
     task_state_t state = name struct_extraction;\
     \
     /*free the data if the task musn't be reprogrammed*/\

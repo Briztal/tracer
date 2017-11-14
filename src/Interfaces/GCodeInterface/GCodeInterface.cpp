@@ -17,15 +17,27 @@
   along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "../../config.h"
+#include <config.h>
+
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterface.h"
-#include "GCodeInterfaceCommands.h"
-#include "../../hardware_language_abstraction.h"
+#include <Project/InterfaceCommands/_interface_data.h>
+#include <Project/InterfaceCommands/GCodeInterfaceCommands.h>
+#include <DataStructures/StringParser.h>
 
 
-void GI::begin() {
+//----------------------------------------------------Initialisation----------------------------------------------------
+
+/*
+ * init : this function initialises the link layer.
+ *
+ *  It is automatically called by the Scheduler at initialisation
+ *
+ */
+
+void GCodeInterface::init() {
+
     gcode_interface_link_t::begin();
 
     delay_ms(100);
@@ -33,16 +45,21 @@ void GI::begin() {
 }
 
 
-void GCodeInterface::echo(const string_t msg) {
-    gcode_interface_link_t::send_str(msg+"\n");
-}
+//-----------------------------------------------------Data reading-----------------------------------------------------
 
-void GCodeInterface::read_serial() {
+/*
+ * read_data : this function reads and processes data.
+ *
+ *  It reads data on the link layer, saves it, and eventually processes it.
+ *
+ */
 
-    while(gcode_interface_link_t::available()) {
+void GCodeInterface::read_data() {
 
-        //Read the serial
-        char read_char = gcode_interface_link_t::read_integer();
+    while (gcode_interface_link_t::available()) {
+
+        //Read the data link
+        char read_char = gcode_interface_link_t::read();
 
         //If the recieved char is a line feed or a carriage_id return
         if ((read_char == 10) || (read_char == 13)) {
@@ -50,15 +67,14 @@ void GCodeInterface::read_serial() {
             //If a char has effectively been received
             if (command_size) {
 
-
                 //Parse the GCode
                 parse();
 
                 //Reset the data_in
                 reset();
 
-                if (!TaskScheduler::spaces())
-                    return;
+                if (!TaskScheduler::available_spaces(255));
+                return;
 
             }
         } else {
@@ -71,186 +87,100 @@ void GCodeInterface::read_serial() {
     }
 }
 
+
+/*
+ * reset : this function resets the parsing structure
+ *
+ */
+
 void GCodeInterface::reset() {
+
+    //No data
     command_size = 0;
+
+    //data insertion at the origin
     data_in = data_in_0;
 }
 
+
+//---------------------------------------------------------Parse--------------------------------------------------------
+
+
+/*
+ * parse : this function parses the received GCode Command.
+ *
+ *  It is called when a GCode command has been entirely received
+ *
+ */
 
 bool GCodeInterface::parse() {
 
+    //Initialise the parsing.
     init_parsing();
 
-    char command_name[GCODE_MAX_DEPTH];
+    //Declare the command id length (ex : 4 for G130).
+    unsigned char command_id_length = 0;
 
-    char c;
-    float value;
+    //Get the command id and its length, by calling the StringParser.
+    command_id_length = StringParser::get_next_word(&data_in, &command_size);
 
-    unsigned char command_size = get_command(command_name);
-    if (!command_size)
+    //Abort if the first word was a space.
+    if (!command_id_length)
         return false;
 
+    //declare a char array to contain the command id (ex : G130).
+    char command_id[GCODE_MAX_DEPTH]{0};
 
-    while (command_size) {//TODO WAT ??
-        //Get next word and analyse_parameter, if it fails, return false;
-        get_parameter(&c, &value);
-        analyse_parameter(c, value);
-    }
+    //Copy the command ID into our local array.
+    memcpy(command_id, StringParser::word_buffer_0, sizeof(char) * command_id_length);
 
-    execute(command_name, command_size);
+    //Analyse the command id.
+    analyse_command(command_id, command_size);
 
     return true;
 
 }
 
 
+/*
+ * init_parsing : this function initialises the data parsing.
+ *
+ *  It positions the data pointer to the beginning of the command, and resets all parameters flags.
+ *
+ */
 
 void GCodeInterface::init_parsing() {
 
-    //INIT :
-
+    //Reset the data pointer
     data_in = data_in_0;
-    motion_size = curve_points_column = curve_points_row = 0;
-    free_row_cases = NB_STEPPERS - 1;
-    free_rows = MAX_CURVE_POINTS - 1;
 
-    curve_width = NB_STEPPERS;
-
-    for (int p = 0; p < NB_PARAMETERS; p++)
-        v_parameters[p] = false;
-
+    //Reset parameter flags
+    memset(args.parameters_flags, sizeof(float) * NB_PARAMETERS, 0);
 
 }
 
 
-unsigned char GCodeInterface::get_command(char *command) {
-    do {
-        if (!command_size--) {
-            return 0;
-        }
-    } while ((*command = *(data_in++)) == ' ');
+/*
+ * analyse_command : this function determines the function associated to a GCode Command.
+ *
+ *  If it succeeds, it calls the scheduling function, passing a pointer to the determines function.
+ *
+ */
 
-    unsigned char size = 1;
-    command++;
+void GCodeInterface::analyse_command(char *command, unsigned char command_size) {
 
-
-    char t;
-    while ((command_size--) && ((t = *(data_in++)) != ' ')) {
-        *(command++) = t;
-        size++;
-    }
-    return size;
-}
-
-bool GCodeInterface::get_parameter(char *id, float *value) {
-    do {
-        if (!command_size--) {
-            return false;
-        }
-    } while ((*id = *(data_in++)) == ' ');
-
-    char t;
-    string_t strValue = "";
-    while ((command_size--) && ((t = *(data_in++)) != ' ')) {
-        strValue += t;
-    }
-    if (!strValue.length()) {
-        *value = 0;
-    } else {
-        *value = str_to_float(strValue);
-    }
-    return true;
-}
-
-
-
-bool GCodeInterface::analyse_parameter(char c, float value) {
-
-    switch (c) {
-
-//-----------------------AXIS_COORDINATES-------------------
-
-#define AXIS_TREATMENT(i, j, si, st, sp, a, d, pinStep, pd, pp, pmi, vi, pma, va) \
-            case j:\
-                if (axis_set[i])\
-                    return false;\
-                *(coords+motion_size) = value;\
-                *(axis + motion_size++) = i;\
-                axis_set[i] = true;\
-                break;
-
-#include "../../config.h"
-
-#undef AXIS_TREATMENT
-
-//-----------------------CURVE PARAMETERS-------------------
-        case 'D' ://CURVE_POINT
-            *(curve_t + NB_STEPPERS * curve_points_row + curve_points_column) = value;
-            if (!free_row_cases)
-                return false;
-            curve_points_column++;
-            free_row_cases--;
-            break;
-
-        case 'N' : //Carriage return in Curve points
-            if (!curve_points_column)
-                break;
-            if (!free_rows)
-                return false;
-            curve_points_row++;
-            if (curve_width > curve_points_column)
-                curve_width = curve_points_column;
-            curve_points_column = 0;
-            free_rows--;
-            free_row_cases = NB_STEPPERS - 1;
-            break;
-
-//-----------------------PARAMETERS-------------------
-
-            //TODO INTEGRER LES ACTIONS
-
-#define GPARAMETER(i, j, k)\
-            case j : \
-                if (!*(v_parameters+i)){\
-                    *(parameters+i) = value;\
-                    *(v_parameters+i) = true;\
-                }\
-                break;
-
-#include "gcode_interface_config.h"
-
-#undef GPARAMETER
-
-        default:
-            return false;
-    }
-
-    return true;
-}
-
-
-void GCodeInterface::clean_parsing() {
-    if (curve_points_column) {
-        if (curve_width > curve_points_column)
-            curve_width = curve_points_column;
-    } else
-        curve_points_row--;
-
-    curve_height = ++curve_points_row;
-
-}
-
-
-void GCodeInterface::execute(char * command, unsigned char command_size) {
-
-    if (!command_size)
-        return;
+    //Initialise a char containing the letter we focus on
     char c = *(command++);
+
+    //As the first letter is saved, decrease the size.
     command_size--;
+
+    //TODO COMMENT THE PARSING
+
 
 #define COMMAND(i, fname) \
     case i : \
-        GCodeInterfaceCommands::fname();\
+        schedule(GCodeInterfaceCommands::fname);\
         return;
 
 #define GO_LOWER(i) \
@@ -261,7 +191,7 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
 
 #define GO_LOWER_COMMAND(i, fname) \
     case i : \
-        if (!(command_size--)) {GCodeInterfaceCommands::fname();return;}\
+        if (!(command_size--)) {schedule(GCodeInterfaceCommands::fname);return;}\
         c = *(command++);\
         switch(c) {\
 
@@ -270,11 +200,12 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
         default : return;\
     }\
 
-    switch(c) {
+    switch (c) {
 
-        #include "gcode_interface_config.h"
+#include <Project/Config/gcode_interface_config.h>
 
-                            default: return;
+        default:
+            return;
     }
 
 #undef COMMAND
@@ -282,39 +213,203 @@ void GCodeInterface::execute(char * command, unsigned char command_size) {
 #undef GO_LOWER_COMMAND
 #undef GO_UPPER
 
+}
+
+
+/*
+ * schedule : this function schedules a GCodeInterfaceCommands command.
+ *
+ *  It simply creates a task, saves the current parameters, packs the data, and gives it to the Scheduler.
+ *
+ */
+
+void GCodeInterface::schedule(task_state_t (*f)(void *)) {
+
+#ifdef PARSE_BEFORE_EXECUTION
+
+    //If we must parse parameters before the execution, parse them. If it fails, abort.
+    if (!parse_parameters(data_in, command_size))
+        return;
+
+    //Save the current parameters
+    uint8_t index = arguments_storage.insert_argument((char *) &args, sizeof(gcode_arguments));
+
+#else
+
+#endif
+
+    //Create a struct in the heap to contain argument-related data.
+    gcode_interface_data_t *data = new gcode_interface_data_t();
+    data->arguments_index = index;
+
+    //Create a task in the stack to contain task data
+    task_t t = task_t();
+    t.type = 255;
+    t.args = (void *) data;
+    t.task = f;
+
+    //Schedule the task
+    TaskScheduler::add_task(t);
 
 }
+
+
+//------------------------------------------------------Parameters------------------------------------------------------
+
+
+/*
+ * parse_parameters : this function will parse the parameter string provided in arguments
+ */
+bool GCodeInterface::parse_parameters(char *parameter_buffer, uint8_t params_size) {
+
+    //Initialise the parsing environment.
+    parameters_size = params_size;
+    parameters_ptr = parameter_buffer;
+
+
+    //Some variables for the current parameter's index and value.
+    char index;
+    float value;
+
+    //While the parameters_size is not null
+    while (parameters_size) {
+
+        /*
+         * Get the next parameter index and value
+         * If the parsing fails (incorrect parameter format), abort.
+         */
+        if (!get_parameter(&index, &value)) {
+            return false;
+        }
+
+        /*
+         * Process the parsed data.
+         * If it fails (wrong parameter index) abort.
+         */
+        if (!process_parameter(index, value)) {
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+
+/*
+ * get_parameter : this function reads parameters_ptr and extract the next word, supposed to be a parameter (index + value)
+ *
+ *  It calls the StringParser to get the word, and then reads the index, and parses the value.
+ *
+ */
+bool GCodeInterface::get_parameter(char *id, float *value) {
+
+
+    //Get the parameter id, its value and its length, by calling the StringParser
+    uint8_t size = StringParser::get_next_word(&parameters_ptr, &parameters_size);
+
+    //Abort if no argument was parsed
+    if (size == 0)
+        return false;
+
+    //Save the parameter id
+    *id = *StringParser::word_buffer_0;
+
+    //Do not parse the rest of the string if only the parameter index was provided
+    if (size == 1) {
+
+        //Default value
+        *value = 0;
+
+        //Complete
+        return true;
+    }
+
+    //Parse the value
+    *value = str_to_float(StringParser::word_buffer_0 + 1);
+
+    //Complete
+    return true;
+
+}
+
+
+/*
+ * process_parameter : this function processes a parameter (index and value).
+ *
+ *  It searches for a parameter matching the given index, and if it is not already set, sets it to the provided value.
+ *
+ */
+
+bool GCodeInterface::process_parameter(char index, float value) {
+
+    //Run through every parameter
+    switch (index) {
+
+        //For each parameter :
+#define GPARAMETER(i, j, k)\
+            /*if the parameter matched the given index*/\
+            case j : \
+                /*if the parameter is not already set*/\
+                if (!*(args.parameters_flags + i)){\
+                    /*set the flag, and save the value*/\
+                    *(args.parameters + i) = value;\
+                    *(args.parameters_flags + i) = true;\
+                }\
+                return true;
+
+#include <Project/Config/gcode_interface_config.h>
+
+#undef GPARAMETER
+
+
+        default:
+            //If the given index doesn't match any parameter, fail.
+            return false;
+
+    }
+
+}
+
+
+//----------------------------------------------------System aliases----------------------------------------------------
+
+
+/*
+ * echo : this function is an alias for the system echo command.
+ *
+ *  It echoes text data on the link layer
+ *
+ */
+
+void GCodeInterface::echo(const string_t msg) {
+
+    gcode_interface_link_t::send_str(msg + "\n");
+
+}
+
+//-------------------------------------------Static declarations / definitions------------------------------------------
 
 #define m GCodeInterface
 
 
-unsigned char m::command_size;
+//Arguments container
+ArgumentsContainer m::arguments_storage = ArgumentsContainer(sizeof(gcode_arguments), NB_PENDING_TASKS);
 
-char tdatain_gcode[PACKET_SIZE];
+//The command size
+unsigned char m::command_size;
+unsigned char m::parameters_size;
+
+//Data pointers
+char tdatain_gcode[GCODE_MAX_SIZE];
 char *m::data_in = tdatain_gcode;
 char *const m::data_in_0 = tdatain_gcode;
 
+//Parameters pointers
+char *m::parameters_ptr;
 
-float tcurve[MAX_CURVE_POINTS][NB_STEPPERS];
-float *const m::curve_t = (float *) tcurve;
-unsigned char m::curve_width;
-unsigned char m::curve_height;
-
-unsigned char m::motion_size, m::curve_points_column, m::curve_points_row, m::free_row_cases, m::free_rows;
-
-unsigned char taxis[NB_STEPPERS];
-unsigned char *const m::axis = taxis;
-
-float tcoords[NB_STEPPERS];
-float *const m::coords = tcoords;
-
-float tparam[NB_PARAMETERS];
-float *const m::parameters = tparam;
-
-bool tbool[NB_PARAMETERS];
-bool *const m::v_parameters = tbool;
-
-bool* axis_set;
+//Current arguments
+gcode_arguments m::args = gcode_arguments();
 
 #undef m
 

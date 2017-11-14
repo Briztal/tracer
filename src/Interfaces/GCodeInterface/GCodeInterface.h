@@ -18,82 +18,134 @@
 
 */
 
-#include "../../config.h"
+#include <config.h>
 #ifdef ENABLE_GCODE_INTERFACE
 
 #ifndef GCODEINTERFACE
 #define GCODEINTERFACE
 
-#include "GCommand.h"
-#include "../../config.h"
-#include "gcode_interface_config.h"
+#include <Project/Config/gcode_interface_config.h>
 #include <hardware_language_abstraction.h>
-
+#include <DataStructures/ArgumentsContainer.h>
+#include <TaskScheduler/TaskScheduler.h>
 
 #define GI GCodeInterface
+
+//TODO PARSE DURING TASK EXECUTION ?
+
+/*
+ * We will declare a structure to contain parameters and their flags.
+ *
+ */
+
+typedef struct gcode_arguments {
+
+    //Parameters.
+    float parameters[NB_PARAMETERS];
+
+    //Parameter flags.
+    bool parameters_flags[NB_PARAMETERS];
+
+} gcode_arguments;
+
 
 class GCodeInterface {
 
 
 private :
 
+
+public :
+
+    //Init function
+    static void init();
+
     //--------------------------------------Serial Read Fields--------------------------------------
 
 private :
 
+    //The current command's size.
     static unsigned char command_size;
+
+    //The current data pointer.
     static char *data_in;
+
+    //The beginning of the data pointer.
     static char *const data_in_0;
+
 
     //--------------------------------------Parsing Fields--------------------------------------
 
 private :
 
-    static float *const curve_t;
-    static unsigned char curve_width;
-    static unsigned char curve_height;
-
-    static unsigned char motion_size, curve_points_column, curve_points_row, free_row_cases, free_rows;
-
-    static unsigned char *const axis;
-    static float *const coords;
-    static float *const parameters;
-    static bool *const v_parameters;
+    //The arguments container.
+    static ArgumentsContainer arguments_storage;
 
 
 
-    //--------------------------------------Parsing Args----------------------------------
+    //--------------------------------------Command Parsing----------------------------------
+
+public :
+    //read data on the data_link
+    static void read_data();
+
 
 private :
 
-    static bool get_parameter(char *command, float *value);
-
+    //Initialise the parsing.
     static void init_parsing();
 
-    static bool analyse_parameter(char c, float value);
-
+    //Parse the GCode Command.
     static bool parse();
 
-    static void clean_parsing();
-
+    //Reset the reading/parsing environment.
     static void reset();
 
-    static unsigned char get_command(char *command);
+    //Analyse the GCode Command index, and schedule the associated command.
+    static void analyse_command(char *command, unsigned char command_size);
 
-    static void execute(char *command, unsigned char command_size);
+    //Schedule a GCodeInterfaceCommand function.
+    static void schedule(task_state_t (*f)(void *));
+
+
+    //--------------------------------------Parameters----------------------------------
+
+public:
+
+    //Parse parameters to
+    static bool parse_parameters(char *parameter_buffer, uint8_t parameters_size);
+
+
+private :
+
+    //The current arguments.
+    static gcode_arguments args;
+
+    //The current parameters size.
+    static unsigned char parameters_size;
+
+    //The current parameter pointer.
+    static char *parameters_ptr;
+
+    //get the next parameter in the GCode Command.
+    static bool get_parameter(char *command, float *value);
+
+    //Process the data given by the function behind.
+    static bool process_parameter(char index, float value);
+
 
     //------------------------------------Standard functions-----------------------------
 
 public :
 
+    //System alias for echo
     static void echo(const string_t msg);
 
+    //System alias for send_postion
     static void send_position(float*){}
 
 
-    static void init();
 
-    static void read_serial();
 };
 
 #endif //CODE_GCodeExecuter_H

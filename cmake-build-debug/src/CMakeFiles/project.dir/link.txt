@@ -1,0 +1,2 @@
+/usr/bin/ar qc libproject.a  CMakeFiles/project.dir/Project/Machine.cpp.o CMakeFiles/project.dir/Project/TempControl.cpp.o
+/usr/bin/ranlib libproject.a

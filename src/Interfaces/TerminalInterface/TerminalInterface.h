@@ -86,7 +86,7 @@ private:
 
     static String *build_tree_summary();
 
-    //Function to parse and execute the received command
+    //Function to parse and analyse_command the received command
     static void execute_tree_style();
 
 

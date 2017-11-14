@@ -18,6 +18,17 @@
 
 */
 
+
+//Uncomment this line to parse parameters before the command execution (more efficient but consumes more space)
+#define PARSE_BEFORE_EXECUTION
+
+//The maximum size of a GCode Command.
+#define GCODE_MAX_SIZE 100
+
+//The maximum number of pending tasks
+#define NB_PENDING_TASKS 20
+
+
 /*
  * The GCode Interface configuration file.
  *
@@ -82,11 +93,11 @@
  *
  */
 
+
 //The maximum command depth : in our example, the two largest commands are G5D0 and M225 -> GCODE_MAX_DEPTH of 4
 #define GCODE_MAX_DEPTH 5
 
 #if defined(GO_LOWER) && defined(GO_LOWER_COMMAND) && defined(COMMAND) && defined(GO_UPPER)
-
 
 GO_LOWER('G')
 COMMAND('0', g0)
@@ -111,9 +122,7 @@ GO_UPPER()
 #endif
 
 
-#ifndef NB_PARAMETERS
 #define NB_PARAMETERS 9
-#endif
 
 #ifdef GCODE_PARAMETER
 #undef F;

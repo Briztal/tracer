@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcore.a  CMakeFiles/core.dir/EEPROM/EEPROMStorage.cpp.o CMakeFiles/core.dir/EEPROM/EEPROMNode.cpp.o CMakeFiles/core.dir/EEPROM/EEPROMInterface.cpp.o
+/usr/bin/ranlib libcore.a

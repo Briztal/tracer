@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtracer_config.a  CMakeFiles/tracer_config.dir/interfaces.cpp.o
+/usr/bin/ranlib libtracer_config.a

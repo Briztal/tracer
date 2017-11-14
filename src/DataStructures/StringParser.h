@@ -13,10 +13,10 @@ class StringParser {
 public :
 
     //Function to extract next word of the command.
-    static unsigned char get_next_word(char **data_in, uint8_t *command_size_p);
+    static uint8_t get_next_word(char **data_in, uint8_t *command_size_p);
 
     //Function to extract next word of the command.
-    static unsigned char get_words_nb(char *data_in, uint8_t string_size);
+    static uint8_t get_words_nb(char *data_in, uint8_t string_size);
 
     //The word buffer.
     static char *word_buffer;

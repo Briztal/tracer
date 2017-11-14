@@ -1,0 +1,2 @@
+/usr/bin/ar qc libkernel2.a  CMakeFiles/kernel2.dir/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o CMakeFiles/kernel2.dir/StepperControl/KinematicsCore2/K2Physics.cpp.o CMakeFiles/kernel2.dir/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o
+/usr/bin/ranlib libkernel2.a

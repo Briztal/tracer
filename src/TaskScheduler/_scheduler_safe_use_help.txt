@@ -131,7 +131,7 @@ The task pool contains 7 type-255 tasks and no space :
     - task 6 adds a type-0 task;
     
     We will suppose, to simplify, that interfaces never create new tasks, and that only things that will prevent
-        task to execute properly are Queues states.
+        task to analyse_command properly are Queues states.
 
     SCHEDULER STATE :
     TASK_POOL | 0() 1()  2(0, 1)  3(1)  4(255)  5()  6(0)  |   ##  QUEUE_0 : 2 spaces left  ##  QUEUE_1 : 0 spaces left

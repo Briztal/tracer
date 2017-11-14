@@ -47,6 +47,7 @@ include_directories(${PIP}/)
 
 add_library(project_interfaces
 
+        ${PIP}/_interface_data.h
         ${PIP}/TerminalInterfaceCommands.h
         ${PIP}/TerminalInterfaceCommands.cpp
         ${PIP}/ProgramInterfaceCommands.h
@@ -59,6 +60,7 @@ add_library(project_interfaces
 
 #--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
 
+include_directories(.)
 
 add_library(tracer_config
 

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libinterface.a  CMakeFiles/interface.dir/Interfaces/LCDInterface/LCDInterface.cpp.o CMakeFiles/interface.dir/Interfaces/TerminalInterface/TerminalInterface.cpp.o CMakeFiles/interface.dir/Interfaces/TerminalInterface/TerminalNode.cpp.o CMakeFiles/interface.dir/Interfaces/ProgramInterface/ProgramInterface.cpp.o CMakeFiles/interface.dir/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+/usr/bin/ranlib libinterface.a
