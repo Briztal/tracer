@@ -34,7 +34,7 @@
 #include <LinearMovement.h>
 #elif (KERNEL == 1)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
-#include <Project/Config/geometry.h>
+#include <Project/Config/geometry.cpp>
 #include <TaskScheduler/task_state_t.h>
 
 #elif (KERNEL == 2)

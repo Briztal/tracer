@@ -81,40 +81,40 @@ src/CMakeFiles/project.dir/Project/Machine.cpp.o.provides: src/CMakeFiles/projec
 src/CMakeFiles/project.dir/Project/Machine.cpp.o.provides.build: src/CMakeFiles/project.dir/Project/Machine.cpp.o
 
 
-src/CMakeFiles/project.dir/Project/TempControl.cpp.o: src/CMakeFiles/project.dir/flags.make
-src/CMakeFiles/project.dir/Project/TempControl.cpp.o: ../src/Project/TempControl.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object src/CMakeFiles/project.dir/Project/TempControl.cpp.o"
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/project.dir/Project/TempControl.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TempControl.cpp
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o: src/CMakeFiles/project.dir/flags.make
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o: ../src/Project/TemperatureController.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o"
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/project.dir/Project/TemperatureController.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp
 
-src/CMakeFiles/project.dir/Project/TempControl.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/Project/TempControl.cpp.i"
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TempControl.cpp > CMakeFiles/project.dir/Project/TempControl.cpp.i
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/project.dir/Project/TemperatureController.cpp.i"
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp > CMakeFiles/project.dir/Project/TemperatureController.cpp.i
 
-src/CMakeFiles/project.dir/Project/TempControl.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/Project/TempControl.cpp.s"
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TempControl.cpp -o CMakeFiles/project.dir/Project/TempControl.cpp.s
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/project.dir/Project/TemperatureController.cpp.s"
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp -o CMakeFiles/project.dir/Project/TemperatureController.cpp.s
 
-src/CMakeFiles/project.dir/Project/TempControl.cpp.o.requires:
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.requires:
 
-.PHONY : src/CMakeFiles/project.dir/Project/TempControl.cpp.o.requires
+.PHONY : src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.requires
 
-src/CMakeFiles/project.dir/Project/TempControl.cpp.o.provides: src/CMakeFiles/project.dir/Project/TempControl.cpp.o.requires
-	$(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TempControl.cpp.o.provides.build
-.PHONY : src/CMakeFiles/project.dir/Project/TempControl.cpp.o.provides
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.provides: src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.provides.build
+.PHONY : src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.provides
 
-src/CMakeFiles/project.dir/Project/TempControl.cpp.o.provides.build: src/CMakeFiles/project.dir/Project/TempControl.cpp.o
+src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.provides.build: src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o
 
 
 # Object files for target project
 project_OBJECTS = \
 "CMakeFiles/project.dir/Project/Machine.cpp.o" \
-"CMakeFiles/project.dir/Project/TempControl.cpp.o"
+"CMakeFiles/project.dir/Project/TemperatureController.cpp.o"
 
 # External object files for target project
 project_EXTERNAL_OBJECTS =
 
 src/libproject.a: src/CMakeFiles/project.dir/Project/Machine.cpp.o
-src/libproject.a: src/CMakeFiles/project.dir/Project/TempControl.cpp.o
+src/libproject.a: src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o
 src/libproject.a: src/CMakeFiles/project.dir/build.make
 src/libproject.a: src/CMakeFiles/project.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libproject.a"
@@ -127,7 +127,7 @@ src/CMakeFiles/project.dir/build: src/libproject.a
 .PHONY : src/CMakeFiles/project.dir/build
 
 src/CMakeFiles/project.dir/requires: src/CMakeFiles/project.dir/Project/Machine.cpp.o.requires
-src/CMakeFiles/project.dir/requires: src/CMakeFiles/project.dir/Project/TempControl.cpp.o.requires
+src/CMakeFiles/project.dir/requires: src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o.requires
 
 .PHONY : src/CMakeFiles/project.dir/requires
 

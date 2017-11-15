@@ -16,7 +16,7 @@ add_library(project
         ${PP}/Machine.cpp
 
 
-        Project/TempControl.cpp Project/TempControl.h)
+        Project/TemperatureController.cpp Project/TemperatureController.h)
 
 
 #--------------------------------------------PROJECT CONFIG-------------------------------------------------------------

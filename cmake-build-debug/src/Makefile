@@ -917,32 +917,32 @@ Project/Machine.cpp.s:
 	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/Machine.cpp.s
 .PHONY : Project/Machine.cpp.s
 
-Project/TempControl.o: Project/TempControl.cpp.o
+Project/TemperatureController.o: Project/TemperatureController.cpp.o
 
-.PHONY : Project/TempControl.o
+.PHONY : Project/TemperatureController.o
 
 # target to build an object file
-Project/TempControl.cpp.o:
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TempControl.cpp.o
-.PHONY : Project/TempControl.cpp.o
+Project/TemperatureController.cpp.o:
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o
+.PHONY : Project/TemperatureController.cpp.o
 
-Project/TempControl.i: Project/TempControl.cpp.i
+Project/TemperatureController.i: Project/TemperatureController.cpp.i
 
-.PHONY : Project/TempControl.i
+.PHONY : Project/TemperatureController.i
 
 # target to preprocess a source file
-Project/TempControl.cpp.i:
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TempControl.cpp.i
-.PHONY : Project/TempControl.cpp.i
+Project/TemperatureController.cpp.i:
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TemperatureController.cpp.i
+.PHONY : Project/TemperatureController.cpp.i
 
-Project/TempControl.s: Project/TempControl.cpp.s
+Project/TemperatureController.s: Project/TemperatureController.cpp.s
 
-.PHONY : Project/TempControl.s
+.PHONY : Project/TemperatureController.s
 
 # target to generate assembly for a file
-Project/TempControl.cpp.s:
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TempControl.cpp.s
-.PHONY : Project/TempControl.cpp.s
+Project/TemperatureController.cpp.s:
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/Project/TemperatureController.cpp.s
+.PHONY : Project/TemperatureController.cpp.s
 
 Sensors/Thermistors/Thermistors.o: Sensors/Thermistors/Thermistors.cpp.o
 
@@ -1571,9 +1571,9 @@ help:
 	@echo "... Project/Machine.o"
 	@echo "... Project/Machine.i"
 	@echo "... Project/Machine.s"
-	@echo "... Project/TempControl.o"
-	@echo "... Project/TempControl.i"
-	@echo "... Project/TempControl.s"
+	@echo "... Project/TemperatureController.o"
+	@echo "... Project/TemperatureController.i"
+	@echo "... Project/TemperatureController.s"
 	@echo "... Sensors/Thermistors/Thermistors.o"
 	@echo "... Sensors/Thermistors/Thermistors.i"
 	@echo "... Sensors/Thermistors/Thermistors.s"

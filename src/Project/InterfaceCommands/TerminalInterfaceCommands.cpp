@@ -30,13 +30,13 @@
 #include <Actions/ContinuousActions.h>
 #include <EEPROM/EEPROMStorage.h>
 #include <interface.h>
-#include <Project/Machine.h>
+#include <Project/MachineController.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <EEPROM/EEPROMInterface.h>
 #include <DataStructures/StringParser.h>
 #include <StepperControl/StepperController.h>
 #include <Sensors/Thermistors/Thermistors.h>
-#include <Project/TempControl.h>
+#include <Project/TemperatureController.h>
 
 
 task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {

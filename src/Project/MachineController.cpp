@@ -20,24 +20,14 @@
 
 #include <EEPROM.h>
 #include <EEPROM/EEPROMStorage.h>
-#include "Machine.h"
+#include "MachineController.h"
+#include "TemperatureController.h"
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <interface.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <Actions/ContinuousActions.h>
-
-
-
-//---------------------------------------------------Power--------------------------------------------------------------
-
-void Machine::disable_stepper_power() {
-
-    while (TrajectoryTracer::started);
-    StepperController::disable();
-
-}
 
 
 //-------------------------------------------------Movement-------------------------------------------------------------
@@ -273,10 +263,19 @@ void Machine::sanity_check(float *position) {
 
 //-----------------------------------------------------setup---------------------------------------------------
 
-task_state_t Machine::disable_steppers() {
+task_state_t Machine::enable_steppers(bool enable) {
 
-    //Disable all steppers
-    StepperController::disable();
+    if (enable) {
+
+        //Enable all steppers
+        StepperController::enable();
+
+    } else {
+
+        //Disable all steppers
+        StepperController::disable();
+
+    }
 
     //Complete
     return complete;
@@ -348,32 +347,53 @@ task_state_t Machine::extruder_speed_set(uint8_t carriage_id, float speed) {
 
 //-------------------------------Hotends-------------------------------
 
+
+/*
+ * set_hotend_temperature : this function sets the required hotend's target temperature to the given value.
+ *
+ */
+
 task_state_t Machine::set_hotend_temperature(uint8_t hotend, float temp) {
-    if (hotend > 3) {
-        return invalid_arguments;
+
+    //Pass the hand to the appropriate function in TemperatureController
+    return TemperatureController::set_hotend_target(hotend, temp);
+
+}
+
+
+/*
+ * get_hotend_temperature : this function reads and returns the temperature of the required hotend.
+ *
+ */
+
+float Machine::get_hotend_temperature(uint8_t hotend) {
+
+    switch (hotend) {
+        case 0:
+            return Thermistors::get_temperature_hotend_0();
+        case 1:
+            return Thermistors::get_temperature_hotend_1();
+        case 2:
+            return Thermistors::get_temperature_hotend_2();
+        case 3:
+            return Thermistors::get_temperature_hotend_3();
+        default:
+            return 0;
+
     }
 
-    //TODO SET TARGET
-
-    return complete;
-}
-
-task_state_t Machine::get_hotend_temperature(uint8_t hotend) {
-
-    return complete;
 
 }
 
-task_state_t Machine::set_hotend_state(uint8_t hotend, bool state) {
+task_state_t Machine::enable_hotend_regulation(uint8_t hotend, bool state) {
 
-    return complete;
-
-    //TODO ENABLE - DISABLE LOOP
+    //Pass the hand to the appropriate function in TemperatureController
+    return TemperatureController::enable_hotend_regulation(hotend, state);
 
 }
 
 
-task_state_t Machine::get_hotend_state(uint8_t hotend) {
+bool Machine::is_hotend_regulation_enabled(uint8_t hotend) {
 
     return complete;
 
@@ -383,37 +403,58 @@ task_state_t Machine::get_hotend_state(uint8_t hotend) {
 //-------------------------------Hotbed-------------------------------
 
 
+/*
+ * set_hotbed_temperature : this function sets hotbed's target temperature to the given value.
+ *
+ */
+
 task_state_t Machine::set_hotbed_temperature(float temp) {
 
-    //TODO SET TARGET
-
-    return complete;
-
-}
-
-task_state_t Machine::get_hotbed_temperature() {
-
-    return complete;
-
-}
-
-task_state_t Machine::set_hotbed_state(bool state) {
-
-    return complete;
-
-    //TODO ENABLE - DISABLE LOOP
+    //Pass the hand to the appropriate function in TemperatureController
+    return TemperatureController::set_hotbed_temperature(temp);
 
 }
 
 
-task_state_t Machine::get_hotbed_state() {
+/*
+ * get_hotbed_temperature : this function reads and returns the temperature of the hotbed.
+ *
+ */
+
+float Machine::get_hotbed_temperature() {
+
+    //Simply read the hotbed thermistor value.
+    return Thermistors::get_temperature_hotbed();
+
+}
+
+
+task_state_t Machine::enable_hotbed_regulation(bool enable) {
+
+    //Pass the hand to the appropriate function in TemperatureController
+    return TemperatureController::enable_hotbed_regulation(enable);
+
+}
+
+
+bool Machine::is_hotbed_regulation_enabled() {
 
     return complete;
+
 }
 
 
 //-------------------------------Cooling-------------------------------
 
+/*
+ *
+ * set_cooling_power : this function sets the power of the cooling.
+ *
+ * It does not turn it on though.
+ *
+ * For this, call enable_cooling
+ *
+ */
 
 task_state_t Machine::set_cooling_power(float power) {
 
@@ -433,16 +474,21 @@ task_state_t Machine::set_cooling_power(float power) {
 
 }
 
-task_state_t Machine::get_cooling_power() {
+/*
+ * get_cooling_power : this function returns the power of the cooling
+ *
+ */
+
+float Machine::get_cooling_power() {
 
     CI::echo(cooling_power);
 
     return complete;
 }
 
-task_state_t Machine::set_cooling_state(bool state) {
+task_state_t Machine::enable_cooling(bool enable) {
 
-    if (state)
+    if (enable)
         ContinuousActions::set_power_5(cooling_power);
     else
         ContinuousActions::stop_0();
@@ -451,7 +497,7 @@ task_state_t Machine::set_cooling_state(bool state) {
 
 }
 
-task_state_t Machine::get_cooling_state() {
+bool Machine::is_cooling_enabled() {
 
     if (ContinuousActions::get_state_5())
         CI::echo("1");

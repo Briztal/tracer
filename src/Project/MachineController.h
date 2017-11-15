@@ -31,18 +31,13 @@
 class Machine {
 
 
-    //-------------------------------------------------Power------------------------------------------------------------
+
 
 public:
 
-    static void disable_stepper_power();
+    //-------------------------------Movement-------------------------------
 
-    //Task interfaces :
-
-public:
-
-    //-------------------------------Move-------------------------------
-
+    //r
     static task_state_t carriages_reset();
 
 GENERATE_SCHEDULER(carriages_reset, 1);
@@ -60,21 +55,25 @@ GENERATE_SCHEDULER(line_of, 1, float, x, float, y, float, z);
 
     //-------------------------------Setup-------------------------------
 
-    static task_state_t disable_steppers();
+    //Enable or disable all steppers
+    static task_state_t enable_steppers(bool enable);
 
-GENERATE_SCHEDULER(disable_steppers, 1);
+GENERATE_SCHEDULER(enable_steppers, 1, bool, enable);
 
 
+    //Set the working extruder
     static task_state_t extruder_set(uint8_t carriage);
 
 GENERATE_SCHEDULER(extruder_set, 1, uint8_t, carriage);
 
 
+    //Set the speed for a particular extruder
     static task_state_t speed_set(uint8_t carriage, float speed);
 
 GENERATE_SCHEDULER(speed_set, 1, uint8_t, carriage, float, speed);
 
 
+    //Set the speef for a particular extruder and select it as the working one.
     static task_state_t extruder_speed_set(uint8_t carriage, float speed);
 
 GENERATE_SCHEDULER(extruder_speed_set, 1, uint8_t, carriage, float, speed);
@@ -82,81 +81,72 @@ GENERATE_SCHEDULER(extruder_speed_set, 1, uint8_t, carriage, float, speed);
 
     //-------------------------------Hotends-------------------------------
 
-
     //Set and get hotends temperatures
-
     static task_state_t set_hotend_temperature(uint8_t hotend, float temp);
 
 GENERATE_SCHEDULER(set_hotend_temperature, 1, uint8_t, hotend, float, temp);
 
 
-    static task_state_t get_hotend_temperature(uint8_t hotend);
+    //Not scheduled : get the CURRENT hotbed temperature
+    static float get_hotend_temperature(uint8_t hotend);
 
-GENERATE_SCHEDULER(get_hotend_temperature, 1, uint8_t, hotend);
 
     //enable - disable hotends
+    static task_state_t enable_hotend_regulation(uint8_t hotend, bool state);
 
-    static task_state_t set_hotend_state(uint8_t hotend, bool state);
-
-GENERATE_SCHEDULER(set_hotend_state, 1, uint8_t, hotend, bool, state);
+GENERATE_SCHEDULER(enable_hotend_regulation, 2, uint8_t, hotend, bool, state);
 
 
-    static task_state_t get_hotend_state(uint8_t hotend);
+    //Not scheduled : is the hotend regulation CURRENTLY enabled
+    static bool is_hotend_regulation_enabled(uint8_t hotend);
 
-GENERATE_SCHEDULER(get_hotend_state, 1, uint8_t, hotend);
 
 
     //-------------------------------Hotbed-------------------------------
 
     //Set and get hotbed temperatures
-
     static task_state_t set_hotbed_temperature(float temp);
 
 GENERATE_SCHEDULER(set_hotbed_temperature, 1, float, temp);
 
 
-    static task_state_t get_hotbed_temperature();
-
-GENERATE_SCHEDULER(get_hotbed_temperature, 1);
+    //Not scheduled : get the CURRENT hotbed temperature
+    static float get_hotbed_temperature();
 
 
     //enable - disable hotbed
+    static task_state_t enable_hotbed_regulation(bool enable);
 
-    static task_state_t set_hotbed_state(bool state);
-
-GENERATE_SCHEDULER(set_hotbed_state, 1, bool, state);
+GENERATE_SCHEDULER(enable_hotbed_regulation, 1, bool, state);
 
 
-    static task_state_t get_hotbed_state();
+    //Not scheduled : is the hotbed regulation CURRENTLY enabled
+    static bool is_hotbed_regulation_enabled();
 
-GENERATE_SCHEDULER(get_hotbed_state, 1);
+
+
 
     //-------------------------------Cooling-------------------------------
 
 
     //Set and get hotbed temperatures
-
     static task_state_t set_cooling_power(float temp);
 
 GENERATE_SCHEDULER(set_cooling_power, 1, float, temp);
 
 
-    static task_state_t get_cooling_power();
-
-GENERATE_SCHEDULER(get_cooling_power, 1);
+    //Not scheduled : get the CURRENT cooling power
+    static float get_cooling_power();
 
 
     //enable - disable hotbed
+    static task_state_t enable_cooling(bool enable);
 
-    static task_state_t set_cooling_state(bool state);
-
-GENERATE_SCHEDULER(set_cooling_state, 1, bool, state);
+GENERATE_SCHEDULER(enable_cooling, 1, bool, state);
 
 
-    static task_state_t get_cooling_state();
-
-GENERATE_SCHEDULER(get_cooling_state, 1);
-
+    //Not scheduled : is the cooling CURRENTLY enabled
+    static bool is_cooling_enabled();
 
 
 private:

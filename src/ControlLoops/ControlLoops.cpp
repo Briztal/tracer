@@ -21,20 +21,19 @@
 #include <interface.h>
 
 #include "ControlLoops.h"
-#include <Project/TempControl.h>
-
+#include <Project/TemperatureController.h>
 
 /*
  * initialisation_function_temperature : The function called when the regulation is enabled.
  *
- * It calls the inline function TempControl::regulation_init().
+ * It calls the inline function TemperatureController::regulation_init().
 
  *
  */
 
 void ControlLoops::initialisation_function_temperature() {
 
-    TempControl::regulation_init();
+    TemperatureController::regulation_init();
 
 }
 
@@ -42,7 +41,9 @@ void ControlLoops::initialisation_function_temperature() {
 /*
  * loop_function_temperature : The function called when the interrupt occurs.
  *
- * It calls the inline function TempControl::temperature_regulation().
+ * It calls the inline function TemperatureController::temperature_regulation().
+ *
+ * Do not forget to disable the interrupt that
  *
  */
 
@@ -50,7 +51,7 @@ void ControlLoops::loop_function_temperature() {
 
     disable_loop_interrupt_0();
 
-    TempControl::temperature_regulation();
+    TemperatureController::temperature_regulation();
 
     enable_loop_interrupt_0();
 
@@ -60,12 +61,11 @@ void ControlLoops::loop_function_temperature() {
 /*
  * finalisation_function_temperature : The function called when the regulation is disabled.
  *
- * It does nothing.
- *
  */
+
 void ControlLoops::finalisation_function_temperature() {
 
-    TempControl::regulation_finalisation();
+    TemperatureController::regulation_finalisation();
 
 }
 

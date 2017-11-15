@@ -5193,10 +5193,10 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Machine.h">
 			<Option target="project"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TempControl.cpp">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp">
 			<Option target="project"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TempControl.h">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.h">
 			<Option target="project"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Sensors/Thermistors/Thermistors.cpp">
