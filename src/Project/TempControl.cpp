@@ -18,127 +18,11 @@
 
 */
 
-#include <Sensors/Thermistors/Thermistors.h>
-#include <ControlLoops/PID.h>
-#include <Actions/ContinuousActions.h>
+
 #include "TempControl.h"
 
 
-
-//-------------------------------------------------Regulation functions-------------------------------------------------
-
-
-void TempControl::regulation_init() {
-
-    //Reset every PID.
-    PID::reset_all();
-
-}
-
-/*
- * temperature_regulation : this function is the interrupt routine, called to regulate temperatures in the machine.
- *
- *  It checks if each thermistor is enabled, and if it is, regulated its temperature.
- *
- */
-
-void TempControl::temperature_regulation() {
-
-
-    //Thermistor 0 :
-    if (temp_regulation_enabled[0]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_0();
-
-        //Get the temperature error
-        float error = temp_targets[0] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_0(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_0(output);
-
-    }
-
-
-
-
-    //Thermistor 0 :
-    if (temp_regulation_enabled[1]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_1();
-
-        //Get the temperature error
-        float error = temp_targets[1] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_1(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_1(output);
-
-    }
-
-
-    //Thermistor 2 :
-    if (temp_regulation_enabled[2]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_2();
-
-        //Get the temperature error
-        float error = temp_targets[2] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_2(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_2(output);
-
-    }
-
-    //Thermistor 3 :
-    if (temp_regulation_enabled[3]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_3();
-
-        //Get the temperature error
-        float error = temp_targets[3] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_3(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_3(output);
-
-    }
-
-
-    //hotbed :
-    if (temp_regulation_enabled[4]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotbed();
-
-        //Get the temperature error
-        float error = temp_targets[4] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotbed(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_4(output);
-
-    }
-
-}
-
-
-//----------------------------------------------Regulation state setters -----------------------------------------------
+//-------------------------------------------------------Hotends--------------------------------------------------------
 
 
 /*
@@ -157,6 +41,23 @@ void TempControl::enable_hotend_regulation(uint8_t hotend) {
         temp_regulation_enabled[hotend] = true;
 
     }
+
+}
+
+
+/*
+ * set_hotend_target : this function enables the hotbed's regulation.
+ *
+ */
+
+void TempControl::set_hotend_target(uint8_t hotend, float target) {
+
+    if (hotend<4) {
+
+        temp_targets[hotend] = target;
+
+    }
+
 
 }
 
@@ -181,6 +82,8 @@ void TempControl::disable_hotend_regulation(uint8_t hotend) {
 }
 
 
+//-------------------------------------------------------Hotbed---------------------------------------------------------
+
 /*
  * enable_hotbed_regulation : this function enables the hotbed's regulation.
  *
@@ -193,6 +96,19 @@ void TempControl::enable_hotbed_regulation() {
 
     //Mark the regulation as enabled
     temp_regulation_enabled[4] = true;
+
+}
+
+
+
+/*
+ * set_hotbed_target : this function enables the hotbed's regulation.
+ *
+ */
+
+void TempControl::set_hotbed_target(float target) {
+
+    temp_targets[4] = target;
 
 }
 
@@ -222,3 +138,5 @@ bool *const TempControl::temp_regulation_enabled = t_t_r_en;
 
 float t_t_tar[5];
 float *const TempControl::temp_targets = t_t_tar;
+
+uint32_t TempControl::uiii = 100;

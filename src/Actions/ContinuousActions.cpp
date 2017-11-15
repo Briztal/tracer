@@ -21,6 +21,7 @@
 #include "ContinuousActions.h"
 #include <hardware_language_abstraction.h>
 #include <EEPROM/EEPROMStorage.h>
+#include <interface.h>
 
 
 /*
@@ -52,10 +53,12 @@ void ContinuousActions::set_power(uint8_t action, float power) {
     if (action >= NB_CONTINUOUS)
         return;
 
+    CI::echo("FINALISATION ! "+String(action));
+
 
     //Switch the given action and call the appropriate function.
 
-#define CONTINUOUS(i, ...) case i: set_power_##i(power);break;
+#define CONTINUOUS(i, ...) case (uint8_t) i:set_power_##i(power);break;
 
     switch (action) {
 
@@ -98,7 +101,7 @@ void ContinuousActions::stop(uint8_t action) {
 
     //Switch the given action and call the appropriate function.
 
-#define CONTINUOUS(i, ...) case i: stop_##i();break;
+#define CONTINUOUS(i, ...) case (uint8_t) i: stop_##i();break;
 
     switch (action) {
 
@@ -120,17 +123,16 @@ void ContinuousActions::set_power_##i (float power) {\
     float max = EEPROMStorage::continuous_data[i].max;\
     \
     /*Get the analog value for the power.*/\
-        uint8_t analog_value = (uint8_t) (power * ((float) 255.0 / max));\
+    uint32_t analog_value = (uint32_t) (power * ((float) 255.0 / max));\
     \
     /*If the value is zero, stop properly.*/\
     if (analog_value<=0){\
-        stop_##i;\
+        stop_##i();\
         return;\
     }\
     \
     /*Update the state*/\
     states[i] = true;\
-    \
     /*Major the value and write*/\
     if (analog_value<=255){analog_write(pin, analog_value);}\
     else{analog_write(pin, 255);}\
@@ -143,6 +145,7 @@ bool ContinuousActions::get_state_##i () {\
 \
 \
 void ContinuousActions::stop_##i() {\
+    CI::echo("STOPPING");\
     analog_write(pin,0);\
     states[i] = false;\
 }

@@ -67,7 +67,6 @@ GO_UPPER()
 GO_LOWER(test, various tests)
 CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed, none)
 CREATE_LEAF(temp, temp_test, reads temps on every thermistor, none)
-CREATE_LEAF(heater, heater_test, enables and disables every heaters, none)
 GO_UPPER()
 
 

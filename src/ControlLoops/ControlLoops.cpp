@@ -18,10 +18,9 @@
 
 */
 
-#include "PID.h"
-#include "ControlLoops.h"
-
 #include <interface.h>
+
+#include "ControlLoops.h"
 #include <Project/TempControl.h>
 
 
@@ -64,7 +63,11 @@ void ControlLoops::loop_function_temperature() {
  * It does nothing.
  *
  */
-void ControlLoops::finalisation_function_temperature() {}
+void ControlLoops::finalisation_function_temperature() {
+
+    TempControl::regulation_finalisation();
+
+}
 
 
 

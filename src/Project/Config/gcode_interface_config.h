@@ -99,25 +99,130 @@
 
 #if defined(GO_LOWER) && defined(GO_LOWER_COMMAND) && defined(COMMAND) && defined(GO_UPPER)
 
+//G COMMANDS
 GO_LOWER('G')
-COMMAND('0', g0)
-GO_LOWER_COMMAND('1', g1)
-COMMAND('0', g10)
+
+
+//G0
+COMMAND('0', linear_move)
+
+
+//G1
+GO_LOWER_COMMAND('1', linear_move)
+
+//G10
+COMMAND('0', retract)
+
+//G11
+COMMAND('1', unretract)
+
+//G12
+COMMAND('2', clean_tools)
+
+//G17
+COMMAND('7', plane_xy)
+
+//G18
+COMMAND('8', plane_zx)
+
+//G19
+COMMAND('9', plane_yz)
+
 GO_UPPER()
-GO_LOWER('5')
-GO_LOWER('D')
-COMMAND('0', g5d0)
+
+
+//G2
+GO_LOWER_COMMAND('2', arc_move_p)
+
+//G20
+COMMAND('0', units_to_inches)
+
+//G21
+COMMAND('1', units_to_millimeters)
+
+//G28
+COMMAND('8', home)
+
 GO_UPPER()
+
+
+//G3
+GO_LOWER_COMMAND('3', arc_move_n)
+
+//G32
+COMMAND('2', auto_level)
+
+
 GO_UPPER()
+
+
+//G4
+COMMAND('4', dwell)
+
+//G9
+GO_LOWER(9)
+
+//G90
+COMMAND('0', absolute_position)
+
+//G91
+COMMAND('1', relative_position)
+
+//G92
+COMMAND('1', set_position)
+
 GO_UPPER()
+
+GO_UPPER()
+
+
+//M COMMANDS
 GO_LOWER('M')
-COMMAND('1', m1)
-GO_LOWER_COMMAND('2', m2)
-GO_LOWER('2')
-COMMAND('5', m225)
+
+
+//M0
+COMMAND('0', stop)
+
+
+//M1
+GO_LOWER_COMMAND('1', stop)
+
+//M17
+COMMAND('7', enable_steppers)
+
+//M18
+COMMAND('8', disable_steppers)
+
 GO_UPPER()
+
+
+//M8..
+GO_LOWER('8')
+
+//M82
+COMMAND('2', absolute_extruder)
+
+//M83
+COMMAND('3', relative_extruder)
+
 GO_UPPER()
+
+
+//M9...
+GO_LOWER('9')
+
+COMMAND('2', set_steps_per)
+
 GO_UPPER()
+
+
+
+GO_UPPER()
+
+
+
+
+
 
 #endif
 
@@ -139,15 +244,21 @@ GO_UPPER()
 
 
 
-GCODE_PARAMETER(0, 'V', V)
-GCODE_PARAMETER(1, 'A', A)
-GCODE_PARAMETER(2, 'B', B)
-GCODE_PARAMETER(3, 'S', S)
-GCODE_PARAMETER(4, 'R', R)
-GCODE_PARAMETER(5, 'U', U)
-GCODE_PARAMETER(6, 'C', C)
-GCODE_PARAMETER(7, 'E', E)
-GCODE_PARAMETER(8, 'L', L)
+GCODE_PARAMETER(0,  'T',    T)
+GCODE_PARAMETER(1,  'S',    S)
+GCODE_PARAMETER(2,  'P',    P)
+GCODE_PARAMETER(3,  'X',    X)
+GCODE_PARAMETER(4,  'Y',    Y)
+GCODE_PARAMETER(5,  'Z,     Z)
+GCODE_PARAMETER(6,  'I',    I)
+GCODE_PARAMETER(7,  'J',    J)
+GCODE_PARAMETER(8,  'D',    D)
+GCODE_PARAMETER(9), 'H',    H)
+GCODE_PARAMETER(10, 'F',    F)
+GCODE_PARAMETER(11, 'R',    R)
+GCODE_PARAMETER(12, 'Q',    Q)
+GCODE_PARAMETER(13, 'E',    E)
+GCODE_PARAMETER(14, 'N',    N)
 
 #endif
 

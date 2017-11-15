@@ -77,6 +77,7 @@ void GCodeInterface::read_data() {
                 return;
 
             }
+
         } else {
 
             //Append the read_output char to data_in
@@ -115,6 +116,7 @@ void GCodeInterface::reset() {
 
 bool GCodeInterface::parse() {
 
+
     //Initialise the parsing.
     init_parsing();
 
@@ -135,7 +137,7 @@ bool GCodeInterface::parse() {
     memcpy(command_id, StringParser::word_buffer_0, sizeof(char) * command_id_length);
 
     //Analyse the command id.
-    analyse_command(command_id, command_size);
+    analyse_command(command_id, command_id_length);
 
     return true;
 
@@ -175,6 +177,8 @@ void GCodeInterface::analyse_command(char *command, unsigned char command_size) 
     //As the first letter is saved, decrease the size.
     command_size--;
 
+    echo(String(command_size));\
+
     //TODO COMMENT THE PARSING
 
 
@@ -191,6 +195,7 @@ void GCodeInterface::analyse_command(char *command, unsigned char command_size) 
 
 #define GO_LOWER_COMMAND(i, fname) \
     case i : \
+        echo(String(command_size));\
         if (!(command_size--)) {schedule(GCodeInterfaceCommands::fname);return;}\
         c = *(command++);\
         switch(c) {\

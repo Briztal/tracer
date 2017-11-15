@@ -36,6 +36,7 @@
 #include <DataStructures/StringParser.h>
 #include <StepperControl/StepperController.h>
 #include <Sensors/Thermistors/Thermistors.h>
+#include <Project/TempControl.h>
 
 
 task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
@@ -298,44 +299,20 @@ task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
 
 task_state_t TerminalInterfaceCommands::temp_test(uint8_t args_index) {
 
-    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(), 5));
-    CI::echo("t1 : "+String(Thermistors::get_temperature_hotend_1(), 5));
-    CI::echo("t2 : "+String(Thermistors::get_temperature_hotend_2(), 5));
-    CI::echo("t3 : "+String(Thermistors::get_temperature_hotend_3(), 5));
-    CI::echo("t4 : "+String(Thermistors::get_temperature_hotbed(), 5));
-
-    return complete;
-}
 
 
-task_state_t TerminalInterfaceCommands::heater_test(uint8_t args_index) {
 
-    CI::echo("SUUS");
-    ContinuousActions::set_power_0(100);
-    ContinuousActions::set_power_1(100);
-    ContinuousActions::set_power_2(100);
-    ContinuousActions::set_power_3(100);
-    ContinuousActions::set_power_4(100);
-    ContinuousActions::set_power_5(100);
+    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(845), 5));
+    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(846), 5));
+    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(847), 5));
+    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(846), 5));
+    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(845), 5));
 
-    CI::echo("ENBALE");
 
-    delay(100000);
-
-    ContinuousActions::set_power_0(0);
-    ContinuousActions::set_power_1(0);
-    ContinuousActions::set_power_2(0);
-    ContinuousActions::set_power_3(0);
-    ContinuousActions::set_power_4(0);
-    ContinuousActions::set_power_5(0);
-
-    CI::echo("OFF");
 
 
     return complete;
-
 }
-
 
 
 #endif

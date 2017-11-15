@@ -70,6 +70,7 @@ float Thermistors::get_temperature_##name() {\
     return get_temperature_##name(read_value);\
 }\
 
+
 #include <config.h>
 
 #undef THERMISTOR
@@ -77,7 +78,7 @@ float Thermistors::get_temperature_##name() {\
 
 /*
  * get_temperature : this function determines the temperature of a thermistor, given  :
- *      - a read_output value (most likely given by calling analogRead or equivalent)
+ *      - a read value (most likely given by calling analogRead or equivalent)
  *      - a lookup tabletable for the current thermistor
  *      - the lookup table size
  *      - the current index on the table
@@ -93,100 +94,95 @@ float Thermistors::get_temperature_##name() {\
  *
  */
 
+#define GET_VALUE(index) table[(index) << 1]
+#define GET_TEMP(index) table[((index) << 1) + 1]
 
-float Thermistors::get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index) {
-    uint8_t index = *v_index;
+float
+Thermistors::get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index) {
 
-    int16_t value, last_value = value = (int16_t) table[index << 1];
+    //Cache the lower index, and declare the upper index
+    uint8_t lower_index = *v_index, upper_index = lower_index + (uint8_t) 1;
 
-    float final_temp;
+    //Current bounds, temperatures associated with lower and upper index.
+    int16_t lower_value = (int16_t) GET_VALUE(lower_index);
+    int16_t upper_value = (int16_t) GET_VALUE(upper_index);
 
-    if (last_value == read_value) {
 
-        //if the current case is the read_output value
-        return table[(index<<1)+1];
 
-    } else if (last_value <read_value) {
+    float temperature;
 
-        //If the current case is lower than the read_output value : must iterate from index+1, in increasing order.
-        while(true) {
-            //Increment the index
-            index++;
+    //-------------------------------Bounds Adjusting-------------------------------
 
-            //If top reached : return the maximum value
-            if (index==size) {
-                index--;
-                final_temp = table[((size-1)<<1)+1];
+
+    //If the read_value is below the current bounds, decrease
+    if (lower_value > read_value) {
+
+        //While the read value is lower than the lower bound, shift bounds of one.
+        while (lower_value > read_value) {
+
+            //If lower_index is zero, we can't go lower. So, we must return the minimal value.
+            if (!lower_index) {
+                temperature = GET_TEMP(lower_index);
                 goto clean_and_return;
             }
 
-            //Update value and last_value
-            last_value = value;
-            value = (int16_t) table[index << 1];
+            //Increment indexes
+            lower_index--, upper_index--;
 
-            //if the current case is the read_output value  2<<3+2
-            if (value == read_value) {
-                final_temp = table[(index<<1)+1];
-                goto clean_and_return;
-            }
-
-
-            //if the current case is higher than the read_output value
-            if (value > read_value) {
-
-                //Not a value in the lookup table -> use an approximation
-                final_temp = linear_approximation(last_value, value, read_value, table[((index-1)<<1)+1], table[(index<<1)+1]);
-
-                //Memorise the lower value
-                index--;
-                goto clean_and_return;
-            }
+            //Update value and lower_value
+            upper_value = lower_value;
+            lower_value = (int16_t) GET_VALUE(lower_index);
 
         }
+
+    } else if (upper_value < read_value) {
+
+        //While the read value is higher than the upper bound, shift bounds of one.
+        while (upper_value < read_value) {
+
+            if (upper_index == size - 1) {
+                temperature = GET_TEMP(upper_index);
+                goto clean_and_return;
+            }
+
+            //Increment indexes
+            lower_index++, upper_index++;
+
+            //Update value and lower_value
+            lower_value = upper_value;
+            upper_value = (int16_t) GET_VALUE(upper_index);
+
+        }
+
+    }
+
+
+    //-------------------------------Temperature computing-------------------------------
+
+    if (read_value == upper_value) {
+
+        //If the read value is the upper bound, return the upper temperature
+        temperature = GET_TEMP(upper_index);
+
+    } else if (read_value == lower_value) {
+
+        //If the read value is the lower bound, return the lower temperature
+        temperature = GET_TEMP(lower_index);
+
     } else {
 
+        //If the read value is between the lower bound and the upper bound (strictly), use an approximation
 
-        if (!index) {
-            final_temp = table[1];
-            goto clean_and_return;
-        }
+        temperature = linear_approximation(lower_value, upper_value, read_value, GET_TEMP(lower_index),
+                                           GET_TEMP(upper_index));
 
-        //If the current case is higher than the read_output value : must iterate from index-1, in decresaing order.
-        while(true) {
-            //Increment the index
-            index--;
-
-            //If top reached : return the maximum value
-            if (!index) {
-                final_temp = table[1];
-                goto clean_and_return;
-            }
-
-            //Update value and last_value
-            last_value = value;
-            value = (int16_t) table[index << 1];
-
-            //if the current case is the read_output value
-            if (value == read_value) {
-                final_temp = table[(index<<1)+1];
-                goto clean_and_return;
-            }
-
-            //if the current case is higher than the read_output value
-            if (value < read_value) {
-
-                //Not a value in the lookup table -> use an approximation
-                final_temp = linear_approximation(last_value, value, read_value, table[((index-1)<<1)+1], table[(index<<1)+1]);
-                goto clean_and_return;
-            }
-
-        }
     }
 
     clean_and_return :
 
-    *v_index = index;
-    return final_temp;
+
+    *v_index = lower_index;
+    return temperature;
 }
 
 
@@ -198,7 +194,8 @@ float Thermistors::get_temperature(const int16_t read_value, const float *const 
  *  this function retrieves y the ordinate of P.
  */
 
-float Thermistors::linear_approximation(const int16_t x0, const int16_t x1, const int16_t x, const float y0, const float y1) {
-    return y0 + ((float)(x-x0)*(y1-y0)/float(x1-x0));
+float
+Thermistors::linear_approximation(const int16_t x0, const int16_t x1, const int16_t x, const float y0, const float y1) {
+    return y0 + ((float) (x - x0) * (y1 - y0) / float(x1 - x0));
 }
 

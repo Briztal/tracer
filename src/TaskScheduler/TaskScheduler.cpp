@@ -27,7 +27,7 @@ PONEY
 #include "../interface.h"
 #include "EEPROM/EEPROMStorage.h"
 #include "../StepperControl/StepperController.h"
-
+#include <ControlLoops/ControlLoops.h>
 
 
 /*
@@ -52,6 +52,9 @@ void TaskScheduler::init() {
     StepperController::init();
 
 #endif
+
+    ControlLoops::enable_temperature();
+
 
 }
 

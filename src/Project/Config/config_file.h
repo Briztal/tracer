@@ -29,16 +29,16 @@
  */
 
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
-//#define terminal_interface_link_t usb_serial
+#define ENABLE_TERMINAL_INTERFACE
+#define terminal_interface_link_t usb_serial
 
 //Uncomment this line to enable the tree interface.
 //#define ENABLE_PROGRAM_INTERFACE
 //#define program_interface_link_t usb_serial
 
 //Uncomment this line to enable the gcode interface.
-#define ENABLE_GCODE_INTERFACE
-#define gcode_interface_link_t usb_serial
+//#define ENABLE_GCODE_INTERFACE
+//#define gcode_interface_link_t usb_serial
 
 //#define ENABLE_LCD_INTERFACE
 //#define lcd_interface_link_t usb_serial
@@ -46,8 +46,8 @@
 
 //You must define the main command Interface. You must uncomment only one of lines below
 //#define MAIN_CI_PROGRAM
-#define MAIN_CI_GCODE
-//#define MAIN_CI_TERMINAL
+//#define MAIN_CI_GCODE
+#define MAIN_CI_TERMINAL
 
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
@@ -136,11 +136,11 @@ EXTERNAL_PARAMETER(1, temp_hotbed, 0, 300, degree)
 
 #ifdef PID
 
-PID(0, hotend_0, 1, 0, 0)
-PID(1, hotend_1, 1, 0, 0)
-PID(2, hotend_2, 1, 0, 0)
-PID(3, hotend_3, 1, 0, 0)
-PID(4, hotbed, 1, 1, 0)
+PID(0, hotend_0, 20, 0, 0)
+PID(1, hotend_1, 20, 0, 0)
+PID(2, hotend_2, 20, 0, 0)
+PID(3, hotend_3, 20, 0, 0)
+PID(4, hotbed, 20, 0, 0)
 
 #endif
 
