@@ -33,7 +33,7 @@
 //-------------------------------------------------Movement-------------------------------------------------------------
 
 
-/* Machine Structure :
+/* MachineController Structure :
  *     _________________
  *    |   |      |      |
  *    |   |      |      |
@@ -63,7 +63,7 @@
  */
 
 
-task_state_t Machine::carriages_reset() {
+task_state_t MachineController::carriages_reset() {
 
     position[0] = position[1] = position[2] = position[3] = 0;
 
@@ -78,7 +78,7 @@ task_state_t Machine::carriages_reset() {
 }
 
 
-task_state_t Machine::line_to(float x, float y, float z) {
+task_state_t MachineController::line_to(float x, float y, float z) {
 
     //Initialise a state
     task_state_t state = complete;
@@ -105,7 +105,7 @@ task_state_t Machine::line_to(float x, float y, float z) {
 }
 
 
-task_state_t Machine::line_of(float x, float y, float z) {
+task_state_t MachineController::line_of(float x, float y, float z) {
 
     //Cache the coords
     float coords[4];
@@ -148,7 +148,7 @@ task_state_t Machine::line_of(float x, float y, float z) {
  *
  */
 
-task_state_t Machine::mode_0(float x, float y, float z) {
+task_state_t MachineController::mode_0(float x, float y, float z) {
 
     MachineInterface::set_speed_group(carriage_id);
 
@@ -209,7 +209,7 @@ task_state_t Machine::mode_0(float x, float y, float z) {
  *
  */
 
-void Machine::sanity_check(float *position) {
+void MachineController::sanity_check(float *position) {
 
     //First, we must check that coordinates on moving axis are not negative :
     float *f;
@@ -263,7 +263,7 @@ void Machine::sanity_check(float *position) {
 
 //-----------------------------------------------------setup---------------------------------------------------
 
-task_state_t Machine::enable_steppers(bool enable) {
+task_state_t MachineController::enable_steppers(bool enable) {
 
     if (enable) {
 
@@ -282,7 +282,7 @@ task_state_t Machine::enable_steppers(bool enable) {
 }
 
 
-task_state_t Machine::speed_set(uint8_t carriage_id, float speed) {
+task_state_t MachineController::speed_set(uint8_t carriage_id, float speed) {
 
     //TODO VERIFY CARRIAGE AND SPEED BOUNDS
 
@@ -292,7 +292,7 @@ task_state_t Machine::speed_set(uint8_t carriage_id, float speed) {
 }
 
 
-task_state_t Machine::extruder_set(uint8_t carriage) {
+task_state_t MachineController::extruder_set(uint8_t carriage) {
 
 
     //Nothing to do if the carriage id the current one.
@@ -332,7 +332,7 @@ task_state_t Machine::extruder_set(uint8_t carriage) {
 }
 
 
-task_state_t Machine::extruder_speed_set(uint8_t carriage_id, float speed) {
+task_state_t MachineController::extruder_speed_set(uint8_t carriage_id, float speed) {
 
     task_state_t state = extruder_set(carriage_id);
 
@@ -353,7 +353,7 @@ task_state_t Machine::extruder_speed_set(uint8_t carriage_id, float speed) {
  *
  */
 
-task_state_t Machine::set_hotend_temperature(uint8_t hotend, float temp) {
+task_state_t MachineController::set_hotend_temperature(uint8_t hotend, float temp) {
 
     //Pass the hand to the appropriate function in TemperatureController
     return TemperatureController::set_hotend_target(hotend, temp);
@@ -366,7 +366,7 @@ task_state_t Machine::set_hotend_temperature(uint8_t hotend, float temp) {
  *
  */
 
-float Machine::get_hotend_temperature(uint8_t hotend) {
+float MachineController::get_hotend_temperature(uint8_t hotend) {
 
     switch (hotend) {
         case 0:
@@ -385,7 +385,7 @@ float Machine::get_hotend_temperature(uint8_t hotend) {
 
 }
 
-task_state_t Machine::enable_hotend_regulation(uint8_t hotend, bool state) {
+task_state_t MachineController::enable_hotend_regulation(uint8_t hotend, bool state) {
 
     //Pass the hand to the appropriate function in TemperatureController
     return TemperatureController::enable_hotend_regulation(hotend, state);
@@ -393,7 +393,7 @@ task_state_t Machine::enable_hotend_regulation(uint8_t hotend, bool state) {
 }
 
 
-bool Machine::is_hotend_regulation_enabled(uint8_t hotend) {
+bool MachineController::is_hotend_regulation_enabled(uint8_t hotend) {
 
     return complete;
 
@@ -408,7 +408,7 @@ bool Machine::is_hotend_regulation_enabled(uint8_t hotend) {
  *
  */
 
-task_state_t Machine::set_hotbed_temperature(float temp) {
+task_state_t MachineController::set_hotbed_temperature(float temp) {
 
     //Pass the hand to the appropriate function in TemperatureController
     return TemperatureController::set_hotbed_temperature(temp);
@@ -421,7 +421,7 @@ task_state_t Machine::set_hotbed_temperature(float temp) {
  *
  */
 
-float Machine::get_hotbed_temperature() {
+float MachineController::get_hotbed_temperature() {
 
     //Simply read the hotbed thermistor value.
     return Thermistors::get_temperature_hotbed();
@@ -429,7 +429,7 @@ float Machine::get_hotbed_temperature() {
 }
 
 
-task_state_t Machine::enable_hotbed_regulation(bool enable) {
+task_state_t MachineController::enable_hotbed_regulation(bool enable) {
 
     //Pass the hand to the appropriate function in TemperatureController
     return TemperatureController::enable_hotbed_regulation(enable);
@@ -437,7 +437,7 @@ task_state_t Machine::enable_hotbed_regulation(bool enable) {
 }
 
 
-bool Machine::is_hotbed_regulation_enabled() {
+bool MachineController::is_hotbed_regulation_enabled() {
 
     return complete;
 
@@ -456,7 +456,7 @@ bool Machine::is_hotbed_regulation_enabled() {
  *
  */
 
-task_state_t Machine::set_cooling_power(float power) {
+task_state_t MachineController::set_cooling_power(float power) {
 
     //Minor the power;
     if (power < 0)
@@ -479,14 +479,14 @@ task_state_t Machine::set_cooling_power(float power) {
  *
  */
 
-float Machine::get_cooling_power() {
+float MachineController::get_cooling_power() {
 
     CI::echo(cooling_power);
 
     return complete;
 }
 
-task_state_t Machine::enable_cooling(bool enable) {
+task_state_t MachineController::enable_cooling(bool enable) {
 
     if (enable)
         ContinuousActions::set_power_5(cooling_power);
@@ -497,7 +497,7 @@ task_state_t Machine::enable_cooling(bool enable) {
 
 }
 
-bool Machine::is_cooling_enabled() {
+bool MachineController::is_cooling_enabled() {
 
     if (ContinuousActions::get_state_5())
         CI::echo("1");
@@ -509,15 +509,15 @@ bool Machine::is_cooling_enabled() {
 }
 
 
-uint8_t Machine::mode = 0;
+uint8_t MachineController::mode = 0;
 
-uint8_t Machine::carriage_id = 0;
+uint8_t MachineController::carriage_id = 0;
 
-float Machine::cooling_power = 100;
+float MachineController::cooling_power = 100;
 
 float tmpos[NB_AXIS];
-float *const Machine::position = tmpos;
+float *const MachineController::position = tmpos;
 
 float t_mch_crd[4]{0};
-float *const Machine::machine_coords = t_mch_crd;
+float *const MachineController::machine_coords = t_mch_crd;
 

@@ -28,7 +28,7 @@
 #include <TaskScheduler/TaskScheduler.h>
 
 
-class Machine {
+class MachineController {
 
 
 
@@ -130,9 +130,9 @@ GENERATE_SCHEDULER(enable_hotbed_regulation, 1, bool, state);
 
 
     //Set and get hotbed temperatures
-    static task_state_t set_cooling_power(float temp);
+    static task_state_t set_cooling_power(float power);
 
-GENERATE_SCHEDULER(set_cooling_power, 1, float, temp);
+GENERATE_SCHEDULER(set_cooling_power, 1, float, power);
 
 
     //Not scheduled : get the CURRENT cooling power

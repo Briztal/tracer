@@ -154,7 +154,7 @@ task_state_t TerminalInterfaceCommands::move_zero(uint8_t args_index) {
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Schedule a reset of the carriages
-    Machine::carriages_reset_scheduled();
+    MachineController::carriages_reset_scheduled();
 
     return complete;
 
@@ -170,6 +170,7 @@ task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
+    //Fail if there are not exactly three arguments
     if (GET_NB_WORDS(args, size) != 3) {
         return invalid_arguments;
     }
@@ -187,7 +188,7 @@ task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
     float z = str_to_float(WORD);
 
     //Schedule a line to the specified coordinates with the specified carriage_id
-    return Machine::line_to_scheduled(x, y, z);
+    return MachineController::line_to_scheduled(x, y, z);
 
 }
 
@@ -200,6 +201,7 @@ task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
+    //Fail if there are not exactly three arguments
     if (GET_NB_WORDS(args, size) != 3) {
         return invalid_arguments;
     }
@@ -217,7 +219,7 @@ task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
     float z = str_to_float(WORD);
 
     //Schedule a line to the specified coordinates with the specified carriage_id
-    return Machine::line_of_scheduled(x, y, z);
+    return MachineController::line_of_scheduled(x, y, z);
 
 }
 
@@ -228,6 +230,7 @@ task_state_t TerminalInterfaceCommands::set_speed(uint8_t args_index) {
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
+    //Fail if there are not exactly two arguments
     if (GET_NB_WORDS(args, size) != 2) {
         return invalid_arguments;
     }
@@ -241,7 +244,7 @@ task_state_t TerminalInterfaceCommands::set_speed(uint8_t args_index) {
     float speed = str_to_float(WORD);
 
     CI::echo("Setting the carriage_id "+String(carriage_id)+" to "+String(speed)+".");
-    Machine::speed_set_scheduled(carriage_id, speed);
+    MachineController::speed_set_scheduled(carriage_id, speed);
 
     return complete;
 
@@ -256,6 +259,7 @@ task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
+    //Fail if there are not exactly two arguments
     if (GET_NB_WORDS(args, size) != 2) {
         return invalid_arguments;
     }
@@ -269,18 +273,216 @@ task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
     float speed = str_to_float(WORD);
 
 
-    task_state_t state = Machine::extruder_speed_set_scheduled(carriage_id, speed);
+    task_state_t state = MachineController::extruder_speed_set_scheduled(carriage_id, speed);
 
     if (state == complete) {
 
         CI::echo("Carriage modified. Moving carriages to zero...");
 
-        Machine::carriages_reset_scheduled();
+        MachineController::carriages_reset_scheduled();
     }
 
     return state;
 
 }
+
+
+
+task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly one argument
+    if (GET_NB_WORDS(args, size) != 1) {
+        return invalid_arguments;
+    }
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    bool enable = (bool) str_to_float(WORD);
+
+    //Schedule an enable / disable of steppers.
+    return MachineController::enable_steppers_scheduled(enable);
+
+}
+
+
+
+task_state_t TerminalInterfaceCommands::enable_cooling(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly one argument
+    if (GET_NB_WORDS(args, size) != 1) {
+        return invalid_arguments;
+    }
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    bool enable = (bool) str_to_float(WORD);
+
+    //Schedule an enable / disable of cooling.
+    return MachineController::enable_cooling_scheduled(enable);
+
+}
+
+
+task_state_t TerminalInterfaceCommands::set_cooling_power(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly one argument
+    if (GET_NB_WORDS(args, size) != 1) {
+        return invalid_arguments;
+    }
+
+    //Extract the power
+    GET_NEXT_WORD(args, size);
+    float power = str_to_float(WORD);
+
+    //Schedule a modification of the cooling power
+    return MachineController::set_cooling_power_scheduled(power);
+
+}
+
+
+
+
+task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly one argument
+    if (GET_NB_WORDS(args, size) != 1) {
+        return invalid_arguments;
+    }
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    bool enable = (bool) str_to_float(WORD);
+
+    //Schedule an enable/disable of the hotbed regulation.
+    return MachineController::enable_hotbed_regulation_scheduled(enable);
+
+}
+
+
+task_state_t TerminalInterfaceCommands::set_bed_temp(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly one argument
+    if (GET_NB_WORDS(args, size) != 1) {
+        return invalid_arguments;
+    }
+
+    //Extract the temperature
+    GET_NEXT_WORD(args, size);
+    float temp = str_to_float(WORD);
+
+    //Schedule a modification of the hotbed power
+    return MachineController::set_hotbed_temperature_scheduled(temp);
+
+
+}
+
+
+
+task_state_t TerminalInterfaceCommands::enable_hotend(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly two arguments
+    if (GET_NB_WORDS(args, size) != 2) {
+        return invalid_arguments;
+    }
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    uint8_t hotend = (uint8_t) str_to_float(WORD);
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    bool enable = (bool) str_to_float(WORD);
+
+    //Schedule an enable/disable of the hotbed regulation.
+    return MachineController::enable_hotend_regulation_scheduled(hotend, enable);
+
+}
+
+
+
+task_state_t TerminalInterfaceCommands::set_hotend_temp(uint8_t args_index) {
+
+    //This task requires the schedule of two type-0 task
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Declare args, size, and give them the correct value
+    GET_ARGS(args_index, args, size);
+
+    //Fail if there are not exactly two arguments
+    if (GET_NB_WORDS(args, size) != 2) {
+        return invalid_arguments;
+    }
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    uint8_t hotend = (uint8_t) str_to_float(WORD);
+
+    //Extract the enable boolean
+    GET_NEXT_WORD(args, size);
+    float temperature = str_to_float(WORD);
+
+    //Schedule an enable/disable of the hotbed regulation.
+    return MachineController::set_hotend_temperature_scheduled(hotend, temperature);
+
+}
+
+
+
+
+//---------------------------------------------------------Gets---------------------------------------------------------
+
+
+
+task_state_t TerminalInterfaceCommands::get_regulations(uint8_t args_index) {
+
+    return complete;
+
+}
+
+
+task_state_t TerminalInterfaceCommands::get_temps(uint8_t args_index) {
+
+    return complete;
+
+}
+
+
 
 //---------------------------------------------------------Tests--------------------------------------------------------
 

@@ -42,7 +42,7 @@
 
 
 //EEPROM
-GO_LOWER(eeprom, move the machine)
+GO_LOWER(eeprom, set persistent machine parameters)
 CREATE_LEAF(read, eeprom_read, read a parameter in the EEPROM, eeprom_path)
 CREATE_LEAF(write, eeprom_write, write a parameter in the EEPROM, eeprom_path)
 CREATE_LEAF(reset, eeprom_reset, resets the EEPROM to its default state, none)
@@ -58,10 +58,30 @@ CREATE_LEAF(of, line_of, draw a line with the current carriage to the specified 
 GO_UPPER()
 
 //Setup
-GO_LOWER(set, setup machine parameters)
+GO_LOWER(set, setup real-time machine parameters)
+
 CREATE_LEAF(carriage, set_carriage, set the current carriage and its speed, carriage_id - speed)
 CREATE_LEAF(speed, set_speed, set the speed for the specified carriage, carriage_id - value)
+CREATE_LEAF(power, enable_steppers, enable or disable all steppers, 0 or 1)
+
+CREATE_LEAF(cooling_p, set_cooling_power, enable or disable the cooling, power)
+CREATE_LEAF(cooling_en, enable_cooling, enable or disable the cooling, 0 or 1)
+
+CREATE_LEAF(hotend_target, set_hotend_temp, set a hotends temperature, 0 or 1)
+CREATE_LEAF(hotend_en, enable_hotend, enable or disable a hotend, 0 or 1)
+
+CREATE_LEAF(bed_target, set_bed_temp, set the bed temperature, 0 or 1)
+CREATE_LEAF(bed_en, enable_bed, enable or disable the bed, 0 or 1)
+
 GO_UPPER()
+
+//Get
+GO_LOWER(get, get real time data)
+CREATE_LEAF(temp, get_temps, display temperatures, none)
+CREATE_LEAF(regs, get_regulations, display the temperatures regulation states, none)
+GO_UPPER()
+
+
 
 //test
 GO_LOWER(test, various tests)
