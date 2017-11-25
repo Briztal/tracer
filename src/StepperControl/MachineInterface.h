@@ -89,6 +89,9 @@ public :
     //The function to get the current regulation_speed, for the current regulation_speed group.
     static float get_speed();
 
+    //The function to get the current regulation_speed, for the speed group provided
+    static float get_speed(uint8_t speed_group);
+
     //The function to set the regulation_speed for the provided regulation_speed group.
     static task_state_t set_speed_for_group(uint8_t speed_group, float new_speed);
 

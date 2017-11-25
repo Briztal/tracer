@@ -1,2 +1,2 @@
-/usr/bin/ar qc libproject_config.a  CMakeFiles/project_config.dir/Project/Config/dumb.c.o
+/usr/bin/ar qc libproject_config.a  CMakeFiles/project_config.dir/Project/Config/geometry.cpp.o
 /usr/bin/ranlib libproject_config.a

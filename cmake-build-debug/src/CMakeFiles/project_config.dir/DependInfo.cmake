@@ -1,15 +1,15 @@
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
-  "C"
+  "CXX"
   )
 # The set of files for implicit dependencies of each language:
-set(CMAKE_DEPENDS_CHECK_C
-  "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/dumb.c" "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src/CMakeFiles/project_config.dir/Project/Config/dumb.c.o"
+set(CMAKE_DEPENDS_CHECK_CXX
+  "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/geometry.cpp" "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src/CMakeFiles/project_config.dir/Project/Config/geometry.cpp.o"
   )
-set(CMAKE_C_COMPILER_ID "GNU")
+set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # Preprocessor definitions for this target.
-set(CMAKE_TARGET_DEFINITIONS_C
+set(CMAKE_TARGET_DEFINITIONS_CXX
   "ARDUINO=10610"
   "F_CPU=120000000L"
   "LAYOUT_US_ENGLISH"
@@ -21,7 +21,7 @@ set(CMAKE_TARGET_DEFINITIONS_C
   )
 
 # The include file search paths:
-set(CMAKE_C_TARGET_INCLUDE_PATH
+set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/root/.platformio/packages/framework-arduinoteensy/cores/teensy3"
   "/media/raph/Data/Projets/TRACER/TRACER/src"
   "/root/.platformio/packages/framework-arduinoteensy/libraries/EEPROM"

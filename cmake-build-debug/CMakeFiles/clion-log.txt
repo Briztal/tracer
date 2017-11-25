@@ -1,4 +1,4 @@
-/opt/clion-2017.1.1/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER
+/opt/clion-2017.2.3/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug

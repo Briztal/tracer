@@ -63,41 +63,147 @@
  */
 
 
+
+//TODO DEBUG
+
+/*
+ * Carriage reset :
+ *
+ *  This function resets all axis to their zero coordinate, at the maximal speed that do not exceeds carriages
+ *      regulation speeds. This speed will be one of current regulations speeds.
+ *
+ *  It determines the maximal speed with the following algorithm :
+ *      - set the carriage 0 as the reference (the one whose speed will be its regulation speed).
+ *      - for each carriage,
+ *          if the speed of the carriage (determined according to the reference carriage) exceeds its regulation speed,
+ *          then this carriage becomes the reference
+ *
+ */
+
 task_state_t MachineController::carriages_reset() {
 
+    //Initialise the reference carriage data
+    carriage_data t = carriage_data();
+
+    //Initialise the reference carriage.
+    set_reference_carriage(0, position[0], position[2], &t);
+
+    //Verify carriages 1, 2 and 3.
+    check_carriage(1, position[1], position[2], &t);
+    check_carriage(2, position[1], position[3], &t);
+    check_carriage(3, position[0], position[3], &t);
+
+    //Set the reference carriage, that will determine the movement speed.
+    MachineInterface::set_speed_group(t.carriage_id);
+
+    //No need to set the regulation speed, ad it is already set.
+
+    //Zero all carriages
     position[0] = position[1] = position[2] = position[3] = 0;
 
-    //TODO DETERMINE THE CARRIAGE THAT MOVES THE MOST AND CHOOSE THE SPEED GROUP ACCORDINGLY
-
-    //MachineInterface::set_speed_group(0);
-
-    //MachineInterface::set_speed_for_group(0, speed);
-
+    //Move
     return MachineInterface::linear_movement(position);
 
 }
 
 
-task_state_t MachineController::line_to(float x, float y, float z) {
+
+/*
+ * set_reference_carriage : this function updates the carriage identifier data, with the provided indice,
+ *      and determines the movement time corresponding to the provided movement data, with the following formula :
+ *
+ *          Movement_time = movement_distance / movement_speed = sqrt(movement_x **2 + movement_y**2) / movement_dist
+ *
+ */
+
+void MachineController::set_reference_carriage(uint8_t id, float x, float y, carriage_data *data) {
+
+    //Set the ID
+    data->carriage_id = id;
+
+    //Use the formula to determine the time
+    data->time = sqrt_float(x * x + y * y) / MachineInterface::get_speed(id);
+
+}
+
+
+/*
+ * check_carriage : this function verifies that the movement speed, with the reference carriage [data] does not exceeds
+ *
+ *  the carriage [id] regulation speeds. if so, it sets [id] as the reference carriage, using the formula in
+ *      the function behind
+ *
+ */
+
+void MachineController::check_carriage(uint8_t id, float x, float y, carriage_data *data) {
+
+    //Determine the carriage [id] 's movement distance.
+    float distance = sqrt_float(x * x + y * y);
+
+    //Determine the speed corresponding to this movement, knowing the movement time
+    float speed = distance / data->time;
+
+    float reg_speed = MachineInterface::get_speed(id);
+
+    //If the speed exceeds the carriage's regulation speed, then set [id] as the reference carriage.
+    if (speed > reg_speed) {
+
+        //Set the ID
+        data->carriage_id = id;
+
+        //Determine the time like in the function behind (we didn't call it, because we already have the distance.
+        data->time = distance / reg_speed;
+
+    }
+
+}
+
+
+//TODO COMMENT
+void MachineController::fill_coords(machine_coords_t *coords) {
+
+    if (!coords->x_enabled) {
+        coords->x = machine_coords[0];
+    }
+    if (!coords->y_enabled) {
+        coords->y = machine_coords[1];
+    }
+    if (!coords->z_enabled) {
+        coords->z = machine_coords[2];
+    }
+    if (!coords->e_enabled) {
+        coords->e = machine_coords[3];
+    }
+}
+
+void MachineController::persist_coords(machine_coords_t *coords) {
+
+    machine_coords[0] = coords->x;
+    machine_coords[1] = coords->y;
+    machine_coords[2] = coords->z;
+    machine_coords[3] = coords->e;
+
+}
+
+
+task_state_t MachineController::line_to(machine_coords_t coords) {
 
     //Initialise a state
     task_state_t state = complete;
 
+    //Get the destination coordinates
+    fill_coords(&coords);
+
     //Try to move to the specified position
     switch (mode) {
         case 0:
-            state = mode_0(x, y, z);
+            state = mode_0(&coords);
         default:
             break;
     }
 
     if (state == complete) {
-
-        //Update the local coords
-        machine_coords[0] = x;
-        machine_coords[1] = y;
-        machine_coords[2] = z;
-
+        persist_coords(&coords);
     }
 
     return state;
@@ -105,16 +211,13 @@ task_state_t MachineController::line_to(float x, float y, float z) {
 }
 
 
-task_state_t MachineController::line_of(float x, float y, float z) {
-
-    //Cache the coords
-    float coords[4];
-    memcpy(coords, machine_coords, 4 * sizeof(float));
+task_state_t MachineController::line_of(machine_coords_t coords) {
 
     //Update the local coords
-    coords[0] += x;
-    coords[1] += y;
-    coords[2] += z;
+    coords.x += machine_coords[0];
+    coords.y += machine_coords[1];
+    coords.z += machine_coords[2];
+    coords.e += machine_coords[3];
 
     //Initialise a state
     task_state_t state = complete;
@@ -122,16 +225,13 @@ task_state_t MachineController::line_of(float x, float y, float z) {
     //Try to move to the specified position
     switch (mode) {
         case 0:
-            state = mode_0(coords[0], coords[1], coords[2]);
+            state = mode_0(&coords);
         default:
             break;
     }
 
     if (state == complete) {
-
-        //Save coords
-        memcpy(machine_coords, coords, 4 * sizeof(float));
-
+        persist_coords(&coords);
     }
 
     return state;
@@ -148,7 +248,7 @@ task_state_t MachineController::line_of(float x, float y, float z) {
  *
  */
 
-task_state_t MachineController::mode_0(float x, float y, float z) {
+task_state_t MachineController::mode_0(machine_coords_t *coords) {
 
     MachineInterface::set_speed_group(carriage_id);
 
@@ -175,18 +275,18 @@ task_state_t MachineController::mode_0(float x, float y, float z) {
 
 
     if (x0) {
-        position[0] = EEPROMStorage::coordinate_interface_data.x0_offset + x;
+        position[0] = EEPROMStorage::coordinate_interface_data.x0_offset + coords->x;
     } else {
-        position[1] = EEPROMStorage::coordinate_interface_data.x1_offset - x;
+        position[1] = EEPROMStorage::coordinate_interface_data.x1_offset - coords->x;
     }
 
     if (y0) {
-        position[2] = EEPROMStorage::coordinate_interface_data.y0_offset + y;
+        position[2] = EEPROMStorage::coordinate_interface_data.y0_offset + coords->y;
     } else {
-        position[3] = EEPROMStorage::coordinate_interface_data.y1_offset - y;
+        position[3] = EEPROMStorage::coordinate_interface_data.y1_offset - coords->y;
     }
 
-    position[4] = EEPROMStorage::coordinate_interface_data.z_offset - z;
+    position[4] = EEPROMStorage::coordinate_interface_data.z_offset - coords->z;
 
     //TODO SANITY CHECK
     //sanity_check(position);
@@ -344,104 +444,6 @@ task_state_t MachineController::extruder_speed_set(uint8_t carriage_id, float sp
 
 }
 
-
-//-------------------------------Hotends-------------------------------
-
-
-/*
- * set_hotend_temperature : this function sets the required hotend's target temperature to the given value.
- *
- */
-
-task_state_t MachineController::set_hotend_temperature(uint8_t hotend, float temp) {
-
-    //Pass the hand to the appropriate function in TemperatureController
-    return TemperatureController::set_hotend_target(hotend, temp);
-
-}
-
-
-/*
- * get_hotend_temperature : this function reads and returns the temperature of the required hotend.
- *
- */
-
-float MachineController::get_hotend_temperature(uint8_t hotend) {
-
-    switch (hotend) {
-        case 0:
-            return Thermistors::get_temperature_hotend_0();
-        case 1:
-            return Thermistors::get_temperature_hotend_1();
-        case 2:
-            return Thermistors::get_temperature_hotend_2();
-        case 3:
-            return Thermistors::get_temperature_hotend_3();
-        default:
-            return 0;
-
-    }
-
-
-}
-
-task_state_t MachineController::enable_hotend_regulation(uint8_t hotend, bool state) {
-
-    //Pass the hand to the appropriate function in TemperatureController
-    return TemperatureController::enable_hotend_regulation(hotend, state);
-
-}
-
-
-bool MachineController::is_hotend_regulation_enabled(uint8_t hotend) {
-
-    return complete;
-
-}
-
-
-//-------------------------------Hotbed-------------------------------
-
-
-/*
- * set_hotbed_temperature : this function sets hotbed's target temperature to the given value.
- *
- */
-
-task_state_t MachineController::set_hotbed_temperature(float temp) {
-
-    //Pass the hand to the appropriate function in TemperatureController
-    return TemperatureController::set_hotbed_temperature(temp);
-
-}
-
-
-/*
- * get_hotbed_temperature : this function reads and returns the temperature of the hotbed.
- *
- */
-
-float MachineController::get_hotbed_temperature() {
-
-    //Simply read the hotbed thermistor value.
-    return Thermistors::get_temperature_hotbed();
-
-}
-
-
-task_state_t MachineController::enable_hotbed_regulation(bool enable) {
-
-    //Pass the hand to the appropriate function in TemperatureController
-    return TemperatureController::enable_hotbed_regulation(enable);
-
-}
-
-
-bool MachineController::is_hotbed_regulation_enabled() {
-
-    return complete;
-
-}
 
 
 //-------------------------------Cooling-------------------------------

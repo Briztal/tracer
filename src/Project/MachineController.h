@@ -27,9 +27,28 @@
 #include <TaskScheduler/task_state_t.h>
 #include <TaskScheduler/TaskScheduler.h>
 
+typedef struct machine_coords_t {
+
+    bool x_enabled = false;
+    bool y_enabled = false;
+    bool z_enabled = false;
+    bool e_enabled = false;
+
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float e = 0;
+
+} machine_coords_t;
+
+
+typedef struct carriage_data {
+    uint8_t carriage_id;
+    float time;
+} carriage_data;
+
 
 class MachineController {
-
 
 
 
@@ -43,14 +62,14 @@ public:
 GENERATE_SCHEDULER(carriages_reset, 1);
 
 
-    static task_state_t line_to(float x, float y, float z);
+    static task_state_t line_to(machine_coords_t coords);
 
-GENERATE_SCHEDULER(line_to, 1, float, x, float, y, float, z);
+GENERATE_SCHEDULER(line_to, 1, machine_coords_t, coords);
 
 
-    static task_state_t line_of(float x, float y, float z);
+    static task_state_t line_of(machine_coords_t coords);
 
-GENERATE_SCHEDULER(line_of, 1, float, x, float, y, float, z);
+GENERATE_SCHEDULER(line_of, 1, machine_coords_t, coords);
 
 
     //-------------------------------Setup-------------------------------
@@ -77,52 +96,6 @@ GENERATE_SCHEDULER(speed_set, 1, uint8_t, carriage, float, speed);
     static task_state_t extruder_speed_set(uint8_t carriage, float speed);
 
 GENERATE_SCHEDULER(extruder_speed_set, 1, uint8_t, carriage, float, speed);
-
-
-    //-------------------------------Hotends-------------------------------
-
-    //Set and get hotends temperatures
-    static task_state_t set_hotend_temperature(uint8_t hotend, float temp);
-
-GENERATE_SCHEDULER(set_hotend_temperature, 1, uint8_t, hotend, float, temp);
-
-
-    //Not scheduled : get the CURRENT hotbed temperature
-    static float get_hotend_temperature(uint8_t hotend);
-
-
-    //enable - disable hotends
-    static task_state_t enable_hotend_regulation(uint8_t hotend, bool state);
-
-GENERATE_SCHEDULER(enable_hotend_regulation, 2, uint8_t, hotend, bool, state);
-
-
-    //Not scheduled : is the hotend regulation CURRENTLY enabled
-    static bool is_hotend_regulation_enabled(uint8_t hotend);
-
-
-
-    //-------------------------------Hotbed-------------------------------
-
-    //Set and get hotbed temperatures
-    static task_state_t set_hotbed_temperature(float temp);
-
-GENERATE_SCHEDULER(set_hotbed_temperature, 1, float, temp);
-
-
-    //Not scheduled : get the CURRENT hotbed temperature
-    static float get_hotbed_temperature();
-
-
-    //enable - disable hotbed
-    static task_state_t enable_hotbed_regulation(bool enable);
-
-GENERATE_SCHEDULER(enable_hotbed_regulation, 1, bool, state);
-
-
-    //Not scheduled : is the hotbed regulation CURRENTLY enabled
-    static bool is_hotbed_regulation_enabled();
-
 
 
 
@@ -161,10 +134,17 @@ private:
 
     static float cooling_power;
 
-    static task_state_t mode_0(float x, float y, float z);
+    static task_state_t mode_0(machine_coords_t *coords);
 
     static void sanity_check(float *hl_coords);
 
+    static void fill_coords(machine_coords_t *coords);
+
+    static void persist_coords(machine_coords_t *coords);
+
+    static void set_reference_carriage(uint8_t id, float x, float y, carriage_data *data);
+
+    static void check_carriage(uint8_t id, float x, float y, carriage_data *data);
 };
 
 

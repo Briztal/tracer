@@ -170,25 +170,33 @@ task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
-    //Fail if there are not exactly three arguments
-    if (GET_NB_WORDS(args, size) != 3) {
+    //Fail if there are not exactly four arguments
+    if (GET_NB_WORDS(args, size) != 4) {
         return invalid_arguments;
     }
 
+    machine_coords_t t = machine_coords_t();
+    t.x_enabled = t.y_enabled = t.z_enabled = t.e_enabled = true;
+
+
     //Extract x
     GET_NEXT_WORD(args, size);
-    float x = str_to_float(WORD);
+    t.x = str_to_float(WORD);
 
     //Extract y
     GET_NEXT_WORD(args, size);
-    float y = str_to_float(WORD);
+    t.y = str_to_float(WORD);
 
     //Extract z
     GET_NEXT_WORD(args, size);
-    float z = str_to_float(WORD);
+    t.z = str_to_float(WORD);
 
-    //Schedule a line to the specified coordinates with the specified carriage_id
-    return MachineController::line_to_scheduled(x, y, z);
+    //Extract e
+    GET_NEXT_WORD(args, size);
+    t.e = str_to_float(WORD);
+
+    //Schedule a line to the specified coordinates
+    return MachineController::line_to_scheduled(t);
 
 }
 
@@ -201,25 +209,32 @@ task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
     //Declare args, size, and give them the correct value
     GET_ARGS(args_index, args, size);
 
-    //Fail if there are not exactly three arguments
-    if (GET_NB_WORDS(args, size) != 3) {
+    //Fail if there are not exactly four arguments
+    if (GET_NB_WORDS(args, size) != 4) {
         return invalid_arguments;
     }
 
+    machine_coords_t t = machine_coords_t();
+    t.x_enabled = t.y_enabled = t.z_enabled = t.e_enabled = true;
+
     //Extract x
     GET_NEXT_WORD(args, size);
-    float x = str_to_float(WORD);
+    t.x = str_to_float(WORD);
 
     //Extract y
     GET_NEXT_WORD(args, size);
-    float y = str_to_float(WORD);
+    t.y = str_to_float(WORD);
 
     //Extract z
     GET_NEXT_WORD(args, size);
-    float z = str_to_float(WORD);
+    t.z = str_to_float(WORD);
+
+    //Extract e
+    GET_NEXT_WORD(args, size);
+    t.e = str_to_float(WORD);
 
     //Schedule a line to the specified coordinates with the specified carriage_id
-    return MachineController::line_of_scheduled(x, y, z);
+    return MachineController::line_of_scheduled(t);
 
 }
 
@@ -378,7 +393,7 @@ task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
     bool enable = (bool) str_to_float(WORD);
 
     //Schedule an enable/disable of the hotbed regulation.
-    return MachineController::enable_hotbed_regulation_scheduled(enable);
+    return TemperatureController::enable_hotbed_regulation_scheduled(enable);
 
 }
 
@@ -401,7 +416,7 @@ task_state_t TerminalInterfaceCommands::set_bed_temp(uint8_t args_index) {
     float temp = str_to_float(WORD);
 
     //Schedule a modification of the hotbed power
-    return MachineController::set_hotbed_temperature_scheduled(temp);
+    return TemperatureController::set_hotbed_temperature_scheduled(temp);
 
 
 }
@@ -430,7 +445,7 @@ task_state_t TerminalInterfaceCommands::enable_hotend(uint8_t args_index) {
     bool enable = (bool) str_to_float(WORD);
 
     //Schedule an enable/disable of the hotbed regulation.
-    return MachineController::enable_hotend_regulation_scheduled(hotend, enable);
+    return TemperatureController::enable_hotend_regulation_scheduled(hotend, enable);
 
 }
 
@@ -458,7 +473,7 @@ task_state_t TerminalInterfaceCommands::set_hotend_temp(uint8_t args_index) {
     float temperature = str_to_float(WORD);
 
     //Schedule an enable/disable of the hotbed regulation.
-    return MachineController::set_hotend_temperature_scheduled(hotend, temperature);
+    return TemperatureController::set_hotend_temperature_scheduled(hotend, temperature);
 
 }
 

@@ -134,6 +134,26 @@ void MachineInterface::get_stepper_positions_for(void (*get_position)(float, flo
  */
 
 float MachineInterface::get_speed() {
+
+    //Verify that the speed group existe
+    if (speed_group >= NB_CARTESIAN_GROUPS)
+        return 0;
+
+    return speeds[speed_group];
+}
+
+
+/*
+ * get_speed : this function returns the regulation_speed on the current regulation_speed group.
+ *
+ */
+
+float MachineInterface::get_speed(uint8_t speed_group) {
+
+    //Verify that the speed group existe
+    if (speed_group >= NB_CARTESIAN_GROUPS)
+        return 0;
+
     return speeds[speed_group];
 }
 
@@ -152,6 +172,11 @@ uint8_t MachineInterface::get_speed_group() {
  */
 
 void MachineInterface::set_speed_group(uint8_t speed_group) {
+
+    //Verify that the speed group existe
+    if (speed_group >= NB_CARTESIAN_GROUPS)
+        return ;
+
     MachineInterface::speed_group = speed_group;
 }
 
@@ -163,6 +188,10 @@ void MachineInterface::set_speed_group(uint8_t speed_group) {
  */
 
 task_state_t MachineInterface::set_speed_for_group(uint8_t speed_group, float new_speed) {
+
+    //Verify that the speed group existe
+    if (speed_group >= NB_CARTESIAN_GROUPS)
+        return invalid_arguments;
 
     //If the current speed if the new speed, nothing to change.
     if (speeds[speed_group] == new_speed) {
@@ -196,6 +225,10 @@ task_state_t MachineInterface::set_speed_for_group(uint8_t speed_group, float ne
  */
 
 float MachineInterface::get_movement_distance_for_group(uint8_t speed_group, const float *const distances) {
+
+    //Verify that the speed group existe
+    if (speed_group >= NB_CARTESIAN_GROUPS)
+        return 0;
 
     float square_dist_sum = 0;
 
@@ -251,7 +284,7 @@ sig_t MachineInterface::get_tools_data(float *energy_densities) {
 #define CONTINUOUS(i, name, pin, max) \
     if ((density = tools_energy_densities[i])) {\
         energy_densities[id++] = density;\
-        sig |= ((sig_t)1<<i);\
+        sig |= ((sig_t)1<<(i));\
     }
 
 #include <config.h>
@@ -273,7 +306,7 @@ uint8_t MachineInterface::set_tools_updating_function(sig_t tools_signature, voi
     uint8_t id = 0;
 
 #define CONTINUOUS(i, name, pin, max) \
-    if (tools_signature&((sig_t)1<<i)) {\
+    if (tools_signature&((sig_t)1<<(i))) {\
         updating_functions[id++] = ContinuousActions::set_power_##i;\
     }
 
@@ -293,7 +326,7 @@ uint8_t MachineInterface::set_tools_updating_function(sig_t tools_signature, voi
 void MachineInterface::stop_tools(sig_t stop_signature) {
 
 #define CONTINUOUS(i, name, pin, max) \
-    if (stop_signature & ((sig_t)((sig_t) 1 << i))) {\
+    if (stop_signature & ((sig_t)((sig_t) 1 << (i)))) {\
         ContinuousActions::stop_##i();\
     }
 

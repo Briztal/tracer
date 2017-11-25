@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Machine.cpp" "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src/CMakeFiles/project.dir/Project/Machine.cpp.o"
+  "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/MachineController.cpp" "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src/CMakeFiles/project.dir/Project/MachineController.cpp.o"
   "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp" "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src/CMakeFiles/project.dir/Project/TemperatureController.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

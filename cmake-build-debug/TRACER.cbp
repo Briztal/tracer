@@ -5148,13 +5148,10 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/config_file.h">
 			<Option target="project_config"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/dumb.c">
-			<Option target="project_config"/>
-		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/gcode_interface_config.h">
 			<Option target="project_config"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/geometry.h">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/geometry.cpp">
 			<Option target="project_config"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/lcd_interface_config.h">
@@ -5187,10 +5184,10 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/_interface_data.h">
 			<Option target="project_interfaces"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Machine.cpp">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/MachineController.cpp">
 			<Option target="project"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Machine.h">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/MachineController.h">
 			<Option target="project"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp">

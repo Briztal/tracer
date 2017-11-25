@@ -12,8 +12,8 @@ include_directories(${PC}/)
 
 add_library(project
 
-        ${PP}/Machine.h
-        ${PP}/Machine.cpp
+        ${PP}/MachineController.h
+        ${PP}/MachineController.cpp
 
 
         Project/TemperatureController.cpp Project/TemperatureController.h)
@@ -33,9 +33,7 @@ add_library(project_config
         ${PCP}/terminal_interface_config.h
         ${PCP}/program_interface_config.h
         ${PCP}/gcode_interface_config.h
-        ${PCP}/geometry.h
-        ${PCP}/dumb.c
-
+        ${PCP}/geometry.cpp
         )
 
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------

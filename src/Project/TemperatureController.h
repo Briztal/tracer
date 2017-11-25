@@ -54,10 +54,16 @@ public:
 
 GENERATE_SCHEDULER(enable_hotend_regulation, 2, uint8_t, hotend, bool, enable);
 
+    //Not scheduled : is the hotend regulation CURRENTLY enabled
+    static bool is_hotend_regulation_enabled(uint8_t hotend);
 
-    static task_state_t set_hotend_target(uint8_t hotend, float target);
+    static task_state_t set_hotend_temperature(uint8_t hotend, float target);
 
-GENERATE_SCHEDULER(set_hotend_target, 2, uint8_t, hotend, float, target);
+GENERATE_SCHEDULER(set_hotend_temperature, 2, uint8_t, hotend, float, target);
+
+    //Not scheduled : get the CURRENT hotbed temperature
+    static float get_hotend_temperature(uint8_t hotend);
+
 
 
     //Hotbed
@@ -65,10 +71,15 @@ GENERATE_SCHEDULER(set_hotend_target, 2, uint8_t, hotend, float, target);
 
 GENERATE_SCHEDULER(enable_hotbed_regulation, 2, bool, enable);
 
+    //Not scheduled : is the hotbed regulation CURRENTLY enabled
+    static bool is_hotbed_regulation_enabled();
 
     static task_state_t set_hotbed_temperature(float target);
 
 GENERATE_SCHEDULER(set_hotbed_temperature, 1, float, target);
+
+    //Not scheduled : get the CURRENT hotbed temperature
+    static float get_hotbed_temperature();
 
 
 private:

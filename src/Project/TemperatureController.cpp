@@ -63,12 +63,21 @@ task_state_t TemperatureController::enable_hotend_regulation(uint8_t hotend, boo
 }
 
 
+bool TemperatureController::is_hotend_regulation_enabled(uint8_t hotend) {
+
+    return complete;
+
+}
+
+
+
+
 /*
  * set_hotend_target : this function enables the hotbed's regulation.
  *
  */
 
-task_state_t TemperatureController::set_hotend_target(uint8_t hotend, float target) {
+task_state_t TemperatureController::set_hotend_temperature(uint8_t hotend, float target) {
 
     //verify that the required hotend exists.
     if (hotend<4) {
@@ -82,6 +91,26 @@ task_state_t TemperatureController::set_hotend_target(uint8_t hotend, float targ
     return invalid_arguments;
 
 }
+
+
+float TemperatureController::get_hotend_temperature(uint8_t hotend) {
+
+    switch (hotend) {
+        case 0:
+            return Thermistors::get_temperature_hotend_0();
+        case 1:
+            return Thermistors::get_temperature_hotend_1();
+        case 2:
+            return Thermistors::get_temperature_hotend_2();
+        case 3:
+            return Thermistors::get_temperature_hotend_3();
+        default:
+            return 0;
+
+    }
+
+}
+
 
 
 //-------------------------------------------------------Hotbed---------------------------------------------------------
@@ -122,6 +151,11 @@ task_state_t TemperatureController::enable_hotbed_regulation(bool enable) {
 }
 
 
+bool TemperatureController::is_hotbed_regulation_enabled() {
+
+    return complete;
+
+}
 
 
 /*
@@ -134,6 +168,19 @@ task_state_t TemperatureController::set_hotbed_temperature(float target) {
     temp_targets[4] = target;
 
     return complete;
+
+}
+
+
+/*
+ * get_hotbed_temperature : this function reads and returns the temperature of the hotbed.
+ *
+ */
+
+float TemperatureController::get_hotbed_temperature() {
+
+    //Simply read the hotbed thermistor value.
+    return Thermistors::get_temperature_hotbed();
 
 }
 
