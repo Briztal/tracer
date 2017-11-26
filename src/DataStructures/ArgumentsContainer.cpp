@@ -3,6 +3,7 @@
 #include <interface.h>
 
 
+//TODO COMMENT
 ArgumentsContainer::ArgumentsContainer(uint8_t args_size, uint8_t nb_args) :
         args_size(args_size + (uint8_t) 1), nb_args(nb_args), available_cases(new bool[nb_args]), nb_spaces(nb_args),
         arguments(new char[(args_size + (uint8_t) 1) * nb_args]) {
@@ -49,9 +50,16 @@ char *ArgumentsContainer::get_argument(uint8_t index, uint8_t *size) {
     return arguments + args_size * index + 1;
 }
 
+
 void ArgumentsContainer::remove_argument(uint8_t index) {
     
     //Mark the line as available.
     available_cases[index] = true;
 
+}
+
+void ArgumentsContainer::clear() {
+
+    //Mark all cases available.
+    memset(available_cases, true, sizeof(bool));
 }

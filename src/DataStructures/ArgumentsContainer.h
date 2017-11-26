@@ -27,6 +27,9 @@ public:
     //Removes an argument.
     void remove_argument(uint8_t index);
 
+    //Deletes all arguments
+    void clear();
+
 
 private:
 

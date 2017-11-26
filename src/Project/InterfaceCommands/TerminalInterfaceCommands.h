@@ -85,24 +85,13 @@ public:
 
 };
 
-//There, are defined 3 macros, that simplify your work with return codes :
-
-//Return without error
-#define RETURN_NO_ERROR return 2;
-
-//Return with error argument
-#define RETURN_ARGUMENT_ERROR return 1;
-
-//Return with no space in task pool
-#define RETURN_TASK_POOL_FULL return 0;
-
 
 //Below is a macro that simplifies the recuperation of argument pointer and size.
-#define GET_ARGS(index, ptr, size) uint8_t size; char *ptr = TerminalInterface::get_arguments(index, &size);
+#define GET_ARGS(index, ptr, size) uint8_t size; char *(ptr) = TerminalInterface::get_arguments(index, &(size));
 
-#define GET_NB_WORDS(ptr, size) StringParser::get_words_nb(args, size)
+#define GET_NB_WORDS(ptr, size) StringParser::get_words_nb((ptr), (size))
 
-#define GET_NEXT_WORD(args, size) StringParser::get_next_word(&args, &size);
+#define GET_NEXT_WORD(args, size) StringParser::get_next_word(&(args), &(size));
 
 #define WORD StringParser::word_buffer_0
 

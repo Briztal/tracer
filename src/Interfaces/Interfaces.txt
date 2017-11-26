@@ -1,0 +1,33 @@
+An interface is (without much surprise) a communication interface with the outside world.
+
+Its goal is to read and process packets. A Packet is :
+- a command identifier, that allows the interface to schedule a particular command.
+- arguments, for the command referenced by the command identifier
+
+
+It has two distinct functions :
+    - Reading and parsing packets from a data link, that can be configured, and schedule the execution of commands.
+    - Parsing arguments.
+
+
+The two functions are distinct, because the arguments parsingcan be a long, resources consuming,
+    and (sometimes) unnecessary process. It is the scheduled function, that will trigger if necessary, the arguments
+    parsing.
+
+
+The routine of an interface will be like the following :
+
+0 - Called by the TaskScheduler, when a task can be scheduled.
+1 - Read a packet from its data link, if available.
+2 - Copy the content of the packet in its own buffer.
+3 - When the packet has been received entirely, parse only the command part.
+4 - Save arguments in its arguments container.
+5 - Schedule the execution of the function referenced by the command identifier, and go back to step 1.
+
+As we mentioned behind, the parsing of arguments is :
+- specific to the interface, some interfaces may parse all arguments in one, and others may parse them one by one.
+- always triggered by the scheduled function, when it is necessary.
+
+
+
+

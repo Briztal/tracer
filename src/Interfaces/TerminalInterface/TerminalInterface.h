@@ -34,36 +34,90 @@
 #define UI TerminalInterface
 
 
+//A simple struct that will be used in the arguments parsing.
+typedef struct id_to_index_t {
+    char identifier;
+    uint8_t index;
+};
+
 class TerminalInterface {
 
 
 public :
 
+    //--------------------------------------Standard Interface functions --------------------------------------
+
+
     //The initialisation function.
     static void init();
 
-
-    //--------------------------------------Serial read_integer --------------------------------------
-
-public :
-
     //Function to read_integer the received data over the serial.
-    static void read_serial();
+    static void read_data();
 
+    //Function to send a string over the serial.
+    static void echo(const string_t msg);
+
+    //Function to send the stepper position over the serial.
+    static void send_position(float *) {}
+
+
+    //--------------------------------------Arguments Processing--------------------------------------
+
+    /*
+     * A terminal interface command can accept an undefined number of arguments, in an argument sequence.
+     *
+     *  An argument sequence is a string structured like :
+     *      -i_0 arg_0 -i_1 arg_1 ... -i_n arg_n
+     *
+     *  where all i_k are characters, and arg_k is a word (meaning anything). The character - is mandatory
+     *      before an identifier, as arg_k can be none (empty string).
+     *
+     */
+
+    //Parse the provided arguments, and save the data in the local buffer.
+    static bool parse_arguments();
+
+    //Get a previously parsed argument if it exists
+    static float get_argument(char id);
+
+    //Verify that all arguments (defined by their identifiers) have been provided (identifiers is null terminated).
+    static bool verify_arguments_presence(const char * identifiers);
+
+
+private:
+
+    //The arguments sequences container
+    static ArgumentsContainer arguments_sequences_storage;
+
+    //Identifiers in a parsed argument sequence
+    static id_to_index_t *identfiers;
+
+    //Number of arguments in a sequence
+    static char *nb_identifiers;
+
+    //Arguments in the parsed sequence.
+    static ArgumentsContainer arguments_storage;
+
+
+
+
+
+    //--------------------------------------data storage--------------------------------------
 
 private :
+
+    //The command size.
+    static unsigned char command_size;
+
+    //The current address to store input data
+    static char *data_in;
+
+    //The input data buffer's address.
+    static char *const data_in_0;
 
     //Function to reset the command reception environment.
     static void reset();
 
-    //The command size, and a saving variable.
-    static unsigned char command_size;
-
-    //The input data buffer.
-    static char *data_in;
-    static char *const data_in_0;
-
-    static ArgumentsContainer arguments_storage;
 
 
 private :
@@ -71,30 +125,40 @@ private :
     static void prepare_execution();
 
 
-    //--------------------------------------Command processing with tree style----------------------------------
+    //--------------------------------------Tree data----------------------------------
 
 private:
 
+    //The command tree
     static TerminalNode *command_tree;
 
+    //The command tree summary, required to generate the tree.
     static String *tree_summary;
+
+
+    //--------------------------------------Command processing--------------------------------------
+
+    //Function to parse and analyse the received command
+    static void execute();
+
+
+    //--------------------------------------Command processing--------------------------------------
+
+    //Function to build the summary of the tree that will be used to generate the effective tree.
+    static String *build_tree_summary();
+
+    //Function to get the number of sub_nodes of a node in the tree.
+    static uint8_t get_sub_nodes_nb(uint16_t command_index);
 
     //Function to generate the tree used to parse commands
     static TerminalNode *generate_tree();
-
-    static uint8_t get_sub_nodes_nb(uint16_t command_index);
-
-    static String *build_tree_summary();
-
-    //Function to parse and analyse_command the received command
-    static void execute_tree_style();
 
 
     //---------------------------------Functions called by TerminalInterfaceCommands------------------------------
 
 public :
 
-    //Get a paricular argument in the storage
+    //Get a particular argument in the storage
     static char *get_arguments(uint8_t task_index, uint8_t *size);
 
     //Mark a task as executed
@@ -102,17 +166,6 @@ public :
 
     //Function to show a log message if the execution failed.
     static void log_tree_style(TerminalNode *log_node, bool log_args);
-
-
-    //------------------------------------Standard functions-----------------------------
-
-public :
-
-    //Function to send a string over the serial.
-    static void echo(const string_t msg);
-
-    //Function to send the stepper position over the serial.
-    static void send_position(float *) {}
 
 
 };

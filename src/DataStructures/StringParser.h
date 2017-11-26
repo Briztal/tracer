@@ -12,6 +12,8 @@ class StringParser {
 
 public :
 
+    //TODO GET RID OF THE SIZE AND USE THE NULL TERMINATION
+
     //Function to extract next word of the command.
     static uint8_t get_next_word(char **data_in, uint8_t *command_size_p);
 

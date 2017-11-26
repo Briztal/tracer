@@ -66,7 +66,7 @@ void TerminalInterface::echo(const string_t msg) {
  *
  */
 
-void TerminalInterface::read_serial() {
+void TerminalInterface::read_data() {
 
     while (terminal_interface_link_t::available()) {
 
@@ -80,7 +80,7 @@ void TerminalInterface::read_serial() {
             if (command_size) {
 
                 //Parse and execute_progmem_style the command
-                execute_tree_style();
+                execute();
 
                 //Reset the data_in
                 reset();
@@ -124,7 +124,102 @@ void TerminalInterface::prepare_execution() {
 }
 
 
-//-----------------------------------------------Tree execution and log-------------------------------------------------
+//--------------------------------------Arguments Processing--------------------------------------
+
+
+bool TerminalInterface::parse_arguments(char *) {
+    return false;
+}
+
+
+
+float TerminalInterface::get_argument(char id) {
+    return 0;
+}
+
+
+bool TerminalInterface::verify_arguments_presence(const char *identifiers) {
+    return false;
+}
+
+
+//-----------------------------------------------------Execution--------------------------------------------------------
+
+void TerminalInterface::execute() {
+
+    prepare_execution();
+
+    //Initialise the current current_node to the root;
+    TerminalNode *current_node = command_tree;
+    TerminalNode *current_sub_node;
+
+    TerminalNode **sub_nodes = current_node->sub_nodes;
+
+    //get the first word
+    StringParser::get_next_word(&data_in, &command_size);
+
+    uint8_t i;
+
+    node_check:
+
+    //Check every sub_node
+    for (i = 0; i < current_node->sub_nodes_nb; i++) {
+        current_sub_node = sub_nodes[i];
+
+        const char* c = (*current_sub_node->name).c_str();
+
+        //If the current word matches the current_node's name
+        if (!strcmp(c, StringParser::word_buffer_0)) {
+
+            //Re-init the current data
+            current_node = current_sub_node;
+            sub_nodes = current_node->sub_nodes;
+
+            //if the new node is not a leaf, check sub nodes
+            if (current_node->sub_nodes_nb) {
+
+                //Go to the lower level
+                StringParser::get_next_word(&data_in, &command_size);
+
+                //check the new node
+                goto node_check;
+
+            } else {
+
+                if (arguments_sequences_storage.available_spaces()) {
+
+                    //Save the arguments sequence.
+                    uint8_t index = arguments_sequences_storage.insert_argument(data_in, command_size);
+
+                    //Create a struct in the heap to contain argument-related data.
+                    terminal_interface_data_t *data = new terminal_interface_data_t();
+                    data->node = current_node;
+                    data->arguments_index = index;
+
+                    //Create a task in the stack to contain task data
+                    task_t t = task_t();
+                    t.type = 255;
+                    t.args = (void *)data;
+                    t.task = current_node->function;
+
+                    //Schedule the task
+                    TaskScheduler::add_task(t);
+
+                }
+
+            }
+
+        }
+
+    }
+
+    //If the current node didn't contain the required command : log the node's content
+    log_tree_style(current_node, false);
+
+}
+
+
+//--------------------------------------------------Tree generation-----------------------------------------------------
 
 TerminalNode *TerminalInterface::generate_tree() {
     uint16_t command_counter = 0;
@@ -284,79 +379,6 @@ String * TerminalInterface::build_tree_summary() {
 
 }
 
-void TerminalInterface::execute_tree_style() {
-
-    prepare_execution();
-
-    //Initialise the current current_node to the root;
-    TerminalNode *current_node = command_tree;
-    TerminalNode *current_sub_node;
-
-    TerminalNode **sub_nodes = current_node->sub_nodes;
-
-    //get the first word
-    StringParser::get_next_word(&data_in, &command_size);
-
-    uint8_t i;
-
-    node_check:
-
-    //Check every sub_node
-    for (i = 0; i < current_node->sub_nodes_nb; i++) {
-        current_sub_node = sub_nodes[i];
-
-        const char* c = (*current_sub_node->name).c_str();
-
-        //If the current word matches the current_node's name
-        if (!strcmp(c, StringParser::word_buffer_0)) {
-
-            //Re-init the current data
-            current_node = current_sub_node;
-            sub_nodes = current_node->sub_nodes;
-
-            //if the new node is not a leaf, check sub nodes
-            if (current_node->sub_nodes_nb) {
-
-                //Go to the lower level
-                StringParser::get_next_word(&data_in, &command_size);
-
-                //check the new node
-                goto node_check;
-
-            } else {
-
-                if (arguments_storage.available_spaces()) {
-
-                    uint8_t index = arguments_storage.insert_argument(data_in, command_size);
-
-                    //Create a struct in the heap to contain argument-related data.
-                    terminal_interface_data_t *data = new terminal_interface_data_t();
-                    data->node = current_node;
-                    data->arguments_index = index;
-
-                    //Create a task in the stack to contain task data
-                    task_t t = task_t();
-                    t.type = 255;
-                    t.args = (void *)data;
-                    t.task = current_node->function;
-
-                    //Schedule the task
-                    TaskScheduler::add_task(t);
-
-                }
-
-            }
-
-        }
-
-    }
-
-    //If the current node didn't contain the required command : log the node's content
-    log_tree_style(current_node, false);
-
-}
-
-
 //---------------------------------Functions called by TerminalInterfaceCommands------------------------------
 
 
@@ -367,7 +389,7 @@ void TerminalInterface::execute_tree_style() {
  */
 
 char *TerminalInterface::get_arguments(uint8_t task_index, uint8_t *size) {
-    return arguments_storage.get_argument(task_index, size);
+    return arguments_sequences_storage.get_argument(task_index, size);
 }
 
 /*
@@ -376,7 +398,7 @@ char *TerminalInterface::get_arguments(uint8_t task_index, uint8_t *size) {
  */
 
 void TerminalInterface::validate_task(uint8_t task_index) {
-    arguments_storage.remove_argument(task_index);
+    arguments_sequences_storage.remove_argument(task_index);
 }
 
 
@@ -429,7 +451,7 @@ char tdatain_terminal[MAX_COMMAND_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
-ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_ARGS_SIZE, NB_PENDING_COMMANDS);
+ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_SIZE, NB_PENDING_COMMANDS);
 
 
 String *m::tree_summary = m::build_tree_summary();
@@ -438,6 +460,7 @@ String *m::tree_summary = m::build_tree_summary();
 
 //Build the command tree
 TerminalNode *m::command_tree = m::generate_tree();
+
 
 
 #undef m

@@ -29,7 +29,7 @@ void read_interfaces() {
         return;
 
 #ifdef ENABLE_TERMINAL_INTERFACE
-    UI::read_serial();
+    UI::read_data();
 #endif
 
     if (!TaskScheduler::available_spaces(0))
