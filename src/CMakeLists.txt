@@ -34,7 +34,7 @@ add_library(project_config
         ${PCP}/program_interface_config.h
         ${PCP}/gcode_interface_config.h
         ${PCP}/geometry.cpp
-        )
+        Project/Config/eeprom_config.h)
 
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
 
@@ -206,8 +206,8 @@ add_library(datastructures
         ${DP}/ArgumentsContainer.h
         ${DP}/ArgumentsContainer.cpp
 
-        ${DP}/StringParser.h
-        ${DP}/StringParser.cpp
+        ${DP}/StringUtils.h
+        ${DP}/StringUtils.cpp
 
         )
 

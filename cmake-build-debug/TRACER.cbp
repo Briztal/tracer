@@ -5088,10 +5088,10 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/Queue.h">
 			<Option target="datastructures"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringParser.cpp">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringUtils.cpp">
 			<Option target="datastructures"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringParser.h">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringUtils.h">
 			<Option target="datastructures"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/EEPROM/EEPROMInterface.cpp">
@@ -5146,6 +5146,9 @@
 			<Option target="interface"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/config_file.h">
+			<Option target="project_config"/>
+		</Unit>
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/eeprom_config.h">
 			<Option target="project_config"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/gcode_interface_config.h">

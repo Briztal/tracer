@@ -22,7 +22,7 @@
 #include "EEPROMStorage.h"
 #include "EEPROMNode.h"
 #include <interface.h>
-#include <DataStructures/StringParser.h>
+#include <DataStructures/StringUtils.h>
 
 
 #define ES EEPROMStorage
@@ -149,7 +149,7 @@ void EEPROMInterface::print_stored_data() {
     //Custom data
 #define EEPROM_VARIABLE(name, default_value) CI::echo("\t"+str(#name)+" : "+str(ES::custom_data.name));
 
-#include <config.h>
+#include <Project/Config/eeprom_config.h>
 
 #undef EEPROM_VARIABLE
 
@@ -337,7 +337,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
 #define EEPROM_VARIABLE(name, default_val) tree->sub_nodes[custom_index] = new EEPROMNode(new String(#name), 0, custom_index, (&ES::custom_data.name));
 
-#include <config.h>
+#include <Project/Config/eeprom_config.h>
 
 #undef EEPROM_VARIABLE
 
@@ -345,7 +345,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
 }
 
 
-bool EEPROMInterface::search_tree_by_string(char *id_string, uint8_t size, float **data) {
+bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
 
     //Initialise the current current_node to the root;
     EEPROMNode *current_node = eeprom_tree;
@@ -353,8 +353,10 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, uint8_t size, float
 
     EEPROMNode **sub_nodes = current_node->sub_nodes;
 
+    char name_buffer[EEPROM_NAMES_MAX_LENGTH];
+
     //get the first word
-    StringParser::get_next_word(&id_string, &size);
+    StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
 
     uint8_t i;
 
@@ -367,7 +369,7 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, uint8_t size, float
         const char *c = (*current_sub_node->name).c_str();
 
         //If the current word matches the current_node's name
-        if (!strcmp(c, StringParser::word_buffer_0)) {
+        if (!strcmp(c, name_buffer)) {
 
             //Re-init the current data
             current_node = current_sub_node;
@@ -377,7 +379,7 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, uint8_t size, float
             if (current_node->sub_nodes_nb) {
 
                 //Go to the lower level
-                StringParser::get_next_word(&id_string, &size);
+                StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
 
                 //check the new node
                 goto node_check;
@@ -412,10 +414,10 @@ void EEPROMInterface::search_log(EEPROMNode *node) {
 }
 
 
-bool EEPROMInterface::read_data_by_string(char *id_string, uint8_t size, float *f) {
+bool EEPROMInterface::read_data_by_string(char *id_string, float *f) {
 
     float *p;
-    if (search_tree_by_string(id_string, size, &p)) {
+    if (search_tree_by_string(id_string, &p)) {
         *f = *p;
         return true;
     } else {
@@ -425,11 +427,11 @@ bool EEPROMInterface::read_data_by_string(char *id_string, uint8_t size, float *
 }
 
 
-void EEPROMInterface::write_data_by_string(char *id_string, uint8_t size, float value) {
+void EEPROMInterface::write_data_by_string(char *id_string, float value) {
 
     float *p;
 
-    if (search_tree_by_string(id_string, size, &p)) {
+    if (search_tree_by_string(id_string, &p)) {
         *p = value;
     }
 

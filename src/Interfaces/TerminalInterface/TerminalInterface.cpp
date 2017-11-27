@@ -27,7 +27,7 @@
 #include "TerminalInterface.h"
 #include <interface.h>
 #include <Project/InterfaceCommands/_interface_data.h>
-#include <DataStructures/StringParser.h>
+#include <DataStructures/StringUtils.h>
 #include "Project/InterfaceCommands/TerminalInterfaceCommands.h"
 #include "../../hardware_language_abstraction.h"
 #include "TerminalNode.h"
@@ -68,6 +68,10 @@ void TerminalInterface::echo(const string_t msg) {
 
 void TerminalInterface::read_data() {
 
+    //Don't process any data if no space is available in the argument sequence container
+    if (!arguments_sequences_storage.available_spaces())
+        return;
+
     while (terminal_interface_link_t::available()) {
 
         //Read the serial
@@ -85,17 +89,38 @@ void TerminalInterface::read_data() {
                 //Reset the data_in
                 reset();
 
+                //If no more tasks spaces are available, complete
                 if (!TaskScheduler::available_spaces(255))
+                    return;
+
+                //Don't process any data if no space is available in the argument sequence container
+                if (!arguments_sequences_storage.available_spaces())
                     return;
 
             }
 
         } else {
 
-            //Append the read_output char to data_in
-            *(data_in++) = read_char;
+            //If there is still space in the input buffer
+            if (command_size != MAX_COMMAND_SIZE) {
 
-            command_size++;
+                //Append the read_output char to data_in
+                *(data_in++) = read_char;
+
+                //Increase the command size
+                command_size++;
+
+            } else {
+
+                //If the received packet was too long for the input buffer :
+
+                //Display an error message
+                CI::echo("WARNING in TerminalInterface::read_data : the received packet was too long for "
+                                 "the input buffer. Please check your terminal_interface_config.h");
+
+                //Reset
+                reset();
+            }
         }
     }
 }
@@ -112,6 +137,7 @@ void TerminalInterface::reset() {
 
 
 void TerminalInterface::prepare_execution() {
+
     //Mark the end of the the received command
     *data_in = 0;
 
@@ -126,21 +152,168 @@ void TerminalInterface::prepare_execution() {
 
 //--------------------------------------Arguments Processing--------------------------------------
 
+/*
+ * parse_arguments : this function parses an argument sequence, whose format is like below :
+ *
+ *  -i0 arg0 -i1 arg1 ... -in argn
+ *
+ *
+ */
 
-bool TerminalInterface::parse_arguments(char *) {
-    return false;
+bool TerminalInterface::parse_arguments(char *arguments_sequence) {
+
+    //First, reset the argument parsing structure :
+
+    //reset the arguments counter
+    nb_identifiers = 0;
+
+    //Clear the argument container
+    arguments_storage.clear();
+
+    do {
+
+        //go to the closest argument identifier
+        arguments_sequence += StringUtils::count_until_char(arguments_sequence, '-');
+
+        //If we have reached the end of the sequence
+        if (!*arguments_sequence)
+            return true;
+
+        //Declare a temporary buffer for the current argument identifier (2 bytes plus null byte)
+        char t[3];
+
+        //Get the argument identifier
+        uint8_t identifier_size = StringUtils::copy_until_char(arguments_sequence, t, 3, ' ');
+
+        //If we have reached the end of the sequence
+        if (!*arguments_sequence)
+            return true;
+
+        //Go to the next unprocessed char
+        arguments_sequence += identifier_size;
+
+        //If the identifier is invalid
+        if (identifier_size != 2) {
+
+            //Display an error message
+            CI::echo("INVALID ARGUMENT IDENTIFIER");
+
+            //Fail
+            return false;
+
+        }
+
+        //If the argument container is already full;
+        if (!arguments_storage.available_spaces()) {
+
+            //Display an error message
+            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(MAX_ARGS_NB) +
+                     " arguments. Please check your terminal_interface_config.h file.");
+
+            //Fail
+            return false;
+
+        }
+
+        //Declare the buffer for the argument
+        char *arg_buffer;
+
+        //Initialise the buffer, as a line in the argument storage.
+        uint8_t index = arguments_storage.insert_argument(&arg_buffer);
+
+        //remove extra spaces.
+        arguments_sequence += StringUtils::count_until_char(arguments_sequence, '-');
+
+        //safely (with size check and null termination) copy the next argument in our buffer.
+        uint8_t argument_size = StringUtils::copy_until_char(arguments_sequence, arg_buffer, MAX_WORD_SIZE + 1, ' ');
+
+        //Go to the next unprocessed char
+        arguments_sequence += argument_size;
+
+        //Save the relation between the identifier and the argument location.
+        id_to_index_t *id_to_index = identfiers + nb_identifiers;
+        id_to_index->identifier = t[1];
+        id_to_index->index = index;
+
+        //Increase the number of parsed arguments
+        nb_identifiers++;
+
+        //If we have reached the end of the sequence
+        if (!*arguments_sequence)
+            return true;
+
+
+    } while (true);
+
 }
-
 
 
 float TerminalInterface::get_argument(char id) {
+
+    //For every identifier
+    for (uint8_t i = 0; i < nb_identifiers; i++) {
+
+        //Cache for the link
+        id_to_index_t *link = identfiers + i;
+
+        //If the links'identifier matches the provided one
+        if (link->identifier == id) {
+
+            //Get the location of the argument (from the link), and convert the argument into a float.
+            return str_to_float(arguments_storage.get_argument(link->index));
+
+        }
+
+    }
+
     return 0;
+
 }
 
 
-bool TerminalInterface::verify_arguments_presence(const char *identifiers) {
+bool TerminalInterface::verify_identifiers_presence(const char *identifiers) {
+
+    //Cache for the current char
+    char c = *(identifiers++);
+
+    //Initialise a flag, that will be false if any of the identifiers is not present in the parsed indetifiers.
+    bool all_present = true;
+
+    //For every identifier in the string (stop at null byte);
+    while (c) {
+
+        //Update the flag
+        all_present = all_present && verify_identifier_presence(c);
+
+        //Update the char
+        c = *(identifiers++);
+
+    }
+
+    return all_present;
+
+}
+
+
+bool TerminalInterface::verify_identifier_presence(char id) {
+
+    //Check every parsed identifier
+    for (uint8_t i = 0; i < nb_identifiers; i++) {
+
+        //Cache for the link
+        id_to_index_t *link = identfiers + i;
+
+        //If the links'identifier matches the provided one, return true
+        if (link->identifier == id) return true;
+
+    }
+
+    //if there was no matches, return false.
     return false;
 }
+
+
+
 
 
 //-----------------------------------------------------Execution--------------------------------------------------------
@@ -153,11 +326,16 @@ void TerminalInterface::execute() {
     TerminalNode *current_node = command_tree;
     TerminalNode *current_sub_node;
 
+    //Cache var for the sub nodes.
     TerminalNode **sub_nodes = current_node->sub_nodes;
 
-    //get the first word
-    StringParser::get_next_word(&data_in, &command_size);
+    //Declare a local word buffer
+    char word_buffer[MAX_WORD_SIZE];
 
+    //get the first node identifier, in the word buffer
+    data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
+
+    //Must declare the int before the jump label.
     uint8_t i;
 
     node_check:
@@ -166,10 +344,10 @@ void TerminalInterface::execute() {
     for (i = 0; i < current_node->sub_nodes_nb; i++) {
         current_sub_node = sub_nodes[i];
 
-        const char* c = (*current_sub_node->name).c_str();
+        const char *c = (*current_sub_node->name).c_str();
 
         //If the current word matches the current_node's name
-        if (!strcmp(c, StringParser::word_buffer_0)) {
+        if (!strcmp(c, word_buffer)) {
 
             //Re-init the current data
             current_node = current_sub_node;
@@ -179,7 +357,9 @@ void TerminalInterface::execute() {
             if (current_node->sub_nodes_nb) {
 
                 //Go to the lower level
-                StringParser::get_next_word(&data_in, &command_size);
+
+                //Get the next node identifier
+                data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
 
                 //check the new node
                 goto node_check;
@@ -188,22 +368,40 @@ void TerminalInterface::execute() {
 
                 if (arguments_sequences_storage.available_spaces()) {
 
+                    //The argument's index
+                    uint8_t index;
+
                     //Save the arguments sequence.
-                    uint8_t index = arguments_sequences_storage.insert_argument(data_in, command_size);
+                    if (arguments_sequences_storage.insert_argument(data_in, &index)) {
 
-                    //Create a struct in the heap to contain argument-related data.
-                    terminal_interface_data_t *data = new terminal_interface_data_t();
-                    data->node = current_node;
-                    data->arguments_index = index;
 
-                    //Create a task in the stack to contain task data
-                    task_t t = task_t();
-                    t.type = 255;
-                    t.args = (void *)data;
-                    t.task = current_node->function;
+                        //Create a struct in the heap to contain argument-related data.
+                        terminal_interface_data_t *data = new terminal_interface_data_t();
+                        data->node = current_node;
+                        data->arguments_index = index;
 
-                    //Schedule the task
-                    TaskScheduler::add_task(t);
+                        //Create a task in the stack to contain task data
+                        task_t t = task_t();
+                        t.type = 255;
+                        t.args = (void *) data;
+                        t.task = current_node->function;
+
+                        //Schedule the task
+                        TaskScheduler::add_task(t);
+
+                        //Complete
+                        return;
+
+                    } //else : too long argument, log message sent by argument_container.
+
+                } else {
+
+                    //If no more space was available in the argument container : display an error message
+                    CI::echo("ERROR in TerminalInterface::execute : the argument container has no more space "
+                                     "available, this is not supposed to happen");
+
+                    //Fail
+                    return;
 
                 }
 
@@ -226,7 +424,7 @@ TerminalNode *TerminalInterface::generate_tree() {
 
     uint8_t root_sons_nb = get_sub_nodes_nb(command_counter++);
 
-    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"),  new String("none"), 0);
+    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"), new String("none"), 0);
 
     //Initialise the current tree and the history.
     TerminalNode *current_tree = root;
@@ -315,7 +513,7 @@ uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
 
     //If the first command is a create_leaf of go_upper, 0 sons.
     char v = tree_summary->charAt(command_index++);
-    if (v == (char)0 || v == (char)1)
+    if (v == (char) 0 || v == (char) 1)
         return 0;
 
     //If not, we will count to the next go_upper (0);
@@ -331,9 +529,9 @@ uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
         //correct the depth if we go upper of lower
         if (v == 0) {
             depth--;
-        } else if (v == (char)1) {
+        } else if (v == (char) 1) {
             if (!depth) sons_nb++;
-        } else if (v == (char)2) {
+        } else if (v == (char) 2) {
             if (!depth) sons_nb++;
             depth++;
         }
@@ -354,12 +552,12 @@ uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
  *  This string is used to determine the number of sub_nodes of a particular node.
  *
  */
-String * TerminalInterface::build_tree_summary() {
+String *TerminalInterface::build_tree_summary() {
 
     String *s = new String();
 
     //Set the initial go_lower
-    s->append((char)2);
+    s->append((char) 2);
 
 #define GO_LOWER(...) s->append((char)2);
 
@@ -388,8 +586,8 @@ String * TerminalInterface::build_tree_summary() {
  *
  */
 
-char *TerminalInterface::get_arguments(uint8_t task_index, uint8_t *size) {
-    return arguments_sequences_storage.get_argument(task_index, size);
+char *TerminalInterface::get_arguments(uint8_t task_index) {
+    return arguments_sequences_storage.get_argument(task_index);
 }
 
 /*
@@ -400,7 +598,6 @@ char *TerminalInterface::get_arguments(uint8_t task_index, uint8_t *size) {
 void TerminalInterface::validate_task(uint8_t task_index) {
     arguments_sequences_storage.remove_argument(task_index);
 }
-
 
 
 /*
@@ -428,7 +625,7 @@ void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
 
         //Fill it with the name and description of direct sub_nodes
         for (int i = 0; i < log_node->sub_nodes_nb; i++) {
-            TerminalNode * t = log_node->sub_nodes[i];
+            TerminalNode *t = log_node->sub_nodes[i];
             s += *t->name + "\t\t : " + *t->desc_log + "\n";
         }
 
@@ -444,14 +641,16 @@ void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
 
 #define m TerminalInterface
 
-
 unsigned char m::command_size = 0;
 
 char tdatain_terminal[MAX_COMMAND_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
-ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_SIZE, NB_PENDING_COMMANDS);
+ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
+                                                                       NB_PENDING_COMMANDS);
+
+ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_WORD_SIZE + 1, NB_PENDING_COMMANDS);
 
 
 String *m::tree_summary = m::build_tree_summary();
@@ -460,7 +659,6 @@ String *m::tree_summary = m::build_tree_summary();
 
 //Build the command tree
 TerminalNode *m::command_tree = m::generate_tree();
-
 
 
 #undef m

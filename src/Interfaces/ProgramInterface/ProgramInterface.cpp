@@ -357,7 +357,7 @@ void TI::process(char *command, uint8_t size) {
 
 void TI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
     //If the function fails,
-    //if (!current_node->function(data_in, command_size)) {
+    //if (!current_node->function(data_in, r_command_size)) {
 
     if (arguments_storage.available_spaces()) {
 

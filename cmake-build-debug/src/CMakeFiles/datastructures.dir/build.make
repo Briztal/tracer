@@ -105,42 +105,42 @@ src/CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o.provid
 src/CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o.provides.build: src/CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o
 
 
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o: src/CMakeFiles/datastructures.dir/flags.make
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o: ../src/DataStructures/StringParser.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o"
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringParser.cpp
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o: src/CMakeFiles/datastructures.dir/flags.make
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o: ../src/DataStructures/StringUtils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o"
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringUtils.cpp
 
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.i"
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringParser.cpp > CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.i
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.i"
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringUtils.cpp > CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.i
 
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.s"
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringParser.cpp -o CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.s
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.s"
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/src && /root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/DataStructures/StringUtils.cpp -o CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.s
 
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.requires:
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.requires:
 
-.PHONY : src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.requires
+.PHONY : src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.requires
 
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.provides: src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.requires
-	$(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.provides.build
-.PHONY : src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.provides
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.provides: src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.requires
+	$(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.provides.build
+.PHONY : src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.provides
 
-src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.provides.build: src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o
+src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.provides.build: src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o
 
 
 # Object files for target datastructures
 datastructures_OBJECTS = \
 "CMakeFiles/datastructures.dir/DataStructures/Queue.cpp.o" \
 "CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o" \
-"CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o"
+"CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o"
 
 # External object files for target datastructures
 datastructures_EXTERNAL_OBJECTS =
 
 src/libdatastructures.a: src/CMakeFiles/datastructures.dir/DataStructures/Queue.cpp.o
 src/libdatastructures.a: src/CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o
-src/libdatastructures.a: src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o
+src/libdatastructures.a: src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o
 src/libdatastructures.a: src/CMakeFiles/datastructures.dir/build.make
 src/libdatastructures.a: src/CMakeFiles/datastructures.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libdatastructures.a"
@@ -154,7 +154,7 @@ src/CMakeFiles/datastructures.dir/build: src/libdatastructures.a
 
 src/CMakeFiles/datastructures.dir/requires: src/CMakeFiles/datastructures.dir/DataStructures/Queue.cpp.o.requires
 src/CMakeFiles/datastructures.dir/requires: src/CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o.requires
-src/CMakeFiles/datastructures.dir/requires: src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o.requires
+src/CMakeFiles/datastructures.dir/requires: src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o.requires
 
 .PHONY : src/CMakeFiles/datastructures.dir/requires
 

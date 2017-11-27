@@ -21,8 +21,11 @@
 //The maximal size of a command (id + arguments)
 #define MAX_COMMAND_SIZE 100
 
-//The maximal size of the argument part
-#define MAX_ARGS_SIZE 50
+//The maximal size of an argument
+#define MAX_WORD_SIZE 20
+
+//The maximal number of arguments
+#define MAX_ARGS_NB 6
 
 //The maximum depth of the tree. //TODO DETERMINE THE MAXIMUM DEPTH WITH AN ALGORITHM
 #define MAX_DEPTH 5

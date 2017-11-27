@@ -539,32 +539,32 @@ DataStructures/Queue.cpp.s:
 	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/Queue.cpp.s
 .PHONY : DataStructures/Queue.cpp.s
 
-DataStructures/StringParser.o: DataStructures/StringParser.cpp.o
+DataStructures/StringUtils.o: DataStructures/StringUtils.cpp.o
 
-.PHONY : DataStructures/StringParser.o
+.PHONY : DataStructures/StringUtils.o
 
 # target to build an object file
-DataStructures/StringParser.cpp.o:
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o
-.PHONY : DataStructures/StringParser.cpp.o
+DataStructures/StringUtils.cpp.o:
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o
+.PHONY : DataStructures/StringUtils.cpp.o
 
-DataStructures/StringParser.i: DataStructures/StringParser.cpp.i
+DataStructures/StringUtils.i: DataStructures/StringUtils.cpp.i
 
-.PHONY : DataStructures/StringParser.i
+.PHONY : DataStructures/StringUtils.i
 
 # target to preprocess a source file
-DataStructures/StringParser.cpp.i:
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.i
-.PHONY : DataStructures/StringParser.cpp.i
+DataStructures/StringUtils.cpp.i:
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.i
+.PHONY : DataStructures/StringUtils.cpp.i
 
-DataStructures/StringParser.s: DataStructures/StringParser.cpp.s
+DataStructures/StringUtils.s: DataStructures/StringUtils.cpp.s
 
-.PHONY : DataStructures/StringParser.s
+.PHONY : DataStructures/StringUtils.s
 
 # target to generate assembly for a file
-DataStructures/StringParser.cpp.s:
-	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.s
-.PHONY : DataStructures/StringParser.cpp.s
+DataStructures/StringUtils.cpp.s:
+	cd /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug && $(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.s
+.PHONY : DataStructures/StringUtils.cpp.s
 
 EEPROM/EEPROMInterface.o: EEPROM/EEPROMInterface.cpp.o
 
@@ -1529,9 +1529,9 @@ help:
 	@echo "... DataStructures/Queue.o"
 	@echo "... DataStructures/Queue.i"
 	@echo "... DataStructures/Queue.s"
-	@echo "... DataStructures/StringParser.o"
-	@echo "... DataStructures/StringParser.i"
-	@echo "... DataStructures/StringParser.s"
+	@echo "... DataStructures/StringUtils.o"
+	@echo "... DataStructures/StringUtils.i"
+	@echo "... DataStructures/StringUtils.s"
 	@echo "... EEPROM/EEPROMInterface.o"
 	@echo "... EEPROM/EEPROMInterface.i"
 	@echo "... EEPROM/EEPROMInterface.s"

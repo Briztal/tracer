@@ -60,7 +60,7 @@ typedef struct servo_data_t {
 #define EEPROM_VARIABLE(name, default_value) float name = default_value;
 
 typedef struct custom_data_t {
-#include "../config.h"
+#include <Project/Config/eeprom_config.h>
 } custom_data_t;
 
 #undef EEPROM_VARIABLE

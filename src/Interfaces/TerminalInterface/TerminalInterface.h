@@ -75,13 +75,13 @@ public :
      */
 
     //Parse the provided arguments, and save the data in the local buffer.
-    static bool parse_arguments();
+    static bool parse_arguments(char *arguments_sequence);
 
     //Get a previously parsed argument if it exists
     static float get_argument(char id);
 
     //Verify that all arguments (defined by their identifiers) have been provided (identifiers is null terminated).
-    static bool verify_arguments_presence(const char * identifiers);
+    static bool verify_identifiers_presence(const char *identifiers);
 
 
 private:
@@ -90,10 +90,10 @@ private:
     static ArgumentsContainer arguments_sequences_storage;
 
     //Identifiers in a parsed argument sequence
-    static id_to_index_t *identfiers;
+    static id_to_index_t *const identfiers;
 
     //Number of arguments in a sequence
-    static char *nb_identifiers;
+    static uint8_t nb_identifiers;
 
     //Arguments in the parsed sequence.
     static ArgumentsContainer arguments_storage;
@@ -159,7 +159,7 @@ private:
 public :
 
     //Get a particular argument in the storage
-    static char *get_arguments(uint8_t task_index, uint8_t *size);
+    static char *get_arguments(uint8_t task_index);
 
     //Mark a task as executed
     static void validate_task(uint8_t task_index);
@@ -168,6 +168,7 @@ public :
     static void log_tree_style(TerminalNode *log_node, bool log_args);
 
 
+    static bool verify_identifier_presence(char id);
 };
 
 

@@ -24,7 +24,7 @@
 #include "GCodeInterface.h"
 #include <Project/InterfaceCommands/_interface_data.h>
 #include <Project/InterfaceCommands/GCodeInterfaceCommands.h>
-#include <DataStructures/StringParser.h>
+#include <DataStructures/StringUtils.h>
 
 
 //----------------------------------------------------Initialisation----------------------------------------------------
@@ -123,8 +123,8 @@ bool GCodeInterface::parse() {
     //Declare the command id length (ex : 4 for G130).
     unsigned char command_id_length = 0;
 
-    //Get the command id and its length, by calling the StringParser.
-    command_id_length = StringParser::get_next_word(&data_in, &command_size);
+    //Get the command id and its length, by calling the StringUtils.
+    command_id_length = StringUtils::get_next_word(&data_in, &command_size);
 
     //Abort if the first word was a space.
     if (!command_id_length)
@@ -134,7 +134,7 @@ bool GCodeInterface::parse() {
     char command_id[GCODE_MAX_DEPTH]{0};
 
     //Copy the command ID into our local array.
-    memcpy(command_id, StringParser::word_buffer_0, sizeof(char) * command_id_length);
+    memcpy(command_id, StringUtils::word_buffer_0, sizeof(char) * command_id_length);
 
     //Analyse the command id.
     analyse_command(command_id, command_id_length);
@@ -304,21 +304,21 @@ bool GCodeInterface::parse_parameters(char *parameter_buffer, uint8_t params_siz
 /*
  * get_parameter : this function reads parameters_ptr and extract the next word, supposed to be a parameter (index + value)
  *
- *  It calls the StringParser to get the word, and then reads the index, and parses the value.
+ *  It calls the StringUtils to get the word, and then reads the index, and parses the value.
  *
  */
 bool GCodeInterface::get_parameter(char *id, float *value) {
 
 
-    //Get the parameter id, its value and its length, by calling the StringParser
-    uint8_t size = StringParser::get_next_word(&parameters_ptr, &parameters_size);
+    //Get the parameter id, its value and its length, by calling the StringUtils
+    uint8_t size = StringUtils::get_next_word(&parameters_ptr, &parameters_size);
 
     //Abort if no argument was parsed
     if (size == 0)
         return false;
 
     //Save the parameter id
-    *id = *StringParser::word_buffer_0;
+    *id = *StringUtils::word_buffer_0;
 
     //Do not parse the rest of the string if only the parameter index was provided
     if (size == 1) {
@@ -331,7 +331,7 @@ bool GCodeInterface::get_parameter(char *id, float *value) {
     }
 
     //Parse the value
-    *value = str_to_float(StringParser::word_buffer_0 + 1);
+    *value = str_to_float(StringUtils::word_buffer_0 + 1);
 
     //Complete
     return true;

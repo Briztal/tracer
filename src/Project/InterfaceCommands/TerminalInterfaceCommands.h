@@ -34,7 +34,6 @@
 
 class TerminalInterfaceCommands {
 
-
     //-----------------------------------------------Custom functions---------------------------------------------------
 
 public:
@@ -82,17 +81,19 @@ public:
 
 #endif
 
+private:
+
+    static char *const word_buffer;
 
 };
 
 
+//TODO MAKE NEW MACROS, FOR PARSING ALL ARGUMENTS (WITH IDENTIFIERS), CHECK IDENTIFIERS PRESENCE, AND GET AN ARGUMENT
 //Below is a macro that simplifies the recuperation of argument pointer and size.
-#define GET_ARGS(index, ptr, size) uint8_t size; char *(ptr) = TerminalInterface::get_arguments(index, &(size));
+//#define GET_ARGS(index, ptr) char *(ptr) = TerminalInterface::get_arguments(index);
 
-#define GET_NB_WORDS(ptr, size) StringParser::get_words_nb((ptr), (size))
+//#define GET_NB_WORDS(ptr) StringUtils::get_nb_words((ptr))
 
-#define GET_NEXT_WORD(args, size) StringParser::get_next_word(&(args), &(size));
-
-#define WORD StringParser::word_buffer_0
+//#define GET_NEXT_WORD(args) args += StringUtils::get_next_word(args, word_buffer, MAX_WORD_SIZE);
 
 #endif //TRACER_TREEINTERFACECOMMANDS_H

@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/datastructures.dir/DataStructures/Queue.cpp.o"
   "CMakeFiles/datastructures.dir/DataStructures/ArgumentsContainer.cpp.o"
-  "CMakeFiles/datastructures.dir/DataStructures/StringParser.cpp.o"
+  "CMakeFiles/datastructures.dir/DataStructures/StringUtils.cpp.o"
   "libdatastructures.pdb"
   "libdatastructures.a"
 )

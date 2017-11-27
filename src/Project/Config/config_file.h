@@ -52,7 +52,7 @@
 //The baudrate of the serial link   //TODO PHYSICAL_LINK_CONFIG
 #define BAUDRATE 115200
 
-#define MAX_WORD_SIZE 40
+//#define MAX_WORD_SIZE 40
 
 //######################################################TaskScheduler############################################################
 
@@ -402,27 +402,5 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 //The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
 #define MAX_CURVE_POINTS 5
-
-#endif
-
-//###############################################EEPROM SETTINGS########################################################
-
-
-/* EEPROM custom data definition : for each variable you need to save in EEPROM, write one of the following lines
- *
- * EEPROM_BOOL(name, default_value)
- * EEPROM_INT8(name, default_value)
- * EEPROM_INT16(name, default_value)
- * EEPROM_INT32(name, default_value)
- * EEPROM_FLOAT(name, default_value)
- *
- * Each one of these functions will create a variable of the specified type with the name provided
- *  in the EPROMStorage class, that will be saved in EEPROM, and take the default value provided
- */
-
-
-#if defined(EEPROM_VARIABLE)
-
-EEPROM_VARIABLE(maximum_speed, 500);
 
 #endif

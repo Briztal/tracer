@@ -34,9 +34,9 @@ public:
 
     static EEPROMNode *build_tree();
 
-    static bool read_data_by_string(char *id_string, uint8_t size, float *f);
+    static bool read_data_by_string(char *id_string, float *f);
 
-    static void write_data_by_string(char *id_string, uint8_t size, float value);
+    static void write_data_by_string(char *id_string, float value);
 
 #ifdef ENABLE_PROGRAM_INTERFACE
 
@@ -50,7 +50,7 @@ private:
 
     static EEPROMNode *eeprom_tree;
 
-    static bool search_tree_by_string(char *id_string, uint8_t size, float **data);
+    static bool search_tree_by_string(char *id_string, float **data);
 
     static void search_log(EEPROMNode *node);
 };

@@ -18,11 +18,14 @@ public:
     //Returns the number of empty lines in the container.
     uint8_t available_spaces();
 
-    //Inserts an argument, and returns its index in the container.
-    uint8_t insert_argument(char *args, uint8_t size);
+    //Save an argument inserted with the method behind, and returns its index in the container.
+    uint8_t insert_argument(char **insertion_pointer);
+
+    //Inserts and saves an argument, and returns its index in the container.
+    bool insert_argument(char *args, uint8_t *index_p);
 
     //Returns a pointer to an argument's first case, and gives the size.
-    char* get_argument(uint8_t index, uint8_t *size);
+    char* get_argument(uint8_t index);
 
     //Removes an argument.
     void remove_argument(uint8_t index);
