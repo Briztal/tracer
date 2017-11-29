@@ -49,40 +49,50 @@ public:
 
     //---------------------------HotEnds---------------------------
 
-    typedef struct hotends_state_t {
+    typedef struct hotend_state_t {
 
         //Flags
 
-        //States.
-        bool enabled_0_flag = false, enabled_1_flag = false, enabled_2_flag = false, enabled_3_flag = false;
+        //Hotend flag
+        bool hotend_flag = false;
+
+        //Activity.
+        bool enabled_flag = false;
 
         //Temperatures.
-        bool temp_0_flag = false, temp_1_flag = false, temp_2_flag = false, temp_3_flag = false;
+        bool temperature_flag = false;
 
 
         //Values
 
+        uint8_t hotend = 0;
+
         //States.
-        bool enabled_0 = false, enabled_1 = false, enabled_2 = false, enabled_3 = false;
+        bool enabled = false;
 
         //Temperatures.
-        float temp_0 = 0, temp_1 = 0, temp_2 = 0, temp_3 = 0;
+        float temperature = 0;
 
     };
 
 
     //Set the current hotends state.
-    static task_state_t set_hotends_state(hotends_state_t state);
+    static task_state_t set_hotends_state(hotend_state_t state);
 
     //Scheduler for the state setter
-GENERATE_SCHEDULER(set_hotends_state, 1, hotends_state_t, state);
+GENERATE_SCHEDULER(set_hotends_state, 1, hotend_state_t, state);
 
     //Get the current hotends state.
-    static hotends_state_t get_hotends_state();
+    static hotend_state_t get_hotends_state(uint8_t hotend_id);
 
 private:
 
-    static hotends_state_t hotends_state;
+    //Hotends States (enabled, disabled)
+    static bool *const hotends_enabled;
+
+    //Hotends Temperatures
+    static float *const hotends_temps;
+
 
 
     //---------------------------HotBed---------------------------
@@ -92,7 +102,7 @@ public:
     typedef struct hotbed_state_t {
 
         //Flags
-        bool enabled_flag = false, temp_flag = false;
+        bool enabled_flag = false, temperature_flag = false;
 
         //Values
         bool enabled = false;

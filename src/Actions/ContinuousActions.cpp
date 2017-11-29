@@ -53,9 +53,6 @@ void ContinuousActions::set_power(uint8_t action, float power) {
     if (action >= NB_CONTINUOUS)
         return;
 
-    CI::echo("FINALISATION ! "+String(action));
-
-
     //Switch the given action and call the appropriate function.
 
 #define CONTINUOUS(i, ...) case (uint8_t) i:set_power_##i(power);break;

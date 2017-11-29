@@ -170,15 +170,11 @@ uint8_t StringUtils::get_next_word(char *in_buffer, char *out_buffer, uint8_t ou
     //Initialise a counter, that will count the number of chars evaluated in this function
     uint8_t increment_counter = lstrip(in_buffer, ' ');
 
-    CI::echo("STRIP : "+String(increment_counter));
     //Increment the input pointer at the end of extra spaces at its beginning.
     in_buffer += increment_counter;
 
     //Copy the next word (without extra spaces)in out_buffer, and update the increment counter.
     increment_counter += copy_until_char(in_buffer, out_buffer, out_buffer_size, ' ');
-
-    CI::echo("SIZE : "+String(increment_counter));
-
 
     //Return the number of chars evaluated.
     return increment_counter;

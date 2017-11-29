@@ -69,11 +69,9 @@ CREATE_LEAF(extrusion, set_extrusion, set the current carriage and its speed, ca
 
 CREATE_LEAF(cooling, set_cooling, enable or disable the cooling, power)
 
-CREATE_LEAF(hotend_target, set_hotend_temp, set a hotends temperature, 0 or 1)
-CREATE_LEAF(hotend_en, enable_hotend, enable or disable a hotend, 0 or 1)
+CREATE_LEAF(hotend, set_hotend, set a hotends temperature, 0 or 1)
 
-CREATE_LEAF(bed_target, set_bed_temp, set the bed temperature, 0 or 1)
-CREATE_LEAF(bed_en, enable_bed, enable or disable the bed, 0 or 1)
+CREATE_LEAF(hotbed, set_hotbed, set the bed temperature, 0 or 1)
 
 GO_UPPER()
 

@@ -381,23 +381,7 @@ task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
 
 }
 
-task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
-}
-
-task_state_t TerminalInterfaceCommands::set_bed_temp(uint8_t args_index) {
-
-}
-
-task_state_t TerminalInterfaceCommands::enable_hotend(uint8_t args_index) {
-
-}
-
-task_state_t TerminalInterfaceCommands::set_hotend_temp(uint8_t args_index) {
-}
-
-/*
-
-task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
+task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -410,99 +394,77 @@ task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
     REQUIRE_ONE_ARGUMENTS("te");
+    TemperatureController::hotend_state_t state = TemperatureController::hotend_state_t();
 
+    state.hotend_flag = true;
+    state.hotend = (uint8_t)GET_ARG_VALUE('h');
 
-    //Declare a new state for the hotends.
-    TemperatureController::hotends_state_t state = TemperatureController::hotends_state_t();
+    //If the temperature must be adjusted
+    if (CHECK_ARGUMENT('t')) {
 
+        //Set the temperature flag
+        state.temperature_flag = true;
 
+        //Get the temperature
+        state.temperature = GET_ARG_VALUE('t');
+
+    }
+
+    //If the activity must be changed
+    if (CHECK_ARGUMENT('e')) {
+
+        //Set the enable flag
+        state.enabled_flag = true;
+
+        //Get the temperature
+        state.enabled = (bool) GET_ARG_VALUE('e');
+
+    }
 
     //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::enable_hotbed_regulation_scheduled(enable);
+    return TemperatureController::set_hotends_state(state);
 
 }
-
-
-task_state_t TerminalInterfaceCommands::set_bed_temp(uint8_t args_index) {
+task_state_t TerminalInterfaceCommands::set_hotbed(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index)
 
-    //Fail if there are not exactly one argument
-    if (GET_NB_WORDS(args) != 1) {
-        return invalid_arguments;
+    //Fail if neither temperature (t) or enable_state (e) are provided.
+    REQUIRE_ONE_ARGUMENTS("te");
+    TemperatureController::hotbed_state_t state = TemperatureController::hotbed_state_t();
+
+
+    //If the temperature must be adjusted
+    if (CHECK_ARGUMENT('t')) {
+
+        //Set the temperature flag
+        state.temperature_flag = true;
+
+        //Get the temperature
+        state.temperature = GET_ARG_VALUE('t');
+
     }
 
-    //Extract the temperature
-    GET_NEXT_WORD(args);
-    float temp = str_to_float(word_buffer);
+    //If the activity must be changed
+    if (CHECK_ARGUMENT('e')) {
 
-    //Schedule a modification of the hotbed power
-    return TemperatureController::set_hotbed_temperature_scheduled(temp);
+        //Set the enable flag
+        state.enabled_flag = true;
 
+        //Get the temperature
+        state.enabled = (bool) GET_ARG_VALUE('e');
 
-}
-
-
-
-task_state_t TerminalInterfaceCommands::enable_hotend(uint8_t args_index) {
-
-    //This task requires the schedule of two type-0 task
-    FAIL_IF_CANT_SCHEDULE(1);
-
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
-
-    //Fail if there are not exactly two arguments
-    if (GET_NB_WORDS(args) != 2) {
-        return invalid_arguments;
     }
-
-    //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    uint8_t hotend = (uint8_t) str_to_float(word_buffer);
-
-    //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    bool enable = (bool) str_to_float(word_buffer);
 
     //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::enable_hotend_regulation_scheduled(hotend, enable);
+    return TemperatureController::set_hotbed_state(state);
 
 }
 
-
-
-task_state_t TerminalInterfaceCommands::set_hotend_temp(uint8_t args_index) {
-
-    //This task requires the schedule of two type-0 task
-    FAIL_IF_CANT_SCHEDULE(1);
-
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
-
-    //Fail if there are not exactly two arguments
-    if (GET_NB_WORDS(args) != 2) {
-        return invalid_arguments;
-    }
-
-    //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    uint8_t hotend = (uint8_t) str_to_float(word_buffer);
-
-    //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    float temperature = str_to_float(word_buffer);
-
-    //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::set_hotend_temperature_scheduled(hotend, temperature);
-
-}
-
-*/
 
 
 
