@@ -30,8 +30,6 @@ class EEPROMInterface {
 
 public:
 
-    static void init();
-
     static void print_stored_data();
 
     static EEPROMNode *build_tree();

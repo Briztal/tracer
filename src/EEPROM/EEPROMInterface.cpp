@@ -72,23 +72,6 @@
 
 
 
-
-void EEPROMInterface::init() {
-
-    Serial.begin(115200);
-
-    EEPROMNode *node = build_tree();
-
-    while(true) {
-
-        Serial.println("child : "+String(*(node->sub_nodes[0]->sub_nodes[1]->name)));
-
-
-        delay(1000);
-    }
-
-}
-
 void EEPROMInterface::print_stored_data() {
 
     //Stepper motors
@@ -245,11 +228,11 @@ EEPROMNode *EEPROMInterface::build_tree() {
     //Continuous actions
 
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("continuous"), NB_CONTINUOUS, root_id, 0);
+    tree = new EEPROMNode(new String("continuous"), NB_CONTINUOUS, root_id, nullptr);
     root->sub_nodes[root_id] = tree;
 
     //Add the sub nodes
-#define CONTINUOUS(i, name, ...) tree->sub_nodes[root_id] = new EEPROMNode(new String("suus"), 0, i, &((ES::continuous_data+i)->max));
+#define CONTINUOUS(i, name, ...) tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, &((ES::continuous_data+i)->max));
 
 #include <config.h>
 
@@ -403,28 +386,15 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
 
     node_check:
 
-    CI::echo("NODE CHECK "+String(name_buffer));
-
-    //Check every sub_node
-    for (i = 0; i < current_node->sub_nodes_nb; i++) {
-        current_sub_node = sub_nodes[i];
-        CI::echo("child : "+String((*current_sub_node->name)));
-
-    }
-
     //Check every sub_node
     for (i = 0; i < current_node->sub_nodes_nb; i++) {
         current_sub_node = sub_nodes[i];
 
         const char *c = (*current_sub_node->name).c_str();
 
-        //CI::echo("sub  "+String(name_buffer)+" "+String(c));
-        CI::echo("c : "+ String((uint8_t)*name_buffer));
-
         //If the current word matches the current_node's name
         if (!strcmp(c, name_buffer)) {
 
-            CI::echo("MATCH");
             //Re-init the current data
             current_node = current_sub_node;
             sub_nodes = current_node->sub_nodes;
@@ -433,9 +403,7 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
             if (current_node->sub_nodes_nb) {
 
                 //Go to the lower level
-                //id_string += StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
-
-                CI::echo("char : "+ String((uint8_t)*id_string));
+                id_string += StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
 
                 //check the new node
                 goto node_check;
@@ -453,8 +421,6 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
     }
 
     search_log(current_node);
-
-    CI::echo("RET CHECK");
 
     return false;
 
@@ -672,4 +638,4 @@ void EEPROMInterface::send_structure() {
 
 #endif
 
-EEPROMNode *EEPROMInterface::eeprom_tree = new EEPROMNode(new String("root"), 0, 0, nullptr);
+EEPROMNode *EEPROMInterface::eeprom_tree = build_tree();

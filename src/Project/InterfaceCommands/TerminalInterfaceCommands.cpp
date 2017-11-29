@@ -61,10 +61,10 @@ task_state_t TerminalInterfaceCommands::eeprom_write(uint8_t args_index) {
     CI::echo("SUUS");
 
     //verify that f and p arguments are provided.
-    REQUIRE_ALL_ARGUMENTS("fp");
+    REQUIRE_ALL_ARGUMENTS("vp");
 
     //Extract the value to write
-    float f = GET_ARG_VALUE('f');
+    float f = GET_ARG_VALUE('v');
 
     char *path = GET_ARG('p');
 

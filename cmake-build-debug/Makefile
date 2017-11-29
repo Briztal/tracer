@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-bui
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/opt/clion-2017.2.3/bin/cmake/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/opt/clion-2017.2.3/bin/cmake/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,82 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named PLATFORMIO_UPDATE_ALL
+# Target rules for targets named PLATFORMIO_BUILD
 
 # Build rule for target.
-PLATFORMIO_UPDATE_ALL: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_UPDATE_ALL
-.PHONY : PLATFORMIO_UPDATE_ALL
+PLATFORMIO_BUILD: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_BUILD
+.PHONY : PLATFORMIO_BUILD
 
 # fast build rule for target.
-PLATFORMIO_UPDATE_ALL/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_UPDATE_ALL.dir/build.make CMakeFiles/PLATFORMIO_UPDATE_ALL.dir/build
-.PHONY : PLATFORMIO_UPDATE_ALL/fast
-
-#=============================================================================
-# Target rules for targets named PLATFORMIO_UPLOADFS
-
-# Build rule for target.
-PLATFORMIO_UPLOADFS: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_UPLOADFS
-.PHONY : PLATFORMIO_UPLOADFS
-
-# fast build rule for target.
-PLATFORMIO_UPLOADFS/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_UPLOADFS.dir/build.make CMakeFiles/PLATFORMIO_UPLOADFS.dir/build
-.PHONY : PLATFORMIO_UPLOADFS/fast
-
-#=============================================================================
-# Target rules for targets named PLATFORMIO_TEST
-
-# Build rule for target.
-PLATFORMIO_TEST: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_TEST
-.PHONY : PLATFORMIO_TEST
-
-# fast build rule for target.
-PLATFORMIO_TEST/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_TEST.dir/build.make CMakeFiles/PLATFORMIO_TEST.dir/build
-.PHONY : PLATFORMIO_TEST/fast
-
-#=============================================================================
-# Target rules for targets named PLATFORMIO_REBUILD_PROJECT_INDEX
-
-# Build rule for target.
-PLATFORMIO_REBUILD_PROJECT_INDEX: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_REBUILD_PROJECT_INDEX
-.PHONY : PLATFORMIO_REBUILD_PROJECT_INDEX
-
-# fast build rule for target.
-PLATFORMIO_REBUILD_PROJECT_INDEX/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_REBUILD_PROJECT_INDEX.dir/build.make CMakeFiles/PLATFORMIO_REBUILD_PROJECT_INDEX.dir/build
-.PHONY : PLATFORMIO_REBUILD_PROJECT_INDEX/fast
-
-#=============================================================================
-# Target rules for targets named PLATFORMIO_PROGRAM
-
-# Build rule for target.
-PLATFORMIO_PROGRAM: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_PROGRAM
-.PHONY : PLATFORMIO_PROGRAM
-
-# fast build rule for target.
-PLATFORMIO_PROGRAM/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_PROGRAM.dir/build.make CMakeFiles/PLATFORMIO_PROGRAM.dir/build
-.PHONY : PLATFORMIO_PROGRAM/fast
-
-#=============================================================================
-# Target rules for targets named PLATFORMIO_CLEAN
-
-# Build rule for target.
-PLATFORMIO_CLEAN: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_CLEAN
-.PHONY : PLATFORMIO_CLEAN
-
-# fast build rule for target.
-PLATFORMIO_CLEAN/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_CLEAN.dir/build.make CMakeFiles/PLATFORMIO_CLEAN.dir/build
-.PHONY : PLATFORMIO_CLEAN/fast
+PLATFORMIO_BUILD/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_BUILD.dir/build.make CMakeFiles/PLATFORMIO_BUILD.dir/build
+.PHONY : PLATFORMIO_BUILD/fast
 
 #=============================================================================
 # Target rules for targets named PLATFORMIO_UPLOAD
@@ -202,108 +137,82 @@ PLATFORMIO_UPLOAD/fast:
 .PHONY : PLATFORMIO_UPLOAD/fast
 
 #=============================================================================
-# Target rules for targets named PLATFORMIO_BUILD
+# Target rules for targets named PLATFORMIO_CLEAN
 
 # Build rule for target.
-PLATFORMIO_BUILD: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_BUILD
-.PHONY : PLATFORMIO_BUILD
+PLATFORMIO_CLEAN: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_CLEAN
+.PHONY : PLATFORMIO_CLEAN
 
 # fast build rule for target.
-PLATFORMIO_BUILD/fast:
-	$(MAKE) -f CMakeFiles/PLATFORMIO_BUILD.dir/build.make CMakeFiles/PLATFORMIO_BUILD.dir/build
-.PHONY : PLATFORMIO_BUILD/fast
+PLATFORMIO_CLEAN/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_CLEAN.dir/build.make CMakeFiles/PLATFORMIO_CLEAN.dir/build
+.PHONY : PLATFORMIO_CLEAN/fast
 
 #=============================================================================
-# Target rules for targets named kernel2
+# Target rules for targets named PLATFORMIO_PROGRAM
 
 # Build rule for target.
-kernel2: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 kernel2
-.PHONY : kernel2
+PLATFORMIO_PROGRAM: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_PROGRAM
+.PHONY : PLATFORMIO_PROGRAM
 
 # fast build rule for target.
-kernel2/fast:
-	$(MAKE) -f src/CMakeFiles/kernel2.dir/build.make src/CMakeFiles/kernel2.dir/build
-.PHONY : kernel2/fast
+PLATFORMIO_PROGRAM/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_PROGRAM.dir/build.make CMakeFiles/PLATFORMIO_PROGRAM.dir/build
+.PHONY : PLATFORMIO_PROGRAM/fast
 
 #=============================================================================
-# Target rules for targets named kernel1
+# Target rules for targets named PLATFORMIO_TEST
 
 # Build rule for target.
-kernel1: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 kernel1
-.PHONY : kernel1
+PLATFORMIO_TEST: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_TEST
+.PHONY : PLATFORMIO_TEST
 
 # fast build rule for target.
-kernel1/fast:
-	$(MAKE) -f src/CMakeFiles/kernel1.dir/build.make src/CMakeFiles/kernel1.dir/build
-.PHONY : kernel1/fast
+PLATFORMIO_TEST/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_TEST.dir/build.make CMakeFiles/PLATFORMIO_TEST.dir/build
+.PHONY : PLATFORMIO_TEST/fast
 
 #=============================================================================
-# Target rules for targets named kernels
+# Target rules for targets named PLATFORMIO_UPLOADFS
 
 # Build rule for target.
-kernels: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 kernels
-.PHONY : kernels
+PLATFORMIO_UPLOADFS: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_UPLOADFS
+.PHONY : PLATFORMIO_UPLOADFS
 
 # fast build rule for target.
-kernels/fast:
-	$(MAKE) -f src/CMakeFiles/kernels.dir/build.make src/CMakeFiles/kernels.dir/build
-.PHONY : kernels/fast
+PLATFORMIO_UPLOADFS/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_UPLOADFS.dir/build.make CMakeFiles/PLATFORMIO_UPLOADFS.dir/build
+.PHONY : PLATFORMIO_UPLOADFS/fast
 
 #=============================================================================
-# Target rules for targets named sensors
+# Target rules for targets named PLATFORMIO_REBUILD_PROJECT_INDEX
 
 # Build rule for target.
-sensors: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 sensors
-.PHONY : sensors
+PLATFORMIO_REBUILD_PROJECT_INDEX: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_REBUILD_PROJECT_INDEX
+.PHONY : PLATFORMIO_REBUILD_PROJECT_INDEX
 
 # fast build rule for target.
-sensors/fast:
-	$(MAKE) -f src/CMakeFiles/sensors.dir/build.make src/CMakeFiles/sensors.dir/build
-.PHONY : sensors/fast
+PLATFORMIO_REBUILD_PROJECT_INDEX/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_REBUILD_PROJECT_INDEX.dir/build.make CMakeFiles/PLATFORMIO_REBUILD_PROJECT_INDEX.dir/build
+.PHONY : PLATFORMIO_REBUILD_PROJECT_INDEX/fast
 
 #=============================================================================
-# Target rules for targets named project
+# Target rules for targets named PLATFORMIO_UPDATE_ALL
 
 # Build rule for target.
-project: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 project
-.PHONY : project
+PLATFORMIO_UPDATE_ALL: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 PLATFORMIO_UPDATE_ALL
+.PHONY : PLATFORMIO_UPDATE_ALL
 
 # fast build rule for target.
-project/fast:
-	$(MAKE) -f src/CMakeFiles/project.dir/build.make src/CMakeFiles/project.dir/build
-.PHONY : project/fast
-
-#=============================================================================
-# Target rules for targets named datastructures
-
-# Build rule for target.
-datastructures: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 datastructures
-.PHONY : datastructures
-
-# fast build rule for target.
-datastructures/fast:
-	$(MAKE) -f src/CMakeFiles/datastructures.dir/build.make src/CMakeFiles/datastructures.dir/build
-.PHONY : datastructures/fast
-
-#=============================================================================
-# Target rules for targets named project_config
-
-# Build rule for target.
-project_config: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 project_config
-.PHONY : project_config
-
-# fast build rule for target.
-project_config/fast:
-	$(MAKE) -f src/CMakeFiles/project_config.dir/build.make src/CMakeFiles/project_config.dir/build
-.PHONY : project_config/fast
+PLATFORMIO_UPDATE_ALL/fast:
+	$(MAKE) -f CMakeFiles/PLATFORMIO_UPDATE_ALL.dir/build.make CMakeFiles/PLATFORMIO_UPDATE_ALL.dir/build
+.PHONY : PLATFORMIO_UPDATE_ALL/fast
 
 #=============================================================================
 # Target rules for targets named TRACER
@@ -315,112 +224,1223 @@ TRACER: cmake_check_build_system
 
 # fast build rule for target.
 TRACER/fast:
-	$(MAKE) -f src/CMakeFiles/TRACER.dir/build.make src/CMakeFiles/TRACER.dir/build
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/build
 .PHONY : TRACER/fast
 
-#=============================================================================
-# Target rules for targets named project_interfaces
+src/Actions/BinaryActions.o: src/Actions/BinaryActions.cpp.o
 
-# Build rule for target.
-project_interfaces: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 project_interfaces
-.PHONY : project_interfaces
+.PHONY : src/Actions/BinaryActions.o
 
-# fast build rule for target.
-project_interfaces/fast:
-	$(MAKE) -f src/CMakeFiles/project_interfaces.dir/build.make src/CMakeFiles/project_interfaces.dir/build
-.PHONY : project_interfaces/fast
+# target to build an object file
+src/Actions/BinaryActions.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/BinaryActions.cpp.o
+.PHONY : src/Actions/BinaryActions.cpp.o
 
-#=============================================================================
-# Target rules for targets named core
+src/Actions/BinaryActions.i: src/Actions/BinaryActions.cpp.i
 
-# Build rule for target.
-core: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 core
-.PHONY : core
+.PHONY : src/Actions/BinaryActions.i
 
-# fast build rule for target.
-core/fast:
-	$(MAKE) -f src/CMakeFiles/core.dir/build.make src/CMakeFiles/core.dir/build
-.PHONY : core/fast
+# target to preprocess a source file
+src/Actions/BinaryActions.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/BinaryActions.cpp.i
+.PHONY : src/Actions/BinaryActions.cpp.i
 
-#=============================================================================
-# Target rules for targets named interface
+src/Actions/BinaryActions.s: src/Actions/BinaryActions.cpp.s
 
-# Build rule for target.
-interface: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 interface
-.PHONY : interface
+.PHONY : src/Actions/BinaryActions.s
 
-# fast build rule for target.
-interface/fast:
-	$(MAKE) -f src/CMakeFiles/interface.dir/build.make src/CMakeFiles/interface.dir/build
-.PHONY : interface/fast
+# target to generate assembly for a file
+src/Actions/BinaryActions.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/BinaryActions.cpp.s
+.PHONY : src/Actions/BinaryActions.cpp.s
 
-#=============================================================================
-# Target rules for targets named scheduler
+src/Actions/ContinuousActions.o: src/Actions/ContinuousActions.cpp.o
 
-# Build rule for target.
-scheduler: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 scheduler
-.PHONY : scheduler
+.PHONY : src/Actions/ContinuousActions.o
 
-# fast build rule for target.
-scheduler/fast:
-	$(MAKE) -f src/CMakeFiles/scheduler.dir/build.make src/CMakeFiles/scheduler.dir/build
-.PHONY : scheduler/fast
+# target to build an object file
+src/Actions/ContinuousActions.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/ContinuousActions.cpp.o
+.PHONY : src/Actions/ContinuousActions.cpp.o
 
-#=============================================================================
-# Target rules for targets named actions
+src/Actions/ContinuousActions.i: src/Actions/ContinuousActions.cpp.i
 
-# Build rule for target.
-actions: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 actions
-.PHONY : actions
+.PHONY : src/Actions/ContinuousActions.i
 
-# fast build rule for target.
-actions/fast:
-	$(MAKE) -f src/CMakeFiles/actions.dir/build.make src/CMakeFiles/actions.dir/build
-.PHONY : actions/fast
+# target to preprocess a source file
+src/Actions/ContinuousActions.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/ContinuousActions.cpp.i
+.PHONY : src/Actions/ContinuousActions.cpp.i
 
-#=============================================================================
-# Target rules for targets named asserv
+src/Actions/ContinuousActions.s: src/Actions/ContinuousActions.cpp.s
 
-# Build rule for target.
-asserv: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 asserv
-.PHONY : asserv
+.PHONY : src/Actions/ContinuousActions.s
 
-# fast build rule for target.
-asserv/fast:
-	$(MAKE) -f src/CMakeFiles/asserv.dir/build.make src/CMakeFiles/asserv.dir/build
-.PHONY : asserv/fast
+# target to generate assembly for a file
+src/Actions/ContinuousActions.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/ContinuousActions.cpp.s
+.PHONY : src/Actions/ContinuousActions.cpp.s
 
-#=============================================================================
-# Target rules for targets named tracer_config
+src/Actions/ServoActions.o: src/Actions/ServoActions.cpp.o
 
-# Build rule for target.
-tracer_config: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 tracer_config
-.PHONY : tracer_config
+.PHONY : src/Actions/ServoActions.o
 
-# fast build rule for target.
-tracer_config/fast:
-	$(MAKE) -f src/CMakeFiles/tracer_config.dir/build.make src/CMakeFiles/tracer_config.dir/build
-.PHONY : tracer_config/fast
+# target to build an object file
+src/Actions/ServoActions.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/ServoActions.cpp.o
+.PHONY : src/Actions/ServoActions.cpp.o
 
-#=============================================================================
-# Target rules for targets named hardware
+src/Actions/ServoActions.i: src/Actions/ServoActions.cpp.i
 
-# Build rule for target.
-hardware: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 hardware
-.PHONY : hardware
+.PHONY : src/Actions/ServoActions.i
 
-# fast build rule for target.
-hardware/fast:
-	$(MAKE) -f src/CMakeFiles/hardware.dir/build.make src/CMakeFiles/hardware.dir/build
-.PHONY : hardware/fast
+# target to preprocess a source file
+src/Actions/ServoActions.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/ServoActions.cpp.i
+.PHONY : src/Actions/ServoActions.cpp.i
+
+src/Actions/ServoActions.s: src/Actions/ServoActions.cpp.s
+
+.PHONY : src/Actions/ServoActions.s
+
+# target to generate assembly for a file
+src/Actions/ServoActions.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Actions/ServoActions.cpp.s
+.PHONY : src/Actions/ServoActions.cpp.s
+
+src/ControlLoops/ControlLoops.o: src/ControlLoops/ControlLoops.cpp.o
+
+.PHONY : src/ControlLoops/ControlLoops.o
+
+# target to build an object file
+src/ControlLoops/ControlLoops.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/ControlLoops.cpp.o
+.PHONY : src/ControlLoops/ControlLoops.cpp.o
+
+src/ControlLoops/ControlLoops.i: src/ControlLoops/ControlLoops.cpp.i
+
+.PHONY : src/ControlLoops/ControlLoops.i
+
+# target to preprocess a source file
+src/ControlLoops/ControlLoops.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/ControlLoops.cpp.i
+.PHONY : src/ControlLoops/ControlLoops.cpp.i
+
+src/ControlLoops/ControlLoops.s: src/ControlLoops/ControlLoops.cpp.s
+
+.PHONY : src/ControlLoops/ControlLoops.s
+
+# target to generate assembly for a file
+src/ControlLoops/ControlLoops.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/ControlLoops.cpp.s
+.PHONY : src/ControlLoops/ControlLoops.cpp.s
+
+src/ControlLoops/ExternalParameters.o: src/ControlLoops/ExternalParameters.cpp.o
+
+.PHONY : src/ControlLoops/ExternalParameters.o
+
+# target to build an object file
+src/ControlLoops/ExternalParameters.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/ExternalParameters.cpp.o
+.PHONY : src/ControlLoops/ExternalParameters.cpp.o
+
+src/ControlLoops/ExternalParameters.i: src/ControlLoops/ExternalParameters.cpp.i
+
+.PHONY : src/ControlLoops/ExternalParameters.i
+
+# target to preprocess a source file
+src/ControlLoops/ExternalParameters.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/ExternalParameters.cpp.i
+.PHONY : src/ControlLoops/ExternalParameters.cpp.i
+
+src/ControlLoops/ExternalParameters.s: src/ControlLoops/ExternalParameters.cpp.s
+
+.PHONY : src/ControlLoops/ExternalParameters.s
+
+# target to generate assembly for a file
+src/ControlLoops/ExternalParameters.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/ExternalParameters.cpp.s
+.PHONY : src/ControlLoops/ExternalParameters.cpp.s
+
+src/ControlLoops/PID.o: src/ControlLoops/PID.cpp.o
+
+.PHONY : src/ControlLoops/PID.o
+
+# target to build an object file
+src/ControlLoops/PID.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/PID.cpp.o
+.PHONY : src/ControlLoops/PID.cpp.o
+
+src/ControlLoops/PID.i: src/ControlLoops/PID.cpp.i
+
+.PHONY : src/ControlLoops/PID.i
+
+# target to preprocess a source file
+src/ControlLoops/PID.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/PID.cpp.i
+.PHONY : src/ControlLoops/PID.cpp.i
+
+src/ControlLoops/PID.s: src/ControlLoops/PID.cpp.s
+
+.PHONY : src/ControlLoops/PID.s
+
+# target to generate assembly for a file
+src/ControlLoops/PID.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/ControlLoops/PID.cpp.s
+.PHONY : src/ControlLoops/PID.cpp.s
+
+src/DataStructures/ArgumentsContainer.o: src/DataStructures/ArgumentsContainer.cpp.o
+
+.PHONY : src/DataStructures/ArgumentsContainer.o
+
+# target to build an object file
+src/DataStructures/ArgumentsContainer.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/ArgumentsContainer.cpp.o
+.PHONY : src/DataStructures/ArgumentsContainer.cpp.o
+
+src/DataStructures/ArgumentsContainer.i: src/DataStructures/ArgumentsContainer.cpp.i
+
+.PHONY : src/DataStructures/ArgumentsContainer.i
+
+# target to preprocess a source file
+src/DataStructures/ArgumentsContainer.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/ArgumentsContainer.cpp.i
+.PHONY : src/DataStructures/ArgumentsContainer.cpp.i
+
+src/DataStructures/ArgumentsContainer.s: src/DataStructures/ArgumentsContainer.cpp.s
+
+.PHONY : src/DataStructures/ArgumentsContainer.s
+
+# target to generate assembly for a file
+src/DataStructures/ArgumentsContainer.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/ArgumentsContainer.cpp.s
+.PHONY : src/DataStructures/ArgumentsContainer.cpp.s
+
+src/DataStructures/Queue.o: src/DataStructures/Queue.cpp.o
+
+.PHONY : src/DataStructures/Queue.o
+
+# target to build an object file
+src/DataStructures/Queue.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/Queue.cpp.o
+.PHONY : src/DataStructures/Queue.cpp.o
+
+src/DataStructures/Queue.i: src/DataStructures/Queue.cpp.i
+
+.PHONY : src/DataStructures/Queue.i
+
+# target to preprocess a source file
+src/DataStructures/Queue.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/Queue.cpp.i
+.PHONY : src/DataStructures/Queue.cpp.i
+
+src/DataStructures/Queue.s: src/DataStructures/Queue.cpp.s
+
+.PHONY : src/DataStructures/Queue.s
+
+# target to generate assembly for a file
+src/DataStructures/Queue.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/Queue.cpp.s
+.PHONY : src/DataStructures/Queue.cpp.s
+
+src/DataStructures/StringUtils.o: src/DataStructures/StringUtils.cpp.o
+
+.PHONY : src/DataStructures/StringUtils.o
+
+# target to build an object file
+src/DataStructures/StringUtils.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/StringUtils.cpp.o
+.PHONY : src/DataStructures/StringUtils.cpp.o
+
+src/DataStructures/StringUtils.i: src/DataStructures/StringUtils.cpp.i
+
+.PHONY : src/DataStructures/StringUtils.i
+
+# target to preprocess a source file
+src/DataStructures/StringUtils.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/StringUtils.cpp.i
+.PHONY : src/DataStructures/StringUtils.cpp.i
+
+src/DataStructures/StringUtils.s: src/DataStructures/StringUtils.cpp.s
+
+.PHONY : src/DataStructures/StringUtils.s
+
+# target to generate assembly for a file
+src/DataStructures/StringUtils.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/DataStructures/StringUtils.cpp.s
+.PHONY : src/DataStructures/StringUtils.cpp.s
+
+src/EEPROM/EEPROMInterface.o: src/EEPROM/EEPROMInterface.cpp.o
+
+.PHONY : src/EEPROM/EEPROMInterface.o
+
+# target to build an object file
+src/EEPROM/EEPROMInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMInterface.cpp.o
+.PHONY : src/EEPROM/EEPROMInterface.cpp.o
+
+src/EEPROM/EEPROMInterface.i: src/EEPROM/EEPROMInterface.cpp.i
+
+.PHONY : src/EEPROM/EEPROMInterface.i
+
+# target to preprocess a source file
+src/EEPROM/EEPROMInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMInterface.cpp.i
+.PHONY : src/EEPROM/EEPROMInterface.cpp.i
+
+src/EEPROM/EEPROMInterface.s: src/EEPROM/EEPROMInterface.cpp.s
+
+.PHONY : src/EEPROM/EEPROMInterface.s
+
+# target to generate assembly for a file
+src/EEPROM/EEPROMInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMInterface.cpp.s
+.PHONY : src/EEPROM/EEPROMInterface.cpp.s
+
+src/EEPROM/EEPROMNode.o: src/EEPROM/EEPROMNode.cpp.o
+
+.PHONY : src/EEPROM/EEPROMNode.o
+
+# target to build an object file
+src/EEPROM/EEPROMNode.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMNode.cpp.o
+.PHONY : src/EEPROM/EEPROMNode.cpp.o
+
+src/EEPROM/EEPROMNode.i: src/EEPROM/EEPROMNode.cpp.i
+
+.PHONY : src/EEPROM/EEPROMNode.i
+
+# target to preprocess a source file
+src/EEPROM/EEPROMNode.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMNode.cpp.i
+.PHONY : src/EEPROM/EEPROMNode.cpp.i
+
+src/EEPROM/EEPROMNode.s: src/EEPROM/EEPROMNode.cpp.s
+
+.PHONY : src/EEPROM/EEPROMNode.s
+
+# target to generate assembly for a file
+src/EEPROM/EEPROMNode.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMNode.cpp.s
+.PHONY : src/EEPROM/EEPROMNode.cpp.s
+
+src/EEPROM/EEPROMStorage.o: src/EEPROM/EEPROMStorage.cpp.o
+
+.PHONY : src/EEPROM/EEPROMStorage.o
+
+# target to build an object file
+src/EEPROM/EEPROMStorage.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMStorage.cpp.o
+.PHONY : src/EEPROM/EEPROMStorage.cpp.o
+
+src/EEPROM/EEPROMStorage.i: src/EEPROM/EEPROMStorage.cpp.i
+
+.PHONY : src/EEPROM/EEPROMStorage.i
+
+# target to preprocess a source file
+src/EEPROM/EEPROMStorage.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMStorage.cpp.i
+.PHONY : src/EEPROM/EEPROMStorage.cpp.i
+
+src/EEPROM/EEPROMStorage.s: src/EEPROM/EEPROMStorage.cpp.s
+
+.PHONY : src/EEPROM/EEPROMStorage.s
+
+# target to generate assembly for a file
+src/EEPROM/EEPROMStorage.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/EEPROM/EEPROMStorage.cpp.s
+.PHONY : src/EEPROM/EEPROMStorage.cpp.s
+
+src/Interfaces/GCodeInterface/GCodeInterface.o: src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.o
+
+# target to build an object file
+src/Interfaces/GCodeInterface/GCodeInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.o
+
+src/Interfaces/GCodeInterface/GCodeInterface.i: src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.i
+
+# target to preprocess a source file
+src/Interfaces/GCodeInterface/GCodeInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.i
+
+src/Interfaces/GCodeInterface/GCodeInterface.s: src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.s
+
+# target to generate assembly for a file
+src/Interfaces/GCodeInterface/GCodeInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+.PHONY : src/Interfaces/GCodeInterface/GCodeInterface.cpp.s
+
+src/Interfaces/LCDInterface/LCDInterface.o: src/Interfaces/LCDInterface/LCDInterface.cpp.o
+
+.PHONY : src/Interfaces/LCDInterface/LCDInterface.o
+
+# target to build an object file
+src/Interfaces/LCDInterface/LCDInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/LCDInterface/LCDInterface.cpp.o
+.PHONY : src/Interfaces/LCDInterface/LCDInterface.cpp.o
+
+src/Interfaces/LCDInterface/LCDInterface.i: src/Interfaces/LCDInterface/LCDInterface.cpp.i
+
+.PHONY : src/Interfaces/LCDInterface/LCDInterface.i
+
+# target to preprocess a source file
+src/Interfaces/LCDInterface/LCDInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/LCDInterface/LCDInterface.cpp.i
+.PHONY : src/Interfaces/LCDInterface/LCDInterface.cpp.i
+
+src/Interfaces/LCDInterface/LCDInterface.s: src/Interfaces/LCDInterface/LCDInterface.cpp.s
+
+.PHONY : src/Interfaces/LCDInterface/LCDInterface.s
+
+# target to generate assembly for a file
+src/Interfaces/LCDInterface/LCDInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/LCDInterface/LCDInterface.cpp.s
+.PHONY : src/Interfaces/LCDInterface/LCDInterface.cpp.s
+
+src/Interfaces/ProgramInterface/ProgramInterface.o: src/Interfaces/ProgramInterface/ProgramInterface.cpp.o
+
+.PHONY : src/Interfaces/ProgramInterface/ProgramInterface.o
+
+# target to build an object file
+src/Interfaces/ProgramInterface/ProgramInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/ProgramInterface/ProgramInterface.cpp.o
+.PHONY : src/Interfaces/ProgramInterface/ProgramInterface.cpp.o
+
+src/Interfaces/ProgramInterface/ProgramInterface.i: src/Interfaces/ProgramInterface/ProgramInterface.cpp.i
+
+.PHONY : src/Interfaces/ProgramInterface/ProgramInterface.i
+
+# target to preprocess a source file
+src/Interfaces/ProgramInterface/ProgramInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/ProgramInterface/ProgramInterface.cpp.i
+.PHONY : src/Interfaces/ProgramInterface/ProgramInterface.cpp.i
+
+src/Interfaces/ProgramInterface/ProgramInterface.s: src/Interfaces/ProgramInterface/ProgramInterface.cpp.s
+
+.PHONY : src/Interfaces/ProgramInterface/ProgramInterface.s
+
+# target to generate assembly for a file
+src/Interfaces/ProgramInterface/ProgramInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/ProgramInterface/ProgramInterface.cpp.s
+.PHONY : src/Interfaces/ProgramInterface/ProgramInterface.cpp.s
+
+src/Interfaces/TerminalInterface/TerminalInterface.o: src/Interfaces/TerminalInterface/TerminalInterface.cpp.o
+
+.PHONY : src/Interfaces/TerminalInterface/TerminalInterface.o
+
+# target to build an object file
+src/Interfaces/TerminalInterface/TerminalInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface.cpp.o
+.PHONY : src/Interfaces/TerminalInterface/TerminalInterface.cpp.o
+
+src/Interfaces/TerminalInterface/TerminalInterface.i: src/Interfaces/TerminalInterface/TerminalInterface.cpp.i
+
+.PHONY : src/Interfaces/TerminalInterface/TerminalInterface.i
+
+# target to preprocess a source file
+src/Interfaces/TerminalInterface/TerminalInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface.cpp.i
+.PHONY : src/Interfaces/TerminalInterface/TerminalInterface.cpp.i
+
+src/Interfaces/TerminalInterface/TerminalInterface.s: src/Interfaces/TerminalInterface/TerminalInterface.cpp.s
+
+.PHONY : src/Interfaces/TerminalInterface/TerminalInterface.s
+
+# target to generate assembly for a file
+src/Interfaces/TerminalInterface/TerminalInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface.cpp.s
+.PHONY : src/Interfaces/TerminalInterface/TerminalInterface.cpp.s
+
+src/Interfaces/TerminalInterface/TerminalNode.o: src/Interfaces/TerminalInterface/TerminalNode.cpp.o
+
+.PHONY : src/Interfaces/TerminalInterface/TerminalNode.o
+
+# target to build an object file
+src/Interfaces/TerminalInterface/TerminalNode.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o
+.PHONY : src/Interfaces/TerminalInterface/TerminalNode.cpp.o
+
+src/Interfaces/TerminalInterface/TerminalNode.i: src/Interfaces/TerminalInterface/TerminalNode.cpp.i
+
+.PHONY : src/Interfaces/TerminalInterface/TerminalNode.i
+
+# target to preprocess a source file
+src/Interfaces/TerminalInterface/TerminalNode.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.i
+.PHONY : src/Interfaces/TerminalInterface/TerminalNode.cpp.i
+
+src/Interfaces/TerminalInterface/TerminalNode.s: src/Interfaces/TerminalInterface/TerminalNode.cpp.s
+
+.PHONY : src/Interfaces/TerminalInterface/TerminalNode.s
+
+# target to generate assembly for a file
+src/Interfaces/TerminalInterface/TerminalNode.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.s
+.PHONY : src/Interfaces/TerminalInterface/TerminalNode.cpp.s
+
+src/Interfaces/TerminalInterface/TreeManager.o: src/Interfaces/TerminalInterface/TreeManager.cpp.o
+
+.PHONY : src/Interfaces/TerminalInterface/TreeManager.o
+
+# target to build an object file
+src/Interfaces/TerminalInterface/TreeManager.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o
+.PHONY : src/Interfaces/TerminalInterface/TreeManager.cpp.o
+
+src/Interfaces/TerminalInterface/TreeManager.i: src/Interfaces/TerminalInterface/TreeManager.cpp.i
+
+.PHONY : src/Interfaces/TerminalInterface/TreeManager.i
+
+# target to preprocess a source file
+src/Interfaces/TerminalInterface/TreeManager.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.i
+.PHONY : src/Interfaces/TerminalInterface/TreeManager.cpp.i
+
+src/Interfaces/TerminalInterface/TreeManager.s: src/Interfaces/TerminalInterface/TreeManager.cpp.s
+
+.PHONY : src/Interfaces/TerminalInterface/TreeManager.s
+
+# target to generate assembly for a file
+src/Interfaces/TerminalInterface/TreeManager.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.s
+.PHONY : src/Interfaces/TerminalInterface/TreeManager.cpp.s
+
+src/Project/Config/geometry.o: src/Project/Config/geometry.cpp.o
+
+.PHONY : src/Project/Config/geometry.o
+
+# target to build an object file
+src/Project/Config/geometry.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o
+.PHONY : src/Project/Config/geometry.cpp.o
+
+src/Project/Config/geometry.i: src/Project/Config/geometry.cpp.i
+
+.PHONY : src/Project/Config/geometry.i
+
+# target to preprocess a source file
+src/Project/Config/geometry.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.i
+.PHONY : src/Project/Config/geometry.cpp.i
+
+src/Project/Config/geometry.s: src/Project/Config/geometry.cpp.s
+
+.PHONY : src/Project/Config/geometry.s
+
+# target to generate assembly for a file
+src/Project/Config/geometry.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.s
+.PHONY : src/Project/Config/geometry.cpp.s
+
+src/Project/InterfaceCommands/GCodeInterfaceCommands.o: src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+
+.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.o
+
+# target to build an object file
+src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+
+src/Project/InterfaceCommands/GCodeInterfaceCommands.i: src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
+
+.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.i
+
+# target to preprocess a source file
+src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
+.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
+
+src/Project/InterfaceCommands/GCodeInterfaceCommands.s: src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
+
+.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.s
+
+# target to generate assembly for a file
+src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
+.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
+
+src/Project/InterfaceCommands/LCDInterfaceCommands.o: src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
+
+.PHONY : src/Project/InterfaceCommands/LCDInterfaceCommands.o
+
+# target to build an object file
+src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
+.PHONY : src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
+
+src/Project/InterfaceCommands/LCDInterfaceCommands.i: src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.i
+
+.PHONY : src/Project/InterfaceCommands/LCDInterfaceCommands.i
+
+# target to preprocess a source file
+src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.i
+.PHONY : src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.i
+
+src/Project/InterfaceCommands/LCDInterfaceCommands.s: src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.s
+
+.PHONY : src/Project/InterfaceCommands/LCDInterfaceCommands.s
+
+# target to generate assembly for a file
+src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.s
+.PHONY : src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.s
+
+src/Project/InterfaceCommands/ProgramInterfaceCommands.o: src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o
+
+.PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.o
+
+# target to build an object file
+src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o
+.PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o
+
+src/Project/InterfaceCommands/ProgramInterfaceCommands.i: src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.i
+
+.PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.i
+
+# target to preprocess a source file
+src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.i
+.PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.i
+
+src/Project/InterfaceCommands/ProgramInterfaceCommands.s: src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s
+
+.PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.s
+
+# target to generate assembly for a file
+src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s
+.PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s
+
+src/Project/InterfaceCommands/TerminalInterfaceCommands.o: src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+
+.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.o
+
+# target to build an object file
+src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+
+src/Project/InterfaceCommands/TerminalInterfaceCommands.i: src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
+
+.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.i
+
+# target to preprocess a source file
+src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
+.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
+
+src/Project/InterfaceCommands/TerminalInterfaceCommands.s: src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
+
+.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.s
+
+# target to generate assembly for a file
+src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
+.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
+
+src/Project/MachineController.o: src/Project/MachineController.cpp.o
+
+.PHONY : src/Project/MachineController.o
+
+# target to build an object file
+src/Project/MachineController.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o
+.PHONY : src/Project/MachineController.cpp.o
+
+src/Project/MachineController.i: src/Project/MachineController.cpp.i
+
+.PHONY : src/Project/MachineController.i
+
+# target to preprocess a source file
+src/Project/MachineController.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.i
+.PHONY : src/Project/MachineController.cpp.i
+
+src/Project/MachineController.s: src/Project/MachineController.cpp.s
+
+.PHONY : src/Project/MachineController.s
+
+# target to generate assembly for a file
+src/Project/MachineController.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.s
+.PHONY : src/Project/MachineController.cpp.s
+
+src/Project/TemperatureController.o: src/Project/TemperatureController.cpp.o
+
+.PHONY : src/Project/TemperatureController.o
+
+# target to build an object file
+src/Project/TemperatureController.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o
+.PHONY : src/Project/TemperatureController.cpp.o
+
+src/Project/TemperatureController.i: src/Project/TemperatureController.cpp.i
+
+.PHONY : src/Project/TemperatureController.i
+
+# target to preprocess a source file
+src/Project/TemperatureController.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.i
+.PHONY : src/Project/TemperatureController.cpp.i
+
+src/Project/TemperatureController.s: src/Project/TemperatureController.cpp.s
+
+.PHONY : src/Project/TemperatureController.s
+
+# target to generate assembly for a file
+src/Project/TemperatureController.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.s
+.PHONY : src/Project/TemperatureController.cpp.s
+
+src/Sensors/Thermistors/Thermistors.o: src/Sensors/Thermistors/Thermistors.cpp.o
+
+.PHONY : src/Sensors/Thermistors/Thermistors.o
+
+# target to build an object file
+src/Sensors/Thermistors/Thermistors.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o
+.PHONY : src/Sensors/Thermistors/Thermistors.cpp.o
+
+src/Sensors/Thermistors/Thermistors.i: src/Sensors/Thermistors/Thermistors.cpp.i
+
+.PHONY : src/Sensors/Thermistors/Thermistors.i
+
+# target to preprocess a source file
+src/Sensors/Thermistors/Thermistors.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.i
+.PHONY : src/Sensors/Thermistors/Thermistors.cpp.i
+
+src/Sensors/Thermistors/Thermistors.s: src/Sensors/Thermistors/Thermistors.cpp.s
+
+.PHONY : src/Sensors/Thermistors/Thermistors.s
+
+# target to generate assembly for a file
+src/Sensors/Thermistors/Thermistors.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.s
+.PHONY : src/Sensors/Thermistors/Thermistors.cpp.s
+
+src/StepperControl/IncrementComputer.o: src/StepperControl/IncrementComputer.cpp.o
+
+.PHONY : src/StepperControl/IncrementComputer.o
+
+# target to build an object file
+src/StepperControl/IncrementComputer.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o
+.PHONY : src/StepperControl/IncrementComputer.cpp.o
+
+src/StepperControl/IncrementComputer.i: src/StepperControl/IncrementComputer.cpp.i
+
+.PHONY : src/StepperControl/IncrementComputer.i
+
+# target to preprocess a source file
+src/StepperControl/IncrementComputer.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.i
+.PHONY : src/StepperControl/IncrementComputer.cpp.i
+
+src/StepperControl/IncrementComputer.s: src/StepperControl/IncrementComputer.cpp.s
+
+.PHONY : src/StepperControl/IncrementComputer.s
+
+# target to generate assembly for a file
+src/StepperControl/IncrementComputer.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.s
+.PHONY : src/StepperControl/IncrementComputer.cpp.s
+
+src/StepperControl/JerkPlanner.o: src/StepperControl/JerkPlanner.cpp.o
+
+.PHONY : src/StepperControl/JerkPlanner.o
+
+# target to build an object file
+src/StepperControl/JerkPlanner.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o
+.PHONY : src/StepperControl/JerkPlanner.cpp.o
+
+src/StepperControl/JerkPlanner.i: src/StepperControl/JerkPlanner.cpp.i
+
+.PHONY : src/StepperControl/JerkPlanner.i
+
+# target to preprocess a source file
+src/StepperControl/JerkPlanner.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.i
+.PHONY : src/StepperControl/JerkPlanner.cpp.i
+
+src/StepperControl/JerkPlanner.s: src/StepperControl/JerkPlanner.cpp.s
+
+.PHONY : src/StepperControl/JerkPlanner.s
+
+# target to generate assembly for a file
+src/StepperControl/JerkPlanner.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.s
+.PHONY : src/StepperControl/JerkPlanner.cpp.s
+
+src/StepperControl/KinematicsCore1/K1Physics.o: src/StepperControl/KinematicsCore1/K1Physics.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore1/K1Physics.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore1/K1Physics.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o
+.PHONY : src/StepperControl/KinematicsCore1/K1Physics.cpp.o
+
+src/StepperControl/KinematicsCore1/K1Physics.i: src/StepperControl/KinematicsCore1/K1Physics.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore1/K1Physics.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore1/K1Physics.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.i
+.PHONY : src/StepperControl/KinematicsCore1/K1Physics.cpp.i
+
+src/StepperControl/KinematicsCore1/K1Physics.s: src/StepperControl/KinematicsCore1/K1Physics.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore1/K1Physics.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore1/K1Physics.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.s
+.PHONY : src/StepperControl/KinematicsCore1/K1Physics.cpp.s
+
+src/StepperControl/KinematicsCore1/KinematicsCore1.o: src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore1/KinematicsCore1.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o
+.PHONY : src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o
+
+src/StepperControl/KinematicsCore1/KinematicsCore1.i: src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore1/KinematicsCore1.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.i
+.PHONY : src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.i
+
+src/StepperControl/KinematicsCore1/KinematicsCore1.s: src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore1/KinematicsCore1.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.s
+.PHONY : src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.s
+
+src/StepperControl/KinematicsCore1/Movements/HomingMovement.o: src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore1/Movements/HomingMovement.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o
+.PHONY : src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o
+
+src/StepperControl/KinematicsCore1/Movements/HomingMovement.i: src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore1/Movements/HomingMovement.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.i
+.PHONY : src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.i
+
+src/StepperControl/KinematicsCore1/Movements/HomingMovement.s: src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore1/Movements/HomingMovement.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.s
+.PHONY : src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.s
+
+src/StepperControl/KinematicsCore1/Movements/LinearMovement.o: src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore1/Movements/LinearMovement.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o
+.PHONY : src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o
+
+src/StepperControl/KinematicsCore1/Movements/LinearMovement.i: src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore1/Movements/LinearMovement.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.i
+.PHONY : src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.i
+
+src/StepperControl/KinematicsCore1/Movements/LinearMovement.s: src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore1/Movements/LinearMovement.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.s
+.PHONY : src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.s
+
+src/StepperControl/KinematicsCore1/SqrtFastComputer.o: src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore1/SqrtFastComputer.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o
+.PHONY : src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o
+
+src/StepperControl/KinematicsCore1/SqrtFastComputer.i: src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore1/SqrtFastComputer.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.i
+.PHONY : src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.i
+
+src/StepperControl/KinematicsCore1/SqrtFastComputer.s: src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore1/SqrtFastComputer.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.s
+.PHONY : src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.s
+
+src/StepperControl/KinematicsCore1/mathProcess.o: src/StepperControl/KinematicsCore1/mathProcess.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore1/mathProcess.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore1/mathProcess.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o
+.PHONY : src/StepperControl/KinematicsCore1/mathProcess.cpp.o
+
+src/StepperControl/KinematicsCore1/mathProcess.i: src/StepperControl/KinematicsCore1/mathProcess.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore1/mathProcess.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore1/mathProcess.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.i
+.PHONY : src/StepperControl/KinematicsCore1/mathProcess.cpp.i
+
+src/StepperControl/KinematicsCore1/mathProcess.s: src/StepperControl/KinematicsCore1/mathProcess.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore1/mathProcess.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore1/mathProcess.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.s
+.PHONY : src/StepperControl/KinematicsCore1/mathProcess.cpp.s
+
+src/StepperControl/KinematicsCore2/K2Physics.o: src/StepperControl/KinematicsCore2/K2Physics.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore2/K2Physics.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore2/K2Physics.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o
+.PHONY : src/StepperControl/KinematicsCore2/K2Physics.cpp.o
+
+src/StepperControl/KinematicsCore2/K2Physics.i: src/StepperControl/KinematicsCore2/K2Physics.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore2/K2Physics.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore2/K2Physics.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.i
+.PHONY : src/StepperControl/KinematicsCore2/K2Physics.cpp.i
+
+src/StepperControl/KinematicsCore2/K2Physics.s: src/StepperControl/KinematicsCore2/K2Physics.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore2/K2Physics.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore2/K2Physics.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.s
+.PHONY : src/StepperControl/KinematicsCore2/K2Physics.cpp.s
+
+src/StepperControl/KinematicsCore2/KinematicsCore2.o: src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore2/KinematicsCore2.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o
+.PHONY : src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o
+
+src/StepperControl/KinematicsCore2/KinematicsCore2.i: src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore2/KinematicsCore2.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.i
+.PHONY : src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.i
+
+src/StepperControl/KinematicsCore2/KinematicsCore2.s: src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore2/KinematicsCore2.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.s
+.PHONY : src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.s
+
+src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.o: src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o
+
+.PHONY : src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.o
+
+# target to build an object file
+src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o
+.PHONY : src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o
+
+src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.i: src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.i
+
+.PHONY : src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.i
+
+# target to preprocess a source file
+src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.i
+.PHONY : src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.i
+
+src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.s: src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.s
+
+.PHONY : src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.s
+
+# target to generate assembly for a file
+src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.s
+.PHONY : src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.s
+
+src/StepperControl/MachineInterface.o: src/StepperControl/MachineInterface.cpp.o
+
+.PHONY : src/StepperControl/MachineInterface.o
+
+# target to build an object file
+src/StepperControl/MachineInterface.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o
+.PHONY : src/StepperControl/MachineInterface.cpp.o
+
+src/StepperControl/MachineInterface.i: src/StepperControl/MachineInterface.cpp.i
+
+.PHONY : src/StepperControl/MachineInterface.i
+
+# target to preprocess a source file
+src/StepperControl/MachineInterface.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.i
+.PHONY : src/StepperControl/MachineInterface.cpp.i
+
+src/StepperControl/MachineInterface.s: src/StepperControl/MachineInterface.cpp.s
+
+.PHONY : src/StepperControl/MachineInterface.s
+
+# target to generate assembly for a file
+src/StepperControl/MachineInterface.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.s
+.PHONY : src/StepperControl/MachineInterface.cpp.s
+
+src/StepperControl/StepperController.o: src/StepperControl/StepperController.cpp.o
+
+.PHONY : src/StepperControl/StepperController.o
+
+# target to build an object file
+src/StepperControl/StepperController.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o
+.PHONY : src/StepperControl/StepperController.cpp.o
+
+src/StepperControl/StepperController.i: src/StepperControl/StepperController.cpp.i
+
+.PHONY : src/StepperControl/StepperController.i
+
+# target to preprocess a source file
+src/StepperControl/StepperController.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.i
+.PHONY : src/StepperControl/StepperController.cpp.i
+
+src/StepperControl/StepperController.s: src/StepperControl/StepperController.cpp.s
+
+.PHONY : src/StepperControl/StepperController.s
+
+# target to generate assembly for a file
+src/StepperControl/StepperController.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.s
+.PHONY : src/StepperControl/StepperController.cpp.s
+
+src/StepperControl/SubMovementManager.o: src/StepperControl/SubMovementManager.cpp.o
+
+.PHONY : src/StepperControl/SubMovementManager.o
+
+# target to build an object file
+src/StepperControl/SubMovementManager.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o
+.PHONY : src/StepperControl/SubMovementManager.cpp.o
+
+src/StepperControl/SubMovementManager.i: src/StepperControl/SubMovementManager.cpp.i
+
+.PHONY : src/StepperControl/SubMovementManager.i
+
+# target to preprocess a source file
+src/StepperControl/SubMovementManager.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.i
+.PHONY : src/StepperControl/SubMovementManager.cpp.i
+
+src/StepperControl/SubMovementManager.s: src/StepperControl/SubMovementManager.cpp.s
+
+.PHONY : src/StepperControl/SubMovementManager.s
+
+# target to generate assembly for a file
+src/StepperControl/SubMovementManager.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.s
+.PHONY : src/StepperControl/SubMovementManager.cpp.s
+
+src/StepperControl/TrajectoryTracer.o: src/StepperControl/TrajectoryTracer.cpp.o
+
+.PHONY : src/StepperControl/TrajectoryTracer.o
+
+# target to build an object file
+src/StepperControl/TrajectoryTracer.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o
+.PHONY : src/StepperControl/TrajectoryTracer.cpp.o
+
+src/StepperControl/TrajectoryTracer.i: src/StepperControl/TrajectoryTracer.cpp.i
+
+.PHONY : src/StepperControl/TrajectoryTracer.i
+
+# target to preprocess a source file
+src/StepperControl/TrajectoryTracer.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.i
+.PHONY : src/StepperControl/TrajectoryTracer.cpp.i
+
+src/StepperControl/TrajectoryTracer.s: src/StepperControl/TrajectoryTracer.cpp.s
+
+.PHONY : src/StepperControl/TrajectoryTracer.s
+
+# target to generate assembly for a file
+src/StepperControl/TrajectoryTracer.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.s
+.PHONY : src/StepperControl/TrajectoryTracer.cpp.s
+
+src/TaskScheduler/TaskScheduler.o: src/TaskScheduler/TaskScheduler.cpp.o
+
+.PHONY : src/TaskScheduler/TaskScheduler.o
+
+# target to build an object file
+src/TaskScheduler/TaskScheduler.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o
+.PHONY : src/TaskScheduler/TaskScheduler.cpp.o
+
+src/TaskScheduler/TaskScheduler.i: src/TaskScheduler/TaskScheduler.cpp.i
+
+.PHONY : src/TaskScheduler/TaskScheduler.i
+
+# target to preprocess a source file
+src/TaskScheduler/TaskScheduler.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.i
+.PHONY : src/TaskScheduler/TaskScheduler.cpp.i
+
+src/TaskScheduler/TaskScheduler.s: src/TaskScheduler/TaskScheduler.cpp.s
+
+.PHONY : src/TaskScheduler/TaskScheduler.s
+
+# target to generate assembly for a file
+src/TaskScheduler/TaskScheduler.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.s
+.PHONY : src/TaskScheduler/TaskScheduler.cpp.s
+
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.o: src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
+
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.o
+
+# target to build an object file
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
+
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.i: src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i
+
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.i
+
+# target to preprocess a source file
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i
+
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.s: src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s
+
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.s
+
+# target to generate assembly for a file
+src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s
+.PHONY : src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.s
+
+src/interfaces.o: src/interfaces.cpp.o
+
+.PHONY : src/interfaces.o
+
+# target to build an object file
+src/interfaces.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/interfaces.cpp.o
+.PHONY : src/interfaces.cpp.o
+
+src/interfaces.i: src/interfaces.cpp.i
+
+.PHONY : src/interfaces.i
+
+# target to preprocess a source file
+src/interfaces.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/interfaces.cpp.i
+.PHONY : src/interfaces.cpp.i
+
+src/interfaces.s: src/interfaces.cpp.s
+
+.PHONY : src/interfaces.s
+
+# target to generate assembly for a file
+src/interfaces.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/interfaces.cpp.s
+.PHONY : src/interfaces.cpp.s
+
+src/main.o: src/main.cpp.o
+
+.PHONY : src/main.o
+
+# target to build an object file
+src/main.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
+
+src/main.i: src/main.cpp.i
+
+.PHONY : src/main.i
+
+# target to preprocess a source file
+src/main.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
+
+src/main.s: src/main.cpp.s
+
+.PHONY : src/main.s
+
+# target to generate assembly for a file
+src/main.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -428,32 +1448,152 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... PLATFORMIO_UPDATE_ALL"
-	@echo "... PLATFORMIO_UPLOADFS"
-	@echo "... rebuild_cache"
-	@echo "... PLATFORMIO_TEST"
-	@echo "... edit_cache"
-	@echo "... PLATFORMIO_REBUILD_PROJECT_INDEX"
-	@echo "... PLATFORMIO_PROGRAM"
-	@echo "... PLATFORMIO_CLEAN"
-	@echo "... PLATFORMIO_UPLOAD"
 	@echo "... PLATFORMIO_BUILD"
-	@echo "... kernel2"
-	@echo "... kernel1"
-	@echo "... kernels"
-	@echo "... sensors"
-	@echo "... project"
-	@echo "... datastructures"
-	@echo "... project_config"
+	@echo "... PLATFORMIO_UPLOAD"
+	@echo "... PLATFORMIO_CLEAN"
+	@echo "... PLATFORMIO_PROGRAM"
+	@echo "... edit_cache"
+	@echo "... PLATFORMIO_TEST"
+	@echo "... PLATFORMIO_UPLOADFS"
+	@echo "... PLATFORMIO_REBUILD_PROJECT_INDEX"
+	@echo "... PLATFORMIO_UPDATE_ALL"
+	@echo "... rebuild_cache"
 	@echo "... TRACER"
-	@echo "... project_interfaces"
-	@echo "... core"
-	@echo "... interface"
-	@echo "... scheduler"
-	@echo "... actions"
-	@echo "... asserv"
-	@echo "... tracer_config"
-	@echo "... hardware"
+	@echo "... src/Actions/BinaryActions.o"
+	@echo "... src/Actions/BinaryActions.i"
+	@echo "... src/Actions/BinaryActions.s"
+	@echo "... src/Actions/ContinuousActions.o"
+	@echo "... src/Actions/ContinuousActions.i"
+	@echo "... src/Actions/ContinuousActions.s"
+	@echo "... src/Actions/ServoActions.o"
+	@echo "... src/Actions/ServoActions.i"
+	@echo "... src/Actions/ServoActions.s"
+	@echo "... src/ControlLoops/ControlLoops.o"
+	@echo "... src/ControlLoops/ControlLoops.i"
+	@echo "... src/ControlLoops/ControlLoops.s"
+	@echo "... src/ControlLoops/ExternalParameters.o"
+	@echo "... src/ControlLoops/ExternalParameters.i"
+	@echo "... src/ControlLoops/ExternalParameters.s"
+	@echo "... src/ControlLoops/PID.o"
+	@echo "... src/ControlLoops/PID.i"
+	@echo "... src/ControlLoops/PID.s"
+	@echo "... src/DataStructures/ArgumentsContainer.o"
+	@echo "... src/DataStructures/ArgumentsContainer.i"
+	@echo "... src/DataStructures/ArgumentsContainer.s"
+	@echo "... src/DataStructures/Queue.o"
+	@echo "... src/DataStructures/Queue.i"
+	@echo "... src/DataStructures/Queue.s"
+	@echo "... src/DataStructures/StringUtils.o"
+	@echo "... src/DataStructures/StringUtils.i"
+	@echo "... src/DataStructures/StringUtils.s"
+	@echo "... src/EEPROM/EEPROMInterface.o"
+	@echo "... src/EEPROM/EEPROMInterface.i"
+	@echo "... src/EEPROM/EEPROMInterface.s"
+	@echo "... src/EEPROM/EEPROMNode.o"
+	@echo "... src/EEPROM/EEPROMNode.i"
+	@echo "... src/EEPROM/EEPROMNode.s"
+	@echo "... src/EEPROM/EEPROMStorage.o"
+	@echo "... src/EEPROM/EEPROMStorage.i"
+	@echo "... src/EEPROM/EEPROMStorage.s"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.o"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.i"
+	@echo "... src/Interfaces/GCodeInterface/GCodeInterface.s"
+	@echo "... src/Interfaces/LCDInterface/LCDInterface.o"
+	@echo "... src/Interfaces/LCDInterface/LCDInterface.i"
+	@echo "... src/Interfaces/LCDInterface/LCDInterface.s"
+	@echo "... src/Interfaces/ProgramInterface/ProgramInterface.o"
+	@echo "... src/Interfaces/ProgramInterface/ProgramInterface.i"
+	@echo "... src/Interfaces/ProgramInterface/ProgramInterface.s"
+	@echo "... src/Interfaces/TerminalInterface/TerminalInterface.o"
+	@echo "... src/Interfaces/TerminalInterface/TerminalInterface.i"
+	@echo "... src/Interfaces/TerminalInterface/TerminalInterface.s"
+	@echo "... src/Interfaces/TerminalInterface/TerminalNode.o"
+	@echo "... src/Interfaces/TerminalInterface/TerminalNode.i"
+	@echo "... src/Interfaces/TerminalInterface/TerminalNode.s"
+	@echo "... src/Interfaces/TerminalInterface/TreeManager.o"
+	@echo "... src/Interfaces/TerminalInterface/TreeManager.i"
+	@echo "... src/Interfaces/TerminalInterface/TreeManager.s"
+	@echo "... src/Project/Config/geometry.o"
+	@echo "... src/Project/Config/geometry.i"
+	@echo "... src/Project/Config/geometry.s"
+	@echo "... src/Project/InterfaceCommands/GCodeInterfaceCommands.o"
+	@echo "... src/Project/InterfaceCommands/GCodeInterfaceCommands.i"
+	@echo "... src/Project/InterfaceCommands/GCodeInterfaceCommands.s"
+	@echo "... src/Project/InterfaceCommands/LCDInterfaceCommands.o"
+	@echo "... src/Project/InterfaceCommands/LCDInterfaceCommands.i"
+	@echo "... src/Project/InterfaceCommands/LCDInterfaceCommands.s"
+	@echo "... src/Project/InterfaceCommands/ProgramInterfaceCommands.o"
+	@echo "... src/Project/InterfaceCommands/ProgramInterfaceCommands.i"
+	@echo "... src/Project/InterfaceCommands/ProgramInterfaceCommands.s"
+	@echo "... src/Project/InterfaceCommands/TerminalInterfaceCommands.o"
+	@echo "... src/Project/InterfaceCommands/TerminalInterfaceCommands.i"
+	@echo "... src/Project/InterfaceCommands/TerminalInterfaceCommands.s"
+	@echo "... src/Project/MachineController.o"
+	@echo "... src/Project/MachineController.i"
+	@echo "... src/Project/MachineController.s"
+	@echo "... src/Project/TemperatureController.o"
+	@echo "... src/Project/TemperatureController.i"
+	@echo "... src/Project/TemperatureController.s"
+	@echo "... src/Sensors/Thermistors/Thermistors.o"
+	@echo "... src/Sensors/Thermistors/Thermistors.i"
+	@echo "... src/Sensors/Thermistors/Thermistors.s"
+	@echo "... src/StepperControl/IncrementComputer.o"
+	@echo "... src/StepperControl/IncrementComputer.i"
+	@echo "... src/StepperControl/IncrementComputer.s"
+	@echo "... src/StepperControl/JerkPlanner.o"
+	@echo "... src/StepperControl/JerkPlanner.i"
+	@echo "... src/StepperControl/JerkPlanner.s"
+	@echo "... src/StepperControl/KinematicsCore1/K1Physics.o"
+	@echo "... src/StepperControl/KinematicsCore1/K1Physics.i"
+	@echo "... src/StepperControl/KinematicsCore1/K1Physics.s"
+	@echo "... src/StepperControl/KinematicsCore1/KinematicsCore1.o"
+	@echo "... src/StepperControl/KinematicsCore1/KinematicsCore1.i"
+	@echo "... src/StepperControl/KinematicsCore1/KinematicsCore1.s"
+	@echo "... src/StepperControl/KinematicsCore1/Movements/HomingMovement.o"
+	@echo "... src/StepperControl/KinematicsCore1/Movements/HomingMovement.i"
+	@echo "... src/StepperControl/KinematicsCore1/Movements/HomingMovement.s"
+	@echo "... src/StepperControl/KinematicsCore1/Movements/LinearMovement.o"
+	@echo "... src/StepperControl/KinematicsCore1/Movements/LinearMovement.i"
+	@echo "... src/StepperControl/KinematicsCore1/Movements/LinearMovement.s"
+	@echo "... src/StepperControl/KinematicsCore1/SqrtFastComputer.o"
+	@echo "... src/StepperControl/KinematicsCore1/SqrtFastComputer.i"
+	@echo "... src/StepperControl/KinematicsCore1/SqrtFastComputer.s"
+	@echo "... src/StepperControl/KinematicsCore1/mathProcess.o"
+	@echo "... src/StepperControl/KinematicsCore1/mathProcess.i"
+	@echo "... src/StepperControl/KinematicsCore1/mathProcess.s"
+	@echo "... src/StepperControl/KinematicsCore2/K2Physics.o"
+	@echo "... src/StepperControl/KinematicsCore2/K2Physics.i"
+	@echo "... src/StepperControl/KinematicsCore2/K2Physics.s"
+	@echo "... src/StepperControl/KinematicsCore2/KinematicsCore2.o"
+	@echo "... src/StepperControl/KinematicsCore2/KinematicsCore2.i"
+	@echo "... src/StepperControl/KinematicsCore2/KinematicsCore2.s"
+	@echo "... src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.o"
+	@echo "... src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.i"
+	@echo "... src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.s"
+	@echo "... src/StepperControl/MachineInterface.o"
+	@echo "... src/StepperControl/MachineInterface.i"
+	@echo "... src/StepperControl/MachineInterface.s"
+	@echo "... src/StepperControl/StepperController.o"
+	@echo "... src/StepperControl/StepperController.i"
+	@echo "... src/StepperControl/StepperController.s"
+	@echo "... src/StepperControl/SubMovementManager.o"
+	@echo "... src/StepperControl/SubMovementManager.i"
+	@echo "... src/StepperControl/SubMovementManager.s"
+	@echo "... src/StepperControl/TrajectoryTracer.o"
+	@echo "... src/StepperControl/TrajectoryTracer.i"
+	@echo "... src/StepperControl/TrajectoryTracer.s"
+	@echo "... src/TaskScheduler/TaskScheduler.o"
+	@echo "... src/TaskScheduler/TaskScheduler.i"
+	@echo "... src/TaskScheduler/TaskScheduler.s"
+	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy35.o"
+	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy35.i"
+	@echo "... src/hardware_language_abstraction/hardware_language_abstraction_teensy35.s"
+	@echo "... src/interfaces.o"
+	@echo "... src/interfaces.i"
+	@echo "... src/interfaces.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

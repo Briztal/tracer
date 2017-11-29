@@ -51,8 +51,6 @@ void TaskScheduler::init() {
 
     EEPROMStorage::init();
 
-    EEPROMInterface::init();
-
 
 #ifdef ENABLE_STEPPER_CONTROL
     StepperController::init();

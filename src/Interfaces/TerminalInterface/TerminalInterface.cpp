@@ -227,7 +227,7 @@ bool TerminalInterface::parse_arguments(uint8_t arguments_sequence_index) {
         arguments_sequence += StringUtils::lstrip(arguments_sequence, ' ');
 
         //safely (with size check and null termination) copy the next argument in our buffer.
-        uint8_t argument_size = StringUtils::copy_until_char(arguments_sequence, arg_buffer, MAX_WORD_SIZE + 1, ' ');
+        uint8_t argument_size = StringUtils::copy_until_char(arguments_sequence, arg_buffer, MAX_WORD_SIZE + 1, '-');
 
         //Go to the next unprocessed char
         arguments_sequence += argument_size;

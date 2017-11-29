@@ -17,7 +17,7 @@ add_definitions(-DARDUINO=10610)
 add_definitions(-DTEENSYDUINO=136)
 
 include_directories("$ENV{HOME}/.platformio/packages/framework-arduinoteensy/cores/teensy3")
-include_directories("/media/raph/Data/Projets/TRACER/TRACER/src")
+include_directories("/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src")
 include_directories("$ENV{HOME}/.platformio/packages/framework-arduinoteensy/libraries/EEPROM")
 include_directories("$ENV{HOME}/.platformio/packages/framework-arduinoteensy/libraries/ADC")
 include_directories("$ENV{HOME}/.platformio/packages/framework-arduinoteensy/libraries/AccelStepper")
@@ -124,4 +124,4 @@ include_directories("$ENV{HOME}/.platformio/packages/toolchain-gccarmnoneeabi/li
 include_directories("$ENV{HOME}/.platformio/packages/toolchain-gccarmnoneeabi/lib/gcc/arm-none-eabi/5.4.1/include-fixed")
 include_directories("$ENV{HOME}/.platformio/packages/tool-unity")
 
-FILE(GLOB_RECURSE SRC_LIST "/media/raph/Data/Projets/TRACER/TRACER/src/*.*")
+FILE(GLOB_RECURSE SRC_LIST "/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/*.*")
