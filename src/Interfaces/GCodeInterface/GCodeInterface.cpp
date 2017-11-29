@@ -61,7 +61,7 @@ void GCodeInterface::read_data() {
         //Read the data link
         char read_char = gcode_interface_link_t::read();
 
-        //If the recieved char is a line feed or a carriage_id return
+        //If the recieved char is a line feed or a working_extruder return
         if ((read_char == 10) || (read_char == 13)) {
 
             //If a char has effectively been received

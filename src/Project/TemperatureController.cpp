@@ -28,67 +28,54 @@
  *
  */
 
-task_state_t TemperatureController::enable_hotend_regulation(uint8_t hotend, bool enable) {
+task_state_t TemperatureController::set_hotends_state(hotends_state_t new_state) {
 
-    //verify that the required hotend exists.
+    //As we must control flags for each hotend, a repetitive process, we will use a macro.
 
-    if (hotend<4) {
+#define HOTEND_ENABLE(i) \
+    if (new_state.enabled_##i##_flag) {\
+        \
+        /*if the hotend must be enabled*/\
+        if (new_state.enabled_##i) {\
+            /*Reset by id*/\
+            PID::reset(i);\
+            \
+            /*Mark the hotend as enabled*/\
+             hotends_state.enabled_##i = true;\
+            \
+        } else {\
+           /*Disable the hotend*/\
+            ContinuousActions::set_power(i, 0);\
+            \
+            /*Mark the hotend as disabled*/\
+            hotends_state.enabled_##i = false;\
+            \
+        }\
+    }\
 
-        if (enable) {
+#define HOTEND_POWER(i)\
+    /*if the hotend power must be changed*/\
+    if (new_state.temp_##i##_flag) {\
+        /*Update the temperature*/\
+        hotends_state.temp_##i = new_state.temp_##i;\
+    }\
 
-            //Disable :
-            //Disable the hotend
-            ContinuousActions::set_power(hotend, 0);
+#define HOTEND_SET(i) HOTEND_ENABLE(i) HOTEND_POWER(i);
 
-            //Mark the hotend as disabled
-            temp_regulation_enabled[hotend] = false;
+HOTEND_SET(0);
+HOTEND_SET(1);
+HOTEND_SET(2);
+HOTEND_SET(3);
 
-        } else {
 
-            //Enable:
-            //Reset by id
-            PID::reset(hotend);
+#undef HOTEND_ENABLE
 
-            //Mark the hotend as enabled
-            temp_regulation_enabled[hotend] = true;
-
-        }
-
-        return complete;
-
-    }
-
-    return invalid_arguments;
 
 }
 
+TemperatureController::hotends_state_t TemperatureController::get_hotends_state() {
 
-bool TemperatureController::is_hotend_regulation_enabled(uint8_t hotend) {
-
-    return complete;
-
-}
-
-
-
-
-/*
- * set_hotend_target : this function enables the hotbed's regulation.
- *
- */
-
-task_state_t TemperatureController::set_hotend_temperature(uint8_t hotend, float target) {
-
-    //verify that the required hotend exists.
-    if (hotend<4) {
-
-        temp_targets[hotend] = target;
-
-        return complete;
-
-    }
-
-    return invalid_arguments;
+    return hotends_state;
 
 }
 
@@ -120,52 +107,39 @@ float TemperatureController::get_hotend_temperature(uint8_t hotend) {
  *
  */
 
-task_state_t TemperatureController::enable_hotbed_regulation(bool enable) {
+task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
 
-    if (enable) {
+    if (new_state.enabled_flag) {
 
-        //Enable
-        //Reset by name
-        PID::reset_hotbed();
+        //If the bed must be enabled
+        if (new_state.enabled) {
 
-        //Mark the regulation as enabled
-        temp_regulation_enabled[4] = true;
+            //Reset by name
+            PID::reset_hotbed();
 
+            //Mark the regulation as enabled
+            hotbed_state.enabled = true;
 
-        //Mark the regulation as disabled
-        temp_regulation_enabled[4] = false;
+        } else {
+            //If the bed must be disabled
 
-    } else {
+            //Disable the hotend
+            ContinuousActions::set_power_5(0);
 
-        //Disable
-        //Disable the hotend
-        ContinuousActions::set_power_5(0);
+            //Mark the regulation as disabled
+            hotbed_state.enabled = false;
 
-        //Mark the regulation as disabled
-        temp_regulation_enabled[4] = false;
+        }
 
     }
 
-    return complete;
+    //If the temperature must be changed
+    if (new_state.temp_flag) {
 
-}
+        //Set the new temperature
+        hotbed_state.temperature = new_state.temperature;
 
-
-bool TemperatureController::is_hotbed_regulation_enabled() {
-
-    return complete;
-
-}
-
-
-/*
- * set_hotbed_temperature : this function enables the hotbed's regulation.
- *
- */
-
-task_state_t TemperatureController::set_hotbed_temperature(float target) {
-
-    temp_targets[4] = target;
+    }
 
     return complete;
 
@@ -211,98 +185,35 @@ void TemperatureController::regulation_init() {
 
 void TemperatureController::temperature_regulation() {
 
-    //Thermistor 0 :
-    if (temp_regulation_enabled[0]) {
 
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_0();
-
-        //Get the temperature error
-        float error = temp_targets[0] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_0(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_0(output);
-
+#define TEMP_REGULATION(i, enabled, target, name) \
+    \
+    /*If the regulation is enabled (flag set)*/\
+    if ((enabled)) {\
+        \
+        /*Get the current temperature*/\
+        float temp = Thermistors::get_temperature_##name();\
+        \
+        /*Get the temperature error*/\
+        float error = (target) - temp;\
+        \
+        /*Get the power output*/\
+        float output = PID::compute_##name(error);\
+        \
+        /*Set the power output.*/\
+        ContinuousActions::set_power_##i(output);\
+        \
     }
 
+    TEMP_REGULATION(0, hotends_state.enabled_0, hotends_state.temp_0, hotend_0);
 
+    TEMP_REGULATION(1, hotends_state.enabled_1, hotends_state.temp_1, hotend_1);
 
+    TEMP_REGULATION(2, hotends_state.enabled_2, hotends_state.temp_2, hotend_2);
 
-    //Thermistor 0 :
-    if (temp_regulation_enabled[1]) {
+    TEMP_REGULATION(3, hotends_state.enabled_3, hotends_state.temp_3, hotend_3);
 
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_1();
-
-        //Get the temperature error
-        float error = temp_targets[1] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_1(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_1(output);
-
-    }
-
-
-    //Thermistor 2 :
-    if (temp_regulation_enabled[2]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_2();
-
-
-        //Get the temperature error
-        float error = temp_targets[2] - temp;
-
-
-        //Get the power output
-        float output = PID::compute_hotend_2(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_2(output);
-
-    }
-
-    //Thermistor 3 :
-    if (temp_regulation_enabled[3]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotend_3();
-
-
-        //Get the temperature error
-        float error = temp_targets[3] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotend_3(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_3(output);
-
-    }
-
-    //hotbed :
-    if (temp_regulation_enabled[4]) {
-
-        //Get the current temperature
-        float temp = Thermistors::get_temperature_hotbed();
-
-        //Get the temperature error
-        float error = temp_targets[4] - temp;
-
-        //Get the power output
-        float output = PID::compute_hotbed(error);
-
-        //Set the power output.
-        ContinuousActions::set_power_4(output);
-
-    }
+    TEMP_REGULATION(4, hotbed_state.enabled, hotbed_state.temperature, hotbed);
 
 };
 
@@ -316,11 +227,14 @@ void TemperatureController::temperature_regulation() {
 
 void TemperatureController::regulation_finalisation() {
 
+    //Set hotends and hotbed target to zero.
+    hotends_state.temp_0 = hotends_state.temp_1 = hotends_state.temp_1 = hotends_state.temp_1 = 0;
+    hotbed_state.temperature = 0;
 
-    memset(temp_targets, 0, sizeof(float) * 5);
-
+    //Reset all PIDs.
     PID::reset_all();
 
+    //Set all powers to zero
     ContinuousActions::set_power_0(0);
     ContinuousActions::set_power_1(0);
     ContinuousActions::set_power_2(0);
@@ -331,10 +245,9 @@ void TemperatureController::regulation_finalisation() {
 
 //-------------------------------------------Static declaration / definitions-------------------------------------------
 
+//Declare and define the hotends state (flags and vars for activities and temperature targets).
+TemperatureController::hotends_state_t TemperatureController::hotends_state = TemperatureController::hotends_state_t();
 
-bool t_t_r_en[5];
-bool *const TemperatureController::temp_regulation_enabled = t_t_r_en;
-
-float t_t_tar[5];
-float *const TemperatureController::temp_targets = t_t_tar;
+//Declare and define the hotbed state (flags and vars for activity and temperature target).
+TemperatureController::hotbed_state_t TemperatureController::hotbed_state = TemperatureController::hotbed_state_t();
 

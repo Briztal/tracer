@@ -85,15 +85,24 @@ private:
 
     static char *const word_buffer;
 
+
+
 };
 
 
-//TODO MAKE NEW MACROS, FOR PARSING ALL ARGUMENTS (WITH IDENTIFIERS), CHECK IDENTIFIERS PRESENCE, AND GET AN ARGUMENT
-//Below is a macro that simplifies the recuperation of argument pointer and size.
-//#define GET_ARGS(index, ptr) char *(ptr) = TerminalInterface::get_arguments(index);
+#define PARSE_ARGUMENTS(index) TerminalInterface::parse_arguments(index);
 
-//#define GET_NB_WORDS(ptr) StringUtils::get_nb_words((ptr))
+#define NB_ARGUMENTS (TerminalInterface::get_nb_arguments())
 
-//#define GET_NEXT_WORD(args) args += StringUtils::get_next_word(args, word_buffer, MAX_WORD_SIZE);
+#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!TerminalInterface::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!TerminalInterface::verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define CHECK_ARGUMENT(identifier) (TerminalInterface::verify_identifier_presence(identifier))
+
+#define GET_ARG(identifier) TerminalInterface::get_argument(identifier)
+
+#define GET_ARG_VALUE(identifier) TerminalInterface::get_argument_value(identifier)
+
 
 #endif //TRACER_TREEINTERFACECOMMANDS_H

@@ -94,7 +94,7 @@ float Thermistors::get_temperature_##name() {\
  *
  */
 
-#define GET_VALUE(index) table[(index) << 1]
+#define GET_ARG_VALUE(index) table[(index) << 1]
 #define GET_TEMP(index) table[((index) << 1) + 1]
 
 float
@@ -104,8 +104,8 @@ Thermistors::get_temperature(const int16_t read_value, const float *const table,
     uint8_t lower_index = *v_index, upper_index = lower_index + (uint8_t) 1;
 
     //Current bounds, temperatures associated with lower and upper index.
-    int16_t lower_value = (int16_t) GET_VALUE(lower_index);
-    int16_t upper_value = (int16_t) GET_VALUE(upper_index);
+    int16_t lower_value = (int16_t) GET_ARG_VALUE(lower_index);
+    int16_t upper_value = (int16_t) GET_ARG_VALUE(upper_index);
 
 
 
@@ -131,7 +131,7 @@ Thermistors::get_temperature(const int16_t read_value, const float *const table,
 
             //Update value and lower_value
             upper_value = lower_value;
-            lower_value = (int16_t) GET_VALUE(lower_index);
+            lower_value = (int16_t) GET_ARG_VALUE(lower_index);
 
         }
 
@@ -150,7 +150,7 @@ Thermistors::get_temperature(const int16_t read_value, const float *const table,
 
             //Update value and lower_value
             lower_value = upper_value;
-            upper_value = (int16_t) GET_VALUE(upper_index);
+            upper_value = (int16_t) GET_ARG_VALUE(upper_index);
 
         }
 

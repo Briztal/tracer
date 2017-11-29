@@ -47,50 +47,76 @@ public:
     static void regulation_finalisation();
 
 
-    //---------------------------State selection functions---------------------------
+    //---------------------------HotEnds---------------------------
 
-    //Hotends
-    static task_state_t enable_hotend_regulation(uint8_t hotend, bool enable);
+    typedef struct hotends_state_t {
 
-GENERATE_SCHEDULER(enable_hotend_regulation, 2, uint8_t, hotend, bool, enable);
+        //Flags
 
-    //Not scheduled : is the hotend regulation CURRENTLY enabled
-    static bool is_hotend_regulation_enabled(uint8_t hotend);
+        //States.
+        bool enabled_0_flag = false, enabled_1_flag = false, enabled_2_flag = false, enabled_3_flag = false;
 
-    static task_state_t set_hotend_temperature(uint8_t hotend, float target);
-
-GENERATE_SCHEDULER(set_hotend_temperature, 2, uint8_t, hotend, float, target);
-
-    //Not scheduled : get the CURRENT hotbed temperature
-    static float get_hotend_temperature(uint8_t hotend);
+        //Temperatures.
+        bool temp_0_flag = false, temp_1_flag = false, temp_2_flag = false, temp_3_flag = false;
 
 
+        //Values
 
-    //Hotbed
-    static task_state_t enable_hotbed_regulation(bool enable);
+        //States.
+        bool enabled_0 = false, enabled_1 = false, enabled_2 = false, enabled_3 = false;
 
-GENERATE_SCHEDULER(enable_hotbed_regulation, 2, bool, enable);
+        //Temperatures.
+        float temp_0 = 0, temp_1 = 0, temp_2 = 0, temp_3 = 0;
 
-    //Not scheduled : is the hotbed regulation CURRENTLY enabled
-    static bool is_hotbed_regulation_enabled();
+    };
 
-    static task_state_t set_hotbed_temperature(float target);
 
-GENERATE_SCHEDULER(set_hotbed_temperature, 1, float, target);
+    //Set the current hotends state.
+    static task_state_t set_hotends_state(hotends_state_t state);
 
-    //Not scheduled : get the CURRENT hotbed temperature
-    static float get_hotbed_temperature();
+    //Scheduler for the state setter
+GENERATE_SCHEDULER(set_hotends_state, 1, hotends_state_t, state);
 
+    //Get the current hotends state.
+    static hotends_state_t get_hotends_state();
 
 private:
 
-    //The temperature targets
-    static float *const temp_targets;
-
-    //The regulation flags : i-th is set if the i-th thermistor's regulation is enabled.
-    static bool *const temp_regulation_enabled;
+    static hotends_state_t hotends_state;
 
 
+    //---------------------------HotBed---------------------------
+
+public:
+
+    typedef struct hotbed_state_t {
+
+        //Flags
+        bool enabled_flag = false, temp_flag = false;
+
+        //Values
+        bool enabled = false;
+        float temperature = 0;
+
+    };
+
+    //Set the current hotbeds state.
+    static task_state_t set_hotbed_state(hotbed_state_t state);
+
+    //Scheduler for the state setter
+GENERATE_SCHEDULER(set_hotbed_state, 1, hotbed_state_t, state);
+
+    //Get the current hotbeds state.
+    static hotbed_state_t get_hotbeds_state();
+
+
+private:
+    static hotbed_state_t hotbed_state;
+
+
+    float get_hotend_temperature(uint8_t hotend);
+
+    float get_hotbed_temperature();
 };
 
 

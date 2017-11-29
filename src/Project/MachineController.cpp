@@ -52,13 +52,13 @@
  *
  *  1 endstop per X_ Y_ Z.
  *
- *  1 Hotend per carriage_id, 1 thermistor per carriage_id
+ *  1 Hotend per working_extruder, 1 thermistor per working_extruder
  *
  *  1 Hotbed, with 1 thermistor
  *
  *  1 permanent ventilation per Hotend
  *
- *  1 power-adjustable print-ventilation per carriage_id.
+ *  1 power-adjustable print-ventilation per working_extruder.
  *
  */
 
@@ -105,7 +105,6 @@ task_state_t MachineController::carriages_reset() {
     return MachineInterface::linear_movement(position);
 
 }
-
 
 
 /*
@@ -195,7 +194,7 @@ task_state_t MachineController::line_to(machine_coords_t coords) {
     fill_coords(&coords);
 
     //Try to move to the specified position
-    switch (mode) {
+    switch (extrusion_state.mode) {
         case 0:
             state = mode_0(&coords);
         default:
@@ -223,7 +222,7 @@ task_state_t MachineController::line_of(machine_coords_t coords) {
     task_state_t state = complete;
 
     //Try to move to the specified position
-    switch (mode) {
+    switch (extrusion_state.mode) {
         case 0:
             state = mode_0(&coords);
         default:
@@ -241,20 +240,20 @@ task_state_t MachineController::line_of(machine_coords_t coords) {
 //---------------------------------------------------Movement planners--------------------------------------------------
 
 /*
- * mode_0 : single carriage_id mode    CI::echo("complete : "+String(state == complete));
+ * mode_0 : single working_extruder mode    CI::echo("complete : "+String(state == complete));
 .
  *
- *  In this mode, every carriage_id can be moved independently.
+ *  In this mode, every working_extruder can be moved independently.
  *
  */
 
 task_state_t MachineController::mode_0(machine_coords_t *coords) {
 
-    MachineInterface::set_speed_group(carriage_id);
+    MachineInterface::set_speed_group(extrusion_state.working_extruder);
 
     bool x0, y0;
 
-    switch (carriage_id) {
+    switch (extrusion_state.working_extruder) {
         case 0:
             x0 = y0 = true;
             break;
@@ -361,7 +360,7 @@ void MachineController::sanity_check(float *position) {
 }
 
 
-//-----------------------------------------------------setup---------------------------------------------------
+//-----------------------------------------------------Steppers---------------------------------------------------
 
 task_state_t MachineController::enable_steppers(bool enable) {
 
@@ -381,34 +380,70 @@ task_state_t MachineController::enable_steppers(bool enable) {
     return complete;
 }
 
+//-----------------------------------------------------Extrusion---------------------------------------------------
 
-task_state_t MachineController::speed_set(uint8_t carriage_id, float speed) {
+task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state) {
 
-    //TODO VERIFY CARRIAGE AND SPEED BOUNDS
+    //Initialise a state, that will be updated at each modification.
+    task_state_t state = complete;
 
-    //Set the speed
-    return MachineInterface::set_speed_for_group(carriage_id, speed);
+    //if the working extruder must be changed :
+    if (new_state.working_extruder_flag) {
+
+        //Change the working extruder
+        state = set_working_extruder(new_state.working_extruder);
+
+        //Fail if the function failed.
+        if (state != complete) return state;
+
+
+    }
+
+    //As next blocs only focus on each carriage's speed, always the same way, we will use a macro.
+
+#define SPEED_MODIFICATION(speed_group, flag, new_speed) \
+    /*if the working extruder must be changed : */\
+    if (flag) {\
+        \
+        /*Change the speed for i'th carriage*/\
+        MachineInterface::set_speed_for_group(speed_group, new_speed);\
+        \
+        /*Fail if the function failed.*/\
+        if (state!=complete) return state;\
+        \
+    }
+
+    //Eventually modify the speed for the current carriage
+    SPEED_MODIFICATION(extrusion_state.working_extruder, new_state.current_speed_flag, new_state.current_speed)
+
+    //Eventually modify the speed for every carriage
+    SPEED_MODIFICATION(0, new_state.speed_0_flag, new_state.speed_0)
+    SPEED_MODIFICATION(1, new_state.speed_1_flag, new_state.speed_1)
+    SPEED_MODIFICATION(2, new_state.speed_2_flag, new_state.speed_2)
+    SPEED_MODIFICATION(3, new_state.speed_3_flag, new_state.speed_3)
+
+    //For safety and good practices, undef the macro.
+#undef SPEED_MODIFICATION
 
 }
 
 
-task_state_t MachineController::extruder_set(uint8_t carriage) {
-
+task_state_t MachineController::set_working_extruder(uint8_t carriage) {
 
     //Nothing to do if the carriage id the current one.
-    if (carriage == carriage_id) {
+    if (carriage == extrusion_state.working_extruder) {
         return null_task;
     }
 
-    switch (mode) {
+    switch (extrusion_state.mode) {
         case 0:
-            //4 carriage mode
+            //4 carriage mode.
             if (carriage > 3) {
                 return invalid_arguments;
             }
             break;
         case 1 :
-            //2 carriages mode
+            //2 carriages mode.
             if (carriage > 1) {
                 return invalid_arguments;
             }
@@ -420,102 +455,86 @@ task_state_t MachineController::extruder_set(uint8_t carriage) {
             }
             break;
         default:
-            //Never happens
+            //Never happens.
             return complete;
     }
 
     //If valid arguments :
-    carriage_id = carriage;
+    extrusion_state.working_extruder = carriage;
 
+    //Succeed.
     return complete;
 
 }
 
 
-task_state_t MachineController::extruder_speed_set(uint8_t carriage_id, float speed) {
+/*
+ * get_extrusion_state : this function returns the current state of the cooling.
+ *
+ */
 
-    task_state_t state = extruder_set(carriage_id);
+const MachineController::extrusion_state_t MachineController::get_extrusion_state() {
 
-    if (state == complete) {
-        state = speed_set(carriage_id, speed);
-    }
-
-    return state;
+    return extrusion_state;
 
 }
-
-
 
 //-------------------------------Cooling-------------------------------
 
+
+task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
+
+    //If the enable state must be changed
+    if (new_state.enabled_flag) {
+
+        if (new_state.enabled) {
+
+            //If the cooling must be enabled, enable it.
+            ContinuousActions::set_power_5(cooling_state.power);
+
+        } else {
+
+            //If the cooling must be stopped, stop it.
+            ContinuousActions::stop_0();
+
+        }
+    }
+
+    //If the power must be changed
+    if (new_state.power_flag) {
+
+        //Cache for the power.
+        float power = new_state.power;
+
+        //Minor the power;
+        if (power < 0)
+            power = 0;
+
+        //Major the power;
+        if (power > 100)
+            power = 100;
+
+        //Save the power
+        cooling_state.power = power;
+
+    }
+
+}
+
 /*
- *
- * set_cooling_power : this function sets the power of the cooling.
- *
- * It does not turn it on though.
- *
- * For this, call enable_cooling
+ * get_cooling_state : this function returns the current state of the cooling.
  *
  */
 
-task_state_t MachineController::set_cooling_power(float power) {
+const MachineController::cooling_state_t MachineController::get_cooling_state() {
 
-    //Minor the power;
-    if (power < 0)
-        power = 0;
-
-    //Major the power;
-    if (power > 100)
-        power = 100;
-
-    //Save the power
-    cooling_power = power;
-
-    //Complete
-    return complete;
+    return cooling_state;
 
 }
 
-/*
- * get_cooling_power : this function returns the power of the cooling
- *
- */
+MachineController::cooling_state_t MachineController::cooling_state = MachineController::cooling_state_t();
 
-float MachineController::get_cooling_power() {
-
-    CI::echo(cooling_power);
-
-    return complete;
-}
-
-task_state_t MachineController::enable_cooling(bool enable) {
-
-    if (enable)
-        ContinuousActions::set_power_5(cooling_power);
-    else
-        ContinuousActions::stop_0();
-
-    return complete;
-
-}
-
-bool MachineController::is_cooling_enabled() {
-
-    if (ContinuousActions::get_state_5())
-        CI::echo("1");
-    else
-        CI::echo("0");
-
-    return complete;
-
-}
-
-
-uint8_t MachineController::mode = 0;
-
-uint8_t MachineController::carriage_id = 0;
-
-float MachineController::cooling_power = 100;
+MachineController::extrusion_state_t MachineController::extrusion_state = MachineController::extrusion_state_t();
 
 float tmpos[NB_AXIS];
 float *const MachineController::position = tmpos;

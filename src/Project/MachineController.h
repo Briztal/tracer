@@ -51,12 +51,10 @@ typedef struct carriage_data {
 class MachineController {
 
 
-
 public:
 
     //-------------------------------Movement-------------------------------
 
-    //r
     static task_state_t carriages_reset();
 
 GENERATE_SCHEDULER(carriages_reset, 1);
@@ -72,7 +70,8 @@ GENERATE_SCHEDULER(line_to, 1, machine_coords_t, coords);
 GENERATE_SCHEDULER(line_of, 1, machine_coords_t, coords);
 
 
-    //-------------------------------Setup-------------------------------
+    //-------------------------------Steppers-------------------------------
+
 
     //Enable or disable all steppers
     static task_state_t enable_steppers(bool enable);
@@ -80,59 +79,107 @@ GENERATE_SCHEDULER(line_of, 1, machine_coords_t, coords);
 GENERATE_SCHEDULER(enable_steppers, 1, bool, enable);
 
 
-    //Set the working extruder
-    static task_state_t extruder_set(uint8_t carriage);
+    //-------------------------------Extrusion-------------------------------
 
-GENERATE_SCHEDULER(extruder_set, 1, uint8_t, carriage);
+public:
+
+    /*
+     * A structure for the extrusion management.
+     *
+     *  This struct will contain:
+     *
+     *  A readonly (won't affect config if set) variable for the current mode;
+     *
+     *  flags and data for:
+     *      - The working extruder;
+     *      - The extruder speeds;
+     */
+
+    typedef struct extrusion_state_t {
+
+        //Readonly variable for mode;
+        uint8_t mode;
+
+        //Flags
+        bool working_extruder_flag = false;
+        bool current_speed_flag = false, speed_0_flag = false, speed_1_flag = false, speed_2_flag = false, speed_3_flag = false;
+
+        //Data
+        uint8_t working_extruder = 0;
+        float current_speed = 0, speed_0 = 0, speed_1 = 0, speed_2 = 0, speed_3 = 0;
+
+    } carriages_state_t;
 
 
-    //Set the speed for a particular extruder
-    static task_state_t speed_set(uint8_t carriage, float speed);
+    /*
+     * The Extrusion state modifier : this function can modify the state of the extrusion, and can be scheduled.
+     *
+     *  It receives a state, vith various flags enabled, and makes the appropriate modifications,
+     *      calling simple set functions :
+     *
+     *      - set_speed;
+     *      - set_working_carriage.
+     *
+     */
+    static task_state_t set_extrusion_state(extrusion_state_t data);
 
-GENERATE_SCHEDULER(speed_set, 1, uint8_t, carriage, float, speed);
+    //The Scheduler for the function.
+GENERATE_SCHEDULER(set_extrusion_state, 1, extrusion_state_t, data);
+
+    //Get the current extrusion state;
+    static const extrusion_state_t get_extrusion_state();
 
 
-    //Set the speef for a particular extruder and select it as the working one.
-    static task_state_t extruder_speed_set(uint8_t carriage, float speed);
+private :
 
-GENERATE_SCHEDULER(extruder_speed_set, 1, uint8_t, carriage, float, speed);
+    //The current extrusion state;
+    static extrusion_state_t extrusion_state;
 
+    //Mofify the current working extruder.
+    static task_state_t set_working_extruder(uint8_t carriage);
 
 
     //-------------------------------Cooling-------------------------------
 
+public:
+
+    /*
+     * A structure for the cooling state management.
+     *
+     *  This struct will contain flags and data for:
+     *      - enable state (is the cooling enabled)
+     *      - the power of the cooling
+     */
+
+    typedef struct cooling_state_t {
+        //Data flags : set if the data is relevant
+        bool enabled_flag = false;
+        bool power_flag = false;
+
+        //Data
+        bool enabled = false;
+        float power = true;
+
+    } cooling_state_t;
 
     //Set and get hotbed temperatures
-    static task_state_t set_cooling_power(float power);
+    static task_state_t set_cooling_state(cooling_state_t);
 
-GENERATE_SCHEDULER(set_cooling_power, 1, float, power);
+GENERATE_SCHEDULER(set_cooling_state, 1, cooling_state_t, state);
 
-
-    //Not scheduled : get the CURRENT cooling power
-    static float get_cooling_power();
+    static const cooling_state_t get_cooling_state();
 
 
-    //enable - disable hotbed
-    static task_state_t enable_cooling(bool enable);
+private:
 
-GENERATE_SCHEDULER(enable_cooling, 1, bool, state);
-
-
-    //Not scheduled : is the cooling CURRENTLY enabled
-    static bool is_cooling_enabled();
+    static cooling_state_t cooling_state;
 
 
 private:
 
     static float *const machine_coords;
 
-    static uint8_t mode;
-
-    static uint8_t carriage_id;
-
     static float *const position;
-
-    static float cooling_power;
 
     static task_state_t mode_0(machine_coords_t *coords);
 

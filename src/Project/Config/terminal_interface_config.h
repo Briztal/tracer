@@ -63,12 +63,11 @@ GO_UPPER()
 //Setup
 GO_LOWER(set, setup real-time machine parameters)
 
-CREATE_LEAF(carriage, set_carriage, set the current carriage and its speed, carriage_id - speed)
-CREATE_LEAF(speed, set_speed, set the speed for the specified carriage, carriage_id - value)
 CREATE_LEAF(power, enable_steppers, enable or disable all steppers, 0 or 1)
 
-CREATE_LEAF(cooling_p, set_cooling_power, enable or disable the cooling, power)
-CREATE_LEAF(cooling_en, enable_cooling, enable or disable the cooling, 0 or 1)
+CREATE_LEAF(extrusion, set_extrusion, set the current carriage and its speed, carriage_id - speed)
+
+CREATE_LEAF(cooling, set_cooling, enable or disable the cooling, power)
 
 CREATE_LEAF(hotend_target, set_hotend_temp, set a hotends temperature, 0 or 1)
 CREATE_LEAF(hotend_en, enable_hotend, enable or disable a hotend, 0 or 1)
@@ -90,10 +89,11 @@ GO_UPPER()
 GO_LOWER(test, various tests)
 CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed, none)
 CREATE_LEAF(temp, temp_test, reads temps on every thermistor, none)
+CREATE_LEAF(demo, action, a simple demo with all axis, i)
+
 GO_UPPER()
 
 
-CREATE_LEAF(demo, action, a simple demo with all axis, i)
 
 #undef GO_LOWER
 #undef GO_UPPER

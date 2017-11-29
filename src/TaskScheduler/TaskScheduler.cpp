@@ -24,10 +24,12 @@ PONEY
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "TaskScheduler.h"
+
 #include "../interface.h"
 #include "EEPROM/EEPROMStorage.h"
 #include "../StepperControl/StepperController.h"
 #include <ControlLoops/ControlLoops.h>
+#include <EEPROM/EEPROMInterface.h>
 
 
 /*
@@ -47,8 +49,12 @@ void TaskScheduler::init() {
 
     Thermistors::init();
 
-#ifdef ENABLE_STEPPER_CONTROL
     EEPROMStorage::init();
+
+    EEPROMInterface::init();
+
+
+#ifdef ENABLE_STEPPER_CONTROL
     StepperController::init();
 
 #endif

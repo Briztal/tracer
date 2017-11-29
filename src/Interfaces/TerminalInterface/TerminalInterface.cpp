@@ -77,7 +77,7 @@ void TerminalInterface::read_data() {
         //Read the serial
         char read_char = terminal_interface_link_t::read();
 
-        //If the recieved char is a line feed or a carriage_id return
+        //If the recieved char is a line feed or a working_extruder return
         if ((read_char == 10) || (read_char == 13)) {
 
             //If a char has effectively been received
@@ -160,8 +160,9 @@ void TerminalInterface::prepare_execution() {
  *
  */
 
-bool TerminalInterface::parse_arguments(char *arguments_sequence) {
+bool TerminalInterface::parse_arguments(uint8_t arguments_sequence_index) {
 
+    char *arguments_sequence = arguments_sequences_storage.get_argument(arguments_sequence_index);
     //First, reset the argument parsing structure :
 
     //reset the arguments counter
@@ -191,6 +192,7 @@ bool TerminalInterface::parse_arguments(char *arguments_sequence) {
 
         //Go to the next unprocessed char
         arguments_sequence += identifier_size;
+
 
         //If the identifier is invalid
         if (identifier_size != 2) {
@@ -222,7 +224,7 @@ bool TerminalInterface::parse_arguments(char *arguments_sequence) {
         uint8_t index = arguments_storage.insert_argument(&arg_buffer);
 
         //remove extra spaces.
-        arguments_sequence += StringUtils::count_until_char(arguments_sequence, '-');
+        arguments_sequence += StringUtils::lstrip(arguments_sequence, ' ');
 
         //safely (with size check and null termination) copy the next argument in our buffer.
         uint8_t argument_size = StringUtils::copy_until_char(arguments_sequence, arg_buffer, MAX_WORD_SIZE + 1, ' ');
@@ -245,10 +247,29 @@ bool TerminalInterface::parse_arguments(char *arguments_sequence) {
 
     } while (true);
 
+
+}
+
+uint8_t TerminalInterface::get_nb_arguments() {
+
+    return nb_identifiers;
+
+}
+
+float TerminalInterface::get_argument_value(char id) {
+
+    //Get the argument pointer.
+    char *ptr = get_argument(id);
+
+    //return the float equivalent.
+    if (ptr != nullptr) {
+        return str_to_float(ptr);
+    } else return 0;
+
 }
 
 
-float TerminalInterface::get_argument(char id) {
+char *TerminalInterface::get_argument(char id) {
 
     //For every identifier
     for (uint8_t i = 0; i < nb_identifiers; i++) {
@@ -260,37 +281,69 @@ float TerminalInterface::get_argument(char id) {
         if (link->identifier == id) {
 
             //Get the location of the argument (from the link), and convert the argument into a float.
-            return str_to_float(arguments_storage.get_argument(link->index));
+            return arguments_storage.get_argument(link->index);
 
         }
 
     }
 
-    return 0;
+    return nullptr;
 
 }
 
 
-bool TerminalInterface::verify_identifiers_presence(const char *identifiers) {
+bool TerminalInterface::verify_all_identifiers_presence(const char *identifiers) {
 
     //Cache for the current char
     char c = *(identifiers++);
 
-    //Initialise a flag, that will be false if any of the identifiers is not present in the parsed indetifiers.
-    bool all_present = true;
-
     //For every identifier in the string (stop at null byte);
     while (c) {
 
-        //Update the flag
-        all_present = all_present && verify_identifier_presence(c);
+        //If the identifier is not present
+        if (!verify_identifier_presence(c)) {
+
+            //Fail
+            return false;
+
+        }
 
         //Update the char
         c = *(identifiers++);
 
     }
 
-    return all_present;
+    //All identifiers are present, succeed.
+    return true;
+
+}
+
+bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers) {
+
+    //Cache for the current char
+    char c = *(identifiers++);
+
+    //Initialise a flag, that will be false if any of the identifiers is not present in the parsed indetifiers.
+    bool one_present = false;
+
+    //For every identifier in the string (stop at null byte);
+    while (c) {
+
+        //If the identifier is present
+        if (verify_identifier_presence(c)) {
+
+            //Succeed
+            return true;
+
+        }
+
+        //Update the char
+        c = *(identifiers++);
+
+    }
+
+    //No identifier detected, fail.
+    return false;
 
 }
 
@@ -647,10 +700,20 @@ char tdatain_terminal[MAX_COMMAND_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
-ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
-                                                                       NB_PENDING_COMMANDS);
+
+
+//Identifiers in a parsed argument sequence
+id_to_index_t t_id_to_indexes[MAX_ARGS_NB];
+id_to_index_t *const m::identfiers = t_id_to_indexes;
+
+//Number of arguments in a sequence
+uint8_t m::nb_identifiers = 0;
+
+
+ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1, NB_PENDING_COMMANDS);
 
 ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_WORD_SIZE + 1, NB_PENDING_COMMANDS);
+
 
 
 String *m::tree_summary = m::build_tree_summary();

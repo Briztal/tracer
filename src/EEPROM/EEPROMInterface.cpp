@@ -72,6 +72,23 @@
 
 
 
+
+void EEPROMInterface::init() {
+
+    Serial.begin(115200);
+
+    EEPROMNode *node = build_tree();
+
+    while(true) {
+
+        Serial.println("child : "+String(*(node->sub_nodes[0]->sub_nodes[1]->name)));
+
+
+        delay(1000);
+    }
+
+}
+
 void EEPROMInterface::print_stored_data() {
 
     //Stepper motors
@@ -189,6 +206,30 @@ uint8_t get_root_sub_nodes_nb() {
 
 }
 
+void display(EEPROMNode *node, uint8_t t) {
+
+    Serial.println("child : "+String(t)+" "+String(*(node->name)));
+
+    if (node->sub_nodes_nb == 0) {
+        Serial.println("dick");
+        return;
+
+    }
+    EEPROMNode** sub_nodes = node->sub_nodes;
+
+    t++;
+    //Check every sub_node
+    for (uint8_t i = 0; i < node->sub_nodes_nb; i++) {
+
+        EEPROMNode * n = (*(sub_nodes + i));
+
+        display(n, t);
+
+    }
+
+}
+
+
 
 EEPROMNode *EEPROMInterface::build_tree() {
 
@@ -208,7 +249,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     root->sub_nodes[root_id] = tree;
 
     //Add the sub nodes
-#define CONTINUOUS(i, name, ...) tree->sub_nodes[root_id] = new EEPROMNode(new String(#name), 0, i, &((ES::continuous_data+i)->max));
+#define CONTINUOUS(i, name, ...) tree->sub_nodes[root_id] = new EEPROMNode(new String("suus"), 0, i, &((ES::continuous_data+i)->max));
 
 #include <config.h>
 
@@ -341,9 +382,9 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
 #undef EEPROM_VARIABLE
 
+
     return root;
 }
-
 
 bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
 
@@ -356,11 +397,20 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
     char name_buffer[EEPROM_NAMES_MAX_LENGTH];
 
     //get the first word
-    StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
+    id_string += StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
 
     uint8_t i;
 
     node_check:
+
+    CI::echo("NODE CHECK "+String(name_buffer));
+
+    //Check every sub_node
+    for (i = 0; i < current_node->sub_nodes_nb; i++) {
+        current_sub_node = sub_nodes[i];
+        CI::echo("child : "+String((*current_sub_node->name)));
+
+    }
 
     //Check every sub_node
     for (i = 0; i < current_node->sub_nodes_nb; i++) {
@@ -368,9 +418,13 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
 
         const char *c = (*current_sub_node->name).c_str();
 
+        //CI::echo("sub  "+String(name_buffer)+" "+String(c));
+        CI::echo("c : "+ String((uint8_t)*name_buffer));
+
         //If the current word matches the current_node's name
         if (!strcmp(c, name_buffer)) {
 
+            CI::echo("MATCH");
             //Re-init the current data
             current_node = current_sub_node;
             sub_nodes = current_node->sub_nodes;
@@ -379,7 +433,9 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
             if (current_node->sub_nodes_nb) {
 
                 //Go to the lower level
-                StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
+                //id_string += StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
+
+                CI::echo("char : "+ String((uint8_t)*id_string));
 
                 //check the new node
                 goto node_check;
@@ -397,6 +453,8 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
     }
 
     search_log(current_node);
+
+    CI::echo("RET CHECK");
 
     return false;
 
@@ -429,6 +487,7 @@ bool EEPROMInterface::read_data_by_string(char *id_string, float *f) {
 
 void EEPROMInterface::write_data_by_string(char *id_string, float value) {
 
+    //TODO MEMORY LEAK ? FAIRE UNE FONCTION RECURSIVE D'AFFICHAGE D'ARBRE, POUR VOIR SI LE PB VIENT DE LA CONSTRUCTION OU D'UNE FUITE MEMOIRE.
     float *p;
 
     if (search_tree_by_string(id_string, &p)) {
@@ -436,6 +495,20 @@ void EEPROMInterface::write_data_by_string(char *id_string, float value) {
     }
 
 }
+
+
+
+
+
+void EEPROMInterface::display_tree() {
+
+    String s = *EEPROMInterface::eeprom_tree->sub_nodes[0]->sub_nodes[1]->name;
+
+    CI::echo("dick : "+String(s));
+
+}
+
+
 
 
 #ifdef ENABLE_PROGRAM_INTERFACE
@@ -599,4 +672,4 @@ void EEPROMInterface::send_structure() {
 
 #endif
 
-EEPROMNode *EEPROMInterface::eeprom_tree = EEPROMInterface::build_tree();
+EEPROMNode *EEPROMInterface::eeprom_tree = new EEPROMNode(new String("root"), 0, 0, nullptr);

@@ -75,13 +75,22 @@ public :
      */
 
     //Parse the provided arguments, and save the data in the local buffer.
-    static bool parse_arguments(char *arguments_sequence);
+    static bool parse_arguments(uint8_t arguments_sequence_index);
+
+    //Get the number of parsed arguments
+    static uint8_t get_nb_arguments();
+
+    //Get the pointer to the required argument
+    static char *get_argument(char id);
 
     //Get a previously parsed argument if it exists
-    static float get_argument(char id);
+    static float get_argument_value(char id);
 
     //Verify that all arguments (defined by their identifiers) have been provided (identifiers is null terminated).
-    static bool verify_identifiers_presence(const char *identifiers);
+    static bool verify_all_identifiers_presence(const char *identifiers);
+
+    //Verify that at least one argument (defined by their identifiers) have been provided (identifiers is null terminated).
+    static bool verify_one_identifiers_presence(const char *identifiers);
 
 
 private:

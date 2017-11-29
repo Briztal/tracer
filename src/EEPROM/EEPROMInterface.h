@@ -30,6 +30,8 @@ class EEPROMInterface {
 
 public:
 
+    static void init();
+
     static void print_stored_data();
 
     static EEPROMNode *build_tree();
@@ -46,6 +48,8 @@ public:
 #endif
 
 
+    static void display_tree();
+
 private:
 
     static EEPROMNode *eeprom_tree;
@@ -53,6 +57,7 @@ private:
     static bool search_tree_by_string(char *id_string, float **data);
 
     static void search_log(EEPROMNode *node);
+
 };
 
 

@@ -41,6 +41,8 @@
 
 task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
+    EEPROMInterface::display_tree();
+
 
     CI::echo("EXIT");
 
@@ -53,18 +55,20 @@ task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
 task_state_t TerminalInterfaceCommands::eeprom_write(uint8_t args_index) {
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index);
 
-    if (GET_NB_WORDS(args) < 2) {
-        return invalid_arguments;
-    }
-    
+    CI::echo("SUUS");
+
+    //verify that f and p arguments are provided.
+    REQUIRE_ALL_ARGUMENTS("fp");
+
     //Extract the value to write
-    GET_NEXT_WORD(args);
-    float f = str_to_float(word_buffer);
-    
-    EEPROMInterface::write_data_by_string(args, f);
+    float f = GET_ARG_VALUE('f');
+
+    char *path = GET_ARG('p');
+
+    EEPROMInterface::write_data_by_string(path, f);
 
     CI::echo("EXIT " + String(f));
 
@@ -75,16 +79,20 @@ task_state_t TerminalInterfaceCommands::eeprom_write(uint8_t args_index) {
 
 task_state_t TerminalInterfaceCommands::eeprom_read(uint8_t args_index) {
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index);
 
-    if (GET_NB_WORDS(args) < 1) {
-        return invalid_arguments;;
-    }
+    //verify that f and p arguments are provided.
+    REQUIRE_ALL_ARGUMENTS("p");
 
-    float f = 0;
+    //Get the path
+    char *path = GET_ARG('p');
 
-    if (EEPROMInterface::read_data_by_string(args, &f)) {
+    //Initialise the float that will contain the reading value.
+    float f;
+
+    //Read and display the value.
+    if (EEPROMInterface::read_data_by_string(path, &f)) {
         CI::echo("value : " + String(f));
     }
 
@@ -167,33 +175,35 @@ task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
     //This task requires the schedule of one type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index);
 
-    //Fail if there are not exactly four arguments
-    if (GET_NB_WORDS(args) != 4) {
-        return invalid_arguments;
-    }
+    //verify that almost one movement coordinate is provided.
+    REQUIRE_ONE_ARGUMENTS("xyze");
 
     machine_coords_t t = machine_coords_t();
-    t.x_enabled = t.y_enabled = t.z_enabled = t.e_enabled = true;
 
+    //If x was provided, enable the x coordinate, and get it.
+    if (CHECK_ARGUMENT('x')) {
+        t.x_enabled = true;
+        t.x = GET_ARG_VALUE('x');
+    }
 
-    //Extract x
-    GET_NEXT_WORD(args);
-    t.x = str_to_float(word_buffer);
+    if (CHECK_ARGUMENT('y')) {
+        t.y_enabled = true;
+        t.y = GET_ARG_VALUE('y');
+    }
 
-    //Extract y
-    GET_NEXT_WORD(args);
-    t.y = str_to_float(word_buffer);
+    if (CHECK_ARGUMENT('z')) {
+        t.z_enabled = true;
+        t.z = GET_ARG_VALUE('z');
+    }
 
-    //Extract z
-    GET_NEXT_WORD(args);
-    t.z = str_to_float(word_buffer);
+    if (CHECK_ARGUMENT('e')) {
+        t.e_enabled = true;
+        t.e = GET_ARG_VALUE('e');
+    }
 
-    //Extract e
-    GET_NEXT_WORD(args);
-    t.e = str_to_float(word_buffer);
 
     //Schedule a line to the specified coordinates
     return MachineController::line_to_scheduled(t);
@@ -206,101 +216,41 @@ task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
     //This task requires the schedule of one type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index);
 
-    //Fail if there are not exactly four arguments
-    if (GET_NB_WORDS(args) != 4) {
-        return invalid_arguments;
-    }
+    //verify that almost one movement coordinate is provided.
+    REQUIRE_ONE_ARGUMENTS("xyze");
 
     machine_coords_t t = machine_coords_t();
-    t.x_enabled = t.y_enabled = t.z_enabled = t.e_enabled = true;
 
-    //Extract x
-    GET_NEXT_WORD(args);
-    t.x = str_to_float(word_buffer);
+    //If x was provided, enable the x coordinate, and get it.
+    if (CHECK_ARGUMENT('x')) {
+        t.x_enabled = true;
+        t.x = GET_ARG_VALUE('x');
+    }
 
-    //Extract y
-    GET_NEXT_WORD(args);
-    t.y = str_to_float(word_buffer);
+    if (CHECK_ARGUMENT('y')) {
+        t.y_enabled = true;
+        t.y = GET_ARG_VALUE('y');
+    }
 
-    //Extract z
-    GET_NEXT_WORD(args);
-    t.z = str_to_float(word_buffer);
+    if (CHECK_ARGUMENT('z')) {
+        t.z_enabled = true;
+        t.z = GET_ARG_VALUE('z');
+    }
 
-    //Extract e
-    GET_NEXT_WORD(args);
-    t.e = str_to_float(word_buffer);
+    if (CHECK_ARGUMENT('e')) {
+        t.e_enabled = true;
+        t.e = GET_ARG_VALUE('e');
+    }
 
-    //Schedule a line to the specified coordinates with the specified carriage_id
+    //Schedule a line to the specified coordinates with the specified working_extruder
     return MachineController::line_of_scheduled(t);
 
 }
 
-//---------------------------------------------------------Setup--------------------------------------------------------
-
-task_state_t TerminalInterfaceCommands::set_speed(uint8_t args_index) {
-
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
-
-    //Fail if there are not exactly two arguments
-    if (GET_NB_WORDS(args) != 2) {
-        return invalid_arguments;
-    }
-
-    //Get the carriage_id
-    GET_NEXT_WORD(args);
-    uint8_t carriage_id = (uint8_t) str_to_float(word_buffer);
-
-    //Get the speed
-    GET_NEXT_WORD(args);
-    float speed = str_to_float(word_buffer);
-
-    CI::echo("Setting the carriage_id "+String(carriage_id)+" to "+String(speed)+".");
-    MachineController::speed_set_scheduled(carriage_id, speed);
-
-    return complete;
-
-}
-
-
-task_state_t TerminalInterfaceCommands::set_carriage(uint8_t args_index) {
-
-    //This task requires the schedule of two type-0 task
-    FAIL_IF_CANT_SCHEDULE(2);
-
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
-
-    //Fail if there are not exactly two arguments
-    if (GET_NB_WORDS(args) != 2) {
-        return invalid_arguments;
-    }
-
-    //Extract carriage_id id
-    GET_NEXT_WORD(args);
-    uint8_t carriage_id = (uint8_t) str_to_float(word_buffer);
-
-    //Extract carriage_id id
-    GET_NEXT_WORD(args);
-    float speed = str_to_float(word_buffer);
-
-
-    task_state_t state = MachineController::extruder_speed_set_scheduled(carriage_id, speed);
-
-    if (state == complete) {
-
-        CI::echo("Carriage modified. Moving carriages to zero...");
-
-        MachineController::carriages_reset_scheduled();
-    }
-
-    return state;
-
-}
-
+//--------------------------------------------------------Extrusion-----------------------------------------------------
 
 
 task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
@@ -308,17 +258,16 @@ task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index);
 
-    //Fail if there are not exactly one argument
-    if (GET_NB_WORDS(args) != 1) {
-        return invalid_arguments;
-    }
+    //Fail if the enabling argument is omitted
+    REQUIRE_ALL_ARGUMENTS("e")
+
+    //TODO SELECT THE STEPPER TO DISABLE, WITH ARGUMENT -s
 
     //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    bool enable = (bool) str_to_float(word_buffer);
+    bool enable = (bool) GET_ARG_VALUE('e');
 
     //Schedule an enable / disable of steppers.
     return MachineController::enable_steppers_scheduled(enable);
@@ -327,70 +276,146 @@ task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
 
 
 
-task_state_t TerminalInterfaceCommands::enable_cooling(uint8_t args_index) {
+task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
 
-    //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index);
 
-    //Fail if there are not exactly one argument
-    if (GET_NB_WORDS(args) != 1) {
-        return invalid_arguments;
+    //At least w (working carriage) and s (speed) must be provided
+    REQUIRE_ONE_ARGUMENTS("ws");
+
+    MachineController::extrusion_state_t new_state = MachineController::extrusion_state_t();
+
+    //If the working carriage must be changed
+    if (CHECK_ARGUMENT('w')) {
+
+        //Set the flag;
+        new_state.working_extruder_flag = true;
+
+        //Set the new working extruder
+        new_state.working_extruder = (uint8_t) GET_ARG_VALUE('w');
+
     }
 
-    //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    bool enable = (bool) str_to_float(word_buffer);
+    //If the speed must be changed
+    if (CHECK_ARGUMENT('s')) {
 
-    //Schedule an enable / disable of cooling.
-    return MachineController::enable_cooling_scheduled(enable);
+        //If we must set the speed for a particular carriage
+        if (CHECK_ARGUMENT('c')) {
+
+            /* As we must select the right speed group, and the process is repetitive, we will use a macro.
+             *  that check for the extruder id, sets the appropriate flag and speed value.
+             */
+
+#define CHECK_SPEED(i) \
+            case(i): new_state.speed_##i##_flag = true;new_state.speed_##i = GET_ARG_VALUE('s');break;
+
+            switch((uint8_t) GET_ARG_VALUE('c')) {
+                CHECK_SPEED(0)
+                CHECK_SPEED(1)
+                CHECK_SPEED(2)
+                CHECK_SPEED(3)
+                default:break;
+
+            }
+
+#undef CHECK_SPEED
+
+        } else {
+            //If we must set the speed for the current carriage
+
+            //Set the flag;
+            new_state.current_speed_flag = true;
+
+            //Set the new working extruder
+            new_state.current_speed = GET_ARG_VALUE('s');
+        }
+
+    }
+
+    return MachineController::set_extrusion_state(new_state);;
 
 }
 
 
-task_state_t TerminalInterfaceCommands::set_cooling_power(uint8_t args_index) {
+
+task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index)
 
-    //Fail if there are not exactly one argument
-    if (GET_NB_WORDS(args) != 1) {
-        return invalid_arguments;
+    //Fail if none of power of enable are provided
+    REQUIRE_ONE_ARGUMENTS("ep");
+
+    MachineController::cooling_state_t new_state = MachineController::cooling_state_t();
+
+    //Set the enable state if required
+    if (CHECK_ARGUMENT('e')) {
+
+        //Set the flag
+        new_state.enabled_flag = true;
+
+        //get the enable boolean
+        new_state.enabled = (bool) GET_ARG_VALUE('e');
+
+
     }
 
-    //Extract the power
-    GET_NEXT_WORD(args);
-    float power = str_to_float(word_buffer);
+    //Set the power if required
+    if (CHECK_ARGUMENT('p')) {
 
-    //Schedule a modification of the cooling power
-    return MachineController::set_cooling_power_scheduled(power);
+        //Set the flag
+        new_state.enabled_flag = true;
+
+        //Set the new power
+        new_state.power = GET_ARG_VALUE('p');
+
+    }
+
+    return MachineController::set_cooling_state(new_state);;
 
 }
 
+task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
+}
 
+task_state_t TerminalInterfaceCommands::set_bed_temp(uint8_t args_index) {
 
+}
+
+task_state_t TerminalInterfaceCommands::enable_hotend(uint8_t args_index) {
+
+}
+
+task_state_t TerminalInterfaceCommands::set_hotend_temp(uint8_t args_index) {
+}
+
+/*
 
 task_state_t TerminalInterfaceCommands::enable_bed(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Declare and define args, and give them the correct value
-    GET_ARGS(args_index, args);
+    //Parse Arguments
+    PARSE_ARGUMENTS(args_index)
 
-    //Fail if there are not exactly one argument
-    if (GET_NB_WORDS(args) != 1) {
-        return invalid_arguments;
-    }
+    //Fail if a hotend was not specified
+    REQUIRE_ALL_ARGUMENTS("h")
 
-    //Extract the enable boolean
-    GET_NEXT_WORD(args);
-    bool enable = (bool) str_to_float(word_buffer);
+    //Fail if neither temperature (t) or enable_state (e) are provided.
+    REQUIRE_ONE_ARGUMENTS("te");
+
+
+    //Declare a new state for the hotends.
+    TemperatureController::hotends_state_t state = TemperatureController::hotends_state_t();
+
+
 
     //Schedule an enable/disable of the hotbed regulation.
     return TemperatureController::enable_hotbed_regulation_scheduled(enable);
@@ -477,6 +502,7 @@ task_state_t TerminalInterfaceCommands::set_hotend_temp(uint8_t args_index) {
 
 }
 
+*/
 
 
 

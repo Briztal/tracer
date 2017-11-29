@@ -177,10 +177,10 @@
 #define SPACE_CAT(t, v) t v
 
 //STRUCT_FILL_CAT uses v for a struct assignment.
-#define STRUCT_FILL_CAT(t, v) data->v = v
+#define STRUCT_FILL_CAT(t, v) _unpacker_data_->v = v
 
 //STRUCT_EXTRACT_CAT uses v for a struct extraction.
-#define STRUCT_EXTRACT_CAT(t, v) data->v
+#define STRUCT_EXTRACT_CAT(t, v) _unpacker_data_->v
 
 
 
@@ -210,13 +210,13 @@
 static task_state_t name##_scheduled signature { \
     \
     /*Create the data in the heap*/\
-    name##_struct_t *data = new name##_struct_t();\
+    name##_struct_t *_unpacker_data_ = new name##_struct_t();\
     \
     /*Fill the data*/\
     struct_fill\
     \
     /*Schedule the task*/\
-    TaskScheduler::schedule_task(_##name, (void *) data, type);\
+    TaskScheduler::schedule_task(_##name, (void *) _unpacker_data_, type);\
     \
     /*Complete*/\
     return complete;\
@@ -224,21 +224,21 @@ static task_state_t name##_scheduled signature { \
 }\
 
 #define GENERATE_UNPACKER(name, struct_extraction)\
-static task_state_t _##name(void *d) {\
+static task_state_t _##name(void *_unpacker_pointer_) {\
     \
     /*Cast the data*/\
-    name##_struct_t *data = (name##_struct_t *) d;\
+    name##_struct_t *_unpacker_data_ = (name##_struct_t *) _unpacker_pointer_;\
     \
     /*Extract the data and analyse_command the function*/\
-    task_state_t state = name struct_extraction;\
+    task_state_t _unpacker_return_state_ = name struct_extraction;\
     \
     /*free the data if the task musn't be reprogrammed*/\
-    if (state != reprogram) {\
-        free(data);\
+    if (_unpacker_return_state_ != reprogram) {\
+        free(_unpacker_data_);\
     }\
     \
     /*Complete with the state of the function.*/\
-    return state;\
+    return _unpacker_return_state_;\
 }
 
 
