@@ -132,7 +132,7 @@ EXTERNAL_PARAMETER(1, temp_hotbed, 0, 300, degree)
  */
 
 //Set the number of PIDs
-#define NB_PIDS 2
+#define NB_PIDS 5
 
 #ifdef PID
 

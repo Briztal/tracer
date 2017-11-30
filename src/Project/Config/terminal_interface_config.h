@@ -45,19 +45,12 @@
 
 
 //EEPROM
-GO_LOWER(eeprom, set persistent machine parameters)
-CREATE_LEAF(read, eeprom_read, read a parameter in the EEPROM, eeprom_path)
-CREATE_LEAF(write, eeprom_write, write a parameter in the EEPROM, eeprom_path)
-CREATE_LEAF(reset, eeprom_reset, resets the EEPROM to its default state, none)
-CREATE_LEAF(print, eeprom_print, print the content of the EEPROM, none)
-GO_UPPER()
+CREATE_LEAF(eeprom, eeprom, manage_eeprom, none)
 
 //Movement
 GO_LOWER(move, move the machine)
-CREATE_LEAF(home, move_home, homes the machine using endstops, none)
-CREATE_LEAF(zero, move_zero, go to zero coordinates for all carriages, none)
-CREATE_LEAF(to, line_to, draw a line with the current carriage to the specified coordinates, x - y - z)
-CREATE_LEAF(of, line_of, draw a line with the current carriage to the specified offsets, x - y - z)
+CREATE_LEAF(home, home, homes the machine, none)
+CREATE_LEAF(line, line, draw a line with the current carriage to the specified coordinates, x - y - z)
 GO_UPPER()
 
 //Setup

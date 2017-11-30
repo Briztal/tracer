@@ -32,7 +32,7 @@
 #ifndef CINTERFACE
 #define CINTERFACE
 
-#define TI ProgramInterface
+#define PI ProgramInterface
 
 #include "Project/Config/program_interface_config.h"
 

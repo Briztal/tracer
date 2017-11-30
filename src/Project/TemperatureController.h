@@ -94,7 +94,6 @@ private:
     static float *const hotends_temps;
 
 
-
     //---------------------------HotBed---------------------------
 
 public:

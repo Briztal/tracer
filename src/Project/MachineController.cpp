@@ -67,7 +67,7 @@
 //TODO DEBUG
 
 /*
- * Carriage reset :
+ * home :
  *
  *  This function resets all axis to their zero coordinate, at the maximal speed that do not exceeds carriages
  *      regulation speeds. This speed will be one of current regulations speeds.
@@ -80,18 +80,18 @@
  *
  */
 
-task_state_t MachineController::carriages_reset() {
+task_state_t MachineController::home() {
 
     //Initialise the reference carriage data
     carriage_data t = carriage_data();
 
     //Initialise the reference carriage.
-    set_reference_carriage(0, position[0], position[2], &t);
+    set_reference_carriage(0, current_axis_positions[0], current_axis_positions[2], &t);
 
     //Verify carriages 1, 2 and 3.
-    check_carriage(1, position[1], position[2], &t);
-    check_carriage(2, position[1], position[3], &t);
-    check_carriage(3, position[0], position[3], &t);
+    check_carriage(1, current_axis_positions[1], current_axis_positions[2], &t);
+    check_carriage(2, current_axis_positions[1], current_axis_positions[3], &t);
+    check_carriage(3, current_axis_positions[0], current_axis_positions[3], &t);
 
     //Set the reference carriage, that will determine the movement speed.
     MachineInterface::set_speed_group(t.carriage_id);
@@ -99,10 +99,10 @@ task_state_t MachineController::carriages_reset() {
     //No need to set the regulation speed, ad it is already set.
 
     //Zero all carriages
-    position[0] = position[1] = position[2] = position[3] = 0;
+    current_axis_positions[0] = current_axis_positions[1] = current_axis_positions[2] = current_axis_positions[3] = 0;
 
     //Move
-    return MachineInterface::linear_movement(position);
+    return MachineInterface::linear_movement(current_axis_positions);
 
 }
 
@@ -158,96 +158,138 @@ void MachineController::check_carriage(uint8_t id, float x, float y, carriage_da
 }
 
 
-//TODO COMMENT
-void MachineController::fill_coords(machine_coords_t *coords) {
+/*
+ * replace_coords : this function replaces coordinates with flag reset by current coordinates.
+ *
+ */
 
-    if (!coords->x_enabled) {
-        coords->x = machine_coords[0];
+void MachineController::replace_coords(movement_state_t *coords) {
+
+    if (!coords->x_flag) {
+        coords->x = current_position[0];
     }
-    if (!coords->y_enabled) {
-        coords->y = machine_coords[1];
+    if (!coords->y_flag) {
+        coords->y = current_position[1];
     }
-    if (!coords->z_enabled) {
-        coords->z = machine_coords[2];
+    if (!coords->z_flag) {
+        coords->z = current_position[2];
     }
-    if (!coords->e_enabled) {
-        coords->e = machine_coords[3];
+    if (!coords->e_flag) {
+        coords->e = current_position[3];
     }
 }
 
-void MachineController::persist_coords(machine_coords_t *coords) {
 
-    machine_coords[0] = coords->x;
-    machine_coords[1] = coords->y;
-    machine_coords[2] = coords->z;
-    machine_coords[3] = coords->e;
-
-}
-
-
-task_state_t MachineController::line_to(machine_coords_t coords) {
+/*
+ * line : this function schedules a linear move to the given coordinates.
+ *
+ *  The destination position can be given in two ways :
+ *      - absolute, real coordinates are given;
+ *      - relative, algebric distances from the current position are given;
+ *
+ */
+task_state_t MachineController::line(movement_state_t movement_state) {
 
     //Initialise a state
     task_state_t state = complete;
 
-    //Get the destination coordinates
-    fill_coords(&coords);
+    //If carriage state must be set
+    if (movement_state.extruder_flag || movement_state.speed_flag) {
+
+        carriages_state_t c_state = carriages_state_t();
+
+        //Eventually set the working carriage
+        if (movement_state.extruder_flag) {
+
+            //Set the carriage flag
+            c_state.working_extruder_flag = true;
+
+            //Set the extruder
+            c_state.working_extruder = movement_state.extruder;
+
+        }
+
+        //Eventually set the current speed
+        if (movement_state.speed_flag) {
+
+            //Set the speed flag
+            c_state.current_speed_flag = true;
+
+            //Set the speed value
+            c_state.current_speed = movement_state.speed;
+
+
+        }
+
+        //Change the extrusion parameters
+        task_state_t return_state = set_extrusion_state(c_state);
+
+        //If the modification failed, fail.
+        if (return_state != complete) {
+            return return_state;
+        }
+
+    }
+
+    if (movement_state.relative_flag) {
+        //Relative movement
+
+        //Sum the given values to the current coordinates to get destinnation coordinates
+        movement_state.x += current_position[0];
+        movement_state.y += current_position[1];
+        movement_state.z += current_position[2];
+        movement_state.e += current_position[3];
+
+    } else {
+        //Absolute movement
+
+        //Get the destination coordinates
+        replace_coords(&movement_state);
+
+    }
 
     //Try to move to the specified position
     switch (extrusion_state.mode) {
         case 0:
-            state = mode_0(&coords);
+            state = move_mode_0(&movement_state);
         default:
             break;
     }
 
     if (state == complete) {
-        persist_coords(&coords);
+        persist_coords(&movement_state);
     }
 
     return state;
 
 }
 
+/*
+ * persist_coords : current coordinates are updated, to new one, given by coords
+ */
+void MachineController::persist_coords(movement_state_t *coords) {
 
-task_state_t MachineController::line_of(machine_coords_t coords) {
-
-    //Update the local coords
-    coords.x += machine_coords[0];
-    coords.y += machine_coords[1];
-    coords.z += machine_coords[2];
-    coords.e += machine_coords[3];
-
-    //Initialise a state
-    task_state_t state = complete;
-
-    //Try to move to the specified position
-    switch (extrusion_state.mode) {
-        case 0:
-            state = mode_0(&coords);
-        default:
-            break;
-    }
-
-    if (state == complete) {
-        persist_coords(&coords);
-    }
-
-    return state;
+    //Save new coordinates.
+    current_position[0] = coords->x;
+    current_position[1] = coords->y;
+    current_position[2] = coords->z;
+    current_position[3] = coords->e;
 
 }
+
+
 
 //---------------------------------------------------Movement planners--------------------------------------------------
 
 /*
- * mode_0 : single working_extruder mode    CI::echo("complete : "+String(state == complete));
+ * move_mode_0 : single working_extruder mode    CI::echo("complete : "+String(state == complete));
 .
  *
  *  In this mode, every working_extruder can be moved independently.
  *
  */
 
-task_state_t MachineController::mode_0(machine_coords_t *coords) {
+task_state_t MachineController::move_mode_0(movement_state_t *coords) {
 
     MachineInterface::set_speed_group(extrusion_state.working_extruder);
 
@@ -273,29 +315,36 @@ task_state_t MachineController::mode_0(machine_coords_t *coords) {
     }
 
 
+    //Set the x position
     if (x0) {
-        position[0] = EEPROMStorage::coordinate_interface_data.x0_offset + coords->x;
+        current_axis_positions[0] = EEPROMStorage::coordinate_interface_data.x0_offset + coords->x;
     } else {
-        position[1] = EEPROMStorage::coordinate_interface_data.x1_offset - coords->x;
+        current_axis_positions[1] = EEPROMStorage::coordinate_interface_data.x1_offset - coords->x;
     }
 
+    //Set the y position
     if (y0) {
-        position[2] = EEPROMStorage::coordinate_interface_data.y0_offset + coords->y;
+        current_axis_positions[2] = EEPROMStorage::coordinate_interface_data.y0_offset + coords->y;
     } else {
-        position[3] = EEPROMStorage::coordinate_interface_data.y1_offset - coords->y;
+        current_axis_positions[3] = EEPROMStorage::coordinate_interface_data.y1_offset - coords->y;
     }
 
-    position[4] = EEPROMStorage::coordinate_interface_data.z_offset - coords->z;
+    //Set the z position
+    current_axis_positions[4] = EEPROMStorage::coordinate_interface_data.z_offset - coords->z;
+
+    //Set the extruder position
+    current_axis_positions[5 + extrusion_state.working_extruder] = coords->e;
 
     //TODO SANITY CHECK
     //sanity_check(position);
 
+    //Display the destination.
     for (uint8_t i = 0; i < NB_AXIS; i++) {
-        CI::echo(String(i) + " " + String(position[i]));
+        CI::echo(String(i) + " " + String(current_axis_positions[i]));
     }
 
-    return MachineInterface::linear_movement(position);
-
+    //Plan movement.
+    return MachineInterface::linear_movement(current_axis_positions);
 
 }
 
@@ -382,6 +431,16 @@ task_state_t MachineController::enable_steppers(bool enable) {
 
 //-----------------------------------------------------Extrusion---------------------------------------------------
 
+/*
+ * set_extrusion_state : this function can modify all parameters related to extrusion :
+ *
+ *  - the working extruder;
+ *  - the working extruder's speed;
+ *  - (nominative) extruders'speeds.
+ *
+ *  Data will be modified only if flags related to it are set.
+ *
+ */
 task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state) {
 
     //Initialise a state, that will be updated at each modification.
@@ -399,7 +458,7 @@ task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state)
 
     }
 
-    //As next blocs only focus on each carriage's speed, always the same way, we will use a macro.
+        //As next blocs only focus on each carriage's speed, always the same way, we will use a macro.
 
 #define SPEED_MODIFICATION(speed_group, flag, new_speed) \
     /*if the working extruder must be changed : */\
@@ -427,7 +486,12 @@ task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state)
 
 }
 
-
+/*
+ * set_working_extruder : sets the working extruder.
+ *
+ *  As the process requires to check the mode and the extruder id, this separate function exists.
+ *
+ */
 task_state_t MachineController::set_working_extruder(uint8_t carriage) {
 
     //Nothing to do if the carriage id the current one.
@@ -481,7 +545,14 @@ const MachineController::extrusion_state_t MachineController::get_extrusion_stat
 
 //-------------------------------Cooling-------------------------------
 
-
+/*
+ * set_cooling_state : this function can modify all parameters related to cooling, namely :
+ *  - cooling power;
+ *  - cooling enable state (enabled, disabled).
+ *
+ *  Parameters will be modified only if their flags are set.
+ *
+ */
 task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
 
     //If the enable state must be changed
@@ -532,13 +603,16 @@ const MachineController::cooling_state_t MachineController::get_cooling_state() 
 
 }
 
+//-------------------------------Static declarations - definitions-------------------------------
+
+
 MachineController::cooling_state_t MachineController::cooling_state = MachineController::cooling_state_t();
 
 MachineController::extrusion_state_t MachineController::extrusion_state = MachineController::extrusion_state_t();
 
 float tmpos[NB_AXIS];
-float *const MachineController::position = tmpos;
+float *const MachineController::current_axis_positions = tmpos;
 
 float t_mch_crd[4]{0};
-float *const MachineController::machine_coords = t_mch_crd;
+float *const MachineController::current_position = t_mch_crd;
 

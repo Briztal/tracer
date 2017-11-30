@@ -31,7 +31,7 @@
 #define BEGIN_BYTE (uint8_t)255
 #define BEGIN_CHAR (char)-1
 
-void TI::init() {
+void PI::init() {
 
     program_interface_link_t::begin();
 
@@ -45,7 +45,7 @@ void TI::init() {
  * The function to initialise the command aliases
  */
 
-void TI::initialise_aliases() {
+void PI::initialise_aliases() {
 
     char t[MAX_DEPTH + 1];
     uint8_t indice = 0;
@@ -74,7 +74,7 @@ void TI::initialise_aliases() {
  * The command id is the following : 0 (system canal) - 6 (echo canal);
  */
 
-void TI::echo(const string_t msg) {
+void PI::echo(const string_t msg) {
 
     prepare_data_out("\0\6", 2);
     add_string_out(msg.c_str());
@@ -88,7 +88,7 @@ void TI::echo(const string_t msg) {
  *
  * The command id is the following : 0 (system canal) - 5 (steppers canal) - 0 (position canal);
  */
-void TI::send_position(float *t) {
+void PI::send_position(float *t) {
     prepare_data_out("\0\5\1", 3);
     for (uint8_t i = 0; i < NB_AXIS; i++) {
         add_float_out(t[i]);
@@ -100,15 +100,15 @@ void TI::send_position(float *t) {
  * Two shortcuts to prepare standard packets
  */
 
-void TI::prepare_structure_packet() {
+void PI::prepare_structure_packet() {
     prepare_data_out("\0\0", 2);
 }
 
-void TI::prepare_system_packet() {
+void PI::prepare_system_packet() {
     prepare_data_out("\0", 1);
 }
 
-void TI::prepare_EEPROM_packet() {
+void PI::prepare_EEPROM_packet() {
     prepare_data_out("\0\1", 2);
 }
 
@@ -120,7 +120,7 @@ void TI::prepare_EEPROM_packet() {
  * It sets the command id bytes, and initialises the data_out size.
  */
 
-void TI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
+void PI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
     data_out = data_out_0 + 2;
     data_out_size = command_id_size + (uint8_t) 1;
 
@@ -139,7 +139,7 @@ void TI::prepare_data_out(const char *command_id, uint8_t command_id_size) {
  */
 
 
-void TI::add_char_out(char data) {
+void PI::add_char_out(char data) {
 
     uint8_t space_count = 0;
     if (data_out_size >= MAX_COMMAND_SIZE
@@ -153,7 +153,7 @@ void TI::add_char_out(char data) {
     data_out_size++;
 }
 
-void TI::add_int_out(int data) {
+void PI::add_int_out(int data) {
 
     char *t = (char *) &data;
     uint8_t space_count = 0;
@@ -174,7 +174,7 @@ void TI::add_int_out(int data) {
 
 }
 
-void TI::add_float_out(float data) {
+void PI::add_float_out(float data) {
     char *t = (char *) &data;
     uint8_t space_count = 0;
     if (data_out_size + 4 >= MAX_COMMAND_SIZE
@@ -205,7 +205,7 @@ void TI::add_float_out(float data) {
 
 }
 
-void TI::add_int32_t_out(int32_t data) {
+void PI::add_int32_t_out(int32_t data) {
     char *t = (char *) &data;
     uint8_t space_count = 0;
     if (data_out_size + 4 >= MAX_COMMAND_SIZE
@@ -237,7 +237,7 @@ void TI::add_int32_t_out(int32_t data) {
 }
 
 
-void TI::add_string_out(const char *data) {
+void PI::add_string_out(const char *data) {
     //WARNING : NO CHECK FOR STRINGS
 
     char c;
@@ -288,7 +288,7 @@ void ProgramInterface::validate_task(uint8_t task_index) {
  *          - initialise_packet must have been called with the correct command_id and size.
  *          - All required data must have been added with the add_X_data functions.
  */
-void TI::send_packet() {
+void PI::send_packet() {
 
     uint8_t size = data_out_size;
 
@@ -303,7 +303,7 @@ void TI::send_packet() {
 
 }
 
-void TI::process(char *command, uint8_t size) {
+void PI::process(char *command, uint8_t size) {
 
     char b = *command;
 
@@ -355,7 +355,7 @@ void TI::process(char *command, uint8_t size) {
  *
  */
 
-void TI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
+void PI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
     //If the function fails,
     //if (!current_node->function(data_in, r_command_size)) {
 
@@ -392,7 +392,7 @@ void TI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
  *      This case marks the beginning of a command
  *
  */
-void TI::read_data() {
+void PI::read_data() {
 
     char r;
 
@@ -400,7 +400,7 @@ void TI::read_data() {
 
         r = program_interface_link_t::read();
 
-        TI::echo("SUUS "+String((uint8_t)r));
+        PI::echo("SUUS "+String((uint8_t)r));
 
         if (first_detected) {
             //If a BEGIN_CHAR has just been detected :
@@ -481,7 +481,7 @@ void TI::read_data() {
  * reset_input_data : resets the input_data.
  *
  */
-void TI::reset_input_data() {
+void PI::reset_input_data() {
     first_detected = false;
     parsing_began = false;
     in_data_remaining = 0;
@@ -498,7 +498,7 @@ void TI::reset_input_data() {
  *
  */
 
-task_state_t TI::send_tree_structure() {
+task_state_t PI::send_tree_structure() {
 
     /*
      * Syntax :
@@ -566,32 +566,32 @@ task_state_t TI::send_tree_structure() {
 #define GO_UPPER
 #define GO_LOWER(i, name)
 #define CREATE_LEAF(i, name)\
-    uint8_t TI::name##_size;\
+    uint8_t PI::name##_size;\
     char tmp##name[MAX_DEPTH+1];\
-    char *const TI::name##_id = tmp##name;\
+    char *const PI::name##_id = tmp##name;\
 
 
 #include <Project/Config/program_interface_config.h>
 
 
-bool TI::parsing_began = false;
-bool TI::first_detected = false;
-uint8_t TI::in_data_remaining = 0;
-uint8_t TI::in_data_size = 0;
+bool PI::parsing_began = false;
+bool PI::first_detected = false;
+uint8_t PI::in_data_remaining = 0;
+uint8_t PI::in_data_size = 0;
 
-ArgumentsContainer TI::arguments_storage = ArgumentsContainer(MAX_COMMAND_SIZE, NB_PENDING_COMMANDS);
+ArgumentsContainer PI::arguments_storage = ArgumentsContainer(MAX_COMMAND_SIZE, NB_PENDING_COMMANDS);
 
 
 char t_data_in[MAX_COMMAND_SIZE];
-char *TI::data_in = t_data_in;
-char *const TI::data_in_0 = t_data_in;
+char *PI::data_in = t_data_in;
+char *const PI::data_in_0 = t_data_in;
 
 char dout[MAX_COMMAND_SIZE
  + 2];
-char *TI::data_out = dout;
-char *const TI::data_out_0 = dout;
-uint8_t TI::data_out_size;
-char *const TI::size_ptr = dout + 1;
+char *PI::data_out = dout;
+char *const PI::data_out_0 = dout;
+uint8_t PI::data_out_size;
+char *const PI::size_ptr = dout + 1;
 
 
 #endif

@@ -27,55 +27,97 @@
 #include <TaskScheduler/task_state_t.h>
 #include <TaskScheduler/TaskScheduler.h>
 
-typedef struct machine_coords_t {
-
-    bool x_enabled = false;
-    bool y_enabled = false;
-    bool z_enabled = false;
-    bool e_enabled = false;
-
-    float x = 0;
-    float y = 0;
-    float z = 0;
-    float e = 0;
-
-} machine_coords_t;
-
-
-typedef struct carriage_data {
-    uint8_t carriage_id;
-    float time;
-} carriage_data;
-
-
 class MachineController {
 
 
 public:
 
-    //-------------------------------Movement-------------------------------
-
-    static task_state_t carriages_reset();
-
-GENERATE_SCHEDULER(carriages_reset, 1);
+    //-------------------------------Homing movement-------------------------------
 
 
-    static task_state_t line_to(machine_coords_t coords);
+    static task_state_t home();
 
-GENERATE_SCHEDULER(line_to, 1, machine_coords_t, coords);
+    //A scheduler for the cooling homing functione
+GENERATE_SCHEDULER(home, 1);
+
+private:
+
+    typedef struct carriage_data {
+        uint8_t carriage_id;
+        float time;
+    } carriage_data;
 
 
-    static task_state_t line_of(machine_coords_t coords);
+    //Set the reference carriage, in the homing preparation
+    static void set_reference_carriage(uint8_t id, float x, float y, carriage_data *data);
 
-GENERATE_SCHEDULER(line_of, 1, machine_coords_t, coords);
+    //Check if a carriage do not exceeds its limit, during the homing preparation.
+    static void check_carriage(uint8_t id, float x, float y, carriage_data *data);
+
+
+    //-------------------------------Line movement-------------------------------
+
+public:
+
+    typedef struct machine_coords_t {
+
+        //Flag for relative movement, default to false -> movement absolute by default.
+        bool relative_flag = false;
+
+        //Flags for coordinates
+        bool x_flag = false, y_flag = false, z_flag = false, e_flag = false;
+
+        //Flags for current carriage and speed.
+        bool extruder_flag = false, speed_flag = false;
+
+        //Coordinates
+        float x = 0, y = 0, z = 0, e = 0;
+
+        //Current carriage
+        uint8_t extruder = 0;
+
+        //Speed
+        float speed = 0;
+
+    } movement_state_t;
+
+
+    static task_state_t line(movement_state_t movement_state);
+
+    //A scheduler for the line function.
+GENERATE_SCHEDULER(line, 1, machine_coords_t, coords);
+
+
+private:
+
+    //The current absolute high level machine coordinates : [x, y, z, e].
+    static float *const current_position;
+
+    //The current axis coordinates.
+    static float *const current_axis_positions;
+
+    //Replace coordinates with flags reset with current ones.
+    static void replace_coords(movement_state_t *coords);
+
+    //Save control coords
+    static void persist_coords(movement_state_t *coords);
+
+    //movement in mode zero, all carriages accessible.
+    static task_state_t move_mode_0(movement_state_t *coords);
+
+    //Sanity check, verify that carriage do not collide, or don't go in negative positions.
+    static void sanity_check(float *hl_coords);
+
 
 
     //-------------------------------Steppers-------------------------------
 
+public:
 
     //Enable or disable all steppers
     static task_state_t enable_steppers(bool enable);
 
+    //A scheduler for the stepper manager
 GENERATE_SCHEDULER(enable_steppers, 1, bool, enable);
 
 
@@ -165,33 +207,18 @@ public:
     //Set and get hotbed temperatures
     static task_state_t set_cooling_state(cooling_state_t);
 
+    //A scheduler for the cooling manager
 GENERATE_SCHEDULER(set_cooling_state, 1, cooling_state_t, state);
+
 
     static const cooling_state_t get_cooling_state();
 
 
 private:
 
+    //The cooling state, that contains all current cooling parameters.
     static cooling_state_t cooling_state;
 
-
-private:
-
-    static float *const machine_coords;
-
-    static float *const position;
-
-    static task_state_t mode_0(machine_coords_t *coords);
-
-    static void sanity_check(float *hl_coords);
-
-    static void fill_coords(machine_coords_t *coords);
-
-    static void persist_coords(machine_coords_t *coords);
-
-    static void set_reference_carriage(uint8_t id, float x, float y, carriage_data *data);
-
-    static void check_carriage(uint8_t id, float x, float y, carriage_data *data);
 };
 
 

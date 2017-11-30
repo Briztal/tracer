@@ -18,7 +18,7 @@ void initialise_interfaces() {
 #endif
 
 #ifdef ENABLE_TERMINAL_INTERFACE
-    UI::init();
+    TI::init();
 #endif
 
 }
@@ -29,7 +29,7 @@ void read_interfaces() {
         return;
 
 #ifdef ENABLE_TERMINAL_INTERFACE
-    UI::read_data();
+    TI::read_data();
 #endif
 
     if (!TaskScheduler::available_spaces(0))

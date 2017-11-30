@@ -56,6 +56,9 @@ StringUtils::copy_until_char(char *in_buffer, char *out_buffer, uint8_t out_buff
         //Increment the size of the copied buffer.
         copy_size++;
 
+        //Decrement the size of the out buffer
+        out_buffer_size--;
+
     }
 
     //Null terminate the copied word.

@@ -31,7 +31,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 #include <Interfaces/TerminalInterface/TerminalInterface.h>
 #ifdef MAIN_CI_TERMINAL
-#define CI UI
+#define CI TI
 #endif
 #endif
 
@@ -45,7 +45,7 @@
 #ifdef ENABLE_PROGRAM_INTERFACE
 #include <Interfaces/ProgramInterface/ProgramInterface.h>
 #ifdef MAIN_CI_PROGRAM
-#define CI TI
+#define CI PI
 #endif
 #endif
 

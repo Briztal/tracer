@@ -435,8 +435,24 @@ void TaskScheduler::process_task_sequences_singular() {
 
 bool TaskScheduler::process_task(task_t *task) {
 
-    //call the function of the task by pointer, and provide the arguments of the task. return false if the task must be reprogrammed
-    return ((*(task->task))(task->args) != reprogram) ;
+    //call the function of the task by pointer, and provide the arguments of the task.
+    task_state_t state = (*(task->task))(task->args);
+
+    //If the task must be reprogrammed,
+    if (state != reprogram) {
+
+        //TODO PUT A FLAG FOR AUTOREMOVE !!!!!!!!!!!!!!!!!!!
+        BECAUSE DATA IN ARGUMENTS STORAGE MUSTNT BE FREED !
+
+        //Free the memory occupied by the task.
+        delete(task->args);
+
+        //Succeed.
+        return true;
+    }
+
+    //Fail if the task must be reprogrammed.
+    return false;
 
 }
 

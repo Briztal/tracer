@@ -34,7 +34,7 @@
 
 bool LCDInterfaceCommands::action(char *, uint8_t) {
 
-    UI::echo("action");
+    TI::echo("action");
     return true;
 
 }
@@ -42,7 +42,7 @@ bool LCDInterfaceCommands::action(char *, uint8_t) {
 
 bool LCDInterfaceCommands::home(char *, uint8_t) {
 
-    UI::echo("home");
+    TI::echo("home");
     return false;
 
 }
@@ -50,7 +50,7 @@ bool LCDInterfaceCommands::home(char *, uint8_t) {
 
 bool LCDInterfaceCommands::line(char *, uint8_t) {
 
-    UI::echo("line");
+    TI::echo("line");
     return true;
 
 }
@@ -58,7 +58,7 @@ bool LCDInterfaceCommands::line(char *, uint8_t) {
 
 bool LCDInterfaceCommands::speed(char *, uint8_t) {
 
-    UI::echo("speed");
+    TI::echo("speed");
     return false;
 
 }

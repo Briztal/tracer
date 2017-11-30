@@ -31,7 +31,7 @@
 #include "TerminalNode.h"
 
 
-#define UI TerminalInterface
+#define TI TerminalInterface
 
 
 //A simple struct that will be used in the arguments parsing.
@@ -46,7 +46,6 @@ class TerminalInterface {
 public :
 
     //--------------------------------------Standard Interface functions --------------------------------------
-
 
     //The initialisation function.
     static void init();

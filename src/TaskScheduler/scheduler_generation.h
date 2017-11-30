@@ -204,13 +204,13 @@
  *
  */
 
-#define GENERATE_STRUCT(name, struct_data) typedef struct name##_struct_t { struct_data } name##_struct_t ;
+#define GENERATE_STRUCT(name, struct_data) struct name##_struct_t { struct_data };
 
 #define GENERATE_PACKER(name, type,  signature, struct_fill)\
 static task_state_t name##_scheduled signature { \
     \
     /*Create the data in the heap*/\
-    name##_struct_t *_unpacker_data_ = new name##_struct_t();\
+    struct name##_struct_t *_unpacker_data_ = new name##_struct_t();\
     \
     /*Fill the data*/\
     struct_fill\
@@ -227,7 +227,7 @@ static task_state_t name##_scheduled signature { \
 static task_state_t _##name(void *_unpacker_pointer_) {\
     \
     /*Cast the data*/\
-    name##_struct_t *_unpacker_data_ = (name##_struct_t *) _unpacker_pointer_;\
+    struct name##_struct_t *_unpacker_data_ = (name##_struct_t *) _unpacker_pointer_;\
     \
     /*Extract the data and analyse_command the function*/\
     task_state_t _unpacker_return_state_ = name struct_extraction;\
@@ -293,6 +293,5 @@ static task_state_t _##name(void *_unpacker_pointer_) {\
 
 #define GENERATE_SCHEDULER(name, type, ...)\
     GENERATE_SCHEDULER_(name, type, GET_SIGNATURE_(__VA_ARGS__), DEFINE_STRUCT_(__VA_ARGS__), FILL_STRUCT_(__VA_ARGS__), EXTRACT_STRUCT_(__VA_ARGS__))
-
 
 

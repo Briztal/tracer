@@ -43,7 +43,6 @@ task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
     EEPROMInterface::display_tree();
 
-
     CI::echo("EXIT");
 
     return complete;
@@ -53,67 +52,64 @@ task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
-task_state_t TerminalInterfaceCommands::eeprom_write(uint8_t args_index) {
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(args_index);
-
-    CI::echo("SUUS");
-
-    //verify that f and p arguments are provided.
-    REQUIRE_ALL_ARGUMENTS("vp");
-
-    //Extract the value to write
-    float f = GET_ARG_VALUE('v');
-
-    char *path = GET_ARG('p');
-
-    EEPROMInterface::write_data_by_string(path, f);
-
-    CI::echo("EXIT " + String(f));
-
-    return complete;
-
-}
-
-
-task_state_t TerminalInterfaceCommands::eeprom_read(uint8_t args_index) {
+task_state_t TerminalInterfaceCommands::eeprom(uint8_t args_index) {
 
     //Parse Arguments
     PARSE_ARGUMENTS(args_index);
 
     //verify that f and p arguments are provided.
-    REQUIRE_ALL_ARGUMENTS("p");
+    REQUIRE_ONE_ARGUMENTS("prd");
 
-    //Get the path
-    char *path = GET_ARG('p');
+    //If the default profile must be reset
+    if (CHECK_ARGUMENT('r')) {
 
-    //Initialise the float that will contain the reading value.
-    float f;
+        TI::echo("Reseting the EEPROM default profile.");
 
-    //Read and display the value.
-    if (EEPROMInterface::read_data_by_string(path, &f)) {
-        CI::echo("value : " + String(f));
+        //Reset
+        EEPROMStorage::set_default_profile();
+
     }
 
-    return complete;
+    //If a path was provided : read or write
+    if (CHECK_ARGUMENT('p')) {
 
-}
+        char *path = GET_ARG('p');
 
+        float f;
 
-task_state_t TerminalInterfaceCommands::eeprom_reset(uint8_t args_index) {
+        //If the value must be written
+        if (CHECK_ARGUMENT('w')) {
 
-    EEPROMStorage::set_default_profile();
+            //Extract the value to write
+            f = GET_ARG_VALUE('w');
 
-    return complete;
+            //Log message
+            TI::echo("Writing " + String(path) + " to " + String(f));
 
-}
+            //write the variable
+            EEPROMInterface::write_data_by_string(path, f);
 
+        }
 
-task_state_t TerminalInterfaceCommands::eeprom_print(uint8_t args_index) {
+        //Read and display the value.
+        if (EEPROMInterface::read_data_by_string(path, &f)) {
 
-    EEPROMInterface::print_stored_data();
+            //Log message
+            CI::echo("Value for " + String(path) + " : " + String(f));
 
+        }
+
+    }
+
+    //If the profile must be printed
+    if (CHECK_ARGUMENT('d')) {
+
+        //Print the current profile.
+        EEPROMInterface::print_stored_data();
+
+    }
+
+    //Succeed
     return complete;
 
 }
@@ -147,30 +143,49 @@ task_state_t TerminalInterfaceCommands::eeprom_print(uint8_t args_index) {
     }\
 
 
-task_state_t TerminalInterfaceCommands::move_home(uint8_t args_index) {
 
-    CI::echo("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
+/*
+ * home : this function moves all axis to zero. It takes the following parameters :
+ *
+ *  -s : homes the machine using endstops.
+ *
+ */
 
-    return complete;
+task_state_t TerminalInterfaceCommands::home(uint8_t args_index) {
 
-}
-
-
-task_state_t TerminalInterfaceCommands::move_zero(uint8_t args_index) {
-
-    //This task requires the schedule of one type-0 task
+    //Require the schedule of one movement
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Schedule a reset of the carriages
-    MachineController::carriages_reset_scheduled();
+    //Parse arguments
+    PARSE_ARGUMENTS(args_index);
+
+    //If the home must use endstops
+    if (CHECK_ARGUMENT('e')) {
+
+        CI::echo("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
+
+    } else {
+        //If the movement must just be a line to zero
+
+        //Schedule a reset of the carriages
+        MachineController::home_scheduled();
+
+    }
 
     return complete;
-
 
 }
 
 
-task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
+/*
+ * line : this function draws a line to the provided position.
+ *  It takes the following arguments  :
+ *
+ *      -{x, y, z, e} : coordinates of the current carriage. Almost one is required.
+ *      - r : (optionnal) all provided coordinates are relative.
+ */
+
+task_state_t TerminalInterfaceCommands::line(uint8_t args_index) {
 
     //This task requires the schedule of one type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -181,77 +196,48 @@ task_state_t TerminalInterfaceCommands::line_to(uint8_t args_index) {
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("xyze");
 
-    machine_coords_t t = machine_coords_t();
+    MachineController::movement_state_t state = MachineController::movement_state_t();
 
-    //If x was provided, enable the x coordinate, and get it.
-    if (CHECK_ARGUMENT('x')) {
-        t.x_enabled = true;
-        t.x = GET_ARG_VALUE('x');
+    /*
+     * To save repetitive lines of code, a macro that, if a coord is provided, sets its flag and its value.
+     */
+#define CHECK_COORDINATE(coord, coord_char)\
+    if (CHECK_ARGUMENT(coord_char)) {\
+        state.coord##_flag = true;\
+        state.coord = GET_ARG_VALUE(coord_char);\
+    }\
+
+    //If a coordinate was provided, enable this coordinate, and get it.
+    CHECK_COORDINATE(x, 'x');
+    CHECK_COORDINATE(y, 'y');
+    CHECK_COORDINATE(z, 'z');
+    CHECK_COORDINATE(e, 'e');
+
+    //For safety, un-define the previously created macro.
+#undef CHECK_COORDINATE
+
+    //If the movement is absolute, move to the destination
+    if (CHECK_ARGUMENT('r')) {
+
+        //Mark the movement to be relative.
+        state.relative_flag = true;
+
     }
-
-    if (CHECK_ARGUMENT('y')) {
-        t.y_enabled = true;
-        t.y = GET_ARG_VALUE('y');
-    }
-
-    if (CHECK_ARGUMENT('z')) {
-        t.z_enabled = true;
-        t.z = GET_ARG_VALUE('z');
-    }
-
-    if (CHECK_ARGUMENT('e')) {
-        t.e_enabled = true;
-        t.e = GET_ARG_VALUE('e');
-    }
-
 
     //Schedule a line to the specified coordinates
-    return MachineController::line_to_scheduled(t);
+    return MachineController::line_scheduled(state);
 
 }
 
-
-task_state_t TerminalInterfaceCommands::line_of(uint8_t args_index) {
-
-    //This task requires the schedule of one type-0 task
-    FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(args_index);
-
-    //verify that almost one movement coordinate is provided.
-    REQUIRE_ONE_ARGUMENTS("xyze");
-
-    machine_coords_t t = machine_coords_t();
-
-    //If x was provided, enable the x coordinate, and get it.
-    if (CHECK_ARGUMENT('x')) {
-        t.x_enabled = true;
-        t.x = GET_ARG_VALUE('x');
-    }
-
-    if (CHECK_ARGUMENT('y')) {
-        t.y_enabled = true;
-        t.y = GET_ARG_VALUE('y');
-    }
-
-    if (CHECK_ARGUMENT('z')) {
-        t.z_enabled = true;
-        t.z = GET_ARG_VALUE('z');
-    }
-
-    if (CHECK_ARGUMENT('e')) {
-        t.e_enabled = true;
-        t.e = GET_ARG_VALUE('e');
-    }
-
-    //Schedule a line to the specified coordinates with the specified working_extruder
-    return MachineController::line_of_scheduled(t);
-
-}
 
 //--------------------------------------------------------Extrusion-----------------------------------------------------
 
+/*
+ * enable_steppers : enable or disable steppers.
+ *
+ *  It takes only one argument, -e followed by 0 (disable) or [not zero] enabled
+ *
+ */
 
 task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
 
@@ -264,8 +250,6 @@ task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
     //Fail if the enabling argument is omitted
     REQUIRE_ALL_ARGUMENTS("e")
 
-    //TODO SELECT THE STEPPER TO DISABLE, WITH ARGUMENT -s
-
     //Extract the enable boolean
     bool enable = (bool) GET_ARG_VALUE('e');
 
@@ -275,7 +259,16 @@ task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
 }
 
 
-
+/*
+ * set_extrusion : this function modifies extrusion parameters.
+ *
+ *  It takes the folloging arguments :
+ *      - c : changes the working carriage;
+ *      - s : changes the speed for the carriages designed by c (or for the working carriage if c is not provided).
+ *
+ *  Almost one must be provided.
+ *
+ */
 task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
 
     FAIL_IF_CANT_SCHEDULE(1);
@@ -284,12 +277,12 @@ task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
     PARSE_ARGUMENTS(args_index);
 
     //At least w (working carriage) and s (speed) must be provided
-    REQUIRE_ONE_ARGUMENTS("ws");
+    REQUIRE_ONE_ARGUMENTS("cs");
 
     MachineController::extrusion_state_t new_state = MachineController::extrusion_state_t();
 
     //If the working carriage must be changed
-    if (CHECK_ARGUMENT('w')) {
+    if (CHECK_ARGUMENT('c')) {
 
         //Set the flag;
         new_state.working_extruder_flag = true;
@@ -312,15 +305,17 @@ task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
 #define CHECK_SPEED(i) \
             case(i): new_state.speed_##i##_flag = true;new_state.speed_##i = GET_ARG_VALUE('s');break;
 
-            switch((uint8_t) GET_ARG_VALUE('c')) {
+            switch ((uint8_t) GET_ARG_VALUE('c')) {
                 CHECK_SPEED(0)
                 CHECK_SPEED(1)
                 CHECK_SPEED(2)
                 CHECK_SPEED(3)
-                default:break;
+                default:
+                    break;
 
             }
 
+            //for safety, un-delete the previously defined macro.
 #undef CHECK_SPEED
 
         } else {
@@ -340,6 +335,14 @@ task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
 }
 
 
+/*
+ * set_cooling : this function modifies the cooling state.
+ *
+ *  It takes the following arguments :
+ *      -e : 0 means disable the cooling, other values will enable it.
+ *      -p : modifies the cooling power (truncated between 0 and 100).
+ *
+ */
 
 task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
 
@@ -363,7 +366,6 @@ task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
         //get the enable boolean
         new_state.enabled = (bool) GET_ARG_VALUE('e');
 
-
     }
 
     //Set the power if required
@@ -381,6 +383,18 @@ task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
 
 }
 
+
+/*
+ * set_hotend : this function sets the state of a particular hotend.
+ *
+ *  It takes the following arguments :
+ *      -h : the hotend to modify, mandatory.
+ *      -e : 0 means disable the power on the hotend, other values will enable it.
+ *      -t : sets the target temperature of the hotend.
+ *
+ *      -e or -t must be provided.
+ */
+
 task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
@@ -397,7 +411,7 @@ task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
     TemperatureController::hotend_state_t state = TemperatureController::hotend_state_t();
 
     state.hotend_flag = true;
-    state.hotend = (uint8_t)GET_ARG_VALUE('h');
+    state.hotend = (uint8_t) GET_ARG_VALUE('h');
 
     //If the temperature must be adjusted
     if (CHECK_ARGUMENT('t')) {
@@ -425,6 +439,18 @@ task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
     return TemperatureController::set_hotends_state(state);
 
 }
+
+
+/*
+ * set_hotbed : this function sets the hotbed's state
+ *
+ *  It takes the following arguments :
+ *      -e : 0 means disable the power on the hotbed, other values will enable it.
+ *      -t : sets the target temperature of the hotbed.
+ *
+ *      -e or -t must be provided.
+ */
+
 task_state_t TerminalInterfaceCommands::set_hotbed(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
@@ -500,20 +526,14 @@ task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
 }
 
 
-
-
 task_state_t TerminalInterfaceCommands::temp_test(uint8_t args_index) {
 
 
-
-
-    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(845), 5));
-    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(846), 5));
-    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(847), 5));
-    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(846), 5));
-    CI::echo("t0 : "+String(Thermistors::get_temperature_hotend_0(845), 5));
-
-
+    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
+    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
+    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
+    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
 
 
     return complete;
