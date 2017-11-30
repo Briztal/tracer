@@ -84,7 +84,7 @@ bool TaskScheduler::check_sequence_type(uint8_t type) {
  *
  */
 
-void TaskScheduler::add_task(task_t task) {
+void TaskScheduler::schedule_task(task_t task) {
 
     //Insert the task only if available_spaces are available
     if (pool_task_spaces) {
@@ -102,14 +102,25 @@ void TaskScheduler::add_task(task_t task) {
 }
 
 
-void TaskScheduler::schedule_task(task_state_t (*f)(void *), void *args, uint8_t type) {
+/*
+ * schedule_task : this function creates a task and adds it to the task pool.
+ *
+ *  It takes in arguments all parameters required to build a task, namely :
+ *      - f : the function to execute;
+ *      - dynamic_args : a void *, adressing the first byte of the arguments. Those may be dynamic or static.
+ *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
+ *      - type : the type of the task.
+ *
+ */
+
+void TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
 
     //Insert the task only if available_spaces are available
     if (pool_task_spaces) {
 
         task_t task = task_t();
         task.task = f;
-        task.args = args;
+        task.dynamic_args = args;
         task.type = type;
 
         //copy the task
@@ -126,18 +137,18 @@ void TaskScheduler::schedule_task(task_state_t (*f)(void *), void *args, uint8_t
 
 
 /*
- * add_procedure : this function adds a task that takes no arguments.
+ * schedule_procedure : this function adds a task that takes no arguments.
  *
  */
 
-uint8_t TaskScheduler::add_procedure(task_state_t (*f)(void *), uint8_t type) {
+uint8_t TaskScheduler::schedule_procedure(task_state_t (*f)(void *), uint8_t type) {
 
     //Insert the task only if available_spaces are available
     if (check_sequence_type(type) && pool_task_spaces) {
 
         //copy the task
         task_pool[pool_task_nb].task = f;
-        task_pool[pool_task_nb].args = 0;
+        task_pool[pool_task_nb].dynamic_args = nullptr;
         task_pool[pool_task_nb].type = type;
 
         //Increase the number of task in the pool
@@ -153,7 +164,7 @@ uint8_t TaskScheduler::add_procedure(task_state_t (*f)(void *), uint8_t type) {
 
 
 /*
- * add_procedure : this function adds a task that takes no arguments, to process asap.
+ * schedule_procedure : this function adds a task that takes no arguments, to process asap.
  *
  */
 
@@ -164,7 +175,7 @@ uint8_t TaskScheduler::add_prioritary_procedure(task_state_t (*f)(void *)) {
 
         //copy the task
         task_pool[pool_task_nb].task = f;
-        task_pool[pool_task_nb].args = 0;
+        task_pool[pool_task_nb].dynamic_args = nullptr;
         task_pool[pool_task_nb].type = 255;
 
         //Increase the number of task in the pool
@@ -435,17 +446,22 @@ void TaskScheduler::process_task_sequences_singular() {
 
 bool TaskScheduler::process_task(task_t *task) {
 
-    //call the function of the task by pointer, and provide the arguments of the task.
-    task_state_t state = (*(task->task))(task->args);
+    //Initialise the state as complete, in case of null task.
+    task_state_t state = complete;
+
+    //Execute if the task is not null.
+    if (task->task != nullptr) {
+
+        //call the function of the task by pointer, and provide the arguments of the task.
+        state = (*(task->task))(task->dynamic_args);
+
+    }
 
     //If the task must be reprogrammed,
     if (state != reprogram) {
 
-        //TODO PUT A FLAG FOR AUTOREMOVE !!!!!!!!!!!!!!!!!!!
-        BECAUSE DATA IN ARGUMENTS STORAGE MUSTNT BE FREED !
-
-        //Free the memory occupied by the task.
-        delete(task->args);
+       //Free the memory occupied by the task.
+        delete (task->dynamic_args);
 
         //Succeed.
         return true;

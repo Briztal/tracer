@@ -80,7 +80,7 @@ public:
     static task_state_t set_hotends_state(hotend_state_t state);
 
     //Scheduler for the state setter
-GENERATE_SCHEDULER(set_hotends_state, 1, hotend_state_t, state);
+GENERATE_SCHEDULER(set_hotends_state, 0, hotend_state_t, state);
 
     //Get the current hotends state.
     static hotend_state_t get_hotends_state(uint8_t hotend_id);
@@ -113,7 +113,7 @@ public:
     static task_state_t set_hotbed_state(hotbed_state_t state);
 
     //Scheduler for the state setter
-GENERATE_SCHEDULER(set_hotbed_state, 1, hotbed_state_t, state);
+GENERATE_SCHEDULER(set_hotbed_state, 0, hotbed_state_t, state);
 
     //Get the current hotbeds state.
     static hotbed_state_t get_hotbeds_state();

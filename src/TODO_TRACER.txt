@@ -1,12 +1,5 @@
 
-
-//TODO AUTOREMOVE_FLAG IN TASK_T
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//TODO VERIFY THAT MEMORY IS CORRECTLY FREED BY THE SCHEDULER !!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+//TODO REMOVE DISPATCHERS IN TERMINALCOMMANDS, AND MAKE ONE DISPATCHER IN TERMIALINTERFACE.
 
 
 
@@ -14,7 +7,6 @@
 //TODO SET CURRENT POSITION IN MACHINE
 
 //TODO CLEAN NOZZLE IN MACHINE AND MECHANIC
-
 
 
 
@@ -33,15 +25,6 @@
 //TODO COMMENT THE PARSING IN GCodeInterface.cpp
 
 
-
-//TODO VERIFY COOLING
-
-
-//TODO INTERPROCESS INTERFACE
-
-
-
-
 //TODO PID_AUTOTUNE
 
 //TODO SD SUPPORT
@@ -50,4 +33,18 @@
 
 //TODO ETALONNAGE DANS LA CLASSE MACHINEINTERFACE
 
+
+
+
+////////////////////////TEST///////////////////////////////
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO VERIFY THAT MEMORY IS CORRECTLY FREED BY THE SCHEDULER !!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+//TODO TEST COOLING
+
+//TODO INTERPROCESS INTERFACE
 

@@ -349,13 +349,13 @@ void PI::process(char *command, uint8_t size) {
 /*
  * add_task : this function sends a task to the scheduler :
  *
- *  It starts by creating the struct to contain args data, then it saves it.
+ *  It starts by creating the struct to contain dynamic_args data, then it saves it.
  *
  *  Finally, it sends the task to task to the scheduler.
  *
  */
 
-void PI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
+void PI::schedule_task(task_state_t (*task)(void *), char *command, uint8_t size) {
     //If the function fails,
     //if (!current_node->function(data_in, r_command_size)) {
 
@@ -370,7 +370,7 @@ void PI::add_task(task_state_t (*task)(void *), char *command, uint8_t size) {
         //Create a task in the stack to contain task data
         task_t t = task_t();
         t.type = 255;
-        t.args = (void *)data;
+        t.dynamic_args = (void *)data;
         t.task = task;
 
         //Schedule the task

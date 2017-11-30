@@ -30,15 +30,15 @@
 class MachineController {
 
 
-public:
 
     //-------------------------------Homing movement-------------------------------
 
+public:
 
     static task_state_t home();
 
     //A scheduler for the cooling homing functione
-GENERATE_SCHEDULER(home, 1);
+GENERATE_SCHEDULER(home, 0);
 
 private:
 
@@ -85,7 +85,7 @@ public:
     static task_state_t line(movement_state_t movement_state);
 
     //A scheduler for the line function.
-GENERATE_SCHEDULER(line, 1, machine_coords_t, coords);
+GENERATE_SCHEDULER(line, 0, machine_coords_t, coords);
 
 
 private:
@@ -118,7 +118,7 @@ public:
     static task_state_t enable_steppers(bool enable);
 
     //A scheduler for the stepper manager
-GENERATE_SCHEDULER(enable_steppers, 1, bool, enable);
+GENERATE_SCHEDULER(enable_steppers, 0, bool, enable);
 
 
     //-------------------------------Extrusion-------------------------------
@@ -140,7 +140,7 @@ public:
     typedef struct extrusion_state_t {
 
         //Readonly variable for mode;
-        uint8_t mode;
+        uint8_t mode = 0;
 
         //Flags
         bool working_extruder_flag = false;
@@ -166,7 +166,7 @@ public:
     static task_state_t set_extrusion_state(extrusion_state_t data);
 
     //The Scheduler for the function.
-GENERATE_SCHEDULER(set_extrusion_state, 1, extrusion_state_t, data);
+GENERATE_SCHEDULER(set_extrusion_state, 0, extrusion_state_t, data);
 
     //Get the current extrusion state;
     static const extrusion_state_t get_extrusion_state();
@@ -208,7 +208,7 @@ public:
     static task_state_t set_cooling_state(cooling_state_t);
 
     //A scheduler for the cooling manager
-GENERATE_SCHEDULER(set_cooling_state, 1, cooling_state_t, state);
+GENERATE_SCHEDULER(set_cooling_state, 0, cooling_state_t, state);
 
 
     static const cooling_state_t get_cooling_state();

@@ -66,7 +66,7 @@ public :
     //Tree Structure update
     static task_state_t send_tree_structure();
 
-    //Add a task : create the struct to contain args data, save it, and send to task to the scheduler.
+    //Add a task : create the struct to contain dynamic_args data, save it, and send to task to the scheduler.
     static void add_task(task_state_t (*task)(void *), char *command, uint8_t size);
 
 

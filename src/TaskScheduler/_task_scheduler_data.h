@@ -5,9 +5,35 @@
 #include "task_state_t.h"
 
 typedef struct task_t {
-    uint8_t type;
-    task_state_t (*task)(void *);
-    void * args;
+
+    /*
+     * The type of the task
+     *  - 255 for a task to execute as soon as possible
+     *  - other values for task to execute in order.
+     *      WARNING : The order only applies for task belonging to the same group!
+     */
+
+    uint8_t type = 255;
+
+
+    /*
+     * The function to execute, at runtime.
+     */
+
+    task_state_t (*task)(void *) = nullptr;
+
+
+    /*
+     * Arguments that must be passed to the function.
+     *  As the signature of a task's function is fixed, we can only pass a pointer to a structure containing the
+     *      arguments
+     *
+     * This structure MUST BE DECLARED IN THE HEAP, as it will be freed automatically, to avoid memory leak.
+     *
+     */
+
+    void *dynamic_args = nullptr;
+
 };
 
 #endif //TRACER_TASK_SCHEDULER_DATA_H

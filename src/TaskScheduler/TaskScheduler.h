@@ -107,11 +107,13 @@ public:
     static void run();
 
     //Schedule a task.
-    static void add_task(task_t task);
-    static void schedule_task(task_state_t (*f)(void *), void *args, uint8_t type);
+    static void schedule_task(task_t task);
+
+    //Build and schedule a task.
+    static void schedule_task(uint8_t type,task_state_t (*f)(void *), void *args);
 
     //Schedule a no-arguments task.
-    static uint8_t add_procedure(task_state_t (*f)(void *), uint8_t type);
+    static uint8_t schedule_procedure(task_state_t (*f)(void *), uint8_t type);
 
     //Schedule a no-arguments task of type 255.
     static uint8_t add_prioritary_procedure(task_state_t (*f)(void *));
@@ -119,10 +121,10 @@ public:
     //Returns the number of type-[type] tasks that can be scheduled.
     static const uint8_t available_spaces(uint8_t type);
 
-    //Lock the specified sequence
+    //Lock the specified sequence.
     static void lock_sequence(uint8_t type);
 
-    //get the state of a sequence
+    //get the state of a sequence.
     static bool is_sequence_locked(uint8_t type);
 
 private:

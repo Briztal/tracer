@@ -119,7 +119,7 @@ public:
 private :
 
     //The current arguments.
-    static gcode_arguments args;
+    static gcode_arguments dynamic_args;
 
     //The current parameters size.
     static unsigned char parameters_size;

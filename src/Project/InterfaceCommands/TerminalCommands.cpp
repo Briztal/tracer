@@ -24,7 +24,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include "Interfaces/TerminalInterface/TerminalInterface.h"
-#include "TerminalInterfaceCommands.h"
+#include "TerminalCommands.h"
 #include "_interface_data.h"
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
@@ -39,7 +39,7 @@
 #include <Project/TemperatureController.h>
 
 
-task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
+task_state_t TerminalCommands::action(uint8_t args_index) {
 
     EEPROMInterface::display_tree();
 
@@ -52,7 +52,7 @@ task_state_t TerminalInterfaceCommands::action(uint8_t args_index) {
 
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
-task_state_t TerminalInterfaceCommands::eeprom(uint8_t args_index) {
+task_state_t TerminalCommands::eeprom(uint8_t args_index) {
 
     //Parse Arguments
     PARSE_ARGUMENTS(args_index);
@@ -151,7 +151,7 @@ task_state_t TerminalInterfaceCommands::eeprom(uint8_t args_index) {
  *
  */
 
-task_state_t TerminalInterfaceCommands::home(uint8_t args_index) {
+task_state_t TerminalCommands::home(uint8_t args_index) {
 
     //Require the schedule of one movement
     FAIL_IF_CANT_SCHEDULE(1);
@@ -168,7 +168,7 @@ task_state_t TerminalInterfaceCommands::home(uint8_t args_index) {
         //If the movement must just be a line to zero
 
         //Schedule a reset of the carriages
-        MachineController::home_scheduled();
+        MachineController::home_scheduled_0();
 
     }
 
@@ -185,7 +185,7 @@ task_state_t TerminalInterfaceCommands::home(uint8_t args_index) {
  *      - r : (optionnal) all provided coordinates are relative.
  */
 
-task_state_t TerminalInterfaceCommands::line(uint8_t args_index) {
+task_state_t TerminalCommands::line(uint8_t args_index) {
 
     //This task requires the schedule of one type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -225,7 +225,7 @@ task_state_t TerminalInterfaceCommands::line(uint8_t args_index) {
     }
 
     //Schedule a line to the specified coordinates
-    return MachineController::line_scheduled(state);
+    return MachineController::line_scheduled_0(state);
 
 }
 
@@ -239,7 +239,7 @@ task_state_t TerminalInterfaceCommands::line(uint8_t args_index) {
  *
  */
 
-task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
+task_state_t TerminalCommands::enable_steppers(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -254,7 +254,7 @@ task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
     bool enable = (bool) GET_ARG_VALUE('e');
 
     //Schedule an enable / disable of steppers.
-    return MachineController::enable_steppers_scheduled(enable);
+    return MachineController::enable_steppers_scheduled_0(enable);
 
 }
 
@@ -269,7 +269,7 @@ task_state_t TerminalInterfaceCommands::enable_steppers(uint8_t args_index) {
  *  Almost one must be provided.
  *
  */
-task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
+task_state_t TerminalCommands::set_extrusion(uint8_t args_index) {
 
     FAIL_IF_CANT_SCHEDULE(1);
 
@@ -330,7 +330,7 @@ task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
 
     }
 
-    return MachineController::set_extrusion_state(new_state);;
+    return MachineController::set_extrusion_state_scheduled_0(new_state);;
 
 }
 
@@ -344,7 +344,7 @@ task_state_t TerminalInterfaceCommands::set_extrusion(uint8_t args_index) {
  *
  */
 
-task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
+task_state_t TerminalCommands::set_cooling(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -379,7 +379,7 @@ task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
 
     }
 
-    return MachineController::set_cooling_state(new_state);;
+    return MachineController::set_cooling_state_scheduled_0(new_state);;
 
 }
 
@@ -395,7 +395,7 @@ task_state_t TerminalInterfaceCommands::set_cooling(uint8_t args_index) {
  *      -e or -t must be provided.
  */
 
-task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
+task_state_t TerminalCommands::set_hotend(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -436,7 +436,7 @@ task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
     }
 
     //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::set_hotends_state(state);
+    return TemperatureController::set_hotends_state_scheduled_0(state);
 
 }
 
@@ -451,7 +451,7 @@ task_state_t TerminalInterfaceCommands::set_hotend(uint8_t args_index) {
  *      -e or -t must be provided.
  */
 
-task_state_t TerminalInterfaceCommands::set_hotbed(uint8_t args_index) {
+task_state_t TerminalCommands::set_hotbed(uint8_t args_index) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
@@ -487,7 +487,7 @@ task_state_t TerminalInterfaceCommands::set_hotbed(uint8_t args_index) {
     }
 
     //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::set_hotbed_state(state);
+    return TemperatureController::set_hotbed_state_scheduled_0(state);
 
 }
 
@@ -498,14 +498,14 @@ task_state_t TerminalInterfaceCommands::set_hotbed(uint8_t args_index) {
 
 
 
-task_state_t TerminalInterfaceCommands::get_regulations(uint8_t args_index) {
+task_state_t TerminalCommands::get_regulations(uint8_t args_index) {
 
     return complete;
 
 }
 
 
-task_state_t TerminalInterfaceCommands::get_temps(uint8_t args_index) {
+task_state_t TerminalCommands::get_temps(uint8_t args_index) {
 
     return complete;
 
@@ -516,7 +516,7 @@ task_state_t TerminalInterfaceCommands::get_temps(uint8_t args_index) {
 //---------------------------------------------------------Tests--------------------------------------------------------
 
 
-task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
+task_state_t TerminalCommands::stepper_test(uint8_t args_index) {
 
     CI::echo("EXIT");
 
@@ -526,7 +526,7 @@ task_state_t TerminalInterfaceCommands::stepper_test(uint8_t args_index) {
 }
 
 
-task_state_t TerminalInterfaceCommands::temp_test(uint8_t args_index) {
+task_state_t TerminalCommands::temp_test(uint8_t args_index) {
 
 
     CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
@@ -540,7 +540,7 @@ task_state_t TerminalInterfaceCommands::temp_test(uint8_t args_index) {
 }
 
 char t_wd_buf_tic[MAX_WORD_SIZE];
-char *const TerminalInterfaceCommands::word_buffer = t_wd_buf_tic;
+char *const TerminalCommands::word_buffer = t_wd_buf_tic;
 
 #endif
 

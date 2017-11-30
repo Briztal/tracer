@@ -34,7 +34,7 @@
  *          to the moment it is effectively executed;
  *      - A scheduler, taking the same arguments than your function, that would put those into
  *          an instance of the struct, and schedule the unpacker (below);
- *      - An unpacker, that would unpack arguments, and analyse_command the desired function, with extracted args.
+ *      - An unpacker, that would unpack arguments, and analyse_command the desired function, with extracted dynamic_args.
  *
  *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
  *
@@ -46,6 +46,16 @@
  *
  *      GENERATE_SCHEDULER(function, 1, uint8_t, var_0, float, var_1, long, var_2)
  *
+ *
+ * the resulting scheduler will be a function, taking exactly the same argument than your primary function,
+ *
+ *  and named :
+ *
+ *  task_state_t function_scheduled_i(uint8_t var_0, float var_1, long var_2) {
+ *      //SOME SCHEDULED OPERATIONS
+ *  }
+ *
+ *          where i is the task type you required previously.
  *
  */
 
@@ -198,16 +208,16 @@
  *
  *  - generate the structure
  *
- *  - generate the packer
+ *  - generate the packer (will put data to the struct)
  *
- *  - generate the unpacker
+ *  - generate the unpacker (will extract data from the struct and call the function with it)
  *
  */
 
 #define GENERATE_STRUCT(name, struct_data) struct name##_struct_t { struct_data };
 
 #define GENERATE_PACKER(name, type,  signature, struct_fill)\
-static task_state_t name##_scheduled signature { \
+static task_state_t name##_scheduled_##type signature { \
     \
     /*Create the data in the heap*/\
     struct name##_struct_t *_unpacker_data_ = new name##_struct_t();\
@@ -215,13 +225,14 @@ static task_state_t name##_scheduled signature { \
     /*Fill the data*/\
     struct_fill\
     \
-    /*Schedule the task*/\
-    TaskScheduler::schedule_task(_##name, (void *) _unpacker_data_, type);\
+    /*Schedule a task, that will execute the required function, passing the previously created data.*/\
+    TaskScheduler::schedule_task(type, _##name, (void *) _unpacker_data_);\
     \
     /*Complete*/\
     return complete;\
     \
 }\
+
 
 #define GENERATE_UNPACKER(name, struct_extraction)\
 static task_state_t _##name(void *_unpacker_pointer_) {\
@@ -231,11 +242,6 @@ static task_state_t _##name(void *_unpacker_pointer_) {\
     \
     /*Extract the data and analyse_command the function*/\
     task_state_t _unpacker_return_state_ = name struct_extraction;\
-    \
-    /*free the data if the task musn't be reprogrammed*/\
-    if (_unpacker_return_state_ != reprogram) {\
-        free(_unpacker_data_);\
-    }\
     \
     /*Complete with the state of the function.*/\
     return _unpacker_return_state_;\
@@ -279,17 +285,14 @@ static task_state_t _##name(void *_unpacker_pointer_) {\
 #define EXTRACT_STRUCT_(...) (COMMA_F(__VA_ARGS__) (STRUCT_EXTRACT_CAT, __VA_ARGS__))
 
 
-
-
 /*
  * Scheduler generation macro :
  *
- * This macro is the one taht is used by the programmer, to schedule a function, taking some args.
+ * This macro is the one that is used by the programmer, to schedule a function, taking some dynamic_args.
  *
  *  It calls the pre-generation macro, passing the code generated using the four macros upper.
  *
  */
-
 
 #define GENERATE_SCHEDULER(name, type, ...)\
     GENERATE_SCHEDULER_(name, type, GET_SIGNATURE_(__VA_ARGS__), DEFINE_STRUCT_(__VA_ARGS__), FILL_STRUCT_(__VA_ARGS__), EXTRACT_STRUCT_(__VA_ARGS__))

@@ -32,7 +32,7 @@
 #include "interface.h"
 #include <TaskScheduler/TaskScheduler.h>
 
-class TerminalInterfaceCommands {
+class TerminalCommands {
 
     //-----------------------------------------------Custom functions---------------------------------------------------
 
@@ -69,6 +69,9 @@ public:
         return b;\
     }
 
+//TODO REMOVE CETTE MERDE ET FAIRE UN DISPATCHEUR GLOBAL !!
+
+
 #define CREATE_CALLABLE_LEAF(i, name, ...)\
     CREATE_LEAF(i, name)
 
@@ -84,8 +87,6 @@ public:
 private:
 
     static char *const word_buffer;
-
-
 
 };
 

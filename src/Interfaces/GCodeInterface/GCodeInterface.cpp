@@ -157,7 +157,7 @@ void GCodeInterface::init_parsing() {
     data_in = data_in_0;
 
     //Reset parameter flags
-    memset(args.parameters_flags, sizeof(float) * NB_PARAMETERS, 0);
+    memset(dynamic_args.parameters_flags, sizeof(float) * NB_PARAMETERS, 0);
 
 }
 
@@ -237,7 +237,7 @@ void GCodeInterface::schedule(task_state_t (*f)(void *)) {
         return;
 
     //Save the current parameters
-    uint8_t index = arguments_storage.insert_argument((char *) &args, sizeof(gcode_arguments));
+    uint8_t index = arguments_storage.insert_argument((char *) &dynamic_args, sizeof(gcode_arguments));
 
 #else
 
@@ -250,7 +250,7 @@ void GCodeInterface::schedule(task_state_t (*f)(void *)) {
     //Create a task in the stack to contain task data
     task_t t = task_t();
     t.type = 255;
-    t.args = (void *) data;
+    t.dynamic_args = (void *) data;
     t.task = f;
 
     //Schedule the task
@@ -356,10 +356,10 @@ bool GCodeInterface::process_parameter(char index, float value) {
             /*if the parameter matched the given index*/\
             case j : \
                 /*if the parameter is not already set*/\
-                if (!*(args.parameters_flags + i)){\
+                if (!*(dynamic_args.parameters_flags + i)){\
                     /*set the flag, and save the value*/\
-                    *(args.parameters + i) = value;\
-                    *(args.parameters_flags + i) = true;\
+                    *(dynamic_args.parameters + i) = value;\
+                    *(dynamic_args.parameters_flags + i) = true;\
                 }\
                 return true;
 
@@ -414,7 +414,7 @@ char *const m::data_in_0 = tdatain_gcode;
 char *m::parameters_ptr;
 
 //Current arguments
-gcode_arguments m::args = gcode_arguments();
+gcode_arguments m::dynamic_args = gcode_arguments();
 
 #undef m
 

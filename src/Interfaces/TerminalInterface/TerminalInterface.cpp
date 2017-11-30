@@ -28,7 +28,7 @@
 #include <interface.h>
 #include <Project/InterfaceCommands/_interface_data.h>
 #include <DataStructures/StringUtils.h>
-#include "Project/InterfaceCommands/TerminalInterfaceCommands.h"
+#include "Project/InterfaceCommands/TerminalCommands.h"
 #include "../../hardware_language_abstraction.h"
 #include "TerminalNode.h"
 
@@ -323,9 +323,6 @@ bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers)
     //Cache for the current char
     char c = *(identifiers++);
 
-    //Initialise a flag, that will be false if any of the identifiers is not present in the parsed indetifiers.
-    bool one_present = false;
-
     //For every identifier in the string (stop at null byte);
     while (c) {
 
@@ -433,14 +430,13 @@ void TerminalInterface::execute() {
                         data->node = current_node;
                         data->arguments_index = index;
 
-                        //Create a task in the stack to contain task data
-                        task_t t = task_t();
-                        t.type = 255;
-                        t.args = (void *) data;
-                        t.task = current_node->function;
 
-                        //Schedule the task
-                        TaskScheduler::add_task(t);
+                        /*
+                         * Schedule a type 255 (asap) task, to execute the required function,
+                         *  with data as arguments.
+                         */
+
+                        TaskScheduler::schedule_task(255, current_node->function, (void *) data);
 
                         //Complete
                         return;
@@ -536,7 +532,7 @@ TerminalNode *TerminalInterface::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc, args)\
-    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalInterfaceCommands::_##function);\
+    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalCommands::_##function);\
     command_counter++;
 
 #include "Project/Config/terminal_interface_config.h"
@@ -630,7 +626,7 @@ String *TerminalInterface::build_tree_summary() {
 
 }
 
-//---------------------------------Functions called by TerminalInterfaceCommands------------------------------
+//---------------------------------Functions called by TerminalCommands------------------------------
 
 
 
@@ -658,7 +654,7 @@ void TerminalInterface::validate_task(uint8_t task_index) {
  *
  *  If the problem comes from the parsing (log_args = false), it will display the node's children.
  *
- *  If it comes from the execution (log_args = true), then it will display the node's args.
+ *  If it comes from the execution (log_args = true), then it will display the node's dynamic_args.
  *
  */
 
@@ -701,7 +697,6 @@ char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
 
-
 //Identifiers in a parsed argument sequence
 id_to_index_t t_id_to_indexes[MAX_ARGS_NB];
 id_to_index_t *const m::identfiers = t_id_to_indexes;
@@ -710,10 +705,10 @@ id_to_index_t *const m::identfiers = t_id_to_indexes;
 uint8_t m::nb_identifiers = 0;
 
 
-ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1, NB_PENDING_COMMANDS);
+ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
+                                                                       NB_PENDING_COMMANDS);
 
 ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_WORD_SIZE + 1, NB_PENDING_COMMANDS);
-
 
 
 String *m::tree_summary = m::build_tree_summary();
