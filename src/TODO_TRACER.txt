@@ -1,14 +1,10 @@
 
-//TODO REMOVE DISPATCHERS IN TERMINALCOMMANDS, AND MAKE ONE DISPATCHER IN TERMIALINTERFACE.
 
-
-
+//TODO REMOVE THE SUPER HEAVY STRUCTURE extrudion_state_t, replace by a simplified version, that can only modify one speed at time.
 
 //TODO SET CURRENT POSITION IN MACHINE
 
 //TODO CLEAN NOZZLE IN MACHINE AND MECHANIC
-
-
 
 //TODO GCODE TREE
 
@@ -38,6 +34,7 @@
 
 ////////////////////////TEST///////////////////////////////
 
+//TODO TEST THE DISPATCHER IN TERMINALINTERFACE
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //TODO VERIFY THAT MEMORY IS CORRECTLY FREED BY THE SCHEDULER !!!!!!!!!!!!!!!!!
@@ -45,6 +42,8 @@
 
 
 //TODO TEST COOLING
+
+//TODO TEST THERMISTORS, HOTBED, AND PIDS
 
 //TODO INTERPROCESS INTERFACE
 

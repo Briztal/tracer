@@ -21,7 +21,7 @@
 #include "TerminalNode.h"
 
 TerminalNode::TerminalNode(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log,
-                           task_state_t (*f)(void *)) :
+                           task_state_t (*f)(char *)) :
         sub_nodes_nb(sub_nodes_nb), name(name), args_log(args_log), desc_log(desc_log), function(f) {
 
     sub_nodes = (TerminalNode **) malloc(sub_nodes_nb * sizeof(TerminalNode *));

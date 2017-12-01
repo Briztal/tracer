@@ -29,14 +29,12 @@
 #include <Project/InterfaceCommands/_interface_data.h>
 #include <DataStructures/StringUtils.h>
 #include "Project/InterfaceCommands/TerminalCommands.h"
-#include "../../hardware_language_abstraction.h"
-#include "TerminalNode.h"
 
 
 /*
  * init : this function initialises the serial, and sets up the command processing environment.
- *
  */
+
 void TerminalInterface::init() {
 
     //Initialise the serial
@@ -54,16 +52,15 @@ void TerminalInterface::init() {
 
 /*
  * echo : this function sends a String over the serial.
- *
  */
 
 void TerminalInterface::echo(const string_t msg) {
     terminal_interface_link_t::send_str(msg + "\n");
 }
 
+
 /*
  * read_data : this function reads and saved the serial available data.
- *
  */
 
 void TerminalInterface::read_data() {
@@ -84,7 +81,7 @@ void TerminalInterface::read_data() {
             if (command_size) {
 
                 //Parse and execute_progmem_style the command
-                execute();
+                schedule_command();
 
                 //Reset the data_in
                 reset();
@@ -136,6 +133,120 @@ void TerminalInterface::reset() {
 }
 
 
+
+//-----------------------------------------------------Execution--------------------------------------------------------
+
+
+/*
+ * schedule_command : this function analyses the packet received, and parses the command part.
+ *
+ *  When it has found the TerminalCommand identified by this string, it saves the rest of the packet (the arguments part)
+ *      in the argument storage, and then, schedules the execution of this function.
+ *
+ *  This command will be executed, by the intermediary of the execute_command function, defined below.
+ *      (see the doc above the function's definition for more explanations).
+ */
+void TerminalInterface::schedule_command() {
+
+    prepare_execution();
+
+    //Initialise the current current_node to the root;
+    TerminalNode *current_node = command_tree;
+    TerminalNode *current_sub_node;
+
+    //Cache var for the sub nodes.
+    TerminalNode **sub_nodes = current_node->sub_nodes;
+
+    //Declare a local word buffer
+    char word_buffer[MAX_WORD_SIZE];
+
+    //get the first node identifier, in the word buffer
+    data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
+
+    //Must declare the int before the jump label.
+    uint8_t i;
+
+    node_check:
+
+    //Check every sub_node
+    for (i = 0; i < current_node->sub_nodes_nb; i++) {
+        current_sub_node = sub_nodes[i];
+
+        const char *c = (*current_sub_node->name).c_str();
+
+        //If the current word matches the current_node's name
+        if (!strcmp(c, word_buffer)) {
+
+            //Re-init the current data
+            current_node = current_sub_node;
+            sub_nodes = current_node->sub_nodes;
+
+            //if the new node is not a leaf, check sub nodes
+            if (current_node->sub_nodes_nb) {
+
+                //Go to the lower level
+
+                //Get the next node identifier
+                data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
+
+                //check the new node
+                goto node_check;
+
+            } else {
+
+                if (arguments_sequences_storage.available_spaces()) {
+
+                    //The argument's index
+                    uint8_t index;
+
+                    //Save the arguments sequence.
+                    if (arguments_sequences_storage.insert_argument(data_in, &index)) {
+
+
+                        //Create a struct in the heap to contain argument-related data.
+                        terminal_interface_data_t *data = new terminal_interface_data_t();
+                        data->arguments_index = index;
+                        data->terminal_command = current_node->function;
+
+                        /*
+                         * Schedule a type 255 (asap) task, to schedule_command the required function,
+                         *  with data as arguments.
+                         */
+
+                        TaskScheduler::schedule_task(255, execute_command, (void *) data);
+
+                        //Complete
+                        return;
+
+                    } //else : too long argument, log message sent by argument_container.
+
+                } else {
+
+                    //If no more space was available in the argument container : display an error message
+                    CI::echo("ERROR in TerminalInterface::schedule_command : the argument container has no more space "
+                                     "available, this is not supposed to happen");
+
+                    //Fail
+                    return;
+
+                }
+
+            }
+
+        }
+
+    }
+
+    //If the current node didn't contain the required command : log the node's content
+    log_parsing_error(current_node);
+
+}
+
+
+/*
+ * prepare execution : this function is called before parsing a packet.
+ */
+
 void TerminalInterface::prepare_execution() {
 
     //Mark the end of the the received command
@@ -150,19 +261,81 @@ void TerminalInterface::prepare_execution() {
 }
 
 
+/*
+ * log_parsing_error : displays a message, after a parsing problem.
+ *
+ *  It displays the node's children.
+ */
+
+void TerminalInterface::log_parsing_error(TerminalNode *log_node) {
+
+    //Display the last correct node's content.
+
+    //init an empty string
+    String s = "";
+
+    //Fill it with the name and description of direct sub_nodes
+    for (int i = 0; i < log_node->sub_nodes_nb; i++) {
+        TerminalNode *t = log_node->sub_nodes[i];
+        s += *t->name + "\t\t : " + *t->desc_log + "\n";
+    }
+
+    //Display
+    echo(s);
+
+}
+
+
+/*
+ * execute_command : this command eases the redaction of TerminalCommands :
+ *
+ *  Normally, if scheduled directly, a TerminalCommand receives a void *, that must be casted in a char *,
+ *      the address of the arguments sequence. After the execution, if the command mustn't be reprogrammed,
+ *      those arguments must be removed from the argument container.
+ *
+ *      As this procedure is common to all TerminalCommands, this function's goal is to execute this procedure.
+ *
+ *  Now, a TerminalCommand receives a simple char *, and this function does the following :
+ *      - extracting arguments (char *);
+ *      - executing the TerminalCommand, passing these args.
+ *      - eventually removing the arguments.
+ */
+
+task_state_t TerminalInterface::execute_command(void *data_pointer) {
+
+    //Get the terminal interface data back
+    terminal_interface_data_t *data = (terminal_interface_data_t *) data_pointer;
+
+    //Cache var for arguments index.
+    uint8_t arguments_index = data->arguments_index;
+
+    //Cache for arguments.
+    char *arguments = arguments_sequences_storage.get_argument(arguments_index);
+
+    //Execute the required TerminalCommand function, and get the execution state
+    const task_state_t state = (*data->terminal_command)(arguments);
+
+    /*remove arguments arguments, if the task mustn't be reprogrammed*/
+    if (state != reprogram) {
+        arguments_sequences_storage.remove_argument(arguments_index);
+    }
+
+    //Return the execution state.
+    return state;
+}
+
+
+
 //--------------------------------------Arguments Processing--------------------------------------
 
 /*
  * parse_arguments : this function parses an argument sequence, whose format is like below :
  *
  *  -i0 arg0 -i1 arg1 ... -in argn
- *
- *
  */
 
-bool TerminalInterface::parse_arguments(uint8_t arguments_sequence_index) {
+bool TerminalInterface::parse_arguments(char *arguments_sequence) {
 
-    char *arguments_sequence = arguments_sequences_storage.get_argument(arguments_sequence_index);
     //First, reset the argument parsing structure :
 
     //reset the arguments counter
@@ -250,11 +423,10 @@ bool TerminalInterface::parse_arguments(uint8_t arguments_sequence_index) {
 
 }
 
-uint8_t TerminalInterface::get_nb_arguments() {
-
-    return nb_identifiers;
-
-}
+/*
+ * get_argument_value : this function presupposes that the argument referenced
+ *  by the identifier id is a numeric value, and returns that value.
+ */
 
 float TerminalInterface::get_argument_value(char id) {
 
@@ -268,6 +440,11 @@ float TerminalInterface::get_argument_value(char id) {
 
 }
 
+
+/*
+ * get_argument : this function returns a pointer to the argument (char *) referenced
+ *  by the identifier id.
+ */
 
 char *TerminalInterface::get_argument(char id) {
 
@@ -291,6 +468,14 @@ char *TerminalInterface::get_argument(char id) {
 
 }
 
+
+/*
+ * verify_all_identifiers_presence : this function return true only if ALL identifiers contained
+ *  in the identifiers string have been extracted during the previous parsing.
+ *
+ *  the identifier string is a string, where all letters are identifiers to check .
+ *      ex "arp" triggers the checking for identifiers a, r and p.
+ */
 
 bool TerminalInterface::verify_all_identifiers_presence(const char *identifiers) {
 
@@ -317,6 +502,14 @@ bool TerminalInterface::verify_all_identifiers_presence(const char *identifiers)
     return true;
 
 }
+
+/*
+ * verify_all_identifiers_presence : this function return true only if ONE identifiers contained
+ *  in the identifiers string has been extracted during the previous parsing.
+ *
+ *  the identifier string is a string, where all letters are identifiers to check .
+ *      ex "arp" triggers the checking for identifiers a, r and p.
+ */
 
 bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers) {
 
@@ -345,6 +538,11 @@ bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers)
 }
 
 
+/*
+ * verify_all_identifiers_presence : this function return true if the identifier id has been extracted
+ *  during the previous parsing.
+ */
+
 bool TerminalInterface::verify_identifier_presence(char id) {
 
     //Check every parsed identifier
@@ -360,120 +558,29 @@ bool TerminalInterface::verify_identifier_presence(char id) {
 
     //if there was no matches, return false.
     return false;
-}
-
-
-
-
-
-//-----------------------------------------------------Execution--------------------------------------------------------
-
-void TerminalInterface::execute() {
-
-    prepare_execution();
-
-    //Initialise the current current_node to the root;
-    TerminalNode *current_node = command_tree;
-    TerminalNode *current_sub_node;
-
-    //Cache var for the sub nodes.
-    TerminalNode **sub_nodes = current_node->sub_nodes;
-
-    //Declare a local word buffer
-    char word_buffer[MAX_WORD_SIZE];
-
-    //get the first node identifier, in the word buffer
-    data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
-
-    //Must declare the int before the jump label.
-    uint8_t i;
-
-    node_check:
-
-    //Check every sub_node
-    for (i = 0; i < current_node->sub_nodes_nb; i++) {
-        current_sub_node = sub_nodes[i];
-
-        const char *c = (*current_sub_node->name).c_str();
-
-        //If the current word matches the current_node's name
-        if (!strcmp(c, word_buffer)) {
-
-            //Re-init the current data
-            current_node = current_sub_node;
-            sub_nodes = current_node->sub_nodes;
-
-            //if the new node is not a leaf, check sub nodes
-            if (current_node->sub_nodes_nb) {
-
-                //Go to the lower level
-
-                //Get the next node identifier
-                data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
-
-                //check the new node
-                goto node_check;
-
-            } else {
-
-                if (arguments_sequences_storage.available_spaces()) {
-
-                    //The argument's index
-                    uint8_t index;
-
-                    //Save the arguments sequence.
-                    if (arguments_sequences_storage.insert_argument(data_in, &index)) {
-
-
-                        //Create a struct in the heap to contain argument-related data.
-                        terminal_interface_data_t *data = new terminal_interface_data_t();
-                        data->node = current_node;
-                        data->arguments_index = index;
-
-
-                        /*
-                         * Schedule a type 255 (asap) task, to execute the required function,
-                         *  with data as arguments.
-                         */
-
-                        TaskScheduler::schedule_task(255, current_node->function, (void *) data);
-
-                        //Complete
-                        return;
-
-                    } //else : too long argument, log message sent by argument_container.
-
-                } else {
-
-                    //If no more space was available in the argument container : display an error message
-                    CI::echo("ERROR in TerminalInterface::execute : the argument container has no more space "
-                                     "available, this is not supposed to happen");
-
-                    //Fail
-                    return;
-
-                }
-
-            }
-
-        }
-
-    }
-
-    //If the current node didn't contain the required command : log the node's content
-    log_tree_style(current_node, false);
 
 }
+
+
+
 
 
 //--------------------------------------------------Tree generation-----------------------------------------------------
 
+
+/*
+ * generate_tree : this function generates the TerminalNode that will be used to parse commands.
+ */
+
 TerminalNode *TerminalInterface::generate_tree() {
     uint16_t command_counter = 0;
 
+    //Get the number of sons of root.
     uint8_t root_sons_nb = get_sub_nodes_nb(command_counter++);
 
-    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"), new String("none"), 0);
+    //Create the root tree.
+    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"), new String("none"),
+                                          nullptr);
 
     //Initialise the current tree and the history.
     TerminalNode *current_tree = root;
@@ -532,7 +639,7 @@ TerminalNode *TerminalInterface::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc, args)\
-    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalCommands::_##function);\
+    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalCommands::function);\
     command_counter++;
 
 #include "Project/Config/terminal_interface_config.h"
@@ -550,7 +657,6 @@ TerminalNode *TerminalInterface::generate_tree() {
 /*
  * get_sub_nodes_nb : this function determines the number of direct sub_nodes of a particular indice in the sub_nodes
  *  string.
- *
  */
 
 uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
@@ -599,8 +705,8 @@ uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
  *  - 2 means go_lower
  *
  *  This string is used to determine the number of sub_nodes of a particular node.
- *
  */
+
 String *TerminalInterface::build_tree_summary() {
 
     String *s = new String();
@@ -623,65 +729,6 @@ String *TerminalInterface::build_tree_summary() {
 #undef CREATE_LEAF
 
     return s;
-
-}
-
-//---------------------------------Functions called by TerminalCommands------------------------------
-
-
-
-/*
- * get_arguments : returns a pointer to the beginning of the required argument
- *
- */
-
-char *TerminalInterface::get_arguments(uint8_t task_index) {
-    return arguments_sequences_storage.get_argument(task_index);
-}
-
-/*
- * validate_task : removes the argument related to the task
- *
- */
-
-void TerminalInterface::validate_task(uint8_t task_index) {
-    arguments_sequences_storage.remove_argument(task_index);
-}
-
-
-/*
- * log_tree_style : displays a message, after a parsing or execution problem.
- *
- *  If the problem comes from the parsing (log_args = false), it will display the node's children.
- *
- *  If it comes from the execution (log_args = true), then it will display the node's dynamic_args.
- *
- */
-
-void TerminalInterface::log_tree_style(TerminalNode *log_node, bool log_args) {
-
-    if (log_args) {
-
-        //If the arguments parsing failed, display the correct syntax for arguments
-        echo("Usage : " + *log_node->name + " " + *log_node->args_log);
-
-    } else {
-
-        //If the command parsing failes, display the last correct node's content.
-
-        //init an empty string
-        String s = "";
-
-        //Fill it with the name and description of direct sub_nodes
-        for (int i = 0; i < log_node->sub_nodes_nb; i++) {
-            TerminalNode *t = log_node->sub_nodes[i];
-            s += *t->name + "\t\t : " + *t->desc_log + "\n";
-        }
-
-        //Display
-        echo(s);
-
-    }
 
 }
 

@@ -275,7 +275,7 @@ char *ProgramInterface::get_arguments(uint8_t task_index, uint8_t *size) {
  *
  */
 
-void ProgramInterface::validate_task(uint8_t task_index) {
+void ProgramInterface::remove_arguments(uint8_t task_index) {
     arguments_storage.remove_argument(task_index);
 }
 

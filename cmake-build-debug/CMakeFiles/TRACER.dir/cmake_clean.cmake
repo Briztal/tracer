@@ -21,7 +21,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o"
-  "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o"
+  "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o"
   "CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o"

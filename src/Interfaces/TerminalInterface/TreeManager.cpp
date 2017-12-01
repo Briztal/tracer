@@ -103,8 +103,8 @@ void TreeManager::edit_choice_tree_labels(uint8_t choice, String *name, String *
  *
  */
 
-void TreeManager::edit_choice_tree_functions(task_state_t (*f_next)(void *), task_state_t (*f_back)(void *),
-                                             task_state_t (*f_abort)(void *)) {
+void TreeManager::edit_choice_tree_functions(task_state_t (*f_next)(char *), task_state_t (*f_back)(char *),
+                                             task_state_t (*f_abort)(char *)) {
 
     choice_tree[0].function = f_next;
     choice_tree[1].function = f_back;

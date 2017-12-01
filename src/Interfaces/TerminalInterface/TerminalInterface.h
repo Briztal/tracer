@@ -60,7 +60,41 @@ public :
     static void send_position(float *) {}
 
 
+    //--------------------------------------Data Storage--------------------------------------
+
+private :
+
+    //The command size.
+    static unsigned char command_size;
+
+    //The current address to store input data
+    static char *data_in;
+
+    //The input data buffer's address.
+    static char *const data_in_0;
+
+
+    //--------------------------------------Command processing--------------------------------------
+
+    //Function to reset the command reception environment.
+    static void reset();
+
+    //Prepare the storage data for execution
+    static void prepare_execution();
+
+    //Function to show a log message if the parsing failed.
+    static void log_parsing_error(TerminalNode *log_node);
+
+    //Function to parse and analyse the received command, and schedule the execution of execute_command.
+    static void schedule_command();
+
+    //This function will execute a TerminalCommand, after getting its arguments, and remove them after execution.
+    static task_state_t execute_command(void *data_pointer);
+
+
     //--------------------------------------Arguments Processing--------------------------------------
+
+public:
 
     /*
      * A terminal interface command can accept an undefined number of arguments, in an argument sequence.
@@ -74,10 +108,7 @@ public :
      */
 
     //Parse the provided arguments, and save the data in the local buffer.
-    static bool parse_arguments(uint8_t arguments_sequence_index);
-
-    //Get the number of parsed arguments
-    static uint8_t get_nb_arguments();
+    static bool parse_arguments(char *arguments_sequence);
 
     //Get the pointer to the required argument
     static char *get_argument(char id);
@@ -90,6 +121,9 @@ public :
 
     //Verify that at least one argument (defined by their identifiers) have been provided (identifiers is null terminated).
     static bool verify_one_identifiers_presence(const char *identifiers);
+
+    //verify that an argument identifier has be provided.
+    static bool verify_identifier_presence(char id);
 
 
 private:
@@ -107,32 +141,6 @@ private:
     static ArgumentsContainer arguments_storage;
 
 
-
-
-
-    //--------------------------------------data storage--------------------------------------
-
-private :
-
-    //The command size.
-    static unsigned char command_size;
-
-    //The current address to store input data
-    static char *data_in;
-
-    //The input data buffer's address.
-    static char *const data_in_0;
-
-    //Function to reset the command reception environment.
-    static void reset();
-
-
-
-private :
-
-    static void prepare_execution();
-
-
     //--------------------------------------Tree data----------------------------------
 
 private:
@@ -142,12 +150,6 @@ private:
 
     //The command tree summary, required to generate the tree.
     static String *tree_summary;
-
-
-    //--------------------------------------Command processing--------------------------------------
-
-    //Function to parse and analyse the received command
-    static void execute();
 
 
     //--------------------------------------Command processing--------------------------------------
@@ -162,21 +164,7 @@ private:
     static TerminalNode *generate_tree();
 
 
-    //---------------------------------Functions called by TerminalInterfaceCommands------------------------------
 
-public :
-
-    //Get a particular argument in the storage
-    static char *get_arguments(uint8_t task_index);
-
-    //Mark a task as executed
-    static void validate_task(uint8_t task_index);
-
-    //Function to show a log message if the execution failed.
-    static void log_tree_style(TerminalNode *log_node, bool log_args);
-
-
-    static bool verify_identifier_presence(char id);
 };
 
 

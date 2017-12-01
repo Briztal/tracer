@@ -9,7 +9,7 @@ typedef struct task_t {
     /*
      * The type of the task
      *  - 255 for a task to execute as soon as possible
-     *  - other values for task to execute in order.
+     *  - other values for task to schedule_command in order.
      *      WARNING : The order only applies for task belonging to the same group!
      */
 
@@ -17,7 +17,7 @@ typedef struct task_t {
 
 
     /*
-     * The function to execute, at runtime.
+     * The function to schedule_command, at runtime.
      */
 
     task_state_t (*task)(void *) = nullptr;

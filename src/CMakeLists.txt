@@ -15,8 +15,8 @@ add_library(project
         ${PP}/MachineController.h
         ${PP}/MachineController.cpp
 
-
-        Project/TemperatureController.cpp Project/TemperatureController.h)
+        ${PP}/TemperatureController.cpp
+        ${PP}/TemperatureController.h)
 
 
 #--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
@@ -46,8 +46,8 @@ include_directories(${PIP}/)
 add_library(project_interfaces
 
         ${PIP}/_interface_data.h
-        ${PIP}/TerminalInterfaceCommands.h
-        ${PIP}/TerminalInterfaceCommands.cpp
+        ${PIP}/TerminalCommands.h
+        ${PIP}/TerminalCommands.cpp
         ${PIP}/ProgramInterfaceCommands.h
         ${PIP}/ProgramInterfaceCommands.cpp
         ${PIP}/GCodeInterfaceCommands.h

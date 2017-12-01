@@ -821,32 +821,32 @@ src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s:
 	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s
 .PHONY : src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.s
 
-src/Project/InterfaceCommands/TerminalInterfaceCommands.o: src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+src/Project/InterfaceCommands/TerminalCommands.o: src/Project/InterfaceCommands/TerminalCommands.cpp.o
 
-.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.o
+.PHONY : src/Project/InterfaceCommands/TerminalCommands.o
 
 # target to build an object file
-src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
-.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+src/Project/InterfaceCommands/TerminalCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o
+.PHONY : src/Project/InterfaceCommands/TerminalCommands.cpp.o
 
-src/Project/InterfaceCommands/TerminalInterfaceCommands.i: src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
+src/Project/InterfaceCommands/TerminalCommands.i: src/Project/InterfaceCommands/TerminalCommands.cpp.i
 
-.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.i
+.PHONY : src/Project/InterfaceCommands/TerminalCommands.i
 
 # target to preprocess a source file
-src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
-.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
+src/Project/InterfaceCommands/TerminalCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.i
+.PHONY : src/Project/InterfaceCommands/TerminalCommands.cpp.i
 
-src/Project/InterfaceCommands/TerminalInterfaceCommands.s: src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
+src/Project/InterfaceCommands/TerminalCommands.s: src/Project/InterfaceCommands/TerminalCommands.cpp.s
 
-.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.s
+.PHONY : src/Project/InterfaceCommands/TerminalCommands.s
 
 # target to generate assembly for a file
-src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
-.PHONY : src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
+src/Project/InterfaceCommands/TerminalCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.s
+.PHONY : src/Project/InterfaceCommands/TerminalCommands.cpp.s
 
 src/Project/MachineController.o: src/Project/MachineController.cpp.o
 
@@ -1525,9 +1525,9 @@ help:
 	@echo "... src/Project/InterfaceCommands/ProgramInterfaceCommands.o"
 	@echo "... src/Project/InterfaceCommands/ProgramInterfaceCommands.i"
 	@echo "... src/Project/InterfaceCommands/ProgramInterfaceCommands.s"
-	@echo "... src/Project/InterfaceCommands/TerminalInterfaceCommands.o"
-	@echo "... src/Project/InterfaceCommands/TerminalInterfaceCommands.i"
-	@echo "... src/Project/InterfaceCommands/TerminalInterfaceCommands.s"
+	@echo "... src/Project/InterfaceCommands/TerminalCommands.o"
+	@echo "... src/Project/InterfaceCommands/TerminalCommands.i"
+	@echo "... src/Project/InterfaceCommands/TerminalCommands.s"
 	@echo "... src/Project/MachineController.o"
 	@echo "... src/Project/MachineController.i"
 	@echo "... src/Project/MachineController.s"

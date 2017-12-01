@@ -548,10 +548,10 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/ProgramInterfaceCommands.h">
 			<Option target="TRACER"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.cpp">
 			<Option target="TRACER"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalInterfaceCommands.h">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.h">
 			<Option target="TRACER"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/_interface_data.h">

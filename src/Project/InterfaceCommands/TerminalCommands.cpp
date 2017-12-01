@@ -25,21 +25,14 @@
 
 #include "Interfaces/TerminalInterface/TerminalInterface.h"
 #include "TerminalCommands.h"
-#include "_interface_data.h"
-#include <StepperControl/MachineInterface.h>
-#include <Actions/ContinuousActions.h>
 #include <EEPROM/EEPROMStorage.h>
-#include <interface.h>
 #include <Project/MachineController.h>
-#include <TaskScheduler/TaskScheduler.h>
 #include <EEPROM/EEPROMInterface.h>
-#include <DataStructures/StringUtils.h>
-#include <StepperControl/StepperController.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
 
 
-task_state_t TerminalCommands::action(uint8_t args_index) {
+task_state_t TerminalCommands::action(char *) {
 
     EEPROMInterface::display_tree();
 
@@ -52,10 +45,10 @@ task_state_t TerminalCommands::action(uint8_t args_index) {
 
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
-task_state_t TerminalCommands::eeprom(uint8_t args_index) {
+task_state_t TerminalCommands::eeprom(char *arguments) {
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index);
+    PARSE_ARGUMENTS(arguments);
 
     //verify that f and p arguments are provided.
     REQUIRE_ONE_ARGUMENTS("prd");
@@ -151,13 +144,13 @@ task_state_t TerminalCommands::eeprom(uint8_t args_index) {
  *
  */
 
-task_state_t TerminalCommands::home(uint8_t args_index) {
+task_state_t TerminalCommands::home(char *arguments) {
 
     //Require the schedule of one movement
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse arguments
-    PARSE_ARGUMENTS(args_index);
+    PARSE_ARGUMENTS(arguments);
 
     //If the home must use endstops
     if (CHECK_ARGUMENT('e')) {
@@ -185,13 +178,13 @@ task_state_t TerminalCommands::home(uint8_t args_index) {
  *      - r : (optionnal) all provided coordinates are relative.
  */
 
-task_state_t TerminalCommands::line(uint8_t args_index) {
+task_state_t TerminalCommands::line(char *arguments) {
 
     //This task requires the schedule of one type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index);
+    PARSE_ARGUMENTS(arguments);
 
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("xyze");
@@ -239,13 +232,13 @@ task_state_t TerminalCommands::line(uint8_t args_index) {
  *
  */
 
-task_state_t TerminalCommands::enable_steppers(uint8_t args_index) {
+task_state_t TerminalCommands::enable_steppers(char *arguments) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index);
+    PARSE_ARGUMENTS(arguments);
 
     //Fail if the enabling argument is omitted
     REQUIRE_ALL_ARGUMENTS("e")
@@ -269,12 +262,12 @@ task_state_t TerminalCommands::enable_steppers(uint8_t args_index) {
  *  Almost one must be provided.
  *
  */
-task_state_t TerminalCommands::set_extrusion(uint8_t args_index) {
+task_state_t TerminalCommands::set_extrusion(char *arguments) {
 
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index);
+    PARSE_ARGUMENTS(arguments);
 
     //At least w (working carriage) and s (speed) must be provided
     REQUIRE_ONE_ARGUMENTS("cs");
@@ -344,13 +337,13 @@ task_state_t TerminalCommands::set_extrusion(uint8_t args_index) {
  *
  */
 
-task_state_t TerminalCommands::set_cooling(uint8_t args_index) {
+task_state_t TerminalCommands::set_cooling(char *arguments) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index)
+    PARSE_ARGUMENTS(arguments)
 
     //Fail if none of power of enable are provided
     REQUIRE_ONE_ARGUMENTS("ep");
@@ -395,13 +388,13 @@ task_state_t TerminalCommands::set_cooling(uint8_t args_index) {
  *      -e or -t must be provided.
  */
 
-task_state_t TerminalCommands::set_hotend(uint8_t args_index) {
+task_state_t TerminalCommands::set_hotend(char *arguments) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index)
+    PARSE_ARGUMENTS(arguments)
 
     //Fail if a hotend was not specified
     REQUIRE_ALL_ARGUMENTS("h")
@@ -451,13 +444,13 @@ task_state_t TerminalCommands::set_hotend(uint8_t args_index) {
  *      -e or -t must be provided.
  */
 
-task_state_t TerminalCommands::set_hotbed(uint8_t args_index) {
+task_state_t TerminalCommands::set_hotbed(char *arguments) {
 
     //This task requires the schedule of two type-0 task
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
-    PARSE_ARGUMENTS(args_index)
+    PARSE_ARGUMENTS(arguments)
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
     REQUIRE_ONE_ARGUMENTS("te");
@@ -498,14 +491,14 @@ task_state_t TerminalCommands::set_hotbed(uint8_t args_index) {
 
 
 
-task_state_t TerminalCommands::get_regulations(uint8_t args_index) {
+task_state_t TerminalCommands::get_regulations(char *) {
 
     return complete;
 
 }
 
 
-task_state_t TerminalCommands::get_temps(uint8_t args_index) {
+task_state_t TerminalCommands::get_temps(char *) {
 
     return complete;
 
@@ -516,7 +509,7 @@ task_state_t TerminalCommands::get_temps(uint8_t args_index) {
 //---------------------------------------------------------Tests--------------------------------------------------------
 
 
-task_state_t TerminalCommands::stepper_test(uint8_t args_index) {
+task_state_t TerminalCommands::stepper_test(char *) {
 
     CI::echo("EXIT");
 
@@ -526,7 +519,7 @@ task_state_t TerminalCommands::stepper_test(uint8_t args_index) {
 }
 
 
-task_state_t TerminalCommands::temp_test(uint8_t args_index) {
+task_state_t TerminalCommands::temp_test(char *) {
 
 
     CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
@@ -538,9 +531,6 @@ task_state_t TerminalCommands::temp_test(uint8_t args_index) {
 
     return complete;
 }
-
-char t_wd_buf_tic[MAX_WORD_SIZE];
-char *const TerminalCommands::word_buffer = t_wd_buf_tic;
 
 #endif
 

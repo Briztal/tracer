@@ -585,28 +585,28 @@ CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o
 
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o: ../src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o: ../src/Project/InterfaceCommands/TerminalCommands.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o"
+	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.cpp
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp > CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.i
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.i"
+	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.cpp > CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.i
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.s
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.s"
+	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.cpp -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.s
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.requires:
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.requires:
 
-.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.requires
+.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.requires
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.provides: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.requires
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.provides.build
-.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.provides
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.provides: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.requires
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.provides.build
+.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.provides
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o
 
 
 CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o: CMakeFiles/TRACER.dir/flags.make
@@ -1161,7 +1161,7 @@ TRACER_OBJECTS = \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o" \
-"CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o" \
+"CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o" \
@@ -1210,7 +1210,7 @@ TRACER: CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o
-TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o
+TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o
@@ -1265,7 +1265,7 @@ CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/Config/geometr
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o.requires
-CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o.requires
+CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o.requires

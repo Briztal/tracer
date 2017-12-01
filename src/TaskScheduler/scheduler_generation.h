@@ -225,7 +225,7 @@ static task_state_t name##_scheduled_##type signature { \
     /*Fill the data*/\
     struct_fill\
     \
-    /*Schedule a task, that will execute the required function, passing the previously created data.*/\
+    /*Schedule a task, that will schedule_command the required function, passing the previously created data.*/\
     TaskScheduler::schedule_task(type, _##name, (void *) _unpacker_data_);\
     \
     /*Complete*/\
