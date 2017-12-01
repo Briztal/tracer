@@ -213,10 +213,10 @@ task_state_t MachineController::line(movement_state_t movement_state) {
         if (movement_state.speed_flag) {
 
             //Set the speed flag
-            c_state.current_speed_flag = true;
+            c_state.working_extruder_speed_flag = true;
 
             //Set the speed value
-            c_state.current_speed = movement_state.speed;
+            c_state.working_extruder_speed = movement_state.speed;
 
 
         }
@@ -473,13 +473,10 @@ task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state)
     }
 
     //Eventually modify the speed for the current carriage
-    SPEED_MODIFICATION(extrusion_state.working_extruder, new_state.current_speed_flag, new_state.current_speed)
+    SPEED_MODIFICATION(extrusion_state.working_extruder, new_state.working_extruder_speed_flag, new_state.working_extruder_speed)
 
     //Eventually modify the speed for every carriage
-    SPEED_MODIFICATION(0, new_state.speed_0_flag, new_state.speed_0)
-    SPEED_MODIFICATION(1, new_state.speed_1_flag, new_state.speed_1)
-    SPEED_MODIFICATION(2, new_state.speed_2_flag, new_state.speed_2)
-    SPEED_MODIFICATION(3, new_state.speed_3_flag, new_state.speed_3)
+    SPEED_MODIFICATION(new_state.nominative_carriage, new_state.nominative_speed_mod_flag, new_state.nominative_speed)
 
     //For safety and good practices, undef the macro.
 #undef SPEED_MODIFICATION

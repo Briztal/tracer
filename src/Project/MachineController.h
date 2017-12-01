@@ -142,13 +142,23 @@ public:
         //Readonly variable for mode;
         uint8_t mode = 0;
 
-        //Flags
+        //Flag for the working extruder modification.
         bool working_extruder_flag = false;
-        bool current_speed_flag = false, speed_0_flag = false, speed_1_flag = false, speed_2_flag = false, speed_3_flag = false;
+
+        //Flag for the working extruder's speed modification.
+        bool working_extruder_speed_flag = false;
+
+        //Flag to enable the modification one carriage's speed.
+        bool nominative_speed_mod_flag = false;
+
 
         //Data
         uint8_t working_extruder = 0;
-        float current_speed = 0, speed_0 = 0, speed_1 = 0, speed_2 = 0, speed_3 = 0;
+        float working_extruder_speed = 0;
+
+        //Data to modify one extruder's speed.
+        uint8_t nominative_carriage = 0;
+        float nominative_speed = 0;
 
     } carriages_state_t;
 

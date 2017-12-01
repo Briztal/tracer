@@ -1,7 +1,5 @@
 
 
-//TODO REMOVE THE SUPER HEAVY STRUCTURE extrudion_state_t, replace by a simplified version, that can only modify one speed at time.
-
 //TODO SET CURRENT POSITION IN MACHINE
 
 //TODO CLEAN NOZZLE IN MACHINE AND MECHANIC

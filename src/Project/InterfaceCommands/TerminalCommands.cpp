@@ -146,7 +146,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
 
 task_state_t TerminalCommands::home(char *arguments) {
 
-    //Require the schedule of one movement
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse arguments
@@ -180,7 +180,7 @@ task_state_t TerminalCommands::home(char *arguments) {
 
 task_state_t TerminalCommands::line(char *arguments) {
 
-    //This task requires the schedule of one type-0 task
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
@@ -234,7 +234,7 @@ task_state_t TerminalCommands::line(char *arguments) {
 
 task_state_t TerminalCommands::enable_steppers(char *arguments) {
 
-    //This task requires the schedule of two type-0 task
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
@@ -264,6 +264,7 @@ task_state_t TerminalCommands::enable_steppers(char *arguments) {
  */
 task_state_t TerminalCommands::set_extrusion(char *arguments) {
 
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
@@ -280,49 +281,40 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
         //Set the flag;
         new_state.working_extruder_flag = true;
 
-        //Set the new working extruder
+        //Set the new working extruder;
         new_state.working_extruder = (uint8_t) GET_ARG_VALUE('w');
 
     }
 
-    //If the speed must be changed
+    //If the speed must be changed;
     if (CHECK_ARGUMENT('s')) {
 
-        //If we must set the speed for a particular carriage
+        //If we must set the speed for a particular carriage:
         if (CHECK_ARGUMENT('c')) {
 
-            /* As we must select the right speed group, and the process is repetitive, we will use a macro.
-             *  that check for the extruder id, sets the appropriate flag and speed value.
-             */
+            //Enable the speed modif for a carriage;
+            new_state.nominative_speed_mod_flag = true;
 
-#define CHECK_SPEED(i) \
-            case(i): new_state.speed_##i##_flag = true;new_state.speed_##i = GET_ARG_VALUE('s');break;
+            //Set the carriage;
+            new_state.nominative_carriage =  (uint8_t) GET_ARG_VALUE('c');
 
-            switch ((uint8_t) GET_ARG_VALUE('c')) {
-                CHECK_SPEED(0)
-                CHECK_SPEED(1)
-                CHECK_SPEED(2)
-                CHECK_SPEED(3)
-                default:
-                    break;
+            //Set the speed;
+            new_state.nominative_speed = GET_ARG_VALUE('s');
 
-            }
-
-            //for safety, un-delete the previously defined macro.
-#undef CHECK_SPEED
 
         } else {
-            //If we must set the speed for the current carriage
+            //If we must set the speed for the current carriage :
 
             //Set the flag;
-            new_state.current_speed_flag = true;
+            new_state.working_extruder_speed_flag = true;
 
-            //Set the new working extruder
-            new_state.current_speed = GET_ARG_VALUE('s');
+            //Set the new working extruder;
+            new_state.working_extruder_speed = GET_ARG_VALUE('s');
         }
 
     }
 
+    //Modify the extrusion state.
     return MachineController::set_extrusion_state_scheduled_0(new_state);;
 
 }
@@ -339,7 +331,7 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
 
 task_state_t TerminalCommands::set_cooling(char *arguments) {
 
-    //This task requires the schedule of two type-0 task
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
@@ -390,7 +382,7 @@ task_state_t TerminalCommands::set_cooling(char *arguments) {
 
 task_state_t TerminalCommands::set_hotend(char *arguments) {
 
-    //This task requires the schedule of two type-0 task
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
@@ -446,7 +438,7 @@ task_state_t TerminalCommands::set_hotend(char *arguments) {
 
 task_state_t TerminalCommands::set_hotbed(char *arguments) {
 
-    //This task requires the schedule of two type-0 task
+    //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Parse Arguments
