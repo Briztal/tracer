@@ -30,6 +30,7 @@ PONEY
 #include "../StepperControl/StepperController.h"
 #include <ControlLoops/ControlLoops.h>
 #include <EEPROM/EEPROMInterface.h>
+#include <Project/MachineController.h>
 
 
 /*
@@ -38,7 +39,6 @@ PONEY
  *  It starts by initialising the hardware_language_abstraction layer, and then initialises all enabled interfaces.
  *
  *  Finally, it initialises the stepper control module.
- *
  */
 
 void TaskScheduler::init() {
@@ -72,7 +72,7 @@ bool TaskScheduler::check_sequence_type(uint8_t type) {
     if (type == 255) {
         return true;
     } else {
-        return (type<NB_TASK_SEQUENCES);
+        return (type < NB_TASK_SEQUENCES);
     }
 }
 
@@ -80,25 +80,62 @@ bool TaskScheduler::check_sequence_type(uint8_t type) {
 //---------------------------------------------------Task Management----------------------------------------------------
 
 /*
- * schedule_task : this function adds a task in the taks pool.
+ * schedule_task : this function adds the task, if it is possible, in :
+ *  - the task pool if its type is 255;
+ *  - a task sequence if its type corresponds to a task sequence.
  *
+ *  WARNING :
+ *
+ *  I REPEAT, {\Color(red) \textit{\textbf{WARNING : }}}
+ *      (If you got that one, you use latex, and you're a good person ! Thanks for reading my comments by the way ;-) )
+ *
+ *  If the task cannot be scheduled, (no space available, or bad sequence type), args are freed automatically.
  */
 
-void TaskScheduler::schedule_task(task_t task) {
+bool TaskScheduler::schedule_task(task_t *task) {
 
-    //Insert the task only if available_spaces are available
-    if (pool_task_spaces) {
+    CI::echo("SCHEDULING : "+String(task->type));
 
-        //copy the task
-        task_pool[pool_task_nb] = task;
+    uint8_t type = task->type;
 
-        //Increase the number of task in the pool
+    if ((type == 255) && (pool_task_spaces)) {
+
+        //copy the task;
+        task_pool[pool_task_nb] = *task;
+
+        //Increase the number of task in the pool;
         pool_task_nb++;
 
-        //Decrease the number of available_spaces in the pool
+        //Decrease the number of available_spaces in the pool;
         pool_task_spaces--;
 
+        //Succeed;
+        return true;
+
     }
+
+    CI::echo("available : "+String(task_sequences[type]->available_spaces()));
+
+    //If the task's type corresponds to an existing sequence:
+    if ((type < NB_TASK_SEQUENCES) && (task_sequences[type]->available_spaces())) {
+
+        //Copy the task in the sequence;
+        *task_sequences[type]->get_input_ptr() = *task;
+
+        //Validate the copy.
+        task_sequences[type]->enqueue();
+
+        //Succeed;
+        return true;
+
+    }
+
+    //If the scheduling failed, automatically free args, to avoid memory leak;
+    free(task->dynamic_args);
+
+
+    //Fail;
+    return false;
 }
 
 
@@ -107,92 +144,32 @@ void TaskScheduler::schedule_task(task_t task) {
  *
  *  It takes in arguments all parameters required to build a task, namely :
  *      - f : the function to schedule_command;
- *      - dynamic_args : a void *, adressing the first byte of the arguments. Those may be dynamic or static.
+ *      - dynamic_args : a void *, addressing the first byte of the arguments. Those may be dynamic or static.
  *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
  *      - type : the type of the task.
- *
  */
 
-void TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
+bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
 
-    //Insert the task only if available_spaces are available
-    if (pool_task_spaces) {
+    //Create a task to contain the provided data;
+    task_t task = task_t();
 
-        task_t task = task_t();
-        task.task = f;
-        task.dynamic_args = args;
-        task.type = type;
+    //Set the function to execute;
+    task.task = f;
 
-        //copy the task
-        task_pool[pool_task_nb] = task;
+    //Set the argument pointer;
+    task.dynamic_args = args;
 
-        //Increase the number of task in the pool
-        pool_task_nb++;
+    //Set the type;
+    task.type = type;
 
-        //Decrease the number of available_spaces in the pool
-        pool_task_spaces--;
-
-    }
+    //Call the scheduling function and return whether the task was successfully scheduled;
+    return schedule_task(&task);
 }
 
 
 /*
- * schedule_procedure : this function adds a task that takes no arguments.
- *
- */
-
-uint8_t TaskScheduler::schedule_procedure(task_state_t (*f)(void *), uint8_t type) {
-
-    //Insert the task only if available_spaces are available
-    if (check_sequence_type(type) && pool_task_spaces) {
-
-        //copy the task
-        task_pool[pool_task_nb].task = f;
-        task_pool[pool_task_nb].dynamic_args = nullptr;
-        task_pool[pool_task_nb].type = type;
-
-        //Increase the number of task in the pool
-        pool_task_nb++;
-
-        //Decrease the number of available_spaces in the pool
-        pool_task_spaces--;
-
-    }
-
-    return pool_task_spaces;
-}
-
-
-/*
- * schedule_procedure : this function adds a task that takes no arguments, to process asap.
- *
- */
-
-uint8_t TaskScheduler::add_prioritary_procedure(task_state_t (*f)(void *)) {
-
-    //Insert the task only if available_spaces are available
-    if (pool_task_spaces) {
-
-        //copy the task
-        task_pool[pool_task_nb].task = f;
-        task_pool[pool_task_nb].dynamic_args = nullptr;
-        task_pool[pool_task_nb].type = 255;
-
-        //Increase the number of task in the pool
-        pool_task_nb++;
-
-        //Decrease the number of available_spaces in the pool
-        pool_task_spaces--;
-
-    }
-
-    return pool_task_spaces;
-}
-
-
-/*
- * spaces : this function returns the number of available_spaces available in the task pool.
- *
+ * spaces : this function returns the number of spaces available in the task pool.
  */
 
 const uint8_t TaskScheduler::available_spaces(uint8_t type) {
@@ -217,7 +194,6 @@ const uint8_t TaskScheduler::available_spaces(uint8_t type) {
 
 /*
  * lock_sequence : this function locks a specified sequence.
- * 
  */
 
 void TaskScheduler::lock_sequence(uint8_t type) {
@@ -239,7 +215,6 @@ void TaskScheduler::lock_sequence(uint8_t type) {
 
 /*
  * is_sequence_locked : this function returns true if the specified sequence is locked, and false if not.
- * 
  */
 
 bool TaskScheduler::is_sequence_locked(uint8_t type) {
@@ -257,7 +232,35 @@ bool TaskScheduler::is_sequence_locked(uint8_t type) {
 }
 
 
+/*
+ * verify_schedulability : this function verifies than nb_tasks of type task_type can be scheduled.
+ *
+ *  To do this, it verifies :
+ *      - that the task sequence (or task pool for a 255-type task) is unlocked
+ *      - that the concerned task container can effectively contain the required number of tasks.
+ */
+
+bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
+
+    //If the sequence is locked, fail, no more tasks of this type are schedulable;
+    if (TaskScheduler::is_sequence_locked(task_type)) {
+        return false;
+    } else {
+
+        //If the sequence (or the task pool, depending on the type) contains less than nb_tasks spaces, fail;
+        if (TaskScheduler::available_spaces(task_type) < nb_tasks) {
+            return false;
+        }
+    }
+
+    //Succeed!
+    return true;
+
+}
+
+
 //---------------------------------------------------Task Execution----------------------------------------------------
+
 
 /*
  * run : this function executes all available tasks in the pool, while maintaining the order for non-non-sequential tasks;
@@ -268,8 +271,13 @@ bool TaskScheduler::is_sequence_locked(uint8_t type) {
  *      task pool;
  *
  *  Finally, it executes every task it can in task sequences.
- *
  */
+
+uint8_t temp_xxx = 0;
+
+uint8_t temp_yyy = 0;
+
+uint8_t temp_zzz = 0;
 
 void TaskScheduler::run() {
 
@@ -282,6 +290,52 @@ void TaskScheduler::run() {
     //Process tasks sequences after
     process_task_sequences();
 
+
+    if (available_spaces(0)) {
+
+        MachineController::movement_state_t state = MachineController::movement_state_t();
+
+        state.x_flag = true;
+        state.y_flag = true;
+        state.z_flag = true;
+
+        state.x = temp_xxx;
+        state.y = temp_yyy;
+        state.z = temp_zzz;
+
+        temp_xxx += 10;
+
+        if (temp_xxx == 150) {
+            temp_xxx = 0;
+            temp_yyy += 10;
+        }
+
+        if (temp_yyy == 150) {
+            temp_yyy = 0;
+            temp_zzz += 10;
+        }
+
+        if (temp_zzz == 300) {
+            temp_zzz = 0;
+        }
+
+        //Schedule a line to the specified coordinates
+        MachineController::line_scheduled_0(state);
+
+    }
+
+    if (available_spaces(0)) {
+
+        //Schedule an enable / disable of steppers.
+        //MachineController::enable_steppers_scheduled_0(true);
+
+    }
+
+    CI::echo("SUUS");
+
+    delay(300);
+
+
 }
 
 
@@ -290,7 +344,6 @@ void TaskScheduler::run() {
  *  and tries to dispatch others.
  *
  *  As non-non-sequential tasks have a sequential constraint, it must tak several precautions.
- *
  */
 
 void TaskScheduler::process_task_pool() {
@@ -337,8 +390,8 @@ void TaskScheduler::process_task_pool() {
 
 /*
  * shift : this function shifts a task to the less greater position possible in the task pool.
- *
  */
+
 uint8_t TaskScheduler::shift(boolean shift_enabled, task_t *task, uint8_t insert_index) {
 
     //Shift only if the shifting is enabled.
@@ -359,14 +412,16 @@ uint8_t TaskScheduler::shift(boolean shift_enabled, task_t *task, uint8_t insert
  * process_task_sequences : this function processes task sequences.
  *
  *  It executes one task for each sequence, until no tasks are executable anymore.
- *
  */
 
 void TaskScheduler::process_task_sequences() {
 
+    //Declare an array of bool, that will enable the processing of the task queue they are indexed with.
     bool process[NB_TASK_SEQUENCES];
+
+    //Fill array with true.
     for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
-        process[NB_TASK_SEQUENCES] = true;
+        process[i] = true;
     }
 
     bool keep_processing = true;
@@ -403,13 +458,11 @@ void TaskScheduler::process_task_sequences() {
 }
 
 
-
 /*
  * process_task_sequences_singular : this function processes task sequences.
  *
  *  It focuses on each sequence consecutively : it executes all possible tasks on one sequence, and then focuses
  *      on another.
- *
  */
 
 void TaskScheduler::process_task_sequences_singular() {
@@ -440,8 +493,7 @@ void TaskScheduler::process_task_sequences_singular() {
 
 
 /*
- * process_task : this function processes a task, and returns the result (it's a simple alias, for comprehensivity.
- *
+ * process_task : this function processes a task, and returns the result (it's a simple alias, for comprehensibility.)
  */
 
 bool TaskScheduler::process_task(task_t *task) {
@@ -460,7 +512,7 @@ bool TaskScheduler::process_task(task_t *task) {
     //If the task must be reprogrammed,
     if (state != reprogram) {
 
-       //Free the memory occupied by the task.
+        //Free the memory occupied by the task.
         delete (task->dynamic_args);
 
         //Succeed.
@@ -508,5 +560,6 @@ bool *const m::queues_locked = t_ftflg;
 //task sequences declaration
 Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
 Queue<task_t> **const m::task_sequences = define_task_queue(t_tsks);
+
 
 #endif

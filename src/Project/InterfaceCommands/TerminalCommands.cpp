@@ -123,11 +123,8 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
 
 #define FAIL_IF_CANT_SCHEDULE(nb)\
     {\
-        bool executable = true;\
-        /*This task requires the schedule of 1 task of type 0.*/\
-        REQUIRE_SCHEDULE(0, 1, executable);\
         /*If the task is not executable :*/\
-        if (!executable) {\
+        if (!TaskScheduler::verify_schedulability(0, nb)) {\
             /*Lock the sequence 0*/\
             LOCK_SEQUENCE(0)\
             /*Schedule a re-execution*/\
@@ -315,6 +312,7 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
     }
 
     //Modify the extrusion state.
+
     return MachineController::set_extrusion_state_scheduled_0(new_state);;
 
 }

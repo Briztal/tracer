@@ -49,32 +49,6 @@
  */
 
 
-/*
- * The Machine TaskScheduler.
- *
- * The TaskScheduler is in charge of :
- * - setting up all used modules, in init function;
- * - processing tasks, provided internally, or coming from any interface;
- *
- * Tasks are stored using 3 Queues :
- *
- *
- * (lower priority)
- *
- * priority 0 :
- *      - Permanent task queue : a list of background routines. Defined in the configuration file, unchangeable
- *              after compilation; these tasks have the lowest priority status.
- *
- * priority 1 :
- *      - External commands queue : a queue containing external commands, received by any interface;
- *
- * priority 2 :
- *      - Internal tasks queue : a queue containing tasks enqueued by an internal procedure.
- *              These tasks are processed with the highest priority.
- *
- * (higher priority)
- */
-
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
@@ -107,25 +81,22 @@ public:
     static void run();
 
     //Schedule a task.
-    static void schedule_task(task_t task);
+    static bool schedule_task(task_t *task);
 
     //Build and schedule a task.
-    static void schedule_task(uint8_t type,task_state_t (*f)(void *), void *args);
-
-    //Schedule a no-arguments task.
-    static uint8_t schedule_procedure(task_state_t (*f)(void *), uint8_t type);
-
-    //Schedule a no-arguments task of type 255.
-    static uint8_t add_prioritary_procedure(task_state_t (*f)(void *));
+    static bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
 
     //Returns the number of type-[type] tasks that can be scheduled.
     static const uint8_t available_spaces(uint8_t type);
 
+    //Verify that nb_tasks can be enqueued
     //Lock the specified sequence.
     static void lock_sequence(uint8_t type);
 
     //get the state of a sequence.
     static bool is_sequence_locked(uint8_t type);
+
+    static bool verify_schedulability(uint8_t task_type, uint8_t nb_tasks);
 
 private:
 
@@ -158,38 +129,10 @@ private:
 };
 
 
-
-//TODO MACRO FOR CHECKING SPACES FOR A CERTAIN TYPE,
-//TODO MACRO FOR VERIFYING THE LOCKING_STATE OF A CERTAIN TYPE (MERGE WITH THE MACRO UPPER ?)
-
-/*
- * REQUIRE_SCHEDULE : This macro shall be used in your tasks, to verify that [task_nb] tasks of type [type]
- *      can be scheduled.
- *
- *      If they can't, result_variable will be set to false.
- *
- */
-#define REQUIRE_SCHEDULE(tasks_type, tasks_nb, result_variable) \
-    {\
-        if(result_variable) {\
-            if (TaskScheduler::is_sequence_locked(tasks_type)) {\
-                result_variable = false;\
-            } else {\
-                if (TaskScheduler::available_spaces(tasks_type) < tasks_nb) {\
-                    result_variable = false;\
-                }\
-            }\
-        }\
-    }
-
-
 /*
  * LOCK_SEQUENCE : This macro shall be used in your tasks to lock a given task_sequence.
  */
-#define LOCK_SEQUENCE(type) \
-    {\
-        TaskScheduler::lock_sequence(type);\
-    }
+#define LOCK_SEQUENCE(type) {TaskScheduler::lock_sequence(type);}
 
 
 #endif //PROJECT_SYSTEM_H

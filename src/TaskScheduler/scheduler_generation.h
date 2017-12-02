@@ -214,6 +214,7 @@
  *
  */
 
+#include <interface.h>
 #define GENERATE_STRUCT(name, struct_data) struct name##_struct_t { struct_data };
 
 #define GENERATE_PACKER(name, type,  signature, struct_fill)\
@@ -221,6 +222,7 @@ static task_state_t name##_scheduled_##type signature { \
     \
     /*Create the data in the heap*/\
     struct name##_struct_t *_unpacker_data_ = new name##_struct_t();\
+    TI::echo("ADDRESS : "+String((uint32_t)_unpacker_data_));\
     \
     /*Fill the data*/\
     struct_fill\
@@ -236,11 +238,10 @@ static task_state_t name##_scheduled_##type signature { \
 
 #define GENERATE_UNPACKER(name, struct_extraction)\
 static task_state_t _##name(void *_unpacker_pointer_) {\
-    \
     /*Cast the data*/\
     struct name##_struct_t *_unpacker_data_ = (name##_struct_t *) _unpacker_pointer_;\
     \
-    /*Extract the data and analyse_command the function*/\
+    /*Extract the data and execute the function*/\
     task_state_t _unpacker_return_state_ = name struct_extraction;\
     \
     /*Complete with the state of the function.*/\

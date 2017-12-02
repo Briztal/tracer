@@ -32,12 +32,8 @@
 
 ////////////////////////TEST///////////////////////////////
 
-//TODO TEST THE DISPATCHER IN TERMINALINTERFACE
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//TODO VERIFY THAT MEMORY IS CORRECTLY FREED BY THE SCHEDULER !!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+//TODO TEST RANDOM MOVEMENTS WITH THE PRINTER
 
 //TODO TEST COOLING
 

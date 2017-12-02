@@ -193,6 +193,8 @@ task_state_t MachineController::line(movement_state_t movement_state) {
     //Initialise a state
     task_state_t state = complete;
 
+    CI::echo("BITE");
+
     //If carriage state must be set
     if (movement_state.extruder_flag || movement_state.speed_flag) {
 
@@ -230,6 +232,8 @@ task_state_t MachineController::line(movement_state_t movement_state) {
         }
 
     }
+
+    CI::echo("SUUS");
 
     if (movement_state.relative_flag) {
         //Relative movement
@@ -344,8 +348,11 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
     }
 
     //Plan movement.
-    return MachineInterface::linear_movement(current_axis_positions);
+    task_state_t state = MachineInterface::linear_movement(current_axis_positions);
 
+    CI::echo("STATE : "+String(state == reprogram));
+
+    return state;
 }
 
 
