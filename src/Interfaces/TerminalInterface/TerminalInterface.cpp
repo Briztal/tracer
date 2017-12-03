@@ -74,7 +74,7 @@ void TerminalInterface::read_data() {
         //Read the serial
         char read_char = terminal_interface_link_t::read();
 
-        //If the recieved char is a line feed or a working_extruder return
+        //If the recieved char is a line feed or a working_carriage return
         if ((read_char == 10) || (read_char == 13)) {
 
             //If a char has effectively been received

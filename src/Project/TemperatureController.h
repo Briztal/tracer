@@ -18,6 +18,14 @@
 
 */
 
+/*
+ * The temperature controller class.
+ *
+ *  This class controls the machine's temperature regulations. It is built on the same structure than
+ *      MachineController (State Manager, see details in MachineController).
+ *
+ */
+
 
 #ifndef TRACER_CLOSEDLOOPS_H
 #define TRACER_CLOSEDLOOPS_H
@@ -48,6 +56,12 @@ public:
 
 
     //---------------------------HotEnds---------------------------
+
+    /*
+     * The hotend state structure : This structure is used to modify the state of a particular hotend.
+     *
+     *  It contains fields (and flags) to identify the hotend, and to update its state (activity and tempertaure).
+     */
 
     typedef struct hotend_state_t {
 
@@ -83,7 +97,11 @@ public:
 GENERATE_SCHEDULER(set_hotends_state, 0, hotend_state_t, state);
 
     //Get the current hotends state.
-    static hotend_state_t get_hotends_state(uint8_t hotend_id);
+    static hotend_state_t get_hotend_state(uint8_t hotend_id);
+
+    //Get a hotend's real-time temperature.
+    static float get_hotend_temperature(uint8_t hotend);
+
 
 private:
 
@@ -98,6 +116,10 @@ private:
 
 public:
 
+
+    /*
+     * The hotbed state structure : This structure is used to modify hotbed's state (activity and temperature)
+     */
     typedef struct hotbed_state_t {
 
         //Flags
@@ -118,14 +140,15 @@ GENERATE_SCHEDULER(set_hotbed_state, 0, hotbed_state_t, state);
     //Get the current hotbeds state.
     static hotbed_state_t get_hotbeds_state();
 
+    //Get the hotbed's real-time temperature.
+    static float get_hotbed_temperature();
+
 
 private:
+
+    //The local hotbed state.
     static hotbed_state_t hotbed_state;
 
-
-    float get_hotend_temperature(uint8_t hotend);
-
-    float get_hotbed_temperature();
 };
 
 

@@ -270,16 +270,16 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
     //At least w (working carriage) and s (speed) must be provided
     REQUIRE_ONE_ARGUMENTS("cs");
 
-    MachineController::extrusion_state_t new_state = MachineController::extrusion_state_t();
+    MachineController::carriages_state_t new_state = MachineController::carriages_state_t();
 
     //If the working carriage must be changed
     if (CHECK_ARGUMENT('c')) {
 
         //Set the flag;
-        new_state.working_extruder_flag = true;
+        new_state.working_carriage_flag = true;
 
         //Set the new working extruder;
-        new_state.working_extruder = (uint8_t) GET_ARG_VALUE('w');
+        new_state.working_carriage = (uint8_t) GET_ARG_VALUE('w');
 
     }
 
@@ -303,17 +303,17 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
             //If we must set the speed for the current carriage :
 
             //Set the flag;
-            new_state.working_extruder_speed_flag = true;
+            new_state.working_carriage_speed_flag = true;
 
             //Set the new working extruder;
-            new_state.working_extruder_speed = GET_ARG_VALUE('s');
+            new_state.working_carriage_speed = GET_ARG_VALUE('s');
         }
 
     }
 
     //Modify the extrusion state.
 
-    return MachineController::set_extrusion_state_scheduled_0(new_state);;
+    return MachineController::set_carriages_state_scheduled_0(new_state);;
 
 }
 

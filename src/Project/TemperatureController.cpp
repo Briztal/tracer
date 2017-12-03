@@ -25,7 +25,6 @@
 
 /*
  * enable_hotend_regulation : this function enables a particular hotend's regulation.
- *
  */
 
 task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) {
@@ -77,7 +76,14 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
 
 }
 
-TemperatureController::hotend_state_t TemperatureController::get_hotends_state(uint8_t hotend_id) {
+
+/*
+ * get_hotend_state : this function returns a copy of the required hotend state.
+ *
+ *  As hotends states are not stored in a state structure (too heavy to manipulate), a state is created and returned.
+ */
+
+TemperatureController::hotend_state_t TemperatureController::get_hotend_state(uint8_t hotend_id) {
 
     //Create a state with all flags to zero
     hotend_state_t state = hotend_state_t();
@@ -105,6 +111,10 @@ TemperatureController::hotend_state_t TemperatureController::get_hotends_state(u
 }
 
 
+/*
+ * get_hotend_temperature : this function reads and returns the required hotend's temperature.
+ */
+
 float TemperatureController::get_hotend_temperature(uint8_t hotend) {
 
     switch (hotend) {
@@ -129,7 +139,6 @@ float TemperatureController::get_hotend_temperature(uint8_t hotend) {
 
 /*
  * enable_hotbed_regulation : this function enables the hotbed's regulation.
- *
  */
 
 task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
@@ -172,8 +181,16 @@ task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
 
 
 /*
+ * get_hotbeds_state : this function will return a copy of the current hotbed state.
+ */
+
+TemperatureController::hotbed_state_t TemperatureController::get_hotbeds_state() {
+    return TemperatureController::hotbed_state;
+}
+
+
+/*
  * get_hotbed_temperature : this function reads and returns the temperature of the hotbed.
- *
  */
 
 float TemperatureController::get_hotbed_temperature() {
@@ -182,6 +199,8 @@ float TemperatureController::get_hotbed_temperature() {
     return Thermistors::get_temperature_hotbed();
 
 }
+
+
 
 //-----------------------------------------------------Regulation-------------------------------------------------------
 

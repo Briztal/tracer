@@ -19,6 +19,34 @@
 */
 
 
+/*
+ * The MachineController class is one of the two state-controllers of the project.
+ *
+ *  This class handles the mechanics state of the machine (movement, cooling, extrusion, position, ...).
+ *      The Temperature control is handled by the named class.
+ *
+ *
+ *  As this class can configure a lot of parameters, and trigger a lot of machine commands, it is built on
+ *    the state manager model :
+ *      - All its public functions (called state modifiers) take state structs in arguments.
+ *      - A state struct is a structure where for all data field, there is a flag (bool) that defined if the
+ *          data field's value is intentionnaly set.
+ *      - When a state modifier is called, it reads all flags, and only proceeds data with their field set.
+ *
+ *  This model is useful, because it allows the programmer (you !!) to call a single function to modify several
+ *      related parameters, for example, modify the speed of the working carriage and the speed
+ *      of a particular carriage (named by its id);
+ *
+ *  The other solution would have been to create a single function for every single command executable, and a modifier
+ *      for every single parameter, for example, we would have called a function to modify the speed of the working
+ *      carriage's speed, and another to modify the speed of a carriage by its id).
+ *
+ *  This solution is viable too, but as functions are scheduled, and we often want to call two related actions at the
+ *      same time (for example, set the current speed AND move to a position with that speed), we would have often
+ *      called functions simultaneously, what would have occupied more spaces in the scheduler.
+ *
+ */
+
 #ifndef TRACER_COORDINATESINTERFACE_H
 #define TRACER_COORDINATESINTERFACE_H
 
@@ -29,7 +57,149 @@
 
 class MachineController {
 
+private:
 
+    /*
+     * State structures, and inheritance schema :
+     *
+     *  Below are defined state structures, that will be used to modify the machine's state.
+     *
+     *  They follow an inheritance schema, which is described.
+     */
+
+    //Below are defined two structs that are extended frequently in the code.
+
+    //Basic 4 coordinates type
+    struct hl_coord_t {
+
+        float x = 0;
+        float y = 0;
+        float z = 0;
+        float e = 0;
+    };
+
+    //A state structure derived of coordinate struct
+    struct hl_coord_state_t : hl_coord_t {
+
+        //Add flags
+        bool x_flag = false;
+        bool y_flag = false;
+        bool z_flag = false;
+        bool e_flag = false;
+
+    };
+
+
+public :
+    /*
+     * The carriages state structure :
+     *
+     *  This struct will will be used to modify the working carriage, and its speed, and also to
+     *      mofify a designated carriage's speed.
+     *
+     *  It will contain:
+     *
+     *  flags and data for:
+     *      - The working extruder;
+     *      - The extruder speeds;
+     */
+
+    struct carriages_state_t {
+
+        //Flag for the working extruder modification.
+        bool working_carriage_flag = false;
+
+        //Flag for the working extruder's speed modification.
+        bool working_carriage_speed_flag = false;
+
+        //Flag to enable the modification one carriage's speed.
+        bool nominative_speed_mod_flag = false;
+
+
+        //Data
+        uint8_t working_carriage = 0;
+        float working_carriage_speed = 0;
+
+        //Data to modify one extruder's speed.
+        uint8_t nominative_carriage = 0;
+        float nominative_speed = 0;
+
+    };
+
+
+public:
+
+    /*
+     * The movement state structure :
+     *
+     *  This structure is the union of structs coord_state_t (movement coordinates) and carriages_state_t.
+     *
+     *  The reason for this, is that when planning a movement, we also may want to set its speed, the carriage that
+     *      will move, etc...
+     *
+     *  The only data added, a flag determining whether the movement is relative or not.
+     */
+
+    struct movement_state_t : hl_coord_state_t, carriages_state_t {
+
+        //The movement type flag.
+        bool relative_flag = false;
+
+    };
+
+
+public:
+
+    /*
+     * The offset state structure :
+     *
+     *  This structure will be used to modify the offsets of the high level (4 axis) coordinate system.
+     *
+     *  It is a simple coordinate state structure.
+     */
+
+    struct offsets_state_t : hl_coord_state_t {
+    };
+
+
+public:
+
+    /*
+     * The cooling state structure :
+     *
+     *  This struct will be used to modify the cooling power, and to enable / disable it.
+     *
+     *  It will contain flags and data for:
+     *      - enable state (is the cooling enabled)
+     *      - the power of the cooling
+     */
+
+    struct cooling_state_t {
+        //Data flags : set if the data is relevant
+        bool enabled_flag = false;
+        bool power_flag = false;
+
+        //Data
+        bool enabled = false;
+        float power = 0;
+
+    };
+
+
+
+
+    /*
+     * -------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------------------------------
+     *
+     * State modifiers : functions below are in charge of modifying the machine's state, according to
+     *  state structures they receive in arguments.
+     *
+     * -------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------------------------------
+     */
 
     //-------------------------------Homing movement-------------------------------
 
@@ -42,10 +212,10 @@ GENERATE_SCHEDULER(home, 0);
 
 private:
 
-    typedef struct carriage_data {
+    struct carriage_data {
         uint8_t carriage_id;
         float time;
-    } carriage_data;
+    };
 
 
     //Set the reference carriage, in the homing preparation
@@ -59,42 +229,19 @@ private:
 
 public:
 
-    typedef struct machine_coords_t {
-
-        //Flag for relative movement, default to false -> movement absolute by default.
-        bool relative_flag = false;
-
-        //Flags for coordinates
-        bool x_flag = false, y_flag = false, z_flag = false, e_flag = false;
-
-        //Flags for current carriage and speed.
-        bool extruder_flag = false, speed_flag = false;
-
-        //Coordinates
-        float x = 0, y = 0, z = 0, e = 0;
-
-        //Current carriage
-        uint8_t extruder = 0;
-
-        //Speed
-        float speed = 0;
-
-    } movement_state_t;
-
-
     static task_state_t line(movement_state_t movement_state);
 
     //A scheduler for the line function.
-GENERATE_SCHEDULER(line, 0, machine_coords_t, coords);
+GENERATE_SCHEDULER(line, 0, movement_state_t, coords);
 
 
 private:
 
     //The current absolute high level machine coordinates : [x, y, z, e].
-    static float *const current_position;
+    static hl_coord_t current_position;
 
     //The current axis coordinates.
-    static float *const current_axis_positions;
+    static float *const axis_positions;
 
     //Replace coordinates with flags reset with current ones.
     static void replace_coords(movement_state_t *coords);
@@ -109,6 +256,21 @@ private:
     static void sanity_check(float *hl_coords);
 
 
+    //-------------------------------Offsets-------------------------------
+
+public:
+
+    //The offset modifier
+    static task_state_t set_offsets_state(offsets_state_t);
+
+    //A scheduler for the offset modifier
+GENERATE_SCHEDULER(set_offsets_state, 0, offsets_state_t, offsets);
+
+
+private:
+
+    //The current absolute high level offsets : [x, y, z, e].
+    static hl_coord_t offsets;
 
     //-------------------------------Steppers-------------------------------
 
@@ -121,71 +283,36 @@ public:
 GENERATE_SCHEDULER(enable_steppers, 0, bool, enable);
 
 
-    //-------------------------------Extrusion-------------------------------
+    //-------------------------------Carriages-------------------------------
 
 public:
 
     /*
-     * A structure for the extrusion management.
-     *
-     *  This struct will contain:
-     *
-     *  A readonly (won't affect config if set) variable for the current mode;
-     *
-     *  flags and data for:
-     *      - The working extruder;
-     *      - The extruder speeds;
-     */
-
-    typedef struct extrusion_state_t {
-
-        //Readonly variable for mode;
-        uint8_t mode = 0;
-
-        //Flag for the working extruder modification.
-        bool working_extruder_flag = false;
-
-        //Flag for the working extruder's speed modification.
-        bool working_extruder_speed_flag = false;
-
-        //Flag to enable the modification one carriage's speed.
-        bool nominative_speed_mod_flag = false;
-
-
-        //Data
-        uint8_t working_extruder = 0;
-        float working_extruder_speed = 0;
-
-        //Data to modify one extruder's speed.
-        uint8_t nominative_carriage = 0;
-        float nominative_speed = 0;
-
-    } carriages_state_t;
-
-
-    /*
-     * The Extrusion state modifier : this function can modify the state of the extrusion, and can be scheduled.
+     * The carriages state modifier : this function can modify the state of the extrusion, and can be scheduled.
      *
      *  It receives a state, vith various flags enabled, and makes the appropriate modifications,
      *      calling simple set functions :
      *
      *      - set_speed;
      *      - set_working_carriage.
-     *
      */
-    static task_state_t set_extrusion_state(extrusion_state_t data);
+
+    static task_state_t set_carriages_state(carriages_state_t data);
 
     //The Scheduler for the function.
-GENERATE_SCHEDULER(set_extrusion_state, 0, extrusion_state_t, data);
+GENERATE_SCHEDULER(set_carriages_state, 0, carriages_state_t, data);
 
     //Get the current extrusion state;
-    static const extrusion_state_t get_extrusion_state();
+    static const carriages_state_t get_extrusion_state();
+
+    //The current mode.
+    static uint8_t mode;
 
 
 private :
 
     //The current extrusion state;
-    static extrusion_state_t extrusion_state;
+    static carriages_state_t extrusion_state;
 
     //Mofify the current working extruder.
     static task_state_t set_working_extruder(uint8_t carriage);
@@ -195,31 +322,11 @@ private :
 
 public:
 
-    /*
-     * A structure for the cooling state management.
-     *
-     *  This struct will contain flags and data for:
-     *      - enable state (is the cooling enabled)
-     *      - the power of the cooling
-     */
-
-    typedef struct cooling_state_t {
-        //Data flags : set if the data is relevant
-        bool enabled_flag = false;
-        bool power_flag = false;
-
-        //Data
-        bool enabled = false;
-        float power = true;
-
-    } cooling_state_t;
-
     //Set and get hotbed temperatures
     static task_state_t set_cooling_state(cooling_state_t);
 
     //A scheduler for the cooling manager
 GENERATE_SCHEDULER(set_cooling_state, 0, cooling_state_t, state);
-
 
     static const cooling_state_t get_cooling_state();
 

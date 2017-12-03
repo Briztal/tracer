@@ -52,13 +52,13 @@
  *
  *  1 endstop per X_ Y_ Z.
  *
- *  1 Hotend per working_extruder, 1 thermistor per working_extruder
+ *  1 Hotend per working_carriage, 1 thermistor per working_carriage
  *
  *  1 Hotbed, with 1 thermistor
  *
  *  1 permanent ventilation per Hotend
  *
- *  1 power-adjustable print-ventilation per working_extruder.
+ *  1 power-adjustable print-ventilation per working_carriage.
  *
  */
 
@@ -77,7 +77,6 @@
  *      - for each carriage,
  *          if the speed of the carriage (determined according to the reference carriage) exceeds its regulation speed,
  *          then this carriage becomes the reference
- *
  */
 
 task_state_t MachineController::home() {
@@ -86,12 +85,12 @@ task_state_t MachineController::home() {
     carriage_data t = carriage_data();
 
     //Initialise the reference carriage.
-    set_reference_carriage(0, current_axis_positions[0], current_axis_positions[2], &t);
+    set_reference_carriage(0, axis_positions[0], axis_positions[2], &t);
 
     //Verify carriages 1, 2 and 3.
-    check_carriage(1, current_axis_positions[1], current_axis_positions[2], &t);
-    check_carriage(2, current_axis_positions[1], current_axis_positions[3], &t);
-    check_carriage(3, current_axis_positions[0], current_axis_positions[3], &t);
+    check_carriage(1, axis_positions[1], axis_positions[2], &t);
+    check_carriage(2, axis_positions[1], axis_positions[3], &t);
+    check_carriage(3, axis_positions[0], axis_positions[3], &t);
 
     //Set the reference carriage, that will determine the movement speed.
     MachineInterface::set_speed_group(t.carriage_id);
@@ -99,10 +98,10 @@ task_state_t MachineController::home() {
     //No need to set the regulation speed, ad it is already set.
 
     //Zero all carriages
-    current_axis_positions[0] = current_axis_positions[1] = current_axis_positions[2] = current_axis_positions[3] = 0;
+    axis_positions[0] = axis_positions[1] = axis_positions[2] = axis_positions[3] = 0;
 
     //Move
-    return MachineInterface::linear_movement(current_axis_positions);
+    return MachineInterface::linear_movement(axis_positions);
 
 }
 
@@ -112,7 +111,6 @@ task_state_t MachineController::home() {
  *      and determines the movement time corresponding to the provided movement data, with the following formula :
  *
  *          Movement_time = movement_distance / movement_speed = sqrt(movement_x **2 + movement_y**2) / movement_dist
- *
  */
 
 void MachineController::set_reference_carriage(uint8_t id, float x, float y, carriage_data *data) {
@@ -131,7 +129,6 @@ void MachineController::set_reference_carriage(uint8_t id, float x, float y, car
  *
  *  the carriage [id] regulation speeds. if so, it sets [id] as the reference carriage, using the formula in
  *      the function behind
- *
  */
 
 void MachineController::check_carriage(uint8_t id, float x, float y, carriage_data *data) {
@@ -160,22 +157,21 @@ void MachineController::check_carriage(uint8_t id, float x, float y, carriage_da
 
 /*
  * replace_coords : this function replaces coordinates with flag reset by current coordinates.
- *
  */
 
 void MachineController::replace_coords(movement_state_t *coords) {
 
     if (!coords->x_flag) {
-        coords->x = current_position[0];
+        coords->x = current_position.x;
     }
     if (!coords->y_flag) {
-        coords->y = current_position[1];
+        coords->y = current_position.y;
     }
     if (!coords->z_flag) {
-        coords->z = current_position[2];
+        coords->z = current_position.z;
     }
     if (!coords->e_flag) {
-        coords->e = current_position[3];
+        coords->e = current_position.e;
     }
 }
 
@@ -185,64 +181,34 @@ void MachineController::replace_coords(movement_state_t *coords) {
  *
  *  The destination position can be given in two ways :
  *      - absolute, real coordinates are given;
- *      - relative, algebric distances from the current position are given;
- *
+ *      - relative, algebraic distances from the current position are given;
  */
+
 task_state_t MachineController::line(movement_state_t movement_state) {
 
     //Initialise a state
     task_state_t state = complete;
 
-    CI::echo("BITE");
+    //The movement_state_t inherits the carriage_state_t, that allows us to modify the extrusion state before moving.
+    task_state_t return_state = set_carriages_state((carriages_state_t) movement_state);
 
-    //If carriage state must be set
-    if (movement_state.extruder_flag || movement_state.speed_flag) {
-
-        carriages_state_t c_state = carriages_state_t();
-
-        //Eventually set the working carriage
-        if (movement_state.extruder_flag) {
-
-            //Set the carriage flag
-            c_state.working_extruder_flag = true;
-
-            //Set the extruder
-            c_state.working_extruder = movement_state.extruder;
-
-        }
-
-        //Eventually set the current speed
-        if (movement_state.speed_flag) {
-
-            //Set the speed flag
-            c_state.working_extruder_speed_flag = true;
-
-            //Set the speed value
-            c_state.working_extruder_speed = movement_state.speed;
-
-
-        }
-
-        //Change the extrusion parameters
-        task_state_t return_state = set_extrusion_state(c_state);
-
-        //If the modification failed, fail.
-        if (return_state != complete) {
-            return return_state;
-        }
-
+    //If the modification failed, fail.
+    if (return_state != complete) {
+        return return_state;
     }
 
-    CI::echo("SUUS");
+    /* As we must transmit the new destination coordinates, we will set all coordinates in movement_state, and pass it
+     *  to movement functions.
+     */
 
     if (movement_state.relative_flag) {
         //Relative movement
 
-        //Sum the given values to the current coordinates to get destinnation coordinates
-        movement_state.x += current_position[0];
-        movement_state.y += current_position[1];
-        movement_state.z += current_position[2];
-        movement_state.e += current_position[3];
+        //Sum the given values to the current coordinates to get destination coordinates
+        movement_state.x += current_position.x;
+        movement_state.y += current_position.y;
+        movement_state.z += current_position.z;
+        movement_state.e += current_position.e;
 
     } else {
         //Absolute movement
@@ -253,7 +219,7 @@ task_state_t MachineController::line(movement_state_t movement_state) {
     }
 
     //Try to move to the specified position
-    switch (extrusion_state.mode) {
+    switch (mode) {
         case 0:
             state = move_mode_0(&movement_state);
         default:
@@ -268,16 +234,18 @@ task_state_t MachineController::line(movement_state_t movement_state) {
 
 }
 
+
 /*
  * persist_coords : current coordinates are updated, to new one, given by coords
  */
+
 void MachineController::persist_coords(movement_state_t *coords) {
 
     //Save new coordinates.
-    current_position[0] = coords->x;
-    current_position[1] = coords->y;
-    current_position[2] = coords->z;
-    current_position[3] = coords->e;
+    current_position.x = coords->x;
+    current_position.y = coords->y;
+    current_position.z = coords->z;
+    current_position.z = coords->e;
 
 }
 
@@ -286,20 +254,19 @@ void MachineController::persist_coords(movement_state_t *coords) {
 //---------------------------------------------------Movement planners--------------------------------------------------
 
 /*
- * move_mode_0 : single working_extruder mode    CI::echo("complete : "+String(state == complete));
+ * move_mode_0 : single working_carriage mode    CI::echo("complete : "+String(state == complete));
 .
  *
- *  In this mode, every working_extruder can be moved independently.
- *
+ *  In this mode, every working_carriage can be moved independently.
  */
 
 task_state_t MachineController::move_mode_0(movement_state_t *coords) {
 
-    MachineInterface::set_speed_group(extrusion_state.working_extruder);
+    MachineInterface::set_speed_group(extrusion_state.working_carriage);
 
     bool x0, y0;
 
-    switch (extrusion_state.working_extruder) {
+    switch (extrusion_state.working_carriage) {
         case 0:
             x0 = y0 = true;
             break;
@@ -318,42 +285,49 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
             return invalid_arguments;
     }
 
+    //Get the real position, taking offsets into account.
+    float x = coords->x + offsets.x;
+    float y = coords->y + offsets.y;
+    float z = coords->z + offsets.z;
+    float e = coords->e + offsets.e;
 
     //Set the x position
     if (x0) {
-        current_axis_positions[0] = EEPROMStorage::coordinate_interface_data.x0_offset + coords->x;
+        axis_positions[0] = EEPROMStorage::coordinate_interface_data.x0_offset + x;
     } else {
-        current_axis_positions[1] = EEPROMStorage::coordinate_interface_data.x1_offset - coords->x;
+        axis_positions[1] = EEPROMStorage::coordinate_interface_data.x1_offset - x;
     }
 
     //Set the y position
     if (y0) {
-        current_axis_positions[2] = EEPROMStorage::coordinate_interface_data.y0_offset + coords->y;
+        axis_positions[2] = EEPROMStorage::coordinate_interface_data.y0_offset + y;
     } else {
-        current_axis_positions[3] = EEPROMStorage::coordinate_interface_data.y1_offset - coords->y;
+        axis_positions[3] = EEPROMStorage::coordinate_interface_data.y1_offset - y;
     }
 
     //Set the z position
-    current_axis_positions[4] = EEPROMStorage::coordinate_interface_data.z_offset - coords->z;
+    axis_positions[4] = EEPROMStorage::coordinate_interface_data.z_offset - z;
 
     //Set the extruder position
-    current_axis_positions[5 + extrusion_state.working_extruder] = coords->e;
+    axis_positions[5 + extrusion_state.working_carriage] = e;
 
     //TODO SANITY CHECK
     //sanity_check(position);
 
     //Display the destination.
     for (uint8_t i = 0; i < NB_AXIS; i++) {
-        CI::echo(String(i) + " " + String(current_axis_positions[i]));
+        CI::echo(String(i) + " " + String(axis_positions[i]));
     }
 
     //Plan movement.
-    task_state_t state = MachineInterface::linear_movement(current_axis_positions);
+    task_state_t state = MachineInterface::linear_movement(axis_positions);
 
-    CI::echo("STATE : "+String(state == reprogram));
+    CI::echo("STATE : " + String(state == reprogram));
 
     return state;
 }
+
+
 
 
 /*
@@ -361,7 +335,6 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
  *
  *  It verifies that coordinates on each axis are not negative (beyond the endstop) and that the space between
  *      carriages allows them not to be in contact.
- *
  */
 
 void MachineController::sanity_check(float *position) {
@@ -416,6 +389,30 @@ void MachineController::sanity_check(float *position) {
 }
 
 
+//-----------------------------------------------------Offsets---------------------------------------------------
+
+task_state_t MachineController::set_offsets_state(offsets_state_t new_offsets) {
+
+    /* As we must check all 4 offsets, the exact same way, a macro will be used.
+     * This macro check the flag for the provided axis, and if set, updates the current offset with the given value.
+     */
+#define CHECK_AXIS(axis)\
+    if (new_offsets.axis##_flag) {\
+        offsets.axis = new_offsets.axis;\
+    }
+
+    //Eventually modify the offset for all 4 axis (x, y, z, e)
+    CHECK_AXIS(x);
+    CHECK_AXIS(y);
+    CHECK_AXIS(z);
+    CHECK_AXIS(e);
+
+#undef CHECK_AXIS;
+
+    return complete;
+}
+
+
 //-----------------------------------------------------Steppers---------------------------------------------------
 
 task_state_t MachineController::enable_steppers(bool enable) {
@@ -439,25 +436,25 @@ task_state_t MachineController::enable_steppers(bool enable) {
 //-----------------------------------------------------Extrusion---------------------------------------------------
 
 /*
- * set_extrusion_state : this function can modify all parameters related to extrusion :
+ * set_carriages_state : this function can modify all parameters related to extrusion :
  *
  *  - the working extruder;
  *  - the working extruder's speed;
  *  - (nominative) extruders'speeds.
  *
  *  Data will be modified only if flags related to it are set.
- *
  */
-task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state) {
+
+task_state_t MachineController::set_carriages_state(carriages_state_t new_state) {
 
     //Initialise a state, that will be updated at each modification.
     task_state_t state = complete;
 
     //if the working extruder must be changed :
-    if (new_state.working_extruder_flag) {
+    if (new_state.working_carriage_flag) {
 
         //Change the working extruder
-        state = set_working_extruder(new_state.working_extruder);
+        state = set_working_extruder(new_state.working_carriage);
 
         //Fail if the function failed.
         if (state != complete) return state;
@@ -480,7 +477,8 @@ task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state)
     }
 
     //Eventually modify the speed for the current carriage
-    SPEED_MODIFICATION(extrusion_state.working_extruder, new_state.working_extruder_speed_flag, new_state.working_extruder_speed)
+    SPEED_MODIFICATION(extrusion_state.working_carriage, new_state.working_carriage_speed_flag,
+                       new_state.working_carriage_speed)
 
     //Eventually modify the speed for every carriage
     SPEED_MODIFICATION(new_state.nominative_carriage, new_state.nominative_speed_mod_flag, new_state.nominative_speed)
@@ -494,16 +492,16 @@ task_state_t MachineController::set_extrusion_state(extrusion_state_t new_state)
  * set_working_extruder : sets the working extruder.
  *
  *  As the process requires to check the mode and the extruder id, this separate function exists.
- *
  */
+
 task_state_t MachineController::set_working_extruder(uint8_t carriage) {
 
     //Nothing to do if the carriage id the current one.
-    if (carriage == extrusion_state.working_extruder) {
+    if (carriage == extrusion_state.working_carriage) {
         return null_task;
     }
 
-    switch (extrusion_state.mode) {
+    switch (mode) {
         case 0:
             //4 carriage mode.
             if (carriage > 3) {
@@ -528,7 +526,7 @@ task_state_t MachineController::set_working_extruder(uint8_t carriage) {
     }
 
     //If valid arguments :
-    extrusion_state.working_extruder = carriage;
+    extrusion_state.working_carriage = carriage;
 
     //Succeed.
     return complete;
@@ -541,7 +539,7 @@ task_state_t MachineController::set_working_extruder(uint8_t carriage) {
  *
  */
 
-const MachineController::extrusion_state_t MachineController::get_extrusion_state() {
+const MachineController::carriages_state_t MachineController::get_extrusion_state() {
 
     return extrusion_state;
 
@@ -555,8 +553,8 @@ const MachineController::extrusion_state_t MachineController::get_extrusion_stat
  *  - cooling enable state (enabled, disabled).
  *
  *  Parameters will be modified only if their flags are set.
- *
  */
+
 task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
 
     //If the enable state must be changed
@@ -594,11 +592,13 @@ task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
 
     }
 
+    return complete;
+
 }
+
 
 /*
  * get_cooling_state : this function returns the current state of the cooling.
- *
  */
 
 const MachineController::cooling_state_t MachineController::get_cooling_state() {
@@ -612,11 +612,14 @@ const MachineController::cooling_state_t MachineController::get_cooling_state() 
 
 MachineController::cooling_state_t MachineController::cooling_state = MachineController::cooling_state_t();
 
-MachineController::extrusion_state_t MachineController::extrusion_state = MachineController::extrusion_state_t();
+MachineController::carriages_state_t MachineController::extrusion_state = MachineController::carriages_state_t();
+
+MachineController::hl_coord_t MachineController::current_position = MachineController::hl_coord_t();
+
+MachineController::hl_coord_t MachineController::offsets = MachineController::hl_coord_t();
 
 float tmpos[NB_AXIS];
-float *const MachineController::current_axis_positions = tmpos;
+float *const MachineController::axis_positions = tmpos;
 
-float t_mch_crd[4]{0};
-float *const MachineController::current_position = t_mch_crd;
 
+uint8_t MachineController::mode = 0;

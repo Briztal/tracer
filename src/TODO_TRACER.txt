@@ -1,8 +1,17 @@
 
 
-//TODO SET CURRENT POSITION IN MACHINE
-
 //TODO CLEAN NOZZLE IN MACHINE AND MECHANIC
+
+//TODO PID_AUTOTUNE
+
+//TODO SD SUPPORT
+
+//TODO SCREEN_INTERFACE
+
+//TODO ETALONNAGE DANS LA CLASSE MACHINEINTERFACE
+
+
+////////////////////////GCODE///////////////////////////////
 
 //TODO GCODE TREE
 
@@ -19,19 +28,11 @@
 //TODO COMMENT THE PARSING IN GCodeInterface.cpp
 
 
-//TODO PID_AUTOTUNE
-
-//TODO SD SUPPORT
-
-//TODO SCREEN_INTERFACE
-
-//TODO ETALONNAGE DANS LA CLASSE MACHINEINTERFACE
-
-
-
-
 ////////////////////////TEST///////////////////////////////
 
+//TODO CHECK POSITION UPDATE
+
+//TODO TEST THE STRUCTURE HIERARCHY IN MachineController, modify carriage data along with a movement and verify the effective modfication.
 
 //TODO TEST RANDOM MOVEMENTS WITH THE PRINTER
 

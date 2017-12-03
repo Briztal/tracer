@@ -156,8 +156,8 @@ float KinematicsCore2::compute_us_time_for_first_sub_movement(k2_sub_movement_da
     K2Physics::update_speeds(sub_movement_data, time);
 
     //Update tools powers
-    float working_extruder_speed = sub_movement_data->movement_distance / time;
-    TrajectoryTracer::update_tools_powers(working_extruder_speed);
+    float working_carriage_speed = sub_movement_data->movement_distance / time;
+    TrajectoryTracer::update_tools_powers(working_carriage_speed);
     //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
     return (float)1000000 * time;
@@ -202,8 +202,8 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
     K2Physics::update_speeds(sub_movement_data, time);
 
     //Update tools powers
-    float working_extruder_speed = sub_movement_data->movement_distance / time;
-    TrajectoryTracer::update_tools_powers(working_extruder_speed);
+    float working_carriage_speed = sub_movement_data->movement_distance / time;
+    TrajectoryTracer::update_tools_powers(working_carriage_speed);
     //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
     return (float)1000000 * time;
