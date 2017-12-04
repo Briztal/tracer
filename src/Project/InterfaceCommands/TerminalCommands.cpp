@@ -250,6 +250,51 @@ task_state_t TerminalCommands::enable_steppers(char *arguments) {
 
 
 /*
+ * enable_steppers : enable or disable steppers.
+ *
+ *  It takes only one argument_t, -e followed by 0 (disable) or [not zero] enabled
+ *
+ */
+
+task_state_t TerminalCommands::set_position(char *arguments) {
+
+    //This command must schedule one type-0 task.
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Parse Arguments
+    PARSE_ARGUMENTS(arguments);
+
+    //verify that almost one movement coordinate is provided.
+    REQUIRE_ONE_ARGUMENTS("xyze");
+
+    MachineController::offsets_state_t state = MachineController::offsets_state_t();
+
+    /*
+     * To save repetitive lines of code, a macro that, if a coord is provided, sets its flag and its value.
+     */
+#define CHECK_COORDINATE(coord, coord_char)\
+    if (CHECK_ARGUMENT(coord_char)) {\
+        state.coord##_flag = true;\
+        state.coord = GET_ARG_VALUE(coord_char);\
+    }\
+
+    //If a coordinate was provided, enable this coordinate, and get it.
+    CHECK_COORDINATE(x, 'x');
+    CHECK_COORDINATE(y, 'y');
+    CHECK_COORDINATE(z, 'z');
+    CHECK_COORDINATE(e, 'e');
+
+    //For safety, un-define the previously created macro.
+#undef CHECK_COORDINATE
+
+
+    //Schedule a line to the specified coordinates
+    return MachineController::set_offsets_state_scheduled_0(state);
+
+}
+
+
+/*
  * set_extrusion : this function modifies extrusion parameters.
  *
  *  It takes the folloging arguments :

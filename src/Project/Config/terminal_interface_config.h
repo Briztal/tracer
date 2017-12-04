@@ -58,6 +58,8 @@ GO_LOWER(set, setup real-time machine parameters)
 
 CREATE_LEAF(power, enable_steppers, enable or disable all steppers, 0 or 1)
 
+CREATE_LEAF(position, set_position, enable or disable all steppers, 0 or 1)
+
 CREATE_LEAF(extrusion, set_extrusion, set the current carriage and its speed, carriage_id - speed)
 
 CREATE_LEAF(cooling, set_cooling, enable or disable the cooling, power)
