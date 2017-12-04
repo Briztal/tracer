@@ -97,8 +97,75 @@
 //The maximum command depth : in our example, the two largest commands are G5D0 and M225 -> GCODE_MAX_DEPTH of 4
 #define GCODE_MAX_DEPTH 5
 
+//The maximum number of arguments in a GCodeCommand.
+#define MAX_ARGS_NB 6
+
+//The maximal size of an argument
+#define MAX_WORD_SIZE 20
+
+//The number of commands that can be received and stored before execution;
+#define NB_PENDING_COMMANDS 10
+
+
+
 #if defined(GO_LOWER) && defined(GO_LOWER_COMMAND) && defined(COMMAND) && defined(GO_UPPER)
 
+
+//G COMMANDS
+GO_LOWER('G')
+
+
+
+//G0
+GO_LOWER('0')
+
+COMMAND('0', home)
+COMMAND('1', line)
+
+GO_UPPER()
+
+
+//Setup
+GO_LOWER('1')
+
+COMMAND('0', enable_steppers)
+
+COMMAND('1', set_extrusion)
+
+COMMAND('2', set_cooling)
+
+COMMAND('3', set_hotend)
+
+COMMAND('4', set_hotbed)
+
+GO_UPPER()
+
+
+//Get
+GO_LOWER('2')
+COMMAND('0', get_temps)
+COMMAND('1', get_regulations)
+GO_UPPER()
+
+
+
+//test
+GO_LOWER('3')
+COMMAND('0', stepper_test)
+COMMAND('1', temp_test)
+COMMAND('2', action)
+
+GO_UPPER()
+
+
+//EEPROM
+COMMAND('4', eeprom)
+
+
+GO_UPPER()
+
+
+/*
 //G COMMANDS
 GO_LOWER('G')
 
@@ -106,9 +173,7 @@ GO_LOWER('G')
 //G0
 COMMAND('0', linear_move)
 
-
-//G1
-GO_LOWER_COMMAND('1', linear_move)
+GO_LOWER('1')
 
 //G10
 COMMAND('0', retract)
@@ -169,7 +234,7 @@ COMMAND('0', absolute_position)
 COMMAND('1', relative_position)
 
 //G92
-COMMAND('1', set_position)
+COMMAND('2', set_position)
 
 GO_UPPER()
 
@@ -185,7 +250,7 @@ COMMAND('0', stop)
 
 
 //M1
-GO_LOWER_COMMAND('1', stop)
+GO_LOWER('1')
 
 //M17
 COMMAND('7', enable_steppers)
@@ -220,6 +285,7 @@ GO_UPPER()
 GO_UPPER()
 
 
+*/
 
 
 

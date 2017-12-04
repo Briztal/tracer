@@ -1,5 +1,19 @@
+//TODO UNIFY INTERFACE_DATA_Type
 
+
+//TODO URGENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO URGENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO THE SIZE OF THE PACKET IS NOT CONTROL IN INTERFACES ! THIS CAN LEAD TO FAT MEMORY CORRUPTION !!
+//TODO URGENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO URGENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //TODO CLEAN NOZZLE IN MACHINE AND MECHANIC
+
+//TODO CHECK THAT SANITY_CHECK.H HANDLES INTERFACES PROBLEMS (TWO INTERFACES ON THE SAME DATA LINK ?)
+
+//TODO PARSE COMMANDS AND ARGS WITHOUT MAKING WORD COPIES IN INTERFACES
+
+
+//TODO MAKE A CLASS TO HANDLE ARGUMENT MANAGEMENT IN HUMAN READABLE INTEFACES
 
 //TODO PID_AUTOTUNE
 
@@ -29,6 +43,7 @@
 
 ////////////////////////TEST///////////////////////////////
 
+//TODO TEST GCODE PARSER AND EXECUTER
 
 //TODO CHECK POSITION UPDATE
 

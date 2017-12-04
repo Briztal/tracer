@@ -18,12 +18,13 @@
 
 */
 
-#include <config.h>
-
-#ifdef ENABLE_TERMINAL_INTERFACE
 
 #ifndef CODE_TERMINAL_INTERFACE
 #define CODE_TERMINAL_INTERFACE
+
+#include <config.h>
+
+#ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
@@ -34,11 +35,6 @@
 #define TI TerminalInterface
 
 
-//A simple struct that will be used in the arguments parsing.
-typedef struct argument_t {
-    char identifier;
-    char *arg;
-};
 
 class TerminalInterface {
 
@@ -129,7 +125,7 @@ public:
 private:
 
     //The arguments sequences container
-    static ArgumentsContainer arguments_sequences_storage;
+    static ArgumentsContainer arguments_sequences;
 
     //Identifiers in a parsed argument_t sequence
     static argument_t *const identifiers;

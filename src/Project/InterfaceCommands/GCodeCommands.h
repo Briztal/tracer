@@ -19,26 +19,31 @@
 */
 
 #include <config.h>
-#ifdef ENABLE_GCODE_INTERFACE
 
+#ifdef ENABLE_GCODE_INTERFACE
 
 #include <TaskScheduler/TaskScheduler.h>
 
-class GCodeInterfaceCommands {
 
-#ifdef ENABLE_GCODE_INTERFACE
+class GCodeCommands {
+
+
+    /*
+     * Here is declared the method you will actually implement, that takes the index of the arguments in the
+     * arguments storage.
+     */
 
 public :
+
 
 #define GO_UPPER()
 
 #define GO_LOWER(i)
 
 #define COMMAND(i, name)\
-    static task_state_t name(void *);
+    static task_state_t name(char *);
 
 #define GO_LOWER_COMMAND(i, fname) COMMAND(i, fname)
-
 
 #include <Project/Config/gcode_interface_config.h>
 
@@ -47,7 +52,20 @@ public :
 #undef GO_LOWER_COMMAND
 #undef COMMAND
 
-#endif
+
+//TODO COMMENT AND COMMENT TERMINALCOMMANDS
+
+#define PARSE_ARGUMENTS(arguments) {if (!GCodeInterface::parse_arguments(arguments)) return invalid_arguments;}
+
+#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!GCodeInterface::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!GCodeInterface::verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define CHECK_ARGUMENT(identifier) (GCodeInterface::verify_identifier_presence(identifier))
+
+#define GET_ARG(identifier) GCodeInterface::get_argument(identifier)
+
+#define GET_ARG_VALUE(identifier) GCodeInterface::get_argument_value(identifier)
 };
 
 

@@ -22,8 +22,7 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterface.h"
-#include <Project/InterfaceCommands/_interface_data.h>
-#include <Project/InterfaceCommands/GCodeInterfaceCommands.h>
+#include <Project/InterfaceCommands/GCodeCommands.h>
 #include <DataStructures/StringUtils.h>
 
 
@@ -82,6 +81,7 @@ void GCodeInterface::read_data() {
 
             //Append the read_output char to data_in
             *(data_in++) = read_char;
+
             command_size++;
 
         }
@@ -111,7 +111,6 @@ void GCodeInterface::reset() {
  * parse : this function parses the received GCode Command.
  *
  *  It is called when a GCode command has been entirely received
- *
  */
 
 bool GCodeInterface::parse() {
@@ -123,18 +122,15 @@ bool GCodeInterface::parse() {
     //Declare the command id length (ex : 4 for G130).
     unsigned char command_id_length = 0;
 
+    //Declare an array to receive the command id (must add one byte for null termination)
+    char command_id[GCODE_MAX_DEPTH + 1];
+
     //Get the command id and its length, by calling the StringUtils.
-    command_id_length = StringUtils::get_next_word(&data_in, &command_size);
+    command_id_length = StringUtils::get_next_word(data_in, command_id, GCODE_MAX_DEPTH + 1);
 
     //Abort if the first word was a space.
     if (!command_id_length)
         return false;
-
-    //declare a char array to contain the command id (ex : G130).
-    char command_id[GCODE_MAX_DEPTH]{0};
-
-    //Copy the command ID into our local array.
-    memcpy(command_id, StringUtils::word_buffer_0, sizeof(char) * command_id_length);
 
     //Analyse the command id.
     analyse_command(command_id, command_id_length);
@@ -148,16 +144,15 @@ bool GCodeInterface::parse() {
  * init_parsing : this function initialises the data parsing.
  *
  *  It positions the data pointer to the beginning of the command, and resets all parameters flags.
- *
  */
 
 void GCodeInterface::init_parsing() {
 
+    //Mark the end of the the received command
+    *data_in = 0;
+
     //Reset the data pointer
     data_in = data_in_0;
-
-    //Reset parameter flags
-    memset(dynamic_args.parameters_flags, sizeof(float) * NB_PARAMETERS, 0);
 
 }
 
@@ -166,7 +161,6 @@ void GCodeInterface::init_parsing() {
  * analyse_command : this function determines the function associated to a GCode Command.
  *
  *  If it succeeds, it calls the scheduling function, passing a pointer to the determines function.
- *
  */
 
 void GCodeInterface::analyse_command(char *command, unsigned char command_size) {
@@ -184,7 +178,7 @@ void GCodeInterface::analyse_command(char *command, unsigned char command_size) 
 
 #define COMMAND(i, fname) \
     case i : \
-        schedule(GCodeInterfaceCommands::fname);\
+        schedule(GCodeCommands::fname);\
         return;
 
 #define GO_LOWER(i) \
@@ -196,7 +190,7 @@ void GCodeInterface::analyse_command(char *command, unsigned char command_size) 
 #define GO_LOWER_COMMAND(i, fname) \
     case i : \
         echo(String(command_size));\
-        if (!(command_size--)) {schedule(GCodeInterfaceCommands::fname);return;}\
+        if (!(command_size--)) {schedule(GCodeCommands::fname);return;}\
         c = *(command++);\
         switch(c) {\
 
@@ -222,160 +216,335 @@ void GCodeInterface::analyse_command(char *command, unsigned char command_size) 
 
 
 /*
- * schedule : this function schedules a GCodeInterfaceCommands command.
+ * schedule : this function schedules a GCodeCommands command.
  *
- *  It simply creates a task, saves the current parameters, packs the data, and gives it to the Scheduler.
+ *  It saves the arguments part in the argument storage, and then, schedules the execution of the function passed
+ *      in arguments
  *
+ *  This command will be executed, by the intermediary of the execute_command function, defined below.
+ *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void GCodeInterface::schedule(task_state_t (*f)(void *)) {
+void GCodeInterface::schedule(task_state_t (*f)(char *)) {
 
-#ifdef PARSE_BEFORE_EXECUTION
+    //Save the current arguments
+    uint8_t index;
 
-    //If we must parse parameters before the execution, parse them. If it fails, abort.
-    if (!parse_parameters(data_in, command_size))
-        return;
+    //Copy the argument string in the argument storage, and get the index it was inserted at.
+    arguments_storage.insert_argument(data_in, &index);
 
-    //Save the current parameters
-    uint8_t index = arguments_storage.insert_argument((char *) &dynamic_args, sizeof(gcode_arguments));
-
-#else
-
-#endif
-
-    //Create a struct in the heap to contain argument_t-related data.
+    //Create a struct in the heap to contain argument-related data.
     gcode_interface_data_t *data = new gcode_interface_data_t();
     data->arguments_index = index;
-
-    //Create a task in the stack to contain task data
-    task_t t = task_t();
-    t.type = 255;
-    t.dynamic_args = (void *) data;
-    t.task = f;
+    data->gcode_command = f;
 
     //Schedule the task
-    TaskScheduler::add_task(t);
+    TaskScheduler::schedule_task(255, execute_command, (void*) data);
 
+}
+
+
+/*
+ * execute_command : this command eases the redaction of TerminalCommands :
+ *
+ *  Normally, if scheduled directly, a GCodeCommand receives a void *, that must be casted in a char *,
+ *      the address of the arguments sequence. After the execution, if the command mustn't be reprogrammed,
+ *      those arguments must be removed from the argument container.
+ *
+ *      As this procedure is common to all GCodeCommands, this function's goal is to execute this procedure.
+ *
+ *  Now, a GCodeCommand receives a simple char *, and this function does the following :
+ *      - extracting arguments (char *);
+ *      - executing the GCodeCommand, passing these args.
+ *      - eventually removing the arguments.
+ */
+
+task_state_t GCodeInterface::execute_command(void *data_pointer) {
+
+    //Get the terminal interface data back
+    gcode_interface_data_t *data = (gcode_interface_data_t *) data_pointer;
+
+    //Cache var for arguments index.
+    uint8_t arguments_index = data->arguments_index;
+
+    //Cache for arguments.
+    char *arguments = arguments_storage.get_argument(arguments_index);
+
+    //Execute the required TerminalCommand function, and get the execution state
+    const task_state_t state = (*data->gcode_command)(arguments);
+
+    /*remove arguments arguments, if the task mustn't be reprogrammed*/
+    if (state != reprogram) {
+        arguments_storage.remove_argument(arguments_index);
+    }
+
+    //Return the execution state.
+    return state;
 }
 
 
 //------------------------------------------------------Parameters------------------------------------------------------
 
 
+//--------------------------------------Arguments Processing--------------------------------------
+
 /*
- * parse_parameters : this function will parse the parameter string provided in arguments
+ * parse_arguments : this function parses an argument sequence, whose format is like below :
+ *
+ *  -i0 arg0 -i1 arg1 ... -in argn
+ *
+ *  After the parsing, arguments can be get with the get_argument methods.
+ *
+ *  Remarks :
+ *      - argi can be empty.
+ *      - The function DOES NOT COPY ARGS. All it does is saving the indices (char),
+ *          and their eventual args's positions (char *). The argument sequence must NEVER be changed,
+ *          or args values will be corrupted.
  */
-bool GCodeInterface::parse_parameters(char *parameter_buffer, uint8_t params_size) {
 
-    //Initialise the parsing environment.
-    parameters_size = params_size;
-    parameters_ptr = parameter_buffer;
+bool GCodeInterface::parse_arguments(char *args_current_position) {
+
+    //First, reset the argument parsing structure :
+
+    //reset the arguments counter
+    nb_identifiers = 0;
 
 
-    //Some variables for the current parameter's index and value.
-    char index;
-    float value;
+    do {
 
-    //While the parameters_size is not null
-    while (parameters_size) {
 
-        /*
-         * Get the next parameter index and value
-         * If the parsing fails (incorrect parameter format), abort.
-         */
-        if (!get_parameter(&index, &value)) {
-            return false;
+        //First, remove unnecessary spaces;
+        args_current_position += StringUtils::lstrip(args_current_position, ' ');
+
+        //The current position is now on an argument identifier, or the argument sequence's end.
+
+        //Get the argument identifier.
+        char argument_identifier = *args_current_position;
+
+        //If we reached the end of the argument string :
+        if (!argument_identifier) {
+
+            //Complete;
+            return true;
+
         }
 
-        /*
-         * Process the parsed data.
-         * If it fails (wrong parameter index) abort.
-         */
-        if (!process_parameter(index, value)) {
+        //Now we are sure to be parsing a new argument.
+
+        //If the argument container is already full;
+        if (nb_identifiers == MAX_ARGS_NB) {
+
+            //Display an error message
+            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(MAX_ARGS_NB) +
+                     " arguments. Please check your terminal_interface_config.h file.");
+
+            //Fail
             return false;
+
+        }
+
+
+        //We are now sure not to be at the string's end position.
+        //The eventual value is just after the current position.
+
+        //Increment the current position (legit, as the string is not finished) and cache the new value.
+        char *arg = ++args_current_position;
+
+        //Make a local flag, that will determine if the parsing keeps on after the current argument.
+        bool finished;
+
+
+        //If the string end here (no value provided, and string end);
+        if (!*arg) {
+
+            //The argument is already at '\0' position, no modification is required.
+
+            //Plan the stop of the loop
+            finished = true;
+
+            //Enqueue an empty argument
+            goto insert_arg;
+
+        }
+
+        //Go to the word's end (if we are already, we will simply not move the position.
+        args_current_position += StringUtils::count_until_char(args_current_position, ' ');
+
+        //If the word's end is '\0' (String terminated), plan the loop stop.
+        finished = (!*args_current_position);
+
+        //Nullify the word's end (reason why we cached the bool.
+        *args_current_position = '\0';
+
+        //----------------------------------Argument saving----------------------------------
+
+
+        insert_arg:
+
+        //Save the relation between the identifier and the argument location.
+        argument_t *argument = identifiers + nb_identifiers;
+        argument->identifier = argument_identifier;
+        argument->arg = arg;
+
+
+        //Increase the number of parsed arguments
+        nb_identifiers++;
+
+        //If we have reached the end of the sequence
+        if (finished) {
+
+            //Complete
+            return true;
+
+        }
+
+
+    } while (true);
+
+
+}
+
+
+
+/*
+ * get_argument_value : this function presupposes that the argument referenced
+ *  by the identifier id is a numeric value, and returns that value.
+ */
+
+float GCodeInterface::get_argument_value(char id) {
+
+    //Get the argument pointer.
+    char *ptr = get_argument(id);
+
+    //return the float equivalent.
+    if (ptr != nullptr) {
+
+        return str_to_float(ptr);
+
+    } else return 0;
+
+}
+
+
+/*
+ * get_argument : this function returns a pointer to the argument (char *) referenced
+ *  by the identifier id.
+ */
+
+char *GCodeInterface::get_argument(char id) {
+
+    //For every identifier
+    for (uint8_t i = 0; i < nb_identifiers; i++) {
+
+        //Cache for the link
+        argument_t *link = identifiers + i;
+
+        //If the links'identifier matches the provided one
+        if (link->identifier == id) {
+
+            //Get the location of the argument (from the link), and convert the argument into a float.
+            return link->arg;
+
         }
 
     }
 
-    return true;
-}
-
-
-/*
- * get_parameter : this function reads parameters_ptr and extract the next word, supposed to be a parameter (index + value)
- *
- *  It calls the StringUtils to get the word, and then reads the index, and parses the value.
- *
- */
-bool GCodeInterface::get_parameter(char *id, float *value) {
-
-
-    //Get the parameter id, its value and its length, by calling the StringUtils
-    uint8_t size = StringUtils::get_next_word(&parameters_ptr, &parameters_size);
-
-    //Abort if no argument_t was parsed
-    if (size == 0)
-        return false;
-
-    //Save the parameter id
-    *id = *StringUtils::word_buffer_0;
-
-    //Do not parse the rest of the string if only the parameter index was provided
-    if (size == 1) {
-
-        //Default value
-        *value = 0;
-
-        //Complete
-        return true;
-    }
-
-    //Parse the value
-    *value = str_to_float(StringUtils::word_buffer_0 + 1);
-
-    //Complete
-    return true;
+    return nullptr;
 
 }
 
 
 /*
- * process_parameter : this function processes a parameter (index and value).
+ * verify_all_identifiers_presence : this function return true only if ALL identifiers contained
+ *  in the identifiers string have been extracted during the previous parsing.
  *
- *  It searches for a parameter matching the given index, and if it is not already set, sets it to the provided value.
- *
+ *  the identifier string is a string, where all letters are identifiers to check .
+ *      ex "arp" triggers the checking for identifiers a, r and p.
  */
 
-bool GCodeInterface::process_parameter(char index, float value) {
+bool GCodeInterface::verify_all_identifiers_presence(const char *identifiers) {
 
-    //Run through every parameter
-    switch (index) {
+    //Cache for the current char
+    char c = *(identifiers++);
 
-        //For each parameter :
-#define GPARAMETER(i, j, k)\
-            /*if the parameter matched the given index*/\
-            case j : \
-                /*if the parameter is not already set*/\
-                if (!*(dynamic_args.parameters_flags + i)){\
-                    /*set the flag, and save the value*/\
-                    *(dynamic_args.parameters + i) = value;\
-                    *(dynamic_args.parameters_flags + i) = true;\
-                }\
-                return true;
+    //For every identifier in the string (stop at null byte);
+    while (c) {
 
-#include <Project/Config/gcode_interface_config.h>
+        //If the identifier is not present
+        if (!verify_identifier_presence(c)) {
 
-#undef GPARAMETER
-
-
-        default:
-            //If the given index doesn't match any parameter, fail.
+            //Fail
             return false;
 
+        }
+
+        //Update the char
+        c = *(identifiers++);
+
     }
+
+    //All identifiers are present, succeed.
+    return true;
 
 }
 
+/*
+ * verify_all_identifiers_presence : this function return true only if ONE identifiers contained
+ *  in the identifiers string has been extracted during the previous parsing.
+ *
+ *  the identifier string is a string, where all letters are identifiers to check .
+ *      ex "arp" triggers the checking for identifiers a, r and p.
+ */
+
+bool GCodeInterface::verify_one_identifiers_presence(const char *identifiers) {
+
+    //Cache for the current char
+    char c = *(identifiers++);
+
+    //For every identifier in the string (stop at null byte);
+    while (c) {
+
+        //If the identifier is present
+        if (verify_identifier_presence(c)) {
+
+            //Succeed
+            return true;
+
+        }
+
+        //Update the char
+        c = *(identifiers++);
+
+    }
+
+    //No identifier detected, fail.
+    return false;
+
+}
+
+
+/*
+ * verify_all_identifiers_presence : this function return true if the identifier id has been extracted
+ *  during the previous parsing.
+ */
+
+bool GCodeInterface::verify_identifier_presence(char id) {
+
+    //Check every parsed identifier
+    for (uint8_t i = 0; i < nb_identifiers; i++) {
+
+        //Cache for the link
+        argument_t *link = identifiers + i;
+
+        //If the links'identifier matches the provided one, return true
+        if (link->identifier == id) return true;
+
+    }
+
+    //if there was no matches, return false.
+    return false;
+
+}
 
 //----------------------------------------------------System aliases----------------------------------------------------
 
@@ -384,7 +553,6 @@ bool GCodeInterface::process_parameter(char index, float value) {
  * echo : this function is an alias for the system echo command.
  *
  *  It echoes text data on the link layer
- *
  */
 
 void GCodeInterface::echo(const string_t msg) {
@@ -398,23 +566,30 @@ void GCodeInterface::echo(const string_t msg) {
 #define m GCodeInterface
 
 
+
+
 //Arguments container
-ArgumentsContainer m::arguments_storage = ArgumentsContainer(sizeof(gcode_arguments), NB_PENDING_TASKS);
+
+ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
+                                                               NB_PENDING_COMMANDS);
+
+
+
+//Identifiers in a parsed argument_t sequence
+argument_t t_id_to_indexes[MAX_ARGS_NB];
+argument_t *const m::identifiers = t_id_to_indexes;
+
+//Number of arguments in a sequence
+uint8_t m::nb_identifiers = 0;
 
 //The command size
 unsigned char m::command_size;
-unsigned char m::parameters_size;
 
 //Data pointers
 char tdatain_gcode[GCODE_MAX_SIZE];
 char *m::data_in = tdatain_gcode;
 char *const m::data_in_0 = tdatain_gcode;
 
-//Parameters pointers
-char *m::parameters_ptr;
-
-//Current arguments
-gcode_arguments m::dynamic_args = gcode_arguments();
 
 #undef m
 

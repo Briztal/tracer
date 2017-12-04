@@ -28,26 +28,10 @@
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>
+#include <Interfaces/_interface_data.h>
+
 
 #define GI GCodeInterface
-
-//TODO PARSE DURING TASK EXECUTION ?
-
-/*
- * We will declare a structure to contain parameters and their flags.
- *
- */
-
-typedef struct gcode_arguments {
-
-    //Parameters.
-    float parameters[NB_PARAMETERS];
-
-    //Parameter flags.
-    bool parameters_flags[NB_PARAMETERS];
-
-} gcode_arguments;
-
 
 class GCodeInterface {
 
@@ -76,10 +60,51 @@ private :
 
     //--------------------------------------Parsing Fields--------------------------------------
 
-private :
+public:
+
+    /*
+     * A Gcode Inteface command can accept an undefined number of arguments, in an argument sequence.
+     *
+     *  An argument sequence is a sequence of word, where the first letter is the identifier, and
+     *      the rest of the word is an eventual value, example
+     *
+     *      X100 Y200 Q300 R2.0214
+     *
+     *  where all i_k are characters, and arg_k is a word (meaning anything). The character - is mandatory
+     *      before an identifier, as arg_k can be none (empty string).
+     *
+     */
+
+    //Parse the provided arguments, and save the data in the local buffer.
+    static bool parse_arguments(char *args_current_position);
+
+    //Get the pointer to the required argument_t
+    static char *get_argument(char id);
+
+    //Get a previously parsed argument_t if it exists
+    static float get_argument_value(char id);
+
+    //Verify that all arguments (defined by their identifiers) have been provided (identifiers is null terminated).
+    static bool verify_all_identifiers_presence(const char *identifiers);
+
+    //Verify that at least one argument_t (defined by their identifiers) have been provided (identifiers is null terminated).
+    static bool verify_one_identifiers_presence(const char *identifiers);
+
+    //verify that an argument_t identifier has be provided.
+    static bool verify_identifier_presence(char id);
+
+
+private:
+
 
     //The arguments container.
     static ArgumentsContainer arguments_storage;
+
+    //Identifiers in a parsed argument_t sequence
+    static argument_t *const identifiers;
+
+    //Number of arguments in a sequence
+    static uint8_t nb_identifiers;
 
 
 
@@ -105,33 +130,10 @@ private :
     static void analyse_command(char *command, unsigned char command_size);
 
     //Schedule a GCodeInterfaceCommand function.
-    static void schedule(task_state_t (*f)(void *));
+    static void schedule(task_state_t (*f)(char *));
 
+    static task_state_t execute_command(void *data_pointer);
 
-    //--------------------------------------Parameters----------------------------------
-
-public:
-
-    //Parse parameters to
-    static bool parse_parameters(char *parameter_buffer, uint8_t parameters_size);
-
-
-private :
-
-    //The current arguments.
-    static gcode_arguments dynamic_args;
-
-    //The current parameters size.
-    static unsigned char parameters_size;
-
-    //The current parameter pointer.
-    static char *parameters_ptr;
-
-    //get the next parameter in the GCode Command.
-    static bool get_parameter(char *command, float *value);
-
-    //Process the data given by the function behind.
-    static bool process_parameter(char index, float value);
 
 
     //------------------------------------Standard functions-----------------------------
@@ -143,7 +145,6 @@ public :
 
     //System alias for send_postion
     static void send_position(float*){}
-
 
 
 };

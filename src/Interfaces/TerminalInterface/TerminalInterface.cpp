@@ -19,7 +19,6 @@
 */
 
 #include <config.h>
-#include <TaskScheduler/TaskScheduler.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
@@ -28,7 +27,9 @@
 #include <interface.h>
 #include <Project/InterfaceCommands/_interface_data.h>
 #include <DataStructures/StringUtils.h>
-#include "Project/InterfaceCommands/TerminalCommands.h"
+#include <Project/InterfaceCommands/TerminalCommands.h>
+#include <TaskScheduler/TaskScheduler.h>
+
 
 
 /*
@@ -66,7 +67,7 @@ void TerminalInterface::echo(const string_t msg) {
 void TerminalInterface::read_data() {
 
     //Don't process any data if no space is available in the argument_t sequence container
-    if (!arguments_sequences_storage.available_spaces())
+    if (!arguments_sequences.available_spaces())
         return;
 
     while (terminal_interface_link_t::available()) {
@@ -91,7 +92,7 @@ void TerminalInterface::read_data() {
                     return;
 
                 //Don't process any data if no space is available in the argument_t sequence container
-                if (!arguments_sequences_storage.available_spaces())
+                if (!arguments_sequences.available_spaces())
                     return;
 
             }
@@ -144,7 +145,7 @@ void TerminalInterface::reset() {
  *      in the argument_t storage, and then, schedules the execution of this function.
  *
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
- *      (see the doc above the function's definition for more explanations).
+ *      (see the doc above the execute_command function's definition for more explanations).
  */
 void TerminalInterface::schedule_command() {
 
@@ -194,13 +195,13 @@ void TerminalInterface::schedule_command() {
 
             } else {
 
-                if (arguments_sequences_storage.available_spaces()) {
+                if (arguments_sequences.available_spaces()) {
 
                     //The argument_t's index
                     uint8_t index;
 
                     //Save the arguments sequence.
-                    if (arguments_sequences_storage.insert_argument(data_in, &index)) {
+                    if (arguments_sequences.insert_argument(data_in, &index)) {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
@@ -310,14 +311,14 @@ task_state_t TerminalInterface::execute_command(void *data_pointer) {
     uint8_t arguments_index = data->arguments_index;
 
     //Cache for arguments.
-    char *arguments = arguments_sequences_storage.get_argument(arguments_index);
+    char *arguments = arguments_sequences.get_argument(arguments_index);
 
     //Execute the required TerminalCommand function, and get the execution state
     const task_state_t state = (*data->terminal_command)(arguments);
 
     /*remove arguments arguments, if the task mustn't be reprogrammed*/
     if (state != reprogram) {
-        arguments_sequences_storage.remove_argument(arguments_index);
+        arguments_sequences.remove_argument(arguments_index);
     }
 
     //Return the execution state.
@@ -616,7 +617,7 @@ bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers)
 
 
 /*
- * verify_all_identifiers_presence : this function return true if the identifier id has been extracted
+ * verfy_identifier_presence : this function return true if the identifier id has been extracted
  *  during the previous parsing.
  */
 
@@ -829,10 +830,9 @@ argument_t *const m::identifiers = t_id_to_indexes;
 uint8_t m::nb_identifiers = 0;
 
 
-ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
+ArgumentsContainer m::arguments_sequences = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
                                                                        NB_PENDING_COMMANDS);
 
-//ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_WORD_SIZE + 1, NB_PENDING_COMMANDS);
 
 
 String *m::tree_summary = m::build_tree_summary();

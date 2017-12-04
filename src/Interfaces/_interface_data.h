@@ -22,7 +22,7 @@ typedef struct terminal_interface_data_t {
 
 
     /*
-     * argument_index : the index of the argument_t sequence in the argument_t storage.
+     * argument_index : the index of the argument sequence in the argument_t storage.
      */
 
     uint8_t arguments_index;
@@ -35,13 +35,47 @@ typedef struct terminal_interface_data_t {
 //TODO COMMENT WHEN THOSE INTERFACES WILL BE REBUILT
 
 typedef struct program_interface_data_t {
+
     uint8_t arguments_index;
+
+
 } program_interface_data_t;
 
+
 typedef struct gcode_interface_data_t {
+
+    /*
+       * gcode_command : the function to execute. This function could have been directly scheduled,
+       *  but the cast from (void *) to argument structure would have been made in the function, making it a little bit
+       *  complex. Instead, this cast is made by a function in GCodeInterface, and the (char *) is given to this
+       *  function.
+       */
+
+    task_state_t (*gcode_command)(char *);
+
+
+    /*
+     * argument_index : the index of the argument sequence in the argument_t storage.
+     */
+
     uint8_t arguments_index;
+
+
 } gcode_interface_data_t;
 
+
+
+/*
+ *  A simple struct that will be used in the arguments parsing for GCode and Terminal Interfaces.
+ */
+
+typedef struct argument_t {
+    //The identfier of an argument
+    char identifier;
+
+    //A pointer to the argument's value (string)
+    char *arg;
+};
 
 
 #endif
