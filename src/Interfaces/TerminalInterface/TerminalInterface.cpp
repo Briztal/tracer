@@ -384,11 +384,11 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
         if (!*current_position)
             return true;
 
-        //Declare a temporary buffer for the current argument_t identifier (2 bytes plus null byte)
-        char t[3];
+        //Get the pointer to the identifier;
+        char identifier = *(current_position + 1);
 
         //Get the argument_t identifier
-        uint8_t identifier_size = StringUtils::copy_until_char(current_position, t, 3, ' ');
+        uint8_t identifier_size = StringUtils::count_until_char(current_position, ' ');
 
         //Go to the next unprocessed char
         current_position += identifier_size;
@@ -454,7 +454,8 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
             //An empty argument must be added;
             goto insert_arg;
 
-        }
+        }//TODO RENAME INTERFACE PREPROCESSOR CONSTANTS
+
 
         //The argument now exists for sure, but we must ensure that there is a '\0' at its end.
 
@@ -505,7 +506,7 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
 
         //Save the relation between the identifier and the argument_t location.
         argument_t *argument = arguments + nb_identifiers;
-        argument->identifier = t[1];
+        argument->identifier = identifier;
         argument->arg = arg;
 
 
