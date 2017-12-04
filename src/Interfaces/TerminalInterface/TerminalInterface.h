@@ -113,10 +113,10 @@ public:
     //Get a previously parsed argument_t if it exists
     static float get_argument_value(char id);
 
-    //Verify that all arguments (defined by their identifiers) have been provided (identifiers is null terminated).
+    //Verify that all arguments (defined by their arguments) have been provided (arguments is null terminated).
     static bool verify_all_identifiers_presence(const char *identifiers);
 
-    //Verify that at least one argument_t (defined by their identifiers) have been provided (identifiers is null terminated).
+    //Verify that at least one argument_t (defined by their arguments) have been provided (arguments is null terminated).
     static bool verify_one_identifiers_presence(const char *identifiers);
 
     //verify that an argument_t identifier has be provided.
@@ -129,7 +129,7 @@ private:
     static ArgumentsContainer arguments_sequences;
 
     //Identifiers in a parsed argument_t sequence
-    static argument_t *const identifiers;
+    static argument_t *const arguments;
 
     //Number of arguments in a sequence
     static uint8_t nb_identifiers;

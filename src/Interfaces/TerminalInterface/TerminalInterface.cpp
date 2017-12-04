@@ -482,7 +482,7 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
         insert_arg:
 
         //Save the relation between the identifier and the argument_t location.
-        argument_t *argument = identifiers + nb_identifiers;
+        argument_t *argument = arguments + nb_identifiers;
         argument->identifier = t[1];
         argument->arg = arg;
 
@@ -529,7 +529,7 @@ char *TerminalInterface::get_argument(char id) {
     for (uint8_t i = 0; i < nb_identifiers; i++) {
 
         //Cache for the link
-        argument_t *link = identifiers + i;
+        argument_t *link = arguments + i;
 
         //If the links'identifier matches the provided one
         if (link->identifier == id) {
@@ -547,11 +547,11 @@ char *TerminalInterface::get_argument(char id) {
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ALL identifiers contained
- *  in the identifiers string have been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ALL arguments contained
+ *  in the arguments string have been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are identifiers to check .
- *      ex "arp" triggers the checking for identifiers a, r and p.
+ *  the identifier string is a string, where all letters are arguments to check .
+ *      ex "arp" triggers the checking for arguments a, r and p.
  */
 
 bool TerminalInterface::verify_all_identifiers_presence(const char *identifiers) {
@@ -575,17 +575,17 @@ bool TerminalInterface::verify_all_identifiers_presence(const char *identifiers)
 
     }
 
-    //All identifiers are present, succeed.
+    //All arguments are present, succeed.
     return true;
 
 }
 
 /*
- * verify_all_identifiers_presence : this function return true only if ONE identifiers contained
- *  in the identifiers string has been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ONE arguments contained
+ *  in the arguments string has been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are identifiers to check .
- *      ex "arp" triggers the checking for identifiers a, r and p.
+ *  the identifier string is a string, where all letters are arguments to check .
+ *      ex "arp" triggers the checking for arguments a, r and p.
  */
 
 bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers) {
@@ -626,7 +626,7 @@ bool TerminalInterface::verify_identifier_presence(char id) {
     for (uint8_t i = 0; i < nb_identifiers; i++) {
 
         //Cache for the link
-        argument_t *link = identifiers + i;
+        argument_t *link = arguments + i;
 
         //If the links'identifier matches the provided one, return true
         if (link->identifier == id) return true;
@@ -822,8 +822,8 @@ char *const m::data_in_0 = tdatain_terminal;
 
 
 //Identifiers in a parsed argument_t sequence
-argument_t t_id_to_indexes[MAX_ARGS_NB];
-argument_t *const m::identifiers = t_id_to_indexes;
+argument_t terminal_arguments_t[MAX_ARGS_NB];
+argument_t *const m::arguments = terminal_arguments_t;
 
 //Number of arguments in a sequence
 uint8_t m::nb_identifiers = 0;

@@ -382,7 +382,7 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
         insert_arg:
 
         //Save the relation between the identifier and the argument location.
-        argument_t *argument = identifiers + nb_identifiers;
+        argument_t *argument = arguments + nb_identifiers;
         argument->identifier = argument_identifier;
         argument->arg = arg;
 
@@ -437,7 +437,7 @@ char *GCodeInterface::get_argument(char id) {
     for (uint8_t i = 0; i < nb_identifiers; i++) {
 
         //Cache for the link
-        argument_t *link = identifiers + i;
+        argument_t *link = arguments + i;
 
         //If the links'identifier matches the provided one
         if (link->identifier == id) {
@@ -455,11 +455,11 @@ char *GCodeInterface::get_argument(char id) {
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ALL identifiers contained
- *  in the identifiers string have been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ALL arguments contained
+ *  in the arguments string have been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are identifiers to check .
- *      ex "arp" triggers the checking for identifiers a, r and p.
+ *  the identifier string is a string, where all letters are arguments to check .
+ *      ex "arp" triggers the checking for arguments a, r and p.
  */
 
 bool GCodeInterface::verify_all_identifiers_presence(const char *identifiers) {
@@ -483,17 +483,17 @@ bool GCodeInterface::verify_all_identifiers_presence(const char *identifiers) {
 
     }
 
-    //All identifiers are present, succeed.
+    //All arguments are present, succeed.
     return true;
 
 }
 
 /*
- * verify_all_identifiers_presence : this function return true only if ONE identifiers contained
- *  in the identifiers string has been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ONE arguments contained
+ *  in the arguments string has been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are identifiers to check .
- *      ex "arp" triggers the checking for identifiers a, r and p.
+ *  the identifier string is a string, where all letters are arguments to check .
+ *      ex "arp" triggers the checking for arguments a, r and p.
  */
 
 bool GCodeInterface::verify_one_identifiers_presence(const char *identifiers) {
@@ -534,7 +534,7 @@ bool GCodeInterface::verify_identifier_presence(char id) {
     for (uint8_t i = 0; i < nb_identifiers; i++) {
 
         //Cache for the link
-        argument_t *link = identifiers + i;
+        argument_t *link = arguments + i;
 
         //If the links'identifier matches the provided one, return true
         if (link->identifier == id) return true;
@@ -576,8 +576,8 @@ ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_
 
 
 //Identifiers in a parsed argument_t sequence
-argument_t t_id_to_indexes[MAX_ARGS_NB];
-argument_t *const m::identifiers = t_id_to_indexes;
+argument_t t_gcode_arguments[MAX_ARGS_NB];
+argument_t *const m::arguments = t_gcode_arguments;
 
 //Number of arguments in a sequence
 uint8_t m::nb_identifiers = 0;
