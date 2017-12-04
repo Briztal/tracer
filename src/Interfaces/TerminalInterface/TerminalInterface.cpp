@@ -25,7 +25,6 @@
 
 #include "TerminalInterface.h"
 #include <interface.h>
-#include <Project/InterfaceCommands/_interface_data.h>
 #include <DataStructures/StringUtils.h>
 #include <Project/InterfaceCommands/TerminalCommands.h>
 #include <TaskScheduler/TaskScheduler.h>
@@ -205,9 +204,9 @@ void TerminalInterface::schedule_command() {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
-                        terminal_interface_data_t *data = new terminal_interface_data_t();
+                        interface_data_t *data = new interface_data_t();
                         data->arguments_index = index;
-                        data->terminal_command = current_node->function;
+                        data->function = current_node->function;
 
                         /*
                          * Schedule a type 255 (asap) task, to schedule_command the required function,
@@ -305,7 +304,7 @@ void TerminalInterface::log_parsing_error(TerminalNode *log_node) {
 task_state_t TerminalInterface::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
-    terminal_interface_data_t *data = (terminal_interface_data_t *) data_pointer;
+    interface_data_t *data = (interface_data_t *) data_pointer;
 
     //Cache var for arguments index.
     uint8_t arguments_index = data->arguments_index;
@@ -314,7 +313,7 @@ task_state_t TerminalInterface::execute_command(void *data_pointer) {
     char *arguments = arguments_sequences.get_argument(arguments_index);
 
     //Execute the required TerminalCommand function, and get the execution state
-    const task_state_t state = (*data->terminal_command)(arguments);
+    const task_state_t state = (*data->function)(arguments);
 
     /*remove arguments arguments, if the task mustn't be reprogrammed*/
     if (state != reprogram) {

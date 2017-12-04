@@ -234,9 +234,9 @@ void GCodeInterface::schedule(task_state_t (*f)(char *)) {
     arguments_storage.insert_argument(data_in, &index);
 
     //Create a struct in the heap to contain argument-related data.
-    gcode_interface_data_t *data = new gcode_interface_data_t();
+    interface_data_t *data = new interface_data_t();
     data->arguments_index = index;
-    data->gcode_command = f;
+    data->function= f;
 
     //Schedule the task
     TaskScheduler::schedule_task(255, execute_command, (void*) data);
@@ -262,7 +262,7 @@ void GCodeInterface::schedule(task_state_t (*f)(char *)) {
 task_state_t GCodeInterface::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
-    gcode_interface_data_t *data = (gcode_interface_data_t *) data_pointer;
+    interface_data_t *data = (interface_data_t *) data_pointer;
 
     //Cache var for arguments index.
     uint8_t arguments_index = data->arguments_index;
@@ -271,7 +271,7 @@ task_state_t GCodeInterface::execute_command(void *data_pointer) {
     char *arguments = arguments_storage.get_argument(arguments_index);
 
     //Execute the required TerminalCommand function, and get the execution state
-    const task_state_t state = (*data->gcode_command)(arguments);
+    const task_state_t state = (*data->function)(arguments);
 
     /*remove arguments arguments, if the task mustn't be reprogrammed*/
     if (state != reprogram) {
