@@ -29,12 +29,12 @@
  */
 
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
-//#define terminal_interface_link_t usb_serial
+#define ENABLE_TERMINAL_INTERFACE
+#define terminal_interface_link_t usb_serial
 
 //Uncomment this line to enable the gcode interface.
 #define ENABLE_GCODE_INTERFACE
-#define gcode_interface_link_t serial1
+#define gcode_interface_link_t usb_serial
 
 //Uncomment this line to enable the program interface.
 //#define ENABLE_PROGRAM_INTERFACE

@@ -119,13 +119,12 @@
  * //TODO IMPLEMENT MORE COMMANDS : CREATE_LOWER_BINARY : cree un node binaire fils
  */
 
-#define MONITOR_CANAL
 
-#define MAX_DEPTH 3
+#define PROGRAM_MAX_DEPTH 3
 
-#define MAX_COMMAND_SIZE 100
+#define PROGRAM_MAX_COMMAND_SIZE 100
 
-#define NB_PENDING_COMMANDS 10
+#define PROGRAM_NB_PENDING_COMMANDS 10
 
 
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)

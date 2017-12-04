@@ -509,6 +509,9 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TreeManager.h">
 			<Option target="TRACER"/>
 		</Unit>
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/_interface_data.h">
+			<Option target="TRACER"/>
+		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/config_file.h">
 			<Option target="TRACER"/>
 		</Unit>
@@ -530,10 +533,10 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/terminal_interface_config.h">
 			<Option target="TRACER"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeCommands.cpp">
 			<Option target="TRACER"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeInterfaceCommands.h">
+		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeCommands.h">
 			<Option target="TRACER"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp">
@@ -552,9 +555,6 @@
 			<Option target="TRACER"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.h">
-			<Option target="TRACER"/>
-		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/_interface_data.h">
 			<Option target="TRACER"/>
 		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/MachineController.cpp">

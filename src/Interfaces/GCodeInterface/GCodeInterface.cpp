@@ -55,6 +55,11 @@ void GCodeInterface::init() {
 
 void GCodeInterface::read_data() {
 
+
+    //Don't process any data if no space is available in the argument_t sequence container
+    if (!arguments_storage.available_spaces())
+        return;
+
     while (gcode_interface_link_t::available()) {
 
         //Read the data link
@@ -63,8 +68,8 @@ void GCodeInterface::read_data() {
         //If the recieved char is a line feed or a working_extruder return
         if ((read_char == 10) || (read_char == 13)) {
 
-            //If a char has effectively been received
-            if (command_size) {
+            //If a non empty uncorrupted packet has effectively been received
+            if (command_size && !corrupted_packet) {
 
                 //Parse the GCode
                 parse();
@@ -72,17 +77,50 @@ void GCodeInterface::read_data() {
                 //Reset the data_in
                 reset();
 
-                if (!TaskScheduler::available_spaces(255));
-                return;
+                if (!TaskScheduler::available_spaces(255)) {
+                    return;
+                }
+
+                //Don't process any data if no space is available in the argument_t sequence container
+                if (!arguments_storage.available_spaces()) {
+                    return;
+                }
 
             }
 
+            //If the received packet was too long for the input buffer :
+            if (corrupted_packet) {
+
+                //Display an error message
+                GI::echo("WARNING in TerminalInterface::read_data : the received packet was too long for "
+                                 "the input buffer. Please check your terminal_interface_config.h");
+
+
+            }
+            //If the packet was corrupted, or empty
+            reset();
+
+
         } else {
+            //If the packet hasn't been entirely received
 
-            //Append the read_output char to data_in
-            *(data_in++) = read_char;
+            //If data still can be inserted in the buffer
+            if (data_spaces) {
 
-            command_size++;
+                //Append the read_output char to data_in;
+                *(data_in++) = read_char;
+
+                //Increment the command size;
+                command_size++;
+
+                //Decrement the number of spaces available;
+                data_spaces--;
+
+            } else {
+
+                //Mark the current packet as corrupted;
+                corrupted_packet = true;
+            }
 
         }
     }
@@ -90,16 +128,22 @@ void GCodeInterface::read_data() {
 
 
 /*
- * reset : this function resets the parsing structure
+ * reset : this function resets the parsing structure;
  *
  */
 
 void GCodeInterface::reset() {
 
-    //No data
+    //No data;
     command_size = 0;
 
-    //data insertion at the origin
+    //Clear the corruption flag;
+    corrupted_packet = false;
+
+    //Maximum numbers of char spaces;
+    data_spaces = GCODE_MAX_SIZE;
+
+    //data insertion at the origin;
     data_in = data_in_0;
 }
 
@@ -114,7 +158,6 @@ void GCodeInterface::reset() {
  */
 
 bool GCodeInterface::parse() {
-
 
     //Initialise the parsing.
     init_parsing();
@@ -131,6 +174,9 @@ bool GCodeInterface::parse() {
     //Abort if the first word was a space.
     if (!command_id_length)
         return false;
+
+    //Update data_in
+    data_in += command_id_length;
 
     //Analyse the command id.
     analyse_command(command_id, command_id_length);
@@ -309,13 +355,12 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
     //reset the arguments counter
     nb_identifiers = 0;
 
-
     do {
 
-
         //First, remove unnecessary spaces;
-        args_current_position += StringUtils::lstrip(args_current_position, ' ');
+        uint8_t dec = StringUtils::lstrip(args_current_position, ' ');
 
+        args_current_position+= dec;
         //The current position is now on an argument identifier, or the argument sequence's end.
 
         //Get the argument identifier.
@@ -332,17 +377,16 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
         //Now we are sure to be parsing a new argument.
 
         //If the argument container is already full;
-        if (nb_identifiers == MAX_ARGS_NB) {
+        if (nb_identifiers == GCODE_MAX_ARGS_NB) {
 
             //Display an error message
-            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(MAX_ARGS_NB) +
+            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(GCODE_MAX_ARGS_NB) +
                      " arguments. Please check your terminal_interface_config.h file.");
 
             //Fail
             return false;
 
         }
-
 
         //We are now sure not to be at the string's end position.
         //The eventual value is just after the current position.
@@ -376,6 +420,9 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
         //Nullify the word's end (reason why we cached the bool.
         *args_current_position = '\0';
 
+        //Shift the current position
+        args_current_position++;
+
         //----------------------------------Argument saving----------------------------------
 
 
@@ -385,7 +432,6 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
         argument_t *argument = arguments + nb_identifiers;
         argument->identifier = argument_identifier;
         argument->arg = arg;
-
 
         //Increase the number of parsed arguments
         nb_identifiers++;
@@ -488,6 +534,7 @@ bool GCodeInterface::verify_all_identifiers_presence(const char *identifiers) {
 
 }
 
+
 /*
  * verify_all_identifiers_presence : this function return true only if ONE arguments contained
  *  in the arguments string has been extracted during the previous parsing.
@@ -570,13 +617,13 @@ void GCodeInterface::echo(const string_t msg) {
 
 //Arguments container
 
-ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
-                                                               NB_PENDING_COMMANDS);
+ArgumentsContainer m::arguments_storage = ArgumentsContainer(GCODE_MAX_ARGS_NB * (GCODE_MAX_WORD_SIZE + 4) + 1,
+                                                               GCODE_MAX_PENDING_COMMANDS);
 
 
 
 //Identifiers in a parsed argument_t sequence
-argument_t t_gcode_arguments[MAX_ARGS_NB];
+argument_t t_gcode_arguments[GCODE_MAX_ARGS_NB];
 argument_t *const m::arguments = t_gcode_arguments;
 
 //Number of arguments in a sequence
@@ -584,6 +631,12 @@ uint8_t m::nb_identifiers = 0;
 
 //The command size
 unsigned char m::command_size;
+
+//The current number of available spaces in the data bugger
+uint8_t m::data_spaces = GCODE_MAX_SIZE;
+
+//A flag set if the current packet is corrupted (too long for the data buffer)
+bool m::corrupted_packet = false;
 
 //Data pointers
 char tdatain_gcode[GCODE_MAX_SIZE];

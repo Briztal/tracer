@@ -19,19 +19,19 @@
 */
 
 //The maximal size of a command (id + arguments)
-#define MAX_COMMAND_SIZE 100
+#define TERMINAL_MAX_COMMAND_SIZE 100
 
 //The maximal size of an argument
-#define MAX_WORD_SIZE 20
+#define TERMINAL_MAX_WORD_SIZE 20
 
 //The maximal number of arguments
-#define MAX_ARGS_NB 6
+#define TERMINAL_MAX_ARGS_NB 6
 
 //The maximum depth of the tree. //TODO DETERMINE THE MAXIMUM DEPTH WITH AN ALGORITHM
-#define MAX_DEPTH 5
+#define TERMINAL_MAX_DEPTH 5
 
 //The number of commands that can be received and stored before execution;
-#define NB_PENDING_COMMANDS 10
+#define TERMINAL_MAX_PENDING_COMMANDS 10
 
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)
 

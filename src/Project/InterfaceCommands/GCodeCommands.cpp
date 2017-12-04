@@ -230,6 +230,7 @@ task_state_t GCodeCommands::line(char *arguments) {
 
 task_state_t GCodeCommands::enable_steppers(char *arguments) {
 
+
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
@@ -341,6 +342,7 @@ task_state_t GCodeCommands::set_cooling(char *arguments) {
 
     //Set the enable state if required
     if (CHECK_ARGUMENT('e')) {
+
 
         //Set the flag
         new_state.enabled_flag = true;

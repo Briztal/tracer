@@ -49,12 +49,18 @@ public :
 private :
 
     //The current command's size.
-    static unsigned char command_size;
+    static uint8_t command_size;
 
-    //The current data pointer.
+    //The current number of available spaces in the data bugger
+    static uint8_t data_spaces;
+
+    //A flag set if the current packet is corrupted (too long for the data buffer)
+    static bool corrupted_packet;
+
+    //The current data pointer, points to a case in the data buffer
     static char *data_in;
 
-    //The beginning of the data pointer.
+    //The beginning of the data buffer.
     static char *const data_in_0;
 
 

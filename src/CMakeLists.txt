@@ -50,8 +50,8 @@ add_library(project_interfaces
         ${PIP}/TerminalCommands.cpp
         ${PIP}/ProgramInterfaceCommands.h
         ${PIP}/ProgramInterfaceCommands.cpp
-        ${PIP}/GCodeInterfaceCommands.h
-        ${PIP}/GCodeInterfaceCommands.cpp
+        ${PIP}/GCodeCommands.h
+        ${PIP}/GCodeCommands.cpp
 
         )
 

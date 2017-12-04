@@ -740,32 +740,32 @@ src/Project/Config/geometry.cpp.s:
 	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.s
 .PHONY : src/Project/Config/geometry.cpp.s
 
-src/Project/InterfaceCommands/GCodeInterfaceCommands.o: src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+src/Project/InterfaceCommands/GCodeCommands.o: src/Project/InterfaceCommands/GCodeCommands.cpp.o
 
-.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.o
+.PHONY : src/Project/InterfaceCommands/GCodeCommands.o
 
 # target to build an object file
-src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
-.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+src/Project/InterfaceCommands/GCodeCommands.cpp.o:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o
+.PHONY : src/Project/InterfaceCommands/GCodeCommands.cpp.o
 
-src/Project/InterfaceCommands/GCodeInterfaceCommands.i: src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
+src/Project/InterfaceCommands/GCodeCommands.i: src/Project/InterfaceCommands/GCodeCommands.cpp.i
 
-.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.i
+.PHONY : src/Project/InterfaceCommands/GCodeCommands.i
 
 # target to preprocess a source file
-src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
-.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
+src/Project/InterfaceCommands/GCodeCommands.cpp.i:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.i
+.PHONY : src/Project/InterfaceCommands/GCodeCommands.cpp.i
 
-src/Project/InterfaceCommands/GCodeInterfaceCommands.s: src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
+src/Project/InterfaceCommands/GCodeCommands.s: src/Project/InterfaceCommands/GCodeCommands.cpp.s
 
-.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.s
+.PHONY : src/Project/InterfaceCommands/GCodeCommands.s
 
 # target to generate assembly for a file
-src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
-.PHONY : src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
+src/Project/InterfaceCommands/GCodeCommands.cpp.s:
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.s
+.PHONY : src/Project/InterfaceCommands/GCodeCommands.cpp.s
 
 src/Project/InterfaceCommands/LCDInterfaceCommands.o: src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
 
@@ -1516,9 +1516,9 @@ help:
 	@echo "... src/Project/Config/geometry.o"
 	@echo "... src/Project/Config/geometry.i"
 	@echo "... src/Project/Config/geometry.s"
-	@echo "... src/Project/InterfaceCommands/GCodeInterfaceCommands.o"
-	@echo "... src/Project/InterfaceCommands/GCodeInterfaceCommands.i"
-	@echo "... src/Project/InterfaceCommands/GCodeInterfaceCommands.s"
+	@echo "... src/Project/InterfaceCommands/GCodeCommands.o"
+	@echo "... src/Project/InterfaceCommands/GCodeCommands.i"
+	@echo "... src/Project/InterfaceCommands/GCodeCommands.s"
 	@echo "... src/Project/InterfaceCommands/LCDInterfaceCommands.o"
 	@echo "... src/Project/InterfaceCommands/LCDInterfaceCommands.i"
 	@echo "... src/Project/InterfaceCommands/LCDInterfaceCommands.s"

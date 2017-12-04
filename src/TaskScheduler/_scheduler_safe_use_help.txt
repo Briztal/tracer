@@ -168,7 +168,7 @@ ROUND 1 :
 
     - task 3 can be executed, as sequence 1 has 1 space left
 
-    - task 4 can be executed, as 4 available_spaces are available in the task pool.
+    - task 4 can be executed, as 4 data_spaces are available in the task pool.
         -> task 7 is added
 
     SCHEDULER STATE :

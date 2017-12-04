@@ -19,15 +19,6 @@
 */
 
 
-//Uncomment this line to parse parameters before the command execution (more efficient but consumes more space)
-#define PARSE_BEFORE_EXECUTION
-
-//The maximum size of a GCode Command.
-#define GCODE_MAX_SIZE 100
-
-//The maximum number of pending tasks
-#define NB_PENDING_TASKS 20
-
 
 /*
  * The GCode Interface configuration file.
@@ -98,13 +89,17 @@
 #define GCODE_MAX_DEPTH 5
 
 //The maximum number of arguments in a GCodeCommand.
-#define MAX_ARGS_NB 6
+#define GCODE_MAX_ARGS_NB 6
 
 //The maximal size of an argument
-#define MAX_WORD_SIZE 20
+#define GCODE_MAX_WORD_SIZE 20
 
 //The number of commands that can be received and stored before execution;
-#define NB_PENDING_COMMANDS 10
+#define GCODE_MAX_PENDING_COMMANDS 10
+
+//The maximum size of a GCode Command.
+#define GCODE_MAX_SIZE 100
+
 
 
 

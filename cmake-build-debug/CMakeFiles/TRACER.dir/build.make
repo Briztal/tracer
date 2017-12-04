@@ -513,28 +513,28 @@ CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o.provides: CMakeFiles/TRA
 CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o
 
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o: ../src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o: ../src/Project/InterfaceCommands/GCodeCommands.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o"
+	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeCommands.cpp
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp > CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.i
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.i"
+	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeCommands.cpp > CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.i
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.s
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.s"
+	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeCommands.cpp -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.s
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.requires:
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.requires:
 
-.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.requires
+.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.requires
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.provides: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.requires
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.provides.build
-.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.provides
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.provides: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.requires
+	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.provides.build
+.PHONY : CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.provides
 
-CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o
 
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
@@ -1158,7 +1158,7 @@ TRACER_OBJECTS = \
 "CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o" \
-"CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o" \
+"CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o" \
@@ -1207,7 +1207,7 @@ TRACER: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface
 TRACER: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o
-TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
+TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o
@@ -1262,7 +1262,7 @@ CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInt
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o.requires
-CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o.requires
+CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.requires

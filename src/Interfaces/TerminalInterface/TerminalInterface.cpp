@@ -22,14 +22,10 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-
 #include "TerminalInterface.h"
 #include <interface.h>
 #include <DataStructures/StringUtils.h>
 #include <Project/InterfaceCommands/TerminalCommands.h>
-#include <TaskScheduler/TaskScheduler.h>
-
-
 
 /*
  * init : this function initialises the serial, and sets up the command processing environment.
@@ -66,7 +62,7 @@ void TerminalInterface::echo(const string_t msg) {
 void TerminalInterface::read_data() {
 
     //Don't process any data if no space is available in the argument_t sequence container
-    if (!arguments_sequences.available_spaces())
+    if (!arguments_storage.available_spaces())
         return;
 
     while (terminal_interface_link_t::available()) {
@@ -77,47 +73,61 @@ void TerminalInterface::read_data() {
         //If the recieved char is a line feed or a working_carriage return
         if ((read_char == 10) || (read_char == 13)) {
 
-            //If a char has effectively been received
-            if (command_size) {
+            //If a non empty uncorrupted packet has effectively been received
+            if (command_size && !corrupted_packet) {
 
-                //Parse and execute_progmem_style the command
+                //Parse and execute the command
                 schedule_command();
 
                 //Reset the data_in
                 reset();
 
-                //If no more tasks spaces are available, complete
-                if (!TaskScheduler::available_spaces(255))
+                //If no more task is schedulable, complete.
+                if (!TaskScheduler::available_spaces(255)) {
                     return;
+                }
 
                 //Don't process any data if no space is available in the argument_t sequence container
-                if (!arguments_sequences.available_spaces())
+                if (!arguments_storage.available_spaces()) {
                     return;
+                }
 
             }
 
-        } else {
-
-            //If there is still space in the input buffer
-            if (command_size != MAX_COMMAND_SIZE) {
-
-                //Append the read_output char to data_in
-                *(data_in++) = read_char;
-
-                //Increase the command size
-                command_size++;
-
-            } else {
-
-                //If the received packet was too long for the input buffer :
+            //If the received packet was too long for the input buffer :
+            if (corrupted_packet) {
 
                 //Display an error message
                 CI::echo("WARNING in TerminalInterface::read_data : the received packet was too long for "
                                  "the input buffer. Please check your terminal_interface_config.h");
 
-                //Reset
-                reset();
+
             }
+            //If the packet was corrupted, or empty
+            reset();
+
+
+        } else {
+            //If the packet hasn't been entirely received
+
+            //If data still can be inserted in the buffer
+            if (data_spaces) {
+
+                //Append the read_output char to data_in;
+                *(data_in++) = read_char;
+
+                //Increment the command size;
+                command_size++;
+
+                //Decrement the number of spaces available;
+                data_spaces--;
+
+            } else {
+
+                //Mark the current packet as corrupted;
+                corrupted_packet = true;
+            }
+
         }
     }
 }
@@ -128,8 +138,19 @@ void TerminalInterface::read_data() {
  */
 
 void TerminalInterface::reset() {
+
+    //No data;
     command_size = 0;
+
+    //Clear the corruption flag;
+    corrupted_packet = false;
+
+    //Maximum numbers of char spaces;
+    data_spaces = GCODE_MAX_SIZE;
+
+    //data insertion at the origin;
     data_in = data_in_0;
+
 }
 
 
@@ -146,6 +167,7 @@ void TerminalInterface::reset() {
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
  *      (see the doc above the execute_command function's definition for more explanations).
  */
+
 void TerminalInterface::schedule_command() {
 
     prepare_execution();
@@ -158,10 +180,10 @@ void TerminalInterface::schedule_command() {
     TerminalNode **sub_nodes = current_node->sub_nodes;
 
     //Declare a local word buffer
-    char word_buffer[MAX_WORD_SIZE];
+    char word_buffer[TERMINAL_MAX_WORD_SIZE];
 
     //get the first node identifier, in the word buffer
-    data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
+    data_in += StringUtils::get_next_word(data_in, word_buffer, TERMINAL_MAX_WORD_SIZE);
 
     //Must declare the int before the jump label.
     uint8_t i;
@@ -187,20 +209,20 @@ void TerminalInterface::schedule_command() {
                 //Go to the lower level
 
                 //Get the next node identifier
-                data_in += StringUtils::get_next_word(data_in, word_buffer, MAX_WORD_SIZE);
+                data_in += StringUtils::get_next_word(data_in, word_buffer, TERMINAL_MAX_WORD_SIZE);
 
                 //check the new node
                 goto node_check;
 
             } else {
 
-                if (arguments_sequences.available_spaces()) {
+                if (arguments_storage.available_spaces()) {
 
                     //The argument_t's index
                     uint8_t index;
 
                     //Save the arguments sequence.
-                    if (arguments_sequences.insert_argument(data_in, &index)) {
+                    if (arguments_storage.insert_argument(data_in, &index)) {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
@@ -310,14 +332,14 @@ task_state_t TerminalInterface::execute_command(void *data_pointer) {
     uint8_t arguments_index = data->arguments_index;
 
     //Cache for arguments.
-    char *arguments = arguments_sequences.get_argument(arguments_index);
+    char *arguments = arguments_storage.get_argument(arguments_index);
 
     //Execute the required TerminalCommand function, and get the execution state
     const task_state_t state = (*data->function)(arguments);
 
     /*remove arguments arguments, if the task mustn't be reprogrammed*/
     if (state != reprogram) {
-        arguments_sequences.remove_argument(arguments_index);
+        arguments_storage.remove_argument(arguments_index);
     }
 
     //Return the execution state.
@@ -384,10 +406,10 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
         }
 
         //If the argument_t container is already full;
-        if (nb_identifiers == MAX_ARGS_NB) {
+        if (nb_identifiers == TERMINAL_MAX_ARGS_NB) {
 
             //Display an error message
-            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(MAX_ARGS_NB) +
+            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(TERMINAL_MAX_ARGS_NB) +
                      " arguments. Please check your terminal_interface_config.h file.");
 
             //Fail
@@ -456,7 +478,7 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
 
             //Nullify it;
             *space_position = '\0';
-            
+
             //Arg will point to the current position (the beginning of the argument.
             arg = current_position;
 
@@ -661,10 +683,10 @@ TerminalNode *TerminalInterface::generate_tree() {
 
     //Initialise the current tree and the history.
     TerminalNode *current_tree = root;
-    TerminalNode *tree_history[MAX_DEPTH];
+    TerminalNode *tree_history[TERMINAL_MAX_DEPTH];
 
     //Initialise the indices history
-    uint8_t indices_history[MAX_DEPTH];
+    uint8_t indices_history[TERMINAL_MAX_DEPTH];
     uint8_t current_index = 0;
     uint8_t depth = 0;
 
@@ -816,27 +838,27 @@ String *TerminalInterface::build_tree_summary() {
 
 unsigned char m::command_size = 0;
 
-char tdatain_terminal[MAX_COMMAND_SIZE];
+char tdatain_terminal[TERMINAL_MAX_COMMAND_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
-
 //Identifiers in a parsed argument_t sequence
-argument_t terminal_arguments_t[MAX_ARGS_NB];
+argument_t terminal_arguments_t[TERMINAL_MAX_ARGS_NB];
 argument_t *const m::arguments = terminal_arguments_t;
 
 //Number of arguments in a sequence
 uint8_t m::nb_identifiers = 0;
 
+ArgumentsContainer m::arguments_storage = ArgumentsContainer(TERMINAL_MAX_ARGS_NB * (TERMINAL_MAX_WORD_SIZE + 4) + 1,
+                                                                       TERMINAL_MAX_PENDING_COMMANDS);
+//The current number of available spaces in the data bugger
+uint8_t m::data_spaces = GCODE_MAX_SIZE;
 
-ArgumentsContainer m::arguments_sequences = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
-                                                                       NB_PENDING_COMMANDS);
+//A flag set if the current packet is corrupted (too long for the data buffer)
+bool m::corrupted_packet = false;
 
-
-
+//Create the command tree summary.
 String *m::tree_summary = m::build_tree_summary();
-
-//Create the command tree summary
 
 //Build the command tree
 TerminalNode *m::command_tree = m::generate_tree();

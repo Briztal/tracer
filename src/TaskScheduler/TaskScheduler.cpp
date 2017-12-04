@@ -106,7 +106,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
         //Increase the number of task in the pool;
         pool_task_nb++;
 
-        //Decrease the number of available_spaces in the pool;
+        //Decrease the number of data_spaces in the pool;
         pool_task_spaces--;
 
         //Succeed;
@@ -292,7 +292,7 @@ void TaskScheduler::run() {
 
 
     /*
-    if (available_spaces(0)) {
+    if (data_spaces(0)) {
 
         MachineController::movement_state_t state = MachineController::movement_state_t();
 
@@ -325,7 +325,7 @@ void TaskScheduler::run() {
 
     }
 
-    if (available_spaces(0)) {
+    if (data_spaces(0)) {
 
         //Schedule an enable / disable of steppers.
         //MachineController::enable_steppers_scheduled_0(true);
@@ -368,7 +368,7 @@ void TaskScheduler::process_task_pool() {
         task_t *task = task_pool + task_index;
 
         /* If the task fails to analyse_command (must be called later), then shift it at the insertion position.
-         * This removes empty available_spaces in the pool, and saved the order.*/
+         * This removes empty data_spaces in the pool, and saved the order.*/
         if (!process_task(task)) {
 
             //Shift the task to the insertion position

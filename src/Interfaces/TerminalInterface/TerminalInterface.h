@@ -32,10 +32,7 @@
 #include <Interfaces/_interface_data.h>
 #include "TerminalNode.h"
 
-
 #define TI TerminalInterface
-
-
 
 class TerminalInterface {
 
@@ -63,6 +60,12 @@ private :
 
     //The command size.
     static unsigned char command_size;
+
+    //The current number of available spaces in the data bugger
+    static uint8_t data_spaces;
+
+    //A flag set if the current packet is corrupted (too long for the data buffer)
+    static bool corrupted_packet;
 
     //The current address to store input data
     static char *data_in;
@@ -126,7 +129,7 @@ public:
 private:
 
     //The arguments sequences container
-    static ArgumentsContainer arguments_sequences;
+    static ArgumentsContainer arguments_storage;
 
     //Identifiers in a parsed argument_t sequence
     static argument_t *const arguments;

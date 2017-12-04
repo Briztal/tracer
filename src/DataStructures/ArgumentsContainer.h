@@ -45,7 +45,7 @@ private:
     //The actual arguments container.
     char *arguments;
 
-    //The number of available_spaces available in the container.
+    //The number of data_spaces available in the container.
     uint8_t nb_spaces;
 
     //A signature for available cases : i-th bool means : 1 = available, 0 = not available.

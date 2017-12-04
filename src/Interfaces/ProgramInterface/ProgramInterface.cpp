@@ -359,7 +359,7 @@ void PI::schedule_task(task_state_t (*task)(void *), char *command, uint8_t size
     //If the function fails,
     //if (!current_node->function(data_in, r_command_size)) {
 
-    if (arguments_storage.available_spaces()) {
+    if (arguments_storage.data_spaces()) {
 
         uint8_t index = arguments_storage.insert_argument(command, size);
 
@@ -465,8 +465,8 @@ void PI::read_data() {
                 //Reset the input data
                 reset_input_data();
 
-                //Stop if no tasks available_spaces are available in the scheduler.
-                if (!TaskScheduler::available_spaces())
+                //Stop if no tasks data_spaces are available in the scheduler.
+                if (!TaskScheduler::data_spaces())
                     return;
 
                 continue;

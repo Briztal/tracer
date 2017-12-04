@@ -18,7 +18,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o"
   "CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o"
-  "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o"
+  "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o"
   "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o"
