@@ -50,10 +50,10 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //verify that f and p arguments are provided.
-    REQUIRE_ONE_ARGUMENTS("prd");
+    REQUIRE_ONE_ARGUMENTS("PRD");
 
     //If the default profile must be reset
-    if (CHECK_ARGUMENT('r')) {
+    if (CHECK_ARGUMENT('R')) {
 
         GI::echo("Reseting the EEPROM default profile.");
 
@@ -63,17 +63,17 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     }
 
     //If a path was provided : read or write
-    if (CHECK_ARGUMENT('p')) {
+    if (CHECK_ARGUMENT('P')) {
 
-        char *path = GET_ARG('p');
+        char *path = GET_ARG('P');
 
         float f;
 
         //If the value must be written
-        if (CHECK_ARGUMENT('w')) {
+        if (CHECK_ARGUMENT('W')) {
 
             //Extract the value to write
-            f = GET_ARG_VALUE('w');
+            f = GET_ARG_VALUE('W');
 
             //Log message
             GI::echo("Writing " + String(path) + " to " + String(f));
@@ -94,7 +94,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     }
 
     //If the profile must be printed
-    if (CHECK_ARGUMENT('d')) {
+    if (CHECK_ARGUMENT('D')) {
 
         //Print the current profile.
         EEPROMInterface::print_stored_data();
@@ -149,7 +149,7 @@ task_state_t GCodeCommands::home(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //If the home must use endstops
-    if (CHECK_ARGUMENT('e')) {
+    if (CHECK_ARGUMENT('E')) {
 
         CI::echo("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
 
@@ -183,7 +183,7 @@ task_state_t GCodeCommands::line(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //verify that almost one movement coordinate is provided.
-    REQUIRE_ONE_ARGUMENTS("xyze");
+    REQUIRE_ONE_ARGUMENTS("XYZE");
 
     MachineController::movement_state_t state = MachineController::movement_state_t();
 
@@ -197,16 +197,16 @@ task_state_t GCodeCommands::line(char *arguments) {
     }\
 
     //If a coordinate was provided, enable this coordinate, and get it.
-    CHECK_COORDINATE(x, 'x');
-    CHECK_COORDINATE(y, 'y');
-    CHECK_COORDINATE(z, 'z');
-    CHECK_COORDINATE(e, 'e');
+    CHECK_COORDINATE(x, 'X');
+    CHECK_COORDINATE(y, 'Y');
+    CHECK_COORDINATE(z, 'Z');
+    CHECK_COORDINATE(e, 'E');
 
     //For safety, un-define the previously created macro.
 #undef CHECK_COORDINATE
 
     //If the movement is absolute, move to the destination
-    if (CHECK_ARGUMENT('r')) {
+    if (CHECK_ARGUMENT('R')) {
 
         //Mark the movement to be relative.
         state.relative_flag = true;
@@ -238,13 +238,59 @@ task_state_t GCodeCommands::enable_steppers(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //Fail if the enabling argument_t is omitted
-    REQUIRE_ALL_ARGUMENTS("e")
+    REQUIRE_ALL_ARGUMENTS("E")
 
     //Extract the enable boolean
-    bool enable = (bool) GET_ARG_VALUE('e');
+    bool enable = (bool) GET_ARG_VALUE('E');
 
     //Schedule an enable / disable of steppers.
     return MachineController::enable_steppers_scheduled_0(enable);
+
+}
+
+
+
+/*
+ * set_position : updates the current position.
+ *
+ *  It takes almost one of the coordinates x, y, z and e.
+ *
+ */
+
+task_state_t GCodeCommands::set_position(char *arguments) {
+
+    //This command must schedule one type-0 task.
+    FAIL_IF_CANT_SCHEDULE(1);
+
+    //Parse Arguments
+    PARSE_ARGUMENTS(arguments);
+
+    //verify that almost one movement coordinate is provided.
+    REQUIRE_ONE_ARGUMENTS("xyze");
+
+    MachineController::offsets_state_t state = MachineController::offsets_state_t();
+
+    /*
+     * To save repetitive lines of code, a macro that, if a coord is provided, sets its flag and its value.
+     */
+#define CHECK_COORDINATE(coord, coord_char)\
+    if (CHECK_ARGUMENT(coord_char)) {\
+        state.coord##_flag = true;\
+        state.coord = GET_ARG_VALUE(coord_char);\
+    }\
+
+    //If a coordinate was provided, enable this coordinate, and get it.
+    CHECK_COORDINATE(x, 'x');
+    CHECK_COORDINATE(y, 'y');
+    CHECK_COORDINATE(z, 'z');
+    CHECK_COORDINATE(e, 'e');
+
+    //For safety, un-define the previously created macro.
+#undef CHECK_COORDINATE
+
+
+    //Schedule a line to the specified coordinates
+    return MachineController::set_offsets_state_scheduled_0(state);
 
 }
 
@@ -268,12 +314,12 @@ task_state_t GCodeCommands::set_extrusion(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //At least w (working carriage) and s (speed) must be provided
-    REQUIRE_ONE_ARGUMENTS("cs");
+    REQUIRE_ONE_ARGUMENTS("CS");
 
     MachineController::carriages_state_t new_state = MachineController::carriages_state_t();
 
     //If the working carriage must be changed
-    if (CHECK_ARGUMENT('c')) {
+    if (CHECK_ARGUMENT('C')) {
 
         //Set the flag;
         new_state.working_carriage_flag = true;
@@ -284,19 +330,19 @@ task_state_t GCodeCommands::set_extrusion(char *arguments) {
     }
 
     //If the speed must be changed;
-    if (CHECK_ARGUMENT('s')) {
+    if (CHECK_ARGUMENT('S')) {
 
         //If we must set the speed for a particular carriage:
-        if (CHECK_ARGUMENT('c')) {
+        if (CHECK_ARGUMENT('C')) {
 
             //Enable the speed modif for a carriage;
             new_state.nominative_speed_mod_flag = true;
 
             //Set the carriage;
-            new_state.nominative_carriage =  (uint8_t) GET_ARG_VALUE('c');
+            new_state.nominative_carriage =  (uint8_t) GET_ARG_VALUE('C');
 
             //Set the speed;
-            new_state.nominative_speed = GET_ARG_VALUE('s');
+            new_state.nominative_speed = GET_ARG_VALUE('S');
 
 
         } else {
@@ -306,7 +352,7 @@ task_state_t GCodeCommands::set_extrusion(char *arguments) {
             new_state.working_carriage_speed_flag = true;
 
             //Set the new working extruder;
-            new_state.working_carriage_speed = GET_ARG_VALUE('s');
+            new_state.working_carriage_speed = GET_ARG_VALUE('S');
         }
 
     }
@@ -336,12 +382,12 @@ task_state_t GCodeCommands::set_cooling(char *arguments) {
     PARSE_ARGUMENTS(arguments)
 
     //Fail if none of power of enable are provided
-    REQUIRE_ONE_ARGUMENTS("ep");
+    REQUIRE_ONE_ARGUMENTS("EP");
 
     MachineController::cooling_state_t new_state = MachineController::cooling_state_t();
 
     //Set the enable state if required
-    if (CHECK_ARGUMENT('e')) {
+    if (CHECK_ARGUMENT('E')) {
 
 
         //Set the flag
@@ -353,7 +399,7 @@ task_state_t GCodeCommands::set_cooling(char *arguments) {
     }
 
     //Set the power if required
-    if (CHECK_ARGUMENT('p')) {
+    if (CHECK_ARGUMENT('P')) {
 
         //Set the flag
         new_state.enabled_flag = true;
@@ -388,34 +434,34 @@ task_state_t GCodeCommands::set_hotend(char *arguments) {
     PARSE_ARGUMENTS(arguments)
 
     //Fail if a hotend was not specified
-    REQUIRE_ALL_ARGUMENTS("h")
+    REQUIRE_ALL_ARGUMENTS("H")
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
-    REQUIRE_ONE_ARGUMENTS("te");
+    REQUIRE_ONE_ARGUMENTS("TE");
     TemperatureController::hotend_state_t state = TemperatureController::hotend_state_t();
 
     state.hotend_flag = true;
-    state.hotend = (uint8_t) GET_ARG_VALUE('h');
+    state.hotend = (uint8_t) GET_ARG_VALUE('H');
 
     //If the temperature must be adjusted
-    if (CHECK_ARGUMENT('t')) {
+    if (CHECK_ARGUMENT('T')) {
 
         //Set the temperature flag
         state.temperature_flag = true;
 
         //Get the temperature
-        state.temperature = GET_ARG_VALUE('t');
+        state.temperature = GET_ARG_VALUE('T');
 
     }
 
     //If the activity must be changed
-    if (CHECK_ARGUMENT('e')) {
+    if (CHECK_ARGUMENT('E')) {
 
         //Set the enable flag
         state.enabled_flag = true;
 
         //Get the temperature
-        state.enabled = (bool) GET_ARG_VALUE('e');
+        state.enabled = (bool) GET_ARG_VALUE('E');
 
     }
 
@@ -444,29 +490,29 @@ task_state_t GCodeCommands::set_hotbed(char *arguments) {
     PARSE_ARGUMENTS(arguments)
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
-    REQUIRE_ONE_ARGUMENTS("te");
+    REQUIRE_ONE_ARGUMENTS("TE");
     TemperatureController::hotbed_state_t state = TemperatureController::hotbed_state_t();
 
 
     //If the temperature must be adjusted
-    if (CHECK_ARGUMENT('t')) {
+    if (CHECK_ARGUMENT('T')) {
 
         //Set the temperature flag
         state.temperature_flag = true;
 
         //Get the temperature
-        state.temperature = GET_ARG_VALUE('t');
+        state.temperature = GET_ARG_VALUE('T');
 
     }
 
     //If the activity must be changed
-    if (CHECK_ARGUMENT('e')) {
+    if (CHECK_ARGUMENT('E')) {
 
         //Set the enable flag
         state.enabled_flag = true;
 
         //Get the temperature
-        state.enabled = (bool) GET_ARG_VALUE('e');
+        state.enabled = (bool) GET_ARG_VALUE('E');
 
     }
 

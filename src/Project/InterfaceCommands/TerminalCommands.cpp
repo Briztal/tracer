@@ -250,9 +250,9 @@ task_state_t TerminalCommands::enable_steppers(char *arguments) {
 
 
 /*
- * enable_steppers : enable or disable steppers.
+ * set_position : updates the current position.
  *
- *  It takes only one argument_t, -e followed by 0 (disable) or [not zero] enabled
+ *  It takes almost one of the coordinates x, y, z and e.
  *
  */
 

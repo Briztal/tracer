@@ -125,13 +125,15 @@ GO_LOWER('1')
 
 COMMAND('0', enable_steppers)
 
-COMMAND('1', set_extrusion)
+COMMAND('1', set_position)
 
-COMMAND('2', set_cooling)
+COMMAND('2', set_extrusion)
 
-COMMAND('3', set_hotend)
+COMMAND('3', set_cooling)
 
-COMMAND('4', set_hotbed)
+COMMAND('4', set_hotend)
+
+COMMAND('5', set_hotbed)
 
 GO_UPPER()
 
