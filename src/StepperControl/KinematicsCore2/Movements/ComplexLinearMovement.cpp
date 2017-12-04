@@ -31,7 +31,7 @@
 
 
 /*
- * plan_movement : this function takes a destination position in argument and prepares a linear movement,
+ * plan_movement : this function takes a destination position in argument_t and prepares a linear movement,
  *      from the current position to the given destination, if the required movement is not a null movement.
  *
  */
@@ -188,7 +188,7 @@ void ComplexLinearMovement::get_slopes(float *slopes, const float *const distanc
 
 /*
  * get_position : this function computes the position for the increment calculation procedure, according to
- *      the point provided in argument.
+ *      the point provided in argument_t.
  */
 
 void ComplexLinearMovement::get_position(float indice, float *positions) {
@@ -249,7 +249,7 @@ void ComplexLinearMovement::finalise_movement() {
 
 /*
  * get_real_time_position : this function computes the position for the increment calculation procedure, according to
- *      the point provided in argument.
+ *      the point provided in argument_t.
  */
 
 void ComplexLinearMovement::get_real_time_position(float index, float *positions) {

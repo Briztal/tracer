@@ -225,7 +225,7 @@ task_state_t TerminalCommands::line(char *arguments) {
 /*
  * enable_steppers : enable or disable steppers.
  *
- *  It takes only one argument, -e followed by 0 (disable) or [not zero] enabled
+ *  It takes only one argument_t, -e followed by 0 (disable) or [not zero] enabled
  *
  */
 
@@ -237,7 +237,7 @@ task_state_t TerminalCommands::enable_steppers(char *arguments) {
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);
 
-    //Fail if the enabling argument is omitted
+    //Fail if the enabling argument_t is omitted
     REQUIRE_ALL_ARGUMENTS("e")
 
     //Extract the enable boolean

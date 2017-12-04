@@ -157,7 +157,7 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
     //Set the function to execute;
     task.task = f;
 
-    //Set the argument pointer;
+    //Set the argument_t pointer;
     task.dynamic_args = args;
 
     //Set the type;
@@ -291,6 +291,7 @@ void TaskScheduler::run() {
     process_task_sequences();
 
 
+    /*
     if (available_spaces(0)) {
 
         MachineController::movement_state_t state = MachineController::movement_state_t();
@@ -336,6 +337,7 @@ void TaskScheduler::run() {
     delay(300);
 
 
+     */
 }
 
 

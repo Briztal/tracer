@@ -64,13 +64,13 @@ public:
      * arguments storage.
      * You have 3 return codes you can use :
      *  - 0 : not enough space in the task pool. Task will be reprogrammed automatically.
-     *  - 1 : argument error. A message with the correct syntax will be displayed.
+     *  - 1 : argument_t error. A message with the correct syntax will be displayed.
      *  - 2 and upper. : correct execution.
      */\
     static task_state_t name(uint8_t arguments_index);\
     /*
      * Then, we will declare and implement a pre_processor that eases your work.
-     *   It starts by calling your implementation, passing only the argument index.
+     *   It starts by calling your implementation, passing only the argument_t index.
      *   If your command does not succeeds, it logs the syntax informato
      * arguments storage.
      */\

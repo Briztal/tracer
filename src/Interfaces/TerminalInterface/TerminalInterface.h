@@ -35,9 +35,9 @@
 
 
 //A simple struct that will be used in the arguments parsing.
-typedef struct id_to_index_t {
+typedef struct argument_t {
     char identifier;
-    uint8_t index;
+    char *arg;
 };
 
 class TerminalInterface {
@@ -97,9 +97,9 @@ private :
 public:
 
     /*
-     * A terminal interface command can accept an undefined number of arguments, in an argument sequence.
+     * A terminal interface command can accept an undefined number of arguments, in an argument_t sequence.
      *
-     *  An argument sequence is a string structured like :
+     *  An argument_t sequence is a string structured like :
      *      -i_0 arg_0 -i_1 arg_1 ... -i_n arg_n
      *
      *  where all i_k are characters, and arg_k is a word (meaning anything). The character - is mandatory
@@ -108,21 +108,21 @@ public:
      */
 
     //Parse the provided arguments, and save the data in the local buffer.
-    static bool parse_arguments(char *arguments_sequence);
+    static bool parse_arguments(char *current_position);
 
-    //Get the pointer to the required argument
+    //Get the pointer to the required argument_t
     static char *get_argument(char id);
 
-    //Get a previously parsed argument if it exists
+    //Get a previously parsed argument_t if it exists
     static float get_argument_value(char id);
 
     //Verify that all arguments (defined by their identifiers) have been provided (identifiers is null terminated).
     static bool verify_all_identifiers_presence(const char *identifiers);
 
-    //Verify that at least one argument (defined by their identifiers) have been provided (identifiers is null terminated).
+    //Verify that at least one argument_t (defined by their identifiers) have been provided (identifiers is null terminated).
     static bool verify_one_identifiers_presence(const char *identifiers);
 
-    //verify that an argument identifier has be provided.
+    //verify that an argument_t identifier has be provided.
     static bool verify_identifier_presence(char id);
 
 
@@ -131,15 +131,11 @@ private:
     //The arguments sequences container
     static ArgumentsContainer arguments_sequences_storage;
 
-    //Identifiers in a parsed argument sequence
-    static id_to_index_t *const identfiers;
+    //Identifiers in a parsed argument_t sequence
+    static argument_t *const identifiers;
 
     //Number of arguments in a sequence
     static uint8_t nb_identifiers;
-
-    //Arguments in the parsed sequence.
-    static ArgumentsContainer arguments_storage;
-
 
     //--------------------------------------Tree data----------------------------------
 

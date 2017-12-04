@@ -25,7 +25,7 @@
  *
  * A command is a sequence of byte.
  * - the first part determines the command;
- * - the other is composed of the argument sequence : size - [size] bytes of data;
+ * - the other is composed of the argument_t sequence : size - [size] bytes of data;
  * - 0 to end;
  *
  * Example : 1 : 20 : 254 : 1 : 7 : 0 : 0 : 0 : 0 : 0 : 0 : 0
@@ -98,7 +98,7 @@
  *
  * Once you have used one of commands CREATE_LEAF and CREATE_CALLABLE_LEAF,
  * you also have access to  documentation commands :
- * REQUIRE_ARG(type, name) : tells the high level that an argument of type 'type', named 'name' is required by
+ * REQUIRE_ARG(type, name) : tells the high level that an argument_t of type 'type', named 'name' is required by
  *      the last defined function.
  *
  *      Types are :

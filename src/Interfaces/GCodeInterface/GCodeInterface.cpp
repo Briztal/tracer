@@ -243,7 +243,7 @@ void GCodeInterface::schedule(task_state_t (*f)(void *)) {
 
 #endif
 
-    //Create a struct in the heap to contain argument-related data.
+    //Create a struct in the heap to contain argument_t-related data.
     gcode_interface_data_t *data = new gcode_interface_data_t();
     data->arguments_index = index;
 
@@ -313,7 +313,7 @@ bool GCodeInterface::get_parameter(char *id, float *value) {
     //Get the parameter id, its value and its length, by calling the StringUtils
     uint8_t size = StringUtils::get_next_word(&parameters_ptr, &parameters_size);
 
-    //Abort if no argument was parsed
+    //Abort if no argument_t was parsed
     if (size == 0)
         return false;
 

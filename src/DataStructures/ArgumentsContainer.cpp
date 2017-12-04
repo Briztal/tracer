@@ -70,7 +70,7 @@ bool ArgumentsContainer::insert_argument(char *args, uint8_t *index_p) {
                 if (!free_size) {
 
                     //Display an error message
-                    CI::echo("WARNING IN ArgumentsContainer::insert_argument : the argument was too big"
+                    CI::echo("WARNING IN ArgumentsContainer::insert_argument : the argument_t was too big"
                                      " for the container.");
 
                     //Fail

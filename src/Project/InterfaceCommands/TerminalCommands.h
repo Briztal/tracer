@@ -64,7 +64,7 @@ public:
 };
 
 
-#define PARSE_ARGUMENTS(arguments) TerminalInterface::parse_arguments(arguments);
+#define PARSE_ARGUMENTS(arguments) {if (!TerminalInterface::parse_arguments(arguments)) return invalid_arguments;}
 
 #define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!TerminalInterface::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
 

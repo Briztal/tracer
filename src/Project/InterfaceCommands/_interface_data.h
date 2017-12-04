@@ -22,7 +22,7 @@ typedef struct terminal_interface_data_t {
 
 
     /*
-     * argument_index : the index of the argument sequence in the argument storage.
+     * argument_index : the index of the argument_t sequence in the argument_t storage.
      */
 
     uint8_t arguments_index;

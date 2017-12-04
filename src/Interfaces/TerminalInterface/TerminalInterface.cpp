@@ -65,7 +65,7 @@ void TerminalInterface::echo(const string_t msg) {
 
 void TerminalInterface::read_data() {
 
-    //Don't process any data if no space is available in the argument sequence container
+    //Don't process any data if no space is available in the argument_t sequence container
     if (!arguments_sequences_storage.available_spaces())
         return;
 
@@ -90,7 +90,7 @@ void TerminalInterface::read_data() {
                 if (!TaskScheduler::available_spaces(255))
                     return;
 
-                //Don't process any data if no space is available in the argument sequence container
+                //Don't process any data if no space is available in the argument_t sequence container
                 if (!arguments_sequences_storage.available_spaces())
                     return;
 
@@ -141,7 +141,7 @@ void TerminalInterface::reset() {
  * schedule_command : this function analyses the packet received, and parses the command part.
  *
  *  When it has found the TerminalCommand identified by this string, it saves the rest of the packet (the arguments part)
- *      in the argument storage, and then, schedules the execution of this function.
+ *      in the argument_t storage, and then, schedules the execution of this function.
  *
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
  *      (see the doc above the function's definition for more explanations).
@@ -196,14 +196,14 @@ void TerminalInterface::schedule_command() {
 
                 if (arguments_sequences_storage.available_spaces()) {
 
-                    //The argument's index
+                    //The argument_t's index
                     uint8_t index;
 
                     //Save the arguments sequence.
                     if (arguments_sequences_storage.insert_argument(data_in, &index)) {
 
 
-                        //Create a struct in the heap to contain argument-related data.
+                        //Create a struct in the heap to contain argument_t-related data.
                         terminal_interface_data_t *data = new terminal_interface_data_t();
                         data->arguments_index = index;
                         data->terminal_command = current_node->function;
@@ -218,12 +218,12 @@ void TerminalInterface::schedule_command() {
                         //Complete
                         return;
 
-                    } //else : too long argument, log message sent by argument_container.
+                    } //else : too long argument_t, log message sent by argument_container.
 
                 } else {
 
-                    //If no more space was available in the argument container : display an error message
-                    CI::echo("ERROR in TerminalInterface::schedule_command : the argument container has no more space "
+                    //If no more space was available in the argument_t container : display an error message
+                    CI::echo("ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
                                      "available, this is not supposed to happen");
 
                     //Fail
@@ -261,7 +261,7 @@ void TerminalInterface::prepare_execution() {
 }
 
 
-/*
+/*uint8_t
  * log_parsing_error : displays a message, after a parsing problem.
  *
  *  It displays the node's children.
@@ -291,7 +291,7 @@ void TerminalInterface::log_parsing_error(TerminalNode *log_node) {
  *
  *  Normally, if scheduled directly, a TerminalCommand receives a void *, that must be casted in a char *,
  *      the address of the arguments sequence. After the execution, if the command mustn't be reprogrammed,
- *      those arguments must be removed from the argument container.
+ *      those arguments must be removed from the argument_t container.
  *
  *      As this procedure is common to all TerminalCommands, this function's goal is to execute this procedure.
  *
@@ -329,42 +329,47 @@ task_state_t TerminalInterface::execute_command(void *data_pointer) {
 //--------------------------------------Arguments Processing--------------------------------------
 
 /*
- * parse_arguments : this function parses an argument sequence, whose format is like below :
+ * parse_arguments : this function parses an argument_t sequence, whose format is like below :
  *
  *  -i0 arg0 -i1 arg1 ... -in argn
+ *
+ *  After the parsing, arguments can be get with the get_argument methods.
+ *
+ *  Remarks :
+ *      - argi can be empty.
+ *      - The function DOES NOT COPY ARGS. All it does is saving the indices (char),
+ *          and their eventual args's positions (char *). The argument sequence must NEVER be changed,
+ *          or args values will be corrupted.
  */
 
-bool TerminalInterface::parse_arguments(char *arguments_sequence) {
+bool TerminalInterface::parse_arguments(char *argument_sequence) {
 
-    //First, reset the argument parsing structure :
+    //A cache with a more relevant name
+    char *current_position = argument_sequence;
+
+    //First, reset the argument_t parsing structure :
 
     //reset the arguments counter
     nb_identifiers = 0;
 
-    //Clear the argument container
-    arguments_storage.clear();
 
     do {
 
-        //go to the closest argument identifier
-        arguments_sequence += StringUtils::count_until_char(arguments_sequence, '-');
+        //go to the closest argument_t identifier
+        current_position += StringUtils::count_until_char(current_position, '-');
 
         //If we have reached the end of the sequence
-        if (!*arguments_sequence)
+        if (!*current_position)
             return true;
 
-        //Declare a temporary buffer for the current argument identifier (2 bytes plus null byte)
+        //Declare a temporary buffer for the current argument_t identifier (2 bytes plus null byte)
         char t[3];
 
-        //Get the argument identifier
-        uint8_t identifier_size = StringUtils::copy_until_char(arguments_sequence, t, 3, ' ');
-
-        //If we have reached the end of the sequence
-        if (!*arguments_sequence)
-            return true;
+        //Get the argument_t identifier
+        uint8_t identifier_size = StringUtils::copy_until_char(current_position, t, 3, ' ');
 
         //Go to the next unprocessed char
-        arguments_sequence += identifier_size;
+        current_position += identifier_size;
 
 
         //If the identifier is invalid
@@ -378,8 +383,8 @@ bool TerminalInterface::parse_arguments(char *arguments_sequence) {
 
         }
 
-        //If the argument container is already full;
-        if (!arguments_storage.available_spaces()) {
+        //If the argument_t container is already full;
+        if (nb_identifiers == MAX_ARGS_NB) {
 
             //Display an error message
             CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(MAX_ARGS_NB) +
@@ -390,31 +395,103 @@ bool TerminalInterface::parse_arguments(char *arguments_sequence) {
 
         }
 
-        //Declare the buffer for the argument
-        char *arg_buffer;
 
-        //Initialise the buffer, as a line in the argument storage.
-        uint8_t index = arguments_storage.insert_argument(&arg_buffer);
+        //remove extra spaces;
+        current_position += StringUtils::lstrip(current_position, ' ');
 
-        //remove extra spaces.
-        arguments_sequence += StringUtils::lstrip(arguments_sequence, ' ');
+        char *arg;
+        char *space_position;
+        uint8_t argument_size;
 
-        //safely (with size check and null termination) copy the next argument in our buffer.
-        uint8_t argument_size = StringUtils::copy_until_char(arguments_sequence, arg_buffer, MAX_WORD_SIZE + 1, '-');
+        //If the argument sequence is finished;
+        if (!*current_position)  {
 
-        //Go to the next unprocessed char
-        arguments_sequence += argument_size;
+            //The arg will point to the zero ending the sequence
+            arg = current_position;
 
-        //Save the relation between the identifier and the argument location.
-        id_to_index_t *id_to_index = identfiers + nb_identifiers;
-        id_to_index->identifier = t[1];
-        id_to_index->index = index;
+            //An empty argument must be added;
+            goto insert_arg;
+
+        }
+
+        //The current position corresponds now to a '-', or to the beginning of an argument.
+        //We now must parse the argument, if it is provided.
+
+        //Count the numbers of chars between the current position and an argument identifier (or the end of the string);
+        argument_size = StringUtils::count_until_char(current_position, '-');
+
+        //If no argument is provided :
+        if (!argument_size) {
+
+            //The arg will point to the space (changed in zero below) before the current position;
+            arg = current_position - 1;
+
+            //Change the space to a zero;
+            *arg = '\0';
+
+            //An empty argument must be added;
+            goto insert_arg;
+
+        }
+
+        //The argument now exists for sure, but we must ensure that there is a '\0' at its end.
+
+        //If we ended the argument sequence, no need to add the zero.
+        if (!*(current_position + argument_size)) {
+
+            //The arg will point to the zero ending the sequence
+            arg = current_position;
+
+            goto insert_arg;
+
+        }
+
+        //We are now sure that a '-' is present.
+
+        //Normally, a space should be present just before the '-';
+        space_position = current_position + argument_size - 1;
+
+        //If the char at the space position is effectively a char:
+        if (*space_position == ' ') {
+
+            //Nullify it;
+            *space_position = '\0';
+            
+            //Arg will point to the current position (the beginning of the argument.
+            arg = current_position;
+
+            //Update the current position the new '-' (or at the end of the sequence).
+            current_position += argument_size;
+
+            //Insert the non empty arg;
+            goto insert_arg;
+
+        } else {
+
+            //If the '-' was in a word, display an error message;
+            CI::echo("Invalid arguments, please do not use '-' in a word.");
+
+            //Fail;
+            return false;
+
+        }
+
+        //----------------------------------Argument saving----------------------------------
+
+
+        insert_arg:
+
+        //Save the relation between the identifier and the argument_t location.
+        argument_t *argument = identifiers + nb_identifiers;
+        argument->identifier = t[1];
+        argument->arg = arg;
+
 
         //Increase the number of parsed arguments
         nb_identifiers++;
 
         //If we have reached the end of the sequence
-        if (!*arguments_sequence)
+        if (!*current_position)
             return true;
 
 
@@ -424,13 +501,13 @@ bool TerminalInterface::parse_arguments(char *arguments_sequence) {
 }
 
 /*
- * get_argument_value : this function presupposes that the argument referenced
+ * get_argument_value : this function presupposes that the argument_t referenced
  *  by the identifier id is a numeric value, and returns that value.
  */
 
 float TerminalInterface::get_argument_value(char id) {
 
-    //Get the argument pointer.
+    //Get the argument_t pointer.
     char *ptr = get_argument(id);
 
     //return the float equivalent.
@@ -442,7 +519,7 @@ float TerminalInterface::get_argument_value(char id) {
 
 
 /*
- * get_argument : this function returns a pointer to the argument (char *) referenced
+ * get_argument : this function returns a pointer to the argument_t (char *) referenced
  *  by the identifier id.
  */
 
@@ -452,13 +529,13 @@ char *TerminalInterface::get_argument(char id) {
     for (uint8_t i = 0; i < nb_identifiers; i++) {
 
         //Cache for the link
-        id_to_index_t *link = identfiers + i;
+        argument_t *link = identifiers + i;
 
         //If the links'identifier matches the provided one
         if (link->identifier == id) {
 
-            //Get the location of the argument (from the link), and convert the argument into a float.
-            return arguments_storage.get_argument(link->index);
+            //Get the location of the argument_t (from the link), and convert the argument_t into a float.
+            return link->arg;
 
         }
 
@@ -549,7 +626,7 @@ bool TerminalInterface::verify_identifier_presence(char id) {
     for (uint8_t i = 0; i < nb_identifiers; i++) {
 
         //Cache for the link
-        id_to_index_t *link = identfiers + i;
+        argument_t *link = identifiers + i;
 
         //If the links'identifier matches the provided one, return true
         if (link->identifier == id) return true;
@@ -744,9 +821,9 @@ char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
 
-//Identifiers in a parsed argument sequence
-id_to_index_t t_id_to_indexes[MAX_ARGS_NB];
-id_to_index_t *const m::identfiers = t_id_to_indexes;
+//Identifiers in a parsed argument_t sequence
+argument_t t_id_to_indexes[MAX_ARGS_NB];
+argument_t *const m::identifiers = t_id_to_indexes;
 
 //Number of arguments in a sequence
 uint8_t m::nb_identifiers = 0;
@@ -755,7 +832,7 @@ uint8_t m::nb_identifiers = 0;
 ArgumentsContainer m::arguments_sequences_storage = ArgumentsContainer(MAX_ARGS_NB * (MAX_WORD_SIZE + 4) + 1,
                                                                        NB_PENDING_COMMANDS);
 
-ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_WORD_SIZE + 1, NB_PENDING_COMMANDS);
+//ArgumentsContainer m::arguments_storage = ArgumentsContainer(MAX_WORD_SIZE + 1, NB_PENDING_COMMANDS);
 
 
 String *m::tree_summary = m::build_tree_summary();

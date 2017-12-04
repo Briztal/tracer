@@ -44,7 +44,7 @@ class Queue {
 public:
 
     /*
-     * Constructor : it takes the buffer size in only argument.
+     * Constructor : it takes the buffer size in only argument_t.
      */
 
     Queue(uint8_t size) :

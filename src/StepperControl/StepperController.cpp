@@ -55,7 +55,7 @@ void StepperController::init() {
 /*
  * enable : this function enables a specific group of steppers, and disables others.
  *
- *  The argument is a signature, where the i-th bit means :
+ *  The argument_t is a signature, where the i-th bit means :
  *      - 1 : enable the i-th stepper
  *      - 0 : disable the i-th stepper
  *
@@ -121,7 +121,7 @@ void StepperController::disable() {
 /*
  * set_directions : this function sets direction for all steppers.
  *
- *  The argument is a signature, where the i-th bit means :
+ *  The argument_t is a signature, where the i-th bit means :
  *      - 1 : negative direction for the i-th stepper
  *      - 0 : positive direction for the i-th stepper
  *
@@ -176,7 +176,7 @@ void StepperController::set_directions(sig_t negative_signatures) {
 /*
  * fastStep : this function steps a specific group of stepper.
  *
- * The argument is a signature, where the i-th bit means :
+ * The argument_t is a signature, where the i-th bit means :
  *      - 1 : the i-th stepper must step;
  *      - 0 : the i-th stepper must not step.
  */

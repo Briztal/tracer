@@ -261,7 +261,7 @@ void PI::add_string_out(const char *data) {
 
 
 /*
- * get_arguments : returns a pointer to the beginning of the required argument
+ * get_arguments : returns a pointer to the beginning of the required argument_t
  *
  */
 
@@ -271,7 +271,7 @@ char *ProgramInterface::get_arguments(uint8_t task_index, uint8_t *size) {
 
 
 /*
- * validate_task : removes the argument related to the task
+ * validate_task : removes the argument_t related to the task
  *
  */
 
@@ -363,7 +363,7 @@ void PI::schedule_task(task_state_t (*task)(void *), char *command, uint8_t size
 
         uint8_t index = arguments_storage.insert_argument(command, size);
 
-        //Create a struct in the heap to contain argument-related data.
+        //Create a struct in the heap to contain argument_t-related data.
         program_interface_data_t *data = new program_interface_data_t();
         data->arguments_index = index;
 

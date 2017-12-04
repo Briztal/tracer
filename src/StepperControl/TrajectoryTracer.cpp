@@ -146,7 +146,7 @@ bool TrajectoryTracer::enqueue_unauthorised() {
 
 
 /*
- * enqueue_movement : this function adds the movement provided in argument to the motion queue.
+ * enqueue_movement : this function adds the movement provided in argument_t to the motion queue.
  *
  *  The movement is provided in the form of :
  *      - min and max, the index variable minimum and maximum values, for (resp) the beginning and end positions

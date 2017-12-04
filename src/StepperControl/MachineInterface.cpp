@@ -75,7 +75,7 @@ void MachineInterface::get_current_position(float *const position) {
 
 
 /*
- * update_position : this function updates the current position with the new position provided as argument.
+ * update_position : this function updates the current position with the new position provided as argument_t.
  *
  */
 
@@ -182,8 +182,8 @@ void MachineInterface::set_speed_group(uint8_t speed_group) {
 
 
 /*
- * set_speed_for_group : this function updates the regulation_speed for the group provided in argument with the regulation_speed
- *      provided in argument, or with the maximum regulation_speed for this group if the regulation_speed is greater than the limit.
+ * set_speed_for_group : this function updates the regulation_speed for the group provided in argument_t with the regulation_speed
+ *      provided in argument_t, or with the maximum regulation_speed for this group if the regulation_speed is greater than the limit.
  *
  */
 
@@ -212,8 +212,8 @@ task_state_t MachineInterface::set_speed_for_group(uint8_t speed_group, float ne
 
 
 /*
- * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument,
- *      in the cartesian group provided in argument.
+ * get_movement_distance_for_group : this function computes the movement distance for the movement provided in argument_t,
+ *      in the cartesian group provided in argument_t.
  *
  *  The movement is provided in the form of its step_distances.
  *
@@ -262,7 +262,7 @@ float MachineInterface::get_movement_distance_for_group(uint8_t speed_group, con
 //---------------------------------------------------Tools_Management---------------------------------------------------
 
 /*
- * set_energy_density : sets the energy density for the action whose index is provided in argument
+ * set_energy_density : sets the energy density for the action whose index is provided in argument_t
  */
 
 void MachineInterface::set_energy_density(uint8_t tool_index, float power) {
@@ -298,7 +298,7 @@ sig_t MachineInterface::get_tools_data(float *energy_densities) {
 
 /*
  * set_tools_updating_function : this function, given a signature, (i_th bit = true -> action i enabled),
- *      updates the function array given in argument, with the power settng function
+ *      updates the function array given in argument_t, with the power settng function
  */
 
 uint8_t MachineInterface::set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float)) {
