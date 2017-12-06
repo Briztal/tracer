@@ -33,9 +33,8 @@ int main() {
      */
     TaskScheduler::init();
 
-    while(true) {
-        TaskScheduler::run();
-    }
+    TaskScheduler::run();
+
 
 }
 

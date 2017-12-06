@@ -32,17 +32,19 @@ class TerminalNode {
 
 public:
 
-    TerminalNode(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, string_t *args_log, task_state_t (*f)(char *));
-
-    TerminalNode **sub_nodes;
+    TerminalNode(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, task_state_t (*const f)(char *));
 
     const String *name;
 
-    task_state_t (*function)(char *);
+    const uint8_t sub_nodes_nb;
+
+    TerminalNode **sub_nodes;
+
+    task_state_t (*const function)(char *);
 
     const string_t *desc_log;
     const string_t *args_log;
-    const uint8_t sub_nodes_nb;
+
 };
 
 

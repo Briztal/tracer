@@ -138,7 +138,6 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
  * home : this function moves all axis to zero. It takes the following parameters :
  *
  *  -s : homes the machine using endstops.
- *
  */
 
 task_state_t TerminalCommands::home(char *arguments) {
@@ -226,7 +225,6 @@ task_state_t TerminalCommands::line(char *arguments) {
  * enable_steppers : enable or disable steppers.
  *
  *  It takes only one argument_t, -e followed by 0 (disable) or [not zero] enabled
- *
  */
 
 task_state_t TerminalCommands::enable_steppers(char *arguments) {
@@ -253,7 +251,6 @@ task_state_t TerminalCommands::enable_steppers(char *arguments) {
  * set_position : updates the current position.
  *
  *  It takes almost one of the coordinates x, y, z and e.
- *
  */
 
 task_state_t TerminalCommands::set_position(char *arguments) {
@@ -302,7 +299,6 @@ task_state_t TerminalCommands::set_position(char *arguments) {
  *      - s : changes the speed for the carriages designed by c (or for the working carriage if c is not provided).
  *
  *  Almost one must be provided.
- *
  */
 task_state_t TerminalCommands::set_extrusion(char *arguments) {
 
@@ -369,7 +365,6 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
  *  It takes the following arguments :
  *      -e : 0 means disable the cooling, other values will enable it.
  *      -p : modifies the cooling power (truncated between 0 and 100).
- *
  */
 
 task_state_t TerminalCommands::set_cooling(char *arguments) {
@@ -524,8 +519,6 @@ task_state_t TerminalCommands::set_hotbed(char *arguments) {
 
 //---------------------------------------------------------Gets---------------------------------------------------------
 
-
-
 task_state_t TerminalCommands::get_regulations(char *) {
 
     return complete;
@@ -540,7 +533,6 @@ task_state_t TerminalCommands::get_temps(char *) {
 }
 
 
-
 //---------------------------------------------------------Tests--------------------------------------------------------
 
 
@@ -549,7 +541,6 @@ task_state_t TerminalCommands::stepper_test(char *) {
     CI::echo("EXIT");
 
     return complete;
-
 
 }
 
@@ -566,6 +557,8 @@ task_state_t TerminalCommands::temp_test(char *) {
 
     return complete;
 }
+
+
 
 #endif
 

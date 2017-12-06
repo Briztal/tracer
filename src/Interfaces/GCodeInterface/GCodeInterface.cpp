@@ -32,7 +32,6 @@
  * init : this function initialises the link layer.
  *
  *  It is automatically called by the Scheduler at initialisation
- *
  */
 
 void GCodeInterface::init() {
@@ -50,7 +49,6 @@ void GCodeInterface::init() {
  * read_data : this function reads and processes data.
  *
  *  It reads data on the link layer, saves it, and eventually processes it.
- *
  */
 
 void GCodeInterface::read_data() {
@@ -97,6 +95,7 @@ void GCodeInterface::read_data() {
 
 
             }
+
             //If the packet was corrupted, or empty
             reset();
 
@@ -129,7 +128,6 @@ void GCodeInterface::read_data() {
 
 /*
  * reset : this function resets the parsing structure;
- *
  */
 
 void GCodeInterface::reset() {
@@ -324,12 +322,56 @@ task_state_t GCodeInterface::execute_command(void *data_pointer) {
         arguments_storage.remove_argument(arguments_index);
     }
 
+    //Confirm the command execution
+    confirm_command_execution(data);
+
     //Return the execution state.
     return state;
 }
 
 
-//------------------------------------------------------Parameters------------------------------------------------------
+/*
+ * confirm_command_execution : this command notifies the interlocutor of the execution state of the command.
+ *
+ *  As the terminal interface is a human-only interface, we will simply display a message to the user.
+ */
+
+void GCodeInterface::confirm_command_execution(const interface_data_t *data) {
+
+//The log will occur only if the command flag is set.
+
+#ifdef GCODE_EXECUTION_CONFIRMATION
+
+    //Switch the return state.
+    switch(data->return_state) {
+
+        //If the task completed correctly
+        case complete:
+            CI::echo("Command complete.");
+            return;
+
+            //If the task completed correctly
+        case invalid_arguments:
+            CI::echo("Invalid Arguments.");
+            return;
+
+            //If the task must be reprogrammed:
+        case reprogram:
+            //CI::echo("Command Reprogrammed.");
+            return;
+
+            //If the task completed correctly
+        default:
+            CI::echo("WARNING Unrecognised return state");
+            return;
+
+    }
+
+#endif
+
+
+}
+
 
 
 //--------------------------------------Arguments Processing--------------------------------------

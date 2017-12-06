@@ -29,6 +29,13 @@ struct interface_data_t {
 
     uint8_t arguments_index;
 
+
+    /*
+     * return_state : the return state of function.
+     */
+
+    task_state_t return_state;
+
 };
 
 

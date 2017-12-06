@@ -146,7 +146,7 @@ void TerminalInterface::reset() {
     corrupted_packet = false;
 
     //Maximum numbers of char spaces;
-    data_spaces = GCODE_MAX_SIZE;
+    data_spaces = TERMINAL_MAX_SIZE;
 
     //data insertion at the origin;
     data_in = data_in_0;
@@ -174,44 +174,68 @@ void TerminalInterface::schedule_command() {
 
     //Initialise the current current_node to the root;
     TerminalNode *current_node = command_tree;
-    TerminalNode *current_sub_node;
 
     //Cache var for the sub nodes.
     TerminalNode **sub_nodes = current_node->sub_nodes;
 
-    //Declare a local word buffer
-    char word_buffer[TERMINAL_MAX_WORD_SIZE];
-
-    //get the first node identifier, in the word buffer
-    data_in += StringUtils::get_next_word(data_in, word_buffer, TERMINAL_MAX_WORD_SIZE);
-
     //Must declare the int before the jump label.
     uint8_t i;
 
+    //A cache for the child of the current node we are focused on.
+    TerminalNode *current_sub_node;
+
+    //--------------------------Tree Iteration--------------------------
+
+    //As the algorithm involves two for - while loops, we must use a goto label to restart with a new node.
     node_check:
+
+    //We must first get the next word of the command.
+
+    //Remove unnecessary spaces;
+    data_in += StringUtils::lstrip(data_in, ' ');
+
+    //Update th beginninhg of the current command_identifier.
+    char *command_identifier = data_in;
+
+    //get the first node identifier, in the command_identifier buffer
+    data_in += StringUtils::count_until_char(data_in, ' ');
+
+    //Nullify and update only if the string is not finished.
+    if (data_in) {
+
+        //Null terminate the word, to make a string of it.
+        *data_in = '\0';
+
+        //Go to the next char
+        data_in++;
+
+    }
+
+
+    //We now must compare each child of the current node, and compare its identifier with the read command identifier.
 
     //Check every sub_node
     for (i = 0; i < current_node->sub_nodes_nb; i++) {
+
+        //Update the current sub_node
         current_sub_node = sub_nodes[i];
 
-        const char *c = (*current_sub_node->name).c_str();
+        const char *node_identifier = (*current_sub_node->name).c_str();
 
-        //If the current word matches the current_node's name
-        if (!strcmp(c, word_buffer)) {
+        CI::echo("word : "+String(command_identifier));
 
-            //Re-init the current data
+        //If the current command_identifier matches the current_node's name
+        if (!strcmp(node_identifier, command_identifier)) {
+
+            //A matching sub_node has been found. It can be a single
+            //Update the current node and the current sub_nodes array.
             current_node = current_sub_node;
             sub_nodes = current_node->sub_nodes;
 
             //if the new node is not a leaf, check sub nodes
             if (current_node->sub_nodes_nb) {
 
-                //Go to the lower level
-
-                //Get the next node identifier
-                data_in += StringUtils::get_next_word(data_in, word_buffer, TERMINAL_MAX_WORD_SIZE);
-
-                //check the new node
+                //Restart the process with the new node
                 goto node_check;
 
             } else {
@@ -245,8 +269,9 @@ void TerminalInterface::schedule_command() {
                 } else {
 
                     //If no more space was available in the argument_t container : display an error message
-                    CI::echo("ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
-                                     "available, this is not supposed to happen");
+                    CI::echo(
+                            "ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
+                                    "available, this is not supposed to happen");
 
                     //Fail
                     return;
@@ -337,15 +362,63 @@ task_state_t TerminalInterface::execute_command(void *data_pointer) {
     //Execute the required TerminalCommand function, and get the execution state
     const task_state_t state = (*data->function)(arguments);
 
-    /*remove arguments arguments, if the task mustn't be reprogrammed*/
+    //Save the state
+    data->return_state = state;
+
+    //Remove arguments arguments, if the task mustn't be reprogrammed
     if (state != reprogram) {
         arguments_storage.remove_argument(arguments_index);
     }
+
+    //Confirm the command execution
+    confirm_command_execution(data);
 
     //Return the execution state.
     return state;
 }
 
+
+/*
+ * confirm_command_execution : this command notifies the interlocutor of the execution state of the command.
+ *
+ *  As the terminal interface is a human-only interface, we will simply display a message to the user.
+ */
+
+void TerminalInterface::confirm_command_execution(const interface_data_t *data) {
+
+//The log will occur only if the command flag is set.
+
+#ifdef TERMINAL_EXECUTION_CONFIRMATION
+
+    //Switch the return state.
+    switch (data->return_state) {
+
+        //If the task completed correctly
+        case complete:
+            CI::echo("Command complete.");
+            return;
+
+            //If the task completed correctly
+        case invalid_arguments:
+            CI::echo("Invalid Arguments.");
+            return;
+
+            //If the task must be reprogrammed:
+        case reprogram:
+            //CI::echo("Command Reprogrammed.");
+            return;
+
+            //If the task completed correctly
+        default:
+            CI::echo("WARNING Unrecognised return state");
+            return;
+
+    }
+
+#endif
+
+
+}
 
 
 //--------------------------------------Arguments Processing--------------------------------------
@@ -409,8 +482,9 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
         if (nb_identifiers == TERMINAL_MAX_ARGS_NB) {
 
             //Display an error message
-            CI::echo("The TerminalInterface hasn't been configured to accept more than " + String(TERMINAL_MAX_ARGS_NB) +
-                     " arguments. Please check your terminal_interface_config.h file.");
+            CI::echo(
+                    "The TerminalInterface hasn't been configured to accept more than " + String(TERMINAL_MAX_ARGS_NB) +
+                    " arguments. Please check your terminal_interface_config.h file.");
 
             //Fail
             return false;
@@ -426,7 +500,7 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
         uint8_t argument_size;
 
         //If the argument sequence is finished;
-        if (!*current_position)  {
+        if (!*current_position) {
 
             //The arg will point to the zero ending the sequence
             arg = current_position;
@@ -454,8 +528,7 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
             //An empty argument must be added;
             goto insert_arg;
 
-        }//TODO RENAME INTERFACE PREPROCESSOR CONSTANTS
-
+        }
 
         //The argument now exists for sure, but we must ensure that there is a '\0' at its end.
 
@@ -679,8 +752,7 @@ TerminalNode *TerminalInterface::generate_tree() {
     uint8_t root_sons_nb = get_sub_nodes_nb(command_counter++);
 
     //Create the root tree.
-    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"), new String("none"),
-                                          nullptr);
+    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"), nullptr);
 
     //Initialise the current tree and the history.
     TerminalNode *current_tree = root;
@@ -708,7 +780,7 @@ TerminalNode *TerminalInterface::generate_tree() {
     current_index = 0;\
     tree_history[depth] = current_tree;\
     tmp_nb = get_sub_nodes_nb(command_counter++);\
-    current_tree = new TerminalNode(new String(#name), tmp_nb, new String(#desc), new String(""), 0);\
+    current_tree = new TerminalNode(new String(#name), tmp_nb, new String(#desc), 0);\
     depth++;
 
 
@@ -738,8 +810,8 @@ TerminalNode *TerminalInterface::generate_tree() {
      *  - increment the command counter.
      */
 
-#define CREATE_LEAF(name, function, desc, args)\
-    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), new String(#args), TerminalCommands::function);\
+#define CREATE_LEAF(name, function, desc)\
+    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), TerminalCommands::function);\
     command_counter++;
 
 #include "Project/Config/terminal_interface_config.h"
@@ -839,7 +911,7 @@ String *TerminalInterface::build_tree_summary() {
 
 unsigned char m::command_size = 0;
 
-char tdatain_terminal[TERMINAL_MAX_COMMAND_SIZE];
+char tdatain_terminal[TERMINAL_MAX_SIZE];
 char *m::data_in = tdatain_terminal;
 char *const m::data_in_0 = tdatain_terminal;
 
@@ -851,9 +923,9 @@ argument_t *const m::arguments = terminal_arguments_t;
 uint8_t m::nb_identifiers = 0;
 
 ArgumentsContainer m::arguments_storage = ArgumentsContainer(TERMINAL_MAX_ARGS_NB * (TERMINAL_MAX_WORD_SIZE + 4) + 1,
-                                                                       TERMINAL_MAX_PENDING_COMMANDS);
+                                                             TERMINAL_MAX_PENDING_COMMANDS);
 //The current number of available spaces in the data bugger
-uint8_t m::data_spaces = GCODE_MAX_SIZE;
+uint8_t m::data_spaces = TERMINAL_MAX_SIZE;
 
 //A flag set if the current packet is corrupted (too long for the data buffer)
 bool m::corrupted_packet = false;

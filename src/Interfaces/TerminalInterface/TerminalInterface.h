@@ -91,6 +91,8 @@ private :
     //This function will execute a TerminalCommand, after getting its arguments, and remove them after execution.
     static task_state_t execute_command(void *data_pointer);
 
+    static void confirm_command_execution(const interface_data_t *data);
+
 
     //--------------------------------------Arguments Processing--------------------------------------
 
@@ -158,7 +160,6 @@ private:
 
     //Function to generate the tree used to parse commands
     static TerminalNode *generate_tree();
-
 
 
 };

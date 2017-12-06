@@ -503,12 +503,6 @@
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TerminalNode.h">
 			<Option target="TRACER"/>
 		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TreeManager.cpp">
-			<Option target="TRACER"/>
-		</Unit>
-		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TreeManager.h">
-			<Option target="TRACER"/>
-		</Unit>
 		<Unit filename="/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/_interface_data.h">
 			<Option target="TRACER"/>
 		</Unit>

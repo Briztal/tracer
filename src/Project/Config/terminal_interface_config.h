@@ -19,7 +19,7 @@
 */
 
 //The maximal size of a command (id + arguments)
-#define TERMINAL_MAX_COMMAND_SIZE 100
+#define TERMINAL_MAX_SIZE 100
 
 //The maximal size of an argument
 #define TERMINAL_MAX_WORD_SIZE 20
@@ -33,6 +33,9 @@
 //The number of commands that can be received and stored before execution;
 #define TERMINAL_MAX_PENDING_COMMANDS 10
 
+//Uncomment this line to be prompted about Terminal Tasks execution.
+#define TERMINAL_EXECUTION_CONFIRMATION
+
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)
 
 #ifndef REQUIRE_ARG
@@ -45,47 +48,40 @@
 
 
 //EEPROM
-CREATE_LEAF(eeprom, eeprom, manage_eeprom, none)
+CREATE_LEAF(eeprom, eeprom, manage_eeprom)
 
 //Movement
 GO_LOWER(move, move the machine)
-CREATE_LEAF(home, home, homes the machine, none)
-CREATE_LEAF(line, line, draw a line with the current carriage to the specified coordinates, x - y - z)
+CREATE_LEAF(home, home, homes the machine)
+CREATE_LEAF(line, line, draw a line with the current carriage to the specified coordinates)
 GO_UPPER()
 
 //Setup
 GO_LOWER(set, setup real-time machine parameters)
 
-CREATE_LEAF(power, enable_steppers, enable or disable all steppers, 0 or 1)
-
-CREATE_LEAF(position, set_position, enable or disable all steppers, 0 or 1)
-
-CREATE_LEAF(extrusion, set_extrusion, set the current carriage and its speed, carriage_id - speed)
-
-CREATE_LEAF(cooling, set_cooling, enable or disable the cooling, power)
-
-CREATE_LEAF(hotend, set_hotend, set a hotends temperature, 0 or 1)
-
-CREATE_LEAF(hotbed, set_hotbed, set the bed temperature, 0 or 1)
+CREATE_LEAF(power, enable_steppers, enable or disable all steppers)
+CREATE_LEAF(position, set_position, enable or disable all steppers)
+CREATE_LEAF(extrusion, set_extrusion, set the current carriage and its speed)
+CREATE_LEAF(cooling, set_cooling, enable or disable the cooling)
+CREATE_LEAF(hotend, set_hotend, set a hotends temperature)
+CREATE_LEAF(hotbed, set_hotbed, set the bed temperature)
 
 GO_UPPER()
 
 //Get
 GO_LOWER(get, get real time data)
-CREATE_LEAF(temp, get_temps, display temperatures, none)
-CREATE_LEAF(regs, get_regulations, display the temperatures regulation states, none)
+CREATE_LEAF(temp, get_temps, display temperatures)
+CREATE_LEAF(regs, get_regulations, display the temperatures regulation states)
 GO_UPPER()
-
 
 
 //test
 GO_LOWER(test, various tests)
-CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed, none)
-CREATE_LEAF(temp, temp_test, reads temps on every thermistor, none)
-CREATE_LEAF(demo, action, a simple demo with all axis, i)
+CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed)
+CREATE_LEAF(temp, temp_test, reads temps on every thermistor)
+CREATE_LEAF(demo, action, a simple demo with all axis)
 
 GO_UPPER()
-
 
 
 #undef GO_LOWER

@@ -465,33 +465,9 @@ CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o.provid
 CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o
 
 
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o: CMakeFiles/TRACER.dir/flags.make
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o: ../src/Interfaces/TerminalInterface/TreeManager.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TreeManager.cpp
-
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.i"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TreeManager.cpp > CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.i
-
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.s"
-	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Interfaces/TerminalInterface/TreeManager.cpp -o CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.s
-
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.requires:
-
-.PHONY : CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.requires
-
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.provides: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.requires
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.provides.build
-.PHONY : CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.provides
-
-CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.provides.build: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o
-
-
 CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o: ../src/Project/Config/geometry.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/Config/geometry.cpp
 
 CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.i: cmake_force
@@ -515,7 +491,7 @@ CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o.provides.build: CMakeFil
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o: ../src/Project/InterfaceCommands/GCodeCommands.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/GCodeCommands.cpp
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.i: cmake_force
@@ -539,7 +515,7 @@ CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.provides
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o: ../src/Project/InterfaceCommands/LCDInterfaceCommands.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.i: cmake_force
@@ -563,7 +539,7 @@ CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o.p
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o: ../src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.i: cmake_force
@@ -587,7 +563,7 @@ CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/ProgramInterfaceCommands.cpp
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o: ../src/Project/InterfaceCommands/TerminalCommands.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/InterfaceCommands/TerminalCommands.cpp
 
 CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.i: cmake_force
@@ -611,7 +587,7 @@ CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/TerminalCommands.cpp.o.provi
 
 CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o: ../src/Project/MachineController.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/MachineController.cpp
 
 CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.i: cmake_force
@@ -635,7 +611,7 @@ CMakeFiles/TRACER.dir/src/Project/MachineController.cpp.o.provides.build: CMakeF
 
 CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o: ../src/Project/TemperatureController.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Project/TemperatureController.cpp
 
 CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.i: cmake_force
@@ -659,7 +635,7 @@ CMakeFiles/TRACER.dir/src/Project/TemperatureController.cpp.o.provides.build: CM
 
 CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o: ../src/Sensors/Thermistors/Thermistors.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/Sensors/Thermistors/Thermistors.cpp
 
 CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.i: cmake_force
@@ -683,7 +659,7 @@ CMakeFiles/TRACER.dir/src/Sensors/Thermistors/Thermistors.cpp.o.provides.build: 
 
 CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o: ../src/StepperControl/IncrementComputer.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/IncrementComputer.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.i: cmake_force
@@ -707,7 +683,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/IncrementComputer.cpp.o.provides.build:
 
 CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o: ../src/StepperControl/JerkPlanner.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/JerkPlanner.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.i: cmake_force
@@ -731,7 +707,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/JerkPlanner.cpp.o.provides.build: CMake
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o: ../src/StepperControl/KinematicsCore1/K1Physics.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore1/K1Physics.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.i: cmake_force
@@ -755,7 +731,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/K1Physics.cpp.o.provide
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o: ../src/StepperControl/KinematicsCore1/KinematicsCore1.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.i: cmake_force
@@ -779,7 +755,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o.p
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o: ../src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.i: cmake_force
@@ -803,7 +779,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/HomingMovemen
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o: ../src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.i: cmake_force
@@ -827,7 +803,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/Movements/LinearMovemen
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o: ../src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.i: cmake_force
@@ -851,7 +827,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o.
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o: ../src/StepperControl/KinematicsCore1/mathProcess.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore1/mathProcess.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.i: cmake_force
@@ -875,7 +851,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore1/mathProcess.cpp.o.provi
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o: ../src/StepperControl/KinematicsCore2/K2Physics.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore2/K2Physics.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.i: cmake_force
@@ -899,7 +875,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/K2Physics.cpp.o.provide
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o: ../src/StepperControl/KinematicsCore2/KinematicsCore2.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.i: cmake_force
@@ -923,7 +899,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/KinematicsCore2.cpp.o.p
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o: ../src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.cpp.i: cmake_force
@@ -947,7 +923,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/KinematicsCore2/Movements/ComplexLinear
 
 CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o: ../src/StepperControl/MachineInterface.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/MachineInterface.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.i: cmake_force
@@ -971,7 +947,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/MachineInterface.cpp.o.provides.build: 
 
 CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o: ../src/StepperControl/StepperController.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/StepperController.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.i: cmake_force
@@ -995,7 +971,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/StepperController.cpp.o.provides.build:
 
 CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o: ../src/StepperControl/SubMovementManager.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/SubMovementManager.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.i: cmake_force
@@ -1019,7 +995,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/SubMovementManager.cpp.o.provides.build
 
 CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o: ../src/StepperControl/TrajectoryTracer.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building CXX object CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/StepperControl/TrajectoryTracer.cpp
 
 CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.i: cmake_force
@@ -1043,7 +1019,7 @@ CMakeFiles/TRACER.dir/src/StepperControl/TrajectoryTracer.cpp.o.provides.build: 
 
 CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o: ../src/TaskScheduler/TaskScheduler.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building CXX object CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building CXX object CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/TaskScheduler/TaskScheduler.cpp
 
 CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.i: cmake_force
@@ -1067,7 +1043,7 @@ CMakeFiles/TRACER.dir/src/TaskScheduler/TaskScheduler.cpp.o.provides.build: CMak
 
 CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o: ../src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building CXX object CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building CXX object CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp
 
 CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.i: cmake_force
@@ -1091,7 +1067,7 @@ CMakeFiles/TRACER.dir/src/hardware_language_abstraction/hardware_language_abstra
 
 CMakeFiles/TRACER.dir/src/interfaces.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/interfaces.cpp.o: ../src/interfaces.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building CXX object CMakeFiles/TRACER.dir/src/interfaces.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building CXX object CMakeFiles/TRACER.dir/src/interfaces.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/interfaces.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/interfaces.cpp
 
 CMakeFiles/TRACER.dir/src/interfaces.cpp.i: cmake_force
@@ -1115,7 +1091,7 @@ CMakeFiles/TRACER.dir/src/interfaces.cpp.o.provides.build: CMakeFiles/TRACER.dir
 
 CMakeFiles/TRACER.dir/src/main.cpp.o: CMakeFiles/TRACER.dir/flags.make
 CMakeFiles/TRACER.dir/src/main.cpp.o: ../src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building CXX object CMakeFiles/TRACER.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building CXX object CMakeFiles/TRACER.dir/src/main.cpp.o"
 	/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/TRACER.dir/src/main.cpp.o -c /media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/src/main.cpp
 
 CMakeFiles/TRACER.dir/src/main.cpp.i: cmake_force
@@ -1156,7 +1132,6 @@ TRACER_OBJECTS = \
 "CMakeFiles/TRACER.dir/src/Interfaces/ProgramInterface/ProgramInterface.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o" \
-"CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o" \
 "CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o" \
@@ -1205,7 +1180,6 @@ TRACER: CMakeFiles/TRACER.dir/src/Interfaces/LCDInterface/LCDInterface.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Interfaces/ProgramInterface/ProgramInterface.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o
-TRACER: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o
@@ -1235,7 +1209,7 @@ TRACER: CMakeFiles/TRACER.dir/src/interfaces.cpp.o
 TRACER: CMakeFiles/TRACER.dir/src/main.cpp.o
 TRACER: CMakeFiles/TRACER.dir/build.make
 TRACER: CMakeFiles/TRACER.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Linking CXX executable TRACER"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/raph/suus/Projets/Robotique/TRACERBOT/TRACER/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Linking CXX executable TRACER"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/TRACER.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -1260,7 +1234,6 @@ CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/LCDInterfac
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/ProgramInterface/ProgramInterface.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalInterface.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.o.requires
-CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/Config/geometry.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/GCodeCommands.cpp.o.requires
 CMakeFiles/TRACER.dir/requires: CMakeFiles/TRACER.dir/src/Project/InterfaceCommands/LCDInterfaceCommands.cpp.o.requires

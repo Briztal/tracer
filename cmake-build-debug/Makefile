@@ -686,33 +686,6 @@ src/Interfaces/TerminalInterface/TerminalNode.cpp.s:
 	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TerminalNode.cpp.s
 .PHONY : src/Interfaces/TerminalInterface/TerminalNode.cpp.s
 
-src/Interfaces/TerminalInterface/TreeManager.o: src/Interfaces/TerminalInterface/TreeManager.cpp.o
-
-.PHONY : src/Interfaces/TerminalInterface/TreeManager.o
-
-# target to build an object file
-src/Interfaces/TerminalInterface/TreeManager.cpp.o:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.o
-.PHONY : src/Interfaces/TerminalInterface/TreeManager.cpp.o
-
-src/Interfaces/TerminalInterface/TreeManager.i: src/Interfaces/TerminalInterface/TreeManager.cpp.i
-
-.PHONY : src/Interfaces/TerminalInterface/TreeManager.i
-
-# target to preprocess a source file
-src/Interfaces/TerminalInterface/TreeManager.cpp.i:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.i
-.PHONY : src/Interfaces/TerminalInterface/TreeManager.cpp.i
-
-src/Interfaces/TerminalInterface/TreeManager.s: src/Interfaces/TerminalInterface/TreeManager.cpp.s
-
-.PHONY : src/Interfaces/TerminalInterface/TreeManager.s
-
-# target to generate assembly for a file
-src/Interfaces/TerminalInterface/TreeManager.cpp.s:
-	$(MAKE) -f CMakeFiles/TRACER.dir/build.make CMakeFiles/TRACER.dir/src/Interfaces/TerminalInterface/TreeManager.cpp.s
-.PHONY : src/Interfaces/TerminalInterface/TreeManager.cpp.s
-
 src/Project/Config/geometry.o: src/Project/Config/geometry.cpp.o
 
 .PHONY : src/Project/Config/geometry.o
@@ -1510,9 +1483,6 @@ help:
 	@echo "... src/Interfaces/TerminalInterface/TerminalNode.o"
 	@echo "... src/Interfaces/TerminalInterface/TerminalNode.i"
 	@echo "... src/Interfaces/TerminalInterface/TerminalNode.s"
-	@echo "... src/Interfaces/TerminalInterface/TreeManager.o"
-	@echo "... src/Interfaces/TerminalInterface/TreeManager.i"
-	@echo "... src/Interfaces/TerminalInterface/TreeManager.s"
 	@echo "... src/Project/Config/geometry.o"
 	@echo "... src/Project/Config/geometry.i"
 	@echo "... src/Project/Config/geometry.s"
