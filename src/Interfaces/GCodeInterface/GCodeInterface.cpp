@@ -106,13 +106,13 @@ void GCodeInterface::read_data() {
             //If data still can be inserted in the buffer
             if (data_spaces) {
 
-                //Append the read_output char to data_in;
+                //Append the get_read_adress char to data_in;
                 *(data_in++) = read_char;
 
                 //Increment the command size;
                 command_size++;
 
-                //Decrement the number of spaces available;
+                //Decrement the number of nb_spaces available;
                 data_spaces--;
 
             } else {
@@ -138,7 +138,7 @@ void GCodeInterface::reset() {
     //Clear the corruption flag;
     corrupted_packet = false;
 
-    //Maximum numbers of char spaces;
+    //Maximum numbers of char nb_spaces;
     data_spaces = GCODE_MAX_SIZE;
 
     //data insertion at the origin;
@@ -399,7 +399,7 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
 
     do {
 
-        //First, remove unnecessary spaces;
+        //First, remove unnecessary nb_spaces;
         uint8_t dec = StringUtils::lstrip(args_current_position, ' ');
 
         args_current_position+= dec;
@@ -674,7 +674,7 @@ uint8_t m::nb_identifiers = 0;
 //The command size
 unsigned char m::command_size;
 
-//The current number of available spaces in the data bugger
+//The current number of available nb_spaces in the data bugger
 uint8_t m::data_spaces = GCODE_MAX_SIZE;
 
 //A flag set if the current packet is corrupted (too long for the data buffer)

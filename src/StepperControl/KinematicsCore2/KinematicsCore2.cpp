@@ -168,11 +168,11 @@ float KinematicsCore2::compute_us_time_for_first_sub_movement(k2_sub_movement_da
 /*
  * compute_time_for_sub_movement : This function prepares the next sub_movement.
  *
- *  Steps to enqueue_object a sub movement :
+ *  Steps to insert_object a sub movement :
  *      - Get the next step_distances > task given to the subclass
  *      - check if obtained step_distances are long enough
  *      - If true, dequeue the distance array
- *      - if not, discard the distance array and start with a new increment
+ *      - if not, discard_sub_movement the distance array and start with a new increment
  *
  * IMPORTANT : END_DISTANCE PROCESSING
  *

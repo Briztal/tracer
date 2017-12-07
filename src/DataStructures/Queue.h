@@ -42,89 +42,142 @@ class Queue {
     }\
 
 
+/*
+ * This struct will be the basic object we will store in the queue.
+ */
+    struct queue_object_t {
+
+        //A flag, to notify whether the object has been allocated.
+        boolean allocated = false;
+
+        //The effective object we want to store.
+        T object;
+
+
+    };
+
 public:
 
     /*
-     * Constructor : it takes the buffer size in only argument_t.
+     * Constructor : initialises all arguments
      */
-
-    Queue(uint8_t size) : size(size), content(new T[size]), max_indice((const uint8_t) (size - 1)), spaces(size) {}
-
-
-    //---------------------------------------------------Dequeue--------------------------------------------------------
-
-    /*
-     * dequeue : this method reads the output element, discards and returns it.
-     *
-     */
-
-    T dequeue() {
-
-
-        T element = content[output_index];
-
-        discard();
-
-        return element;
-
-    }
-
+    Queue(uint8_t size) :
+            size(size), content(new queue_object_t[size]), max_indice((const uint8_t) (size - 1)), nb_spaces(size) {}
 
 
     String display() {
 
-        return "\ninput "+String(input_index)+" output "+String(output_index)+" elements "+String(elements)+ " spaces "+String(spaces);
+        return "\ninput " + String(insertion_index) + " output " + String(reading_index) + " nb_elements " +
+               String(nb_elements) + " nb_spaces " + String(nb_spaces);
 
+    }
+
+    //---------------------------------------------Read Object Manipulation---------------------------------------------
+
+
+    /*
+     * get_read_adress : this method returns a pointer to the output element.
+     *
+     */
+
+    T *get_reading_address(bool *success) {
+
+        //First, cache the address of the queue object at the reading index;
+        queue_object_t *reading_object = content + reading_index;
+
+        //Update the success flag;
+        *success = reading_object->allocated;
+
+        //Return an actual object only if the object is allocated:
+        if (*success) {
+            return &reading_object->object;
+        }
+
+        return nullptr;
     }
 
 
     /*
-     * read_output : this method returns a pointer to the output element.
-     *
+     * discard_sub_movement : this method discards the current reading element
      */
 
-    T *read_output() {
+    void discard(bool *success) {
 
-        return content + output_index;
-    }
+        //First, cache the address of the queue object at the reading index.
+        queue_object_t *reading_object = content + reading_index;
 
+        //Update the success flag;
+        *success = reading_object->allocated;
 
-    /*
-     * discard : this method discards the output element
-     *
-     */
+        //Only modify the state variables if the object is allocated
+        if (*success) {
 
-    void discard() {
+            reading_object->allocated = false;
 
-        if (elements) {
+            //update the reading index
+            SAFE_DECR(reading_index);
 
-            SAFE_DECR(output_index);
+            //Modify the state variables
+            nb_elements--;
+            nb_spaces++;
 
-            elements--;
-            spaces++;
 
         }
+
+        return;
+
     }
 
-    //---------------------------------------------------Enqueue--------------------------------------------------------
+
+    //------------------------------------------Insertion Object Manipulation-------------------------------------------
 
     /*
-     * enqueue_object : this method copies the element provided object to the current input case,
+     * get_input_ptr : this method returns a pointer to the current input case
+     *
+     */
+
+    T *get_insertion_address(bool *success) {
+
+
+        //First, cache the address of the queue object at the reading index;
+        queue_object_t *insertion_object = content + insertion_index;
+
+        //Update the success flag.
+        *success = !insertion_object->allocated;
+
+        //Return an actual object only if the object is not:
+        if (*success) {
+            return &insertion_object->object;
+        }
+
+        return nullptr;
+    }
+
+
+    /*
+     * insert_object : this method copies the element provided object to the current input case,
      *      and updates the input index.
      *
      */
 
-    void enqueue_object(T element) {
+    void insert_object(T *object, bool *success) {
 
-        if (!spaces)
-            return;
+        //First, cache the address of the queue object at the reading index;
+        queue_object_t *insertion_object = content + insertion_index;
 
-        content[input_index] = element;
+        //Update the success flag;
+        *success = !insertion_object->allocated;
 
-        SAFE_DECR(input_index);
+        //Return an actual object only if the object is not allocated:
+        if (*success) {
 
-        elements++;
-        spaces--;
+            //Copy data from the object to the insertion object;
+            insertion_object->object = *object;
+
+            //Save the copied object, and eventually reset *success in case of error.
+            insert(success);
+
+        }
 
     }
 
@@ -134,28 +187,31 @@ public:
      *
      */
 
-    void enqueue() {
+    void insert(bool *success) {
 
-        if (!spaces)
-            return;
+        //First, cache the address of the queue object at the reading index.
+        queue_object_t *insertion_object = content + insertion_index;
 
-        SAFE_DECR(input_index);
+        //Update the success flag;
+        *success = !insertion_object->allocated;
 
-        elements++;
-        spaces--;
+
+        //Only modify the state variables if the object is not allocated
+        if (*success) {
+
+            insertion_object->allocated = true;
+
+            //update the reading index
+            SAFE_DECR(insertion_index);
+
+            //Modify the state variables
+            nb_elements++;
+            nb_spaces--;
+
+        }
 
     }
 
-
-    /*
-     * get_input_ptr : this method returns a pointer to the current input case
-     *
-     */
-
-    T *get_input_ptr() {
-
-        return content + input_index;
-    }
 
 
     /*
@@ -165,8 +221,8 @@ public:
 
     /*
     T *read_previous_input_ptr() {
-        if (input_index != max_indice) {
-            return content + input_index + 1;
+        if (insertion_index != max_indice) {
+            return content + insertion_index + 1;
         } else {
             return content;
         }
@@ -180,10 +236,10 @@ public:
 
     /*
     T *read_input_ptr_offset(uint8_t i) {
-        if (input_index + i <=  max_indice) {
-            return content + input_index + i;
+        if (insertion_index + i <=  max_indice) {
+            return content + insertion_index + i;
         } else {
-            return content + i - (max_indice - input_index) -1;
+            return content + i - (max_indice - insertion_index) -1;
         }
     }*/
 
@@ -192,19 +248,41 @@ public:
 
 
     uint8_t available_spaces() {
-        return spaces;
+        return nb_spaces;
     }
 
     uint8_t available_elements() {
-        return elements;
+        return nb_elements;
     }
 
-    const uint8_t pull_indice() {
-        return output_index;
+
+    const uint8_t get_reading_index(bool *success) {
+
+        //Update the success flag
+        *success = content[reading_index].allocated;
+
+        //Return a valid index only is the element is allocated.
+        if (*success) {
+            return reading_index;
+        }
+
+        //If the element is not allocated, return 0
+        return 0;
+
     }
 
-    const uint8_t push_indice() {
-        return input_index;
+    const uint8_t get_insertion_index(bool *success) {
+
+        //Update the success flag
+        *success = !content[insertion_index].allocated;
+
+        //Return a valid index only is the element is not allocated.
+        if (*success) {
+            return insertion_index;
+        }
+
+        //If the element is allocated, return 0
+        return 0;
     }
 
 
@@ -216,13 +294,13 @@ private:
     const uint8_t size;
     const uint8_t max_indice;
 
-    T *const content;
+    queue_object_t *const content;
 
-    uint8_t output_index = 0;
-    uint8_t input_index = 0;
+    uint8_t reading_index = 0;
+    uint8_t insertion_index = 0;
 
-    uint8_t elements = 0;
-    uint8_t spaces;
+    uint8_t nb_elements = 0;
+    uint8_t nb_spaces;
 
 };
 

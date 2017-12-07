@@ -67,6 +67,8 @@ public :
     //The state of the movement routine;
     static volatile bool started;
 
+    //A boolean to stop the machine at any time;
+    static volatile bool emergency_stop;
 
     //The signatures for the sub_movement that is currently executed
     static sig_t *saved_elementary_signatures;
@@ -76,6 +78,7 @@ public :
 
     //The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
     static uint8_t saved_trajectory_index;
+
 private :
 
     //the stop flag : enabled when all sub_movements have been processed
@@ -188,7 +191,7 @@ private:
     static float *const tools_linear_powers_storage;
 
     //The variables for action data update :
-    static uint8_t next_tools_powers_indice;
+    static uint8_t next_tools_powers_index;
 
     static sig_t current_tools_signature;
 

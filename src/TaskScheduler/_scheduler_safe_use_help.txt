@@ -35,7 +35,7 @@ The type of the task determines how it will be executed.
 //TODO ARGUMENTS
 
 Tasks mainly come from interfaces. The scheduler will regularly consult interfaces, and those will add tasks
-    if spaces are available.
+    if nb_spaces are available.
 
 An important thing to know, is that tasks comming from interfaces are not necessarly typed : a function in the terminal interface
 (for example) may plan a future stepper movement, and a DC movement. These two tasks have different types.
@@ -113,7 +113,7 @@ As you can guess, this problem cannot be solved without implementing some securi
 
 2 - at the beginning of its execution, a type-255 task must verify that every sequence it may enqueue tasks is not locked,
     and have enough space to contain all tasks the function wants to enqueue.
-    If not, the function locks all queues where it has to enqueue tasks, and fails.
+    If not, the function locks all queues where it has to insert tasks, and fails.
 
 3 - if a function fails, it is not deleted of the scheduler. It will be re-executed later.
 
@@ -134,29 +134,29 @@ The task pool contains 7 type-255 tasks and no space :
         task to analyse_command properly are Queues states.
 
     SCHEDULER STATE :
-    TASK_POOL | 0() 1()  2(0, 1)  3(1)  4(255)  5()  6(0)  |   ##  QUEUE_0 : 2 spaces left  ##  QUEUE_1 : 0 spaces left
+    TASK_POOL | 0() 1()  2(0, 1)  3(1)  4(255)  5()  6(0)  |   ##  QUEUE_0 : 2 nb_spaces left  ##  QUEUE_1 : 0 nb_spaces left
         
 
 ROUND 0 :
 
     First, the scheduler will process the task pool :
     - tasks 0 and 1 are executed. 
-    - task 2 must add a type-1 task, but no spaces are left in the sequence 1.
+    - task 2 must add a type-1 task, but no nb_spaces are left in the sequence 1.
         -> queues 0 and 1 are locked, and task 2 doesn't complete.
     - task 3 doesn't complete, because it must add a type-1 task, and sequence 1 is locked.
-    - task 4 doesn't complete, because the task pool has no spaces left.
+    - task 4 doesn't complete, because the task pool has no nb_spaces left.
     - task 5 completes.
     - task 6 doesn't complete, because the sequence 0 is locked.
 
     - end of processing : Scheduler unlocks both queues.
 
     SCHEDULER STATE :
-    TASK_POOL | 2(0, 1)  3(1)  4(255) 6(0) _  _  _ |   ##  QUEUE_0 : 2 spaces left  ##  QUEUE_1 : 0 spaces left
+    TASK_POOL | 2(0, 1)  3(1)  4(255) 6(0) _  _  _ |   ##  QUEUE_0 : 2 nb_spaces left  ##  QUEUE_1 : 0 nb_spaces left
 
     Then, the scheduler processes queues. Let's say, for the example, that it processes 2 task in the sequence 1
 
     SCHEDULER STATE :
-    TASK_POOL | 2(0, 1)  3(1)  4(255) 6(0) _  _  _ |   ##  QUEUE_0 : 2 spaces left  ##  QUEUE_1 : 2 spaces left
+    TASK_POOL | 2(0, 1)  3(1)  4(255) 6(0) _  _  _ |   ##  QUEUE_0 : 2 nb_spaces left  ##  QUEUE_1 : 2 nb_spaces left
 
 ROUND 1 :
 
@@ -181,7 +181,7 @@ ROUND 1 :
 
      SCHEDULER FINAL  STATE :
      TASK_POOL | _  _  _  _  _  _  _ |   ##  QUEUE_0 : 0 space left  ##  QUEUE_1 : 0 space left
-     All tasks are processed on the task pool, and no spaces are left on both queues.
+     All tasks are processed on the task pool, and no nb_spaces are left on both queues.
 
 
 
@@ -189,7 +189,7 @@ GOOD PRACTICES :
 
 When you implement tasks for an interface (in [interface]Commands.cpp) :
     - If you function plans a/some type-non255 task/s, always verify that the corresponding sequence does have to required
-        number of spaces. If not, never forget to lock very sequence related to your function.
+        number of nb_spaces. If not, never forget to lock very sequence related to your function.
     - Some functions plan tasks by themselves (Stepper movements plan for example). When you use them, systematically
         check the return value : if it returns "reprogram", your function must stop, eventually lock the appropriate
         sequence, and return the same state.

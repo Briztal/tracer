@@ -43,7 +43,7 @@
  *
  *  This solution is viable too, but as functions are scheduled, and we often want to call two related actions at the
  *      same time (for example, set the current speed AND move to a position with that speed), we would have often
- *      called functions simultaneously, what would have occupied more spaces in the scheduler.
+ *      called functions simultaneously, what would have occupied more nb_spaces in the scheduler.
  *
  */
 

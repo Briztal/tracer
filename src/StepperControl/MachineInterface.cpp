@@ -197,7 +197,7 @@ task_state_t MachineInterface::set_speed_for_group(uint8_t speed_group, float ne
 
     //If the current speed if the new speed, nothing to change.
     if (speeds[speed_group] == new_speed) {
-        return null_task;
+        return complete;
     }
 
     //Get the maximum regulation_speed for this group

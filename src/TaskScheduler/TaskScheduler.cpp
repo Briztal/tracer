@@ -124,14 +124,35 @@ bool TaskScheduler::schedule_task(task_t *task) {
     //If the task's type corresponds to an existing sequence:
     if ((type < NB_TASK_SEQUENCES) && (task_sequences[type]->available_spaces())) {
 
+        //First, cache the address of the current task sequence;
+        Queue<task_t> *queue = task_sequences[type];
+
+        //Initialise a flag;
+        bool queue_flag = false;
+
         //Copy the task in the sequence;
-        *task_sequences[type]->get_input_ptr() = *task;
+        queue->insert_object(task, &queue_flag);
 
-        //Validate the copy.
-        task_sequences[type]->enqueue();
 
-        //Succeed;
-        return true;
+        //Copy the task in the sequence;
+        *task_sequences[type]->get_insertion_address(&queue_flag) = *task;
+
+        //Integriy check
+        if (!queue_flag) {
+
+            //Log
+            CI::echo("ERROR in TaskScheduler::schedule_task : failed to copy the task in the queue.");
+
+            //Emergency stop
+            //TODO EMERGENCY_STOP
+
+        } else {
+
+            //Succeed;
+            return true;
+
+        }
+
 
     }
 
@@ -174,7 +195,7 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
 
 
 /*
- * spaces : this function returns the number of spaces available in the task pool.
+ * nb_spaces : this function returns the number of nb_spaces available in the task pool.
  */
 
 const uint8_t TaskScheduler::available_spaces(uint8_t type) {
@@ -182,7 +203,7 @@ const uint8_t TaskScheduler::available_spaces(uint8_t type) {
 
     if (type == 255) {
 
-        //If the type corresponds to the task pool : return the number of spaces of the pool
+        //If the type corresponds to the task pool : return the number of nb_spaces of the pool
         return pool_task_spaces;
 
     } else {
@@ -192,7 +213,7 @@ const uint8_t TaskScheduler::available_spaces(uint8_t type) {
             return 0;
 
 
-        //If the type corresponds to a sequence, return the number of spaces in the concerned sequence.
+        //If the type corresponds to a sequence, return the number of nb_spaces in the concerned sequence.
         return task_sequences[type]->available_spaces();
 
     }
@@ -254,7 +275,7 @@ bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
         return false;
     } else {
 
-        //If the sequence (or the task pool, depending on the type) contains less than nb_tasks spaces, fail;
+        //If the sequence (or the task pool, depending on the type) contains less than nb_tasks nb_spaces, fail;
         if (TaskScheduler::available_spaces(task_type) < nb_tasks) {
             return false;
         }
@@ -334,7 +355,7 @@ void TaskScheduler::run() {
                 //Schedule a line to the specified coordinates
                 MachineController::line(state);
 
-                CI::echo("ENDING");
+                CI::echo("ENCDING");
 
             }
 
@@ -454,8 +475,27 @@ void TaskScheduler::process_task_sequences() {
                 //If the sequence still has tasks to process
                 if (sequence->available_elements()) {
 
+                    //Declare a flag
+                    bool queue_flag = false;
+
+                    //Get the task to execute
+                    task_t *task = sequence->get_reading_address(&queue_flag);
+
+                    //Integrity check
+                    if (!queue_flag) {
+
+                        //Log
+                        CI::echo("ERROR in TaskScheduler::process_task_sequences : the reading element is not allocated.");
+
+                        //Emergency stop
+                        //TODO EMERGENCY_STOP
+
+                        return;
+
+                    }
+
                     //If the executed task must be reprogrammed
-                    if ((process_task(sequence->read_output()) == reprogram)) {
+                    if ((process_task(task) == reprogram)) {
 
                         //Disable this sequence's processing
                         process[sequence_id] = false;
@@ -464,8 +504,24 @@ void TaskScheduler::process_task_sequences() {
                     } else {
                         //If the task was processed :
 
+                        //Reset the flag
+                        queue_flag = false;
+
                         //Go to the other task
-                        sequence->discard();
+                        sequence->discard(&queue_flag);
+
+                        //Integrity check
+                        if (!queue_flag) {
+
+                            //Log
+                            CI::echo("ERROR in TaskScheduler::process_task_sequences : the discarded element was not allocated.");
+
+                            //Emergency stop
+                            //TODO EMERGENCY_STOP
+
+                            return;
+
+                        }
 
                         //Enable the next processing
                         keep_processing = true;
@@ -503,11 +559,46 @@ void TaskScheduler::process_task_sequences_singular() {
 
         while (sequence->available_elements()) {
 
+            //Declare a flag
+            bool queue_flag = false;
+
+            //Cache the task pointer;
+            task_t *task = sequence->get_reading_address(&queue_flag);
+
+            //Integrity check
+            if (!queue_flag) {
+
+                //Log
+                CI::echo("ERROR in TaskScheduler::process_task_sequences : the reading element is not allocated.");
+
+                //Emergency stop
+                //TODO EMERGENCY_STOP
+
+                return;
+
+            }
+
             //if the output task is correctly processed :
-            if (process_task(sequence->read_output())) {
+            if (process_task(task)) {
+
+                //Reset the flag
+                queue_flag = false;
 
                 //Go to the other task
-                sequence->discard();
+                sequence->discard(&queue_flag);
+
+                //Integrity check
+                if (!queue_flag) {
+
+                    //Log
+                    CI::echo("ERROR in TaskScheduler::process_task_sequences : the discarded element was not allocated.");
+
+                    //Emergency stop
+                    //TODO EMERGENCY_STOP
+
+                    return;
+
+                }
 
             } else {
 

@@ -5,8 +5,8 @@
 enum task_state_t {
     complete,
     invalid_arguments,
-    null_task,
     reprogram,
+    error
 };
 
 

@@ -42,7 +42,6 @@ void TerminalInterface::init() {
     //Setup a correct command environment
     reset();
 
-
 }
 
 
@@ -113,13 +112,13 @@ void TerminalInterface::read_data() {
             //If data still can be inserted in the buffer
             if (data_spaces) {
 
-                //Append the read_output char to data_in;
+                //Append the get_read_adress char to data_in;
                 *(data_in++) = read_char;
 
                 //Increment the command size;
                 command_size++;
 
-                //Decrement the number of spaces available;
+                //Decrement the number of nb_spaces available;
                 data_spaces--;
 
             } else {
@@ -145,7 +144,7 @@ void TerminalInterface::reset() {
     //Clear the corruption flag;
     corrupted_packet = false;
 
-    //Maximum numbers of char spaces;
+    //Maximum numbers of char nb_spaces;
     data_spaces = TERMINAL_MAX_SIZE;
 
     //data insertion at the origin;
@@ -191,7 +190,7 @@ void TerminalInterface::schedule_command() {
 
     //We must first get the next word of the command.
 
-    //Remove unnecessary spaces;
+    //Remove unnecessary nb_spaces;
     data_in += StringUtils::lstrip(data_in, ' ');
 
     //Update th beginninhg of the current command_identifier.
@@ -221,8 +220,6 @@ void TerminalInterface::schedule_command() {
         current_sub_node = sub_nodes[i];
 
         const char *node_identifier = (*current_sub_node->name).c_str();
-
-        CI::echo("word : "+String(command_identifier));
 
         //If the current command_identifier matches the current_node's name
         if (!strcmp(node_identifier, command_identifier)) {
@@ -492,7 +489,7 @@ bool TerminalInterface::parse_arguments(char *argument_sequence) {
         }
 
 
-        //remove extra spaces;
+        //remove extra nb_spaces;
         current_position += StringUtils::lstrip(current_position, ' ');
 
         char *arg;
@@ -922,7 +919,7 @@ uint8_t m::nb_identifiers = 0;
 
 ArgumentsContainer m::arguments_storage = ArgumentsContainer(TERMINAL_MAX_ARGS_NB * (TERMINAL_MAX_WORD_SIZE + 4) + 1,
                                                              TERMINAL_MAX_PENDING_COMMANDS);
-//The current number of available spaces in the data bugger
+//The current number of available nb_spaces in the data bugger
 uint8_t m::data_spaces = TERMINAL_MAX_SIZE;
 
 //A flag set if the current packet is corrupted (too long for the data buffer)

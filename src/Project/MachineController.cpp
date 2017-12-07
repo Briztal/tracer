@@ -495,7 +495,7 @@ task_state_t MachineController::set_working_extruder(uint8_t carriage) {
 
     //Nothing to do if the carriage id the current one.
     if (carriage == extrusion_state.working_carriage) {
-        return null_task;
+        return complete;
     }
 
     switch (mode) {

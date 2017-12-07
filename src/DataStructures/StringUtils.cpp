@@ -145,7 +145,7 @@ uint8_t StringUtils::get_nb_words(char *in_buffer) {
 
     do {
 
-        //Remove unnecessary spaces at the beginning of the char sequence.
+        //Remove unnecessary nb_spaces at the beginning of the char sequence.
         in_buffer += lstrip(in_buffer, ' ');
 
         //Get the size of the next word (will ne zero only if the sequence is finished).
@@ -173,10 +173,10 @@ uint8_t StringUtils::get_next_word(char *in_buffer, char *out_buffer, uint8_t ou
     //Initialise a counter, that will count the number of chars evaluated in this function
     uint8_t increment_counter = lstrip(in_buffer, ' ');
 
-    //Increment the input pointer at the end of extra spaces at its beginning.
+    //Increment the input pointer at the end of extra nb_spaces at its beginning.
     in_buffer += increment_counter;
 
-    //Copy the next word (without extra spaces)in out_buffer, and update the increment counter.
+    //Copy the next word (without extra nb_spaces)in out_buffer, and update the increment counter.
     increment_counter += copy_until_char(in_buffer, out_buffer, out_buffer_size, ' ');
 
     //Return the number of chars evaluated.

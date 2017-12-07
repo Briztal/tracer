@@ -100,7 +100,7 @@ public :
     //function to pop the next position in the queue.
     static sub_movement_data_t *read_next_sub_movement();
 
-    static void discard();
+    static void discard_sub_movement();
 
 
 

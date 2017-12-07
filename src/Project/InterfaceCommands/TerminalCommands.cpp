@@ -39,7 +39,8 @@ task_state_t TerminalCommands::action(char *) {
 
     float temp_xxx, temp_yyy, temp_zzz = temp_xxx = temp_yyy = 0;
 
-    while (TrajectoryTracer::movement_data_queue.available_spaces() != 0) {
+    //while (TrajectoryTracer::enqueue_authorised()) {
+    for (uint8_t i = 0; i < 18; i++) {
 
         MachineController::movement_state_t state = MachineController::movement_state_t();
 
@@ -70,7 +71,7 @@ task_state_t TerminalCommands::action(char *) {
         //Schedule a line to the specified coordinates
         MachineController::line(state);
 
-        CI::echo("ENDING");
+        CI::echo("ENxDING");
 
     }
 
@@ -377,7 +378,7 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
             new_state.nominative_speed_mod_flag = true;
 
             //Set the carriage;
-            new_state.nominative_carriage =  (uint8_t) GET_ARG_VALUE('c');
+            new_state.nominative_carriage = (uint8_t) GET_ARG_VALUE('c');
 
             //Set the speed;
             new_state.nominative_speed = GET_ARG_VALUE('s');
@@ -600,7 +601,6 @@ task_state_t TerminalCommands::temp_test(char *) {
 
     return complete;
 }
-
 
 
 #endif

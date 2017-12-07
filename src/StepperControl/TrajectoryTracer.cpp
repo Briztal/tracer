@@ -71,30 +71,35 @@ void TrajectoryTracer::start() {
 
     Kinematics::initialise_tracing_procedure();
 
+    //Enable all steppers
     StepperController::enable();
 
-
-    //Initialise the end booleans
+    //Initialise the end booleans;
     stop_programmed = false;
     final_sub_movement_started = false;
 
-    //Initialise the K2Physics for the first movement
+    //Disable the emergeny stop;
+    emergency_stop = false;
+
+    //Initialise the K2Physics for the first movement;
     process_next_movement();
 
+    //TODO COMMENT ?
     update_real_time_movement_data();
 
-    //Set up the movement procedure
+    //Set up the movement procedure;
     prepare_first_sub_movement();
 
     //Setup properly the interrupt procedure;
     setup_stepper_interrupt(prepare_next_sub_movement, (uint32_t) delay_us);
 
-    //Mark the movement procedure as started
+    //Mark the movement procedure as started;
     started = true;
 
-
     //Start the interrupt sequence.
-    enable_stepper_interrupt();
+    if (!emergency_stop) {
+        enable_stepper_interrupt();
+    }
 
 }
 
@@ -114,6 +119,9 @@ void TrajectoryTracer::stop() {
 
     //Interrupt the movement routing, by stopping the interrupt sequence
     disable_stepper_interrupt()
+
+    //Trigger an emergency stop, in case stop was called during the movement routine (in case of movement errors)
+    emergency_stop = true;
 
     //Get the half of the delay_us period
     uint32_t half_delay = (uint32_t) (delay_us / 2);
@@ -136,6 +144,7 @@ void TrajectoryTracer::stop() {
     //Enable the movement enqueuing
     movement_queue_lock_flag = false;
 
+    //Display the steppers position;
     StepperController::send_position();
 
 }
@@ -162,9 +171,9 @@ bool TrajectoryTracer::queue_locked() {
  */
 
 task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_initialisation)(),
-                                                 void (*movement_finalisation)(),
-                                                 void(*pre_process_trajectory_function)(float, float *),
-                                                 void(*trajectory_function)(float, float *)) {
+                                                void (*movement_finalisation)(),
+                                                void(*pre_process_trajectory_function)(float, float *),
+                                                void(*trajectory_function)(float, float *)) {
 
 
     if (!enqueue_authorised()) {
@@ -172,7 +181,10 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
         CI::echo("ERROR : NO SPACE LEFT IN THE MOVEMENT QUEUE");
 
-        return reprogram;
+        //Emergency stop
+        TrajectoryTracer::stop();
+
+        return error;
 
     }
 
@@ -181,18 +193,35 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
         //Send an error message.
         CI::echo("ERROR : THE MOVEMENT QUEUE WAS LOCKED WHEN THE MOVEMENT WAS PUSHED. THE MOVEMENT WILL BE IGNORED.");
 
+        //Emergency stop
+        TrajectoryTracer::stop();
+
         //Fail
-        return reprogram;
+        return error;
     }
 
 
     //---------------Movement container pointers Initialisation-----------------
 
-    movement_data_t new_movement = movement_data_t();
+    //Declare a flag;
+    bool queue_flag = false;
 
-    movement_data_t *current_movement = &new_movement;
-    //movement_data_t *current_movement = movement_data_queue.get_input_ptr();//TODO REVERSE
-    //movement_data_t *previous_movement = movement_data_queue.read_input_ptr_offset(1);
+    //Query the insertion address;
+    movement_data_t *current_movement = movement_data_queue.get_insertion_address(&queue_flag);
+
+    //Integrity check :
+    if (!queue_flag) {
+
+        //Log;
+        CI::echo("ERROR in TrajectoryTracer::enqueue_movement : The insertion element was not allocated.");
+
+        //Emergency stop
+        TrajectoryTracer::stop();
+
+        //Fail;
+        return error;
+    }
+    //movement_data_t *previous_movement = movement_data_queue.read_input_ptr_offset(1);//TODO REVERSE
 
 
     //---------------kernel-invariant data-----------------
@@ -209,8 +238,26 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     current_movement->jerk_point = false;
 
 
-    //Get the current insertion position in the linear_powers storage
-    float *tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.push_indice();
+    //Reset the flag
+    queue_flag = false;
+
+    //Set the current insertion position in the linear_powers storage, as the same position than in movement_data_queue.
+    float *tools_linear_powers =
+            tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.get_insertion_index(&queue_flag);
+
+    //Integrity check :
+    if (!queue_flag) {
+
+        //Log
+        CI::echo("ERROR in TrajectoryTracer::enqueue_movement : The element at the insertion index was already allocated.");
+
+        //Emergency Stop
+        TrajectoryTracer::stop();
+
+        //Fail
+        return error;
+
+    }
 
     //Get the action signature and fill the linear_powers storage.
     current_movement->tools_signatures = MachineInterface::get_tools_data(tools_linear_powers);
@@ -266,20 +313,43 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
 
 
-    debug("Enqueueing  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
+    debug("Enqueueing  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
+          String(movement_data_queue.available_spaces()));
 
-    //Push
-    movement_data_queue.enqueue_object(new_movement);
-    //movement_data_queue.enqueue();//TODO REVERSE
 
-    debug("Enqueued  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
+    //Enqueue the movement.
+
+    //Reset the flag;
+    queue_flag = false;
+
+    //Insert the movement
+    movement_data_queue.insert(&queue_flag);
+
+    //Integrity check
+    if (!queue_flag) {
+
+        //Log;
+        CI::echo("ERROR in TrajectoryTracer::enqueue_movement : the insertion element was already allocated.");
+
+        //Emergency stop
+        TrajectoryTracer::stop();
+
+        //Fail;
+        return error;
+
+    }
+
+    debug("Enqueued  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
+          String(movement_data_queue.available_spaces()));
 
     debug(movement_data_queue.display());
 
-    CI::echo("started :"+String(started));
+    CI::echo("started :" + String(started));
+
+
     //Start the movement procedure if it is not already started.
     //if (!started) {//TODO REVERSE
-    if (false) {
+    if ((!started) && !enqueue_authorised()) {
 
         //TODO FIND THE FUCK WHERE IT ALL FUCKS UP !!
 
@@ -307,9 +377,25 @@ void TrajectoryTracer::process_next_movement() {
 
     if (movement_data_queue.available_elements()) {
 
+        //declare a flag;
+        bool queue_flag = false;
 
         //Pull the next movement
-        movement_data_t *movement_data = movement_data_queue.read_output();
+        movement_data_t *movement_data = movement_data_queue.get_reading_address(&queue_flag);
+
+        //Integrity check :
+        if (!queue_flag) {
+
+            //Log
+            CI::echo("ERROR in TrajectoryTracer::process_next_movement : The reading element was not allocated.");
+
+            //Emergency stop;
+            TrajectoryTracer::stop();
+
+            //Fail
+            return;
+
+        }
 
         //Initialise the new movement
         (*(movement_data->movement_initialisation))();
@@ -317,8 +403,25 @@ void TrajectoryTracer::process_next_movement() {
         //update the finalisation function.
         movement_finalisation = movement_data->movement_finalisation;
 
-        //Update the tools indice.
-        next_tools_powers_indice = movement_data_queue.pull_indice();
+        //Reset the flag
+        queue_flag = false;
+
+        //Update the tools index.
+        next_tools_powers_index = movement_data_queue.get_reading_index(&queue_flag);
+
+        //Integrity check :
+        if (!queue_flag) {
+
+            //Log
+            CI::echo("ERROR in TrajectoryTracer::process_next_movement : The reading element at the reading index was not allocated.");
+
+            //Emergency stop;
+            TrajectoryTracer::stop();
+
+            //Fail
+            return;
+
+        }
 
         //Enable the future movement switch.
         movement_switch_flag = true;
@@ -329,7 +432,7 @@ void TrajectoryTracer::process_next_movement() {
         //Update now the pre_processing data, the real_time will be in the function below.
         Kinematics::load_pre_process_kinetics_data(movement_data);
 
-        //Don't discard the movement struct for instance, it will be done in update_real_time_jerk_environment;
+        //Don't discard_sub_movement the movement struct for instance, it will be done in update_real_time_jerk_environment;
 
     }
 
@@ -339,13 +442,29 @@ void TrajectoryTracer::process_next_movement() {
 /*
  * update_real_time_jerk_environment : this function actualises the jerk environment for the current move
  *      with the provided data.
- *
  */
 
 void TrajectoryTracer::update_real_time_movement_data() {
 
+    //declare a flag;
+    bool queue_flag = false;
 
-    movement_data_t *movement_data = movement_data_queue.read_output();
+    //Read the current movement;
+    movement_data_t *movement_data = movement_data_queue.get_reading_address(&queue_flag);
+
+    //Integrity check :
+    if (!queue_flag) {
+
+        //Log
+        CI::echo("ERROR in TrajectoryTracer::update_real_time_movement_data : The reading element was not allocated.");
+
+        //Emergency stop;
+        stop();
+
+        //Fail
+        return;
+
+    }
 
     //------Tools------
 
@@ -368,11 +487,32 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
     CI::echo("\n----------------------------------\n\nMOVEMENT POPPED\n\n-----------------------------\n");
 
-    debug("Discarding  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
+    debug("Discarding  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
+          String(movement_data_queue.available_spaces()));
+
+    //Reset the flag
+    queue_flag = false;
 
     //leave a space for a future movement_data.
-    movement_data_queue.discard();
-    debug("Discarded  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
+    movement_data_queue.discard(&queue_flag);
+
+    //Integrity check :
+    if (!queue_flag) {
+
+        //Log
+        CI::echo(
+                "ERROR in TrajectoryTracer::update_real_time_movement_data : The discarded element was not allocated.");
+
+        //Emergency stop;
+        stop();
+
+        //Fail
+        return;
+
+    }
+
+    debug("Discarded  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
+          String(movement_data_queue.available_spaces()));
 
 
     //Disable the movement_data switch.
@@ -418,7 +558,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
 
 
     //Discard the current sub_movement in the sub-movements queue.
-    SubMovementManager::discard();
+    SubMovementManager::discard_sub_movement();
 
     //Push as much sub_movements as possible.
     SubMovementManager::fill_sub_movement_queue();
@@ -472,7 +612,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     delay_us = time_us / (float) trajectory_index;
 
     //Discard the current sub_movement in the sub-movements queue.
-    SubMovementManager::discard();
+    SubMovementManager::discard_sub_movement();
 
     //If no more pre-process is required
     if (SubMovementManager::movement_processed()) {
@@ -505,12 +645,14 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     set_stepper_int_function(finish_sub_movement);
 
     //Re-enable the stepper interrupt
-    enable_stepper_interrupt();
+    if (!emergency_stop) {
+        enable_stepper_interrupt();
+    }
 }
 
 
 /*
- * initialise_sub_movement : sets the delay_us, the trajectory indice, the steppers directions
+ * initialise_sub_movement : sets the delay_us, the trajectory index, the steppers directions
  *      and returns the pointer to the elementary signatures processed before
  */
 
@@ -547,7 +689,6 @@ sig_t *TrajectoryTracer::initialise_sub_movement() {
     }
 
 }
-
 
 
 /*
@@ -686,7 +827,9 @@ void TrajectoryTracer::finish_sub_movement() {
                 final_sub_movement_started = true;
 
                 //re-interrupt on this function, as no more process is required
-                enable_stepper_interrupt();
+                if (!emergency_stop) {
+                    enable_stepper_interrupt();
+                }
 
                 return;
 
@@ -722,7 +865,9 @@ void TrajectoryTracer::finish_sub_movement() {
 
     }
 
-    enable_stepper_interrupt();
+    if (!emergency_stop) {
+        enable_stepper_interrupt();
+    }
 }
 
 
@@ -751,7 +896,7 @@ void TrajectoryTracer::update_tools_data(movement_data_t *movement) {
     tools_nb = MachineInterface::set_tools_updating_function(next_tools_signature, tools_update_functions);
 
     //update linear powers
-    tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_indice;
+    tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_index;
 
     //update the tools signature
     current_tools_signature = next_tools_signature;
@@ -794,6 +939,9 @@ void TrajectoryTracer::update_tools_powers(float speed) {
 //Acceleration Fields
 
 volatile bool m::started = false;
+
+//
+volatile bool m::emergency_stop = false;
 
 
 bool m::stop_programmed = false;
@@ -843,7 +991,7 @@ float *const m::tools_linear_powers_storage = t_a_ls;
 
 float *m::tools_linear_powers;
 
-uint8_t m::next_tools_powers_indice = 0;
+uint8_t m::next_tools_powers_index = 0;
 sig_t m::current_tools_signature = 0;
 
 bool m::movement_switch_flag = false;

@@ -91,8 +91,25 @@ bool SubMovementManager::movement_processed() {
 
 
 void SubMovementManager::push_new_position() {
-    sub_movement_data_t *sub_movement_data = sub_movement_queue.get_input_ptr();
 
+    //Inistalise the queue flag;
+    bool queue_flag = false;
+
+    //Get the insertion address;
+    sub_movement_data_t *sub_movement_data = sub_movement_queue.get_insertion_address(&queue_flag);
+
+    //Control the flag, for safety:
+    if (!queue_flag) {
+
+        //Log if the flag is reset (error)
+        CI::echo("ERROR in SubMovementManager::push_new_position : the insertion element is already assigned");
+
+        //Stop any movement now;
+        TrajectoryTracer::stop();
+
+        return;
+
+    }
 
     //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
     //get a new sub-movement
@@ -157,9 +174,22 @@ void SubMovementManager::verify_sub_movement(sub_movement_data_t *sub_movement_d
     if (distance_bounds_error(max_distance))
         return;
 
+    //Initialise a queue flag;
+    bool queue_flag = false;
 
     //Now that validity checks are made, process the sub_movement data
-    sub_movement_queue.enqueue();
+    sub_movement_queue.insert(&queue_flag);
+
+    //Control the flag for safety
+    if (!queue_flag) {
+
+        //Log
+        CI::echo("ERROR in SubMovementManager::verify_sub_movement : The insertion position is already allocated.");
+
+        //Emergency stop
+        TrajectoryTracer::stop();
+
+    }
 
     //Update the index
     index = sub_movement_data->index_candidate;
@@ -286,25 +316,68 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
 
 sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
 
+    //Get the number of available sub movements
     uint8_t size = sub_movement_queue.available_elements();
 
+    //If no more sub movements are present in the queue :
     if (!size) {
 
         //if the queue is empty : error
-        CI::echo("ERROR : IN TrajectoryTracer::read_next_sub_movement : THE SUB_MOVEMENT QUEUE IS EMPTY");
+        CI::echo("ERROR : IN SubMovementManager::read_next_sub_movement : THE SUB_MOVEMENT QUEUE IS EMPTY");
 
+        //Emergency stop;
+        TrajectoryTracer::stop();
+
+        //Fail
         return 0;
 
     } else {
 
-        return sub_movement_queue.read_output();
+        //Define a flag :
+        bool queue_flag = false;
+
+        //Get the reading adress
+        sub_movement_data_t *address = sub_movement_queue.get_reading_address(&queue_flag);
+
+        //Control the data integrity
+        if (queue_flag) {
+
+            //Log;
+            CI::echo("ERROR : IN SubMovementManager::read_next_sub_movement : the reading element was not allocated");
+
+            //Emergency stop;
+            TrajectoryTracer::stop();
+
+            //Fail;
+            return 0;
+
+        }
+
+        return address;
 
     }
 
 }
 
-void SubMovementManager::discard() {
-    sub_movement_queue.discard();
+void SubMovementManager::discard_sub_movement() {
+
+    //Define a flag;
+    bool queue_flag = false;
+
+    //Discard the sub_movement;
+    sub_movement_queue.discard(&queue_flag);
+
+    //Integrity control :
+    if (queue_flag) {
+
+        //Log;
+        CI::echo("ERROR : IN SubMovementManager::discard_sub_movement : the reading element was not allocated");
+
+        //Emergency stop;
+        TrajectoryTracer::stop();
+
+    }
+
 }
 
 

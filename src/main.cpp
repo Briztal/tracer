@@ -27,7 +27,7 @@ int main() {
 
     while(true) {
         if (Serial.available()) {
-            Serial.println(Serial.read_output());
+            Serial.println(Serial.get_read_adress());
         }
     }
      */
