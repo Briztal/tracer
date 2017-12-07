@@ -28,6 +28,8 @@ PONEY
 #include <EEPROM/EEPROMStorage.h>
 #include <StepperControl/StepperController.h>
 #include <ControlLoops/ControlLoops.h>
+#include <Project/MachineController.h>
+#include <StepperControl/TrajectoryTracer.h>
 
 
 /*
@@ -118,7 +120,6 @@ bool TaskScheduler::schedule_task(task_t *task) {
 
     }
 
-    CI::echo("available : " + String(task_sequences[type]->available_spaces()));
 
     //If the task's type corresponds to an existing sequence:
     if ((type < NB_TASK_SEQUENCES) && (task_sequences[type]->available_spaces())) {
@@ -178,9 +179,6 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
 
 const uint8_t TaskScheduler::available_spaces(uint8_t type) {
 
-    //If the type is not allocated, return zero
-    if (!check_sequence_type(type))
-        return 0;
 
     if (type == 255) {
 
@@ -188,6 +186,11 @@ const uint8_t TaskScheduler::available_spaces(uint8_t type) {
         return pool_task_spaces;
 
     } else {
+
+        //If the type is not allocated, return zero
+        if (!check_sequence_type(type))
+            return 0;
+
 
         //If the type corresponds to a sequence, return the number of spaces in the concerned sequence.
         return task_sequences[type]->available_spaces();
@@ -297,53 +300,53 @@ void TaskScheduler::run() {
         //Process tasks sequences after
         process_task_sequences();
 
-        /*
-        if (data_spaces(0)) {
+        if (flood_enabled) {
+            while (TrajectoryTracer::enqueue_authorised()) {
 
-            MachineController::movement_state_t state = MachineController::movement_state_t();
+                CI::echo("\nTASK_AVAILABLE. BEGINNING: "+String(available_spaces(0)));
 
-            state.x_flag = true;
-            state.y_flag = true;
-            state.z_flag = true;
+                MachineController::movement_state_t state = MachineController::movement_state_t();
 
-            state.x = temp_xxx;
-            state.y = temp_yyy;
-            state.z = temp_zzz;
+                state.x_flag = true;
+                state.y_flag = true;
+                state.z_flag = true;
 
-            temp_xxx += 10;
+                state.x = temp_xxx;
+                state.y = temp_yyy;
+                state.z = temp_zzz;
 
-            if (temp_xxx == 150) {
-                temp_xxx = 0;
-                temp_yyy += 10;
+                temp_xxx += 10;
+
+                if (temp_xxx == 150) {
+                    temp_xxx = 0;
+                    temp_yyy += 10;
+                }
+
+                if (temp_yyy == 150) {
+                    temp_yyy = 0;
+                    temp_zzz += 10;
+                }
+
+                if (temp_zzz == 300) {
+                    temp_zzz = 0;
+                }
+
+                //Schedule a line to the specified coordinates
+                MachineController::line(state);
+
+                CI::echo("ENDING");
+
             }
 
-            if (temp_yyy == 150) {
-                temp_yyy = 0;
-                temp_zzz += 10;
-            }
+            CI::echo("OUT");
 
-            if (temp_zzz == 300) {
-                temp_zzz = 0;
-            }
-
-            //Schedule a line to the specified coordinates
-            MachineController::line_scheduled_0(state);
 
         }
 
-        if (data_spaces(0)) {
-
-            //Schedule an enable / disable of steppers.
-            //MachineController::enable_steppers_scheduled_0(true);
-
-        }
-
-        CI::echo("SUUS");
-
-        delay(300);
 
 
-         */
+        delay(80);
+
 
     }
 }
@@ -445,26 +448,42 @@ void TaskScheduler::process_task_sequences() {
             //Cache the task sequence;
             Queue<task_t> *sequence = task_sequences[sequence_id];
 
-            //If the sequence still has elements to process  the output task is correctly processed;
-            if (process[sequence_id] && (sequence->available_elements()) && process_task(sequence->read_output())) {
+            //If the sequence can be processed :
+            if (process[sequence_id]) {
 
-                //Go to the other task
-                sequence->discard();
+                //If the sequence still has tasks to process
+                if (sequence->available_elements()) {
 
-                //Enable the next processing
-                keep_processing = true;
+                    //If the executed task must be reprogrammed
+                    if ((process_task(sequence->read_output()) == reprogram)) {
 
-            } else {
+                        //Disable this sequence's processing
+                        process[sequence_id] = false;
 
-                //Disable this sequence's processing
-                process[sequence_id] = false;
+
+                    } else {
+                        //If the task was processed :
+
+                        //Go to the other task
+                        sequence->discard();
+
+                        //Enable the next processing
+                        keep_processing = true;
+
+                    }
+
+                } else {
+
+                    //Disable this sequence's processing
+                    process[sequence_id] = false;
+
+                }
 
             }
 
         }
 
     }
-
 }
 
 
@@ -571,5 +590,6 @@ bool *const m::queues_locked = t_ftflg;
 Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
 Queue<task_t> **const m::task_sequences = define_task_queue(t_tsks);
 
+bool m::flood_enabled = false;
 
 #endif

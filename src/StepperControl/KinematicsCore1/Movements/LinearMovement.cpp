@@ -20,14 +20,11 @@
 
 #include <config.h>
 
-#ifndef ENABLE_STEPPER_CONTROL
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 0)
 
 #include <interface.h>
-#include <Core/EEPROMStorage.h>
-#include <StepperControl/Kernel1/SpeedPlanner.h>
-#include <StepperControl/Kernel1/K1RealTimeProcessor.h>
+#include <EEPROM/EEPROMStorage.h>
 #include <StepperControl/StepperController.h>
-#include <StepperControl/Kernel1/TrajectoryExecuter.h>
 #include "LinearMovement.h"
 
 

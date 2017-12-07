@@ -45,10 +45,12 @@ class TrajectoryTracer {
 
     //--------------------------------------------movement_queue_management---------------------------------------------
 
+public:
 
+    static bool enqueue_authorised();
+
+    static Queue<movement_data_t> movement_data_queue;//TODO REVERSE PUBLIC
 private:
-
-    static Queue<movement_data_t> movement_data_queue;
 
 
     //The flag for a real-time movement switch
@@ -66,14 +68,14 @@ public :
     static volatile bool started;
 
 
-//The signatures for the sub_movement that is currently executed
-static sig_t *saved_elementary_signatures;
+    //The signatures for the sub_movement that is currently executed
+    static sig_t *saved_elementary_signatures;
 
-//the trajectory array : contains the signature order.
-static const uint8_t *const trajectory_array;
+    //the trajectory array : contains the signature order.
+    static const uint8_t *const trajectory_array;
 
-//The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
-static uint8_t saved_trajectory_index;
+    //The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
+    static uint8_t saved_trajectory_index;
 private :
 
     //the stop flag : enabled when all sub_movements have been processed
@@ -126,7 +128,7 @@ public :
     static void stop();
 
     //The function to verify that the enqueueing is authorised. returns true if the process isn't unauthorised.
-    static bool enqueue_unauthorised();
+    static bool queue_locked();
 
     //new movement enqueueing
     static task_state_t enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
@@ -172,7 +174,7 @@ private :
 public :
 
     //The function to update the action variables
-    static void update_tools_powers(float current_speed) ;
+    static void update_tools_powers(float current_speed);
 
 private:
 
@@ -213,7 +215,6 @@ private:
 #define STEP_AND_WAIT \
     StepperController::fastStep(CTE::saved_elementary_signatures[CTE::trajectory_array[CTE::saved_trajectory_index--]]);\
     WAIT
-
 
 
 #endif //TRACER_MOTIONEXECUTER_H

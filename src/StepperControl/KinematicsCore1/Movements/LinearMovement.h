@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#ifndef ENABLE_STEPPER_CONTROL
+#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 0)
 
 #ifndef CODE_MOTIONND_H
 #define CODE_MOTIONND_H

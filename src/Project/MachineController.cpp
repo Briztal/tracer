@@ -186,6 +186,10 @@ void MachineController::replace_coords(movement_state_t *coords) {
 
 task_state_t MachineController::line(movement_state_t movement_state) {
 
+    if (!TrajectoryTracer::enqueue_authorised()) {
+        return reprogram;
+    };
+
     //Initialise a state
     task_state_t state = complete;
 
@@ -254,7 +258,7 @@ void MachineController::persist_coords(movement_state_t *coords) {
 //---------------------------------------------------Movement planners--------------------------------------------------
 
 /*
- * move_mode_0 : single working_carriage mode    CI::echo("complete : "+String(state == complete));
+ * move_mode_0 : single working_carriage mode
 .
  *
  *  In this mode, every working_carriage can be moved independently.
@@ -314,15 +318,8 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
     //TODO SANITY CHECK
     //sanity_check(position);
 
-    //Display the destination.
-    for (uint8_t i = 0; i < NB_AXIS; i++) {
-        CI::echo(String(i) + " " + String(axis_positions[i]));
-    }
-
     //Plan movement.
     task_state_t state = MachineInterface::linear_movement(axis_positions);
-
-    CI::echo("STATE : " + String(state == reprogram));
 
     return state;
 }
@@ -391,14 +388,14 @@ void MachineController::sanity_check(float *position) {
 
 //-----------------------------------------------------Offsets---------------------------------------------------
 
-task_state_t MachineController::set_offsets_state(offsets_state_t new_offsets) {
+task_state_t MachineController::set_current_position(offsets_state_t new_position) {
 
     /* As we must check all 4 offsets, the exact same way, a macro will be used.
      * This macro check the flag for the provided axis, and if set, updates the current offset with the given value.
      */
 #define CHECK_AXIS(axis)\
-    if (new_offsets.axis##_flag) {\
-        offsets.axis = new_offsets.axis;\
+    if (new_position.axis##_flag) {\
+        offsets.axis = current_position.axis - new_position.axis;\
     }
 
     //Eventually modify the offset for all 4 axis (x, y, z, e)

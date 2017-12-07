@@ -98,7 +98,11 @@ public:
 
     static bool verify_schedulability(uint8_t task_type, uint8_t nb_tasks);
 
+    static bool flood_enabled;
+
+
 private:
+
 
     //The primary task pool
     static task_t *const task_pool;

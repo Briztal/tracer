@@ -222,7 +222,6 @@ static task_state_t name##_scheduled_##type signature { \
     \
     /*Create the data in the heap*/\
     struct name##_struct_t *_unpacker_data_ = new name##_struct_t();\
-    CI::echo("ADDRESS : "+String((uint32_t)_unpacker_data_));\
     \
     /*Fill the data*/\
     struct_fill\

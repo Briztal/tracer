@@ -405,7 +405,7 @@ void TerminalInterface::confirm_command_execution(const interface_data_t *data) 
 
             //If the task must be reprogrammed:
         case reprogram:
-            //CI::echo("Command Reprogrammed.");
+            CI::echo("Command Reprogrammed.");
             return;
 
             //If the task completed correctly
@@ -676,6 +676,7 @@ bool TerminalInterface::verify_all_identifiers_presence(const char *identifiers)
 
 }
 
+
 /*
  * verify_all_identifiers_presence : this function return true only if ONE arguments contained
  *  in the arguments string has been extracted during the previous parsing.
@@ -712,7 +713,7 @@ bool TerminalInterface::verify_one_identifiers_presence(const char *identifiers)
 
 
 /*
- * verfy_identifier_presence : this function return true if the identifier id has been extracted
+ * verify_identifier_presence : this function return true if the identifier id has been extracted
  *  during the previous parsing.
  */
 
@@ -733,9 +734,6 @@ bool TerminalInterface::verify_identifier_presence(char id) {
     return false;
 
 }
-
-
-
 
 
 //--------------------------------------------------Tree generation-----------------------------------------------------

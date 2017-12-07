@@ -38,8 +38,6 @@
 
 task_state_t ComplexLinearMovement::plan_movement(const float *const destination) {
 
-
-
     //get the movement step_distances
     float distances[NB_AXIS];
 
@@ -79,15 +77,17 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     pre_process_max_axis = max_axis;
 
     //Wait for the enqueuing to be authorised in TrajectoryTracer.
-    while (TrajectoryTracer::enqueue_unauthorised());
+    while (TrajectoryTracer::queue_locked());
 
+
+    CI::echo("PREPARATION_DONE");
 
     //The state of the process must be saved, as in determies if the task must be reprogrammed
     task_state_t enqueue_state = TrajectoryTracer::enqueue_movement(0, max_distance, initialise_movement,
                                                                     finalise_movement, get_position,
                                                                     get_real_time_position);
 
-    //If the process has complete,
+    //If the process has completed,
     if (enqueue_state == complete) {
 
         //Push the local data

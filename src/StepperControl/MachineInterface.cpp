@@ -34,12 +34,13 @@
 #include <LinearMovement.h>
 #elif (KERNEL == 1)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
-#include <Project/Config/geometry.cpp>
-#include <TaskScheduler/task_state_t.h>
 
 #elif (KERNEL == 2)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
+
+#include <Project/Config/geometry.cpp>
+
 
 //------------------------------------------------------Movements-------------------------------------------------------
 
@@ -123,6 +124,7 @@ void MachineInterface::get_stepper_positions_for(void (*get_position)(float, flo
 
     //Translate it to obtain the initial stepper position
     MachineInterface::translate(hl_positions, positions);
+
 }
 
 

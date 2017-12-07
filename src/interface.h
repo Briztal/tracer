@@ -49,6 +49,7 @@
 #endif
 #endif
 
+#define debug(s) CI::echo(String("debug ") + s);
 
 void initialise_interfaces();
 

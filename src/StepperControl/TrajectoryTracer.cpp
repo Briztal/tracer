@@ -35,6 +35,14 @@
 
 //------------------------------------------------movement_queue_management---------------------------------------------
 
+bool TrajectoryTracer::enqueue_authorised() {
+
+    return movement_data_queue.available_spaces() >= 1;
+
+}
+
+//------------------------------------------------Movement_Procedure------------------------------------------------
+
 /*
  * The function to start the movement routine. It will run in interrupts while movements are to trace, and then stop.
  *
@@ -54,12 +62,12 @@ void TrajectoryTracer::start() {
         //If no movements are in the queue, no need to start.
 
         //send an error message
-        CI::echo("No movements are present in the queue, starting aborted");
+        debug("No movements are present in the queue, starting aborted");
 
         return;
     }
 
-    CI::echo("Movements procedure started.");
+    debug("Movements procedure started.");
 
     Kinematics::initialise_tracing_procedure();
 
@@ -125,8 +133,6 @@ void TrajectoryTracer::stop() {
     //Mark the movement routine as stopped
     started = false;
 
-    CI::echo("STOPED");
-
     //Enable the movement enqueuing
     movement_queue_lock_flag = false;
 
@@ -136,11 +142,11 @@ void TrajectoryTracer::stop() {
 
 
 /*
- * enqueue_unauthorised : this function is used by another process, to verify if the movement queue is not locked.
+ * queue_locked : this function is used by another process, to verify if the movement queue is not locked.
  *      It returns true if the queue is locked, and the enqueuing is not permitted.
  */
 
-bool TrajectoryTracer::enqueue_unauthorised() {
+bool TrajectoryTracer::queue_locked() {
     return movement_queue_lock_flag;
 }
 
@@ -153,7 +159,6 @@ bool TrajectoryTracer::enqueue_unauthorised() {
  *      - increment : the index increment for the first movement;
  *      - movement_initialisation : the movement's in_real_time initialisation function;
  *      - trajectory_function : the function that will be used to compute new positions in_real_time.
- *
  */
 
 task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*movement_initialisation)(),
@@ -162,10 +167,10 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
                                                  void(*trajectory_function)(float, float *)) {
 
 
-    if (!movement_data_queue.available_spaces()) {
+    if (!enqueue_authorised()) {
         //If no more space is available in the data queue, reprogram the task
 
-        CI::echo("NO SPACE LEFT");
+        CI::echo("ERROR : NO SPACE LEFT IN THE MOVEMENT QUEUE");
 
         return reprogram;
 
@@ -183,8 +188,11 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //---------------Movement container pointers Initialisation-----------------
 
-    movement_data_t *current_movement = movement_data_queue.get_input_ptr();
-    movement_data_t *previous_movement = movement_data_queue.read_input_ptr_offset(1);
+    movement_data_t new_movement = movement_data_t();
+
+    movement_data_t *current_movement = &new_movement;
+    //movement_data_t *current_movement = movement_data_queue.get_input_ptr();//TODO REVERSE
+    //movement_data_t *previous_movement = movement_data_queue.read_input_ptr_offset(1);
 
 
     //---------------kernel-invariant data-----------------
@@ -229,12 +237,13 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     //we must check the jerk if the routine is started, or if movements are already present in the queue.
     bool jerk_checking = (started) || (movement_data_queue.available_elements());
 
-    //Control the jerk bounds if required, and init the jerk control for the next movement
-    JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
+    //Control the jerk bounds if required, and init the jerk control for the next movement //TODO REVERSE
+    //JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
 
 
     //---------------Jerk adjusting----------------------
 
+    /*
     if (jerk_checking && previous_movement->jerk_point) {
 
         //If the movement has been popped since the processing has started
@@ -245,6 +254,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
         }
     }
+     *///TODO REVRSE
 
 
     /*
@@ -256,17 +266,28 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
 
 
+    debug("Enqueueing  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
+
     //Push
-    movement_data_queue.enqueue();
+    movement_data_queue.enqueue_object(new_movement);
+    //movement_data_queue.enqueue();//TODO REVERSE
 
-    CI::echo("ENQUEUED : " + str(movement_data_queue.available_elements()));
+    debug("Enqueued  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
 
+    debug(movement_data_queue.display());
+
+    CI::echo("started :"+String(started));
     //Start the movement procedure if it is not already started.
-    if (!started) {
+    //if (!started) {//TODO REVERSE
+    if (false) {
+
+        //TODO FIND THE FUCK WHERE IT ALL FUCKS UP !!
+
+        //TODO : IT FUCKS UP WHEN THE QUEUE IS FILLED, DURING THE MOVEMENT PROCEDURE
 
         start();
 
-        CI::echo("STARTED");
+        debug("Movement Started");
 
     }
 
@@ -283,7 +304,9 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
 void TrajectoryTracer::process_next_movement() {
 
+
     if (movement_data_queue.available_elements()) {
+
 
         //Pull the next movement
         movement_data_t *movement_data = movement_data_queue.read_output();
@@ -308,7 +331,6 @@ void TrajectoryTracer::process_next_movement() {
 
         //Don't discard the movement struct for instance, it will be done in update_real_time_jerk_environment;
 
-
     }
 
 }
@@ -322,9 +344,10 @@ void TrajectoryTracer::process_next_movement() {
 
 void TrajectoryTracer::update_real_time_movement_data() {
 
+
     movement_data_t *movement_data = movement_data_queue.read_output();
 
-    //------Tools-----K2Physics-
+    //------Tools------
 
     //Update tool_environment
     update_tools_data(movement_data);
@@ -335,17 +358,22 @@ void TrajectoryTracer::update_real_time_movement_data() {
     //Jerk positions
     SubMovementManager::update_jerk_position(movement_data->jerk_position);
 
-    SubMovementManager::display_distances();
+    //SubMovementManager::display_distances();
 
     //Jerk environment
 
     Kinematics::load_real_time_kinetics_data(movement_data);
 
-
     //------Clean------
+
+    CI::echo("\n----------------------------------\n\nMOVEMENT POPPED\n\n-----------------------------\n");
+
+    debug("Discarding  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
 
     //leave a space for a future movement_data.
     movement_data_queue.discard();
+    debug("Discarded  : size  : " + str(movement_data_queue.available_elements())+" spaces " + String(movement_data_queue.available_spaces()));
+
 
     //Disable the movement_data switch.
     movement_switch_flag = false;
@@ -643,7 +671,7 @@ void TrajectoryTracer::finish_sub_movement() {
                 //Stop the routine
                 stop();
 
-                CI::echo("STOPPED");
+                debug("Movement Stopped");
 
                 return;
 
@@ -820,6 +848,7 @@ sig_t m::current_tools_signature = 0;
 
 bool m::movement_switch_flag = false;
 uint8_t m::movement_switch_counter = 0;
+
 
 #undef m
 #endif

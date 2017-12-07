@@ -261,10 +261,10 @@ private:
 public:
 
     //The offset modifier
-    static task_state_t set_offsets_state(offsets_state_t);
+    static task_state_t set_current_position(offsets_state_t);
 
     //A scheduler for the offset modifier
-GENERATE_SCHEDULER(set_offsets_state, 0, offsets_state_t, offsets);
+GENERATE_SCHEDULER(set_current_position, 0, offsets_state_t, offsets);
 
 
 private:

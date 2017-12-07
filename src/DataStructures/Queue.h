@@ -22,6 +22,7 @@
 #define TRACER_QUEUE_H
 
 #include <stdint.h>
+#include "hardware_language_abstraction.h"
 
 template<typename T>
 class Queue {
@@ -47,10 +48,7 @@ public:
      * Constructor : it takes the buffer size in only argument_t.
      */
 
-    Queue(uint8_t size) :
-            size(size), content(new T[size]), max_indice((const uint8_t) (size - 1)),
-            spaces(size) {
-    }
+    Queue(uint8_t size) : size(size), content(new T[size]), max_indice((const uint8_t) (size - 1)), spaces(size) {}
 
 
     //---------------------------------------------------Dequeue--------------------------------------------------------
@@ -68,6 +66,14 @@ public:
         discard();
 
         return element;
+
+    }
+
+
+
+    String display() {
+
+        return "\ninput "+String(input_index)+" output "+String(output_index)+" elements "+String(elements)+ " spaces "+String(spaces);
 
     }
 
@@ -157,6 +163,7 @@ public:
      *
      */
 
+    /*
     T *read_previous_input_ptr() {
         if (input_index != max_indice) {
             return content + input_index + 1;
@@ -165,19 +172,20 @@ public:
         }
     }
 
-
+    */
     /*
     * read_input_ptr_offset : this method returns a pointer to the case that was the input case [i] inputs ago.
     *
     */
 
+    /*
     T *read_input_ptr_offset(uint8_t i) {
         if (input_index + i <=  max_indice) {
             return content + input_index + i;
         } else {
             return content + i - (max_indice - input_index) -1;
         }
-    }
+    }*/
 
 
     //-------------------------------------------------Queue state------------------------------------------------------

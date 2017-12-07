@@ -63,7 +63,7 @@ public:
      *  It contains fields (and flags) to identify the hotend, and to update its state (activity and tempertaure).
      */
 
-    typedef struct hotend_state_t {
+    struct hotend_state_t {
 
         //Flags
 

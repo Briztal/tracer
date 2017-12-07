@@ -52,7 +52,7 @@
 //The following line defines the task pool size
 #define TASK_POOL_SIZE 20
 
-#define NB_TASK_SEQUENCES 3
+#define NB_TASK_SEQUENCES 1
 
 /*
  * The following block defines the number of task sequences, their ID, their name and their size
@@ -62,8 +62,6 @@
 #ifdef TASK_SEQUENCE
 
 TASK_SEQUENCE(0, 20)
-TASK_SEQUENCE(1, 10)
-TASK_SEQUENCE(2, 10)
 
 #endif
 
@@ -71,8 +69,6 @@ TASK_SEQUENCE(2, 10)
 
 //Aliases for sequences ids
 #define MOVEMENT_SEQUENCE 0
-#define EEPROM_SEQUENCE 1
-#define VARIOUS_SEQUENCE 2
 
 
 //######################################################SENSORS#########################################################
