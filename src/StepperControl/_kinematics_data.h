@@ -200,6 +200,7 @@ typedef struct {
     float offsets[NB_AXIS]; //4*NB_AXIS
     float slopes[NB_STEPPERS]; //4 * (NB_AXIS + NB_STEPPERS)
     uint8_t max_axis; //4 * (NB_AXIS + NB_STEPPERS) + 1
+    uint8_t movement_id;
     //--end : 4 * (NB_AXIS + NB_STEPPERS + 1) bytes--
 } k2_linear_data;
 

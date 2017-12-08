@@ -38,7 +38,7 @@ class Queue {
     if (i) {\
         i--;\
     } else {\
-        i = max_indice;\
+        i = max_index;\
     }\
 
 
@@ -62,13 +62,13 @@ public:
      * Constructor : initialises all arguments
      */
     Queue(uint8_t size) :
-            size(size), content(new queue_object_t[size]), max_indice((const uint8_t) (size - 1)), nb_spaces(size) {}
+            size(size), content(new queue_object_t[size]), max_index((const uint8_t) (size - 1)), nb_spaces(size) {}
 
 
     String display() {
 
-        return "\ninput " + String(insertion_index) + " output " + String(reading_index) + " nb_elements " +
-               String(nb_elements) + " nb_spaces " + String(nb_spaces);
+        return "\ninput " + String(insertion_index) + " output " + String(reading_index) + " nb_objects " +
+               String(nb_objects) + " nb_spaces " + String(nb_spaces);
 
     }
 
@@ -98,6 +98,43 @@ public:
 
 
     /*
+    * read_inserted_object : this method returns a pointer to the case that was the input case [i] inputs ago.
+    *
+    */
+
+    T *read_inserted_object(uint8_t i, bool *success) {
+
+        //First, cache the new index.
+        uint8_t new_index = insertion_index + i;
+
+        //As the offset is unknown, the first part is gonna be to convert the index into one that fits in the buffer.
+
+        //As the index must necessarily be decreased, while it is superior to the size, decrease it of the size.
+        while (new_index >= size) {
+
+            //Decrease;
+            new_index -= size;
+
+        }
+
+        //Now, cache the address of the queue object at the computed index;
+        queue_object_t *reading_object = content + new_index;
+
+        //Update the success flag;
+        *success = reading_object->allocated;
+
+        //Return an actual object only if the object is allocated:
+        if (*success) {
+            return &reading_object->object;
+        }
+
+        //If the object was not allocated, fail.
+        return nullptr;
+
+    }
+
+
+    /*
      * discard_sub_movement : this method discards the current reading element
      */
 
@@ -118,7 +155,7 @@ public:
             SAFE_DECR(reading_index);
 
             //Modify the state variables
-            nb_elements--;
+            nb_objects--;
             nb_spaces++;
 
 
@@ -199,14 +236,16 @@ public:
         //Only modify the state variables if the object is not allocated
         if (*success) {
 
-            insertion_object->allocated = true;
 
             //update the reading index
             SAFE_DECR(insertion_index);
 
             //Modify the state variables
-            nb_elements++;
+            nb_objects++;
             nb_spaces--;
+
+            insertion_object->allocated = true;
+
 
         }
 
@@ -221,7 +260,7 @@ public:
 
     /*
     T *read_previous_input_ptr() {
-        if (insertion_index != max_indice) {
+        if (insertion_index != max_index) {
             return content + insertion_index + 1;
         } else {
             return content;
@@ -229,19 +268,6 @@ public:
     }
 
     */
-    /*
-    * read_input_ptr_offset : this method returns a pointer to the case that was the input case [i] inputs ago.
-    *
-    */
-
-    /*
-    T *read_input_ptr_offset(uint8_t i) {
-        if (insertion_index + i <=  max_indice) {
-            return content + insertion_index + i;
-        } else {
-            return content + i - (max_indice - insertion_index) -1;
-        }
-    }*/
 
 
     //-------------------------------------------------Queue state------------------------------------------------------
@@ -251,8 +277,8 @@ public:
         return nb_spaces;
     }
 
-    uint8_t available_elements() {
-        return nb_elements;
+    uint8_t available_objects() {
+        return nb_objects;
     }
 
 
@@ -292,14 +318,14 @@ public:
 private:
 
     const uint8_t size;
-    const uint8_t max_indice;
+    const uint8_t max_index;
 
     queue_object_t *const content;
 
     uint8_t reading_index = 0;
     uint8_t insertion_index = 0;
 
-    uint8_t nb_elements = 0;
+    uint8_t nb_objects = 0;
     uint8_t nb_spaces;
 
 };

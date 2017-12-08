@@ -28,6 +28,7 @@
 #include <interface.h>
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/TrajectoryTracer.h>
+#include <StepperControl/_kinematics_data.h>
 
 
 /*
@@ -98,14 +99,22 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
                                                                     finalise_movement, get_position,
                                                                     get_real_time_position);
 
+    CI::echo("\nENQUEUED. SAVING LOCAL DATA\n");
+
     //If the process has completed,
     if (enqueue_state == complete) {
+
+        CI::echo("\nOK, ENQUEUING\n");
 
         //Reset the flag;
         queue_flag = false;
 
+        d->movement_id = movement_id++;
+
         //Push the local data
         linear_data_queue.insert(&queue_flag);
+
+        CI::echo("inserted movement "+String(d->movement_id));
 
         if (!queue_flag) {
 
@@ -114,15 +123,23 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
 
             TrajectoryTracer::stop();
 
-
             //Fail;
             return error;
 
         }
 
+        CI::echo("queue size  :"+String(linear_data_queue.available_objects()));
+
         //Update the final position
         MachineInterface::update_position(destination);
 
+
+        //Start the Movement if not already done.
+        TrajectoryTracer::start();
+
+    } else  {
+
+        CI::echo("\n\nERROR IN LINEAR_MOVEMENT\n\n");
     }
 
     return enqueue_state;
@@ -251,6 +268,7 @@ void ComplexLinearMovement::initialise_movement() {
     //Get the address of the top element
     k2_linear_data *d = linear_data_queue.get_reading_address(&queue_flag);
 
+
     if (!queue_flag) {
 
         //Log
@@ -265,6 +283,9 @@ void ComplexLinearMovement::initialise_movement() {
     real_time_max_axis = d->max_axis;
     real_time_offsets = d->offsets;
     real_time_slopes = d->slopes;
+
+    CI::echo("INITIALISING MOVEMENT "+String(linear_data_queue.get_reading_address(&queue_flag)->movement_id));
+
 
     //Do not discard_sub_movement the current element, of it is likely to be rewritten.
 
@@ -283,8 +304,12 @@ void ComplexLinearMovement::finalise_movement() {
     //Initialise a flag;
     bool queue_flag = false;
 
+    CI::echo("DISCARDING MOVEMENT "+String(linear_data_queue.get_reading_address(&queue_flag)->movement_id));
+
+
     //the current element is now used, discard_sub_movement it;
     linear_data_queue.discard(&queue_flag);
+
 
     //Control the status :
     if (!queue_flag) {
@@ -343,6 +368,7 @@ float *m::real_time_offsets = t_rtof;
 float *m::real_time_slopes = t_rtsl;
 uint8_t m::real_time_max_axis = 0;
 
+uint8_t m::movement_id = 0;
 #undef m
 
 #endif

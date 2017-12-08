@@ -35,7 +35,7 @@
 
 
 /*
- * control_and_initialise_jerk : this function pre-process the increment and determines the jerk parameter for
+ * control_and_initialise_jerk : this function determines the jerk parameter for
  *      the provided movement.
  *
  */

@@ -40,7 +40,7 @@ task_state_t TerminalCommands::action(char *) {
     float temp_xxx, temp_yyy, temp_zzz = temp_xxx = temp_yyy = 0;
 
     //while (TrajectoryTracer::enqueue_authorised()) {
-    for (uint8_t i = 0; i < 18; i++) {
+    for (uint8_t i = 0; i < 20; i++) {
 
         MachineController::movement_state_t state = MachineController::movement_state_t();
 
@@ -74,11 +74,6 @@ task_state_t TerminalCommands::action(char *) {
         CI::echo("ENxDING");
 
     }
-
-    CI::echo("OUT");
-
-    TrajectoryTracer::start();
-
 
     CI::echo("EXIT");
 

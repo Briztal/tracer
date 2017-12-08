@@ -35,10 +35,10 @@ public :
 
     //A simple method to return the number of available_sub_movements currently in the sub_movement queue.
     static uint8_t available_sub_movements() {
-        return sub_movement_queue.available_elements();
+        return sub_movement_queue.available_objects();
     }
 
-    static bool movement_processed();
+    static bool is_movement_processed();
 
 
     //-----------------------------------------Current_Movement_Variables-----------------------------------------------
@@ -71,8 +71,8 @@ private :
 
 private :
 
-    //movement_processed_flag flag, true when the current movement's last position have been processed
-    static bool movement_processed_flag;
+    //movement_last_position_processed_flag flag, true when the current movement's last position have been processed
+    static bool movement_last_position_processed_flag;
 
 
 public :
@@ -83,13 +83,13 @@ public :
      */
 
     //function to determine and process a candidate position.
-    static void push_new_position();
+    static void push_new_sub_movement();
 
     //function to determine a candidate position.
-    static bool compute_new_sub_movement(sub_movement_data_t *sub_movement_data);
+    static void compute_new_sub_movement(sub_movement_data_t *sub_movement_data);
 
     //function to process (if the step_distances bounds are respected) the previously computed position in the queue.
-    static void verify_sub_movement(sub_movement_data_t *sub_movement_data);
+    static bool confirm_sub_movement(sub_movement_data_t *sub_movement_data);
 
     //function to update the increment and to verify the distance bounds validity
     static bool distance_bounds_error(float max_distance);

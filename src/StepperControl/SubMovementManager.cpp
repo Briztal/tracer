@@ -34,10 +34,10 @@ uint8_t SubMovementManager::update_current_movement(movement_data_t *movement_da
     get_new_position = movement_data->trajectory_function;
 
     //flag
-    movement_processed_flag = false;
+    movement_last_position_processed_flag = false;
 
     //Return the number of sub_movements to wait before updating the movement environment
-    return sub_movement_queue.available_elements();
+    return sub_movement_queue.available_objects();
 
 }
 
@@ -56,18 +56,31 @@ void SubMovementManager::display_distances() {
 
 //-----------------------------------Intermediary_Positions_Pre_Computation---------------------------------------------
 
+/*
+ * fill_sub_movement_queue : this function will push new sub movement until the sub_movement queue is full.
+ */
 
 void SubMovementManager::fill_sub_movement_queue() {
 
-    while (sub_movement_queue.available_spaces() && !movement_processed_flag) {
-        push_new_position();
+
+    CI::echo("FILLING THE MOVEMENT QUEUE");
+    while (sub_movement_queue.available_spaces() && !movement_last_position_processed_flag) {
+        push_new_sub_movement();
     }
+
+    CI::echo("END FILL");
+
 }
 
 
-bool SubMovementManager::movement_processed() {
-    return movement_processed_flag;
+/*
+ * is_movement_processed : this function returns true if the current movement's last position has been processed.
+ */
+
+bool SubMovementManager::is_movement_processed() {
+    return movement_last_position_processed_flag;
 }
+
 
 /*
  * compute_new_sub_movement : this function gets the next position, defined by the image of index+increment
@@ -85,12 +98,13 @@ bool SubMovementManager::movement_processed() {
  *      Notes :
  *          - The distance is given by the maximum of all step_distances on each stepper.
  *          - The second criteria is (far) more restrictive than the first, but gives a better regulation_speed regulation
- *
  */
 
+void SubMovementManager::push_new_sub_movement() {
 
-
-void SubMovementManager::push_new_position() {
+    if ((!sub_movement_queue.available_spaces()) || (movement_last_position_processed_flag)) {
+        return;
+    }
 
     //Inistalise the queue flag;
     bool queue_flag = false;
@@ -102,7 +116,7 @@ void SubMovementManager::push_new_position() {
     if (!queue_flag) {
 
         //Log if the flag is reset (error)
-        CI::echo("ERROR in SubMovementManager::push_new_position : the insertion element is already assigned");
+        CI::echo("ERROR in SubMovementManager::push_new_sub_movement : the insertion element is already assigned");
 
         //Stop any movement now;
         TrajectoryTracer::stop();
@@ -111,24 +125,60 @@ void SubMovementManager::push_new_position() {
 
     }
 
+
     //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
-    //get a new sub-movement
-    bool b = compute_new_sub_movement(sub_movement_data);
+    //get a new sub-movement;
+    compute_new_sub_movement(sub_movement_data);
+
+    //Declare a flag that will allow us to control good execution;
+    bool execution_flag;
+
+    //As the computation occurred without errors, we must now verify the computed movement.
 
     //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
-    //validate the sub-movement
-    if (b) verify_sub_movement(sub_movement_data);
+    //validate the sub-movement;
+    execution_flag = confirm_sub_movement(sub_movement_data);
 
+    //Fail if the movement was not added
+    if (!execution_flag) return;
+
+    //As the verification occurred without errors, we must now enqueue the computed movement.
+
+    //Initialise a queue flag;
+    queue_flag = false;
+
+    //Now that validity checks are made, process the sub_movement data
+    sub_movement_queue.insert(&queue_flag);
+
+    queue_flag = false;
+
+    sub_movement_queue.get_reading_address(&queue_flag);
+
+    //Control the flag for safety
+    if (!queue_flag) {
+
+        //Log
+        CI::echo("ERROR in SubMovementManager::confirm_sub_movement : The insertion position is already allocated.");
+
+        //Emergency stop
+        TrajectoryTracer::stop();
+
+    }
 
 }
 
 
-bool SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movement_data) {
+/*
+ * compute_new_sub_movement : this function will take a pointer to a sub_movement_data_t, and fill it
+ *  with a new sub_movement.
+ *
+ *  It first updates the index candidate, and then gets a new position to reach.
+ *
+ *  It then updates the position data according to the translation of the previous position, and
+ *      finally fills the kinetics part, with the help of the kinetics manager.
+ */
 
-    if ((!sub_movement_queue.available_spaces()) || (movement_processed_flag)) {
-        return false;
-    }
-
+void SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movement_data) {
 
     //------------------Index computing-----------------------------
 
@@ -138,7 +188,7 @@ bool SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
     //If the index is close of less than one increment of its limit, go to the end position
     if (((positive_index_dir) && (local_index_candidate + increment > index_limit)) ||
         ((!positive_index_dir) && (local_index_candidate + increment < index_limit))) {
-        movement_processed_flag = true;
+        movement_last_position_processed_flag = true;
         local_index_candidate = index_limit;
     }
 
@@ -155,41 +205,25 @@ bool SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
     MachineInterface::translate(sub_movement_data->candidate_high_level_positions,
                                 sub_movement_data->future_steppers_positions);
 
-    //Call the kernel, to fill the kernel-reserved part of the data.
+    //Call the Kinematics Manager, to fill the kernel-reserved part of the data.
     Kinematics::initialise_sub_movement(sub_movement_data);
 
-    return true;
 }
 
 
-void SubMovementManager::verify_sub_movement(sub_movement_data_t *sub_movement_data) {
+/*
+ * confirm_sub_movement : this function will validate
+ */
 
+bool SubMovementManager::confirm_sub_movement(sub_movement_data_t *sub_movement_data) {
 
 
     //Get the steppers step_distances, high level step_distances, and the maximal stepper and distance
     float max_distance = get_steppers_distances(current_stepper_positions, sub_movement_data);
 
-
     //Distance Validity_Verification : fail if an error is detected
     if (distance_bounds_error(max_distance))
-        return;
-
-    //Initialise a queue flag;
-    bool queue_flag = false;
-
-    //Now that validity checks are made, process the sub_movement data
-    sub_movement_queue.insert(&queue_flag);
-
-    //Control the flag for safety
-    if (!queue_flag) {
-
-        //Log
-        CI::echo("ERROR in SubMovementManager::verify_sub_movement : The insertion position is already allocated.");
-
-        //Emergency stop
-        TrajectoryTracer::stop();
-
-    }
+        return false;
 
     //Update the index
     index = sub_movement_data->index_candidate;
@@ -197,15 +231,22 @@ void SubMovementManager::verify_sub_movement(sub_movement_data_t *sub_movement_d
     //Update the kernel data
     Kinematics::accept_sub_movement(sub_movement_data);
 
+    return true;
+
 }
 
+
+/*
+ * distance_bounds_error : this function verifies that the maximal distance (for the current movement) verifies
+ *  the distances bounds.
+ */
 
 bool SubMovementManager::distance_bounds_error(float max_distance) {
 
     float up_error = (max_distance >= MAXIMUM_DISTANCE_LIMIT);
 
     //Increment adjustment according to the target
-    if ((uint16_t)max_distance != (uint16_t)DISTANCE_TARGET) {
+    if ((uint16_t) max_distance != (uint16_t) DISTANCE_TARGET) {
 
         //get the distance ratio
         float ratio = (float) DISTANCE_TARGET / max_distance;
@@ -219,12 +260,12 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
     }
 
     //If the maximal distance is below the lower limit :
-    if (up_error && (!movement_processed_flag)) {
+    if (up_error && (!movement_last_position_processed_flag)) {
         return true;
     }
 
     //If the maximal distance is below the lower limit :
-    if ((!movement_processed_flag) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
+    if ((!movement_last_position_processed_flag) && (max_distance <= MINIMUM_DISTANCE_LIMIT)) {
         return true;
     }
 
@@ -238,7 +279,6 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
  *
  * It also computes the direction signature, as step_distances are positive numbers, and saves the maximum stepper
  *      and the maximum distance.
- *
  */
 
 float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_data_t *sub_movement_data) {
@@ -317,7 +357,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
 sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
 
     //Get the number of available sub movements
-    uint8_t size = sub_movement_queue.available_elements();
+    uint8_t size = sub_movement_queue.available_objects();
 
     //If no more sub movements are present in the queue :
     if (!size) {
@@ -340,7 +380,7 @@ sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
         sub_movement_data_t *address = sub_movement_queue.get_reading_address(&queue_flag);
 
         //Control the data integrity
-        if (queue_flag) {
+        if (!queue_flag) {
 
             //Log;
             CI::echo("ERROR : IN SubMovementManager::read_next_sub_movement : the reading element was not allocated");
@@ -368,7 +408,7 @@ void SubMovementManager::discard_sub_movement() {
     sub_movement_queue.discard(&queue_flag);
 
     //Integrity control :
-    if (queue_flag) {
+    if (!queue_flag) {
 
         //Log;
         CI::echo("ERROR : IN SubMovementManager::discard_sub_movement : the reading element was not allocated");
@@ -432,8 +472,6 @@ void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_p
 }
 
 
-
-
 /*
  * update_end_jerk_distances : this function updates step_distances to end point and jerk point.
  *
@@ -481,7 +519,7 @@ bool m::positive_index_dir = false;
 void (*m::get_new_position)(float, float *);
 
 //Queue state
-bool m::movement_processed_flag = false;
+bool m::movement_last_position_processed_flag = false;
 
 
 //End step_distances

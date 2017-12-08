@@ -473,7 +473,7 @@ void TaskScheduler::process_task_sequences() {
             if (process[sequence_id]) {
 
                 //If the sequence still has tasks to process
-                if (sequence->available_elements()) {
+                if (sequence->available_objects()) {
 
                     //Declare a flag
                     bool queue_flag = false;
@@ -557,7 +557,7 @@ void TaskScheduler::process_task_sequences_singular() {
         //Cache the task sequence;
         Queue<task_t> *sequence = task_sequences[sequence_id];
 
-        while (sequence->available_elements()) {
+        while (sequence->available_objects()) {
 
             //Declare a flag
             bool queue_flag = false;

@@ -56,9 +56,13 @@ bool TrajectoryTracer::enqueue_authorised() {
 
 void TrajectoryTracer::start() {
 
+    if (started)
+        return;
+
     disable_stepper_interrupt();
 
-    if (!movement_data_queue.available_elements()) {
+
+    if (!movement_data_queue.available_objects()) {
         //If no movements are in the queue, no need to start.
 
         //send an error message
@@ -221,7 +225,6 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
         //Fail;
         return error;
     }
-    //movement_data_t *previous_movement = movement_data_queue.read_input_ptr_offset(1);//TODO REVERSE
 
 
     //---------------kernel-invariant data-----------------
@@ -282,26 +285,52 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     //---------------Speed and Jerk (kernel variable)-----------------
 
     //we must check the jerk if the routine is started, or if movements are already present in the queue.
-    bool jerk_checking = (started) || (movement_data_queue.available_elements());
+    bool jerk_checking = (started) || (movement_data_queue.available_objects());
 
-    //Control the jerk bounds if required, and init the jerk control for the next movement //TODO REVERSE
-    //JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
+    movement_data_t *previous_movement;
+
+    //TODO C'EST CRADE ET ERREUROGENE, ON PASSE POTENTIELLEMENT UN TRUC PAS INITIALISE...
+
+    if (jerk_checking) {
+
+        //Reset the flag;
+        queue_flag = false;
+
+        //Query the last movement address;
+        previous_movement = movement_data_queue.read_inserted_object(1, &queue_flag);
+
+        //Integrity check :
+        if (!queue_flag) {
+
+            //Log;
+            CI::echo("ERROR in TrajectoryTracer::enqueue_movement : The previous insertion element was not allocated.");
+
+            //Emergency stop
+            TrajectoryTracer::stop();
+
+            //Fail;
+            return error;
+        }
+    }
+
+
+    //Control the jerk bounds if required, and init the jerk control for the next movement
+    JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
 
 
     //---------------Jerk adjusting----------------------
 
-    /*
+
     if (jerk_checking && previous_movement->jerk_point) {
 
         //If the movement has been popped since the processing has started
-        if (!movement_data_queue.available_elements()) {
+        if (!movement_data_queue.available_objects()) {
 
             //Load only the jerk data
             Kinematics::load_real_time_jerk_data(previous_movement);
 
         }
     }
-     *///TODO REVRSE
 
 
     /*
@@ -311,10 +340,6 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //---------------Persisting in Queue-----------------
 
-
-
-    debug("Enqueueing  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
-          String(movement_data_queue.available_spaces()));
 
 
     //Enqueue the movement.
@@ -339,28 +364,6 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     }
 
-    debug("Enqueued  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
-          String(movement_data_queue.available_spaces()));
-
-    debug(movement_data_queue.display());
-
-    CI::echo("started :" + String(started));
-
-
-    //Start the movement procedure if it is not already started.
-    //if (!started) {//TODO REVERSE
-    if ((!started) && !enqueue_authorised()) {
-
-        //TODO FIND THE FUCK WHERE IT ALL FUCKS UP !!
-
-        //TODO : IT FUCKS UP WHEN THE QUEUE IS FILLED, DURING THE MOVEMENT PROCEDURE
-
-        start();
-
-        debug("Movement Started");
-
-    }
-
     return complete;
 
 }
@@ -375,7 +378,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 void TrajectoryTracer::process_next_movement() {
 
 
-    if (movement_data_queue.available_elements()) {
+    if (movement_data_queue.available_objects()) {
 
         //declare a flag;
         bool queue_flag = false;
@@ -487,7 +490,7 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
     CI::echo("\n----------------------------------\n\nMOVEMENT POPPED\n\n-----------------------------\n");
 
-    debug("Discarding  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
+    debug("Discarding  : size  : " + str(movement_data_queue.available_objects()) + " nb_spaces " +
           String(movement_data_queue.available_spaces()));
 
     //Reset the flag
@@ -511,7 +514,7 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
     }
 
-    debug("Discarded  : size  : " + str(movement_data_queue.available_elements()) + " nb_spaces " +
+    debug("Discarded  : size  : " + str(movement_data_queue.available_objects()) + " nb_spaces " +
           String(movement_data_queue.available_spaces()));
 
 
@@ -526,9 +529,10 @@ void TrajectoryTracer::update_real_time_movement_data() {
 
 void TrajectoryTracer::prepare_first_sub_movement() {
 
-    //Push the first sub_movement (increment pre-processed to be correct)
-    SubMovementManager::push_new_position();
+    CI::echo("PREPARING FIRST");
 
+    //Push the first sub_movement (increment pre-processed to be correct)
+    SubMovementManager::push_new_sub_movement();
 
     ///Step 1 : Get a new position to reach
     sub_movement_data_t *sub_movement_data = SubMovementManager::read_next_sub_movement();
@@ -615,7 +619,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     SubMovementManager::discard_sub_movement();
 
     //If no more pre-process is required
-    if (SubMovementManager::movement_processed()) {
+    if (SubMovementManager::is_movement_processed()) {
         goto exit;
     }
 
@@ -625,17 +629,17 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //-------------------Sub-movements pre-computation-------------------
 
     //Process a first movement for the one we made
-    SubMovementManager::push_new_position();
+    SubMovementManager::push_new_sub_movement();
 
     //If no more pre-process is required
-    if (SubMovementManager::movement_processed()) {
+    if (SubMovementManager::is_movement_processed()) {
         goto exit;
     }
 
     STEP_AND_WAIT
 
     //Process a second movement, to fill the queue if needes
-    SubMovementManager::push_new_position();
+    SubMovementManager::push_new_sub_movement();
 
 
     //-------------------Exit-------------------
@@ -793,7 +797,7 @@ void TrajectoryTracer::finish_sub_movement() {
         if (stop_programmed) {
             //if (false) {
 
-            if (movement_data_queue.available_elements()) {
+            if (movement_data_queue.available_objects()) {
                 //If another movement has been pushed just after stop_programmed was set (rare case) :
 
                 //Process the next movement
@@ -838,14 +842,14 @@ void TrajectoryTracer::finish_sub_movement() {
             }
 
 
-        } else if (SubMovementManager::movement_processed()) {
+        } else if (SubMovementManager::is_movement_processed()) {
 
             //If the movement pre-processing is finished :
 
             //finalise the current movement
             (*movement_finalisation)();
 
-            if (movement_data_queue.available_elements()) {
+            if (movement_data_queue.available_objects()) {
                 //If another movement can be loaded :
 
                 //Process the next movement
