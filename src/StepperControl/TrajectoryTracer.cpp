@@ -32,6 +32,7 @@
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <StepperControl/JerkPlanner.h>
+#include <Kernel.h>
 
 //--------------------------------------------- Movement queue management ----------------------------------------------
 
@@ -67,7 +68,7 @@ bool TrajectoryTracer::queue_locked() {
 //------------------------------------------------ Start - Stop ------------------------------------------------
 
 /*
- * The function to start the movement routine. It will run in interrupts while movements are to trace, and then stop.
+ * The function to start the movement routine. It will iterate in interrupts while movements are to trace, and then stop.
  *
  *  It first verifies that movement are enqueued,
  *
@@ -78,15 +79,15 @@ bool TrajectoryTracer::queue_locked() {
 
 void TrajectoryTracer::start() {
 
-    //Don't execute if the movement is already started.
+    //Don't execute if the movement is already started;
     if (started)
         return;
 
+    //Disable the stepper interrupt, to avoid interrupt re-call (causes stack overflow);
     disable_stepper_interrupt();
 
-
     if (!movement_data_queue.available_objects()) {
-        //If no movements are in the queue, no need to start.
+        //If no movements are in the queue, no need to start;
 
         //send an error message;
         debug("No movements are present  in the queue, starting aborted");
@@ -212,10 +213,7 @@ void TrajectoryTracer::emergency_stop() {
     //Enable the movement enqueuing;
     movement_queue_lock_flag = false;
 
-    debug("\nEmergency Stop triggered\n");
-
-    //Display the steppers position;
-    StepperController::send_position();
+    debug("Emergency Stop triggered\n");
 
 }
 
@@ -245,8 +243,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
         CI::echo("Error in TrajectoryTracer::enqueue_movement : There is no space left in the movement queue.");
 
         //Emergency stop;
-        //TODO EMERGENCY_STOP
-        TrajectoryTracer::emergency_stop();
+        Kernel::emergency_stop();
 
         //Fail;
         return error;
@@ -261,8 +258,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
                          "The movement queue was locked when the function was called.");
 
         //Emergency stop;
-        //TODO EMERGENCY_STOP
-        TrajectoryTracer::emergency_stop();
+        Kernel::emergency_stop();
 
         //Fail;
         return error;
@@ -319,8 +315,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
                          "The element at the insertion index was already allocated.");
 
         //Emergency Stop;
-        //TODO EMERGENCY_STOP
-        TrajectoryTracer::emergency_stop();
+        Kernel::emergency_stop();
 
         //Fail;
         return error;
@@ -372,8 +367,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
             CI::echo("Error in TrajectoryTracer::enqueue_movement : The previous insertion element was not allocated.");
 
             //Emergency stop,
-            //TODO EMERGENCY STOP
-            TrajectoryTracer::emergency_stop();
+            Kernel::emergency_stop();
 
             //Fail;
             return error;
@@ -420,8 +414,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
         CI::echo("Error in TrajectoryTracer::enqueue_movement : the insertion element was already allocated.");
 
         //Emergency stop;
-        //TODO EMERGENCY STOP
-        TrajectoryTracer::emergency_stop();
+        Kernel::emergency_stop();
 
         //Fail;
         return error;
@@ -452,8 +445,7 @@ void TrajectoryTracer::discard_movement() {
                          "The discarded element was not allocated.");
 
         //Emergency stop;
-        //TODO EMERGENCY STOP
-        emergency_stop();
+        Kernel::emergency_stop();
 
         //Fail;
         return;
@@ -495,8 +487,7 @@ void TrajectoryTracer::process_next_movement() {
             CI::echo("Error in TrajectoryTracer::process_next_movement : The reading element was not allocated.");
 
             //Emergency stop;
-            //TODO EMERGENCY STOP
-            TrajectoryTracer::emergency_stop();
+            Kernel::emergency_stop();
 
             //Fail;
             return;
@@ -523,8 +514,7 @@ void TrajectoryTracer::process_next_movement() {
                     "Error in TrajectoryTracer::process_next_movement : The reading element at the reading index was not allocated.");
 
             //Emergency stop;
-            //TODO EMERGENCY STOP
-            TrajectoryTracer::emergency_stop();
+            Kernel::emergency_stop();
 
             //Fail;
             return;
@@ -569,8 +559,7 @@ void TrajectoryTracer::update_movement_environment() {
         CI::echo("Error in TrajectoryTracer::update_movement_environment : The reading element was not allocated.");
 
         //Emergency stop;
-        //TODO EMERGENCY STOP
-        emergency_stop();
+        Kernel::emergency_stop();
 
         //Fail;
         return;

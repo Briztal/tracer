@@ -45,6 +45,8 @@ void GCodeInterface::init() {
 
 //-----------------------------------------------------Data reading-----------------------------------------------------
 
+
+
 /*
  * read_data : this function reads and processes data.
  *

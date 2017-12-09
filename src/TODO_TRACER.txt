@@ -1,3 +1,6 @@
+//TODO TaskScheduler::read_interfaces : KEEP A TRACK OF PREVIOUS READ INTERFACE, TO AVOID READING ALWAYS THE SAME INTERFACE, IN CASE OF FLOOD !
+
+//TODO TaskScheduler::read_interfaces : Read one task per interface at the time !!
 
 //TODO CALL AN EMERGENCY STOP FUNCTION EVERY TIME AN ERROR IS RETURNED.
 
@@ -42,6 +45,8 @@
 ////////////////////////TEST///////////////////////////////
 
 //TODO TEST RANDOM MOVEMENTS
+
+//TODO TEST JERKS
 
 //TOD RMEOVE DEBUG IN TRAJECTORY TRACER
 

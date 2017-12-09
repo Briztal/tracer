@@ -54,6 +54,8 @@ public :
     static void send_position(float *) {}
 
 
+
+
     //--------------------------------------Data Storage--------------------------------------
 
 private :
@@ -75,6 +77,9 @@ private :
 
 
     //--------------------------------------Command processing--------------------------------------
+
+
+private:
 
     //Function to reset the command reception environment.
     static void reset();

@@ -29,6 +29,7 @@
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/_kinematics_data.h>
+#include <Kernel.h>
 
 
 /*
@@ -52,6 +53,9 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
 
         CI::echo("ERROR in ComplexLinearMovement::plan_movement : the insertion element is already allocated.");
 
+        //Emergency stop
+        Kernel::emergency_stop();
+
         return error;
 
     }
@@ -72,7 +76,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     if (null_move) {
 
         //Send an error message.
-        debug("INFO : THE MACHINE IS ALREADY AT ITS DESTINATION POSITION THE MOVEMENT WILL BE IGNORED.");
+        debug("Info : The machine is already at its destination. The movement will be ignored.");
 
         return complete;
 
@@ -100,10 +104,8 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     //If the process has completed,
     if (enqueue_state == complete) {
 
-
         //Reset the flag;
         queue_flag = false;
-
 
         //Push the local data
         linear_data_queue.insert(&queue_flag);
@@ -113,7 +115,8 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
             //Log;
             CI::echo("ERROR in ComplexLinearMovement::plan_movement : the previously controlled insertion element is now allocated.");
 
-            TrajectoryTracer::emergency_stop();
+            //Emergency stop;
+            Kernel::emergency_stop();
 
             //Fail;
             return error;
@@ -264,9 +267,11 @@ void ComplexLinearMovement::initialise_movement() {
         //Log
         CI::echo("ERROR in ComplexLinearMovement::initialise_movement : the output element is not assigned.");
 
-        //Stop any movement now.
-        TrajectoryTracer::emergency_stop();
+        //Emergency stop
+        Kernel::emergency_stop();
 
+        //Fail;
+        return;
     }
 
 
@@ -304,8 +309,10 @@ void ComplexLinearMovement::finalise_movement() {
         //Log;
         CI::echo("ERROR in ComplexLinearMovement::finalise_movement : the output element is not allocated.");
 
-        //Stop any movement to avoid memory corruption, and see the debug logs;
-        TrajectoryTracer::emergency_stop();
+        //Emergency stop;
+        Kernel::emergency_stop();
+
+        return;
     }
 
 }

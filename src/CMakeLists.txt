@@ -309,6 +309,6 @@ target_link_libraries(kernels datastructures)
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
 
-add_executable(TRACER main.cpp)
+add_executable(TRACER main.cpp Kernel.cpp Kernel.h)
 
 

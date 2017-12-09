@@ -30,46 +30,7 @@ PONEY
 #include <ControlLoops/ControlLoops.h>
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>
-
-
-/*
- * init : this function initialises the code.
- *
- *  It starts by initialising the hardware_language_abstraction layer, and then initialises all enabled interfaces.
- *
- *  Finally, it initialises the stepper control module.
- */
-
-void TaskScheduler::init() {
-
-    //Initialise the hardware and the framework
-    hl_init();
-
-    //Initialise all enabled interfaces
-    initialise_interfaces();
-
-    //Initialise Thermistors
-    Thermistors::init();
-
-    //Initialise the EEPROM data
-    EEPROMStorage::init();
-
-
-    //Initialise the StepperController module only if it is enabled
-#ifdef ENABLE_STEPPER_CONTROL
-
-    StepperController::init();
-
-#endif
-
-    //TODO SEPARATE THIS FROM THE SCHEDULER
-
-    //Enable the
-    ControlLoops::enable_temperature();
-
-
-}
-
+#include <Kernel.h>
 
 
 
@@ -144,7 +105,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
             CI::echo("ERROR in TaskScheduler::schedule_task : failed to copy the task in the queue.");
 
             //Emergency stop
-            //TODO EMERGENCY_STOP
+            Kernel::emergency_stop();
 
         } else {
 
@@ -234,7 +195,7 @@ void TaskScheduler::lock_sequence(uint8_t type) {
     if (type != 255) {
 
         //Set the lock of the concerned sequence.
-        queues_locked[type] = true;
+        sequences_locked[type] = true;
 
     }
 
@@ -256,7 +217,7 @@ bool TaskScheduler::is_sequence_locked(uint8_t type) {
         return false;
     }
 
-    return !queues_locked[type];
+    return !sequences_locked[type];
 }
 
 
@@ -291,7 +252,7 @@ bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
 
 
 /*
- * run : this function executes all available tasks in the pool, while maintaining the order for non-non-sequential tasks;
+ * iterate : this function executes all available tasks in the pool, while maintaining the order for non-non-sequential tasks;
  *
  *  It starts by reading interfaces, and filling the task pool with incoming tasks;
  *
@@ -307,71 +268,131 @@ uint8_t temp_yyy = 0;
 
 uint8_t temp_zzz = 0;
 
-void TaskScheduler::run() {
+void TaskScheduler::iterate() {
 
-    while (true) {
+    //Add as much tasks as possible in the pool;
+    read_interfaces();//TODO WATCH FOR SPACES
+
+    //Process non-sequential tasks in priority
+    process_task_pool();
+
+    //Process tasks sequences after
+    process_task_sequences();
 
 
-        //Add as much tasks as possible in the pool;
-        read_interfaces();//TODO WATCH FOR SPACES
+    //TODO REMOVE
+    if (flood_enabled) {
 
-        //Process non-sequential tasks in priority
-        process_task_pool();
+        while (TrajectoryTracer::enqueue_authorised()) {
 
-        //Process tasks sequences after
-        process_task_sequences();
+            MachineController::movement_state_t state = MachineController::movement_state_t();
 
-        if (flood_enabled) {
-            while (TrajectoryTracer::enqueue_authorised()) {
+            state.x_flag = true;
+            state.y_flag = true;
+            state.z_flag = true;
 
-                CI::echo("\nTASK_AVAILABLE. BEGINNING: "+String(available_spaces(0)));
+            state.x = temp_xxx;
+            state.y = temp_yyy;
+            state.z = temp_zzz;
 
-                MachineController::movement_state_t state = MachineController::movement_state_t();
+            temp_xxx += 10;
 
-                state.x_flag = true;
-                state.y_flag = true;
-                state.z_flag = true;
-
-                state.x = temp_xxx;
-                state.y = temp_yyy;
-                state.z = temp_zzz;
-
-                temp_xxx += 10;
-
-                if (temp_xxx == 150) {
-                    temp_xxx = 0;
-                    temp_yyy += 10;
-                }
-
-                if (temp_yyy == 150) {
-                    temp_yyy = 0;
-                    temp_zzz += 10;
-                }
-
-                if (temp_zzz == 300) {
-                    temp_zzz = 0;
-                }
-
-                //Schedule a line to the specified coordinates
-                MachineController::line(state);
-
-                CI::echo("ENCDING");
-
+            if (temp_xxx == 150) {
+                temp_xxx = 0;
+                temp_yyy += 10;
             }
 
-            CI::echo("OUT");
+            if (temp_yyy == 150) {
+                temp_yyy = 0;
+                temp_zzz += 10;
+            }
 
+            if (temp_zzz == 300) {
+                temp_zzz = 0;
+            }
+
+            //Schedule a line to the specified coordinates
+            MachineController::line(state);
 
         }
 
 
-
-        delay(80);
-
-
     }
+
+
+
+
 }
 
+
+/*
+ * read_interfaces : this function will read all interfaces, in order to schedule new tasks.
+ *
+ *  It interrogates each interface, if a task space is available;
+ *
+ */
+void TaskScheduler::read_interfaces() {
+
+    //TODO KEEP A TRACK OF PREVIOUS READ INTERFACE, TO AVOID READING ALWAYS THE SAME INTERFACE, IN CASE OF FLOOD !
+
+    //TODO READ ONE TASK AT THE TIME;
+
+
+    if (!TaskScheduler::available_spaces(0))
+        return;
+
+#ifdef ENABLE_TERMINAL_INTERFACE
+    TI::read_data();
+#endif
+
+    if (!TaskScheduler::available_spaces(0))
+        return;
+
+#ifdef ENABLE_PROGRAM_INTERFACE
+    TI::read_data();
+#endif
+
+    if (!TaskScheduler::available_spaces(0))
+        return;
+
+#ifdef ENABLE_GCODE_INTERFACE
+    GI::read_data();
+#endif
+
+}
+
+
+/*
+ * clear : this function deletes all programmed tasks.
+ *
+ */
+
+void TaskScheduler::clear() {
+    //TODO RMEOVE
+    flood_enabled = false;
+
+    //Empty the task pool : simply reset size indicators.
+
+    //The number of tasks stored in the task pool;
+    pool_task_nb = 0;
+
+    //The number of tasks stored in the task pool;
+    pool_task_spaces = TASK_POOL_SIZE;
+
+
+    //Clear all tasks sequences.
+
+    //For each task sequence :
+    for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
+
+        //Clear the sequence;
+        task_sequences[i]->clear();
+
+    }
+
+
+
+}
 
 /*
  * process_task_pool : this function executes every non-sequential task it can in the task pool,
@@ -384,7 +405,7 @@ void TaskScheduler::process_task_pool() {
 
     //Reset the first-task flags
     for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
-        queues_locked[i] = true;
+        sequences_locked[i] = true;
     }
 
     //Initialise an insertion index;
@@ -401,7 +422,7 @@ void TaskScheduler::process_task_pool() {
 
         /* If the task fails to analyse_command (must be called later), then shift it at the insertion position.
          * This removes empty data_spaces in the pool, and saved the order.*/
-        if (!process_task(task)) {
+        if (!execute_task(task)) {
 
             //Shift the task to the insertion position
             insert_index = shift(shift_enabled, task, insert_index);
@@ -485,17 +506,18 @@ void TaskScheduler::process_task_sequences() {
                     if (!queue_flag) {
 
                         //Log
-                        CI::echo("ERROR in TaskScheduler::process_task_sequences : the reading element is not allocated.");
+                        CI::echo("ERROR in TaskScheduler::process_task_sequences : "
+                                        "the reading element is not allocated.");
 
                         //Emergency stop
-                        //TODO EMERGENCY_STOP
+                        Kernel::emergency_stop();
 
                         return;
 
                     }
 
                     //If the executed task must be reprogrammed
-                    if ((process_task(task) == reprogram)) {
+                    if ((execute_task(task) == reprogram)) {
 
                         //Disable this sequence's processing
                         process[sequence_id] = false;
@@ -514,10 +536,11 @@ void TaskScheduler::process_task_sequences() {
                         if (!queue_flag) {
 
                             //Log
-                            CI::echo("ERROR in TaskScheduler::process_task_sequences : the discarded element was not allocated.");
+                            CI::echo("ERROR in TaskScheduler::process_task_sequences : "
+                                             "the discarded element was not allocated.");
 
                             //Emergency stop
-                            //TODO EMERGENCY_STOP
+                            Kernel::emergency_stop();
 
                             return;
 
@@ -544,79 +567,10 @@ void TaskScheduler::process_task_sequences() {
 
 
 /*
- * process_task_sequences_singular : this function processes task sequences.
- *
- *  It focuses on each sequence consecutively : it executes all possible tasks on one sequence, and then focuses
- *      on another.
+ * execute_task : this function processes a task, and returns the result (it's a simple alias, for comprehensibility.)
  */
 
-void TaskScheduler::process_task_sequences_singular() {
-
-    for (uint8_t sequence_id = 0; sequence_id < NB_TASK_SEQUENCES; sequence_id++) {
-
-        //Cache the task sequence;
-        Queue<task_t> *sequence = task_sequences[sequence_id];
-
-        while (sequence->available_objects()) {
-
-            //Declare a flag
-            bool queue_flag = false;
-
-            //Cache the task pointer;
-            task_t *task = sequence->get_reading_address(&queue_flag);
-
-            //Integrity check
-            if (!queue_flag) {
-
-                //Log
-                CI::echo("ERROR in TaskScheduler::process_task_sequences : the reading element is not allocated.");
-
-                //Emergency stop
-                //TODO EMERGENCY_STOP
-
-                return;
-
-            }
-
-            //if the output task is correctly processed :
-            if (process_task(task)) {
-
-                //Reset the flag
-                queue_flag = false;
-
-                //Go to the other task
-                sequence->discard(&queue_flag);
-
-                //Integrity check
-                if (!queue_flag) {
-
-                    //Log
-                    CI::echo("ERROR in TaskScheduler::process_task_sequences : the discarded element was not allocated.");
-
-                    //Emergency stop
-                    //TODO EMERGENCY_STOP
-
-                    return;
-
-                }
-
-            } else {
-
-                /* If the output task fails to analyse_command (must be called later), then stop the process for the sequence,
-                 * as the execution order must be respected */
-
-                break;
-            }
-        }
-    }
-}
-
-
-/*
- * process_task : this function processes a task, and returns the result (it's a simple alias, for comprehensibility.)
- */
-
-bool TaskScheduler::process_task(task_t *task) {
+bool TaskScheduler::execute_task(task_t *task) {
 
     //Initialise the state as complete, in case of null task.
     task_state_t state = complete;
@@ -675,12 +629,13 @@ uint8_t m::pool_task_spaces = TASK_POOL_SIZE;
 
 //Sequences lock counters definition
 bool t_ftflg[NB_TASK_SEQUENCES]{0};
-bool *const m::queues_locked = t_ftflg;
+bool *const m::sequences_locked = t_ftflg;
 
 //task sequences declaration
 Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
 Queue<task_t> **const m::task_sequences = define_task_queue(t_tsks);
 
 bool m::flood_enabled = false;
+
 
 #endif

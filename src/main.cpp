@@ -17,23 +17,12 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "TaskScheduler/TaskScheduler.h"
+
+#include "Kernel.h"
 
 int main() {
 
-    /*
-     * Serial.init(115200);
-
-    while(true) {
-        if (Serial.available()) {
-            Serial.println(Serial.get_read_adress());
-        }
-    }
-     */
-
-    TaskScheduler::init();
-
-    TaskScheduler::run();
+  Kernel::start();
 
 
 }

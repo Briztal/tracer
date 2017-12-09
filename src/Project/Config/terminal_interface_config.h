@@ -79,7 +79,7 @@ GO_UPPER()
 GO_LOWER(test, various tests)
 CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed)
 CREATE_LEAF(temp, temp_test, reads temps on every thermistor)
-CREATE_LEAF(demo, action, a simple demo with all axis)
+CREATE_LEAF(flood, flood, flood the movement manager)
 
 GO_UPPER()
 

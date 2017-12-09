@@ -24,111 +24,118 @@
 
 //TODO : ENVOI DES ACTIONS (METTRE UN OCTET POUR LE TYPE)
 
-//TODO REINTEGRATE GCODEINTERFACE
-//TODO ENABLE-DISABLE GCODEINTERFACE
 //TODO PIN_INTERRUPT
-//TODO DIGITALWRITE DIGITALREAD ANALOGWRITE ANALOGREAD IN HARDWARE_LANGUAGE_ABSTRACTION
-
-
-
-/*
- * TaskScheduler Structure :
- *
- * Main thread: Task manager. Runs basic tasks, like
- * - Communication Interface
- * - Basic interaction
- * - StepperControl Plannification for TRACER
- *
- * A task can be added, in the queue. Priorities may be defined in a future commit.
- *
- *
- * Level 0 Thread : Running permanent tasks, on non prioritary interrupts
- * - Control loops;
- * - Step process function
- *
- */
 
 
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
-
 #include <sanity_check.h>
-
 #include <DataStructures/Queue.h>
 #include "_task_scheduler_data.h"
 
-//All files that include this library may requrie the generation of a scheduler.
+//All files that include this library may require the generation of a scheduler.
 #include "scheduler_generation.h"
+
+//The file scheduler_safe_use.txt contains documentation and help about the scheduler. I Hope it will help you.
 
 class TaskScheduler {
 
+
+    //-------------------------------------------- Parsing - execution cycle -------------------------------------------
+
 public:
 
-    //Initialise TRACER's enabled modules.
-    static void init();
+    //Trigger a complete parsing - execution cycle;
+    static void iterate();
+
+
+    //-------------------------------------------- Interfaces interrogation  -------------------------------------------
+
+private:
+
+    //Read all possible data on interfaces;
+    static void read_interfaces();
+
+
+    //-------------------------------------------------- State getters -------------------------------------------------
+
+public:
+
+    //Returns the number of type-[type] tasks that can be scheduled;
+    static const uint8_t available_spaces(uint8_t type);
+
+    //Lock the specified sequence;
+    static void lock_sequence(uint8_t type);
+
+    //get the state of a sequence;
+    static bool is_sequence_locked(uint8_t type);
+
+    //Verify that nb_tasks can be schedule;
+    static bool verify_schedulability(uint8_t task_type, uint8_t nb_tasks);
 
 
 private:
+
+    //First tasks flags;
+    static bool *const sequences_locked;
+
+
+    //------------------------------------------- Task scheduling - execution ------------------------------------------
+
+public:
+
+    //Schedule a task;
+    static bool schedule_task(task_t *task);
+
+    //Build and schedule a task;
+    static bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
+
+
+private:
+
+    //Process a particular task;
+    static bool execute_task(task_t *task);
+
+public:
+    //Temp var for tests//TODO REMOVE
+    static bool flood_enabled;
+
+
+    //------------------------------------------ Pool and Sequences processing -----------------------------------------
+
+public:
+
+    //Clear the task pool and all task sequences;
+    static void clear();
+
+
+private:
+
+    //Execute every possible task of the task pool;
+    static void process_task_pool();
+
+    //Execute every possible task on tasks sequences;
+    static void process_task_sequences();
+
+    //Shift a task at the insertion index;
+    static uint8_t shift(boolean shift_enabled, task_t *task, uint8_t insert_index);
 
     //Verify that a type exists
     static bool check_sequence_type(uint8_t type);
 
 
-public:
-
-    //Start the scheduling - execution.
-    static void run();
-
-    //Schedule a task.
-    static bool schedule_task(task_t *task);
-
-    //Build and schedule a task.
-    static bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
-
-    //Returns the number of type-[type] tasks that can be scheduled.
-    static const uint8_t available_spaces(uint8_t type);
-
-    //Verify that nb_tasks can be enqueued
-    //Lock the specified sequence.
-    static void lock_sequence(uint8_t type);
-
-    //get the state of a sequence.
-    static bool is_sequence_locked(uint8_t type);
-
-    static bool verify_schedulability(uint8_t task_type, uint8_t nb_tasks);
-
-    static bool flood_enabled;
-
-
-private:
-
-
-    //The primary task pool
+    //The primary task pool;
     static task_t *const task_pool;
 
-    //The number of tasks stored in the task pool
+    //The number of tasks stored in the task pool;
     static uint8_t pool_task_nb;
 
-    //The number of tasks stored in the task pool
+    //The number of tasks stored in the task pool;
     static uint8_t pool_task_spaces;
 
-    //Task sequences
+    //Task sequences;
     static Queue<task_t> **const task_sequences;
-
-    //First tasks flags
-    static bool *const queues_locked;
-
-    static void process_task_pool();
-
-    static void process_task_sequences();
-
-    static bool process_task(task_t *task);
-
-    static uint8_t shift(boolean shift_enabled, task_t *task, uint8_t insert_index);
-
-    static void process_task_sequences_singular();
-
 
 };
 
@@ -136,6 +143,7 @@ private:
 /*
  * LOCK_SEQUENCE : This macro shall be used in your tasks to lock a given task_sequence.
  */
+
 #define LOCK_SEQUENCE(type) {TaskScheduler::lock_sequence(type);}
 
 

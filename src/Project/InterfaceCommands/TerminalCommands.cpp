@@ -33,47 +33,9 @@
 #include <StepperControl/TrajectoryTracer.h>
 
 
-task_state_t TerminalCommands::action(char *) {
+task_state_t TerminalCommands::flood(char *) {
 
-    //TaskScheduler::flood_enabled = true;
-
-    float temp_xxx, temp_yyy, temp_zzz = temp_xxx = temp_yyy = 0;
-
-    //while (TrajectoryTracer::enqueue_authorised()) {
-    for (uint8_t i = 0; i < 20; i++) {
-
-        MachineController::movement_state_t state = MachineController::movement_state_t();
-
-        state.x_flag = true;
-        state.y_flag = true;
-        state.z_flag = true;
-
-        state.x = temp_xxx;
-        state.y = temp_yyy;
-        state.z = temp_zzz;
-
-        temp_xxx += 10;
-
-        if (temp_xxx == 150) {
-            temp_xxx = 0;
-            temp_yyy += 10;
-        }
-
-        if (temp_yyy == 150) {
-            temp_yyy = 0;
-            temp_zzz += 10;
-        }
-
-        if (temp_zzz == 300) {
-            temp_zzz = 0;
-        }
-
-        //Schedule a line to the specified coordinates
-        MachineController::line(state);
-
-        CI::echo("ENxDING");
-
-    }
+    TaskScheduler::flood_enabled = true;
 
     CI::echo("EXIT");
 

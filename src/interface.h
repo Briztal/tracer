@@ -1,5 +1,5 @@
 /*
-  config.h - Part of TRACER
+  interfaces.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -52,7 +52,5 @@
 #define debug(s) CI::echo(String("debug ") + s);
 
 void initialise_interfaces();
-
-void read_interfaces();
 
 #endif

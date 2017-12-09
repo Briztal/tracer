@@ -103,7 +103,7 @@ private :
 
 public:
 
-    //Enqueue a new movement
+    //Enqueue a new movement;
     static task_state_t enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
                                          void (*trajectory_function)(float, float *),
                                          void (*pre_process_trajectory_function)(float, float *));
@@ -123,26 +123,26 @@ private:
 
 private:
 
-    //new movement processing
+    //new movement processing;
     static void process_next_movement();
 
-    //Movement environment switching
+    //Movement environment switching;
     static void update_movement_environment();
 
-    //sub_movement finishing procedure
+    //sub_movement finishing procedure;
     static void finish_sub_movement();
 
     //The function to finalise the current movement;
     static void (*movement_finalisation)();
 
 
-    //the final sub_movement flag : enabled when the last sub_movement of the movement procedure has begun.
+    //the final sub_movement flag : enabled when the last sub_movement of the movement procedure has begun;
     static bool final_sub_movement_started;
 
-    //The flag for a real-time movement switch
+    //The flag for a real-time movement switch;
     static bool movement_switch_flag;
 
-    //The number of sub_movements before the movement switch
+    //The number of sub_movements before the movement switch;
     static uint8_t movement_switch_counter;
 
 
@@ -150,13 +150,13 @@ private:
 
 private:
 
-    //next sub_movement processing
+    //next sub_movement processing;
     static void prepare_next_sub_movement();
 
-    //Method to init a sub_movement
+    //Method to init a sub_movement;
     static sig_t *initialise_sub_movement();
 
-    //Method to init the first sub movement of the movement procedure
+    //Method to init the first sub movement of the movement procedure;
     static void prepare_first_sub_movement();
 
 
@@ -164,13 +164,13 @@ private:
 
 public:
 
-    //An algorithm constant : contains the order in which signatures must be accessed to correctly peform a movement.
+    //An algorithm constant : contains the order in which signatures must be accessed to correctly perform a movement;
     static const uint8_t *const trajectory_array;
 
 
 private:
 
-    //This is one of the algorithm's constants. It indicated the index to start in, depending on the signatures sizes.
+    //This is one of the algorithm's constants. It indicated the index to start in, depending on the signatures sizes;
     static const uint8_t *const trajectory_beginning_indices;
 
 
@@ -179,7 +179,7 @@ private:
 
 public: //Accessed by other programs
 
-    //The signatures for the sub_movement that is currently executed
+    //The signatures for the sub_movement that is currently executed;
     static sig_t *saved_elementary_signatures;
 
     //The trajectory index for the next movement;
@@ -191,20 +191,20 @@ private :
     //The current index in trajectory_array;
     static uint8_t trajectory_index;
 
-    //The direction signature for the next sub_movement.
+    //The direction signature for the next sub_movement;
     static sig_t next_direction_signature;
 
 
-    //The arrays to store signatures. They alternately store the current signature, or the saved signatures
+    //The arrays to store signatures. They alternately store the current signature, or the saved signatures;
     static sig_t *const es0, *const es1;
 
-    //The array flag : is true when saved elementary_signatures is es0.
+    //The array flag : is true when saved elementary_signatures is es0;
     static bool is_es_0;
 
 
 private :
 
-    //Signatures processing
+    //Signatures processing;
     static void process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures);
 
 
@@ -212,33 +212,34 @@ private :
 
 public :
 
-    //The function to update the action variables
+    //The function to update the action variables;
     static void update_tools_powers(float current_speed);
 
 
 private:
 
-    //Number of actions enabled during the current movement
+    //Number of actions enabled during the current movement;
     static uint8_t tools_nb;
 
-    //The action linear power array
+    //The action linear power array;
     static float *tools_linear_powers;
 
-    //The container of action linear power arrays
+    //The container of action linear power arrays;
     static float *const tools_linear_powers_storage;
 
-    //The variables for action data update :
+    //The variables for action data update;
     static uint8_t next_tools_powers_index;
 
+    //The current tool signatures;
     static sig_t current_tools_signature;
 
-    //The function to update actions regulation_speed
+    //The function to update actions regulation_speed;
     static void (**tools_update_functions)(float);
 
-    //the function to change the linear powers and functions
+    //the function to change the linear powers and functions;
     static void update_tools_data(const movement_data_t *movement);
 
-    //Stop all tools
+    //Stop all tools;
     static void stop_tools();
 
 };

@@ -312,8 +312,33 @@ public:
     }
 
 
-    //------------------------------------------------Queue fields------------------------------------------------------
 
+    //-------------------------------------------------- Clear ---------------------------------------------------------
+
+    void clear() {
+
+        //Reset indices;
+        reading_index = insertion_index = 0;
+
+        //Reset the number of objects contained in the queue to zero;
+        nb_objects = 0;
+
+        //Reset the number of available spaces to the maximum number;
+        nb_spaces = size;
+
+        //Deallocate all objects :
+
+        //For each element :
+        for (uint8_t i = 0; i < size; i++) {
+
+            //Deallocate the element;
+            content[i].allocated = false;
+
+        }
+
+
+    }
+    //----------------------------------------------- Queue fields -----------------------------------------------------
 
 private:
 
