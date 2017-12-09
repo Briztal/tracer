@@ -124,13 +124,12 @@ void TrajectoryTracer::start() {
     //Mark the movement procedure as started;
     started = true;
 
-    //enable the stepper timer;//TODO TIMER
-    //enable_stepper_timer();
-
     //Start the interrupt sequence.
     if (!emergency_stop_flag) {
         enable_stepper_interrupt();
     }
+
+
 
 }
 
@@ -147,8 +146,8 @@ void TrajectoryTracer::stop() {
     //Interrupt the movement routing, by stopping the interrupt sequence;
     disable_stepper_interrupt()
 
-    //Disable the stepper timer, now that the interrupt is disabled;//TODO TIMER
-    //disable_stepper_timer();
+    //Disable the stepper timer, now that the interrupt is disabled;
+    disable_stepper_timer();
 
     //Trigger an emergency stop, in case stop was called during the movement routine (in case of movement errors);
     emergency_stop_flag = true;
@@ -201,8 +200,8 @@ void TrajectoryTracer::emergency_stop() {
     //Interrupt the movement routing, by stopping the interrupt sequence;
     disable_stepper_interrupt()
 
-    //Disable the stepper timer, now that the interrupt is disabled;//TODO TIMER
-    //disable_stepper_timer();
+    //Disable the stepper timer, now that the interrupt is disabled;
+    disable_stepper_timer();
 
     //Stop all currently enabled tools;
     stop_tools();

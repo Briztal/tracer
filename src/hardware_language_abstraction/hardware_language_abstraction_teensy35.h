@@ -74,6 +74,7 @@
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
+//init function : this function initialises the hardware, and disables timers
 void hl_init();
 
 //----------------------------------------------------STRING------------------------------------------------------------
@@ -165,7 +166,7 @@ static inline static void delay_ms(uint16_t time_ms){
 
 
 //Disabling interrupt
-#define disable_stepper_interrupt() PIT_TCTRL0 &= 5;
+#define disable_stepper_interrupt() PIT_TCTRL0 &= ~PIT_TCTRL_TIE;
 
 
 //Enabling timer
@@ -173,7 +174,7 @@ static inline static void delay_ms(uint16_t time_ms){
 
 
 //Disabling timer
-#define disable_stepper_timer() PIT_TCTRL0 &= 6;
+#define disable_stepper_timer() PIT_TCTRL0 &= ~PIT_TCTRL_TEN;
 
 
 //Flag management

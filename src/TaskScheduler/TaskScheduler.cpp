@@ -316,6 +316,7 @@ void TaskScheduler::iterate() {
 
         }
 
+        flood_enabled = false;
 
     }
 

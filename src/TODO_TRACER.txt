@@ -2,10 +2,6 @@
 
 //TODO TaskScheduler::read_interfaces : Read one task per interface at the time !!
 
-//TODO CALL AN EMERGENCY STOP FUNCTION EVERY TIME AN ERROR IS RETURNED.
-
-//TODO TIMERS POEROFF POWERON IN TRAJECTORY_TRACER
-
 //TODO GCODE AND TERMINAL COMMANDS ACKS
 
 //TODO SEPARATE Project Initialisation FROM THE SCHEDULER
@@ -48,9 +44,7 @@
 
 //TODO TEST JERKS
 
-//TOD RMEOVE DEBUG IN TRAJECTORY TRACER
-
-//TODO CHECK POSITION UPDATE
+//TODO REMOVE DEBUG IN TRAJECTORY TRACER
 
 //TODO TEST THE STRUCTURE HIERARCHY IN MachineController, modify carriage data along with a movement and verify the effective modfication.
 
