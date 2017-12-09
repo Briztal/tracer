@@ -28,7 +28,7 @@ class ServoActions {
 
 public:
 
-#define SERVO(k1_position_indice, name, pin, min, max) \
+#define SERVO(k1_position_indice, name, pin, beginning, ending) \
     static void set##k1_position_indice(float f);
 
 #include "../config_files.h"
@@ -36,7 +36,7 @@ public:
 
 private:
 
-#define SERVO(k1_position_indice, name, pin, min, max) \
+#define SERVO(k1_position_indice, name, pin, beginning, ending) \
     static Servo* servo##k1_position_indice;
 
 #include "../config_files.h"

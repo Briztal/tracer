@@ -250,7 +250,7 @@ void EEPROMStorage::set_default_profile() {
 
     //---------------------------------------------Actions---------------------------------------------
 
-    //Continuous max
+    //Continuous ending
 #define CONTINUOUS(i, name, powerPin, maxValue)\
     (continuous_data+i)->max = maxValue;
 
@@ -258,7 +258,7 @@ void EEPROMStorage::set_default_profile() {
 
 #undef CONTINUOUS
 
-    //Servo min and max
+    //Servo beginning and ending
     
     servo_data_t *servo_p;
 

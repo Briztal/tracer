@@ -22,13 +22,13 @@
 #include "ServoActions.h"
 
 void ServoActions::init() {
-#define SERVO(k1_position_indice, name, pin, min, max) \
-    servo##k1_position_indice->attach(pin, min, max);
+#define SERVO(k1_position_indice, name, pin, beginning, ending) \
+    servo##k1_position_indice->attach(pin, beginning, ending);
 
 #include "../config_files.h"
 }
 
-#define SERVO(k1_position_indice, name, pin, min, max) \
+#define SERVO(k1_position_indice, name, pin, beginning, ending) \
 void ServoActions::set##k1_position_indice (float f) {\
     servo##k1_position_indice->write(f);\
 }
@@ -38,7 +38,7 @@ void ServoActions::set##k1_position_indice (float f) {\
 #undef SERVO
 
 //###################################################SERVO INIT#########################################################
-#define SERVO(k1_position_indice, name, pin, min, max) \
+#define SERVO(k1_position_indice, name, pin, beginning, ending) \
 Servo *ServoActions::servo##k1_position_indice = new Servo();\
 
 

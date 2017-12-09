@@ -1,2 +1,0 @@
-/usr/bin/ar qc libsensors.a  CMakeFiles/sensors.dir/Sensors/Thermistors/Thermistors.cpp.o
-/usr/bin/ranlib libsensors.a

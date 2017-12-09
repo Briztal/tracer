@@ -72,7 +72,7 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
         //Formula : low_time_bound = stepper_distance / maximum_speed
         float down_time = f_step_distances[stepper] / maximum_speed;
 
-        //update minimum time, as the maximum of the new time and the current min time :
+        //update minimum time, as the maximum of the new time and the current beginning time :
         min_time = (down_time < min_time) ? min_time : down_time;
 
     }
@@ -137,7 +137,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
             //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
             float up_time = f_step_distances[stepper] / s;
 
-            //update maximum time, as the minimum of the new time and the current max time :
+            //update maximum time, as the minimum of the new time and the current ending time :
             max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
 
             first = false;
@@ -156,7 +156,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
         //Formula : low_time_bound = stepper_distance / maximum_speed
         float down_time = f_step_distances[stepper] / maximum_speed;
 
-        //update minimum time, as the maximum of the new time and the current min time :
+        //update minimum time, as the maximum of the new time and the current beginning time :
         min_time = (down_time < min_time) ? min_time : down_time;
 
 
@@ -175,7 +175,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
     } else if (regulation_time < min_time) {
 
-        //If the regulation time is lower than the min time :
+        //If the regulation time is lower than the beginning time :
 
         //choose the time corresponding to the maximum acceleration.
         new_time = min_time;
@@ -265,14 +265,14 @@ void K2Physics::compute_jerk_offsets(float speed, k2_movement_data *previous_mov
     //Cache vars for offsets
     uint32_t *jerk_distances_offsets = previous_movement->jerk_offsets;
 
-    //Cache var for final_jerk_ratios
-    float *final_jerk_ratios = previous_movement->final_jerk_ratios;
+    //Cache var for ending_jjerk_ratios
+    float *ending_jjerk_ratios = previous_movement->ending_jjerk_ratios;
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //get the maximum regulation_speed on the current axis :
         //Formula : max_stepper_speed = max_speed * stepper_distance / high_level_distance;
-        float stepper_speed = speed * final_jerk_ratios[stepper];
+        float stepper_speed = speed * ending_jjerk_ratios[stepper];
 
         stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
 

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libkernels.a  CMakeFiles/kernels.dir/StepperControl/MachineInterface.cpp.o CMakeFiles/kernels.dir/StepperControl/TrajectoryTracer.cpp.o CMakeFiles/kernels.dir/StepperControl/StepperController.cpp.o CMakeFiles/kernels.dir/StepperControl/IncrementComputer.cpp.o CMakeFiles/kernels.dir/StepperControl/JerkPlanner.cpp.o CMakeFiles/kernels.dir/StepperControl/SubMovementManager.cpp.o
-/usr/bin/ranlib libkernels.a

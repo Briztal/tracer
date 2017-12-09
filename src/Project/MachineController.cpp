@@ -349,7 +349,7 @@ void MachineController::sanity_check(float *position) {
 
     //We first check X axis :
 
-    //Cache for the difference between the sum and the max sum.
+    //Cache for the difference between the sum and the ending sum.
     float difference = EEPROMStorage::coordinate_interface_data.x_max_sum - (position[0] + position[1]);
 
     //If the sum is greater than the limit,
@@ -367,7 +367,7 @@ void MachineController::sanity_check(float *position) {
 
     //Same thing for Y axis :
 
-    //Cache for the difference between the sum and the max sum.
+    //Cache for the difference between the sum and the ending sum.
     difference = EEPROMStorage::coordinate_interface_data.y_max_sum - (position[2] + position[3]);
 
     //If the sum is greater than the limit,

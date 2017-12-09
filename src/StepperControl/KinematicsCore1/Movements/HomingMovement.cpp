@@ -61,10 +61,10 @@ void HomingMovement::move() {
     float speed;
     uint32_t d;
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        //regulation_speed = min(EEPROM::maximum_speeds[axis], EEPROM::accelerations[axis] * (float)0.05);
+        //regulation_speed = beginning(EEPROM::maximum_speeds[axis], EEPROM::accelerations[axis] * (float)0.05);
         d = (uint32_t) (1000000 / (speed * EEPROMStorage::steppers_data[axis].steps));
         delays[axis] = delay;
-        //delay_us = max(delay_us, d);
+        //delay_us = ending(delay_us, d);
     }
 
     /*
@@ -106,7 +106,7 @@ uint32_t HomingMovement::getMaxDelay(sig_t signature, uint32_t *delays) {
     }
     for (; axis < NB_STEPPERS; axis++) {
         if (signature & (uint32_t) 1) {
-            //delay_us = max(delay_us, delays[axis]);
+            //delay_us = ending(delay_us, delays[axis]);
         }
         signature >>= 1;
     }

@@ -33,7 +33,7 @@
 bool IncrementComputer::determine_increments(movement_data *movement) {
 
     //Cache vars
-    float min = movement->min, max = movement->max;
+    float min = movement->beginning, max = movement->ending;
     float min_increment, max_increment;
 
     //We must distinguish the two cases, of an ascending movement, and a descending movement.
@@ -62,8 +62,8 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
     }
 
     //Save cache vars
-    movement->min_increment = min_increment;
-    movement->max_increment = max_increment;
+    movement->beginning_increment = min_increment;
+    movement->ending_increment = max_increment;
 
     //No error
     return true;

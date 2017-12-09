@@ -1,10 +1,6 @@
 
-#--------------------------------------------LOW LEVEL LIBS-------------------------------------------------------------
-
 include_directories()
-
 #------------------------------------------------PROJECT----------------------------------------------------------------
-
 
 set(PP "Project")
 
@@ -34,7 +30,7 @@ add_library(project_config
         ${PCP}/program_interface_config.h
         ${PCP}/gcode_interface_config.h
         ${PCP}/geometry.cpp
-        Project/Config/eeprom_config.h)
+        ${PCP}/eeprom_config.h)
 
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
 
@@ -45,7 +41,6 @@ include_directories(${PIP}/)
 
 add_library(project_interfaces
 
-        ${PIP}/_interface_data.h
         ${PIP}/TerminalCommands.h
         ${PIP}/TerminalCommands.cpp
         ${PIP}/ProgramInterfaceCommands.h
@@ -123,6 +118,9 @@ set(IP "Interfaces")
 include_directories(${IP}/)
 
 add_library(interface
+
+        ${IP}/_interface_data.h
+
 
         #LCDInterface
         ${IP}/LCDInterface/LCDInterface.h

@@ -14,7 +14,7 @@
  * initialise_movement : this function is called when the current movement is finished.
  *
  *  Parameters passed update all variables used to compute positions :
- *      - min and max, the minimum and the maximum of index (beginning and ending of movement)
+ *      - beginning and ending, the minimum and the maximum of index (beginning and ending of movement)
  *      - incr : the index increment for the first plan_movement (pre computed and supposedly accurate)
  *      - trajectory_function : the function that actually computes stepper positions.
  *
@@ -25,9 +25,9 @@ uint8_t SubMovementManager::update_current_movement(movement_data_t *movement_da
     //----------------Movement data initialisation-----------------------
 
     //Index data
-    index_limit = movement_data->max;
-    index = movement_data->min;
-    increment = movement_data->min_increment;
+    index_limit = movement_data->ending;
+    index = movement_data->beginning;
+    increment = movement_data->beginning_increment;
     positive_index_dir = (increment > 0);
 
     //update position provider
@@ -324,7 +324,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
         real_dists[stepper] = distance;
         int_dists[stepper] = int_dist;
 
-        //Update max dist
+        //Update ending dist
         if (int_dist > max_int_dist) {
             max_int_dist = int_dist;
             max_f_dist = distance;

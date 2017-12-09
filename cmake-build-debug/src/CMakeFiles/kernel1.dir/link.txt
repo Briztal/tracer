@@ -1,2 +1,0 @@
-/usr/bin/ar qc libkernel1.a  CMakeFiles/kernel1.dir/StepperControl/KinematicsCore1/mathProcess.cpp.o CMakeFiles/kernel1.dir/StepperControl/KinematicsCore1/KinematicsCore1.cpp.o CMakeFiles/kernel1.dir/StepperControl/KinematicsCore1/K1Physics.cpp.o CMakeFiles/kernel1.dir/StepperControl/KinematicsCore1/SqrtFastComputer.cpp.o CMakeFiles/kernel1.dir/StepperControl/KinematicsCore1/Movements/HomingMovement.cpp.o CMakeFiles/kernel1.dir/StepperControl/KinematicsCore1/Movements/LinearMovement.cpp.o
-/usr/bin/ranlib libkernel1.a

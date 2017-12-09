@@ -1,2 +1,0 @@
-/usr/bin/ar qc libasserv.a  CMakeFiles/asserv.dir/ControlLoops/PID.cpp.o CMakeFiles/asserv.dir/ControlLoops/ControlLoops.cpp.o
-/usr/bin/ranlib libasserv.a

@@ -33,137 +33,137 @@
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 
-
 /*
- * control_and_initialise_jerk : this function determines the jerk parameter for
- *      the provided movement.
+ * save_final_jerk_offsets : this function is called for every movement planned.
  *
+ *  It determines and memorises the jerk offsets, for an eventual jerk computation.
+ *
+ *  This computation will be made using the method compute_jerk, below.
+ *
+ *  ----------------------------------------- IMPORTANT -----------------------------------------
+ *
+ *      This step couldn't be called at the same time than the jerk computation, as both function use
+ *          pre-process trajectory functions, during the jerk ratios computation, and there functions are static.
+ *          Those use static data, that is not available during the planning of a movement.
+ *
+ *          If both movements were lines, and we tried to execute this function at the same time than compute_jerk,
+ *          we would be calling the same function (the EXACT same function) for both movements.
  */
 
-bool JerkPlanner::control_and_initialise_jerk(const movement_data_t *current_movement,
-                                              movement_data_t *previous_movement, bool jerk_control) {
+void JerkPlanner::save_final_jerk_offsets(movement_data_t *current_movement) {
 
-    //cache vars for min and max.
-    const float min = current_movement->min, max = current_movement->max;
-    const float min_increment = current_movement->min_increment, max_increment = current_movement->max_increment;
-    const uint8_t speed_group = current_movement->speed_group;
+    //---------------------Stepper positions computation---------------------
 
-    //Initialise an array for the jerk step_distances (initial and final)
-    float jerk_distances[NB_STEPPERS];
-    float t_min[NB_STEPPERS];
+    //Cache var for ending index and increment;
+    const float ending = current_movement->ending;
+    const float ending_increment = current_movement->ending_increment;
 
-    //Cache for the current movement's trajectory function.
+    //Cache for the current movement's trajectory function;
     void (*trajectory_function)(float, float *) = current_movement->pre_process_trajectory_function;
 
-    //if we must do a jerk verification
-    if (jerk_control) {
 
-        float final_jerk_ratios[NB_STEPPERS];
+    float stepper_positions[NB_STEPPERS];
 
-        //Update the final jerk ratios with the final sub movement data
-        get_final_jerk_ratios(saved_final_stepper_positions, speed_group, final_jerk_ratios);
+    //Get the step_distances for the last sub_movement;
+    get_stepper_distances(ending, ending - ending_increment, trajectory_function, stepper_positions);
 
-        //Get the jerk position
-        MachineInterface::get_stepper_positions_for(trajectory_function, min, t_min);
+    //---------------------Jerk ratios computation---------------------
 
-        //cache var for jerk pos
-        int32_t *jerk_pos = previous_movement->jerk_position;
+    //Cache for speed group;
+    const uint8_t speed_group = current_movement->speed_group;
 
-        //Convert to int32_t
-        for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-            jerk_pos[stepper] = (int32_t) t_min[stepper];
-        }
-
-        //Get the step_distances for the first sub_movement
-        get_stepper_distances(min, min + min_increment, trajectory_function, jerk_distances);
-
-        //Get the initial jerk ratios
-        float speed = get_jerk_point_speed(jerk_distances, speed_group, final_jerk_ratios);
-
-        //get the correct jerk offsets for the current movement
-        Kinematics::compute_jerk_offsets(speed, previous_movement);
-
-        previous_movement->jerk_point = true;
-
-    }
-
-    //Anyway, init the jerk control for the next movement
-
-    //Get the step_distances for the last sub_movement
-    get_stepper_distances(max, max - max_increment, trajectory_function, saved_final_stepper_positions);
-
-    get_final_jerk_ratios(saved_final_stepper_positions, speed_group, previous_movement->final_jerk_ratios);
-
-    return true;
-
-}
-
-float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, const uint8_t speed_group, const float *final_jerk_ratios) {
-
-    //First, determine the inverse of th high level distance for the sub_movement.
-    float distance_inverse = (float) 1 / MachineInterface::get_movement_distance_for_group(speed_group, initial_steps_distances);
-
-    float speed = 0;
-    bool first = true;
-
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-
-        //determine the initial jerk_ratio for the current stepper;
-        float initial_jerk_ratio = initial_steps_distances[stepper] * distance_inverse;
-
-        //determine the algebric ratio difference.
-        float algebric_difference = final_jerk_ratios[stepper] - initial_jerk_ratio;
-
-        //extract the absolute difference
-        if (algebric_difference < 0) algebric_difference = -algebric_difference;
-
-        //Get the maximum regulation_speed.
-        //Formula : regulation_speed < max_jerk(unit/s) / abs(final_ratio - initial_ratio)
-        stepper_data_t *data = EEPROMStorage::steppers_data+stepper;
-        float max_speed = data->jerk * data->steps / algebric_difference;
-
-        //Update the maximum regulation_speed.
-        speed = (first) ? speed : ((speed < max_speed) ? speed : max_speed);
-
-        //first stepper is done.
-        first = false;
-
-    }
-
-    return speed;
+    //Get ending jerk ratios;
+    get_ending_jerk_ratios(stepper_positions, speed_group, current_movement->ending_jerk_ratios);
 
 }
 
 
 /*
- * get_stepper_distances : this function gets the algebric step_distances on each stepper, between the two provided
- *      positions of the provided trajectory.
+ * control_and_initialise_jerk : this function is called for every movement planned, except for the first movement.
+ *
+ *  It used data computed with the function save_final_jerk_offsets right behind, to determine jerk bounds,
+ *
+ *      for the current movement's first point.
  */
 
-void JerkPlanner::get_stepper_distances(const float p0, const float p1, void (*trajectory_function)(float, float *),
-                                        float *distances) {
+void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement_data_t *previous_movement) {
 
-    float t0[NB_STEPPERS]{0}, t1[NB_STEPPERS]{0};
+    //First, let's enable the jerk watching for the previous movement;
+    previous_movement->jerk_point = true;
 
-    //Get the stepper position for the point p0
-    MachineInterface::get_stepper_positions_for(trajectory_function, p0, t0);
 
-    //Get the stepper position for the point p1
-    MachineInterface::get_stepper_positions_for(trajectory_function, p1, t1);
+    //---------------------Speed Group---------------------
 
-    //Get distances
+    //The chosen speed group will determine in which referential we calculate the maximum jerk speed;
+
+    //As the deceleration will be made in the previous movement's referential, the previous speed group is chosen;
+    const uint8_t speed_group = current_movement->speed_group;
+
+
+    //---------------------Final Jerk Ratios computation---------------------
+
+    //Local data;
+    float final_jerk_ratios[NB_STEPPERS];
+
+    //Update the final jerk ratios with the final sub movement data;
+    get_ending_jerk_ratios(saved_final_stepper_positions, speed_group, final_jerk_ratios);
+
+
+    //---------------------Initial Jerk Ratios pre computation---------------------
+
+    //cache vars for beginning index and increment;
+    const float beginning = current_movement->beginning;
+    const float beginning_increment = current_movement->beginning_increment;
+
+    //Declare an array that will contain the stepper positions;
+    float stepper_positions[NB_STEPPERS];
+
+    //Cache for the current movement's trajectory function;
+    void (*trajectory_function)(float, float *) = current_movement->pre_process_trajectory_function;
+
+    //Get the jerk position;
+    MachineInterface::get_stepper_positions_for(trajectory_function, beginning, stepper_positions);
+
+    //cache var for jerk pos;
+    int32_t *jerk_pos = previous_movement->jerk_position;
+
+    //Convert to int32_t;
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        distances[stepper] = t1[stepper] - t0[stepper];
+        jerk_pos[stepper] = (int32_t) stepper_positions[stepper];
     }
+
+    //We need an array to contain the jerk distances.
+    //For optimisation purposes, we will reuse stepper_positions, that isn't used anymore;
+    float *jerk_distances = stepper_positions;
+
+    //Get the step_distances for the first sub_movement;
+    get_stepper_distances(beginning, beginning + beginning_increment, trajectory_function, jerk_distances);
+
+
+    //---------------------Limitation speed computation---------------------
+
+    //Get the initial jerk ratios;
+    float speed = get_jerk_point_speed(jerk_distances, speed_group, final_jerk_ratios);
+
+
+    //---------------------Jerk offsets computation---------------------
+
+    //get the correct jerk offsets for the current movement;
+    Kinematics::compute_jerk_offsets(speed, previous_movement);
+
 
 }
 
 
-void JerkPlanner::get_final_jerk_ratios(float *final_steps_distances, const uint8_t speed_group,
-                                        float *final_jerk_ratios) {
+//---------------------------------------------------Private Methods----------------------------------------------------
 
-    //First, determine the inverse of the high level distance for the sub_movement
-    float distance_inverse =//TODO NO !!!!!!!!! THE MOVEMENT DISTANCE IS NOT KNOWN AS THE NEXT SPEED GROUP IS NEITHER. DUMBASS.
+
+
+void JerkPlanner::get_ending_jerk_ratios(float *final_steps_distances, const uint8_t speed_group,
+                                         float *final_jerk_ratios) {
+
+    //First, determine the inverse of the high level distance for the sub_movement;
+    float distance_inverse =
             1 / MachineInterface::get_movement_distance_for_group(speed_group, final_steps_distances);
 
     //Then, update the end ratios :
@@ -172,6 +172,153 @@ void JerkPlanner::get_final_jerk_ratios(float *final_steps_distances, const uint
     }
 
 }
+
+/*
+ * get_stepper_distances : this function gets the algebraic step_distances on each stepper, between the two provided
+ *      positions of the provided trajectory.
+ */
+
+void JerkPlanner::get_stepper_distances(const float p0, const float p1, void (*trajectory_function)(float, float *),
+                                        float *distances) {
+
+    //Local arrays to contain positions;
+    float t0[NB_STEPPERS]{0}, t1[NB_STEPPERS]{0};
+
+    //Get the stepper position for the point p0;
+    MachineInterface::get_stepper_positions_for(trajectory_function, p0, t0);
+
+    //Get the stepper position for the point p1;
+    MachineInterface::get_stepper_positions_for(trajectory_function, p1, t1);
+
+    //Get distances;
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+        distances[stepper] = t1[stepper] - t0[stepper];
+    }
+
+}
+
+
+/*
+ * get_jerk_point_speed : this function determines the maximum acceptable speed for the provided jerk point.
+ *
+ *  It uses the formula that is explained at the bottom of this file.
+ *
+ */
+float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, const uint8_t speed_group,
+                                        const float *final_jerk_ratios) {
+
+    //First, determine the inverse of th high level distance for the sub_movement;
+    float distance_inverse =
+            (float) 1 / MachineInterface::get_movement_distance_for_group(speed_group, initial_steps_distances);
+
+    //The maximum speed;
+    float maximum_speed = 0;
+
+    //A flag for the first iteration;
+    bool first = true;
+
+    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+
+        //determine the initial jerk_ratio for the current stepper;
+        float initial_jerk_ratio = initial_steps_distances[stepper] * distance_inverse;
+
+        //determine the algebric ratio difference;
+        float algebric_difference = final_jerk_ratios[stepper] - initial_jerk_ratio;
+
+        //extract the absolute difference;
+        if (algebric_difference < 0) algebric_difference = -algebric_difference;
+
+        //Get the maximum regulation_speed;
+        //Formula : regulation_speed(unit/s) < max_jerk(steps/s) / abs( final_ratio(steps/unit) - initial_ratio(steps/unit) ).
+        stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
+        float max_speed = data->jerk * data->steps / algebric_difference;
+
+        //Update the maximum regulation_speed;
+        maximum_speed = (first) ? maximum_speed : ((maximum_speed < max_speed) ? maximum_speed : max_speed);
+
+        //first stepper is done;
+        first = false;
+
+    }
+
+    //return the computed speed;
+    return maximum_speed;
+
+}
+
+/*
+
+ FORMULAS FOR JERK REGULATION :
+
+    Definition 1 : global speed V. The global speed is the speed of the machine on a particular speed group.
+        This speed has a physical meaning (the speed of a carriage in space for example), has its unit (unit)
+        and is regulated during the movement.
+
+    Definition 1 : global distance D. The global distance during a movement is the distance that the machine on
+        a particular group of axis, this group axis being a speed group.
+        This distance has a physical meaning (the distance a carriage traveled in space for example), has its unit (unit)
+        and is controlled during the movement.
+
+     Definition 2 : jerk limit Ji. A stepper mustn't have its speed changing more than its jerk limit in a brief time
+        period.
+
+        Equation (E1) : |vi+ - vi-| < Ji;
+
+    Notations :
+        - V- (unit/s)   : global speed before the jerk movement;
+        - V+ (unit/s)   : global speed after the jerk movement;
+        - D- (unit)     : global distance of the sub movement before the jerk point;
+        - D+ (unit)     : global distance of the sub movement after the jerk point;
+        - vi- (steps/s) : stepper motor i speed before the movement (steps/s);
+        - vi+ (steps/s) : stepper motor i speed after the movement (steps/s);
+        - si- (steps)   : stepper motor i distance for the sub movement before the jerk point;
+        - si+ (steps)   : stepper motor i distance for the sub movement after the jerk point;
+        - Ji (steps/s)  : jerk limit on stepper i;
+        - t- (s)        : the duration of the sub movement before the jerk point;
+        - t+ (s)        : the duration of the sub movement after the jerk point;
+
+    Prerequisites :
+        V(unit/s) = D(unit/s) / t(s) <=> t(s) = D(unit) / V(unit/s);
+        vi(steps/s) = si(steps) / t(s);
+
+
+    Proposition 1 : The global speed before a jerk point and after a jerk point is the same.
+
+        Explanation : The speed variation is regulated by the machine, and can only occur continuously (or, as the
+            movement is discrete, during a movement). A jerk point is (as its name says), a point, and the global speed
+            must, as a consequence, remain the same before and after.
+            This means that only stepper speeds will vary during the jerk.
+
+        ie :  V+ = V- = V;
+
+        Consequence :
+            - t+ = D+ / V
+            - t- = D- / V
+
+    Definition 3 : target speed. The target speed Vt, for a jerk point, is the maximum speed that allow all steppers to
+        stay beyond their jerk limit.
+
+
+    Determination of Vt :
+
+        For all steppers, we must have
+
+        (E1)    |vi+ - vi-| < Ji
+            =>  |si+ / t+ - si- / t-| < Ji
+            =>  |si+ / D+ - si- / D-| * Vt < Ji
+            =>  Vt < Ji / |si+ / D+ - si- / D-|
+
+
+    Result :
+
+        Vt is the greater speed that verifies for all stepper the following condition :
+
+            Vt < Ji / |si+ / D+ - si- / D-|
+
+
+
+
+ */
 
 
 float t_sfsp[NB_STEPPERS];

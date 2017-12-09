@@ -1,1 +1,0 @@
-/root/.platformio/packages/toolchain-gccarmnoneeabi/bin/arm-none-eabi-g++  -g  -rdynamic CMakeFiles/TRACER.dir/main.cpp.o  -o TRACER 

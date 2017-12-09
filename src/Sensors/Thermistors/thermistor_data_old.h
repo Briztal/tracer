@@ -59,13 +59,13 @@
  * EPCOS 100K Thermistor #1(B57540G0104F000)
  * Thermistor lookup table for RepRap Temperature Sensor Boards (http://make.rrrf.org/ts)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=4066 --max-adc=1023
+ * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=4066 --ending-adc=1023
  * r0: 100000
  * t0: 25
  * r1: 0
  * r2: 4700
  * beta: 4066
- * max adc: 1023
+ * ending adc: 1023
  */
 
 #define B57540G0104F000_SIZE 20
@@ -99,13 +99,13 @@
 /*
  * EPCOS 100K Thermistor #2 (B57560G1104F)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=4092 --max-adc=1023
+ * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=4092 --ending-adc=1023
  * r0: 100000
  * t0: 25
  * r1: 0
  * r2: 4700
  * beta: 4092
- * max adc: 1023
+ * ending adc: 1023
 
  */
 
@@ -139,13 +139,13 @@
 
 /* EPCOS 100K Thermistor #3(B57560G104F)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=4036 --max-adc=1023
+ * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=4036 --ending-adc=1023
  * r0: 100000
  * t0: 25
  * r1: 0
  * r2: 4700
  * beta: 4036
- * max adc: 1023
+ * ending adc: 1023
  */
 
 #define B57560G104F_SIZE 20
@@ -179,13 +179,13 @@
 /* RRRF100K :
  * Thermistor lookup table for RepRap Temperature Sensor Boards (http://make.rrrf.org/ts)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=3960 --max-adc=1023
+ * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=3960 --ending-adc=1023
  * r0: 100000
  * t0: 25
  * r1: 0
  * r2: 4700
  * beta: 3960
- * max adc: 1023
+ * ending adc: 1023
  */
 
 #define RRRF100K_SIZE 20
@@ -219,13 +219,13 @@
 /* RRRF10K :
  * Thermistor lookup table for RepRap Temperature Sensor Boards (http://make.rrrf.org/ts)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=10000 --t0=25 --r1=680 --r2=1600 --beta=3964 --max-adc=305
+ * ./createTemperatureLookup.py --r0=10000 --t0=25 --r1=680 --r2=1600 --beta=3964 --ending-adc=305
  * r0: 10000
  * t0: 25
  * r1: 680
  * r2: 1600
  * beta: 3964
- * max adc: 305
+ * ending adc: 305
  */
 
 #define RRRF10K_SIZE 19
@@ -258,13 +258,13 @@
 /* RS10K
  * Thermistor lookup table for RepRap Temperature Sensor Boards (http://make.rrrf.org/ts)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=10000 --t0=25 --r1=680 --r2=1600 --beta=3480 --max-adc=315
+ * ./createTemperatureLookup.py --r0=10000 --t0=25 --r1=680 --r2=1600 --beta=3480 --ending-adc=315
  * r0: 10000
  * t0: 25
  * r1: 680
  * r2: 1600
  * beta: 3480
- * max adc: 315
+ * ending adc: 315
  */
 
 
@@ -298,13 +298,13 @@
 
 /* Honeywell 100K Thermistor (135-104LAG-J01)
  * Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
- * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=3974 --max-adc=1023
+ * ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=3974 --ending-adc=1023
  * r0: 100000
  * t0: 25
  * r1: 0
  * r2: 4700
  * beta: 3974
- * max adc: 1023
+ * ending adc: 1023
  */
 
 #define HW100K_SIZE 20

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libproject_interfaces.a  CMakeFiles/project_interfaces.dir/Project/InterfaceCommands/TerminalInterfaceCommands.cpp.o CMakeFiles/project_interfaces.dir/Project/InterfaceCommands/ProgramInterfaceCommands.cpp.o CMakeFiles/project_interfaces.dir/Project/InterfaceCommands/GCodeInterfaceCommands.cpp.o
-/usr/bin/ranlib libproject_interfaces.a

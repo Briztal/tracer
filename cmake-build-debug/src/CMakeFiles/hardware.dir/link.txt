@@ -1,2 +1,0 @@
-/usr/bin/ar qc libhardware.a  CMakeFiles/hardware.dir/hardware_language_abstraction/hardware_language_abstraction_teensy35.cpp.o
-/usr/bin/ranlib libhardware.a

@@ -56,6 +56,7 @@ bool TrajectoryTracer::enqueue_authorised() {
 
 void TrajectoryTracer::start() {
 
+    //Don't execute if the movement is already started.
     if (started)
         return;
 
@@ -66,7 +67,7 @@ void TrajectoryTracer::start() {
         //If no movements are in the queue, no need to start.
 
         //send an error message
-        debug("No movements are present in the queue, starting aborted");
+        debug("No movements are present  in the queue, starting aborted");
 
         return;
     }
@@ -168,7 +169,7 @@ bool TrajectoryTracer::queue_locked() {
  * enqueue_movement : this function adds the movement provided in argument_t to the motion queue.
  *
  *  The movement is provided in the form of :
- *      - min and max, the index variable minimum and maximum values, for (resp) the beginning and end positions
+ *      - beginning and ending, the index variable minimum and maximum values, for (resp) the beginning and end positions
  *      - increment : the index increment for the first movement;
  *      - movement_initialisation : the movement's in_real_time initialisation function;
  *      - trajectory_function : the function that will be used to compute new positions in_real_time.
@@ -230,8 +231,8 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     //---------------kernel-invariant data-----------------
 
     //Trajectory vars
-    current_movement->min = min;
-    current_movement->max = max;
+    current_movement->beginning = min;
+    current_movement->ending = max;
     current_movement->trajectory_function = trajectory_function;
     current_movement->pre_process_trajectory_function = pre_process_trajectory_function;
 
@@ -244,7 +245,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     //Reset the flag
     queue_flag = false;
 
-    //Set the current insertion position in the linear_powers storage, as the same position than in movement_data_queue.
+    //Set the current insertion position in the linear_powers storage, as the same position than in movement_data_queue;
     float *tools_linear_powers =
             tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.get_insertion_index(&queue_flag);
 
@@ -252,7 +253,8 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     if (!queue_flag) {
 
         //Log
-        CI::echo("ERROR in TrajectoryTracer::enqueue_movement : The element at the insertion index was already allocated.");
+        CI::echo(
+                "ERROR in TrajectoryTracer::enqueue_movement : The element at the insertion index was already allocated.");
 
         //Emergency Stop
         TrajectoryTracer::stop();
@@ -269,7 +271,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //---------------Increment computing, kernel invariant-----------------
 
-    //The increment computer will determine the min and max increment.
+    //The increment computer will determine the beginning and ending increment.
     if (!IncrementComputer::determine_increments(current_movement)) {
 
         //If the increment computer detects a micro movement, the machine will not move; complete.
@@ -282,22 +284,22 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     Kinematics::initialise_kinetics_data(current_movement);
 
-    //---------------Speed and Jerk (kernel variable)-----------------
 
-    //we must check the jerk if the routine is started, or if movements are already present in the queue.
-    bool jerk_checking = (started) || (movement_data_queue.available_objects());
+    //---------------Jerk computation-----------------
 
-    movement_data_t *previous_movement;
+    /* The jerk computation will occur only if the previous movement is not entirely processed.
+     *  As movements are discarded only when they are effectively processed, this is equialent to checking
+     *  that the queue is not empty.
+     */
+    if (movement_data_queue.available_objects()) {
 
-    //TODO C'EST CRADE ET ERREUROGENE, ON PASSE POTENTIELLEMENT UN TRUC PAS INITIALISE...
-
-    if (jerk_checking) {
+        //Get the previous movement, now that we know that the queue is not empty (the previous movement exists).
 
         //Reset the flag;
         queue_flag = false;
 
         //Query the last movement address;
-        previous_movement = movement_data_queue.read_inserted_object(1, &queue_flag);
+        movement_data_t *previous_movement = movement_data_queue.read_inserted_object(1, &queue_flag);
 
         //Integrity check :
         if (!queue_flag) {
@@ -310,37 +312,26 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
             //Fail;
             return error;
-        }
-    }
-
-
-    //Control the jerk bounds if required, and init the jerk control for the next movement
-    JerkPlanner::control_and_initialise_jerk(current_movement, previous_movement, jerk_checking);
-
-
-    //---------------Jerk adjusting----------------------
-
-
-    if (jerk_checking && previous_movement->jerk_point) {
-
-        //If the movement has been popped since the processing has started
-        if (!movement_data_queue.available_objects()) {
-
-            //Load only the jerk data
-            Kinematics::load_real_time_jerk_data(previous_movement);
 
         }
+
+        //Compute the jerk for the previous movement
+        JerkPlanner::compute_jerk(current_movement, previous_movement);
+
+
+        /*
+         * TODO JERK_PROPAGATION
+         *
+         */
+
+
     }
 
+    //Anyway, we must save the current movement's ending jerk ratios.
+    JerkPlanner::save_final_jerk_offsets(current_movement);
 
-    /*
-     * TODO JERK_PROPAGATION
-     *
-     */
 
     //---------------Persisting in Queue-----------------
-
-
 
     //Enqueue the movement.
 
@@ -416,7 +407,8 @@ void TrajectoryTracer::process_next_movement() {
         if (!queue_flag) {
 
             //Log
-            CI::echo("ERROR in TrajectoryTracer::process_next_movement : The reading element at the reading index was not allocated.");
+            CI::echo(
+                    "ERROR in TrajectoryTracer::process_next_movement : The reading element at the reading index was not allocated.");
 
             //Emergency stop;
             TrajectoryTracer::stop();
@@ -759,7 +751,7 @@ int k2_position_indice = 4;
  *
  *  This procedure comprises the following steps :
  *      - change the trajectory function;
- *      - change the trajectory variables (min, max, index)
+ *      - change the trajectory variables (beginning, ending, index)
  *      - init the new movement
  *
  *

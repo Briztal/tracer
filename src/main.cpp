@@ -19,7 +19,6 @@
 */
 #include "TaskScheduler/TaskScheduler.h"
 
-
 int main() {
 
     /*
@@ -31,24 +30,12 @@ int main() {
         }
     }
      */
+
     TaskScheduler::init();
 
     TaskScheduler::run();
 
 
 }
-
-/*
-#include "TaskScheduler/TaskScheduler.h"
-
-void setup() {
-    TaskScheduler::init();
-}
-
-void loop() {
-    TaskScheduler::run();
-
-}
- */
 
 

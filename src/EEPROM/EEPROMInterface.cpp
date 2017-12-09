@@ -82,7 +82,7 @@ void EEPROMInterface::print_stored_data() {
         CI::echo("Stepper " + str(stepper));
         CI::echo("\tsize : \t" + str(data->size));
         CI::echo("\tsteps : \t" + str(data->steps));
-        CI::echo("\tmax speed : \t" + str(data->maximum_speed));
+        CI::echo("\tending speed : \t" + str(data->maximum_speed));
         CI::echo("\tacceleration : \t" + str(data->acceleration));
         CI::echo("\tjerk : \t" + str(data->jerk)+"\n");
     }
@@ -92,7 +92,7 @@ void EEPROMInterface::print_stored_data() {
     CI::echo("Cartesian Groups : \n");
     for (uint8_t speed_group = 0; speed_group < NB_CARTESIAN_GROUPS; speed_group++) {
         CI::echo(
-                "Group " + str(speed_group) + ", max regulation speed : " + str(ES::group_maximum_speeds[speed_group]));
+                "Group " + str(speed_group) + ", ending regulation speed : " + str(ES::group_maximum_speeds[speed_group]));
     }
 
 #endif

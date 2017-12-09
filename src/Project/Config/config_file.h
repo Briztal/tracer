@@ -105,7 +105,7 @@ THERMISTOR(4, hotbed,   19,     BED100K)
 
 /* External Parameters : an external parameter, computed with sensors
  * For each parameter, put one line like behind and provide the parameter name
- * EXTERNAL_PARAMETER(i, name, min, max, unit)
+ * EXTERNAL_PARAMETER(i, name, beginning, ending, unit)
  */
 
 #ifdef EXTERNAL_PARAMETER

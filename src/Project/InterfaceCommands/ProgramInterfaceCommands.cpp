@@ -91,13 +91,13 @@ task_state_t ProgramInterfaceCommands::parameters_system_canal(char *data, uint8
     switch (sub_canal) {
         case 0 :
             /* Init case : send_packet data concerning all External Parameters.
-             * Packet Structure : indice, name, min, max, unit
+             * Packet Structure : indice, name, beginning, ending, unit
              */
 
-#define EXTERNAL_PARAMETER(indice, name, min, max, unit)\
+#define EXTERNAL_PARAMETER(indice, name, beginning, ending, unit)\
             TI::prepare_system_packet();TI::add_char_out(PARAMETER_SUBCANAL);TI::add_char_out(0);\
-            TI::add_char_out(indice); TI::add_string_out(#name); TI::add_float_out(min) ;\
-            TI::add_float_out(max); TI::add_string_out(#unit);TI::send_packet();
+            TI::add_char_out(indice); TI::add_string_out(#name); TI::add_float_out(beginning) ;\
+            TI::add_float_out(ending); TI::add_string_out(#unit);TI::send_packet();
 
 #include <config.h>
 
@@ -134,7 +134,7 @@ task_state_t ProgramInterfaceCommands::pid_system_canal(char *data, uint8_t size
 
         case 0 :
             /* Init case : send_packet data concerning all External Parameters.
-             * Packet Structure : indice, name, min, max, unit
+             * Packet Structure : indice, name, beginning, ending, unit
              */
 
 #define PID(i, name, ...)\
@@ -169,7 +169,7 @@ task_state_t ProgramInterfaceCommands::loop_system_canal(char *data, uint8_t siz
     switch (sub_canal) {
         case 0 :
             /* Init case : send_packet data concerning all External Parameters.
-             * Packet Structure : indice, name, min, max, unit
+             * Packet Structure : indice, name, beginning, ending, unit
              */
 
 #define LOOP_FUNCTION(indice, name, period_ms)\

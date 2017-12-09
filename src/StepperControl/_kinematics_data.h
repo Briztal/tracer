@@ -60,7 +60,7 @@
 
 /*
  * movement_data : this structure contains all data related to one movement :
- *  - the index variables : min, max, increment;
+ *  - the index variables : beginning, ending, increment;
  *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
  *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
@@ -69,20 +69,75 @@
  */
 
 typedef struct kernel_movement_data {
-    float min; //4
-    float max;//8
-    float min_increment; //12
-    float max_increment; //12
-    void (*movement_initialisation)(); //16
-    void (*movement_finalisation)(); //20
-    void (*trajectory_function)(float, float *); //24
-    void (*pre_process_trajectory_function)(float, float *); //24
-    sig_t tools_signatures; //30 -> 33
+
+    /*
+     * Trajectory data :
+     *
+     *  The following lines contain data required to trace a trajectory.
+     */
+
+    //The trajectory function : it takes a real value (the index) and outputs a position;
+    void (*trajectory_function)(float, float *);
+
+    //The pre processing trajectory function : this function is exactly like the previous one, but is not use during
+    //  the movement. It takes a real value (the index) and outputs a position;
+    void (*pre_process_trajectory_function)(float, float *);
+
+    //The beginning value of the trajectory index;
+    float beginning;
+
+    //The ending value of the trajectory index;
+    float ending;
+
+    //The increment at the beginning point;
+    float beginning_increment;
+
+    //The increment at the ending point;
+    float ending_increment;
+
+
+    /*
+     * The speed group on which the speed regulation is based on.
+     */
+
+    uint8_t speed_group;
+
+
+    /*
+     * Movement cleanup function :
+     *
+     *  The following lines contain functions to initialise and finalise correctly the movement;
+     */
+
+    //Initialisation, called before the movement processing starts;
+    void (*movement_initialisation)();
+
+    //Finalisation, called when the movement is entirely processed;
+    void (*movement_finalisation)();
+
+
+    /*
+     * Jerk :
+     *
+     *  The following lines contain all data required to perform the jerk regulation
+     */
+
+    //A boolean, determining whether the ending point is a jerk point
     bool jerk_point = false;
+
+    //The position of the jerk point
     int32_t jerk_position[NB_STEPPERS]{0};
-    float final_jerk_ratios[NB_STEPPERS];
-    uint8_t speed_group; //29
-    //-----------end : 32 to 36 bytes----------
+
+    //The jerk ratios, at the end of the movement.
+    float ending_jerk_ratios[NB_STEPPERS];
+
+
+    /*
+     * Tools data : the following signature determines which of tools will move during the movement.
+     */
+
+    sig_t tools_signatures;
+
 } movement_data;
 
 
@@ -151,7 +206,7 @@ typedef sub_movement_data k1_sub_movement_data;
 
 /*
  * k2_movement_data : this structure contains all data related to one movement :
- *  - the index variables : min, max, increment;
+ *  - the index variables : beginning, ending, increment;
  *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
  *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
@@ -169,7 +224,7 @@ typedef struct k2_movement_data : movement_data {
 
 /*
  * k2_movement_data : this structure contains all data related to one movement :
- *  - the index variables : min, max, increment;
+ *  - the index variables : beginning, ending, increment;
  *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
  *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
