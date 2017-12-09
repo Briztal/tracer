@@ -56,13 +56,17 @@ void TerminalInterface::echo(const string_t msg) {
 
 /*
  * read_data : this function reads and saved the serial available data.
+ *
+ *  It returns true if data is still available in the data link buffer, and false if the buffer is empty;
  */
 
-void TerminalInterface::read_data() {
+bool TerminalInterface::read_data() {
 
     //Don't process any data if no space is available in the argument_t sequence container
     if (!arguments_storage.available_spaces())
-        return;
+
+        //Return true if the data_link buffer is not empty.
+        return (bool)(terminal_interface_link_t::available());
 
     while (terminal_interface_link_t::available()) {
 
@@ -83,12 +87,18 @@ void TerminalInterface::read_data() {
 
                 //If no more task is schedulable, complete.
                 if (!TaskScheduler::available_spaces(255)) {
-                    return;
+
+                    //Return true if the data_link buffer is not empty.
+                    return (bool)(terminal_interface_link_t::available());
+
                 }
 
                 //Don't process any data if no space is available in the argument_t sequence container
                 if (!arguments_storage.available_spaces()) {
-                    return;
+
+                    //Return true if the data_link buffer is not empty.
+                    return (bool)(terminal_interface_link_t::available());
+
                 }
 
             }

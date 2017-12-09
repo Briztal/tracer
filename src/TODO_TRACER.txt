@@ -1,10 +1,7 @@
-//TODO TaskScheduler::read_interfaces : KEEP A TRACK OF PREVIOUS READ INTERFACE, TO AVOID READING ALWAYS THE SAME INTERFACE, IN CASE OF FLOOD !
-
-//TODO TaskScheduler::read_interfaces : Read one task per interface at the time !!
 
 //TODO GCODE AND TERMINAL COMMANDS ACKS
 
-//TODO SEPARATE Project Initialisation FROM THE SCHEDULER
+//TODO Correct class initiliations
 
 //TODO GCODE TREE GENERATION
 

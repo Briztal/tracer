@@ -45,7 +45,7 @@ public :
     static void init();
 
     //Function to read_integer the received data over the serial.
-    static void read_data();
+    static bool read_data();
 
     //Function to send a string over the serial.
     static void echo(const string_t msg);

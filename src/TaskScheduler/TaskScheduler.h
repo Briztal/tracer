@@ -57,6 +57,9 @@ private:
     //Read all possible data on interfaces;
     static void read_interfaces();
 
+    //The identifier of the next interface to be called, used when the TaskPool is full;
+    static uint8_t next_interface;
+
 
     //-------------------------------------------------- State getters -------------------------------------------------
 

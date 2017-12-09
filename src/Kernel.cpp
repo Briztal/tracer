@@ -9,7 +9,6 @@
 #include <TaskScheduler/TaskScheduler.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include "Kernel.h"
-#include "interface.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
 
