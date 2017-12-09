@@ -266,13 +266,13 @@ void K2Physics::compute_jerk_offsets(float speed, k2_movement_data *previous_mov
     uint32_t *jerk_distances_offsets = previous_movement->jerk_offsets;
 
     //Cache var for ending_jjerk_ratios
-    float *ending_jjerk_ratios = previous_movement->ending_jjerk_ratios;
+    float *ending_jerk_ratios = previous_movement->ending_jerk_ratios;
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //get the maximum regulation_speed on the current axis :
         //Formula : max_stepper_speed = max_speed * stepper_distance / high_level_distance;
-        float stepper_speed = speed * ending_jjerk_ratios[stepper];
+        float stepper_speed = speed * ending_jerk_ratios[stepper];
 
         stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
 

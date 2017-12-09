@@ -78,7 +78,7 @@ void KinematicsCore1::compute_jerk_offsets(float speed, k1_movement_data *previo
  *  It requires some physics, so it is delegated to the K1Physics class.
  */
 
-void KinematicsCore1::load_real_time_kinetics_data(k1_movement_data *movement_data) {
+void KinematicsCore1::load_real_time_kinetics_data(const k1_movement_data *movement_data) {
 
     //TODO INLINE
     //Load the kinetics data
@@ -90,7 +90,7 @@ void KinematicsCore1::load_real_time_kinetics_data(k1_movement_data *movement_da
 }
 
 
-void KinematicsCore1::load_real_time_jerk_data(k1_movement_data *movement_data) {
+void KinematicsCore1::load_real_time_jerk_data(const k1_movement_data *movement_data) {
 
     //TODO INLINE
     K1Physics::load_real_time_jerk_data(movement_data);

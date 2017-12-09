@@ -44,11 +44,11 @@ public :
 
     static void initialise_kinetics_data(k1_movement_data *movement_data);
 
-    static void load_real_time_kinetics_data(k1_movement_data *movement_data);
+    static void load_real_time_kinetics_data(const k1_movement_data *movement_data);
 
-    static void load_real_time_jerk_data(k1_movement_data *movement_data);
+    static void load_real_time_jerk_data(const k1_movement_data *movement_data);
 
-    static void load_pre_process_kinetics_data(k1_movement_data *movement_data);
+    static void load_pre_process_kinetics_data(const k1_movement_data *movement_data);
 
     static void update_evolution_coefficient(float multiplier);
 

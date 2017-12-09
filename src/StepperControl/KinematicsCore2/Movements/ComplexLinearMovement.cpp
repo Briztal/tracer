@@ -92,43 +92,33 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     while (TrajectoryTracer::queue_locked());
 
 
-    CI::echo("PREPARATION_DONE");
-
     //The state of the process must be saved, as in determines if the task must be reprogrammed
     task_state_t enqueue_state = TrajectoryTracer::enqueue_movement(0, max_distance, initialise_movement,
                                                                     finalise_movement, get_position,
                                                                     get_real_time_position);
 
-    CI::echo("\nENQUEUED. SAVING LOCAL DATA\n");
-
     //If the process has completed,
     if (enqueue_state == complete) {
 
-        CI::echo("\nOK, ENQUEUING\n");
 
         //Reset the flag;
         queue_flag = false;
 
-        d->movement_id = movement_id++;
 
         //Push the local data
         linear_data_queue.insert(&queue_flag);
-
-        CI::echo("inserted movement "+String(d->movement_id));
 
         if (!queue_flag) {
 
             //Log;
             CI::echo("ERROR in ComplexLinearMovement::plan_movement : the previously controlled insertion element is now allocated.");
 
-            TrajectoryTracer::stop();
+            TrajectoryTracer::emergency_stop();
 
             //Fail;
             return error;
 
         }
-
-        CI::echo("queue size  :"+String(linear_data_queue.available_objects()));
 
         //Update the final position
         MachineInterface::update_position(destination);
@@ -275,16 +265,16 @@ void ComplexLinearMovement::initialise_movement() {
         CI::echo("ERROR in ComplexLinearMovement::initialise_movement : the output element is not assigned.");
 
         //Stop any movement now.
-        TrajectoryTracer::stop();
+        TrajectoryTracer::emergency_stop();
 
     }
+
 
     //Update all real-time data
     real_time_max_axis = d->max_axis;
     real_time_offsets = d->offsets;
     real_time_slopes = d->slopes;
 
-    CI::echo("INITIALISING MOVEMENT "+String(linear_data_queue.get_reading_address(&queue_flag)->movement_id));
 
 
     //Do not discard_sub_movement the current element, of it is likely to be rewritten.
@@ -304,9 +294,6 @@ void ComplexLinearMovement::finalise_movement() {
     //Initialise a flag;
     bool queue_flag = false;
 
-    CI::echo("DISCARDING MOVEMENT "+String(linear_data_queue.get_reading_address(&queue_flag)->movement_id));
-
-
     //the current element is now used, discard_sub_movement it;
     linear_data_queue.discard(&queue_flag);
 
@@ -318,7 +305,7 @@ void ComplexLinearMovement::finalise_movement() {
         CI::echo("ERROR in ComplexLinearMovement::finalise_movement : the output element is not allocated.");
 
         //Stop any movement to avoid memory corruption, and see the debug logs;
-        TrajectoryTracer::stop();
+        TrajectoryTracer::emergency_stop();
     }
 
 }
@@ -368,7 +355,6 @@ float *m::real_time_offsets = t_rtof;
 float *m::real_time_slopes = t_rtsl;
 uint8_t m::real_time_max_axis = 0;
 
-uint8_t m::movement_id = 0;
 #undef m
 
 #endif

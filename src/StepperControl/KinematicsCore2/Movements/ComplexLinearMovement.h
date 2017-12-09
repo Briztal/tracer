@@ -36,10 +36,9 @@ class ComplexLinearMovement {
 
 public:
 
-    //The function to call to trace a line from the current position to the destination provided in argument.
+    //The function to call to trace a line from the current position to the destination provided in argument;
     static task_state_t plan_movement(const float *const destination);
 
-    static uint8_t movement_id;
 
 private :
 
@@ -49,14 +48,14 @@ private :
     static uint8_t pre_process_max_axis;
 
 
-    //step_distances computation
+    //step_distances computation;
     static bool get_distances(float *position, const float *destination, float *distances, uint8_t *maximum_axis,
                               float *maximum_distance);
 
-    //slopes pre-computation
+    //slopes pre-computation;
     static void get_slopes(float *slopes, const float *const distances, uint8_t max_axis, float max_distance);
 
-    //position provider for increment computing
+    //position provider for increment computing;
     static void get_position(float indice, float *positions);
 
 

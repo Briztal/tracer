@@ -86,11 +86,11 @@ public :
     static void compute_jerk_offsets(float speed, k2_movement_data *previous_movement);
 
     //Function to update the real time jerk data
-    static void load_real_time_jerk_data(k2_movement_data *movement_data);
+    static void load_real_time_jerk_data(const k2_movement_data *movement_data);
 
 
     //In KinematicsCore2, there is no more information to load in real time than jerk.
-    static inline void load_real_time_kinetics_data(k2_movement_data *movement_data) {
+    static inline void load_real_time_kinetics_data(const k2_movement_data *movement_data) {
         load_real_time_jerk_data(movement_data);
     }
 

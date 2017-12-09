@@ -43,15 +43,101 @@
 class TrajectoryTracer {
 
 
-    //--------------------------------------------movement_queue_management---------------------------------------------
+    //-------------------------------------------- module status ---------------------------------------------
+
+
+public :
+
+    //The state of the movement routine. Public because accessed by other modules.
+    static volatile bool started;
+
+
+private :
+
+    //the stop flag : enabled when all sub_movements have been processed;
+    static bool stop_programmed;
+
+    //A boolean to stop the machine at any time;
+    static volatile bool emergency_stop_flag;
+
+
+    //------------------------------------------- movement_queue_management --------------------------------------------
 
 public:
 
+    //The function to verify that the enqueueing is authorised. returns true if the process isn't unauthorised;
     static bool enqueue_authorised();
 
-    static Queue<movement_data_t> movement_data_queue;//TODO REVERSE PUBLIC
+    //The function to verify that the queue is locked. returns true if the process isn't unauthorised;
+    static bool queue_locked();
+
+
 private:
 
+    //the queue lock flag;
+    static bool movement_queue_lock_flag;
+
+
+    //-------------------------------------------------- Start - Stop --------------------------------------------------
+
+public :
+
+    //Start the movement procedure;
+    static void start();
+
+    //Terminate the movement procedure (regular stop, only cleans the structure, doesn't shutdown interrupt);
+    static void stop();
+
+    //Abort the movement procedure (emergency stop, shutdowns the interrupt);
+    static void emergency_stop();
+
+
+    //-------------------------------------------- Real time movement data ---------------------------------------------
+private :
+
+    //the delay_us for the next movement;
+    static float delay_us;
+
+
+    //-------------------------------------------------- Start - Stop --------------------------------------------------
+
+public:
+
+    //Enqueue a new movement
+    static task_state_t enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
+                                         void (*trajectory_function)(float, float *),
+                                         void (*pre_process_trajectory_function)(float, float *));
+
+private:
+
+
+    //Discard the current movement;
+    static void discard_movement();
+
+
+    //The queue that contains all movements data;
+    static Queue<movement_data_t> movement_data_queue;
+
+
+    //----------------------------------------------- Movement Procedure -----------------------------------------------
+
+private:
+
+    //new movement processing
+    static void process_next_movement();
+
+    //Movement environment switching
+    static void update_movement_environment();
+
+    //sub_movement finishing procedure
+    static void finish_sub_movement();
+
+    //The function to finalise the current movement;
+    static void (*movement_finalisation)();
+
+
+    //the final sub_movement flag : enabled when the last sub_movement of the movement procedure has begun.
+    static bool final_sub_movement_started;
 
     //The flag for a real-time movement switch
     static bool movement_switch_flag;
@@ -60,109 +146,12 @@ private:
     static uint8_t movement_switch_counter;
 
 
-    //-----------------------------------------------sub_movement_queue-------------------------------------------------
-
-public :
-
-    //The state of the movement routine;
-    static volatile bool started;
-
-    //A boolean to stop the machine at any time;
-    static volatile bool emergency_stop;
-
-    //The signatures for the sub_movement that is currently executed
-    static sig_t *saved_elementary_signatures;
-
-    //the trajectory array : contains the signature order.
-    static const uint8_t *const trajectory_array;
-
-    //The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
-    static uint8_t saved_trajectory_index;
-
-private :
-
-    //the stop flag : enabled when all sub_movements have been processed
-    static bool stop_programmed;
-
-    //the final sub_movement flag : enabled when the last sub_movement of the movement procedure has begun.
-    static bool final_sub_movement_started;
-
-    //the queue lock flag :
-    static bool movement_queue_lock_flag;
-
-
-    //---------------------------------------------Real_Time_Movement_data----------------------------------------------
-
-private :
-
-    //The trajectory indice (signature indice in the movement) for the current move and the next plan_movement
-    static uint8_t trajectory_index;
-
-    static sig_t saved_direction_signature;
-
-    //The trajectory indices. Those are constant in the algorithm.
-    static const uint8_t *const trajectory_indices;
-
-private :
-
-    //the delay_us for the next movement;
-    static float delay_us;
-
-
-    //--------------------------------------Sub_Movement_Pre_Computation------------------------------------------------
-
-private :
-
-    //The arrays to store signatures. They alternately store the current signature, or the saved signatures
-    static sig_t *const es0, *const es1;
-
-    //The array flag : is true when saved elementary_signatures is es0.
-    static bool is_es_0;
-
-
-    //------------------------------------------------Movement_Procedure------------------------------------------------
-
-public :
-
-    //movement routing start
-    static void start();
-
-    //movement routine interruption
-    static void stop();
-
-    //The function to verify that the enqueueing is authorised. returns true if the process isn't unauthorised.
-    static bool queue_locked();
-
-    //new movement enqueueing
-    static task_state_t enqueue_movement(float min, float max, void (*m_initialisation)(), void (*m_finalisation)(),
-                                         void (*trajectory_function)(float, float *),
-                                         void (*pre_process_trajectory_function)(float, float *));
-
+    //------------------------------------------------ Sub movements ------------------------------------------------------
 
 private:
 
-    //The function to finalise the current movement;
-    static void (*movement_finalisation)();
-
-    //new movement processing
-    static void process_next_movement();
-
-    //Movement environment switching
-    static void update_real_time_movement_data();
-
     //next sub_movement processing
     static void prepare_next_sub_movement();
-
-    //sub_movement finishing procedure
-    static void finish_sub_movement();
-
-
-    //----------------------------------------------------Signatures----------------------------------------------------
-
-private :
-
-    //Signatures processing
-    static void process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures);
 
     //Method to init a sub_movement
     static sig_t *initialise_sub_movement();
@@ -171,13 +160,61 @@ private :
     static void prepare_first_sub_movement();
 
 
-    //--------------------------------------------------------Tools-----------------------------------------------------
+    //-----------------------------------------------Algorithm constants------------------------------------------------
 
+public:
+
+    //An algorithm constant : contains the order in which signatures must be accessed to correctly peform a movement.
+    static const uint8_t *const trajectory_array;
+
+
+private:
+
+    //This is one of the algorithm's constants. It indicated the index to start in, depending on the signatures sizes.
+    static const uint8_t *const trajectory_beginning_indices;
+
+
+    //--------------------------------------------------Real time data--------------------------------------------------
+
+
+public: //Accessed by other programs
+
+    //The signatures for the sub_movement that is currently executed
+    static sig_t *saved_elementary_signatures;
+
+    //The trajectory index for the next movement;
+    static uint8_t saved_trajectory_index;
+
+
+private :
+
+    //The current index in trajectory_array;
+    static uint8_t trajectory_index;
+
+    //The direction signature for the next sub_movement.
+    static sig_t next_direction_signature;
+
+
+    //The arrays to store signatures. They alternately store the current signature, or the saved signatures
+    static sig_t *const es0, *const es1;
+
+    //The array flag : is true when saved elementary_signatures is es0.
+    static bool is_es_0;
+
+
+private :
+
+    //Signatures processing
+    static void process_signatures(uint8_t *const elementary_dists, sig_t *elementary_signatures);
+
+
+    //--------------------------------------------------------Tools-----------------------------------------------------
 
 public :
 
     //The function to update the action variables
     static void update_tools_powers(float current_speed);
+
 
 private:
 
@@ -199,10 +236,10 @@ private:
     static void (**tools_update_functions)(float);
 
     //the function to change the linear powers and functions
-    static void update_tools_data(movement_data_t *movement);
+    static void update_tools_data(const movement_data_t *movement);
 
+    //Stop all tools
     static void stop_tools();
-
 
 };
 

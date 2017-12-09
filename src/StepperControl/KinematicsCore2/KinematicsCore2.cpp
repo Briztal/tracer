@@ -88,7 +88,7 @@ void KinematicsCore2::compute_jerk_offsets(float speed, k2_movement_data *previo
  * TODO
  */
 
-void KinematicsCore2::load_real_time_jerk_data(k2_movement_data *movement_data) {
+void KinematicsCore2::load_real_time_jerk_data(const k2_movement_data *movement_data) {
 
     //Jerk
     if (movement_data->jerk_point) {

@@ -81,7 +81,7 @@ void K1Physics::initialise_kinetics_data(k1_movement_data *movement_data) {
  *  It also must save the first sub movement distance in the
  */
 
-void K1Physics::load_pre_process_kinetics_data(k1_movement_data *movement_data) {
+void K1Physics::load_pre_process_kinetics_data(const k1_movement_data *movement_data) {
     saved_evolution_coefficient = evolution_coefficient;
     evolution_coefficient = 1;
 
@@ -95,7 +95,7 @@ void K1Physics::load_pre_process_kinetics_data(k1_movement_data *movement_data) 
 
 //-------------------------------------------real_time_data update-------------------------------------------
 
-void K1Physics::load_real_time_jerk_data(k1_movement_data *movement_data) {
+void K1Physics::load_real_time_jerk_data(const k1_movement_data *movement_data) {
 
     watch_for_jerk_point = movement_data->jerk_point;
 
@@ -112,7 +112,7 @@ void K1Physics::load_real_time_jerk_data(k1_movement_data *movement_data) {
  *      - the current delay_us;
  *
  */
-void K1Physics::load_real_time_kinetics_data(k1_movement_data *movement_data) {
+void K1Physics::load_real_time_kinetics_data(const k1_movement_data *movement_data) {
 
     //Reference axis.
     reference_axis = movement_data->reference_axis;
