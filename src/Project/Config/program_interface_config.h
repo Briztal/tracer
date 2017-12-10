@@ -69,8 +69,8 @@
  * GO_UPPER() :
  *      returns to the parent node;
  *
- * CREATE_LEAF(char c, void (*f)(void)) :
- *      creates a leaf node, labeled by c, pointing to the function f.
+ * CREATE_LEAF(char c, void (*function)(void)) :
+ *      creates a leaf node, labeled by c, pointing to the function function.
  *
  * System leafs creation :
  * You can notify the higher level that a particular leaf leads to a system function.

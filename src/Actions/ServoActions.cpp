@@ -29,8 +29,8 @@ void ServoActions::init() {
 }
 
 #define SERVO(k1_position_indice, name, pin, beginning, ending) \
-void ServoActions::set##k1_position_indice (float f) {\
-    servo##k1_position_indice->write(f);\
+void ServoActions::set##k1_position_indice (float function) {\
+    servo##k1_position_indice->write(function);\
 }
 
 #include "../config_files.h"

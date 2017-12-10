@@ -160,7 +160,6 @@ void Kernel::emergency_stop() {
 
 void Kernel::display_logo() {
 
-
     CI::echo("");
     CI::echo("    dBBBBBBP  dBBBBb  dBBBBb     dBBBP  dBBBP  dBBBBb");
     CI::echo("      dBP     dP dBP   BBABB    dBP    dBP     BP dBP");

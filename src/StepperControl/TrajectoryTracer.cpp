@@ -138,7 +138,6 @@ void TrajectoryTracer::start() {
  * stop : this function terminates the movement procedure, by simply disabling the interrupt.
  *
  *  After disabling the interrupt, it disables the timer, and set the state flag to disabled;
- *
  */
 
 void TrajectoryTracer::stop() {
@@ -249,7 +248,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     }
 
-    //After, we must check that movement queue is unlocked.
+    //After, we must check that movement queue is unlocked :
     if (movement_queue_lock_flag) {
 
         //Send an error message.

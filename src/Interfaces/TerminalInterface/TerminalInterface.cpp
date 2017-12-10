@@ -182,7 +182,7 @@ void TerminalInterface::schedule_command() {
     prepare_execution();
 
     //Initialise the current current_node to the root;
-    TerminalNode *current_node = command_tree;
+    const TerminalNode *current_node = command_tree;
 
     //Cache var for the sub nodes.
     TerminalNode **sub_nodes = current_node->sub_nodes;
@@ -321,7 +321,7 @@ void TerminalInterface::prepare_execution() {
  *  It displays the node's children.
  */
 
-void TerminalInterface::log_parsing_error(TerminalNode *log_node) {
+void TerminalInterface::log_parsing_error(const TerminalNode *const log_node) {
 
     //Display the last correct node's content.
 
@@ -751,6 +751,7 @@ bool TerminalInterface::verify_identifier_presence(char id) {
  */
 
 TerminalNode *TerminalInterface::generate_tree() {
+
     uint16_t command_counter = 0;
 
     //Get the number of sons of root.
@@ -939,7 +940,7 @@ bool m::corrupted_packet = false;
 String *m::tree_summary = m::build_tree_summary();
 
 //Build the command tree
-TerminalNode *m::command_tree = m::generate_tree();
+const TerminalNode *const m::command_tree = m::generate_tree();
 
 
 

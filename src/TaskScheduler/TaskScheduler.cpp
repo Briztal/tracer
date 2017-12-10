@@ -130,7 +130,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
  * schedule_task : this function creates a task and adds it to the task pool.
  *
  *  It takes in arguments all parameters required to build a task, namely :
- *      - f : the function to schedule_command;
+ *      - function : the function to schedule_command;
  *      - dynamic_args : a void *, addressing the first byte of the arguments. Those may be dynamic or static.
  *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
  *      - type : the type of the task.

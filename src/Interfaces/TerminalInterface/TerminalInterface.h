@@ -88,7 +88,7 @@ private:
     static void prepare_execution();
 
     //Function to show a log message if the parsing failed.
-    static void log_parsing_error(TerminalNode *log_node);
+    static void log_parsing_error(const TerminalNode *const log_node);
 
     //Function to parse and analyse the received command, and schedule the execution of execute_command.
     static void schedule_command();
@@ -149,7 +149,7 @@ private:
 private:
 
     //The command tree
-    static TerminalNode *command_tree;
+    static const TerminalNode *const command_tree;
 
     //The command tree summary, required to generate the tree.
     static String *tree_summary;
@@ -165,6 +165,7 @@ private:
 
     //Function to generate the tree used to parse commands
     static TerminalNode *generate_tree();
+
 
 
 };

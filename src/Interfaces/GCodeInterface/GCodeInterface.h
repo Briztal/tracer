@@ -29,7 +29,7 @@
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <Interfaces/_interface_data.h>
-
+#include "GCodeNode.h"
 
 #define GI GCodeInterface
 
@@ -140,7 +140,7 @@ private :
 
     static task_state_t execute_command(void *data_pointer);
 
-
+    static void confirm_command_execution(const interface_data_t *data);
 
     //------------------------------------Standard functions-----------------------------
 
@@ -153,6 +153,7 @@ public :
     static void send_position(float*){}
 
 
+    GCodeNode *generate_tree();
 };
 
 #endif //CODE_GCodeExecuter_H

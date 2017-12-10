@@ -22,6 +22,7 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterface.h"
+#include "GCodeNode.h"
 #include <Project/InterfaceCommands/GCodeCommands.h>
 #include <DataStructures/StringUtils.h>
 
@@ -282,10 +283,10 @@ void GCodeInterface::schedule(task_state_t (*f)(char *)) {
     //Create a struct in the heap to contain argument-related data.
     interface_data_t *data = new interface_data_t();
     data->arguments_index = index;
-    data->function= f;
+    data->function = f;
 
     //Schedule the task
-    TaskScheduler::schedule_task(255, execute_command, (void*) data);
+    TaskScheduler::schedule_task(255, execute_command, (void *) data);
 
 }
 
@@ -404,7 +405,7 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
         //First, remove unnecessary nb_spaces;
         uint8_t dec = StringUtils::lstrip(args_current_position, ' ');
 
-        args_current_position+= dec;
+        args_current_position += dec;
         //The current position is now on an argument identifier, or the argument sequence's end.
 
         //Get the argument identifier.
@@ -467,8 +468,7 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
         //Shift the current position
         args_current_position++;
 
-        //----------------------------------Argument saving----------------------------------
-
+        //---------------------------------- Argument saving ----------------------------------
 
         insert_arg:
 
@@ -493,7 +493,6 @@ bool GCodeInterface::parse_arguments(char *args_current_position) {
 
 
 }
-
 
 
 /*
@@ -637,6 +636,263 @@ bool GCodeInterface::verify_identifier_presence(char id) {
 
 }
 
+
+//--------------------------------------------------- Tree Generation --------------------------------------------------
+
+//TODO MAkE A SEPARATE CLASS;
+
+/*
+ * generate_tree : this function generates the TerminalNode that will be used to parse commands.
+ */
+
+GCodeNode *GCodeInterface::generate_tree() {
+
+    
+
+}
+
+
+
+//TODO COMMENT
+struct command_line {
+
+    char name[GCODE_MAX_DEPTH + 1];
+
+    String *desc;
+
+    task_state_t (*function)(char *);
+
+};
+
+
+void
+
+
+/*
+ * check_prefix_presence : this function returns true if both strings have exactly the same content.
+ */
+
+bool check_prefix_presence(const char *string, const char *prefix) {
+
+    //The index to compare in strings;
+    uint8_t index = 0;
+
+    do {
+
+        //Get the char in the prefix;
+        char p = prefix[index];
+
+        //If the prefix is finished :
+        if (!p) {
+
+            //Complete
+            return true;
+        }
+
+        //Get the char in the string
+        char s = string[index];
+
+        //If the prefix letter is not the string letter (prefix is not contained in string) :
+        if (p != s) {
+
+            //Fail;
+            return false;
+
+        }
+
+        //No need to check that s is not null, as p is not, and p == s.
+
+        //Set the current letter to the next one.
+        index++;
+
+    } while (true);//Return cases are already handled inside the loop.
+
+}
+
+
+/*
+ * count_children : this is used to count the number of direct children of a tree represented by its prefix.
+ *
+ *  More explicitly, it counts the number of different chars right after [prefix], in lines of the [command]
+ *      array, until it examines a string that doesn't start with [prefix].
+ *      It start the counting from line [line_number], and so, all lines before [line_number] will not be counted.
+ *
+ *  When
+ *      - the [commands] array is sorted in the alphanumeric order of its command strings;
+ *
+ *      This algorithm accomplished the function given at the first line of this paragraph.
+ */
+
+bool
+count_children(command_line **commands, uint8_t nb_commands, uint8_t line_number, char *prefix, uint8_t *nb_children) {
+
+    //First, we must determine the index where to search chars (the size of prefix).
+
+    //Declare the index;
+    uint8_t index = 0;
+
+    //Increment while prefix is not ended (null terminated string).
+    while (prefix[index++]);
+
+    /*
+     * As a node can contain at most 256 children, we will here declare a local array of 256 spaces,
+     * to contain the found_chars characters.
+     * This will not mess with the stack, as this function is only called at the program initialisation, before
+     * the main loop.
+     */
+    char found_chars[256];
+
+    //Initialise a variable counting lines validating the requirement.
+    uint8_t children_counter = 0;
+
+    //define a flag, showing that a line matching exactly the prefix was found_chars.
+    bool matching_line = false;
+
+    //Iterate while the last line hasn't been processed.
+    while (line_number < nb_commands) {
+
+        //Cache the name of the command;
+        char *name = commands[line_number]->name;
+
+        //If the prefix is present :
+        if (check_prefix_presence(name, prefix)) {
+
+            //Cache the char to analyse;
+            char c = name[index];
+
+            //If the char at index in string is the string end (the line matches exactly the prefix);
+            if (!c) {
+
+                //Set the matching flag;
+                matching_line = true;
+
+            } else {
+                //If the name strictly contains the prefix, one potential new child has been found_chars.
+
+                //We now must verify that the char at index was not already found_chars.
+
+                //Declare a flag;
+                bool duplicate = false;
+
+                //For all found_chars children
+                for (uint8_t found_child = 0; found_child < children_counter; found_child++) {
+
+                    //If the char has already been encountered :
+                    if (c == found_chars[found_child]) {
+
+                        //Set the flag;
+                        duplicate = true;
+
+                        //Stop iterating, no need to search more;
+                        break;
+
+                    }
+                }
+
+                //If we found a new child :
+                if (!duplicate) {
+
+                    //Save the found char
+                    found_chars[children_counter] = c;
+
+                    //Increment the number of found children.
+                    children_counter++;
+
+                }
+
+            }
+
+            //Increment the current line
+            line_number++;
+
+        } else {
+            //If the string doesn't contain the prefix :
+
+            //Stop iterating.
+            goto end;
+        }
+
+    }
+
+    //A jump label for the end, to avoid duplicating the end code.
+    end:
+
+    //Update the number of children found_chars;
+    *nb_children = children_counter;
+
+    //Return the boolean flag;
+    return matching_line;
+
+}
+
+
+GCodeNode *generate_tree(command_line **commands, uint8_t nb_commands, uint8_t *current_line, uint8_t index) {
+
+
+    //TODO SORT AND REMOVE DUPLICATES
+
+    //----------------------------- Prefix Computation -----------------------------
+
+    //TODO STATIC
+    char prefix[GCODE_MAX_DEPTH + 1];
+
+    //Get the prefix;
+    memcpy(prefix, commands[*current_line]->name, index * sizeof(char));
+
+    //Null terminate the prefix;
+    prefix[index] = '\0';
+
+    //----------------------------- Prefix Computation -----------------------------
+
+    //Local var for the number of children of the current tree.
+    uint8_t nb_children = 0;
+
+    //Count the number of children, and save the flag. It shows if the current line belongs to the current tree.
+    bool matching_command = count_children(commands, nb_commands, *current_line, prefix, &nb_children);
+
+
+    //Create a cache for the current line;
+    command_line *line = commands[*current_line];
+
+    //Declare the tree
+    GCodeNode *tree;
+
+    //Cache the tree's letter. Take the letter before index if it exists, and null char if not.
+    char name = (index) ? prefix[index - 1] : (char) 0;
+
+    //if the current line belongs to the current tree (processed.)
+    if (matching_command) {
+
+        //Increment the current line
+        (*current_line)++;
+
+        //Assign tree
+        tree = new GCodeNode(name, nb_children, line->function);
+
+    } else {
+        //If it doesn't belong to the tree, no need to increment or register a particular function.
+
+        //Assign tree
+        tree = new GCodeNode(name, nb_children, 0);
+
+    }
+
+    //Increment the index, so that sub_trees focus on next chars.
+    index++;
+
+    //Fill the tree with all determined children.
+    for (uint8_t child = 0; child < nb_children; child++) {
+
+        //Build the sub_tree and add it to the current tree.
+        tree->sub_nodes[child] = generate_tree(commands, nb_commands, current_line, index);
+
+    }
+
+    return tree;
+
+
+}
+
 //----------------------------------------------------System aliases----------------------------------------------------
 
 
@@ -662,8 +918,7 @@ void GCodeInterface::echo(const string_t msg) {
 //Arguments container
 
 ArgumentsContainer m::arguments_storage = ArgumentsContainer(GCODE_MAX_ARGS_NB * (GCODE_MAX_WORD_SIZE + 4) + 1,
-                                                               GCODE_MAX_PENDING_COMMANDS);
-
+                                                             GCODE_MAX_PENDING_COMMANDS);
 
 
 //Identifiers in a parsed argument_t sequence
@@ -691,6 +946,118 @@ char *const m::data_in_0 = tdatain_gcode;
 #undef m
 
 #endif
+
+/*
+
+      FONCTION RECURSIVE. Args: tableau, taille, ligne de debut, index de debut. retour, arbre correspondant
+
+      Premier appel, taille 8, ligne 0, index 0.
+
+      G
+      G0
+      G01
+      G06
+      G076
+      G1
+      M
+      M320
+      M6
+
+
+      TRI A BULLES DE lA LISTE
+
+      Comptage des chars 0 différents avec "" précédant : deux.
+
+      Creation de l'arbre de retour, à deux fils.
+
+      Pas de feuille ajoutée, pas d'incrementation de ligne.
+
+      Itération de deux appels
+
+
+          Appel ligne 0, index 1;
+
+          comptage des chars 1 différents avec G précédement
+
+          Creation de l'arbre de retour G, quatre fils.
+
+          Commande 0 de taille 1 (égale à l'index), ajout de la fonction
+
+          Iteration sur 4 appels
+
+
+              Appel ligne 1, index 2
+
+              ...
+
+          Appel ligne 6, index 1;
+
+          comptage des chars 1 différents avec M précédement
+
+          Creation de l'arbre de retour M, deux fils.
+
+          Commande 0 de taille 1 (égale à l'index), ajout de la fonction
+
+          Iteration sur 2 appels
+
+
+              Appel ligne 7, index 2;
+
+              comptage des chars 2 différents avec M3 précédement;
+
+              Creation de l'arbre de retour M3, un fils;
+
+              Iteration sur 1 appel;
+
+
+                  Appel ligne 7, index 3;
+
+                  comptage des chars 3 différents avec M32 précédement;
+
+                  Creation de l'arbre de retour M32, un fils;
+
+                  Iteration sur 1 appel;
+
+
+                      Appel ligne 7, index 4;
+
+                      comptage des chars 4 différents avec M320 précédement;
+
+                      Creation de l'arbre de retour M320, zero;
+
+                      Commande 0 de taille 1 (égale à l'index), ajout de la fonction
+
+
+              Appel ligne 8, index 2
+
+              comptage des chars 2 différents avec M6 précédement;
+
+              Creation de l'arbre de retour M6, zero fils;
+
+              Commande 0 de taille 1 (égale à l'index), ajout de la fonction
+
+
+
+
+
+
+
+      ALgo a partir d'une liste triée.
+
+          arguments : line number, index.
+
+          Get the command prexif (command from zero to index - 1)
+
+          Count the number of different chars at position [index] in commands beginning with the prefix.
+
+          Create a tree with the given number of children;
+
+          If the prefix matches the line at [line number] (info may be given by the counting function),
+              add the function to the tree, and increment the line number.
+
+          Fill the tree recalling the function for every argument.
+
+    */
 
 
 

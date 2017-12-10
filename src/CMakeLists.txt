@@ -51,11 +51,14 @@ add_library(project_interfaces
         )
 
 
-#--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
+#-------------------------------------------------------- TRACER -------------------------------------------------------
 
 include_directories(.)
 
 add_library(tracer_config
+
+        Kernel.h
+        Kernel.cpp
 
         config.h
         parameters_indices.h
@@ -121,16 +124,11 @@ add_library(interface
 
         ${IP}/_interface_data.h
 
-
-        #LCDInterface
-        ${IP}/LCDInterface/LCDInterface.h
-        ${IP}/LCDInterface/LCDInterface.cpp
-
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
         ${IP}/TerminalInterface/TerminalInterface.cpp
-        Interfaces/TerminalInterface/TerminalNode.cpp
-        Interfaces/TerminalInterface/TerminalNode.h
+        ${IP}/TerminalInterface/TerminalNode.cpp
+        ${IP}/TerminalInterface/TerminalNode.h
 
         #ProgramInterface
         ${IP}/ProgramInterface/ProgramInterface.h
@@ -139,6 +137,8 @@ add_library(interface
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
         ${IP}/GCodeInterface/GCodeInterface.cpp
+        ${IP}/GCodeInterface/GCodeNode.cpp
+        ${IP}/GCodeInterface/GCodeNode.h
 
         )
 
@@ -210,13 +210,13 @@ add_library(datastructures
         )
 
 
-#-------------------------------------------------KERNELS---------------------------------------------------------------
+#-------------------------------------------------Kinematics Cores------------------------------------------------------
 
 
 set(KP "StepperControl")
 include_directories(${KP}/)
 
-add_library(kernels
+add_library(kinematics_cores
 
         ${KP}/_kinematics_data.h
 
@@ -235,7 +235,7 @@ add_library(kernels
         ${KP}/SubMovementManager.h)
 
 
-#-------------------------------------------------KERNEL1---------------------------------------------------------------
+#-------------------------------------------------Core 1---------------------------------------------------------------
 
 set(K1P "StepperControl/KinematicsCore1")
 set(K1LP "StepperControl/KinematicsCore1/Movements")
@@ -245,7 +245,7 @@ include_directories(${K1P}/)
 include_directories(${K1LP}/)
 include_directories(${K1NP}/)
 
-add_library(kernel1
+add_library(core1
 
         #general
         ${K1P}/mathProcess.hpp
@@ -266,16 +266,16 @@ add_library(kernel1
         )
 
 
-#-------------------------------------------------KERNEL2---------------------------------------------------------------
+#-------------------------------------------------Core 1---------------------------------------------------------------
 
 set(K2P "StepperControl/KinematicsCore2")
 set(K2MP "StepperControl/KinematicsCore2/Movements")
 
 include_directories(${K2P}/)
 
-add_library(kernel2
+add_library(core2
 
-        #kernel2
+        #core2
         ${K2P}/KinematicsCore2.cpp
         ${K2P}/KinematicsCore2.h
         ${K2P}/K2Physics.h
@@ -295,20 +295,20 @@ target_link_libraries(core interface)
 target_link_libraries(actions external)
 target_link_libraries(core asserv)
 
-target_link_libraries(kernels datastructures)
-target_link_libraries(kernel1 datastructures)
-target_link_libraries(kernel2 datastructures)
+target_link_libraries(kinematics_cores datastructures)
+target_link_libraries(core1 datastructures)
+target_link_libraries(core2 datastructures)
 
-target_link_libraries(core kernels)
-target_link_libraries(kernels interface)
-target_link_libraries(kernels core)
+target_link_libraries(core kinematics_cores)
+target_link_libraries(kinematics_cores interface)
+target_link_libraries(kinematics_cores core)
 
 target_link_libraries(core datastructures)
-target_link_libraries(kernels datastructures)
+target_link_libraries(kinematics_cores datastructures)
 
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
 
-add_executable(TRACER main.cpp Kernel.cpp Kernel.h)
+add_executable(TRACER main.cpp)
 
 

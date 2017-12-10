@@ -49,7 +49,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);
 
-    //verify that f and p arguments are provided.
+    //verify that function and p arguments are provided.
     REQUIRE_ONE_ARGUMENTS("PRD");
 
     //If the default profile must be reset

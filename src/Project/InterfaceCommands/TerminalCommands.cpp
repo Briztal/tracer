@@ -51,7 +51,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);
 
-    //verify that f and p arguments are provided.
+    //verify that function and p arguments are provided.
     REQUIRE_ONE_ARGUMENTS("prd");
 
     //If the default profile must be reset
@@ -69,27 +69,27 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
 
         char *path = GET_ARG('p');
 
-        float f;
+        float function;
 
         //If the value must be written
         if (CHECK_ARGUMENT('w')) {
 
             //Extract the value to write
-            f = GET_ARG_VALUE('w');
+            function = GET_ARG_VALUE('w');
 
             //Log message
-            TI::echo("Writing " + String(path) + " to " + String(f));
+            TI::echo("Writing " + String(path) + " to " + String(function));
 
             //write the variable
-            EEPROMInterface::write_data_by_string(path, f);
+            EEPROMInterface::write_data_by_string(path, function);
 
         }
 
         //Read and display the value.
-        if (EEPROMInterface::read_data_by_string(path, &f)) {
+        if (EEPROMInterface::read_data_by_string(path, &function)) {
 
             //Log message
-            CI::echo("Value for " + String(path) + " : " + String(f));
+            CI::echo("Value for " + String(path) + " : " + String(function));
 
         }
 

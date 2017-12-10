@@ -5,7 +5,7 @@
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
-  the FreT Software Foundation, either version 3 of the License, or
+  the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   TRACER is distributed in the hope that it will be useful,
@@ -21,29 +21,27 @@
 
 #include <config.h>
 
-#ifndef TRACER_NODE_H
-#define TRACER_NODE_H
+#ifndef TRACER_GCodeNode_H
+#define TRACER_GCodeNode_H
 
 #include <hardware_language_abstraction.h>
 #include <TaskScheduler/task_state_t.h>
 
-//TODO COMMEND
-class TerminalNode {
+class GCodeNode {
 
 
 public:
 
-    TerminalNode(string_t *name, uint8_t sub_nodes_nb, string_t *desc_log, task_state_t (*const f)(char *));
+    GCodeNode(char name, uint8_t sub_nodes_nb, task_state_t (*const f)(char *));
 
-    const String *name;
+    const char name;
 
     const uint8_t sub_nodes_nb;
 
-    TerminalNode **sub_nodes;
+    GCodeNode **sub_nodes;
 
     task_state_t (*const function)(char *);
 
-    const string_t *desc_log;
 
 };
 
