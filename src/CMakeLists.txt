@@ -140,7 +140,7 @@ add_library(interface
         ${IP}/GCodeInterface/GCodeNode.cpp
         ${IP}/GCodeInterface/GCodeNode.h
 
-        )
+        Interfaces/GCodeInterface/GCodeTreeGenerator.cpp Interfaces/GCodeInterface/GCodeTreeGenerator.h)
 
 #-------------------------------------------------ACTIONS---------------------------------------------------------------
 
