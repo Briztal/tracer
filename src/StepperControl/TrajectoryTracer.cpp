@@ -338,7 +338,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //---------------Kinematics variable data-----------------
 
-    //Let the kinematics manager initialise kinetics data;
+    //Let the kinematics manager initialise_data kinetics data;
     Kinematics::initialise_kinetics_data(current_movement);
 
 
@@ -846,7 +846,7 @@ int k2_position_indice = 4;
  *  This procedure comprises the following steps :
  *      - change the trajectory function;
  *      - change the trajectory variables (beginning, ending, index)
- *      - init the new movement
+ *      - initialise_data the new movement
  *
  *
  *

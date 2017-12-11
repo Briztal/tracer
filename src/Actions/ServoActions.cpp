@@ -21,7 +21,7 @@
 /*
 #include "ServoActions.h"
 
-void ServoActions::init() {
+void ServoActions::initialise_data() {
 #define SERVO(k1_position_indice, name, pin, beginning, ending) \
     servo##k1_position_indice->attach(pin, beginning, ending);
 

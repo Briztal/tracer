@@ -204,7 +204,7 @@ void LinearMovement::enqueue_movement(uint32_t *dists) {
 }
 
 /*
- * The position processing init function : it sets parameters required to process position :
+ * The position processing initialise_data function : it sets parameters required to process position :
  *  - slopes
  *  - shift_nb
  */

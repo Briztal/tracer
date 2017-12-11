@@ -22,7 +22,8 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterface.h"
-#include "GCodeNode.h"
+#include "GCodeTree.h"
+#include "GCodeTreeGenerator.h"
 #include <Project/InterfaceCommands/GCodeCommands.h>
 #include <DataStructures/StringUtils.h>
 
@@ -30,23 +31,52 @@
 //----------------------------------------------------Initialisation----------------------------------------------------
 
 /*
- * init : this function initialises the link layer.
+ * setup_hardware : this function initialises the link layer.
  *
- *  It is automatically called by the Scheduler at initialisation
+ *  It is automatically called by the Kernel at initialisation
  */
 
-void GCodeInterface::init() {
+void GCodeInterface::initialise_hardware() {
 
+    //Initialise the data link;
     gcode_interface_link_t::begin();
 
+    //Wait a bit for data link init to complete.
     delay_ms(100);
 
 }
 
 
+/*
+ * initialise_data : this function resets initialises all data of the class
+ */
+
+void GCodeInterface::initialise_data() {
+    
+    //Command Parsing initialisation;
+    reset();
+    
+    
+    //Arguments initialisation;
+    arguments_storage.clear();
+    
+    
+    //Argument parsing initialisation;
+    nb_identifiers = 0;
+    
+    
+    //Tree initialisation.
+    
+    //delete the current tree;
+    delete(command_tree);
+    
+    //Create a new command tree;
+    command_tree = GCodeTreeGenerator::generate_tree();
+    
+}
+
+
 //-----------------------------------------------------Data reading-----------------------------------------------------
-
-
 
 /*
  * read_data : this function reads and processes data.
@@ -54,12 +84,16 @@ void GCodeInterface::init() {
  *  It reads data on the link layer, saves it, and eventually processes it.
  */
 
-void GCodeInterface::read_data() {
+bool GCodeInterface::read_data() {
 
 
     //Don't process any data if no space is available in the argument_t sequence container
-    if (!arguments_storage.available_spaces())
-        return;
+    if (!arguments_storage.available_spaces()) {
+
+        //Return true if the data_link buffer is not empty.
+        return (bool) gcode_interface_link_t::available();
+
+    }
 
     while (gcode_interface_link_t::available()) {
 
@@ -78,14 +112,8 @@ void GCodeInterface::read_data() {
                 //Reset the data_in
                 reset();
 
-                if (!TaskScheduler::available_spaces(255)) {
-                    return;
-                }
-
-                //Don't process any data if no space is available in the argument_t sequence container
-                if (!arguments_storage.available_spaces()) {
-                    return;
-                }
+                //Return true if the data_link buffer is not empty.
+                return (bool)gcode_interface_link_t::available();
 
             }
 
@@ -123,9 +151,11 @@ void GCodeInterface::read_data() {
                 //Mark the current packet as corrupted;
                 corrupted_packet = true;
             }
-
         }
     }
+
+    //No more data available;
+    return false;
 }
 
 
@@ -163,15 +193,16 @@ bool GCodeInterface::parse() {
     //Initialise the parsing.
     init_parsing();
 
-    //Declare the command id length (ex : 4 for G130).
-    unsigned char command_id_length = 0;
 
-    //Declare an array to receive the command id (must add one byte for null termination)
-    char command_id[GCODE_MAX_DEPTH + 1];
-
-    //Get the command id and its length, by calling the StringUtils.
-    command_id_length = StringUtils::get_next_word(data_in, command_id, GCODE_MAX_DEPTH + 1);
-
+    //Remove extra spaces;
+    data_in += StringUtils::lstrip(data_in, ' ');
+    
+    //Save the pointer to the first char of the command id.
+    char *command_id = data_in;
+    
+    //Get the command id length;
+    uint8_t command_id_length = StringUtils::count_until_char(data_in, ' ');
+    
     //Abort if the first word was a space.
     if (!command_id_length)
         return false;
@@ -180,7 +211,7 @@ bool GCodeInterface::parse() {
     data_in += command_id_length;
 
     //Analyse the command id.
-    analyse_command(command_id, command_id_length);
+    schedule_command(command_id);
 
     return true;
 
@@ -205,62 +236,116 @@ void GCodeInterface::init_parsing() {
 
 
 /*
- * analyse_command : this function determines the function associated to a GCode Command.
+ * schedule_command : this function analyses the packet received, and parses the command part.
  *
- *  If it succeeds, it calls the scheduling function, passing a pointer to the determines function.
+ *  When it has found the GCodeCommand identified by this string, it saves the rest of the packet (the arguments part)
+ *      in the argument storage, and then, schedules the execution of this function.
+ *
+ *  This command will be executed, by the intermediary of the execute_command function, defined below.
+ *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void GCodeInterface::analyse_command(char *command, unsigned char command_size) {
+void GCodeInterface::schedule_command(char *command) {
+    
+    //Initialise the current current_tree to the root;
+    const GCodeTree *current_tree = command_tree;
 
-    //Initialise a char containing the letter we focus on
-    char c = *(command++);
+    //The current depth
+    uint8_t depth = 0;
 
-    //As the first letter is saved, decrease the size.
-    command_size--;
+    //Must declare the int before the jump label.
+    uint8_t i;
 
-    echo(String(command_size));\
+    //A cache for the child of the current node we are focused on.
+    const GCodeTree *current_child;
 
-    //TODO COMMENT THE PARSING
+    //The current char in the command;
+    char command_id;
+    //--------------------------Tree Iteration--------------------------
+
+    //As the algorithm involves two for - while loops, we must use a goto label to restart with a new node.
+    node_check:
+
+    //Get the command identifier, and increment the depth;
+    command_id = command[depth++];
+
+    //We now must compare each child of the current node, and compare its identifier with the read command identifier.
+
+    //Check every sub_node
+    for (i = 0; i < current_tree->nb_children; i++) {
+
+        //We now need to get the child.
+
+        //Declare a flag;
+        bool tree_flag = false;
+
+        //Update the current sub_node
+        current_child = current_tree->get_child(i, &tree_flag);
+
+        const char tree_id = current_child->name;
+
+        //If the current command_identifier matches the current_tree's name
+        if (command_id == tree_id) {
+
+            //A matching sub_node has been found. It can be a single
+            //Update the current node and the current children array.
+            current_tree = current_child;
+
+            //if the new node is not a leaf, check sub nodes
+            if (current_tree->nb_children) {
+
+                //Restart the process with the new node
+                goto node_check;
+
+            } else {
+
+                if (arguments_storage.available_spaces()) {
+
+                    //The argument_t's index
+                    uint8_t index;
+
+                    //Save the arguments sequence.
+                    if (arguments_storage.insert_argument(data_in, &index)) {
 
 
-#define COMMAND(i, fname) \
-    case i : \
-        schedule(GCodeCommands::fname);\
-        return;
+                        //Create a struct in the heap to contain argument_t-related data.
+                        interface_data_t *data = new interface_data_t();
+                        data->arguments_index = index;
+                        data->function = current_tree->function;
 
-#define GO_LOWER(i) \
-    case i : \
-        if (!(command_size--)) return;\
-        c = *(command++);\
-        switch(c) {\
+                        /*
+                         * Schedule a type 255 (asap) task, to schedule_command the required function,
+                         *  with data as arguments.
+                         */
 
-#define GO_LOWER_COMMAND(i, fname) \
-    case i : \
-        echo(String(command_size));\
-        if (!(command_size--)) {schedule(GCodeCommands::fname);return;}\
-        c = *(command++);\
-        switch(c) {\
+                        TaskScheduler::schedule_task(255, execute_command, (void *) data);
 
+                        //Complete
+                        return;
 
-#define GO_UPPER()\
-        default : return;\
-    }\
+                    } //else : too long argument_t, log message sent by argument_container.
 
-    switch (c) {
+                } else {
 
-#include <Project/Config/gcode_interface_config.h>
+                    //If no more space was available in the argument_t container : display an error message
+                    CI::echo(
+                            "ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
+                                    "available, this is not supposed to happen");
 
-        default:
-            return;
+                    //Fail
+                    return;
+
+                }
+
+            }
+
+        }
+
     }
 
-#undef COMMAND
-#undef GO_LOWER
-#undef GO_LOWER_COMMAND
-#undef GO_UPPER
+    //If the command_id didn't match any know child tree, return;
 
 }
-
 
 /*
  * schedule : this function schedules a GCodeCommands command.
@@ -689,6 +774,8 @@ char tdatain_gcode[GCODE_MAX_SIZE];
 char *m::data_in = tdatain_gcode;
 char *const m::data_in_0 = tdatain_gcode;
 
+//Create an empty temporary tree;
+GCodeTree *m::command_tree = new GCodeTree(' ', 0, nullptr);
 
 #undef m
 

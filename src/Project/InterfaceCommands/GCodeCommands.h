@@ -36,21 +36,13 @@ class GCodeCommands {
 public :
 
 
-#define GO_UPPER()
-
-#define GO_LOWER(i)
-
-#define COMMAND(i, name)\
+#define GCODE_COMMAND(command, name)\
     static task_state_t name(char *);
-
-#define GO_LOWER_COMMAND(i, fname) COMMAND(i, fname)
 
 #include <Project/Config/gcode_interface_config.h>
 
-#undef GO_UPPER
-#undef GO_LOWER
-#undef GO_LOWER_COMMAND
-#undef COMMAND
+#undef GCODE_COMMAND
+
 
 
 //TODO COMMENT AND COMMENT TERMINALCOMMANDS

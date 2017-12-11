@@ -108,7 +108,7 @@ uint8_t StringUtils::count_until_char(char *in_buffer, const char limit_char) {
 
 uint8_t StringUtils::lstrip(char *in_buffer, const char verif_char) {
 
-    //initialise a counter
+    //initialise_data a counter
     uint8_t counter = 0;
 
     //Initialise a cache var for the current char
@@ -140,7 +140,7 @@ uint8_t StringUtils::get_nb_words(char *in_buffer) {
     //Initialise a word counter.
     uint8_t nb_words = 0;
 
-    //initialise a size for the current word.
+    //initialise_data a size for the current word.
     uint8_t size;
 
     do {

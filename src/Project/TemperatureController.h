@@ -45,7 +45,7 @@ public:
 
     //---------------------------Interrupt regulation functions---------------------------
 
-    //The function to initialise the temperature regulation routine
+    //The function to initialise_data the temperature regulation routine
     static void regulation_init();
 
     //Temperature regulation routine.

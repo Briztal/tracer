@@ -34,7 +34,7 @@
 
 void K2Physics::start() {
 
-    //init speeds and step_distances to zeros.
+    //initialise_data speeds and step_distances to zeros.
     memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
     memset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
 

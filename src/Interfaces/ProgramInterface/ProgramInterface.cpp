@@ -407,7 +407,7 @@ void PI::read_data() {
             //If a BEGIN_CHAR has just been detected :
 
             if (r == BEGIN_CHAR) {
-                //Second time init byte is detected : not a init symbol.
+                //Second time init byte is detected : not a initialise_data symbol.
 
                 //Clear the flag
                 first_detected = false;

@@ -2,14 +2,15 @@
 // Created by root on 10/12/17.
 //
 
+#include "interface.h"
 #include "GCodeTreeGenerator.h"
-
+#include <Project/InterfaceCommands/GCodeCommands.h>
 
 /*
  * generate_tree : this function generates the TerminalNode that will be used to parse commands.
  */
 
-GCodeNode *GCodeTreeGenerator::generate_tree() {
+GCodeTree *GCodeTreeGenerator::generate_tree() {
 
     //Declare the command array size;
     uint16_t nb_commands;
@@ -29,7 +30,7 @@ GCodeNode *GCodeTreeGenerator::generate_tree() {
     }
 
     //Build the command tree, with the command array and its size, starting from the first line at index zero.
-    GCodeNode *tree = generate_tree(commands, nb_commands, &current_line, 0);
+    GCodeTree *tree = generate_tree(commands, nb_commands, &current_line, 0);
 
     //Free all temporary commands, passing the original size;
     free_commands(commands, nb_commands);
@@ -57,11 +58,13 @@ command_line_t **GCodeTreeGenerator::build_commands(uint16_t *nb_commands_p) {
     //The current command index;
     uint16_t i = 0;
 
+
+
     //Define a macro that will create a new command line, and fill its data with passed parameters.
 #define GCODE_COMMAND(name_, function_)\
-        commands[i++] = command_line = new command_line();\
-        command_line->name = name_;\
-        command_line->function = function_;
+        commands[i++] = command_line = new command_line_t();\
+        command_line->function = GCodeCommands::function_;\
+        save_command_name(command_line, String(#name_).c_str());
 
     //Create all commands
 #include <Project/Config/gcode_interface_config.h>
@@ -72,6 +75,27 @@ command_line_t **GCodeTreeGenerator::build_commands(uint16_t *nb_commands_p) {
     //update the number of commands;
     *nb_commands_p = nb_commands;
 
+}
+
+void GCodeTreeGenerator::save_command_name(command_line_t *command, const char *name) {
+
+    //Cache the command name pointer;
+    char *n = command->name;
+
+    //Cache for the current char;
+    char c;
+
+    for (uint8_t index = 0; index<GCODE_MAX_DEPTH; index++) {
+
+        //Copy the current char and get its value;
+        c = *(n++) = *(name++);
+
+        //If we copied the null terminating the string, terminate.
+        if (!c) {
+            return;
+        }
+
+    }
 }
 
 
@@ -85,12 +109,12 @@ void GCodeTreeGenerator::free_commands(command_line_t **commands, const uint16_t
     for (uint16_t command = 0; command < nb_commands; command++) {
 
         //Free the command;
-        free(commands[command]);
+        delete commands[command];
 
     }
 
     //Free the array;
-    free(commands);
+    delete [] commands;
 
 }
 
@@ -309,7 +333,7 @@ void GCodeTreeGenerator::switch_commands(command_line_t **commands, uint16_t ind
 
 
 
-GCodeNode *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t nb_commands, uint16_t *current_line,
+GCodeTree *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t nb_commands, uint16_t *current_line,
                                              uint8_t index) {
 
 
@@ -337,7 +361,7 @@ GCodeNode *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t
     command_line_t *line = commands[*current_line];
 
     //Declare the tree
-    GCodeNode *tree;
+    GCodeTree *tree;
 
     //Cache the tree's letter. Take the letter before index if it exists, and null char if not.
     char name = (index) ? prefix[index - 1] : (char) 0;
@@ -349,24 +373,39 @@ GCodeNode *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t
         (*current_line)++;
 
         //Assign tree
-        tree = new GCodeNode(name, nb_children, line->function);
+        tree = new GCodeTree(name, nb_children, line->function);
 
     } else {
         //If it doesn't belong to the tree, no need to increment or register a particular function.
 
         //Assign tree
-        tree = new GCodeNode(name, nb_children, 0);
+        tree = new GCodeTree(name, nb_children, 0);
 
     }
 
-    //Increment the index, so that sub_trees focus on next chars.
+    //Increment the index, so that children focus on next chars.
     index++;
 
     //Fill the tree with all determined children.
-    for (uint8_t child = 0; child < nb_children; child++) {
+    for (uint8_t child_id = 0; child_id < nb_children; child_id++) {
 
         //Build the sub_tree and add it to the current tree.
-        tree->sub_nodes[child] = generate_tree(commands, nb_commands, current_line, index);
+        GCodeTree *child_tree = generate_tree(commands, nb_commands, current_line, index);
+
+        //Initialise a flag to check the child set execution.
+        bool tree_flag = false;
+
+        //Set the child of the tree;
+        tree->set_child(child_id, child_tree, &tree_flag);
+
+        //If the child set encountered an error
+        if (!tree_flag) {
+
+            //Log
+            CI::echo("Error in GCodeTreeGenerator::generate_tree : the child was already assigned, or un-assignable. ");
+
+        }
+
 
     }
 

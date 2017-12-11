@@ -153,10 +153,10 @@ private:
     //next sub_movement processing;
     static void prepare_next_sub_movement();
 
-    //Method to init a sub_movement;
+    //Method to initialise_data a sub_movement;
     static sig_t *initialise_sub_movement();
 
-    //Method to init the first sub movement of the movement procedure;
+    //Method to initialise_data the first sub movement of the movement procedure;
     static void prepare_first_sub_movement();
 
 

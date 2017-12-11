@@ -360,7 +360,7 @@ void TaskScheduler::read_interfaces() {
                     }\
                     \
                     /*Re-iterate the loop if data is still available;*/\
-                    keep_on |= TI::read_data();\
+                    keep_on |= interface_name::read_data();\
                     /*Do not break, as we must interrogate other interfaces.*/
 
 
@@ -474,7 +474,7 @@ void TaskScheduler::process_task_pool() {
         //Fist, cache the task pointer and the task's type.
         task_t *task = task_pool + task_index;
 
-        /* If the task fails to analyse_command (must be called later), then shift it at the insertion position.
+        /* If the task fails to schedule_command (must be called later), then shift it at the insertion position.
          * This removes empty data_spaces in the pool, and saved the order.*/
         if (!execute_task(task)) {
 

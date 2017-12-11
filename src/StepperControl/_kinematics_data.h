@@ -106,7 +106,7 @@ typedef struct kernel_movement_data {
     /*
      * Movement cleanup function :
      *
-     *  The following lines contain functions to initialise and finalise correctly the movement;
+     *  The following lines contain functions to initialise_data and finalise correctly the movement;
      */
 
     //Initialisation, called before the movement processing starts;

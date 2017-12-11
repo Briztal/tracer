@@ -42,7 +42,7 @@ private:
 #include "../config_files.h"
 #undef SERVO
 
-    void init();
+    void initialise_data();
 };
 
 */

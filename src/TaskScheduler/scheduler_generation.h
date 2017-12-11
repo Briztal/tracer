@@ -34,7 +34,7 @@
  *          to the moment it is effectively executed;
  *      - A scheduler, taking the same arguments than your function, that would put those into
  *          an instance of the struct, and schedule the unpacker (below);
- *      - An unpacker, that would unpack arguments, and analyse_command the desired function, with extracted dynamic_args.
+ *      - An unpacker, that would unpack arguments, and schedule_command the desired function, with extracted dynamic_args.
  *
  *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
  *

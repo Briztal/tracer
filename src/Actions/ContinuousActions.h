@@ -33,7 +33,7 @@ class ContinuousActions {
 
 public:
 
-    //initialise all PWMs
+    //initialise_data all PWMs
     static void init();
 
     //Set an action's power

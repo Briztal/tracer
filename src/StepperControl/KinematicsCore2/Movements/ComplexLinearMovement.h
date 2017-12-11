@@ -74,7 +74,7 @@ private :
     static float *real_time_slopes;
     static uint8_t real_time_max_axis;
 
-    //the function to init movement
+    //the function to initialise_data movement
     static void initialise_movement();
 
     //The function to finalise the movement

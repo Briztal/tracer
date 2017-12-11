@@ -29,42 +29,50 @@
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <Interfaces/_interface_data.h>
-#include "GCodeNode.h"
+#include "GCodeTree.h"
 
 #define GI GCodeInterface
 
 class GCodeInterface {
 
 
-private :
-
-
 public :
 
-    //Init function
-    static void init();
+    //Hardware setup function;
+    static void initialise_hardware();
+
+    //Data init function;
+    static void initialise_data();
 
     //--------------------------------------Serial Read Fields--------------------------------------
 
 private :
 
-    //The current command's size.
+    //The current command's size;
     static uint8_t command_size;
 
-    //The current number of available spaces in the data bugger
+    //The current number of available spaces in the data buffer;
     static uint8_t data_spaces;
 
-    //A flag set if the current packet is corrupted (too long for the data buffer)
+    //A flag set if the current packet is corrupted (too long for the data buffer);
     static bool corrupted_packet;
 
-    //The current data pointer, points to a case in the data buffer
+    //The current data pointer, points to a case in the data buffer;
     static char *data_in;
 
-    //The beginning of the data buffer.
+    //The beginning of the data buffer;
     static char *const data_in_0;
 
 
-    //--------------------------------------Parsing Fields--------------------------------------
+    //--------------------------------------Arguments Storage--------------------------------------
+
+private:
+
+    //The arguments container;
+    static ArgumentsContainer arguments_storage;
+
+
+    //--------------------------------------Arguments parsing--------------------------------------
 
 public:
 
@@ -81,44 +89,39 @@ public:
      *
      */
 
-    //Parse the provided arguments, and save the data in the local buffer.
+    //Parse the provided arguments, and save the data in the local buffer;
     static bool parse_arguments(char *args_current_position);
 
-    //Get the pointer to the required argument_t
+    //Get the pointer to the required argument;
     static char *get_argument(char id);
 
-    //Get a previously parsed argument_t if it exists
+    //Get a previously parsed argument_t if it exists;
     static float get_argument_value(char id);
 
-    //Verify that all arguments (defined by their arguments) have been provided (arguments is null terminated).
+    //Verify that all arguments (defined by their arguments) have been provided (arguments is null terminated);
     static bool verify_all_identifiers_presence(const char *identifiers);
 
-    //Verify that at least one argument_t (defined by their arguments) have been provided (arguments is null terminated).
+    //Verify that at least one argument_t (defined by their arguments) have been provided (arguments is null terminated);
     static bool verify_one_identifiers_presence(const char *identifiers);
 
-    //verify that an argument_t identifier has be provided.
+    //verify that an argument_t identifier has be provided;
     static bool verify_identifier_presence(char id);
 
 
 private:
 
-
-    //The arguments container.
-    static ArgumentsContainer arguments_storage;
-
-    //Identifiers in a parsed argument_t sequence
-    static argument_t *const arguments;
-
-    //Number of arguments in a sequence
+    //Number of arguments in a sequence;
     static uint8_t nb_identifiers;
 
+    //Identifiers in a parsed argument_t sequence;
+    static argument_t *const arguments;
 
 
     //--------------------------------------Command Parsing----------------------------------
 
 public :
     //read data on the data_link
-    static void read_data();
+    static bool read_data();
 
 
 private :
@@ -133,14 +136,19 @@ private :
     static void reset();
 
     //Analyse the GCode Command index, and schedule the associated command.
-    static void analyse_command(char *command, unsigned char command_size);
+    static void schedule_command(char *command);
 
     //Schedule a GCodeInterfaceCommand function.
     static void schedule(task_state_t (*f)(char *));
 
+    //Execute a parsed command;
     static task_state_t execute_command(void *data_pointer);
 
+    //Finalise the execution of a command;
     static void confirm_command_execution(const interface_data_t *data);
+
+    //The GCode Command tree;
+    static GCodeTree *command_tree;
 
     //------------------------------------Standard functions-----------------------------
 
@@ -152,8 +160,6 @@ public :
     //System alias for send_postion
     static void send_position(float*){}
 
-
-    GCodeNode *generate_tree();
 };
 
 #endif //CODE_GCodeExecuter_H

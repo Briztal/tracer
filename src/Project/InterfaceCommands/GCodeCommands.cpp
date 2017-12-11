@@ -290,7 +290,7 @@ task_state_t GCodeCommands::set_position(char *arguments) {
 
 
     //Schedule a line to the specified coordinates
-    return MachineController::set_offsets_state_scheduled_0(state);
+    return MachineController::set_current_position_scheduled_0(state);
 
 }
 

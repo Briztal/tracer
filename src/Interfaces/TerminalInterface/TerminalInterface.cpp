@@ -85,21 +85,8 @@ bool TerminalInterface::read_data() {
                 //Reset the data_in
                 reset();
 
-                //If no more task is schedulable, complete.
-                if (!TaskScheduler::available_spaces(255)) {
-
-                    //Return true if the data_link buffer is not empty.
-                    return (bool)(terminal_interface_link_t::available());
-
-                }
-
-                //Don't process any data if no space is available in the argument_t sequence container
-                if (!arguments_storage.available_spaces()) {
-
-                    //Return true if the data_link buffer is not empty.
-                    return (bool)(terminal_interface_link_t::available());
-
-                }
+                //Return true if the data_link buffer is not empty.
+                return (bool)(terminal_interface_link_t::available());
 
             }
 
@@ -139,6 +126,9 @@ bool TerminalInterface::read_data() {
 
         }
     }
+
+    //No more data available;
+    return false;
 }
 
 
@@ -185,7 +175,7 @@ void TerminalInterface::schedule_command() {
     const TerminalNode *current_node = command_tree;
 
     //Cache var for the sub nodes.
-    TerminalNode **sub_nodes = current_node->sub_nodes;
+    TerminalNode **children = current_node->children;
 
     //Must declare the int before the jump label.
     uint8_t i;
@@ -224,10 +214,10 @@ void TerminalInterface::schedule_command() {
     //We now must compare each child of the current node, and compare its identifier with the read command identifier.
 
     //Check every sub_node
-    for (i = 0; i < current_node->sub_nodes_nb; i++) {
+    for (i = 0; i < current_node->nb_children; i++) {
 
         //Update the current sub_node
-        current_sub_node = sub_nodes[i];
+        current_sub_node = children[i];
 
         const char *node_identifier = (*current_sub_node->name).c_str();
 
@@ -235,12 +225,12 @@ void TerminalInterface::schedule_command() {
         if (!strcmp(node_identifier, command_identifier)) {
 
             //A matching sub_node has been found. It can be a single
-            //Update the current node and the current sub_nodes array.
+            //Update the current node and the current children array.
             current_node = current_sub_node;
-            sub_nodes = current_node->sub_nodes;
+            children = current_node->children;
 
             //if the new node is not a leaf, check sub nodes
-            if (current_node->sub_nodes_nb) {
+            if (current_node->nb_children) {
 
                 //Restart the process with the new node
                 goto node_check;
@@ -325,12 +315,12 @@ void TerminalInterface::log_parsing_error(const TerminalNode *const log_node) {
 
     //Display the last correct node's content.
 
-    //init an empty string
+    //initialise_data an empty string
     String s = "";
 
-    //Fill it with the name and description of direct sub_nodes
-    for (int i = 0; i < log_node->sub_nodes_nb; i++) {
-        TerminalNode *t = log_node->sub_nodes[i];
+    //Fill it with the name and description of direct children
+    for (int i = 0; i < log_node->nb_children; i++) {
+        TerminalNode *t = log_node->children[i];
         s += *t->name + "\t\t : " + *t->desc_log + "\n";
     }
 
@@ -803,7 +793,7 @@ TerminalNode *TerminalInterface::generate_tree() {
 #define GO_UPPER()\
     depth--;\
     current_index = indices_history[depth];\
-    tree_history[depth]->sub_nodes[current_index++] = current_tree;\
+    tree_history[depth]->children[current_index++] = current_tree;\
     current_tree = tree_history[depth];\
     command_counter++;
 
@@ -817,7 +807,7 @@ TerminalNode *TerminalInterface::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc)\
-    current_tree->sub_nodes[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), TerminalCommands::function);\
+    current_tree->children[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), TerminalCommands::function);\
     command_counter++;
 
 #include "Project/Config/terminal_interface_config.h"
@@ -833,7 +823,7 @@ TerminalNode *TerminalInterface::generate_tree() {
 
 
 /*
- * get_sub_nodes_nb : this function determines the number of direct sub_nodes of a particular indice in the sub_nodes
+ * get_sub_nodes_nb : this function determines the number of direct children of a particular indice in the children
  *  string.
  */
 
@@ -882,7 +872,7 @@ uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
  *  - 1 means create_leaf
  *  - 2 means go_lower
  *
- *  This string is used to determine the number of sub_nodes of a particular node.
+ *  This string is used to determine the number of children of a particular node.
  */
 
 String *TerminalInterface::build_tree_summary() {

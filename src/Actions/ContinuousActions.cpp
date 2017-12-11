@@ -25,7 +25,7 @@
 
 
 /*
- * init : this function initialises all PWMs
+ * initialise_data : this function initialises all PWMs
  */
 
 void ContinuousActions::init() {

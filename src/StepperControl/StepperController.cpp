@@ -33,7 +33,7 @@
 //-------------------------------------------------------Initialisation--------------------------------------------------
 
 /*
- * init : this function initialises pins for stepper management
+ * initialise_data : this function initialises pins for stepper management
  */
 void StepperController::init() {
 

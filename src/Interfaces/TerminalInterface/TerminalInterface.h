@@ -160,7 +160,7 @@ private:
     //Function to build the summary of the tree that will be used to generate the effective tree.
     static String *build_tree_summary();
 
-    //Function to get the number of sub_nodes of a node in the tree.
+    //Function to get the number of children of a node in the tree.
     static uint8_t get_sub_nodes_nb(uint16_t command_index);
 
     //Function to generate the tree used to parse commands

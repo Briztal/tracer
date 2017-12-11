@@ -18,7 +18,7 @@ public:
     /*
      * start : this function is called once, by main only. It is the project's entry point.
      *
-     *  It will call init, and then call iterate indefinitely.
+     *  It will call initialise_data, and then call iterate indefinitely.
      */
 
     static void start();
@@ -36,7 +36,7 @@ private:
     /*
      * initialise : this function is called once, by start only. It is the project initialisation function.
      *
-     *  As its name suggests, it will initialise every module of the code.
+     *  As its name suggests, it will initialise_data every module of the code.
      */
 
     static void initialise();

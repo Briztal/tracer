@@ -26,7 +26,7 @@
 void initialise_interfaces() {
 
 #ifdef ENABLE_GCODE_INTERFACE
-    GI::init();
+    GI::initialise_data();
 #endif
 
 #ifdef ENABLE_PROGRAM_INTERFACE

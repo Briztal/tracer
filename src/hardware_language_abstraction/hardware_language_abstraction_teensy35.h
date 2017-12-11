@@ -74,7 +74,7 @@
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
-//init function : this function initialises the hardware, and disables timers
+//initialise_data function : this function initialises the hardware, and disables timers
 void hl_init();
 
 //----------------------------------------------------STRING------------------------------------------------------------

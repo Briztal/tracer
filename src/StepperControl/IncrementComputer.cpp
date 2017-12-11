@@ -136,7 +136,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
 uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
 
-    //init the maimum distance
+    //initialise_data the maimum distance
     uint32_t max_dist = 0;
 
     //for each stepper

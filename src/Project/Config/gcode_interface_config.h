@@ -103,63 +103,31 @@
 
 
 
-#if defined(GO_LOWER) && defined(GO_LOWER_COMMAND) && defined(COMMAND) && defined(GO_UPPER)
+#if defined(GCODE_COMMAND)
 
-
-//G COMMANDS
-GO_LOWER('G')
-
-
-
-//G0
-GO_LOWER('0')
-
-COMMAND('0', home)
-COMMAND('1', line)
-
-GO_UPPER()
-
+//Movement
+GCODE_COMMAND(G01, home)
+GCODE_COMMAND(G01, line)
 
 //Setup
-GO_LOWER('1')
-
-COMMAND('0', enable_steppers)
-
-COMMAND('1', set_position)
-
-COMMAND('2', set_extrusion)
-
-COMMAND('3', set_cooling)
-
-COMMAND('4', set_hotend)
-
-COMMAND('5', set_hotbed)
-
-GO_UPPER()
-
+GCODE_COMMAND(G10, enable_steppers)
+GCODE_COMMAND(G11, set_position)
+GCODE_COMMAND(G12, set_extrusion)
+GCODE_COMMAND(G13, set_cooling)
+GCODE_COMMAND(G14, set_hotend)
+GCODE_COMMAND(G15, set_hotbed)
 
 //Get
-GO_LOWER('2')
-COMMAND('0', get_temps)
-COMMAND('1', get_regulations)
-GO_UPPER()
-
-
+GCODE_COMMAND(G20, get_temps)
+GCODE_COMMAND(G21, get_regulations)
 
 //test
-GO_LOWER('3')
-COMMAND('0', stepper_test)
-COMMAND('1', temp_test)
-COMMAND('2', action)
+GCODE_COMMAND(G30, stepper_test)
+GCODE_COMMAND(G31, temp_test)
+GCODE_COMMAND(G32, action)
 
-GO_UPPER()
-
-
-//EEPROM
-COMMAND('4', eeprom)
-
-
-GO_UPPER()
+//Eeprom
+GCODE_COMMAND(G4, eeprom)
 
 
 /*

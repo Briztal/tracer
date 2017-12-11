@@ -159,7 +159,7 @@ void EEPROMInterface::print_stored_data() {
 
 
 /*
- * get_root_sub_nodes_nb : this function calculates the number of sub_nodes of the root EEPROMNode.
+ * get_root_sub_nodes_nb : this function calculates the number of children of the root EEPROMNode.
  *
  *  It makes nothing but verifying that modules are enabled, and adding integers to the total amount if so.
  *
@@ -395,7 +395,7 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
         //If the current word matches the current_node's name
         if (!strcmp(c, name_buffer)) {
 
-            //Re-init the current data
+            //Re-initialise_data the current data
             current_node = current_sub_node;
             sub_nodes = current_node->sub_nodes;
 
