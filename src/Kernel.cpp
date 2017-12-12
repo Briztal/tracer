@@ -63,7 +63,10 @@ void Kernel::start() {
     }
 
     //Logo and initialise_hardware message
-    display_logo();
+    Interfaces::initialisation_message();
+
+    //Wait for the eventual retransmission;
+    delay(500);
 
     //Initialise the environment;
     initialise_data();
@@ -183,26 +186,6 @@ void Kernel::emergency_stop() {
 
 }
 
-//------------------------------------------- Logo Display -------------------------------------------
-
-/*
- * The following function displays a logo at the initialisation of the code.
- *
- * //TODO I'll add some macros, to accelerate the version / author customisation.
- */
-
-void Kernel::display_logo() {
-
-    CI::echo("");
-    CI::echo("    dBBBBBBP  dBBBBb  dBBBBb     dBBBP  dBBBP  dBBBBb");
-    CI::echo("      dBP     dP dBP   BBABB    dBP    dBP     BP dBP");
-    CI::echo("     dBP     dBBBBK'  dBP BB   dBP    dBBP    dBBBBK'");
-    CI::echo("    dBP     dBP  BB  dBBBBBB  dBP    dBP     dBP  BB");
-    CI::echo("   dBP     dBP  dB' dBP   BB dBBBBP dBBBBP  dBP  dB'");
-    CI::echo("");
-    CI::echo("\nTRACER initialised and ready. Waiting for commands.\n\n");
-
-}
 
 //--------------------------------- Static declarations - definitions ---------------------------------
 

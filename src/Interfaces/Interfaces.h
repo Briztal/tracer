@@ -62,6 +62,9 @@ public:
     //Initialise all interfaces hardware (data_link);
     static void initialise_hardware();
 
+    //Send the initialisation message on all interfaces
+    static void initialisation_message();
+
     //Initialise all interfaces data (fields and processing environment);
     static void initialise_data();
 

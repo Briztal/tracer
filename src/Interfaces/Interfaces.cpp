@@ -39,6 +39,23 @@ void Interfaces::initialise_hardware() {
 }
 
 
+void Interfaces::initialisation_message() {
+
+#ifdef ENABLE_GCODE_INTERFACE
+    GI::init_message();
+#endif
+
+#ifdef ENABLE_PROGRAM_INTERFACE
+    PI::init_message();
+#endif
+
+#ifdef ENABLE_TERMINAL_INTERFACE
+    TI::init_message();
+#endif
+
+}
+
+
 void Interfaces::initialise_data() {
 
 #ifdef ENABLE_GCODE_INTERFACE

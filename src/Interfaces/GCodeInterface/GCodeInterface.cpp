@@ -52,22 +52,40 @@ void GCodeInterface::initialise_hardware() {
  */
 
 void GCodeInterface::initialise_data() {
-    
+
     //Command Parsing initialisation;
     reset();
 
     //Arguments initialisation;
     GCodeArguments::clear();
 
-    
+
     //Tree initialisation.
 
     //delete the current tree;
-    delete(command_tree);
-    
+    delete (command_tree);
+
     //Create a new command tree;
     command_tree = GCodeTreeGenerator::generate_tree();
 
+
+    //Empty the data buffer;
+    while(gcode_interface_link_t::available()) gcode_interface_link_t::read();
+
+
+}
+
+
+
+/*
+ * The following function displays a logo at the initialisation of the code.
+ *
+ * //TODO I'll add some macros, to accelerate the version / author customisation.
+ */
+
+void GCodeInterface::init_message() {
+
+    CI::respond("start");
 
 }
 
@@ -109,7 +127,7 @@ bool GCodeInterface::read_data() {
                 reset();
 
                 //Return true if the data_link buffer is not empty.
-                return (bool)gcode_interface_link_t::available();
+                return (bool) gcode_interface_link_t::available();
 
             }
 
@@ -192,13 +210,13 @@ bool GCodeInterface::parse() {
 
     //Remove extra spaces;
     data_in += StringUtils::lstrip(data_in, ' ');
-    
+
     //Save the pointer to the first char of the command id.
     char *command_id = data_in;
-    
+
     //Get the command id length;
     uint8_t command_id_length = StringUtils::count_until_char(data_in, ' ');
-    
+
     //Abort if the first word was a space.
     if (!command_id_length)
         return false;
@@ -242,11 +260,11 @@ void GCodeInterface::init_parsing() {
  */
 
 void GCodeInterface::schedule_command(char *command) {
-    
+
     //Initialise the current current_tree to the root;
     const GCodeTree *current_tree = command_tree;
 
-    CI::echo("COMMAND : "+String(command));
+    echo("COMMAND : " + String(command));
     //The current depth
     uint8_t depth = 0;
 
@@ -327,7 +345,7 @@ void GCodeInterface::schedule_command(char *command) {
                 } else {
 
                     //If no more space was available in the argument_t container : display an error message
-                    CI::echo(
+                    echo(
                             "ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
                                     "available, this is not supposed to happen");
 
@@ -342,7 +360,11 @@ void GCodeInterface::schedule_command(char *command) {
 
     }
 
-    //If the command_id didn't match any know child tree, return;
+    //If the command_id didn't match any know child tree, send a warning and complete;
+    echo("Warning : Command not supported");
+    respond("ok");
+    
+    
 
 }
 
@@ -425,36 +447,32 @@ task_state_t GCodeInterface::execute_command(void *data_pointer) {
 
 void GCodeInterface::confirm_command_execution(const interface_data_t *data) {
 
-//The log will occur only if the command flag is set.
-
-#ifdef GCODE_EXECUTION_CONFIRMATION
-
     //Switch the return state.
-    switch(data->return_state) {
+    switch (data->return_state) {
 
         //If the task completed correctly
         case complete:
-            CI::echo("Command complete.");
+            respond("ok");
             return;
 
             //If the task completed correctly
         case invalid_arguments:
-            CI::echo("Invalid Arguments.");
+            echo("WARNING Invalid Arguments");
+            respond("ok");
             return;
 
             //If the task must be reprogrammed:
         case reprogram:
-            //CI::echo("Command Reprogrammed.");
+            //echo("Command Reprogrammed.");
             return;
 
             //If the task completed correctly
         default:
-            CI::echo("WARNING Unrecognised return state");
+            echo("WARNING Unrecognised return state");
+            respond("ok");
             return;
 
     }
-
-#endif
 
 
 }
@@ -470,6 +488,19 @@ void GCodeInterface::confirm_command_execution(const interface_data_t *data) {
  */
 
 void GCodeInterface::echo(const string_t msg) {
+
+    gcode_interface_link_t::send_str("// " + msg + "\n");
+
+}
+
+
+/*
+ * respond : this function is an alias for the system echo command.
+ *
+ *  It echoes text data on the link layer
+ */
+
+void GCodeInterface::respond(const string_t msg) {
 
     gcode_interface_link_t::send_str(msg + "\n");
 

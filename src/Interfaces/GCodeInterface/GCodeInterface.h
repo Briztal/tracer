@@ -41,8 +41,14 @@ public :
     //Hardware setup function;
     static void initialise_hardware();
 
+    //Send the initialisation message
+    static void init_message();
+
     //Data initialise_hardware function;
     static void initialise_data();
+
+
+
 
     //--------------------------------------Serial Read Fields--------------------------------------
 
@@ -102,10 +108,13 @@ private :
 
 public :
 
-    //System alias for echo
+    //System alias for echo;
     static void echo(const string_t msg);
 
-    //System alias for send_postion
+    //System alias for a response (doesn't add //);
+    static void respond(const String msg);
+
+    //System alias for send_position;
     static void send_position(float*){}
 
 };

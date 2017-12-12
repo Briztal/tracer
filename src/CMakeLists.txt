@@ -1,5 +1,5 @@
 
-include_directories()
+include_directories(".")
 #------------------------------------------------PROJECT----------------------------------------------------------------
 
 set(PP "Project")
@@ -31,6 +31,7 @@ add_library(project_config
         ${PCP}/gcode_interface_config.h
         ${PCP}/geometry.cpp
         ${PCP}/eeprom_config.h)
+
 
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
 

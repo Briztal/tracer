@@ -34,9 +34,6 @@
 
 task_state_t GCodeCommands::action(char *) {
 
-
-    CI::echo("ACTION\nEXIT");
-
     return complete;
 
 }

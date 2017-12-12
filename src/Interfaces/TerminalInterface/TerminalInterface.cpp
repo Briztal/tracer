@@ -52,11 +52,14 @@ void TerminalInterface::initialise_hardware() {
 
 void TerminalInterface::initialise_data() {
 
+
     //Command Parsing initialisation;
     reset();
 
+
     //Arguments initialisation;
     TerminalArguments::clear();
+
 
     //Tree initialisation.
 
@@ -66,6 +69,26 @@ void TerminalInterface::initialise_data() {
     //Create a new command tree;
     command_tree = TerminalTreeGenerator::generate_tree();
 
+
+    //Empty the data buffer;
+    while(terminal_interface_link_t::available()) terminal_interface_link_t::read();
+}
+
+
+/*
+ * The following function displays a logo at the initialisation of the code.
+ */
+
+void TerminalInterface::init_message() {
+
+    CI::echo("");
+    CI::echo("    dBBBBBBP  dBBBBb  dBBBBb     dBBBP  dBBBP  dBBBBb");
+    CI::echo("      dBP     dP  dP   dP BB    dP     dP      BP  dP");
+    CI::echo("     dBP     dBBBBK'  dP  BB   dP     dBBP    dBBBBK'");
+    CI::echo("    dBP     dBP  BB  dBBBBBB  dP     dP      dBP  BB");
+    CI::echo("   dBP     dBP  dB' dBP   BB dBBBBP dBBBBP  dBP  dB'");
+    CI::echo("");
+    CI::echo("\nTRACER initialised and ready. Waiting for commands.\n\n");
 
 }
 
