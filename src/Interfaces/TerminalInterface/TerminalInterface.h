@@ -41,19 +41,19 @@ public :
 
     //--------------------------------------Standard Interface functions --------------------------------------
 
-    //The hardware initialisation function.
+    //The hardware initialisation function;
     static void initialise_hardware();
 
-    //The data initialisation function.
+    //The data initialisation function;
     static void initialise_data();
 
-    //Function to read_integer the received data over the serial.
+    //Function to read_integer the received data over the serial;
     static bool read_data();
 
-    //Function to send a string over the serial.
+    //Function to send a string over the serial;
     static void echo(const string_t msg);
 
-    //Function to send the stepper position over the serial.
+    //Function to send the stepper position over the serial;
     static void send_position(float *) {}
 
 
@@ -61,19 +61,19 @@ public :
 
 private :
 
-    //The command size.
+    //The command size;
     static unsigned char command_size;
 
-    //The current number of available spaces in the data bugger
+    //The current number of available spaces in the data buffer;
     static uint8_t data_spaces;
 
-    //A flag set if the current packet is corrupted (too long for the data buffer)
+    //A flag set if the current packet is corrupted (too long for the data buffer);
     static bool corrupted_packet;
 
-    //The current address to store input data
+    //The current address to store input data;
     static char *data_in;
 
-    //The input data buffer's address.
+    //The input data buffer's address;
     static char *const data_in_0;
 
 
@@ -81,68 +81,23 @@ private :
 
 private:
 
-    //Function to reset the command reception environment.
+    //Function to reset the command reception environment;
     static void reset();
 
-    //Prepare the storage data for execution
+    //Prepare the storage data for execution;
     static void prepare_execution();
 
-    //Function to show a log message if the parsing failed.
+    //Function to show a log message if the parsing failed;
     static void log_parsing_error(const TerminalTree *const log_node);
 
-    //Function to parse and analyse the received command, and schedule the execution of execute_command.
+    //Function to parse and analyse the received command, and schedule the execution of execute_command;
     static void schedule_command();
 
-    //This function will execute a TerminalCommand, after getting its arguments, and remove them after execution.
+    //This function will execute a TerminalCommand, after getting its arguments, and remove them after execution;
     static task_state_t execute_command(void *data_pointer);
 
+    //Post execution function;
     static void confirm_command_execution(const interface_data_t *data);
-
-
-    //--------------------------------------Arguments Processing--------------------------------------
-
-public:
-
-    /*
-     * A terminal interface command can accept an undefined number of arguments, in an argument_t sequence.
-     *
-     *  An argument_t sequence is a string structured like :
-     *      -i_0 arg_0 -i_1 arg_1 ... -i_n arg_n
-     *
-     *  where all i_k are characters, and arg_k is a word (meaning anything). The character - is mandatory
-     *      before an identifier, as arg_k can be none (empty string).
-     *
-     */
-
-    //Parse the provided arguments, and save the data in the local buffer.
-    static bool parse_arguments(char *current_position);
-
-    //Get the pointer to the required argument_t
-    static char *get_argument(char id);
-
-    //Get a previously parsed argument_t if it exists
-    static float get_argument_value(char id);
-
-    //Verify that all arguments (defined by their arguments) have been provided (arguments is null terminated).
-    static bool verify_all_identifiers_presence(const char *identifiers);
-
-    //Verify that at least one argument_t (defined by their arguments) have been provided (arguments is null terminated).
-    static bool verify_one_identifiers_presence(const char *identifiers);
-
-    //verify that an argument_t identifier has be provided.
-    static bool verify_identifier_presence(char id);
-
-
-private:
-
-    //The arguments sequences container
-    static ArgumentsContainer arguments_storage;
-
-    //Identifiers in a parsed argument_t sequence
-    static argument_t *const arguments;
-
-    //Number of arguments in a sequence
-    static uint8_t nb_identifiers;
 
 
     //--------------------------------------Tree data----------------------------------

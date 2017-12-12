@@ -1,3 +1,22 @@
+/*
+  StringUtils.cpp - Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #include <cstdint>
 #include "StringUtils.h"
@@ -10,7 +29,7 @@
  *  When the copy is done, it null-terminates the copied sequence.
  *
  */
-
+/*
 uint8_t
 StringUtils::copy_until_char(char *in_buffer, char *out_buffer, uint8_t out_buffer_size, const char limit_char) {
 
@@ -66,6 +85,7 @@ StringUtils::copy_until_char(char *in_buffer, char *out_buffer, uint8_t out_buff
     return copy_size;
 }
 
+*/
 
 /*
  * count_until_char : this function copies the char sequence in in_buffer in out_buffer char by char,
@@ -166,6 +186,7 @@ uint8_t StringUtils::get_nb_words(char *in_buffer) {
  *
  */
 
+/*
 uint8_t StringUtils::get_next_word(char *in_buffer, char *out_buffer, uint8_t out_buffer_size) {
 
     //Initialise a counter, that will count the number of chars evaluated in this function
@@ -181,4 +202,6 @@ uint8_t StringUtils::get_next_word(char *in_buffer, char *out_buffer, uint8_t ou
     return increment_counter;
 
 }
+
+ */
 

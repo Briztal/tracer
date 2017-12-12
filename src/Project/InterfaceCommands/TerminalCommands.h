@@ -31,6 +31,8 @@
 #include <Interfaces/_interface_data.h>
 #include <Interfaces/Interfaces.h>
 #include <TaskScheduler/TaskScheduler.h>
+#include <Interfaces/TerminalInterface/TerminalArguments.h>
+
 
 class TerminalCommands {
 
@@ -60,22 +62,21 @@ public:
 
 #endif
 
-
 };
 
 
 //TODO COMMENT AND COMMENT GCODEINTERFACECOMMANDS
-#define PARSE_ARGUMENTS(arguments) {if (!TerminalInterface::parse_arguments(arguments)) return invalid_arguments;}
+#define PARSE_ARGUMENTS(arguments) {if (!TerminalArguments::parse_arguments(arguments)) return invalid_arguments;}
 
-#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!TerminalInterface::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
+#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!TerminalArguments::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
 
-#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!TerminalInterface::verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
+#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!TerminalArguments::verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
 
-#define CHECK_ARGUMENT(identifier) (TerminalInterface::verify_identifier_presence(identifier))
+#define CHECK_ARGUMENT(identifier) (TerminalArguments::verify_identifier_presence(identifier))
 
-#define GET_ARG(identifier) TerminalInterface::get_argument(identifier)
+#define GET_ARG(identifier) TerminalArguments::get_argument(identifier)
 
-#define GET_ARG_VALUE(identifier) TerminalInterface::get_argument_value(identifier)
+#define GET_ARG_VALUE(identifier) TerminalArguments::get_argument_value(identifier)
 
 
 #endif //TRACER_TREEINTERFACECOMMANDS_H

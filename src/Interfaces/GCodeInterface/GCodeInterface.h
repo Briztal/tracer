@@ -64,59 +64,6 @@ private :
     static char *const data_in_0;
 
 
-    //--------------------------------------Arguments Storage--------------------------------------
-
-private:
-
-    //The arguments container;
-    static ArgumentsContainer arguments_storage;
-
-
-    //--------------------------------------Arguments parsing--------------------------------------
-
-public:
-
-    /*
-     * A Gcode Inteface command can accept an undefined number of arguments, in an argument sequence.
-     *
-     *  An argument sequence is a sequence of word, where the first letter is the identifier, and
-     *      the rest of the word is an eventual value, example
-     *
-     *      X100 Y200 Q300 R2.0214
-     *
-     *  where all i_k are characters, and arg_k is a word (meaning anything). The character - is mandatory
-     *      before an identifier, as arg_k can be none (empty string).
-     *
-     */
-
-    //Parse the provided arguments, and save the data in the local buffer;
-    static bool parse_arguments(char *args_current_position);
-
-    //Get the pointer to the required argument;
-    static char *get_argument(char id);
-
-    //Get a previously parsed argument_t if it exists;
-    static float get_argument_value(char id);
-
-    //Verify that all arguments (defined by their arguments) have been provided (arguments is null terminated);
-    static bool verify_all_identifiers_presence(const char *identifiers);
-
-    //Verify that at least one argument_t (defined by their arguments) have been provided (arguments is null terminated);
-    static bool verify_one_identifiers_presence(const char *identifiers);
-
-    //verify that an argument_t identifier has be provided;
-    static bool verify_identifier_presence(char id);
-
-
-private:
-
-    //Number of arguments in a sequence;
-    static uint8_t nb_identifiers;
-
-    //Identifiers in a parsed argument_t sequence;
-    static argument_t *const arguments;
-
-
     //--------------------------------------Command Parsing----------------------------------
 
 public :
@@ -149,6 +96,7 @@ private :
 
     //The GCode Command tree;
     static GCodeTree *command_tree;
+
 
     //------------------------------------Standard functions-----------------------------
 

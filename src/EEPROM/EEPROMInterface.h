@@ -49,7 +49,7 @@ private:
 
     static EEPROMNode *eeprom_tree;
 
-    static bool search_tree_by_string(char *id_string, float **data);
+    static bool search_tree_by_string(char *data_in, float **data);
 
     static void search_log(EEPROMNode *node);
 

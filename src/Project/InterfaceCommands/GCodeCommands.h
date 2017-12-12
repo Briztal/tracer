@@ -22,6 +22,7 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
+#include <Interfaces/GCodeInterface/GCodeArguments.h>
 #include <TaskScheduler/TaskScheduler.h>
 
 
@@ -47,17 +48,17 @@ public :
 
 //TODO COMMENT AND COMMENT TERMINALCOMMANDS
 
-#define PARSE_ARGUMENTS(arguments) {if (!GCodeInterface::parse_arguments(arguments)) return invalid_arguments;}
+#define PARSE_ARGUMENTS(arguments) {if (!GCodeArguments::parse_arguments(arguments)) return invalid_arguments;}
 
-#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!GCodeInterface::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
+#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!GCodeArguments::verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
 
-#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!GCodeInterface::verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
+#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!GCodeArguments::verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
 
-#define CHECK_ARGUMENT(identifier) (GCodeInterface::verify_identifier_presence(identifier))
+#define CHECK_ARGUMENT(identifier) (GCodeArguments::verify_identifier_presence(identifier))
 
-#define GET_ARG(identifier) GCodeInterface::get_argument(identifier)
+#define GET_ARG(identifier) GCodeArguments::get_argument(identifier)
 
-#define GET_ARG_VALUE(identifier) GCodeInterface::get_argument_value(identifier)
+#define GET_ARG_VALUE(identifier) GCodeArguments::get_argument_value(identifier)
 };
 
 

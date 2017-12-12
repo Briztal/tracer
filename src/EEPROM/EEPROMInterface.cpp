@@ -369,49 +369,62 @@ EEPROMNode *EEPROMInterface::build_tree() {
     return root;
 }
 
-bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
+bool EEPROMInterface::search_tree_by_string(char *data_in, float **data) {
 
-    //Initialise the current current_node to the root;
-    EEPROMNode *current_node = eeprom_tree;
-    EEPROMNode *current_sub_node;
+    //Initialise the current current_tree to the root;
+    EEPROMNode *current_tree = eeprom_tree;
+    EEPROMNode *current_sub_tree;
 
-    EEPROMNode **sub_nodes = current_node->sub_nodes;
+    EEPROMNode **sub_nodes = current_tree->sub_nodes;
 
-    char name_buffer[EEPROM_NAMES_MAX_LENGTH];
-
-    //get the first word
-    id_string += StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
+    //char name_buffer[EEPROM_NAMES_MAX_LENGTH];
 
     uint8_t i;
 
+    char *word;
+
     node_check:
 
+    //remove extra spaces
+    data_in += StringUtils::lstrip(data_in, ' ');
+
+    //Get the word address;
+    word = data_in;
+
+    //Go to the next word;
+    data_in += StringUtils::count_until_char(data_in, ' ');
+
+    //Increment the next char if the string is not finished;
+    if (*data_in) {
+        *(data_in++) = 0;
+    }
+
     //Check every sub_node
-    for (i = 0; i < current_node->sub_nodes_nb; i++) {
-        current_sub_node = sub_nodes[i];
+    for (i = 0; i < current_tree->sub_nodes_nb; i++) {
+        current_sub_tree = sub_nodes[i];
 
-        const char *c = (*current_sub_node->name).c_str();
+        const char *c = (*current_sub_tree->name).c_str();
 
-        //If the current word matches the current_node's name
-        if (!strcmp(c, name_buffer)) {
+        //If the current word matches the current_tree's name
+        if (!strcmp(c, word)) {
 
             //Re-initialise_data the current data
-            current_node = current_sub_node;
-            sub_nodes = current_node->sub_nodes;
+            current_tree = current_sub_tree;
+            sub_nodes = current_tree->sub_nodes;
 
             //if the new node is not a leaf, check sub nodes
-            if (current_node->sub_nodes_nb) {
-
-                //Go to the lower level
-                id_string += StringUtils::get_next_word(id_string, name_buffer, EEPROM_NAMES_MAX_LENGTH);
+            if (current_tree->sub_nodes_nb) {
 
                 //check the new node
                 goto node_check;
 
             } else {
+                //If the sub_node is a leaf:
 
-                *data = current_node->data;
+                //Update the data pointer
+                *data = current_tree->data;
 
+                //Return;
                 return true;
 
             }
@@ -420,7 +433,7 @@ bool EEPROMInterface::search_tree_by_string(char *id_string, float **data) {
 
     }
 
-    search_log(current_node);
+    search_log(current_tree);
 
     return false;
 
@@ -435,6 +448,7 @@ void EEPROMInterface::search_log(EEPROMNode *node) {
     }
 
     CI::echo(s);
+
 }
 
 

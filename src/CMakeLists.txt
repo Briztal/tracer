@@ -127,10 +127,12 @@ add_library(interface
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
         ${IP}/TerminalInterface/TerminalInterface.cpp
-        ${IP}/TerminalInterface/TerminalTree.cpp
         ${IP}/TerminalInterface/TerminalTree.h
-        ${IP}/TerminalInterface/TerminalTreeGenerator.cpp
+        ${IP}/TerminalInterface/TerminalTree.cpp
+        ${IP}/TerminalInterface/TerminalArguments.h
+        ${IP}/TerminalInterface/TerminalArguments.cpp
         ${IP}/TerminalInterface/TerminalTreeGenerator.h
+        ${IP}/TerminalInterface/TerminalTreeGenerator.cpp
 
         #ProgramInterface
         ${IP}/ProgramInterface/ProgramInterface.h
@@ -139,10 +141,12 @@ add_library(interface
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
         ${IP}/GCodeInterface/GCodeInterface.cpp
-        ${IP}/GCodeInterface/GCodeTree.cpp
         ${IP}/GCodeInterface/GCodeTree.h
-        ${IP}/GCodeInterface/GCodeTreeGenerator.cpp
+        ${IP}/GCodeInterface/GCodeTree.cpp
         ${IP}/GCodeInterface/GCodeTreeGenerator.h
+        ${IP}/GCodeInterface/GCodeTreeGenerator.cpp
+        ${IP}/GCodeInterface/GCodeArguments.h
+        ${IP}/GCodeInterface/GCodeArguments.cpp
         )
 
 
