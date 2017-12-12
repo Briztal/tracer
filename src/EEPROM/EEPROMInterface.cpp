@@ -21,8 +21,8 @@
 #include "EEPROMInterface.h"
 #include "EEPROMStorage.h"
 #include "EEPROMNode.h"
-#include <interface.h>
 #include <DataStructures/StringUtils.h>
+#include <Interfaces/Interfaces.h>
 
 
 #define ES EEPROMStorage
@@ -461,19 +461,6 @@ void EEPROMInterface::write_data_by_string(char *id_string, float value) {
     }
 
 }
-
-
-
-
-
-void EEPROMInterface::display_tree() {
-
-    String s = *EEPROMInterface::eeprom_tree->sub_nodes[0]->sub_nodes[1]->name;
-
-    CI::echo("dick : "+String(s));
-
-}
-
 
 
 

@@ -1,6 +1,22 @@
-//
-// Created by root on 09/12/17.
-//
+/*
+  Kernel.h Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #ifndef TRACER_KERNEL_H
 #define TRACER_KERNEL_H
@@ -34,12 +50,22 @@ private:
 private:
 
     /*
-     * initialise : this function is called once, by start only. It is the project initialisation function.
+     * initialise_hardware : this function is called once, by start only. It is the hardware initialisation function.
      *
-     *  As its name suggests, it will initialise_data every module of the code.
+     *  As its name suggests, it will initialise the hardware for all interfaces.
      */
 
-    static void initialise();
+    static void initialise_hardware();
+
+
+    /*
+     * initialise_data : this function is called after the restoration point. It resets every module's processing
+     *
+     *  environment.
+     */
+
+    static void initialise_data();
+
 
 
     //------------------------------------------- Main Loop -------------------------------------------

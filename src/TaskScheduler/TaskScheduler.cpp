@@ -31,6 +31,7 @@ PONEY
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
+#include <Interfaces/Interfaces.h>
 
 
 
@@ -271,7 +272,7 @@ uint8_t temp_zzz = 0;
 void TaskScheduler::iterate() {
 
     //Add as much tasks as possible in the pool;
-    read_interfaces();
+    Interfaces::read_interfaces();
 
     //Process non-sequential tasks in priority
     process_task_pool();
@@ -323,98 +324,6 @@ void TaskScheduler::iterate() {
 
 }
 
-
-/*
- * read_interfaces : this function will read all interfaces, in order to schedule new tasks.
- *
- *  In order to process all interfaces, with the same priority, the two following rules are applied :
- *
- *      - The function interrogates one interface at the time;
- *
- *      - When being interrogated, an interface schedules at most one task;
- *          This prevents from interrogating the first interface, and fulling the queue, and not being able to
- *          interrogate other interfaces.
- *
- *      - When the TaskPool is full, and no more tasks can be scheduled, the current interface is saved,
- *          and at the next call of the function, this interface will be called at first.
- *          This rule prevents from always calling the first interface.
- */
-
-void TaskScheduler::read_interfaces() {
-
-
-    //-------------------------------- Macro --------------------------------
-
-    /*
-     * As the algorithm for querying each interface is exactly the same (but with different values,
-     *  we will use a function-like macro.
-     */
-
-#define QUERY_INTERFACE(interface_name, interface_identifier) \
-                /*Special case of the interface identifier*/\
-                case interface_identifier:\
-                    /*Break if the scheduler's task pool is full;*/\
-                    if (!TaskScheduler::available_spaces(0)) {\
-                        next_interface = interface_identifier;\
-                        return;\
-                    }\
-                    \
-                    /*Re-iterate the loop if data is still available;*/\
-                    keep_on |= interface_name::read_data();\
-                    /*Do not break, as we must interrogate other interfaces.*/
-
-
-
-    //-------------------------------- Code --------------------------------
-
-
-    //Declare a flag that will allow us to determine if the loop must continue.
-    boolean keep_on;
-
-    //The loop condition will be examined at the end of the loop;
-    do {
-
-        //Reset the loop flag;
-        keep_on = false;
-
-        //Query the saved interface
-        switch(next_interface) {
-
-                //If the Terminal Interface is enabled :
-#ifdef ENABLE_TERMINAL_INTERFACE
-
-                //Interrogate the Terminal Interface
-                QUERY_INTERFACE(TI, 0)
-
-#endif
-
-            //If the Program Interface is enabled :
-#ifdef ENABLE_PROGRAM_INTERFACE
-
-            //Interrogate the Program Interface
-            QUERY_INTERFACE(PI, 1)
-
-#endif
-
-
-            //If the GCode Interface is enabled :
-#ifdef ENABLE_GCODE_INTERFACE
-
-            //Interrogate the GCode Interface
-            QUERY_INTERFACE(GI, 2)
-
-#endif
-            //Do nothing if the last interface  was undeclared (never happens, safe).
-            default:break;
-        }
-
-        //Now that all interfaces are queried, the next interface to query will be the first one.
-        next_interface = 0;
-
-    } while (keep_on);
-
-
-}
 
 
 /*
@@ -680,8 +589,6 @@ uint8_t m::pool_task_nb = 0;
 //The number of tasks stored in the task pool
 uint8_t m::pool_task_spaces = TASK_POOL_SIZE;
 
-//the next interface to be called.
-uint8_t m::next_interface;
 
 //Sequences lock counters definition
 bool t_ftflg[NB_TASK_SEQUENCES]{0};

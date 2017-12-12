@@ -20,7 +20,6 @@
 
 #include "Thermistors.h"
 #include <hardware_language_abstraction.h>
-#include <interface.h>
 
 void Thermistors::init() {
 

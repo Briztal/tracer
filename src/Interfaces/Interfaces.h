@@ -1,5 +1,5 @@
 /*
-  interfaces.h - Part of TRACER
+  Interfaces.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,8 +18,9 @@
 
 */
 
-#ifndef TRACER_INTERFACES
-#define TRACER_INTERFACES
+#ifndef TRACER_INTERFACES_H
+#define TRACER_INTERFACES_H
+
 
 /*
  * This files simplifies the interface manipulation : it includes the correct files, and defines a macro for the main
@@ -49,8 +50,31 @@
 #endif
 #endif
 
+
+
 #define debug(s) CI::echo(String("debug ") + s);
 
-void initialise_interfaces();
 
-#endif
+class Interfaces {
+
+public:
+
+    //Initialise all interfaces hardware (data_link);
+    static void initialise_hardware();
+
+    //Initialise all interfaces data (fields and processing environment);
+    static void initialise_data();
+
+    //Read interfaces;
+    static void read_interfaces();
+
+
+private:
+
+};
+
+
+//A piece of macro that will help the automatic
+
+
+#endif //TRACER_INTERFACES_H

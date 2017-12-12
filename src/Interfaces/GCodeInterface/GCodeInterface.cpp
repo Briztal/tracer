@@ -22,10 +22,9 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeInterface.h"
-#include "GCodeTree.h"
 #include "GCodeTreeGenerator.h"
-#include <Project/InterfaceCommands/GCodeCommands.h>
 #include <DataStructures/StringUtils.h>
+#include <Interfaces/Interfaces.h>
 
 
 //----------------------------------------------------Initialisation----------------------------------------------------
@@ -55,8 +54,7 @@ void GCodeInterface::initialise_data() {
     
     //Command Parsing initialisation;
     reset();
-    
-    
+
     //Arguments initialisation;
     arguments_storage.clear();
     
@@ -66,13 +64,14 @@ void GCodeInterface::initialise_data() {
     
     
     //Tree initialisation.
-    
+
     //delete the current tree;
     delete(command_tree);
     
     //Create a new command tree;
     command_tree = GCodeTreeGenerator::generate_tree();
-    
+
+
 }
 
 
@@ -250,6 +249,7 @@ void GCodeInterface::schedule_command(char *command) {
     //Initialise the current current_tree to the root;
     const GCodeTree *current_tree = command_tree;
 
+    CI::echo("COMMAND : "+String(command));
     //The current depth
     uint8_t depth = 0;
 
@@ -268,6 +268,7 @@ void GCodeInterface::schedule_command(char *command) {
 
     //Get the command identifier, and increment the depth;
     command_id = command[depth++];
+
 
     //We now must compare each child of the current node, and compare its identifier with the read command identifier.
 
@@ -300,6 +301,7 @@ void GCodeInterface::schedule_command(char *command) {
             } else {
 
                 if (arguments_storage.available_spaces()) {
+
 
                     //The argument_t's index
                     uint8_t index;

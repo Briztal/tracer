@@ -43,7 +43,7 @@ void PI::init() {
 
 
 /*
- * The function to initialise the command aliases
+ * The function to initialise_hardware the command aliases
  */
 
 void PI::initialise_aliases() {

@@ -1,6 +1,22 @@
-//
-// Created by root on 09/12/17.
-//
+/*
+  Kernel.cpp Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #include <Sensors/Thermistors/Thermistors.h>
 #include <EEPROM/EEPROMStorage.h>
@@ -8,6 +24,7 @@
 #include <ControlLoops/ControlLoops.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <StepperControl/TrajectoryTracer.h>
+#include <Interfaces/Interfaces.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -31,7 +48,7 @@ void Kernel::start() {
     //Setup the restoration jump buffer;
     int jump_state = setjmp(restoration_point);
 
-    initialise();
+    initialise_hardware();
 
     //If the restoration point was already used, probabily due to an uncaught exception :
     if (jump_state) {
@@ -45,10 +62,11 @@ void Kernel::start() {
 
     }
 
-
-    //Logo and initialise_data message
+    //Logo and init message
     display_logo();
 
+    //Initialise the environment;
+    initialise_data();
 
     //Call the main loop;
     run();
@@ -61,18 +79,18 @@ void Kernel::start() {
 
 
 /*
- * initialise : this function is called once, by start only. It is the project initialisation function.
+ * initialise_hardware : this function is called once, by start only. It is the project initialisation function.
  *
  *  As its name suggests, it will initialise_data every module of the code.
  */
 
-void Kernel::initialise() {
+void Kernel::initialise_hardware() {
 
     //Initialise the hardware and the framework
     hl_init();
 
     //Initialise all enabled interfaces
-    initialise_interfaces();
+    Interfaces::initialise_hardware();
 
     //Initialise Thermistors
     Thermistors::init();
@@ -90,6 +108,20 @@ void Kernel::initialise() {
     //TODO MAKE AN INITIALISATION FUNCTION IN ControlLoops
     //Enable the temperature regulation loop
     ControlLoops::enable_temperature();
+
+}
+
+
+/*
+ * initialise_hardware : this function is called once, by start only. It is the project initialisation function.
+ *
+ *  As its name suggests, it will initialise_data every module of the code.
+ */
+
+void Kernel::initialise_data() {
+
+    //Initialise all enabled interfaces
+    Interfaces::initialise_data();
 
 }
 
@@ -117,6 +149,7 @@ void Kernel::run() {
          */
 
         TaskScheduler::iterate();
+
 
     }
 

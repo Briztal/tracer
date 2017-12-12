@@ -214,7 +214,6 @@
  *
  */
 
-#include <interface.h>
 #define GENERATE_STRUCT(name, struct_data) struct name##_struct_t { struct_data };
 
 #define GENERATE_PACKER(name, type,  signature, struct_fill)\

@@ -5,10 +5,9 @@
 #include "SubMovementManager.h"
 #include "MachineInterface.h"
 #include "TrajectoryTracer.h"
-#include <hardware_language_abstraction.h>
-#include <interface.h>
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
+#include <Interfaces/Interfaces.h>
 
 /*
  * initialise_movement : this function is called when the current movement is finished.

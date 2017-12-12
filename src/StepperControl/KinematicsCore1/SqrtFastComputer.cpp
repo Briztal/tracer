@@ -19,8 +19,9 @@
 */
 
 #include "SqrtFastComputer.h"
-#include "../../interface.h"
 #include <hardware_language_abstraction.h>
+#include <Interfaces/Interfaces.h>
+
 
 /*
  * sqrt_slow : this function updates the speed_distances, and its square root, with a call to sqrt.

@@ -63,8 +63,6 @@ add_library(tracer_config
         config.h
         parameters_indices.h
         hardware_language_abstraction.h
-        interface.h
-        interfaces.cpp
         sanity_check.h
 
         )
@@ -123,6 +121,8 @@ include_directories(${IP}/)
 add_library(interface
 
         ${IP}/_interface_data.h
+        ${IP}/Interfaces.cpp
+        ${IP}/Interfaces.h
 
         #TerminalInterface
         ${IP}/TerminalInterface/TerminalInterface.h
@@ -137,10 +137,11 @@ add_library(interface
         #GcodeInterface
         ${IP}/GCodeInterface/GCodeInterface.h
         ${IP}/GCodeInterface/GCodeInterface.cpp
-        ${IP}/GCodeInterface/GCodeNode.cpp
-        ${IP}/GCodeInterface/GCodeNode.h
+        ${IP}/GCodeInterface/GCodeTree.cpp
+        ${IP}/GCodeInterface/GCodeTree.h
+        ${IP}/GCodeInterface/GCodeTreeGenerator.cpp
+        ${IP}/GCodeInterface/GCodeTreeGenerator.h)
 
-        Interfaces/GCodeInterface/GCodeTreeGenerator.cpp Interfaces/GCodeInterface/GCodeTreeGenerator.h)
 
 #-------------------------------------------------ACTIONS---------------------------------------------------------------
 

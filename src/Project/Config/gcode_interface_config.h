@@ -101,12 +101,10 @@
 #define GCODE_MAX_SIZE 100
 
 
-
-
 #if defined(GCODE_COMMAND)
 
 //Movement
-GCODE_COMMAND(G01, home)
+GCODE_COMMAND(G00, home)
 GCODE_COMMAND(G01, line)
 
 //Setup

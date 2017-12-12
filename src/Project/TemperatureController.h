@@ -35,7 +35,6 @@
 #include <ControlLoops/PID.h>
 #include <Actions/ContinuousActions.h>
 #include "TemperatureController.h"
-#include <interface.h>
 #include <TaskScheduler/TaskScheduler.h>
 
 class TemperatureController {

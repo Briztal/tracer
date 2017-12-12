@@ -25,10 +25,6 @@
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
 #include <StepperControl/TrajectoryTracer.h>
-#include <interface.h>
-#include <TaskScheduler/TaskScheduler.h>
-#include <Actions/ContinuousActions.h>
-
 
 //-------------------------------------------------Movement-------------------------------------------------------------
 

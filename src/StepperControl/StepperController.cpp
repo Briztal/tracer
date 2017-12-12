@@ -25,8 +25,8 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "StepperController.h"
-#include "../interface.h"
 #include <EEPROM/EEPROMStorage.h>
+#include <Interfaces/Interfaces.h>
 
 
 

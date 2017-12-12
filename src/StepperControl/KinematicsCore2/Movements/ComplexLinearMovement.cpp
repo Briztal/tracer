@@ -25,11 +25,11 @@
 
 #include "ComplexLinearMovement.h"
 
-#include <interface.h>
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/TrajectoryTracer.h>
-#include <StepperControl/_kinematics_data.h>
 #include <Kernel.h>
+#include <Interfaces/Interfaces.h>
+
 
 
 /*

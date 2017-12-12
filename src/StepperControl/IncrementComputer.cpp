@@ -25,7 +25,7 @@
 
 #include "IncrementComputer.h"
 #include <StepperControl/MachineInterface.h>
-#include <interface.h>
+#include <Interfaces/Interfaces.h>
 
 #define DEFAULT_ABSOLUTE_INCREMENT (float) 0.01
 

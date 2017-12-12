@@ -17,9 +17,6 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
-#include <interface.h>
-
 #include "ControlLoops.h"
 #include <Project/TemperatureController.h>
 

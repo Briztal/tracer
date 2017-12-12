@@ -29,13 +29,13 @@
 #include <EEPROM/EEPROMInterface.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
+#include <Interfaces/Interfaces.h>
 
 
 task_state_t GCodeCommands::action(char *) {
 
-    EEPROMInterface::display_tree();
 
-    CI::echo("EXIT");
+    CI::echo("ACTION\nEXIT");
 
     return complete;
 

@@ -45,9 +45,6 @@ public:
 
 #endif
 
-
-    static void display_tree();
-
 private:
 
     static EEPROMNode *eeprom_tree;

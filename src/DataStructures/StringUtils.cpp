@@ -1,9 +1,7 @@
 
 #include <cstdint>
 #include "StringUtils.h"
-#include <hardware_language_abstraction.h>
-#include <interface.h>
-
+#include <Interfaces/Interfaces.h>
 
 /*
  * copy_until_char : this function copies the char sequence in in_buffer in out_buffer char by char,
