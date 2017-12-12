@@ -1,5 +1,5 @@
 /*
-  GCodeTree.cpp - Part of TRACER
+  TerminalTree.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -20,26 +20,24 @@
 
 #include <config.h>
 
-#ifdef ENABLE_GCODE_INTERFACE
+#ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "GCodeTree.h"
+#include "TerminalTree.h"
 
-/*
- * Constructor.
- */
-GCodeTree::GCodeTree(char name, uint8_t nb_children, task_state_t (*const f)(char *)) :
-
-        //Initialise all fields.
-        nb_children(nb_children), name(name), function(f), children(new gcode_child_container_t[nb_children]){
-
-}
+TerminalTree::TerminalTree(string_t *name, uint8_t nb_children, string_t *description, task_state_t (*const f)(char *))
+        : nb_children(nb_children), name(name), description(description), function(f),
+          children(new terminal_child_container_t[nb_children]) {}
 
 
 /*
  * Destructor : calls itself on every sub_node, terminates.
  */
 
-GCodeTree::~GCodeTree() {
+TerminalTree::~TerminalTree() {
+
+    delete name;
+
+    delete description;
 
     //For every sub_tree :
     for (uint8_t sub_tree = 0; sub_tree < nb_children; sub_tree++) {
@@ -61,7 +59,7 @@ GCodeTree::~GCodeTree() {
  * It fails if the child has not been allocated.
  */
 
-const GCodeTree *GCodeTree::get_child(uint8_t id, bool *success) const {
+const TerminalTree *TerminalTree::get_child(uint8_t id, bool *success) const {
 
     //First, we must check that the required child exists well.
     if (id >= nb_children) {
@@ -94,7 +92,7 @@ const GCodeTree *GCodeTree::get_child(uint8_t id, bool *success) const {
  * It fails if the child has already been allocated.
  */
 
-void GCodeTree::set_child(uint8_t id, GCodeTree *child, bool *success) {
+void TerminalTree::set_child(uint8_t id, TerminalTree *child, bool *success) {
 
     //First, we must check that the required child exists well.
     if (id >= nb_children) {
@@ -119,6 +117,5 @@ void GCodeTree::set_child(uint8_t id, GCodeTree *child, bool *success) {
     }
 
 }
-
 
 #endif

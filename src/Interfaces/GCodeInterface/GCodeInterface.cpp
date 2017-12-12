@@ -40,7 +40,7 @@ void GCodeInterface::initialise_hardware() {
     //Initialise the data link;
     gcode_interface_link_t::begin();
 
-    //Wait a bit for data link init to complete.
+    //Wait a bit for data link initialise_hardware to complete.
     delay_ms(100);
 
 }

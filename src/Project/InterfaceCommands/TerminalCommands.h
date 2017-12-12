@@ -29,7 +29,7 @@
 
 #include <stdint.h>
 #include <Interfaces/_interface_data.h>
-#include "interface.h"
+#include <Interfaces/Interfaces.h>
 #include <TaskScheduler/TaskScheduler.h>
 
 class TerminalCommands {

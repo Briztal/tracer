@@ -18,8 +18,9 @@
 
 */
 
-
+#include "stdint.h"
 #include "Interfaces.h"
+#include <TaskScheduler/TaskScheduler.h>
 
 void Interfaces::initialise_hardware() {
 

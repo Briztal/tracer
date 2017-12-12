@@ -22,6 +22,9 @@
 #ifndef TRACER_GCODETREEGENERATOR_H
 #define TRACER_GCODETREEGENERATOR_H
 
+#include <config.h>
+
+#ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeTree.h"
 #include "GCodeTree.h"
@@ -87,5 +90,8 @@ private:
 
 };
 
+#endif
+
 
 #endif //TRACER_GCODETREEGENERATOR_H
+

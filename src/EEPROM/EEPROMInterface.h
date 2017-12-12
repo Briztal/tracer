@@ -23,7 +23,7 @@
 
 
 #include <cstdint>
-#include <Interfaces/TerminalInterface/TerminalNode.h>
+#include <Interfaces/TerminalInterface/TerminalTree.h>
 #include "EEPROMNode.h"
 
 class EEPROMInterface {

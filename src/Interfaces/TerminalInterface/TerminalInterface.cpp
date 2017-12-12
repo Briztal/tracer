@@ -23,24 +23,53 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include "TerminalInterface.h"
-#include <interface.h>
+#include "TerminalTreeGenerator.h"
+#include <Interfaces/Interfaces.h>
 #include <DataStructures/StringUtils.h>
 #include <Project/InterfaceCommands/TerminalCommands.h>
 
+
 /*
- * init : this function initialises the serial, and sets up the command processing environment.
+ * initialise_hardware : this function initialises the serial, and sets up the command processing environment.
  */
 
-void TerminalInterface::init() {
+void TerminalInterface::initialise_hardware() {
 
     //Initialise the serial
     terminal_interface_link_t::begin();
 
-    //Wait for the serial to  correctly init
+    //Wait for the serial to  correctly initialise_hardware
     delay_ms(100);
 
-    //Setup a correct command environment
+
+}
+
+
+/*
+ * initialise_data : this function initialises the serial, and sets up the command processing environment.
+ */
+
+void TerminalInterface::initialise_data() {
+
+    //Command Parsing initialisation;
     reset();
+
+    //Arguments initialisation;
+    arguments_storage.clear();
+
+
+    //Argument parsing initialisation;
+    nb_identifiers = 0;
+
+
+    //Tree initialisation.
+
+    //delete the current tree;
+    delete(command_tree);
+
+    //Create a new command tree;
+    command_tree = TerminalTreeGenerator::generate_tree();
+
 
 }
 
@@ -172,16 +201,12 @@ void TerminalInterface::schedule_command() {
     prepare_execution();
 
     //Initialise the current current_node to the root;
-    const TerminalNode *current_node = command_tree;
-
-    //Cache var for the sub nodes.
-    TerminalNode **children = current_node->children;
+    const TerminalTree *current_node = command_tree;
 
     //Must declare the int before the jump label.
     uint8_t i;
 
-    //A cache for the child of the current node we are focused on.
-    TerminalNode *current_sub_node;
+
 
     //--------------------------Tree Iteration--------------------------
 
@@ -216,8 +241,22 @@ void TerminalInterface::schedule_command() {
     //Check every sub_node
     for (i = 0; i < current_node->nb_children; i++) {
 
-        //Update the current sub_node
-        current_sub_node = children[i];
+        //Flag for the tree query execution;
+        bool tree_flag = false;
+
+        //Cache the current sub_node
+        const TerminalTree *current_sub_node = current_node->get_child(i, &tree_flag);
+
+        //Check the correct execution of the command :
+        if (!tree_flag) {
+
+            //Log
+            CI::echo("Error in TerminalInterface::schedule_command : Unable to query the required child tree.");
+
+            //Fail;
+            return;
+
+        }
 
         const char *node_identifier = (*current_sub_node->name).c_str();
 
@@ -227,7 +266,6 @@ void TerminalInterface::schedule_command() {
             //A matching sub_node has been found. It can be a single
             //Update the current node and the current children array.
             current_node = current_sub_node;
-            children = current_node->children;
 
             //if the new node is not a leaf, check sub nodes
             if (current_node->nb_children) {
@@ -311,7 +349,7 @@ void TerminalInterface::prepare_execution() {
  *  It displays the node's children.
  */
 
-void TerminalInterface::log_parsing_error(const TerminalNode *const log_node) {
+void TerminalInterface::log_parsing_error(const TerminalTree *const log_node) {
 
     //Display the last correct node's content.
 
@@ -319,9 +357,27 @@ void TerminalInterface::log_parsing_error(const TerminalNode *const log_node) {
     String s = "";
 
     //Fill it with the name and description of direct children
-    for (int i = 0; i < log_node->nb_children; i++) {
-        TerminalNode *t = log_node->children[i];
-        s += *t->name + "\t\t : " + *t->desc_log + "\n";
+    for (uint8_t i = 0; i < log_node->nb_children; i++) {
+
+        //Create a flag to check the execution of the command;
+        bool tree_flag = false;
+
+        //Get the child tree;
+        const TerminalTree *t = log_node->get_child(i, &tree_flag);
+
+        //If the query succeeded;
+        if(tree_flag) {
+
+            //Complete the string
+            s += *t->name + "\t\t : " + *t->description + "\n";
+
+
+        } else {
+            //If the query fails :
+
+            s += "error \n";
+
+        }
     }
 
     //Display
@@ -733,173 +789,6 @@ bool TerminalInterface::verify_identifier_presence(char id) {
 }
 
 
-//--------------------------------------------------Tree generation-----------------------------------------------------
-
-
-/*
- * generate_tree : this function generates the TerminalNode that will be used to parse commands.
- */
-
-TerminalNode *TerminalInterface::generate_tree() {
-
-    uint16_t command_counter = 0;
-
-    //Get the number of sons of root.
-    uint8_t root_sons_nb = get_sub_nodes_nb(command_counter++);
-
-    //Create the root tree.
-    TerminalNode *root = new TerminalNode(new String("root"), root_sons_nb, new String("root"), nullptr);
-
-    //Initialise the current tree and the history.
-    TerminalNode *current_tree = root;
-    TerminalNode *tree_history[TERMINAL_MAX_DEPTH];
-
-    //Initialise the indices history
-    uint8_t indices_history[TERMINAL_MAX_DEPTH];
-    uint8_t current_index = 0;
-    uint8_t depth = 0;
-
-    uint8_t tmp_nb;
-
-
-    /*
-     * Procedure for a go_lower :
-     *  - save the index
-     *  - save the current node
-     *  - get the children number for the current node;
-     *  - create a new current node
-     *  - increment the depth;
-     */
-
-#define GO_LOWER(name, desc)\
-    indices_history[depth] = current_index;\
-    current_index = 0;\
-    tree_history[depth] = current_tree;\
-    tmp_nb = get_sub_nodes_nb(command_counter++);\
-    current_tree = new TerminalNode(new String(#name), tmp_nb, new String(#desc), 0);\
-    depth++;
-
-
-    /*
-     * Procedure for a go_upper :
-     *  - decrement the depth;
-     *  - restore the previous index;
-     *  - use it to add the current node to the previous node's sons;
-     *  - increment the index;
-     *  - restore the previous node;
-     *  - increment the command counter.
-     */
-
-#define GO_UPPER()\
-    depth--;\
-    current_index = indices_history[depth];\
-    tree_history[depth]->children[current_index++] = current_tree;\
-    current_tree = tree_history[depth];\
-    command_counter++;
-
-
-    /*
-     * Procedure for a leaf creation :
-     *  - create a leaf node;
-     *  - add it to the current node;
-     *  - increment the index;
-     *  - increment the command counter.
-     */
-
-#define CREATE_LEAF(name, function, desc)\
-    current_tree->children[current_index++] = new TerminalNode(new String(#name), 0, new String(#desc), TerminalCommands::function);\
-    command_counter++;
-
-#include "Project/Config/terminal_interface_config.h"
-
-#undef GO_LOWER
-
-#undef GO_UPPER
-
-#undef CREATE_LEAF
-
-    return root;
-}
-
-
-/*
- * get_sub_nodes_nb : this function determines the number of direct children of a particular indice in the children
- *  string.
- */
-
-uint8_t TerminalInterface::get_sub_nodes_nb(uint16_t command_index) {
-
-    uint16_t max = (uint16_t) tree_summary->length();
-
-    //If the command index is below the command nb, return 0 for safety
-    if (command_index > max) return 0;
-
-    //If the first command is a create_leaf of go_upper, 0 sons.
-    char v = tree_summary->charAt(command_index++);
-    if (v == (char) 0 || v == (char) 1)
-        return 0;
-
-    //If not, we will count to the next go_upper (0);
-
-    uint8_t sons_nb = 0;
-    uint8_t depth = 0;
-
-    v = tree_summary->charAt(command_index++);
-
-    //We stop counting when we detect a zero at depth zero, or when the all command have been listed.
-    // -> keep while the depth is not zero or the value is not zero, and command are still to be processed.
-    while (((depth || v)) && (command_index != max)) {
-        //correct the depth if we go upper of lower
-        if (v == 0) {
-            depth--;
-        } else if (v == (char) 1) {
-            if (!depth) sons_nb++;
-        } else if (v == (char) 2) {
-            if (!depth) sons_nb++;
-            depth++;
-        }
-        v = tree_summary->charAt(command_index++);
-    }
-
-    return sons_nb;
-
-}
-
-
-/*
- * generate_sub_nodes_string : this function generates a string, containing the summary of the tree creation :
- *  - 0 means go_upper
- *  - 1 means create_leaf
- *  - 2 means go_lower
- *
- *  This string is used to determine the number of children of a particular node.
- */
-
-String *TerminalInterface::build_tree_summary() {
-
-    String *s = new String();
-
-    //Set the initial go_lower
-    s->append((char) 2);
-
-#define GO_LOWER(...) s->append((char)2);
-
-#define GO_UPPER(...) s->append((char)0);
-
-#define CREATE_LEAF(...) s->append((char)1);
-
-#include "Project/Config/terminal_interface_config.h"
-
-#undef GO_UPPER
-
-#undef GO_LOWER
-
-#undef CREATE_LEAF
-
-    return s;
-
-}
-
 //---------------------------------Static declarations / definitions------------------------------
 
 
@@ -926,12 +815,8 @@ uint8_t m::data_spaces = TERMINAL_MAX_SIZE;
 //A flag set if the current packet is corrupted (too long for the data buffer)
 bool m::corrupted_packet = false;
 
-//Create the command tree summary.
-String *m::tree_summary = m::build_tree_summary();
-
 //Build the command tree
-const TerminalNode *const m::command_tree = m::generate_tree();
-
+const TerminalTree *m::command_tree = new TerminalTree(new String(), 0, new String(), nullptr);
 
 
 #undef m

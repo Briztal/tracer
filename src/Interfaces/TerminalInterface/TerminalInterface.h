@@ -30,7 +30,7 @@
 #include <DataStructures/ArgumentsContainer.h>
 #include "Project/Config/terminal_interface_config.h"
 #include <Interfaces/_interface_data.h>
-#include "TerminalNode.h"
+#include "TerminalTree.h"
 
 #define TI TerminalInterface
 
@@ -41,8 +41,11 @@ public :
 
     //--------------------------------------Standard Interface functions --------------------------------------
 
-    //The initialisation function.
-    static void init();
+    //The hardware initialisation function.
+    static void initialise_hardware();
+
+    //The data initialisation function.
+    static void initialise_data();
 
     //Function to read_integer the received data over the serial.
     static bool read_data();
@@ -52,8 +55,6 @@ public :
 
     //Function to send the stepper position over the serial.
     static void send_position(float *) {}
-
-
 
 
     //--------------------------------------Data Storage--------------------------------------
@@ -78,7 +79,6 @@ private :
 
     //--------------------------------------Command processing--------------------------------------
 
-
 private:
 
     //Function to reset the command reception environment.
@@ -88,7 +88,7 @@ private:
     static void prepare_execution();
 
     //Function to show a log message if the parsing failed.
-    static void log_parsing_error(const TerminalNode *const log_node);
+    static void log_parsing_error(const TerminalTree *const log_node);
 
     //Function to parse and analyse the received command, and schedule the execution of execute_command.
     static void schedule_command();
@@ -144,29 +144,13 @@ private:
     //Number of arguments in a sequence
     static uint8_t nb_identifiers;
 
+
     //--------------------------------------Tree data----------------------------------
 
 private:
 
     //The command tree
-    static const TerminalNode *const command_tree;
-
-    //The command tree summary, required to generate the tree.
-    static String *tree_summary;
-
-
-    //--------------------------------------Command processing--------------------------------------
-
-    //Function to build the summary of the tree that will be used to generate the effective tree.
-    static String *build_tree_summary();
-
-    //Function to get the number of children of a node in the tree.
-    static uint8_t get_sub_nodes_nb(uint16_t command_index);
-
-    //Function to generate the tree used to parse commands
-    static TerminalNode *generate_tree();
-
-
+    static const TerminalTree *command_tree;
 
 };
 

@@ -62,7 +62,7 @@ void Kernel::start() {
 
     }
 
-    //Logo and init message
+    //Logo and initialise_hardware message
     display_logo();
 
     //Initialise the environment;

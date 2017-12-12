@@ -1,11 +1,11 @@
 /*
-  GCodeTree.h - Part of TRACER
+  TerminalTree.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
+  the FreT Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
   TRACER is distributed in the hope that it will be useful,
@@ -19,48 +19,52 @@
 */
 
 /*
- * GCodeTree : This class will be used to parse the GCode packets we will receive.
+ * TerminalTree : This class will be used to parse the terminal packets we will receive.
  *
- *  The GCode language will be stored in a tree, build from configuration file.
+ *  The terminal language will be stored in a tree, build from configuration file.
  *
- *  Every tree will contain a char, a command, and child trees, representing sub_commands.
+ *  Every tree will contain a word, a description, a command, and child trees, representing sub_commands.
  */
 
-#ifndef TRACER_GCodeNode_H
-#define TRACER_GCodeNode_H
+#ifndef TRACER_NODE_H
+#define TRACER_NODE_H
 
 #include <config.h>
 
-#ifdef ENABLE_GCODE_INTERFACE
+#ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <hardware_language_abstraction.h>
 #include <TaskScheduler/task_state_t.h>
 
-class GCodeTree {
 
+class TerminalTree {
 
 public:
 
     //Constructor
-    GCodeTree(char name, uint8_t nb_children, task_state_t (*const f)(char *));
+    TerminalTree(string_t *name, uint8_t nb_children, string_t *description, task_state_t (*const f)(char *));
 
-    //Destructor.
-    ~GCodeTree();
+    //Destructor
+    ~TerminalTree();
 
-    //The name of the tree
-    const char name;
+    //The name of the command : a single non-spaced word.
+    const String *const name;
 
-    //The function called from this tree.
+    //The description
+    const string_t *const description;
+
+    //The function to execute
     task_state_t (*const function)(char *);
 
-    //The number of children trees
+    //The number of children
     const uint8_t nb_children;
 
     //Assign a sub_tree. Fails if the child is already assigned.
-    void set_child(uint8_t id, GCodeTree *child, bool *success);
+    void set_child(uint8_t id, TerminalTree *child, bool *success);
 
     //Get a pointer to a child. Fails if the child is not assigned.
-    const GCodeTree *get_child (uint8_t id, bool *success) const;
+    const TerminalTree *get_child (uint8_t id, bool *success) const;
+
 
 private:
 
@@ -68,17 +72,17 @@ private:
      * As verifying that a sub_tree is allocated before accessing it, we will store our children in structs.
      */
 
-    struct gcode_child_container_t {
+    struct terminal_child_container_t {
 
         //The allocation flag;
         bool allocated = false;
 
         //The tree;
-        GCodeTree *tree;
+        TerminalTree *tree;
     };
 
     //The array of structs containing children.
-    gcode_child_container_t *children;
+    terminal_child_container_t *children;
 
 };
 

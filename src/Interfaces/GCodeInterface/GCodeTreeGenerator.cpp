@@ -18,12 +18,16 @@
 
 */
 
+#include <config.h>
+
+#ifdef ENABLE_GCODE_INTERFACE
+
 #include "GCodeTreeGenerator.h"
 #include <Project/InterfaceCommands/GCodeCommands.h>
 #include <Interfaces/Interfaces.h>
 
 /*
- * generate_tree : this function generates the TerminalNode that will be used to parse commands.
+ * generate_tree : this function generates the TerminalTree that will be used to parse commands.
  */
 
 GCodeTree *GCodeTreeGenerator::generate_tree() {
@@ -612,3 +616,4 @@ bool GCodeTreeGenerator::check_prefix_presence(const char *string, const char *p
 
 }
 
+#endif

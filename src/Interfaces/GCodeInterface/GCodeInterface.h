@@ -41,7 +41,7 @@ public :
     //Hardware setup function;
     static void initialise_hardware();
 
-    //Data init function;
+    //Data initialise_hardware function;
     static void initialise_data();
 
     //--------------------------------------Serial Read Fields--------------------------------------

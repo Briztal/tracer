@@ -29,12 +29,12 @@
  */
 
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
-//#define terminal_interface_link_t usb_serial
+#define ENABLE_TERMINAL_INTERFACE
+#define terminal_interface_link_t usb_serial
 
 //Uncomment this line to enable the gcode interface.
-#define ENABLE_GCODE_INTERFACE
-#define gcode_interface_link_t usb_serial
+//#define ENABLE_GCODE_INTERFACE
+//#define gcode_interface_link_t usb_serial
 
 //Uncomment this line to enable the program interface.
 //#define ENABLE_PROGRAM_INTERFACE
@@ -43,8 +43,8 @@
 
 //You must define the main command Interface. You must uncomment only one of lines below
 //#define MAIN_CI_PROGRAM
-#define MAIN_CI_GCODE
-//#define MAIN_CI_TERMINAL
+//#define MAIN_CI_GCODE
+#define MAIN_CI_TERMINAL
 
 
 //######################################################TaskScheduler############################################################
