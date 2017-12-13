@@ -91,6 +91,7 @@ private:
 
 
 public :
+
     /*
      * The carriages state structure :
      *
@@ -182,6 +183,27 @@ public:
         //Data
         bool enabled = false;
         float power = 0;
+
+    };
+
+
+public:
+
+    /*
+     * The coordinate interface state structure :
+     *
+     *  This struct will be used to modify coordinate interface variables.
+     *
+     *  It will contain flags and data for every piece of data declared in your configuration file;
+     */
+
+    struct coord_interface_state_t {
+
+#define COORD_INTERFACE_VARIABLE(name,...) float name = 0;bool name##_flag = false;
+
+#include <config.h>
+
+#undef COORD_INTERFACE_VARIABLE
 
     };
 
@@ -335,6 +357,23 @@ private:
 
     //The cooling state, that contains all current cooling parameters.
     static cooling_state_t cooling_state;
+
+
+    //-------------------------------Cooling-------------------------------
+
+public:
+
+    //This function does not store its data. It is stored in the EEPROM.
+
+    //Set and get hotbed temperatures
+    static task_state_t set_coord_interface_state(coord_interface_state_t);
+
+    //A scheduler for the cooling manager
+GENERATE_SCHEDULER(set_coord_interface_state, 0, coord_interface_state_t, state);
+
+    static const coord_interface_state_t get_coord_interface_state();
+
+
 
 };
 

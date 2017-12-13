@@ -600,6 +600,59 @@ const MachineController::cooling_state_t MachineController::get_cooling_state() 
 
 }
 
+
+
+//------------------------------- Coordinate interfaces -------------------------------
+
+/*
+ * set_cooling_state : this function can modify all parameters related to cooling, namely :
+ *  - cooling power;
+ *  - cooling enable state (enabled, disabled).
+ *
+ *  Parameters will be modified only if their flags are set.
+ */
+
+task_state_t MachineController::set_coord_interface_state(coord_interface_state_t new_state) {
+
+#define COORD_INTERFACE_VARIABLE(name,...)\
+    if (new_state.name##_flag) {\
+        EEPROMStorage::coordinate_interface_data.name = new_state.name;\
+    }
+
+#include <config.h>
+
+#undef COORD_INTERFACE_VARIABLE
+
+    return complete;
+
+}
+
+
+/*
+ * get_cooling_state : this function returns the current state of the cooling.
+ */
+
+const MachineController::coord_interface_state_t MachineController::get_coord_interface_state() {
+
+    //Create the object
+    coord_interface_state_t t;
+
+//Fill it
+#define COORD_INTERFACE_VARIABLE(name,...)\
+    t.name##_flag = true;\
+    t.name = EEPROMStorage::coordinate_interface_data.name;
+
+#include <config.h>
+
+#undef COORD_INTERFACE_VARIABLE
+
+    //Return the object, not by pointer. It will be copied.
+    return t;
+
+}
+
+
+
 //-------------------------------Static declarations - definitions-------------------------------
 
 
