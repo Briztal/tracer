@@ -31,7 +31,7 @@ PONEY
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 
 
@@ -272,7 +272,7 @@ uint8_t temp_zzz = 0;
 void TaskScheduler::iterate() {
 
     //Add as much tasks as possible in the pool;
-    Interfaces::read_interfaces();
+    Controllers::read_interfaces();
 
     //Process non-sequential tasks in priority
     process_task_pool();

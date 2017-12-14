@@ -30,7 +30,7 @@
 #include "config.h"
 
 #ifdef ENABLE_TERMINAL_INTERFACE
-#include <Interfaces/TerminalInterface/TerminalInterface.h>
+#include <Communication/TerminalInterface/TerminalInterface.h>
 #ifdef MAIN_CI_TERMINAL
 #define CI TI
 #endif
@@ -44,7 +44,7 @@
 #endif
 
 #ifdef ENABLE_PROGRAM_INTERFACE
-#include <Interfaces/ProgramInterface/ProgramInterface.h>
+#include <Communication/ProgramInterface/ProgramInterface.h>
 #ifdef MAIN_CI_PROGRAM
 #define CI PI
 #endif
@@ -55,7 +55,7 @@
 #define debug(s) CI::echo(String("debug ") + s);
 
 
-class Interfaces {
+class Controllers {
 
 public:
 

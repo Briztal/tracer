@@ -7,7 +7,7 @@
 #include "TrajectoryTracer.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 /*
  * initialise_movement : this function is called when the current movement is finished.

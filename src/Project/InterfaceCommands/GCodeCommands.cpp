@@ -29,7 +29,7 @@
 #include <EEPROM/EEPROMInterface.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 
 task_state_t GCodeCommands::action(char *) {

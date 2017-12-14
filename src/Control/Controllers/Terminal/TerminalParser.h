@@ -32,9 +32,9 @@
 #include <Interfaces/_interface_data.h>
 #include "TerminalTree.h"
 
-#define TI TerminalInterface
+#define TI Terminal
 
-class TerminalInterface {
+class Terminal {
 
 
 public :

@@ -25,7 +25,7 @@
 #include "TrajectoryTracer.h"
 #include "IncrementComputer.h"
 #include "SubMovementManager.h"
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>

@@ -1,5 +1,5 @@
 /*
-  TerminalInterface.cpp - Part of TRACER
+  Terminal.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "TerminalInterface.h"
+#include "Terminal.h"
 #include "TerminalTreeGenerator.h"
 #include "TerminalArguments.h"
 #include <Interfaces/Interfaces.h>
@@ -34,7 +34,7 @@
  * initialise_hardware : this function initialises the serial, and sets up the command processing environment.
  */
 
-void TerminalInterface::initialise_hardware() {
+void Terminal::initialise_hardware() {
 
     //Initialise the serial
     terminal_interface_link_t::begin();
@@ -50,7 +50,7 @@ void TerminalInterface::initialise_hardware() {
  * initialise_data : this function initialises the serial, and sets up the command processing environment.
  */
 
-void TerminalInterface::initialise_data() {
+void Terminal::initialise_data() {
 
 
     //Command Parsing initialisation;
@@ -79,7 +79,7 @@ void TerminalInterface::initialise_data() {
  * The following function displays a logo at the initialisation of the code.
  */
 
-void TerminalInterface::init_message() {
+void Terminal::init_message() {
 
     CI::echo("");
     CI::echo("    dBBBBBBP  dBBBBb  dBBBBb     dBBBP  dBBBP  dBBBBb");
@@ -97,7 +97,7 @@ void TerminalInterface::init_message() {
  * echo : this function sends a String over the serial.
  */
 
-void TerminalInterface::echo(const string_t msg) {
+void Terminal::echo(const string_t msg) {
     terminal_interface_link_t::send_str(msg + "\n");
 }
 
@@ -108,7 +108,7 @@ void TerminalInterface::echo(const string_t msg) {
  *  It returns true if data is still available in the data link buffer, and false if the buffer is empty;
  */
 
-bool TerminalInterface::read_data() {
+bool Terminal::read_data() {
 
     //Don't process any data if no space is available in the argument_t sequence container
     if (!TerminalArguments::available_spaces()) {
@@ -144,7 +144,7 @@ bool TerminalInterface::read_data() {
             if (corrupted_packet) {
 
                 //Display an error message
-                CI::echo("WARNING in TerminalInterface::read_data : the received packet was too long for "
+                CI::echo("WARNING in Terminal::read_data : the received packet was too long for "
                                  "the input buffer. Please check your terminal_interface_config.h");
 
 
@@ -186,7 +186,7 @@ bool TerminalInterface::read_data() {
  * reset : this function resets the command reception environment
  */
 
-void TerminalInterface::reset() {
+void Terminal::reset() {
 
     //No data;
     command_size = 0;
@@ -217,7 +217,7 @@ void TerminalInterface::reset() {
  *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void TerminalInterface::schedule_command() {
+void Terminal::schedule_command() {
 
     prepare_execution();
 
@@ -272,7 +272,7 @@ void TerminalInterface::schedule_command() {
         if (!tree_flag) {
 
             //Log
-            CI::echo("Error in TerminalInterface::schedule_command : Unable to query the required child tree.");
+            CI::echo("Error in Terminal::schedule_command : Unable to query the required child tree.");
 
             //Fail;
             return;
@@ -326,7 +326,7 @@ void TerminalInterface::schedule_command() {
 
                     //If no more space was available in the argument_t container : display an error message
                     CI::echo(
-                            "ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
+                            "ERROR in Terminal::schedule_command : the argument_t container has no more space "
                                     "available, this is not supposed to happen");
 
                     //Fail
@@ -350,7 +350,7 @@ void TerminalInterface::schedule_command() {
  * prepare execution : this function is called before parsing a packet.
  */
 
-void TerminalInterface::prepare_execution() {
+void Terminal::prepare_execution() {
 
     //Mark the end of the the received command
     *data_in = 0;
@@ -370,7 +370,7 @@ void TerminalInterface::prepare_execution() {
  *  It displays the node's children.
  */
 
-void TerminalInterface::log_parsing_error(const TerminalTree *const log_node) {
+void Terminal::log_parsing_error(const TerminalTree *const log_node) {
 
     //Display the last correct node's content.
 
@@ -422,7 +422,7 @@ void TerminalInterface::log_parsing_error(const TerminalTree *const log_node) {
  *      - eventually removing the arguments.
  */
 
-task_state_t TerminalInterface::execute_command(void *data_pointer) {
+task_state_t Terminal::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
     interface_data_t *data = (interface_data_t *) data_pointer;
@@ -458,7 +458,7 @@ task_state_t TerminalInterface::execute_command(void *data_pointer) {
  *  As the terminal interface is a human-only interface, we will simply display a message to the user.
  */
 
-void TerminalInterface::confirm_command_execution(const interface_data_t *data) {
+void Terminal::confirm_command_execution(const interface_data_t *data) {
 
 //The log will occur only if the command flag is set.
 
@@ -496,7 +496,7 @@ void TerminalInterface::confirm_command_execution(const interface_data_t *data) 
 //---------------------------------Static declarations / definitions------------------------------
 
 
-#define m TerminalInterface
+#define m Terminal
 
 unsigned char m::command_size = 0;
 

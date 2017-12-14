@@ -26,13 +26,13 @@
 #include <TaskScheduler/task_state_t.h>
 
 #if !defined(HL_SERIAL_FLAG)
-#error ProgramInterface requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
+#error Program requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
 #endif
 
 #ifndef CINTERFACE
 #define CINTERFACE
 
-#define PI ProgramInterface
+#define PI Program
 
 #include "Project/Config/program_interface_config.h"
 
@@ -41,13 +41,13 @@
 //TODO POTENTIAL LOSS OF PACKETS : The data size transmitted is not the real size, but the size with BEGIN_BYTES doubled
 
 /*
- * The ProgramInterface class is in charge of receiving data from the outside, and to decode them, according to
+ * The Program class is in charge of receiving data from the outside, and to decode them, according to
  *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config_files file).
  *
  * When it received a command, it enqueues it in TaskScheduler's external_tasks queue.
  */
 
-class ProgramInterface {
+class Program {
 
 public :
 

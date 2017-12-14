@@ -28,7 +28,7 @@
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 
 

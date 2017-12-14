@@ -22,7 +22,7 @@
 #include "EEPROMStorage.h"
 #include "EEPROMNode.h"
 #include <DataStructures/StringUtils.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 
 #define ES EEPROMStorage

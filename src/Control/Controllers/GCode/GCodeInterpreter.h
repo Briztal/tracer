@@ -28,12 +28,12 @@
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>
-#include <Interfaces/_interface_data.h>
+#include <Control/Controllers/_interface_data.h>
 #include "GCodeTree.h"
 
-#define GI GCodeInterface
+#define GI GCodeInterpreter
 
-class GCodeInterface {
+class GCodeInterpreter {
 
 
 public :
@@ -50,31 +50,7 @@ public :
 
 
 
-    //--------------------------------------Serial Read Fields--------------------------------------
-
-private :
-
-    //The current command's size;
-    static uint8_t command_size;
-
-    //The current number of available spaces in the data buffer;
-    static uint8_t data_spaces;
-
-    //A flag set if the current packet is corrupted (too long for the data buffer);
-    static bool corrupted_packet;
-
-    //The current data pointer, points to a case in the data buffer;
-    static char *data_in;
-
-    //The beginning of the data buffer;
-    static char *const data_in_0;
-
-
     //--------------------------------------Command Parsing----------------------------------
-
-public :
-    //read data on the data_link
-    static bool read_data();
 
 
 private :
@@ -84,9 +60,6 @@ private :
 
     //Parse the GCode Command.
     static bool parse();
-
-    //Reset the reading/parsing environment.
-    static void reset();
 
     //Analyse the GCode Command index, and schedule the associated command.
     static void schedule_command(char *command);

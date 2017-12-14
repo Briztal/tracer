@@ -21,11 +21,11 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include "GCodeInterface.h"
+#include "GCodeInterpreter.h"
 #include "GCodeTreeGenerator.h"
 #include "GCodeArguments.h"
 #include <DataStructures/StringUtils.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 
 //----------------------------------------------------Initialisation----------------------------------------------------
@@ -36,7 +36,7 @@
  *  It is automatically called by the Kernel at initialisation
  */
 
-void GCodeInterface::initialise_hardware() {
+void GCodeInterpreter::initialise_hardware() {
 
     //Initialise the data link;
     gcode_interface_link_t::begin();
@@ -51,7 +51,7 @@ void GCodeInterface::initialise_hardware() {
  * initialise_data : this function resets initialises all data of the class
  */
 
-void GCodeInterface::initialise_data() {
+void GCodeInterpreter::initialise_data() {
 
     //Command Parsing initialisation;
     reset();
@@ -83,113 +83,10 @@ void GCodeInterface::initialise_data() {
  * //TODO I'll add some macros, to accelerate the version / author customisation.
  */
 
-void GCodeInterface::init_message() {
+void GCodeInterpreter::init_message() {
 
     CI::respond("start");
 
-}
-
-
-//-----------------------------------------------------Data reading-----------------------------------------------------
-
-/*
- * read_data : this function reads and processes data.
- *
- *  It reads data on the link layer, saves it, and eventually processes it.
- */
-
-bool GCodeInterface::read_data() {
-
-
-    //Don't process any data if no space is available in the argument_t sequence container
-    if (!GCodeArguments::available_spaces()) {
-
-        //Return true if the data_link buffer is not empty.
-        return (bool) gcode_interface_link_t::available();
-
-    }
-
-    while (gcode_interface_link_t::available()) {
-
-        //Read the data link
-        char read_char = gcode_interface_link_t::read();
-
-        //If the recieved char is a line feed or a working_extruder return
-        if ((read_char == 10) || (read_char == 13)) {
-
-            //If a non empty uncorrupted packet has effectively been received
-            if (command_size && !corrupted_packet) {
-
-                //Parse the GCode
-                parse();
-
-                //Reset the data_in
-                reset();
-
-                //Return true if the data_link buffer is not empty.
-                return (bool) gcode_interface_link_t::available();
-
-            }
-
-            //If the received packet was too long for the input buffer :
-            if (corrupted_packet) {
-
-                //Display an error message
-                GI::echo("WARNING in TerminalInterface::read_data : the received packet was too long for "
-                                 "the input buffer. Please check your terminal_interface_config.h");
-
-
-            }
-
-            //If the packet was corrupted, or empty
-            reset();
-
-
-        } else {
-            //If the packet hasn't been entirely received
-
-            //If data still can be inserted in the buffer
-            if (data_spaces) {
-
-                //Append the get_read_adress char to data_in;
-                *(data_in++) = read_char;
-
-                //Increment the command size;
-                command_size++;
-
-                //Decrement the number of nb_spaces available;
-                data_spaces--;
-
-            } else {
-
-                //Mark the current packet as corrupted;
-                corrupted_packet = true;
-            }
-        }
-    }
-
-    //No more data available;
-    return false;
-}
-
-
-/*
- * reset : this function resets the parsing structure;
- */
-
-void GCodeInterface::reset() {
-
-    //No data;
-    command_size = 0;
-
-    //Clear the corruption flag;
-    corrupted_packet = false;
-
-    //Maximum numbers of char nb_spaces;
-    data_spaces = GCODE_MAX_SIZE;
-
-    //data insertion at the origin;
-    data_in = data_in_0;
 }
 
 
@@ -202,7 +99,7 @@ void GCodeInterface::reset() {
  *  It is called when a GCode command has been entirely received
  */
 
-bool GCodeInterface::parse() {
+bool GCodeInterpreter::parse() {
 
     //Initialise the parsing.
     init_parsing();
@@ -238,7 +135,7 @@ bool GCodeInterface::parse() {
  *  It positions the data pointer to the beginning of the command, and resets all parameters flags.
  */
 
-void GCodeInterface::init_parsing() {
+void GCodeInterpreter::init_parsing() {
 
     //Mark the end of the the received command
     *data_in = 0;
@@ -259,7 +156,7 @@ void GCodeInterface::init_parsing() {
  *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void GCodeInterface::schedule_command(char *command) {
+void GCodeInterpreter::schedule_command(char *command) {
 
     //Initialise the current current_tree to the root;
     const GCodeTree *current_tree = command_tree;
@@ -346,7 +243,7 @@ void GCodeInterface::schedule_command(char *command) {
 
                     //If no more space was available in the argument_t container : display an error message
                     echo(
-                            "ERROR in TerminalInterface::schedule_command : the argument_t container has no more space "
+                            "ERROR in Terminal::schedule_command : the argument_t container has no more space "
                                     "available, this is not supposed to happen");
 
                     //Fail
@@ -378,7 +275,7 @@ void GCodeInterface::schedule_command(char *command) {
  *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void GCodeInterface::schedule(task_state_t (*f)(char *)) {
+void GCodeInterpreter::schedule(task_state_t (*f)(char *)) {
 
     //Save the current arguments
     uint8_t index;
@@ -412,7 +309,7 @@ void GCodeInterface::schedule(task_state_t (*f)(char *)) {
  *      - eventually removing the arguments.
  */
 
-task_state_t GCodeInterface::execute_command(void *data_pointer) {
+task_state_t GCodeInterpreter::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
     interface_data_t *data = (interface_data_t *) data_pointer;
@@ -445,7 +342,7 @@ task_state_t GCodeInterface::execute_command(void *data_pointer) {
  *  As the terminal interface is a human-only interface, we will simply display a message to the user.
  */
 
-void GCodeInterface::confirm_command_execution(const interface_data_t *data) {
+void GCodeInterpreter::confirm_command_execution(const interface_data_t *data) {
 
     //Switch the return state.
     switch (data->return_state) {
@@ -487,7 +384,7 @@ void GCodeInterface::confirm_command_execution(const interface_data_t *data) {
  *  It echoes text data on the link layer
  */
 
-void GCodeInterface::echo(const string_t msg) {
+void GCodeInterpreter::echo(const string_t msg) {
 
     gcode_interface_link_t::send_str("// " + msg + "\n");
 
@@ -500,7 +397,7 @@ void GCodeInterface::echo(const string_t msg) {
  *  It echoes text data on the link layer
  */
 
-void GCodeInterface::respond(const string_t msg) {
+void GCodeInterpreter::respond(const string_t msg) {
 
     gcode_interface_link_t::send_str(msg + "\n");
 
@@ -508,22 +405,8 @@ void GCodeInterface::respond(const string_t msg) {
 
 //-------------------------------------------Static declarations / definitions------------------------------------------
 
-#define m GCodeInterface
+#define m GCodeInterpreter
 
-
-//The command size
-unsigned char m::command_size;
-
-//The current number of available nb_spaces in the data bugger
-uint8_t m::data_spaces = GCODE_MAX_SIZE;
-
-//A flag set if the current packet is corrupted (too long for the data buffer)
-bool m::corrupted_packet = false;
-
-//Data pointers
-char tdatain_gcode[GCODE_MAX_SIZE];
-char *m::data_in = tdatain_gcode;
-char *const m::data_in_0 = tdatain_gcode;
 
 //Create an empty temporary tree;
 GCodeTree *m::command_tree = new GCodeTree(' ', 0, nullptr);

@@ -29,7 +29,7 @@
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 
 
 

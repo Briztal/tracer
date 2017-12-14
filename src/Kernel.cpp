@@ -24,7 +24,7 @@
 #include <ControlLoops/ControlLoops.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <StepperControl/TrajectoryTracer.h>
-#include <Interfaces/Interfaces.h>
+#include <Communication/Controllers.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -63,7 +63,7 @@ void Kernel::start() {
     }
 
     //Logo and initialise_hardware message
-    Interfaces::initialisation_message();
+    Controllers::initialisation_message();
 
     //Wait for the eventual retransmission;
     delay(500);
@@ -93,7 +93,7 @@ void Kernel::initialise_hardware() {
     hl_init();
 
     //Initialise all enabled interfaces
-    Interfaces::initialise_hardware();
+    Controllers::initialise_hardware();
 
     //Initialise Thermistors
     Thermistors::init();
@@ -124,7 +124,7 @@ void Kernel::initialise_hardware() {
 void Kernel::initialise_data() {
 
     //Initialise all enabled interfaces
-    Interfaces::initialise_data();
+    Controllers::initialise_data();
 
 }
 

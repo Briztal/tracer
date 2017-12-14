@@ -7,8 +7,8 @@
 
 /*
  * The interface data : this structure contains all required data to execute an Interface function, wheather it
- *  may come from TerminalInterface, GCodeInterface, ProgramInterface, or any interface,
- *      as Interfaces share a same structure.
+ *  may come from Terminal, GCode, ProgramInterface, or any interface,
+ *      as Control share a same structure.
  *
  */
 struct interface_data_t {
@@ -40,7 +40,7 @@ struct interface_data_t {
 
 
 /*
- *  A simple struct that will be used in the arguments parsing for GCode and Terminal Interfaces.
+ *  A simple struct that will be used in the arguments parsing for GCode and Terminal Control.
  */
 
 typedef struct argument_t {

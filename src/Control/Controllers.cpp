@@ -19,10 +19,10 @@
 */
 
 #include "stdint.h"
-#include "Interfaces.h"
+#include "Controllers.h"
 #include <TaskScheduler/TaskScheduler.h>
 
-void Interfaces::initialise_hardware() {
+void Controllers::initialise_hardware() {
 
 #ifdef ENABLE_GCODE_INTERFACE
     GI::initialise_hardware();
@@ -39,7 +39,7 @@ void Interfaces::initialise_hardware() {
 }
 
 
-void Interfaces::initialisation_message() {
+void Controllers::initialisation_message() {
 
 #ifdef ENABLE_GCODE_INTERFACE
     GI::init_message();
@@ -56,7 +56,7 @@ void Interfaces::initialisation_message() {
 }
 
 
-void Interfaces::initialise_data() {
+void Controllers::initialise_data() {
 
 #ifdef ENABLE_GCODE_INTERFACE
     GI::initialise_data();
@@ -84,12 +84,12 @@ void Interfaces::initialise_data() {
  *          This prevents from interrogating the first interface, and fulling the queue, and not being able to
  *          interrogate other interfaces.
  *
- *      - Interfaces are interrogated in order, and all with the same priority.
+ *      - Control are interrogated in order, and all with the same priority.
  *          It means that if interface 0 is interrogated, the next interface to be interrogated will
  *          necessarily be interface 1.
  */
 
-void Interfaces::read_interfaces() {
+void Controllers::read_interfaces() {
 
     //The number of interfaces to skip;
     static uint8_t skip_counter = 0;

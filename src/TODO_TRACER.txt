@@ -26,7 +26,7 @@
 
 //TODO GCODE ACKNOWLEDGEMENT
 
-//TODO COMMENT THE PARSING IN GCodeInterface.cpp
+//TODO COMMENT THE PARSING IN GCodeInterpreter.cpp
 
 
 ////////////////////////TEST///////////////////////////////

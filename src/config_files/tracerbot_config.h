@@ -47,7 +47,7 @@
 //The maximum size of a data in one message
 #define PACKET_SIZE 200
 
-//The maximum size of a data in one word of data (for TerminalInterface)
+//The maximum size of a data in one word of data (for Terminal)
 #define MAX_WORD_SIZE 50
 
 //######################################################TaskScheduler############################################################
