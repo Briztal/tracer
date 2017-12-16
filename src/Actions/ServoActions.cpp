@@ -30,7 +30,7 @@ void ServoActions::initialise_data() {
 
 #define SERVO(k1_position_indice, name, pin, beginning, ending) \
 void ServoActions::set##k1_position_indice (float function) {\
-    servo##k1_position_indice->write(function);\
+    servo##k1_position_indice->write_data(function);\
 }
 
 #include "../config_files.h"

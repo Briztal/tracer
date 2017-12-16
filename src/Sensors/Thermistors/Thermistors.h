@@ -27,7 +27,7 @@ private:\
 
 private:
 
-    //Get the temperature for a reading, a lookup table and its size, and the previous index read.
+    //Get the temperature for a reading, a lookup table and its size, and the previous index read_data.
     static float get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index);
 
     //Make a linear approximation of the ordinate,  with two given points and an abscissa.

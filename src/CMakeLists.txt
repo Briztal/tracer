@@ -140,8 +140,8 @@ add_library(controllers
         ${CCP}/ProgramInterface/ProgramInterface.cpp
 
         #GcodeInterface
-        ${CCP}/GCodeInterface/GCodeInterpreter.h
-        ${CCP}/GCodeInterface/GCodeInterpreter.cpp
+        ${CCP}/GCodeInterface/GCode.h
+        ${CCP}/GCodeInterface/GCode.cpp
         ${CCP}/GCodeInterface/GCodeTree.h
         ${CCP}/GCodeInterface/GCodeTree.cpp
         ${CCP}/GCodeInterface/GCodeTreeGenerator.h
@@ -158,6 +158,9 @@ include_directories(${CPP}/)
 
 
 add_library(protocols
+
+        ${CPP}/Protocol.h
+        ${CPP}/Protocol.cpp
 
         ${CPP}/ClearText.h
         ${CPP}/ClearText.cpp

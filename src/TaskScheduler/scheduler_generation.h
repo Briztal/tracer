@@ -34,7 +34,7 @@
  *          to the moment it is effectively executed;
  *      - A scheduler, taking the same arguments than your function, that would put those into
  *          an instance of the struct, and schedule the unpacker (below);
- *      - An unpacker, that would unpack arguments, and schedule_command the desired function, with extracted dynamic_args.
+ *      - An unpacker, that would unpack arguments, and parse the desired function, with extracted dynamic_args.
  *
  *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
  *
@@ -42,7 +42,7 @@
  *
  *      GENERATE_SCHEDULER(function_name, task_type, type_0, variable_0, ..., type_[nb_args], variable_[nb_args])
  *
- *  To keep up with our example, to generate the scheduling structure for "function" with the type 1, you would write :
+ *  To keep up with our example, to generate the scheduling structure for "function" with the type 1, you would write_data :
  *
  *      GENERATE_SCHEDULER(function, 1, uint8_t, var_0, float, var_1, long, var_2)
  *
@@ -123,10 +123,10 @@
 
 
 /*
- * Macros SEMICOLON_F and COMMA_F, defined below are meant to write the name  the function corresponding 
+ * Macros SEMICOLON_F and COMMA_F, defined below are meant to write_data the name  the function corresponding
  *  to the number of arguments provided;
  *
- *  They will write one of the SEMICOLON_[i] or COMMA_[i] functions.
+ *  They will write_data one of the SEMICOLON_[i] or COMMA_[i] functions.
  *
  */
 
@@ -225,8 +225,8 @@ static task_state_t name##_scheduled_##type signature { \
     /*Fill the data*/\
     struct_fill\
     \
-    /*Schedule a task, that will schedule_command the required function, passing the previously created data.*/\
-    TaskScheduler::schedule_task(type, _##name, (void *) _unpacker_data_);\
+    /*Schedule a task, that will parse the required function, passing the previously created data.*/\
+    TaskScheduler::schedule_task(type, _##name, (void *) _unpacker_data_, nullptr, nullptr);\
     \
     /*Complete*/\
     return complete;\
@@ -269,7 +269,7 @@ static task_state_t _##name(void *_unpacker_pointer_) {\
  *      - get the signature;
  *      - define the structure;
  *      - fill the structure;
- *      - read data from the structure;
+ *      - read_data data from the structure;
  *
  *  from arguments.
  *

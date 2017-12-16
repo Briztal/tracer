@@ -43,7 +43,7 @@ void EEPROMStorage::init() {
 
 
 /*
- * read_data : this function reads the data at index [index] in the EEPROM.
+ * decode_char : this function reads the data at index [index] in the EEPROM.
  *
  */
 

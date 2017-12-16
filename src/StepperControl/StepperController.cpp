@@ -26,7 +26,7 @@
 
 #include "StepperController.h"
 #include <EEPROM/EEPROMStorage.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 
@@ -239,7 +239,7 @@ void StepperController::fastStep(sig_t id) {
 void StepperController::send_position() {
 
 #define STEPPER(i, ...) \
-    CI::echo("pos : "+str(i)+" "+str(pos##i));\
+    std_out("pos : "+str(i)+" "+str(pos##i));\
 
 
 #include <config.h>

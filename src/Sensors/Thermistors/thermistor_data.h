@@ -66,10 +66,10 @@
 
  *
  *
- * You must write a line like the following in your config_files.h to enable a particular thermistor, named [NAME] :
+ * You must write_data a line like the following in your config_files.h to enable a particular thermistor, named [NAME] :
  *
  * THEMRISTOR(index,  pin, NAME)
- *      where index is the thermistor index, pin is the pin it will read, and NAME is the thermistor name
+ *      where index is the thermistor index, pin is the pin it will read_data, and NAME is the thermistor name
  *
  */
 

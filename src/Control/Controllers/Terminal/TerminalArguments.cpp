@@ -24,7 +24,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <DataStructures/StringUtils.h>
-#include <Interfaces/Interfaces.h>
+#include <Control/Control.h>
 #include "TerminalArguments.h"
 
 
@@ -92,7 +92,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
         if (identifier_size != 2) {
 
             //Display an error message
-            CI::echo("INVALID ARGUMENT IDENTIFIER");
+            std_out("INVALID ARGUMENT IDENTIFIER");
 
             //Fail
             return false;
@@ -103,7 +103,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
         if (nb_identifiers == TERMINAL_MAX_ARGS_NB) {
 
             //Display an error message
-            CI::echo(
+            std_out(
                     "The TerminalArguments hasn't been configured to accept more than " + String(TERMINAL_MAX_ARGS_NB) +
                     " arguments. Please check your terminal_interface_config.h file.");
 
@@ -186,7 +186,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
         } else {
 
             //If the '-' was in a word, display an error message;
-            CI::echo("Invalid arguments, please do not use '-' in a word.");
+            std_out("Invalid arguments, please do not use '-' in a word.");
 
             //Fail;
             return false;

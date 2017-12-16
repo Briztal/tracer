@@ -61,7 +61,7 @@ float Thermistors::get_temperature_##name(const int16_t read_value) {\
 /*
  * get_temperature_[indice] : gets the temperature for Thermistor [indice]'s pin.
  *
- * It calls get_temperature_[indice] with the value read on the pin.
+ * It calls get_temperature_[indice] with the value read_all on the pin.
  *
  */\
 float Thermistors::get_temperature_##name() {\
@@ -77,7 +77,7 @@ float Thermistors::get_temperature_##name() {\
 
 /*
  * get_temperature : this function determines the temperature of a thermistor, given  :
- *      - a read value (most likely given by calling analogRead or equivalent)
+ *      - a read_data value (most likely given by calling analogRead or equivalent)
  *      - a lookup tabletable for the current thermistor
  *      - the lookup table size
  *      - the current index on the table
@@ -116,7 +116,7 @@ Thermistors::get_temperature(const int16_t read_value, const float *const table,
     //If the read_value is below the current bounds, decrease
     if (lower_value > read_value) {
 
-        //While the read value is lower than the lower bound, shift bounds of one.
+        //While the read_data value is lower than the lower bound, shift bounds of one.
         while (lower_value > read_value) {
 
             //If lower_index is zero, we can't go lower. So, we must return the minimal value.
@@ -136,7 +136,7 @@ Thermistors::get_temperature(const int16_t read_value, const float *const table,
 
     } else if (upper_value < read_value) {
 
-        //While the read value is higher than the upper bound, shift bounds of one.
+        //While the read_data value is higher than the upper bound, shift bounds of one.
         while (upper_value < read_value) {
 
             if (upper_index == size - 1) {
@@ -160,17 +160,17 @@ Thermistors::get_temperature(const int16_t read_value, const float *const table,
 
     if (read_value == upper_value) {
 
-        //If the read value is the upper bound, return the upper temperature
+        //If the read_data value is the upper bound, return the upper temperature
         temperature = GET_TEMP(upper_index);
 
     } else if (read_value == lower_value) {
 
-        //If the read value is the lower bound, return the lower temperature
+        //If the read_data value is the lower bound, return the lower temperature
         temperature = GET_TEMP(lower_index);
 
     } else {
 
-        //If the read value is between the lower bound and the upper bound (strictly), use an approximation
+        //If the read_data value is between the lower bound and the upper bound (strictly), use an approximation
 
         temperature = linear_approximation(lower_value, upper_value, read_value, GET_TEMP(lower_index),
                                            GET_TEMP(upper_index));

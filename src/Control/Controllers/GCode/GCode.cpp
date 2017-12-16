@@ -21,44 +21,26 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include "GCodeInterpreter.h"
+#include "GCode.h"
 #include "GCodeTreeGenerator.h"
 #include "GCodeArguments.h"
 #include <DataStructures/StringUtils.h>
-#include <Communication/Controllers.h>
 
 
 //----------------------------------------------------Initialisation----------------------------------------------------
-
-/*
- * setup_hardware : this function initialises the link layer.
- *
- *  It is automatically called by the Kernel at initialisation
- */
-
-void GCodeInterpreter::initialise_hardware() {
-
-    //Initialise the data link;
-    gcode_interface_link_t::begin();
-
-    //Wait a bit for data link initialise_hardware to complete.
-    delay_ms(100);
-
-}
 
 
 /*
  * initialise_data : this function resets initialises all data of the class
  */
 
-void GCodeInterpreter::initialise_data() {
+void GCode::initialise_data(Protocol *protocol) {
 
-    //Command Parsing initialisation;
-    reset();
+    //Initialise the output log_protocol;
+    output_protocol = protocol;
 
     //Arguments initialisation;
     GCodeArguments::clear();
-
 
     //Tree initialisation.
 
@@ -69,10 +51,6 @@ void GCodeInterpreter::initialise_data() {
     command_tree = GCodeTreeGenerator::generate_tree();
 
 
-    //Empty the data buffer;
-    while(gcode_interface_link_t::available()) gcode_interface_link_t::read();
-
-
 }
 
 
@@ -80,12 +58,11 @@ void GCodeInterpreter::initialise_data() {
 /*
  * The following function displays a logo at the initialisation of the code.
  *
- * //TODO I'll add some macros, to accelerate the version / author customisation.
  */
 
-void GCodeInterpreter::init_message() {
+void GCode::init_message() {
 
-    CI::respond("start");
+    respond("start");
 
 }
 
@@ -99,55 +76,35 @@ void GCodeInterpreter::init_message() {
  *  It is called when a GCode command has been entirely received
  */
 
-bool GCodeInterpreter::parse() {
-
-    //Initialise the parsing.
-    init_parsing();
-
+bool GCode::parse(char *message) {
 
     //Remove extra spaces;
-    data_in += StringUtils::lstrip(data_in, ' ');
+    message += StringUtils::lstrip(message, ' ');
 
     //Save the pointer to the first char of the command id.
-    char *command_id = data_in;
+    char *command_id = message;
 
     //Get the command id length;
-    uint8_t command_id_length = StringUtils::count_until_char(data_in, ' ');
+    uint8_t command_id_length = StringUtils::count_until_char(message, ' ');
 
     //Abort if the first word was a space.
     if (!command_id_length)
         return false;
 
     //Update data_in
-    data_in += command_id_length;
+    message += command_id_length;
 
     //Analyse the command id.
-    schedule_command(command_id);
+    schedule_command(command_id, message);
 
+    //Success
     return true;
 
 }
 
 
 /*
- * init_parsing : this function initialises the data parsing.
- *
- *  It positions the data pointer to the beginning of the command, and resets all parameters flags.
- */
-
-void GCodeInterpreter::init_parsing() {
-
-    //Mark the end of the the received command
-    *data_in = 0;
-
-    //Reset the data pointer
-    data_in = data_in_0;
-
-}
-
-
-/*
- * schedule_command : this function analyses the packet received, and parses the command part.
+ * parse : this function analyses the packet received, and parses the command part.
  *
  *  When it has found the GCodeCommand identified by this string, it saves the rest of the packet (the arguments part)
  *      in the argument storage, and then, schedules the execution of this function.
@@ -156,12 +113,12 @@ void GCodeInterpreter::init_parsing() {
  *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void GCodeInterpreter::schedule_command(char *command) {
+void GCode::schedule_command(const char *command_id, const char *arguments) {
 
     //Initialise the current current_tree to the root;
     const GCodeTree *current_tree = command_tree;
 
-    echo("COMMAND : " + String(command));
+    log("COMMAND : " + String(command_id));
     //The current depth
     uint8_t depth = 0;
 
@@ -171,18 +128,18 @@ void GCodeInterpreter::schedule_command(char *command) {
     //A cache for the child of the current node we are focused on.
     const GCodeTree *current_child;
 
-    //The current char in the command;
-    char command_id;
+    //The current char in the command_char;
+    char command_char;
     //--------------------------Tree Iteration--------------------------
 
     //As the algorithm involves two for - while loops, we must use a goto label to restart with a new node.
     node_check:
 
-    //Get the command identifier, and increment the depth;
-    command_id = command[depth++];
+    //Get the command_char identifier, and increment the depth;
+    command_char = command_id[depth++];
 
 
-    //We now must compare each child of the current node, and compare its identifier with the read command identifier.
+    //We now must compare each child of the current node, and compare its identifier with the read_data command_char identifier.
 
     //Check every sub_node
     for (i = 0; i < current_tree->nb_children; i++) {
@@ -198,7 +155,7 @@ void GCodeInterpreter::schedule_command(char *command) {
         const char tree_id = current_child->name;
 
         //If the current command_identifier matches the current_tree's name
-        if (command_id == tree_id) {
+        if (command_char == tree_id) {
 
             //A matching sub_node has been found. It can be a single
             //Update the current node and the current children array.
@@ -212,6 +169,7 @@ void GCodeInterpreter::schedule_command(char *command) {
 
             } else {
 
+                //If arguments can be enqueued :
                 if (GCodeArguments::available_spaces()) {
 
 
@@ -219,7 +177,7 @@ void GCodeInterpreter::schedule_command(char *command) {
                     uint8_t index;
 
                     //Save the arguments sequence.
-                    if (GCodeArguments::insert_argument(data_in, &index)) {
+                    if (GCodeArguments::insert_argument(arguments, &index)) {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
@@ -227,12 +185,13 @@ void GCodeInterpreter::schedule_command(char *command) {
                         data->arguments_index = index;
                         data->function = current_tree->function;
 
+
                         /*
-                         * Schedule a type 255 (asap) task, to schedule_command the required function,
-                         *  with data as arguments.
+                         * Schedule a type 255 (asap) task, to parse the required function,
+                         *  with data as arguments, the log function, and the output protocol;
                          */
 
-                        TaskScheduler::schedule_task(255, execute_command, (void *) data);
+                        TaskScheduler::schedule_task(255, execute_command, (void *) data, external_log, output_protocol);
 
                         //Complete
                         return;
@@ -242,8 +201,8 @@ void GCodeInterpreter::schedule_command(char *command) {
                 } else {
 
                     //If no more space was available in the argument_t container : display an error message
-                    echo(
-                            "ERROR in Terminal::schedule_command : the argument_t container has no more space "
+                    log(
+                            "ERROR in Terminal::parse : the argument_t container has no more space "
                                     "available, this is not supposed to happen");
 
                     //Fail
@@ -257,39 +216,11 @@ void GCodeInterpreter::schedule_command(char *command) {
 
     }
 
-    //If the command_id didn't match any know child tree, send a warning and complete;
-    echo("Warning : Command not supported");
+    //If the command_char didn't match any know child tree, send a warning and complete;
+    log("Warning : Command not supported");
     respond("ok");
     
     
-
-}
-
-/*
- * schedule : this function schedules a GCodeCommands command.
- *
- *  It saves the arguments part in the argument storage, and then, schedules the execution of the function passed
- *      in arguments
- *
- *  This command will be executed, by the intermediary of the execute_command function, defined below.
- *      (see the doc above the execute_command function's definition for more explanations).
- */
-
-void GCodeInterpreter::schedule(task_state_t (*f)(char *)) {
-
-    //Save the current arguments
-    uint8_t index;
-
-    //Copy the argument string in the argument storage, and get the index it was inserted at.
-    GCodeArguments::insert_argument(data_in, &index);
-
-    //Create a struct in the heap to contain argument-related data.
-    interface_data_t *data = new interface_data_t();
-    data->arguments_index = index;
-    data->function = f;
-
-    //Schedule the task
-    TaskScheduler::schedule_task(255, execute_command, (void *) data);
 
 }
 
@@ -309,7 +240,7 @@ void GCodeInterpreter::schedule(task_state_t (*f)(char *)) {
  *      - eventually removing the arguments.
  */
 
-task_state_t GCodeInterpreter::execute_command(void *data_pointer) {
+task_state_t GCode::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
     interface_data_t *data = (interface_data_t *) data_pointer;
@@ -342,7 +273,7 @@ task_state_t GCodeInterpreter::execute_command(void *data_pointer) {
  *  As the terminal interface is a human-only interface, we will simply display a message to the user.
  */
 
-void GCodeInterpreter::confirm_command_execution(const interface_data_t *data) {
+void GCode::confirm_command_execution(const interface_data_t *data) {
 
     //Switch the return state.
     switch (data->return_state) {
@@ -354,18 +285,18 @@ void GCodeInterpreter::confirm_command_execution(const interface_data_t *data) {
 
             //If the task completed correctly
         case invalid_arguments:
-            echo("WARNING Invalid Arguments");
+            log("WARNING Invalid Arguments");
             respond("ok");
             return;
 
             //If the task must be reprogrammed:
         case reprogram:
-            //echo("Command Reprogrammed.");
+            //log("Command Reprogrammed.");
             return;
 
             //If the task completed correctly
         default:
-            echo("WARNING Unrecognised return state");
+            log("WARNING Unrecognised return state");
             respond("ok");
             return;
 
@@ -379,37 +310,50 @@ void GCodeInterpreter::confirm_command_execution(const interface_data_t *data) {
 
 
 /*
- * echo : this function is an alias for the system echo command.
- *
- *  It echoes text data on the link layer
+ * log : this function encodes a string and transmits it with the output protocol;
  */
 
-void GCodeInterpreter::echo(const string_t msg) {
+void GCode::external_log(Protocol *protocol, const string_t msg) {
 
-    gcode_interface_link_t::send_str("// " + msg + "\n");
+    protocol->encode_data("// " + msg + "\n");
 
 }
 
 
 /*
- * respond : this function is an alias for the system echo command.
+ * log : this function encodes a string and transmits it with the provided protocol;
+ */
+
+void GCode::log(const string_t msg) {
+
+    output_protocol->encode_data("// " + msg + "\n");
+
+}
+
+
+
+/*
+ * respond : this function is an alias for the system log command.
  *
  *  It echoes text data on the link layer
  */
 
-void GCodeInterpreter::respond(const string_t msg) {
+void GCode::respond(const string_t msg) {
 
-    gcode_interface_link_t::send_str(msg + "\n");
+    output_protocol->encode_data(msg + "\n");
 
 }
 
 //-------------------------------------------Static declarations / definitions------------------------------------------
 
-#define m GCodeInterpreter
+#define m GCode
 
 
 //Create an empty temporary tree;
 GCodeTree *m::command_tree = new GCodeTree(' ', 0, nullptr);
+
+//The log_protocol used to transmit all communication interfaces;
+Protocol *m::output_protocol;
 
 #undef m
 

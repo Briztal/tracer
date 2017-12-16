@@ -23,34 +23,36 @@
 #define TRACER_CLEARTEXT_H
 
 #include "stdint.h"
+#include "Control/Protocols/Protocol.h"
 
-class ClearText {
-
+class ClearText : public Protocol {
 
 public :
-    //read data on the data_link
-    static bool read_data();
+
+    //Constructor;
+    ClearText(uint8_t size, uint16_t (*const available_f)(void), void (*const write_f)(char), char (*const read_f)(void));
+
+    //read all available_data;
+    void decode_data();
+
+    //Encode data on data_link;
+    void encode_data(String data);
+
+    //Get a pointer to the data;
+    char *get_data();
+
+    //Is the data can be parsed;
+    bool parsing_ready();
 
     //Reset the reading/parsing environment.
-    static void reset();
+    void reset();
 
 
-private :
+private:
 
-    //The current command's size;
-    static uint8_t command_size;
+    //read_data data on the data_link
+    void decode_char(char data);
 
-    //The current number of available spaces in the data buffer;
-    static uint8_t data_spaces;
-
-    //A flag set if the current packet is corrupted (too long for the data buffer);
-    static bool corrupted_packet;
-
-    //The current data pointer, points to a case in the data buffer;
-    static char *data_in;
-
-    //The beginning of the data buffer;
-    static char *const data_in_0;
 
 };
 

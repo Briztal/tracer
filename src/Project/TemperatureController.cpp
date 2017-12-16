@@ -195,7 +195,7 @@ TemperatureController::hotbed_state_t TemperatureController::get_hotbeds_state()
 
 float TemperatureController::get_hotbed_temperature() {
 
-    //Simply read the hotbed thermistor value.
+    //Simply read_data the hotbed thermistor value.
     return Thermistors::get_temperature_hotbed();
 
 }

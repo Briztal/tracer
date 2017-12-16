@@ -95,20 +95,6 @@ public:
 
     static jmp_buf restoration_point;
 
-
-    //------------------------------------------- Logo Display -------------------------------------------
-
-private:
-
-    /*
-     * The following function displays a logo at the initialisation of the code.
-     *
-     * //TODO I'll add some macros, to accelerate the version / author customisation.
-     */
-
-    static void display_logo();
-
-
 };
 
 

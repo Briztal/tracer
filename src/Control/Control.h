@@ -28,34 +28,31 @@
  */
 
 #include "config.h"
+#include <Control/Protocols/Protocol.h>
+
 
 #ifdef ENABLE_TERMINAL_INTERFACE
-#include <Communication/TerminalInterface/TerminalInterface.h>
-#ifdef MAIN_CI_TERMINAL
-#define CI TI
-#endif
+#include <Control/Controllers/Terminal/Terminal.h>
 #endif
 
 #ifdef ENABLE_GCODE_INTERFACE
-#include <Interfaces/GCodeInterface/GCodeInterface.h>
-#ifdef MAIN_CI_GCODE
-#define CI GI
-#endif
+#include <Control/Controllers/GCode/GCode.h>
 #endif
 
 #ifdef ENABLE_PROGRAM_INTERFACE
 #include <Communication/ProgramInterface/ProgramInterface.h>
-#ifdef MAIN_CI_PROGRAM
-#define CI PI
-#endif
 #endif
 
+#include <TaskScheduler/TaskScheduler.h>
+
+#define debug(s) TaskScheduler::log(String("debug ") + s);
+
+#define std_out(s) TaskScheduler::log(s)
 
 
-#define debug(s) CI::echo(String("debug ") + s);
+class Control {
 
-
-class Controllers {
+    //------------------------------------------------- Initialisation -------------------------------------------------
 
 public:
 
@@ -68,11 +65,28 @@ public:
     //Initialise all interfaces data (fields and processing environment);
     static void initialise_data();
 
-    //Read interfaces;
-    static void read_interfaces();
+
+private:
+
+    //Initialise controllers
+    static void initialise_external_controllers();
+
+
+    //------------------------------------------------- Controls -------------------------------------------------
+
+public:
+
+    //Read internal controllers
+    static void read_internal_controllers();
+
+    //Read external controllers;
+    static void read_external_controllers();
 
 
 private:
+
+    //The log_protocol array;
+    static Protocol **const protocols;
 
 };
 

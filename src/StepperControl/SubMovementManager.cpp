@@ -7,7 +7,7 @@
 #include "TrajectoryTracer.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 /*
  * initialise_movement : this function is called when the current movement is finished.
@@ -43,11 +43,11 @@ uint8_t SubMovementManager::update_current_movement(movement_data_t *movement_da
 
 void SubMovementManager::display_distances() {
     for (int i = 0; i < NB_STEPPERS; i++) {
-        CI::echo(str(i) + " ed : " + str(end_distances[i]) + " jd : " + str(jerk_distances[i]));
+        std_out(str(i) + " ed : " + str(end_distances[i]) + " jd : " + str(jerk_distances[i]));
     }
 
     for (int i = 0; i < NB_STEPPERS; i++) {
-        CI::echo(str(i) + " ed : " + str(end_position[i]) + " jd : " + str(jerk_position[i]));
+        std_out(str(i) + " ed : " + str(end_position[i]) + " jd : " + str(jerk_position[i]));
     }
 }
 
@@ -62,12 +62,12 @@ void SubMovementManager::display_distances() {
 void SubMovementManager::fill_sub_movement_queue() {
 
 
-    CI::echo("FILLING THE MOVEMENT QUEUE");
+    std_out("FILLING THE MOVEMENT QUEUE");
     while (sub_movement_queue.available_spaces() && !movement_last_position_processed_flag) {
         push_new_sub_movement();
     }
 
-    CI::echo("END FILL");
+    std_out("END FILL");
 
 }
 
@@ -115,7 +115,7 @@ void SubMovementManager::push_new_sub_movement() {
     if (!queue_flag) {
 
         //Log if the flag is reset (error)
-        CI::echo("ERROR in SubMovementManager::push_new_sub_movement : the insertion element is already assigned");
+        std_out("ERROR in SubMovementManager::push_new_sub_movement : the insertion element is already assigned");
 
         //Stop any movement now;
         TrajectoryTracer::stop();
@@ -157,7 +157,7 @@ void SubMovementManager::push_new_sub_movement() {
     if (!queue_flag) {
 
         //Log
-        CI::echo("ERROR in SubMovementManager::confirm_sub_movement : The insertion position is already allocated.");
+        std_out("ERROR in SubMovementManager::confirm_sub_movement : The insertion position is already allocated.");
 
         //Emergency stop
         TrajectoryTracer::stop();
@@ -362,7 +362,7 @@ sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
     if (!size) {
 
         //if the queue is empty : error
-        CI::echo("ERROR : IN SubMovementManager::read_next_sub_movement : THE SUB_MOVEMENT QUEUE IS EMPTY");
+        std_out("ERROR : IN SubMovementManager::read_next_sub_movement : THE SUB_MOVEMENT QUEUE IS EMPTY");
 
         //Emergency stop;
         TrajectoryTracer::stop();
@@ -382,7 +382,7 @@ sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
         if (!queue_flag) {
 
             //Log;
-            CI::echo("ERROR : IN SubMovementManager::read_next_sub_movement : the reading element was not allocated");
+            std_out("ERROR : IN SubMovementManager::read_next_sub_movement : the reading element was not allocated");
 
             //Emergency stop;
             TrajectoryTracer::stop();
@@ -410,7 +410,7 @@ void SubMovementManager::discard_sub_movement() {
     if (!queue_flag) {
 
         //Log;
-        CI::echo("ERROR : IN SubMovementManager::discard_sub_movement : the reading element was not allocated");
+        std_out("ERROR : IN SubMovementManager::discard_sub_movement : the reading element was not allocated");
 
         //Emergency stop;
         TrajectoryTracer::stop();

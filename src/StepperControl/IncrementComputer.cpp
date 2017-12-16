@@ -25,7 +25,7 @@
 
 #include "IncrementComputer.h"
 #include <StepperControl/MachineInterface.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 #define DEFAULT_ABSOLUTE_INCREMENT (float) 0.01
 
@@ -54,7 +54,7 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
     if (((min_increment > 0) && (min + min_increment > max)) || ((min_increment < 0) && (min + min_increment < max))) {
 
         //Send an error message
-        CI::echo("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
+        std_out("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
 
         //ignore movement
         return false;

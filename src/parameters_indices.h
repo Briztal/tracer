@@ -20,7 +20,7 @@
 
 
 /* This file provides parameter indices for parameters you have set in parser_config. It gives you a "physical access"
- * in the code, instead of having to write an XMacro and to call parser_config.
+ * in the code, instead of having to write_data an XMacro and to call parser_config.
  */
 
 #ifndef CODE_PARAMETERS_INDICES_H

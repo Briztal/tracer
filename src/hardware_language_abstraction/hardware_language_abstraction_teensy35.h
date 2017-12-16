@@ -276,15 +276,16 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 class name {\
 public:\
     static inline void begin() {serial.begin(115200);}\
-    static inline void send_byte(char c) {serial.print(c);}\
-    static inline void send_str(string_t c) {serial.print(c);}\
-    static inline int available() {return serial.available();}\
+    static inline uint16_t available() {return (uint16_t)serial.available();}\
+    static inline void write(char c) {serial.print(c);}\
     static inline char read() {return (char)serial.read();}\
+    static inline void send_str(string_t c) {serial.print(c);}\
 };
 
 /*
  * We define here 4 serial adapters : the usb serial and serial 1, 2 and 3.
  */
+
 
 SERIAL_CLASS_ADAPTER(usb_serial, Serial)
 SERIAL_CLASS_ADAPTER(serial1, Serial1)

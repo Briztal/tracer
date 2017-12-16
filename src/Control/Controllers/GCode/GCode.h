@@ -28,44 +28,35 @@
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>
-#include <Control/Controllers/_interface_data.h>
+#include <Control/Controllers/_controller_data.h>
+#include <Control/Protocols/Protocol.h>
 #include "GCodeTree.h"
 
-#define GI GCodeInterpreter
-
-class GCodeInterpreter {
+class GCode {
 
 
 public :
-
-    //Hardware setup function;
-    static void initialise_hardware();
 
     //Send the initialisation message
     static void init_message();
 
     //Data initialise_hardware function;
-    static void initialise_data();
-
-
+    static void initialise_data(Protocol *protocol);
 
 
     //--------------------------------------Command Parsing----------------------------------
 
 
-private :
-
-    //Initialise the parsing.
-    static void init_parsing();
+public:
 
     //Parse the GCode Command.
-    static bool parse();
+    static bool parse(char *message);
+
+
+private :
 
     //Analyse the GCode Command index, and schedule the associated command.
-    static void schedule_command(char *command);
-
-    //Schedule a GCodeInterfaceCommand function.
-    static void schedule(task_state_t (*f)(char *));
+    static void schedule_command(const char *command_id, const char *arguments);
 
     //Execute a parsed command;
     static task_state_t execute_command(void *data_pointer);
@@ -77,18 +68,29 @@ private :
     static GCodeTree *command_tree;
 
 
-    //------------------------------------Standard functions-----------------------------
+    //------------------------------------ Output -----------------------------
 
 public :
 
     //System alias for echo;
-    static void echo(const string_t msg);
+    static void log(const string_t msg);
+
+    //System alias for echo;
+    static void external_log(Protocol *protocol, const string_t msg);
+
+    //System alias for send_position;
+    static void send_position(float*){}
+
+private:
 
     //System alias for a response (doesn't add //);
     static void respond(const String msg);
 
-    //System alias for send_position;
-    static void send_position(float*){}
+
+
+private:
+
+    static Protocol *output_protocol;
 
 };
 

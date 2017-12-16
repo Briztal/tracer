@@ -2,14 +2,15 @@
 #define TRACER_TASK_SCHEDULER_DATA_H
 
 
+#include <Control/Protocols/Protocol.h>
 #include "task_state_t.h"
 
 typedef struct task_t {
 
     /*
-     * The type of the task
+     * The type of the task :
      *  - 255 for a task to execute as soon as possible
-     *  - other values for task to schedule_command in order.
+     *  - other values for task to parse in order.
      *      WARNING : The order only applies for task belonging to the same group!
      */
 
@@ -17,7 +18,7 @@ typedef struct task_t {
 
 
     /*
-     * The function to schedule_command, at runtime.
+     * The function to parse, at runtime.
      */
 
     task_state_t (*task)(void *) = nullptr;
@@ -33,6 +34,25 @@ typedef struct task_t {
      */
 
     void *dynamic_args = nullptr;
+
+
+    /*
+     * The communication method :
+     *  If communication is required (logs), this function will take care of the encoding, and transmit
+     *      the encoded string, using a particular log_protocol.
+     *
+     *  The log_protocol, as the message, must be provided.
+     */
+
+    void (*log_function)(Protocol *, const string_t message) = nullptr;
+
+
+    /*
+     * The log_protocol used to communicate.
+     */
+
+    Protocol *log_protocol = nullptr;
+
 
 };
 

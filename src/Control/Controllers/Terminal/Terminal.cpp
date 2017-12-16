@@ -25,41 +25,21 @@
 #include "Terminal.h"
 #include "TerminalTreeGenerator.h"
 #include "TerminalArguments.h"
-#include <Interfaces/Interfaces.h>
+#include <Control/Control.h>
 #include <DataStructures/StringUtils.h>
-#include <Project/InterfaceCommands/TerminalCommands.h>
-
-
-/*
- * initialise_hardware : this function initialises the serial, and sets up the command processing environment.
- */
-
-void Terminal::initialise_hardware() {
-
-    //Initialise the serial
-    terminal_interface_link_t::begin();
-
-    //Wait for the serial to  correctly initialise_hardware
-    delay_ms(100);
-
-
-}
 
 
 /*
  * initialise_data : this function initialises the serial, and sets up the command processing environment.
  */
 
-void Terminal::initialise_data() {
+void Terminal::initialise_data(Protocol *protocol) {
 
-
-    //Command Parsing initialisation;
-    reset();
-
+    //Initialise the protocol;
+    output_protocol = protocol;
 
     //Arguments initialisation;
     TerminalArguments::clear();
-
 
     //Tree initialisation.
 
@@ -70,8 +50,6 @@ void Terminal::initialise_data() {
     command_tree = TerminalTreeGenerator::generate_tree();
 
 
-    //Empty the data buffer;
-    while(terminal_interface_link_t::available()) terminal_interface_link_t::read();
 }
 
 
@@ -81,134 +59,23 @@ void Terminal::initialise_data() {
 
 void Terminal::init_message() {
 
-    CI::echo("");
-    CI::echo("    dBBBBBBP  dBBBBb  dBBBBb     dBBBP  dBBBP  dBBBBb");
-    CI::echo("      dBP     dP  dP   dP BB    dP     dP      BP  dP");
-    CI::echo("     dBP     dBBBBK'  dP  BB   dP     dBBP    dBBBBK'");
-    CI::echo("    dBP     dBP  BB  dBBBBBB  dP     dP      dBP  BB");
-    CI::echo("   dBP     dBP  dB' dBP   BB dBBBBP dBBBBP  dBP  dB'");
-    CI::echo("");
-    CI::echo("\nTRACER initialised and ready. Waiting for commands.\n\n");
+    log("");
+    log("    dBBBBBBP  dBBBBb  dBBBBb     dBBBP  dBBBP  dBBBBb");
+    log("      dBP     dP  dP   dP BB    dP     dP      BP  dP");
+    log("     dBP     dBBBBK'  dP  BB   dP     dBBP    dBBBBK'");
+    log("    dBP     dBP  BB  dBBBBBB  dP     dP      dBP  BB");
+    log("   dBP     dBP  dB' dBP   BB dBBBBP dBBBBP  dBP  dB'");
+    log("");
+    log("\nTRACER initialised and ready. Waiting for commands.\n\n");
 
 }
-
-
-/*
- * echo : this function sends a String over the serial.
- */
-
-void Terminal::echo(const string_t msg) {
-    terminal_interface_link_t::send_str(msg + "\n");
-}
-
-
-/*
- * read_data : this function reads and saved the serial available data.
- *
- *  It returns true if data is still available in the data link buffer, and false if the buffer is empty;
- */
-
-bool Terminal::read_data() {
-
-    //Don't process any data if no space is available in the argument_t sequence container
-    if (!TerminalArguments::available_spaces()) {
-
-        //Return true if the data_link buffer is not empty.
-        return (bool) (terminal_interface_link_t::available());
-
-    }
-
-    while (terminal_interface_link_t::available()) {
-
-        //Read the serial
-        char read_char = terminal_interface_link_t::read();
-
-        //If the recieved char is a line feed or a working_carriage return
-        if ((read_char == 10) || (read_char == 13)) {
-
-            //If a non empty uncorrupted packet has effectively been received
-            if (command_size && !corrupted_packet) {
-
-                //Parse and execute the command
-                schedule_command();
-
-                //Reset the data_in
-                reset();
-
-                //Return true if the data_link buffer is not empty.
-                return (bool) (terminal_interface_link_t::available());
-
-            }
-
-            //If the received packet was too long for the input buffer :
-            if (corrupted_packet) {
-
-                //Display an error message
-                CI::echo("WARNING in Terminal::read_data : the received packet was too long for "
-                                 "the input buffer. Please check your terminal_interface_config.h");
-
-
-            }
-            //If the packet was corrupted, or empty
-            reset();
-
-
-        } else {
-            //If the packet hasn't been entirely received
-
-            //If data still can be inserted in the buffer
-            if (data_spaces) {
-
-                //Append the get_read_adress char to data_in;
-                *(data_in++) = read_char;
-
-                //Increment the command size;
-                command_size++;
-
-                //Decrement the number of nb_spaces available;
-                data_spaces--;
-
-            } else {
-
-                //Mark the current packet as corrupted;
-                corrupted_packet = true;
-            }
-
-        }
-    }
-
-    //No more data available;
-    return false;
-}
-
-
-/*
- * reset : this function resets the command reception environment
- */
-
-void Terminal::reset() {
-
-    //No data;
-    command_size = 0;
-
-    //Clear the corruption flag;
-    corrupted_packet = false;
-
-    //Maximum numbers of char nb_spaces;
-    data_spaces = TERMINAL_MAX_SIZE;
-
-    //data insertion at the origin;
-    data_in = data_in_0;
-
-}
-
 
 
 //-----------------------------------------------------Execution--------------------------------------------------------
 
 
 /*
- * schedule_command : this function analyses the packet received, and parses the command part.
+ * parse : this function analyses the packet received, and parses the command part.
  *
  *  When it has found the TerminalCommand identified by this string, it saves the rest of the packet (the arguments part)
  *      in the argument_t storage, and then, schedules the execution of this function.
@@ -217,9 +84,11 @@ void Terminal::reset() {
  *      (see the doc above the execute_command function's definition for more explanations).
  */
 
-void Terminal::schedule_command() {
+void Terminal::parse(char *message) {
 
-    prepare_execution();
+    //Display the revieved command
+    log("\n" + str(PROJECT_NAME) + "> " + str(message));
+
 
     //Initialise the current current_node to the root;
     const TerminalTree *current_node = command_tree;
@@ -237,27 +106,29 @@ void Terminal::schedule_command() {
     //We must first get the next word of the command.
 
     //Remove unnecessary nb_spaces;
-    data_in += StringUtils::lstrip(data_in, ' ');
+    message += StringUtils::lstrip(message, ' ');
 
     //Update th beginninhg of the current command_identifier.
-    char *command_identifier = data_in;
+    char *command_identifier = message;
 
     //get the first node identifier, in the command_identifier buffer
-    data_in += StringUtils::count_until_char(data_in, ' ');
+    message += StringUtils::count_until_char(message, ' ');
 
     //Nullify and update only if the string is not finished.
-    if (data_in) {
+    if (message) {
 
         //Null terminate the word, to make a string of it.
-        *data_in = '\0';
+        *message = '\0';
 
         //Go to the next char
-        data_in++;
+        message++;
 
     }
 
 
-    //We now must compare each child of the current node, and compare its identifier with the read command identifier.
+    std_out(String(message));
+
+    //We now must compare each child of the current node, and compare its identifier with the read_data command identifier.
 
     //Check every sub_node
     for (i = 0; i < current_node->nb_children; i++) {
@@ -272,7 +143,7 @@ void Terminal::schedule_command() {
         if (!tree_flag) {
 
             //Log
-            CI::echo("Error in Terminal::schedule_command : Unable to query the required child tree.");
+            log("Error in Terminal::parse : Unable to query the required child tree.");
 
             //Fail;
             return;
@@ -302,7 +173,7 @@ void Terminal::schedule_command() {
                     uint8_t index;
 
                     //Save the arguments sequence.
-                    if (TerminalArguments::insert_argument(data_in, &index)) {
+                    if (TerminalArguments::insert_argument(message, &index)) {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
@@ -311,11 +182,11 @@ void Terminal::schedule_command() {
                         data->function = current_node->function;
 
                         /*
-                         * Schedule a type 255 (asap) task, to schedule_command the required function,
+                         * Schedule a type 255 (asap) task, to parse the required function,
                          *  with data as arguments.
                          */
 
-                        TaskScheduler::schedule_task(255, execute_command, (void *) data);
+                        TaskScheduler::schedule_task(255, execute_command, (void *) data, external_log, output_protocol);
 
                         //Complete
                         return;
@@ -325,8 +196,8 @@ void Terminal::schedule_command() {
                 } else {
 
                     //If no more space was available in the argument_t container : display an error message
-                    CI::echo(
-                            "ERROR in Terminal::schedule_command : the argument_t container has no more space "
+                    log(
+                            "ERROR in Terminal::parse : the argument_t container has no more space "
                                     "available, this is not supposed to happen");
 
                     //Fail
@@ -346,22 +217,6 @@ void Terminal::schedule_command() {
 }
 
 
-/*
- * prepare execution : this function is called before parsing a packet.
- */
-
-void Terminal::prepare_execution() {
-
-    //Mark the end of the the received command
-    *data_in = 0;
-
-    //Display the revieved command
-    echo("\n" + str(PROJECT_NAME) + "> " + str(data_in_0));
-
-    //Setup and save the message state
-    data_in = data_in_0;
-
-}
 
 
 /*uint8_t
@@ -402,7 +257,7 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
     }
 
     //Display
-    echo(s);
+    log(s);
 
 }
 
@@ -469,22 +324,22 @@ void Terminal::confirm_command_execution(const interface_data_t *data) {
 
         //If the task completed correctly
         case complete:
-            CI::echo("Command complete.");
+            log("Command complete.");
             return;
 
             //If the task completed correctly
         case invalid_arguments:
-            CI::echo("Invalid Arguments.");
+            log("Invalid Arguments.");
             return;
 
             //If the task must be reprogrammed:
         case reprogram:
-            CI::echo("Command Reprogrammed.");
+            log("Command Reprogrammed.");
             return;
 
             //If the task completed correctly
         default:
-            CI::echo("WARNING Unrecognised return state");
+            log("WARNING Unrecognised return state");
             return;
 
     }
@@ -493,26 +348,54 @@ void Terminal::confirm_command_execution(const interface_data_t *data) {
 
 
 }
+
+//------------------------------------ Output -----------------------------
+
+
+
+/*
+ * log : this function encodes a string and transmits it with the output protocol;
+ */
+
+void Terminal::external_log(Protocol *protocol, const string_t msg) {
+
+    protocol->encode_data(msg + "\n");
+
+}
+
+
+/*
+ * log : this function encodes a string and transmits it with the provided protocol;
+ */
+
+void Terminal::log(const string_t msg) {
+
+    output_protocol->encode_data(msg + "\n");
+
+}
+
+
+
+/*
+ * respond : this function is an alias for the system log command.
+ *
+ *  It echoes text data on the link layer
+ */
+
+void Terminal::respond(const string_t msg) {
+
+    output_protocol->encode_data(msg + "\n");
+
+}
 //---------------------------------Static declarations / definitions------------------------------
 
 
 #define m Terminal
 
-unsigned char m::command_size = 0;
-
-char tdatain_terminal[TERMINAL_MAX_SIZE];
-char *m::data_in = tdatain_terminal;
-char *const m::data_in_0 = tdatain_terminal;
-
-//The current number of available nb_spaces in the data bugger
-uint8_t m::data_spaces = TERMINAL_MAX_SIZE;
-
-//A flag set if the current packet is corrupted (too long for the data buffer)
-bool m::corrupted_packet = false;
-
 //Build the command tree
 const TerminalTree *m::command_tree = new TerminalTree(new String(), 0, new String(), nullptr);
 
+Protocol *m::output_protocol;
 
 #undef m
 

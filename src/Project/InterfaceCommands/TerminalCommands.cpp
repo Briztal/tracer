@@ -23,7 +23,7 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "Interfaces/TerminalInterface/TerminalInterface.h"
+#include "Control/Controllers/Terminal/Terminal.h"
 #include "TerminalCommands.h"
 #include <EEPROM/EEPROMStorage.h>
 #include <Project/MachineController.h>
@@ -37,7 +37,7 @@ task_state_t TerminalCommands::flood(char *) {
 
     TaskScheduler::flood_enabled = true;
 
-    CI::echo("EXIT");
+    std_out("EXIT");
 
     return complete;
 
@@ -57,14 +57,14 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     //If the default profile must be reset
     if (CHECK_ARGUMENT('r')) {
 
-        TI::echo("Reseting the EEPROM default profile.");
+        std_out("Reseting the EEPROM default profile.");
 
         //Reset
         EEPROMStorage::set_default_profile();
 
     }
 
-    //If a path was provided : read or write
+    //If a path was provided : read_data or write_data
     if (CHECK_ARGUMENT('p')) {
 
         char *path = GET_ARG('p');
@@ -74,13 +74,13 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         //If the value must be written
         if (CHECK_ARGUMENT('w')) {
 
-            //Extract the value to write
+            //Extract the value to write_data
             function = GET_ARG_VALUE('w');
 
             //Log message
-            TI::echo("Writing " + String(path) + " to " + String(function));
+            std_out("Writing " + String(path) + " to " + String(function));
 
-            //write the variable
+            //write_data the variable
             EEPROMInterface::write_data_by_string(path, function);
 
         }
@@ -89,7 +89,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         if (EEPROMInterface::read_data_by_string(path, &function)) {
 
             //Log message
-            CI::echo("Value for " + String(path) + " : " + String(function));
+            std_out("Value for " + String(path) + " : " + String(function));
 
         }
 
@@ -152,7 +152,7 @@ task_state_t TerminalCommands::home(char *arguments) {
     //If the home must use endstops
     if (CHECK_ARGUMENT('e')) {
 
-        CI::echo("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
+        std_out("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
 
     } else {
         //If the movement must just be a line to zero
@@ -539,7 +539,7 @@ task_state_t TerminalCommands::get_temps(char *) {
 
 task_state_t TerminalCommands::stepper_test(char *) {
 
-    CI::echo("EXIT");
+    std_out("EXIT");
 
     return complete;
 
@@ -549,11 +549,11 @@ task_state_t TerminalCommands::stepper_test(char *) {
 task_state_t TerminalCommands::temp_test(char *) {
 
 
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
 
 
     return complete;

@@ -31,7 +31,7 @@ PONEY
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 
@@ -103,7 +103,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
         if (!queue_flag) {
 
             //Log
-            CI::echo("ERROR in TaskScheduler::schedule_task : failed to copy the task in the queue.");
+            std_out("ERROR in TaskScheduler::schedule_task : failed to copy the task in the queue.");
 
             //Emergency stop
             Kernel::emergency_stop();
@@ -131,13 +131,14 @@ bool TaskScheduler::schedule_task(task_t *task) {
  * schedule_task : this function creates a task and adds it to the task pool.
  *
  *  It takes in arguments all parameters required to build a task, namely :
- *      - function : the function to schedule_command;
+ *      - function : the function to parse;
  *      - dynamic_args : a void *, addressing the first byte of the arguments. Those may be dynamic or static.
  *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
  *      - type : the type of the task.
  */
 
-bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
+bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
+                                  void (*log_function)(Protocol *, const string_t), Protocol *protocol) {
 
     //Create a task to contain the provided data;
     task_t task = task_t();
@@ -151,6 +152,12 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
     //Set the type;
     task.type = type;
 
+    //Set the log function;
+    task.log_function = log_function;
+
+    //Set the log protocol;
+    task.log_protocol = protocol;
+
     //Call the scheduling function and return whether the task was successfully scheduled;
     return schedule_task(&task);
 }
@@ -162,20 +169,18 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
 
 const uint8_t TaskScheduler::available_spaces(uint8_t type) {
 
-
     if (type == 255) {
 
-        //If the type corresponds to the task pool : return the number of nb_spaces of the pool
+        //If the type corresponds to the task pool : return the number of nb_spaces of the pool;
         return pool_task_spaces;
 
     } else {
 
-        //If the type is not allocated, return zero
+        //If the type is not allocated, return zero;
         if (!check_sequence_type(type))
             return 0;
 
-
-        //If the type corresponds to a sequence, return the number of nb_spaces in the concerned sequence.
+        //If the type corresponds to a sequence, return the number of nb_spaces in the concerned sequence;
         return task_sequences[type]->available_spaces();
 
     }
@@ -188,14 +193,13 @@ const uint8_t TaskScheduler::available_spaces(uint8_t type) {
 
 void TaskScheduler::lock_sequence(uint8_t type) {
 
-    //If the type is not allocated, do nothing
+    //If the type is not allocated, do nothing;
     if (!check_sequence_type(type))
         return;
 
-
     if (type != 255) {
 
-        //Set the lock of the concerned sequence.
+        //Set the lock of the concerned sequence;
         sequences_locked[type] = true;
 
     }
@@ -272,7 +276,7 @@ uint8_t temp_zzz = 0;
 void TaskScheduler::iterate() {
 
     //Add as much tasks as possible in the pool;
-    Controllers::read_interfaces();
+    Control::read_external_controllers();
 
     //Process non-sequential tasks in priority
     process_task_pool();
@@ -323,7 +327,6 @@ void TaskScheduler::iterate() {
 
 
 }
-
 
 
 /*
@@ -383,7 +386,7 @@ void TaskScheduler::process_task_pool() {
         //Fist, cache the task pointer and the task's type.
         task_t *task = task_pool + task_index;
 
-        /* If the task fails to schedule_command (must be called later), then shift it at the insertion position.
+        /* If the task fails to parse (must be called later), then shift it at the insertion position.
          * This removes empty data_spaces in the pool, and saved the order.*/
         if (!execute_task(task)) {
 
@@ -469,7 +472,7 @@ void TaskScheduler::process_task_sequences() {
                     if (!queue_flag) {
 
                         //Log
-                        CI::echo("ERROR in TaskScheduler::process_task_sequences : "
+                        std_out("ERROR in TaskScheduler::process_task_sequences : "
                                          "the reading element is not allocated.");
 
                         //Emergency stop
@@ -499,7 +502,7 @@ void TaskScheduler::process_task_sequences() {
                         if (!queue_flag) {
 
                             //Log
-                            CI::echo("ERROR in TaskScheduler::process_task_sequences : "
+                            std_out("ERROR in TaskScheduler::process_task_sequences : "
                                              "the discarded element was not allocated.");
 
                             //Emergency stop
@@ -526,6 +529,7 @@ void TaskScheduler::process_task_sequences() {
         }
 
     }
+
 }
 
 
@@ -540,6 +544,14 @@ bool TaskScheduler::execute_task(task_t *task) {
 
     //Execute if the task is not null.
     if (task->task != nullptr) {
+
+        //Save the log function if it is not null;
+        if (task->log_function)
+            log_function = task->log_function;
+
+        //Save the protocol if it is not null;
+        if (task->log_protocol)
+            log_protocol = task->log_protocol;
 
         //call the function of the task by pointer, and provide the arguments of the task.
         state = (*(task->task))(task->dynamic_args);
@@ -562,6 +574,20 @@ bool TaskScheduler::execute_task(task_t *task) {
 }
 
 
+//-------------------------------------------------------- Log ---------------------------------------------------------
+
+
+void TaskScheduler::log(String message) {
+
+    //If both log function and log log_protocol have been assigned :
+    if (log_function && log_protocol) {
+
+        //Send the message with the correct log_protocol.
+        (*log_function)(log_protocol, message);
+
+    }
+
+}
 
 //-----------------------------------------Static declarations and definitions------------------------------------------
 
@@ -599,6 +625,14 @@ Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
 Queue<task_t> **const m::task_sequences = define_task_queue(t_tsks);
 
 bool m::flood_enabled = false;
+
+
+
+//The encoding function;
+void (*m::log_function)(Protocol *, String message);
+
+//The communication log_protocol;
+Protocol *m::log_protocol;
 
 
 #endif

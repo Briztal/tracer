@@ -1,6 +1,4 @@
 
-//TODO GCODE COMMANDS ACKS
-
 //TODO PID_AUTOTUNE
 
 //TODO SD SUPPORT
@@ -14,8 +12,6 @@
 
 ////////////////////////GCODE///////////////////////////////
 
-//TODO GCODE TREE
-
 //TODO GCODE COMMENTS
 
 //TODO GCODE ", ', and \
@@ -26,7 +22,7 @@
 
 //TODO GCODE ACKNOWLEDGEMENT
 
-//TODO COMMENT THE PARSING IN GCodeInterpreter.cpp
+//TODO COMMENT THE PARSING IN GCode.cpp
 
 
 ////////////////////////TEST///////////////////////////////

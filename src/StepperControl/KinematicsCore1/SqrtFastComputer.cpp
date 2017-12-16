@@ -20,7 +20,7 @@
 
 #include "SqrtFastComputer.h"
 #include <hardware_language_abstraction.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 /*
@@ -128,6 +128,6 @@ uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
 
 
 void SqrtFastComputer::print_data() {
-    CI::echo("sd : " + str(primary));
-    CI::echo("de : " + str(square_root));
+    std_out("sd : " + str(primary));
+    std_out("de : " + str(square_root));
 }

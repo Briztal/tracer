@@ -393,13 +393,13 @@ void PI::schedule_task(task_state_t (*task)(void *), char *command, uint8_t size
  *      This case marks the beginning of a command
  *
  */
-void PI::read_data() {
+void PI::accept_data() {
 
     char r;
 
     while (program_interface_link_t::available()) {
 
-        r = program_interface_link_t::read();
+        r = program_interface_link_t::read_data();
 
         PI::echo("SUUS "+String((uint8_t)r));
 

@@ -24,7 +24,7 @@
 #include <ControlLoops/ControlLoops.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <StepperControl/TrajectoryTracer.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -56,20 +56,33 @@ void Kernel::start() {
         delay(500);
 
         //Log
-        CI::echo("\nAn error has occurred in the code, and it was restored to its initialisation.\n"
+        std_out("\nAn error has occurred in the code, and it was restored to its initialisation.\n"
                          "You should find an error message in the logs behind. \n"
                          "I hope it will help you to find what has gone wrong ! ");
 
     }
 
-    //Logo and initialise_hardware message
-    Controllers::initialisation_message();
 
     //Wait for the eventual retransmission;
     delay(500);
 
     //Initialise the environment;
     initialise_data();
+
+    /*
+    while (true) {
+
+        digitalWrite(13, !(bool) digitalRead(13));
+        delay(1000);
+        GCode::echo("SUUS");
+
+    }
+
+     */
+
+
+    //Logo and initialise_hardware message
+    Control::initialisation_message();
 
     //Call the main loop;
     run();
@@ -93,7 +106,7 @@ void Kernel::initialise_hardware() {
     hl_init();
 
     //Initialise all enabled interfaces
-    Controllers::initialise_hardware();
+    Control::initialise_hardware();
 
     //Initialise Thermistors
     Thermistors::init();
@@ -124,7 +137,7 @@ void Kernel::initialise_hardware() {
 void Kernel::initialise_data() {
 
     //Initialise all enabled interfaces
-    Controllers::initialise_data();
+    Control::initialise_data();
 
 }
 
@@ -146,7 +159,7 @@ void Kernel::run() {
 
         /*
          * Trigger an iteration of the task scheduler :
-         *  - read all available interfaces until TaskScheduler is full or interface buffers are empties;
+         *  - read_data all available interfaces until TaskScheduler is full or interface buffers are empties;
          *  - execute all possible tasks in the task pool;
          *  - execute all possible tasks in all sequences;
          */

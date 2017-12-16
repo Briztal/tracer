@@ -1,6 +1,6 @@
 An interface is (without much surprise) a communication interface with the outside world.
 
-Its goal is to read and process packets. A Packet is :
+Its goal is to read_data and process packets. A Packet is :
 - a command identifier, that allows the interface to schedule a particular command.
 - arguments, for the command referenced by the command identifier
 

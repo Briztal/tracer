@@ -18,14 +18,6 @@
 
 */
 
-//TODO TESTER L'ENVOI DES PARAMETRES
-//TODO MONITOR : AFFICHER LES VALEURS DANS LES WIDGETS
-//TODO MONITOR : FAIRE L'AFFICHAGE DES PID ET DES ACTIONS
-
-//TODO : ENVOI DES ACTIONS (METTRE UN OCTET POUR LE TYPE)
-
-//TODO PIN_INTERRUPT
-
 
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
@@ -85,7 +77,9 @@ public:
     static bool schedule_task(task_t *task);
 
     //Build and schedule a task;
-    static bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
+    static bool
+    schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
+                  void (*log_f)(Protocol *, const string_t), Protocol *protocol);
 
 
 private:
@@ -132,6 +126,25 @@ private:
 
     //Task sequences;
     static Queue<task_t> **const task_sequences;
+
+
+    //------------------------------------------ Log -----------------------------------------
+
+
+public:
+
+    //Echo a message on the current log pipe; inline for efficiency.
+    static void log(String message);
+
+private:
+
+    //The encoding function;
+    static void (*log_function)(Protocol *, String message);
+
+    //The communication log_protocol;
+    static Protocol *log_protocol;
+
+
 
 };
 

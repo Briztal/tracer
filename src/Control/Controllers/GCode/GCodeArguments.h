@@ -23,7 +23,7 @@
 
 
 #include <DataStructures/ArgumentsContainer.h>
-#include <Interfaces/_interface_data.h>
+#include <Control/Controllers/_controller_data.h>
 
 class GCodeArguments {
 
@@ -38,7 +38,7 @@ public:
     static inline uint8_t available_spaces() {return arguments_storage.available_spaces();}
 
     //Inserts and saves an argument, and returns its index in the container;
-    static inline bool insert_argument(char *args, uint8_t *index_p) {return arguments_storage.insert_argument(args, index_p);}
+    static inline bool insert_argument(const char *args, uint8_t *index_p) {return arguments_storage.insert_argument(args, index_p);}
 
     //Returns a pointer to an argument's first case, and gives the size;
     static inline char* get_argument(uint8_t index) {return arguments_storage.get_argument(index);}

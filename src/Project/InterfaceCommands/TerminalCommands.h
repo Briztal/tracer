@@ -28,10 +28,10 @@
 
 
 #include <stdint.h>
-#include <Interfaces/_interface_data.h>
-#include <Interfaces/Interfaces.h>
+#include <Control/Controllers/_controller_data.h>
+#include <Control/Control.h>
 #include <TaskScheduler/TaskScheduler.h>
-#include <Interfaces/TerminalInterface/TerminalArguments.h>
+#include <Control/Controllers/Terminal/TerminalArguments.h>
 
 
 class TerminalCommands {

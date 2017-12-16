@@ -39,7 +39,7 @@ public:
     uint8_t insert_argument(char **insertion_pointer);
 
     //Inserts and saves an argument, and returns its index in the container;
-    bool insert_argument(char *args, uint8_t *index_p);
+    bool insert_argument(const char *args, uint8_t *index_p);
 
     //Returns a pointer to an argument's first case, and gives the size;
     char* get_argument(uint8_t index);

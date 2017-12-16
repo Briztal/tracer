@@ -295,7 +295,7 @@ task_state_t ProgramInterfaceCommands::EEPROM_system_canal(char *data, uint8_t s
             return complete;
 
         case 2 : //Write case
-            f = 0;//EEPROMInterface::write(data, size);
+            f = 0;//EEPROMInterface::write_data(data, size);
             TI::prepare_EEPROM_packet();
             TI::add_char_out(2);
             TI::add_float_out(f);

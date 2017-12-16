@@ -28,7 +28,7 @@
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 
@@ -51,7 +51,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     //If the insertion failed
     if (!queue_flag) {
 
-        CI::echo("ERROR in ComplexLinearMovement::plan_movement : the insertion element is already allocated.");
+        std_out("ERROR in ComplexLinearMovement::plan_movement : the insertion element is already allocated.");
 
         //Emergency stop
         Kernel::emergency_stop();
@@ -113,7 +113,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
         if (!queue_flag) {
 
             //Log;
-            CI::echo("ERROR in ComplexLinearMovement::plan_movement : the previously controlled insertion element is now allocated.");
+            std_out("ERROR in ComplexLinearMovement::plan_movement : the previously controlled insertion element is now allocated.");
 
             //Emergency stop;
             Kernel::emergency_stop();
@@ -132,7 +132,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
 
     } else  {
 
-        CI::echo("\n\nERROR IN LINEAR_MOVEMENT\n\n");
+        std_out("\n\nERROR IN LINEAR_MOVEMENT\n\n");
     }
 
     return enqueue_state;
@@ -265,7 +265,7 @@ void ComplexLinearMovement::initialise_movement() {
     if (!queue_flag) {
 
         //Log
-        CI::echo("ERROR in ComplexLinearMovement::initialise_movement : the output element is not assigned.");
+        std_out("ERROR in ComplexLinearMovement::initialise_movement : the output element is not assigned.");
 
         //Emergency stop
         Kernel::emergency_stop();
@@ -307,7 +307,7 @@ void ComplexLinearMovement::finalise_movement() {
     if (!queue_flag) {
 
         //Log;
-        CI::echo("ERROR in ComplexLinearMovement::finalise_movement : the output element is not allocated.");
+        std_out("ERROR in ComplexLinearMovement::finalise_movement : the output element is not allocated.");
 
         //Emergency stop;
         Kernel::emergency_stop();

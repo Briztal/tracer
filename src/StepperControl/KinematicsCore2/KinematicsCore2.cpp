@@ -29,7 +29,7 @@
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 
@@ -224,7 +224,7 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
 void KinematicsCore2::send_position() {
 
     //Send the current high level position
-    CI::send_position(current_hl_position);
+    //CI::send_position(current_hl_position);
     //StepperController::send_position();
 
 

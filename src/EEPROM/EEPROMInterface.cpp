@@ -22,7 +22,7 @@
 #include "EEPROMStorage.h"
 #include "EEPROMNode.h"
 #include <DataStructures/StringUtils.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 #define ES EEPROMStorage
@@ -76,84 +76,84 @@ void EEPROMInterface::print_stored_data() {
 
     //Stepper motors
 #ifdef ENABLE_STEPPER_CONTROL
-    CI::echo("Stepper Motors : \n");
+    std_out("Stepper Motors : \n");
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         stepper_data_t *data = ES::steppers_data + stepper;
-        CI::echo("Stepper " + str(stepper));
-        CI::echo("\tsize : \t" + str(data->size));
-        CI::echo("\tsteps : \t" + str(data->steps));
-        CI::echo("\tending speed : \t" + str(data->maximum_speed));
-        CI::echo("\tacceleration : \t" + str(data->acceleration));
-        CI::echo("\tjerk : \t" + str(data->jerk)+"\n");
+        std_out("Stepper " + str(stepper));
+        std_out("\tsize : \t" + str(data->size));
+        std_out("\tsteps : \t" + str(data->steps));
+        std_out("\tending speed : \t" + str(data->maximum_speed));
+        std_out("\tacceleration : \t" + str(data->acceleration));
+        std_out("\tjerk : \t" + str(data->jerk)+"\n");
     }
 
-    CI::echo("\n---------------------\n");
+    std_out("\n---------------------\n");
 
-    CI::echo("Cartesian Groups : \n");
+    std_out("Cartesian Groups : \n");
     for (uint8_t speed_group = 0; speed_group < NB_CARTESIAN_GROUPS; speed_group++) {
-        CI::echo(
+        std_out(
                 "Group " + str(speed_group) + ", ending regulation speed : " + str(ES::group_maximum_speeds[speed_group]));
     }
 
 #endif
 
-    CI::echo("\n---------------------\n");
+    std_out("\n---------------------\n");
 
 #ifdef ENABLE_ASSERV
 
     //PIDs
-    CI::echo("PIDS : \n");
+    std_out("PIDS : \n");
     for (int pid = 0; pid < NB_PIDS; pid++) {
         pid_data_t *data = ES::pids_data + pid;
-        CI::echo("\tPID " + str(pid));
-        CI::echo("\tkp : \t" + str(data->kp));
-        CI::echo("\tki : \t" + str(data->ki));
-        CI::echo("\tkd : \t" + str(data->kd)+"\n");
+        std_out("\tPID " + str(pid));
+        std_out("\tkp : \t" + str(data->kp));
+        std_out("\tki : \t" + str(data->ki));
+        std_out("\tkd : \t" + str(data->kd)+"\n");
     }
 
-    CI::echo("\n---------------------\n");
+    std_out("\n---------------------\n");
 
     //Control Loops
-    CI::echo("Control Loops : \n");
+    std_out("Control Loops : \n");
     for (int loop = 0; loop < NB_LOOPS; loop++) {
-        CI::echo("\tLoop " + str(loop) + ", period (ms) : \t" + str(ES::loop_periods[loop]));
+        std_out("\tLoop " + str(loop) + ", period (ms) : \t" + str(ES::loop_periods[loop]));
     }
 
 #endif
 
-    CI::echo("\n---------------------\n");
+    std_out("\n---------------------\n");
 
     //Continuous Actions
-    CI::echo("Continuous Actions : \n");
+    std_out("Continuous Actions : \n");
     for (int continuous = 0; continuous < NB_CONTINUOUS; continuous++) {
         continuous_data_t *data = ES::continuous_data + continuous;
-        CI::echo("\tContinuous " + str(continuous) + " : maximum : \t" + str(data->max));
+        std_out("\tContinuous " + str(continuous) + " : maximum : \t" + str(data->max));
     }
 
-    CI::echo("\n---------------------\n");
+    std_out("\n---------------------\n");
 
     //Servo Actions
-    CI::echo("Servo Actions : \n");
+    std_out("Servo Actions : \n");
     for (int servo = 0; servo < NB_SERVOS; servo++) {
         servo_data_t *data = ES::servos_data + servo;
-        CI::echo("Loop " + str(servo));
-        CI::echo("\tminimum : \t" + str(data->min));
-        CI::echo("\tmaximum : \t" + str(data->max) + "\n");
+        std_out("Loop " + str(servo));
+        std_out("\tminimum : \t" + str(data->min));
+        std_out("\tmaximum : \t" + str(data->max) + "\n");
     }
 
-    CI::echo("\n---------------------\n");
+    std_out("\n---------------------\n");
 
     //Custom Data
-    CI::echo("Custom Data : ");
+    std_out("Custom Data : ");
 
     //Custom data
-#define EEPROM_VARIABLE(name, default_value) CI::echo("\t"+str(#name)+" : "+str(ES::custom_data.name));
+#define EEPROM_VARIABLE(name, default_value) std_out("\t"+str(#name)+" : "+str(ES::custom_data.name));
 
 #include <Project/Config/eeprom_config.h>
 
 #undef EEPROM_VARIABLE
 
-    CI::echo(" ");
+    std_out(" ");
 
 }
 
@@ -447,7 +447,7 @@ void EEPROMInterface::search_log(EEPROMNode *node) {
         s += *node->sub_nodes[i]->name + ", ";
     }
 
-    CI::echo(s);
+    std_out(s);
 
 }
 

@@ -24,7 +24,7 @@
 
 #include "GCodeTreeGenerator.h"
 #include <Project/InterfaceCommands/GCodeCommands.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 /*
  * generate_tree : this function generates the TerminalTree that will be used to parse commands.
@@ -163,7 +163,7 @@ uint16_t GCodeTreeGenerator::get_command_nb() {
 
 void GCodeTreeGenerator::print_tree(const GCodeTree *tree) {
 
-    CI::echo(String(tree->name));
+    GCode::log(String(tree->name));
 
     for (uint8_t child_id = 0; child_id < tree->nb_children; child_id++) {
 
@@ -174,7 +174,7 @@ void GCodeTreeGenerator::print_tree(const GCodeTree *tree) {
         if (b) {
             print_tree(child);
         } else {
-            CI::echo("Error in GCodeTreeGenerator::print_tree : the child "+String(child_id)+" is not assigned");
+            std_out("Error in GCodeTreeGenerator::print_tree : the child "+String(child_id)+" is not assigned");
         }
     }
 
@@ -443,7 +443,7 @@ GCodeTree *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t
         if (!tree_flag) {
 
             //Log
-            CI::echo("Error in GCodeTreeGenerator::generate_tree : the child was already assigned, or un-assignable. ");
+            std_out("Error in GCodeTreeGenerator::generate_tree : the child was already assigned, or un-assignable. ");
 
         }
 

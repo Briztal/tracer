@@ -28,7 +28,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <DataStructures/ArgumentsContainer.h>
-#include <Interfaces/_interface_data.h>
+#include <Control/Controllers/_controller_data.h>
 
 class TerminalArguments {
 

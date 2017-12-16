@@ -62,7 +62,7 @@
  *      GO_UPPER()                  : returns to the parent node level
  *
  *
- * For example, to effectively implement the tree mentioned above, you may write the following commands :
+ * For example, to effectively implement the tree mentioned above, you may write_data the following commands :
  *
  * GO_LOWER('G')
  * COMMAND('0', g0)

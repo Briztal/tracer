@@ -17,7 +17,7 @@
 #define ENABLE_STEPPER_CONTROL
 
 
-//####################################################Interface#########################################################
+//------------------------------------------------------ Control -------------------------------------------------------
 
 
 /*
@@ -28,26 +28,49 @@
  *  between the two interfaces, breaking its integrity.
  */
 
+
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
-//#define terminal_interface_link_t usb_serial
+#define ENABLE_TERMINAL_INTERFACE
 
 //Uncomment this line to enable the gcode interface.
-#define ENABLE_GCODE_INTERFACE
-#define gcode_interface_link_t usb_serial
+//#define ENABLE_GCODE_INTERFACE
 
 //Uncomment this line to enable the program interface.
 //#define ENABLE_PROGRAM_INTERFACE
-//#define program_interface_link_t usb_serial
 
 
-//You must define the main command Interface. You must uncomment only one of lines below
-//#define MAIN_CI_PROGRAM
-#define MAIN_CI_GCODE
-//#define MAIN_CI_TERMINAL
 
+/*
+ * The next lines focus on Control configuration. Control are static classes, meant only to interpret data.
+ *
+ * In order to receive orders from th outside, a Controller must receive its data from a Protocol, that reads and decode
+ *  data over transmission layers;
+ *
+ * Protocols are objects, created by the Kernel;
+ *
+ *  Transmission layers are static data defined in hardware_language_abstraction.
+ *
+ *  To create a log_protocol objetc, based on a transmission layer, and piped into a controller,
+ *      you may add one line like below :
+ *
+ *  CONTROL(controller, log_protocol, protocol_buffer_size, transmission_layer), where :
+ *
+ *      - controller is the name of a Controller class;
+ *      - log_protocol is the name of a Protocol class (Control/Protocols);
+ *      - protocol_buffer_size is the size of the Protocol class's input buffer;
+ *      - transmission layer is the name of a transmission layer (hardware_language_abstraction_xxxx.h)
+ *
+ */
 
-//######################################################TaskScheduler############################################################
+#define NB_CONTROLS 1
+
+#ifdef EXTERNAL_CONTROL
+
+EXTERNAL_CONTROL(Terminal, ClearText, 100, usb_serial)
+
+#endif
+
+//--------------------------------------------------- TaskScheduler ----------------------------------------------------
 
 //The following line defines the task pool size
 #define TASK_POOL_SIZE 20

@@ -22,17 +22,19 @@
 #include "config.h"
 
 #ifdef ENABLE_GCODE_INTERFACE
-#include <Interfaces/GCodeInterface/GCodeInterface.h>
+#include <Control/Controllers/GCode/GCode.h>
 #include "GCodeCommands.h"
 #include <EEPROM/EEPROMStorage.h>
 #include <Project/MachineController.h>
 #include <EEPROM/EEPROMInterface.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 task_state_t GCodeCommands::action(char *) {
+
+    std_out("DUMB COMMAND");
 
     return complete;
 
@@ -52,14 +54,14 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     //If the default profile must be reset
     if (CHECK_ARGUMENT('R')) {
 
-        GI::echo("Reseting the EEPROM default profile.");
+        std_out("Reseting the EEPROM default profile.");
 
         //Reset
         EEPROMStorage::set_default_profile();
 
     }
 
-    //If a path was provided : read or write
+    //If a path was provided : read_data or write_data
     if (CHECK_ARGUMENT('P')) {
 
         char *path = GET_ARG('P');
@@ -69,13 +71,13 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
         //If the value must be written
         if (CHECK_ARGUMENT('W')) {
 
-            //Extract the value to write
+            //Extract the value to write_data
             f = GET_ARG_VALUE('W');
 
             //Log message
-            GI::echo("Writing " + String(path) + " to " + String(f));
+            std_out("Writing " + String(path) + " to " + String(f));
 
-            //write the variable
+            //write_data the variable
             EEPROMInterface::write_data_by_string(path, f);
 
         }
@@ -84,7 +86,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
         if (EEPROMInterface::read_data_by_string(path, &f)) {
 
             //Log message
-            CI::echo("Value for " + String(path) + " : " + String(f));
+            std_out("Value for " + String(path) + " : " + String(f));
 
         }
 
@@ -148,7 +150,7 @@ task_state_t GCodeCommands::home(char *arguments) {
     //If the home must use endstops
     if (CHECK_ARGUMENT('E')) {
 
-        CI::echo("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
+        std_out("ENDSTOPS NOT SUPPORTED FOR INSTANCE");
 
     } else {
         //If the movement must just be a line to zero
@@ -544,7 +546,7 @@ task_state_t GCodeCommands::get_temps(char *) {
 
 task_state_t GCodeCommands::stepper_test(char *) {
 
-    CI::echo("EXIT");
+    std_out("EXIT");
 
     return complete;
 
@@ -555,11 +557,11 @@ task_state_t GCodeCommands::stepper_test(char *) {
 task_state_t GCodeCommands::temp_test(char *) {
 
 
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    CI::echo("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
 
 
     return complete;

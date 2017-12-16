@@ -21,7 +21,7 @@
 #include "ContinuousActions.h"
 #include <hardware_language_abstraction.h>
 #include <EEPROM/EEPROMStorage.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 
 
 /*
@@ -135,14 +135,14 @@ void ContinuousActions::set_power_##i (float power) {\
     else{analog_write(pin, 255);}\
 }\
 \
-\
+/*Get the state of a particular action (by id)*/\
 bool ContinuousActions::get_state_##i () {\
     return states[i];\
 }\
 \
-\
+/*Stop a particular action, by id*/\
 void ContinuousActions::stop_##i() {\
-    CI::echo("STOPPING");\
+    debug("STOPPING");\
     analog_write(pin,0);\
     states[i] = false;\
 }

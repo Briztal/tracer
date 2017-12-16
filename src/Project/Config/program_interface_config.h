@@ -81,7 +81,7 @@
  *
  * //TODO EXAMPLES WITH SYSTEM CANALS
  *
- * To keep the upper example, to define the upper command tree, you may write the following code :
+ * To keep the upper example, to define the upper command tree, you may write_data the following code :
  *
  * GO_LOWER(1)
  * CREATE_LEAF(1, function_0)

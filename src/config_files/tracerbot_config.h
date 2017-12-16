@@ -402,7 +402,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 //###############################################EEPROM SETTINGS########################################################
 
 
-/* EEPROM custom data definition : for each variable you need to save in EEPROM, write one of the following lines
+/* EEPROM custom data definition : for each variable you need to save in EEPROM, write_data one of the following lines
  *
  * EEPROM_BOOL(name, default_value)
  * EEPROM_INT8(name, default_value)

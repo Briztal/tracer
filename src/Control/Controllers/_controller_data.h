@@ -3,7 +3,7 @@
 #define TRACER_INTERFACE_DATA_H
 
 #include <stdint.h>
-#include <Interfaces/TerminalInterface/TerminalTree.h>
+#include <TaskScheduler/task_state_t.h>
 
 /*
  * The interface data : this structure contains all required data to execute an Interface function, wheather it

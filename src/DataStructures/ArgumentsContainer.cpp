@@ -20,7 +20,7 @@
 
 
 #include <hardware_language_abstraction.h>
-#include <Communication/Controllers.h>
+#include <Control/Control.h>
 #include "ArgumentsContainer.h"
 
 
@@ -62,7 +62,7 @@ uint8_t ArgumentsContainer::insert_argument(char ** insertion_pointer) {
 }
 
 
-bool ArgumentsContainer::insert_argument(char *args, uint8_t *index_p) {
+bool ArgumentsContainer::insert_argument(const char *args, uint8_t *index_p) {
 
     if (!nb_spaces)
         return false;
@@ -91,7 +91,7 @@ bool ArgumentsContainer::insert_argument(char *args, uint8_t *index_p) {
                 if (!free_size) {
 
                     //Display an error message
-                    CI::echo("WARNING IN ArgumentsContainer::insert_argument : the argument_t was too big"
+                    std_out("WARNING IN ArgumentsContainer::insert_argument : the argument_t was too big"
                                      " for the container.");
 
                     //Fail

@@ -19,88 +19,142 @@
 */
 
 #include "ClearText.h"
+#include <Control/Control.h>
 
 
 /*
- * read_data : this function reads and processes data.
+ * Constructor : initialises all fields;
+ */
+
+ClearText::ClearText(uint8_t size, uint16_t (*const available_f)(void), void (*const write_f)(char),
+                     char (*const read_f)(void)) : Protocol(size, available_f, write_f, read_f) {
+
+    reset();
+}
+
+
+/*
+ * encode_data : this function encodes a string, and sends it.
+ */
+
+void ClearText::encode_data(String s) {
+
+    //For every char in the string :
+    for (uint8_t i = 0; i < s.length(); i++) {
+
+        //Echo the char;
+        (*write_data)(s.charAt(i));
+
+    }
+}
+
+
+void ClearText::decode_data() {
+
+    //While data is available and the parsing is not ready;
+    while ((*data_available)() && !packet_received) {
+
+        //Read a char and decode it.
+        decode_char((*read_data)());
+    }
+
+}
+
+
+/*
+ * decode_char : this function reads and processes data.
  *
  *  It reads data on the link layer, saves it, and eventually processes it.
  */
 
-bool ClearText::read_data() {
+void ClearText::decode_char(char read_char) {
 
+    //Don't process any data if no space is available in the argument_t sequence container :
+    if (packet_received) {
 
-    //Don't process any data if no space is available in the argument_t sequence container
-    if (!GCodeArguments::available_spaces()) {
-
-        //Return true if the data_link buffer is not empty.
-        return (bool) gcode_interface_link_t::available();
+        //Fail;
+        return;
 
     }
 
-    while (gcode_interface_link_t::available()) {
+    //If the recieved char is a line feed or a working_extruder return :
+    if (read_char < 32) {
 
-        //Read the data link
-        char read_char = gcode_interface_link_t::read();
+        //If the received packet was too long for the input buffer :
+        if (corrupted_packet) {
 
-        //If the recieved char is a line feed or a working_extruder return
-        if ((read_char == 10) || (read_char == 13)) {
+            //Display an error message
+            std_out("WARNING in Terminal::decode_char : the received packet was too long for "
+                             "the input buffer. Please check your terminal_interface_config.h");
 
-            //If a non empty uncorrupted packet has effectively been received
-            if (command_size && !corrupted_packet) {
+        } else if (command_size) {
+            //If a non empty uncorrupted packet has effectively been received :
 
-                //Parse the GCode
-                parse();
+            //Enable the parsing flag;
+            packet_received = true;
 
-                //Reset the data_in
-                reset();
+            //Set the last byte to 0;
+            *data_in = 0;
 
-                //Return true if the data_link buffer is not empty.
-                return (bool) gcode_interface_link_t::available();
+            //Complete;
+            return;
 
-            }
-
-            //If the received packet was too long for the input buffer :
-            if (corrupted_packet) {
-
-                //Display an error message
-                GI::echo("WARNING in Terminal::read_data : the received packet was too long for "
-                                 "the input buffer. Please check your terminal_interface_config.h");
+        }
 
 
-            }
+        //If the packet was corrupted, or empty;
+        reset();
 
-            //If the packet was corrupted, or empty
-            reset();
 
+    } else {
+        //If the packet hasn't been entirely received :
+
+        //If data still can be inserted in the buffer :
+        if (data_spaces) {
+
+            //Append the get_read_adress char to data_in;
+            *(data_in++) = read_char;
+
+            //Increment the command size;
+            command_size++;
+
+            //Decrement the number of nb_spaces available;
+            data_spaces--;
 
         } else {
-            //If the packet hasn't been entirely received
 
-            //If data still can be inserted in the buffer
-            if (data_spaces) {
-
-                //Append the get_read_adress char to data_in;
-                *(data_in++) = read_char;
-
-                //Increment the command size;
-                command_size++;
-
-                //Decrement the number of nb_spaces available;
-                data_spaces--;
-
-            } else {
-
-                //Mark the current packet as corrupted;
-                corrupted_packet = true;
-            }
+            //Mark the current packet as corrupted;
+            corrupted_packet = true;
         }
     }
-
-    //No more data available;
-    return false;
 }
 
+
+/*
+ * packet_received : this function returns the parsing flag;
+ */
+
+bool ClearText::parsing_ready() {
+    return packet_received;
+}
+
+
+/*
+ * get_data : this function return a pointer to the initial value of data_in buffer;
+ */
+
+char *ClearText::get_data() {
+
+    //Reset the parsing flag;
+    packet_received = false;
+
+    //Reset the environment;
+    reset();
+
+    //Return the beginning of the input buffer;
+    return data_in_0;
+
+}
 
 
 /*
@@ -116,27 +170,13 @@ void ClearText::reset() {
     corrupted_packet = false;
 
     //Maximum numbers of char nb_spaces;
-    data_spaces = GCODE_MAX_SIZE;
+    data_spaces = buffer_size;
 
     //data insertion at the origin;
     data_in = data_in_0;
 }
 
-
 #define m ClearText
 
-//The command size
-unsigned char m::command_size;
-
-//The current number of available nb_spaces in the data bugger
-uint8_t m::data_spaces = GCODE_MAX_SIZE;
-
-//A flag set if the current packet is corrupted (too long for the data buffer)
-bool m::corrupted_packet = false;
-
-//Data pointers
-char tdatain_gcode[GCODE_MAX_SIZE];
-char *m::data_in = tdatain_gcode;
-char *const m::data_in_0 = tdatain_gcode;
 
 

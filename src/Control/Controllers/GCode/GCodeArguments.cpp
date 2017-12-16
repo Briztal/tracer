@@ -22,7 +22,7 @@
 #include <DataStructures/StringUtils.h>
 #include <Project/Config/gcode_interface_config.h>
 #include <hardware_language_abstraction.h>
-#include "Communication/Controllers.h"
+#include "Control/Control.h"
 #include "GCodeArguments.h"
 
 
@@ -90,7 +90,7 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
         if (nb_identifiers == GCODE_MAX_ARGS_NB) {
 
             //Display an error message
-            CI::echo("The Terminal hasn't been configured to accept more than " + String(GCODE_MAX_ARGS_NB) +
+            std_out("The Terminal hasn't been configured to accept more than " + String(GCODE_MAX_ARGS_NB) +
                      " arguments. Please check your terminal_interface_config.h file.");
 
             //Fail
