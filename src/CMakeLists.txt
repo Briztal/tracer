@@ -116,38 +116,40 @@ add_library(hardware
 
 #-----------------------------------------------INTERFACES--------------------------------------------------------------
 
-set(CCP "Control/Controllers")
+set(CCP "Control")
 include_directories(${CCP}/)
 
 add_library(controllers
 
-        ${CCP}/_interface_data.h
-        ${CCP}/Interfaces.cpp
-        ${CCP}/Interfaces.h
+        ${CCP}/Control.cpp
+        ${CCP}/Control.h
+
+
+        ${CCP}/Controllers/_controller_data.h
 
         #Terminal
-        ${CCP}/TerminalInterface/TerminalInterpreter.h
-        ${CCP}/TerminalInterface/TerminalInterpreter.cpp
-        ${CCP}/TerminalInterface/TerminalTree.h
-        ${CCP}/TerminalInterface/TerminalTree.cpp
-        ${CCP}/TerminalInterface/TerminalArguments.h
-        ${CCP}/TerminalInterface/TerminalArguments.cpp
-        ${CCP}/TerminalInterface/TerminalTreeGenerator.h
-        ${CCP}/TerminalInterface/TerminalTreeGenerator.cpp
+        ${CCP}/Controllers/Terminal/Terminal.h
+        ${CCP}/Controllers/Terminal/Terminal.cpp
+        ${CCP}/Controllers/Terminal/TerminalTree.h
+        ${CCP}/Controllers/Terminal/TerminalTree.cpp
+        ${CCP}/Controllers/Terminal/TerminalArguments.h
+        ${CCP}/Controllers/Terminal/TerminalArguments.cpp
+        ${CCP}/Controllers/Terminal/TerminalTreeGenerator.h
+        ${CCP}/Controllers/Terminal/TerminalTreeGenerator.cpp
 
         #ProgramInterface
-        ${CCP}/ProgramInterface/ProgramInterface.h
-        ${CCP}/ProgramInterface/ProgramInterface.cpp
+        ${CCP}/Controllers/Program/ProgramInterface.h
+        ${CCP}/Controllers/Program/ProgramInterface.cpp
 
         #GcodeInterface
-        ${CCP}/GCodeInterface/GCode.h
-        ${CCP}/GCodeInterface/GCode.cpp
-        ${CCP}/GCodeInterface/GCodeTree.h
-        ${CCP}/GCodeInterface/GCodeTree.cpp
-        ${CCP}/GCodeInterface/GCodeTreeGenerator.h
-        ${CCP}/GCodeInterface/GCodeTreeGenerator.cpp
-        ${CCP}/GCodeInterface/GCodeArguments.h
-        ${CCP}/GCodeInterface/GCodeArguments.cpp
+        ${CCP}/Controllers/GCode/GCode.h
+        ${CCP}/Controllers/GCode/GCode.cpp
+        ${CCP}/Controllers/GCode/GCodeTree.h
+        ${CCP}/Controllers/GCode/GCodeTree.cpp
+        ${CCP}/Controllers/GCode/GCodeTreeGenerator.h
+        ${CCP}/Controllers/GCode/GCodeTreeGenerator.cpp
+        ${CCP}/Controllers/GCode/GCodeArguments.h
+        ${CCP}/Controllers/GCode/GCodeArguments.cpp
         
         )
 
@@ -160,7 +162,6 @@ include_directories(${CPP}/)
 add_library(protocols
 
         ${CPP}/Protocol.h
-        ${CPP}/Protocol.cpp
 
         ${CPP}/ClearText.h
         ${CPP}/ClearText.cpp
