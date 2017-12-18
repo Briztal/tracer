@@ -22,6 +22,8 @@
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
+#include <Config/scheduler_config.h>
+
 #include <sanity_check.h>
 #include <DataStructures/Queue.h>
 #include "_task_scheduler_data.h"
@@ -41,10 +43,6 @@ public:
     //Trigger a complete parsing - execution cycle;
     static void iterate();
 
-
-    //-------------------------------------------- Control interrogation  -------------------------------------------
-
-private:
 
     //-------------------------------------------------- State getters -------------------------------------------------
 

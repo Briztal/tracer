@@ -2,8 +2,8 @@
 #define TRACER_GEOMETRY_H
 
 #include <stdint.h>
-#include <config.h>
 #include <EEPROM/EEPROMStorage.h>
+
 
 inline void geometry_translate(const float *const hl_coordinates, float *const steppers_coordinates) {
 

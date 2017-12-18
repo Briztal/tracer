@@ -108,7 +108,7 @@ void PID::reset_##name() {\
     lasts[i] = 0;\
 }
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef PID
 

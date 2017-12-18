@@ -57,7 +57,7 @@ private:\
     static void finalisation_function_##name();\
 
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef LOOP_FUNCTION
 

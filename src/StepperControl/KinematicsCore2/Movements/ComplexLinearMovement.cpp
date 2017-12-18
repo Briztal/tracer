@@ -101,6 +101,8 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
                                                                     finalise_movement, get_position,
                                                                     get_real_time_position);
 
+    std_out("SSUUS CONTROL");
+
     //If the process has completed,
     if (enqueue_state == complete) {
 

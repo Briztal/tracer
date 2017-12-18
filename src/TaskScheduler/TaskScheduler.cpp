@@ -19,21 +19,16 @@ PONEY
 */
 
 #include <Sensors/Thermistors/Thermistors.h>
-#include "../config.h"
-
-#ifdef ENABLE_STEPPER_CONTROL
 
 #include "TaskScheduler.h"
 
-#include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/Steppers.h>
-#include <ControlLoops/ControlLoops.h>
-#include <Project/MachineController.h>
-#include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
 #include <Control/Control.h>
 
-
+#include <EEPROM/EEPROMStorage.h>
+#include <StepperControl/Steppers.h>
+#include <Project/MachineController.h>
+#include <StepperControl/TrajectoryTracer.h>
 
 //--------------------------------------------------Type Verification---------------------------------------------------
 
@@ -236,6 +231,7 @@ bool TaskScheduler::is_sequence_locked(uint8_t type) {
 
 bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
 
+    std_out("NB TASK SEQUENCES "+String(NB_TASK_SEQUENCES));
     //If the sequence is locked, fail, no more tasks of this type are schedulable;
     if (TaskScheduler::is_sequence_locked(task_type)) {
         return false;
@@ -566,6 +562,7 @@ bool TaskScheduler::execute_task(task_t *task) {
 
         //Succeed.
         return true;
+
     }
 
     //Fail if the task must be reprogrammed.
@@ -596,7 +593,7 @@ Queue<task_t> **define_task_queue(Queue<task_t> **ptr) {
 //task sequences definition
 #define TASK_SEQUENCE(i, size) ptr[i] = new Queue<task_t>(size);
 
-#include <config.h>
+#include <Config/scheduler_config.h>
 
 #undef TASK_SEQUENCE
 
@@ -617,7 +614,7 @@ uint8_t m::pool_task_spaces = TASK_POOL_SIZE;
 
 
 //Sequences lock counters definition
-bool t_ftflg[NB_TASK_SEQUENCES]{0};
+bool t_ftflg[NB_TASK_SEQUENCES]{false};
 bool *const m::sequences_locked = t_ftflg;
 
 //task sequences declaration
@@ -634,5 +631,3 @@ void (*m::log_function)(Protocol *, String message);
 //The communication log_protocol;
 Protocol *m::log_protocol;
 
-
-#endif

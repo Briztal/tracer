@@ -26,6 +26,7 @@
 
 #include "Steppers.h"
 #include <EEPROM/EEPROMStorage.h>
+#include <Config/stepper_control_config.h>
 #include <Control/Control.h>
 
 
@@ -41,7 +42,7 @@ void Steppers::initialise_hardware() {
     pin_mode_output(pinPower);pin_mode_output(pinDir);pin_mode_output(pinStep);\
 
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -75,7 +76,7 @@ void Steppers::enable(sig_t signature) {
     }\
 
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -94,7 +95,7 @@ void Steppers::enable() {
     digital_write(pinPower, LOW);\
     digital_write(13, LOW);
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -114,7 +115,7 @@ void Steppers::disable() {
     digital_write(pinPower, HIGH);\
 
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -168,7 +169,7 @@ void Steppers::set_directions(sig_t negative_signatures) {
 
 #endif
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -197,7 +198,7 @@ void Steppers::fastStep(sig_t id) {
             digital_write(pinStep, HIGH);\
         }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -209,7 +210,7 @@ void Steppers::fastStep(sig_t id) {
             digital_write(pinStep, LOW);\
         }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -221,7 +222,7 @@ void Steppers::fastStep(sig_t id) {
             digital_write(pinStep, HIGH);\
         }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -248,7 +249,7 @@ void Steppers::send_position() {
     std_out("pos : "+str(i)+" "+str(pos##i));\
 
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -272,7 +273,7 @@ sig_t m::direction_signature = 0;
     int32_t m::incr##i = 1;\
     int32_t m::pos##i = 0;
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 

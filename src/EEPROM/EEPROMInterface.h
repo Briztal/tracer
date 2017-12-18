@@ -21,10 +21,9 @@
 #ifndef TRACER_EEPROMINTERFACE_H
 #define TRACER_EEPROMINTERFACE_H
 
-
-#include <cstdint>
-#include <Control/Controllers/Terminal/TerminalTree.h>
 #include "EEPROMNode.h"
+
+#include <Control/Controllers/Terminal/TerminalTree.h>
 
 class EEPROMInterface {
 

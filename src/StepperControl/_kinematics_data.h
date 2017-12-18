@@ -19,23 +19,15 @@
 */
 
 #include <config.h>
-#include <stdint.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
+#include <Config/stepper_control_config.h>
 
 #ifndef TRACER_COMPLEX_MOTION_DATA_H
 #define TRACER_COMPLEX_MOTION_DATA_H
 
-
-//The distance bounds
-
-#define MINIMUM_DISTANCE_LIMIT 8
-
-#define DISTANCE_TARGET 11
-
-#define MAXIMUM_DISTANCE_LIMIT 14
-
+#include "stdint.h"
 
 /*
  * The structures used to save and update information through the movement procedure of the kernel2.

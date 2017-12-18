@@ -40,7 +40,7 @@ public :
 #define GCODE_COMMAND(command, name)\
     static task_state_t name(char *);
 
-#include <Config/gcode_interface_config.h>
+#include <Config/controller_gcode_config.h>
 
 #undef GCODE_COMMAND
 

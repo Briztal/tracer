@@ -33,7 +33,7 @@ void Thermistors::initialise_hardware() {
 #define THERMISTOR(i, name, pin, ...)\
     pin_mode_input(pin);
 
-#include <config.h>
+#include <Config/sensors_config.h>
 
 #undef THERMISTOR
 
@@ -81,7 +81,7 @@ float Thermistors::get_temperature_##name() {\
 }\
 
 
-#include <config.h>
+#include <Config/sensors_config.h>
 
 #undef THERMISTOR
 

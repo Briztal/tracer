@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <Config/gcode_interface_config.h>
+#include <Config/controller_gcode_config.h>
 
 #include <DataStructures/StringUtils.h>
 #include <hardware_language_abstraction.h>

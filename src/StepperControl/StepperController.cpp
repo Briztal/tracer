@@ -24,6 +24,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include <stdint.h>
+
 #include "StepperController.h"
 #include "EEPROM/EEPROMStorage.h"
 #include "SubMovementManager.h"
@@ -104,7 +105,7 @@ void StepperController::_initialise_data() {
     //Reset current and maximum speeds;
 #define CARTESIAN_GROUP(i, a, b, c, s) speeds[i] = 100; max_speeds[i] = s;
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CARTESIAN_GROUP
 
@@ -364,7 +365,7 @@ sig_t StepperController::get_tools_data(float *energy_densities) {
         sig |= ((sig_t)1<<(i));\
     }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CONTINUOUS
 
@@ -387,7 +388,7 @@ uint8_t StepperController::set_tools_updating_function(sig_t tools_signature, vo
         updating_functions[id++] = ContinuousActions::set_power_##i;\
     }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CONTINUOUS
 
@@ -407,7 +408,7 @@ void StepperController::stop_tools(sig_t stop_signature) {
         ContinuousActions::stop_##i();\
     }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CONTINUOUS
 
@@ -444,7 +445,7 @@ int8_t t_sg_indices[3 * NB_CARTESIAN_GROUPS + 1] = {
 
 #define CARTESIAN_GROUP(i, a, b, c, s) a, b, c,
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CARTESIAN_GROUP
         //end the array

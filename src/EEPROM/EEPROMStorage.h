@@ -95,7 +95,7 @@ public :
 
     //---------------------------------------------Closed loops data----------------------------------------------------
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
 public :
 

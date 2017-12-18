@@ -18,10 +18,10 @@
 
 */
 
+#include "_kinematics_data.h"
 #include "SubMovementManager.h"
 #include "StepperController.h"
 #include "TrajectoryTracer.h"
-#include "_kinematics_data.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <Control/Control.h>
@@ -549,7 +549,7 @@ void SubMovementManager::update_end_jerk_distances(const sig_t negative_signatur
     else {end_distances[i] -= elementary_dists[i];jerk_distances[i] -= elementary_dists[i];}\
 
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -602,7 +602,7 @@ int32_t *const m::jerk_distances = k2jdt;
 #define STEPPER(i, sig, ...) sig,
 sig_t k2t_sig[NB_STEPPERS + 1]{
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
         0};
 

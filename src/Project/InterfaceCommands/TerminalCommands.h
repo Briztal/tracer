@@ -53,7 +53,7 @@ public:
 
 #define CREATE_CALLABLE_LEAF(i, name, ...) CREATE_LEAF(i, name)
 
-#include <Config/terminal_interface_config.h>
+#include <Config/controller_terminal_config.h>
 
 #undef GO_UPPER
 #undef GO_LOWER

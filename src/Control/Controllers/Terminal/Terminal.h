@@ -28,7 +28,7 @@
 
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
-#include "Config/terminal_interface_config.h"
+#include "Config/controller_terminal_config.h"
 #include <Control/Controllers/_controller_data.h>
 #include <Control/Protocols/Protocol.h>
 #include "TerminalTree.h"

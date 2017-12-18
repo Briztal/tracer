@@ -311,6 +311,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     }
 
 
+
     //---------------Movement container pointers Initialisation-----------------
 
     //Declare a flag;
@@ -369,9 +370,9 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     }
 
+
     //Get the action signature and fill the linear_powers storage.
     current_movement->tools_signatures = StepperController::get_tools_data(tools_linear_powers);
-
 
 
     //---------------Increment computing, kernel invariant-----------------
@@ -444,6 +445,8 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     JerkPlanner::save_final_jerk_offsets(current_movement);
 
 
+
+
     //---------------Persisting in Queue-----------------
 
     //Enqueue the movement.
@@ -467,6 +470,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
         return error;
 
     }
+
 
     return complete;
 
@@ -851,7 +855,7 @@ void TrajectoryTracer::process_signatures(uint8_t *const elementary_dists, sig_t
 
 #define STEPPER(i, signature, ...) if (*(elementary_dists+i) & (uint8_t) 1) { sig |= signature; }
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -864,7 +868,8 @@ void TrajectoryTracer::process_signatures(uint8_t *const elementary_dists, sig_t
         //Step 2 : shift right and check if last enqueue_movement is reached
 #define STEPPER(i, signature, ...) if ((*(elementary_dists+i) >>= 1)) { end_move = false; }
 
-#include  <config.h>
+#include <Config/stepper_control_config.h>
+
 
 #undef STEPPER
 

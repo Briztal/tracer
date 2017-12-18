@@ -26,6 +26,8 @@
 #define CODE_STEPPER_CONTROLLER_H
 
 #include <stdint.h>
+#include <Config/stepper_control_config.h>
+
 
 class Steppers {
 
@@ -91,7 +93,7 @@ private:
     static int32_t incr##i;\
     public:static int32_t pos##i;\
 
-#include  <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 

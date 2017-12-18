@@ -30,7 +30,8 @@ public:
     static void enable##i();\
     static void disable##i();
 
-#include "../config.h"
+#include <Config/actions_config.h>
+
 #undef BINARY
 
 };

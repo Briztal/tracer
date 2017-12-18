@@ -67,6 +67,6 @@
 
 #ifdef EXTERNAL_CONTROL
 
-EXTERNAL_CONTROL(Terminal, ClearText, 100, usb_serial)
+EXTERNAL_CONTROL(GCode, ClearText, 100, usb_serial)
 
 #endif

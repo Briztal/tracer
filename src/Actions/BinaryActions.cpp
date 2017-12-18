@@ -32,8 +32,7 @@ void BinaryActions::disable##i() {\
     digital_write(pin, !ev);\
 }
 
-
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef BINARY
 

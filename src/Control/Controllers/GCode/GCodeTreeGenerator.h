@@ -28,7 +28,7 @@
 
 #include "GCodeTree.h"
 #include "GCodeTree.h"
-#include "Config/gcode_interface_config.h"
+#include "Config/controller_gcode_config.h"
 
 typedef struct command_line_t {
 

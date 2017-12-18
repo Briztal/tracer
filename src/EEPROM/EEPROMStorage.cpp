@@ -19,8 +19,11 @@
 */
 
 #include "EEPROMStorage.h"
-#include <config.h>
 #include "../Actions/ContinuousActions.h"
+
+#include <Config/stepper_control_config.h>
+#include <Config/actions_config.h>
+#include <Config/control_loops_config.h>
 
 
 /*
@@ -97,7 +100,7 @@ bool EEPROMStorage::extract_profile() {
 
 #endif
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
     //Write PIDs
     read_data(index, NB_PIDS * sizeof(pid_data_t), (uint8_t*)pids_data);
 
@@ -149,7 +152,7 @@ void EEPROMStorage::write_profile() {
 
 #endif
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     //Write PIDs
     write_data(index, NB_PIDS * sizeof(pid_data_t), (uint8_t*) pids_data);
@@ -189,22 +192,20 @@ void EEPROMStorage::set_default_profile() {
     //---------------------------------------------Steppers---------------------------------------------
 
 #ifdef ENABLE_STEPPER_CONTROL
-    
-    
 
     //Set default steppers data
 
     stepper_data_t *step_p;
 
 #define STEPPER_DATA(i, j, d_size, d_steps, d_speed, d_acc, d_jerk)\
-    step_p = steppers_data+i;\
+    step_p = steppers_data+(i);\
     step_p->size = d_size;\
     step_p->steps = d_steps;\
     step_p->maximum_speed = d_speed;\
     step_p->acceleration = d_acc;\
     step_p->jerk = d_jerk;
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER_DATA
 
@@ -213,7 +214,7 @@ void EEPROMStorage::set_default_profile() {
 #define CARTESIAN_GROUP(i, m0, m1, m2, s)\
     group_maximum_speeds[i] = s;
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CARTESIAN_GROUP
 
@@ -222,18 +223,18 @@ void EEPROMStorage::set_default_profile() {
     
     //---------------------------------------------Asserv---------------------------------------------
     
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     //PIDs kp, ki, kd
     pid_data_t *pid_p;
 
 #define PID(i, name, d_kp, d_ki, d_kd)\
-    pid_p = pids_data+i;\
+    pid_p = pids_data+(i);\
     pid_p->kp = d_kp;\
     pid_p->ki = d_ki;\
     pid_p->kd = d_kd;
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef PID
 
@@ -241,7 +242,7 @@ void EEPROMStorage::set_default_profile() {
 #define  LOOP_FUNCTION(index, name, period_ms)\
     loop_periods[index] = period_ms;
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef LOOP_FUNCTION
 
@@ -252,9 +253,9 @@ void EEPROMStorage::set_default_profile() {
 
     //Continuous ending
 #define CONTINUOUS(i, name, powerPin, maxValue)\
-    (continuous_data+i)->max = maxValue;
+    (continuous_data+(i))->max = maxValue;
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
@@ -263,11 +264,11 @@ void EEPROMStorage::set_default_profile() {
     servo_data_t *servo_p;
 
 #define SERVO(i, name, dataPin, minValue, maxValue)\
-    servo_p = servos_data+i;\
+    servo_p = servos_data+(i);\
     servo_p->min = minValue;\
     servo_p->max = maxValue;
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef SERVO
 
@@ -296,7 +297,7 @@ coordinate_interface_data_t m::coordinate_interface_data = coordinate_interface_
 #endif
 
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
 //PIDs :
 pid_data_t tpdt[NB_PIDS];

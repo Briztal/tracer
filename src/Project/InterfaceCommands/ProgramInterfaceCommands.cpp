@@ -80,7 +80,7 @@ task_state_t ProgramInterfaceCommands::system_canal_function(char *data, uint8_t
 task_state_t ProgramInterfaceCommands::parameters_system_canal(char *data, uint8_t size) {
 
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     delay_ms(50);
 
@@ -123,7 +123,7 @@ task_state_t ProgramInterfaceCommands::pid_system_canal(char *data, uint8_t size
 
 
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
     
     pid_data_t *pid_p;
     
@@ -161,7 +161,7 @@ task_state_t ProgramInterfaceCommands::pid_system_canal(char *data, uint8_t size
 
 task_state_t ProgramInterfaceCommands::loop_system_canal(char *data, uint8_t size) {
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     if (!size) return invalid_arguments;
     char sub_canal = *data;

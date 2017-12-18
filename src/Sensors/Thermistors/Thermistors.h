@@ -31,7 +31,7 @@ private:\
     static const uint8_t therm_size_##i;\
     static uint8_t *index_##i;
 
-#include <config.h>
+#include <Config/sensors_config.h>
 
 #undef THERMISTOR
 

@@ -25,6 +25,10 @@
 #include <Control/Control.h>
 
 
+#include <Config/actions_config.h>
+#include <Config/control_loops_config.h>
+
+
 #define ES EEPROMStorage
 
 /*
@@ -99,7 +103,7 @@ void EEPROMInterface::print_stored_data() {
 
     std_out("\n---------------------\n");
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     //PIDs
     std_out("PIDS : \n");
@@ -172,7 +176,7 @@ uint8_t get_root_sub_nodes_nb() {
     //Custom data actions;
     uint8_t nb = 3;
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
     //PIDs
     //Loops
     nb += 2;
@@ -265,7 +269,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
     //-------------------Asserv-------------------
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     //PIDs
     //Create the tree, and add it to root
@@ -518,7 +522,7 @@ void EEPROMInterface::send_structure() {
     TI::send_packet();
 
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
     //---------------------------------------------PIDs---------------------------------------------
 

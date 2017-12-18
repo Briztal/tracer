@@ -37,7 +37,7 @@ void ContinuousActions::initialise_hardware() {
 #define CONTINUOUS(i, name, pin, max) \
     pin_mode_output(pin);
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
@@ -55,7 +55,7 @@ void ContinuousActions::initialise_data() {
 #define CONTINUOUS(i, name, pin, max) \
     analog_write(pin, 0);
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
@@ -80,7 +80,7 @@ void ContinuousActions::set_power(uint8_t action, float power) {
 
     switch (action) {
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
@@ -127,7 +127,7 @@ void ContinuousActions::stop(uint8_t action) {
 
     switch (action) {
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
@@ -173,7 +173,7 @@ void ContinuousActions::stop_##i() {\
 }
 
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 

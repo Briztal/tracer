@@ -177,8 +177,13 @@ task_state_t TerminalCommands::home(char *arguments) {
 
 task_state_t TerminalCommands::line(char *arguments) {
 
+    std_out("SUUS");
+
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
+
+    std_out("SUUS2");
+
 
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);

@@ -54,7 +54,7 @@ public:
     /*reset function*/\
     static void reset_##name();
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef PID
 

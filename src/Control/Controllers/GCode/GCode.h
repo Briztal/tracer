@@ -25,7 +25,7 @@
 #ifndef GCODEINTERFACE
 #define GCODEINTERFACE
 
-#include <Config/gcode_interface_config.h>
+#include <Config/controller_gcode_config.h>
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>

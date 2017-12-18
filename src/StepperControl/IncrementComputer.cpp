@@ -44,6 +44,7 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
     float min = movement->beginning, max = movement->ending;
     float min_increment, max_increment;
 
+
     //We must distinguish the two cases, of an ascending movement, and a descending movement.
     if (min<max) {
         min_increment = extract_increment(movement->trajectory_function, min, DEFAULT_ABSOLUTE_INCREMENT);
@@ -113,10 +114,10 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     //cache float var for distance_target
     float ftarget = (float) DISTANCE_TARGET;
 
-
     //correct the increment until it gives a position at the target distance.
     while (d != DISTANCE_TARGET) {
 
+        //Catch the case where d becomes 0.
         if (!d) d = 1;
 
         //Update the increment

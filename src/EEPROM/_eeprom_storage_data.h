@@ -24,7 +24,7 @@ typedef struct stepper_data_t {
 //The coordinate interface structure : contains all persistent data required in config_files.h
 typedef struct coordinate_interface_data_t {
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 } coordinate_interface_data_t;
 
@@ -33,7 +33,7 @@ typedef struct coordinate_interface_data_t {
 #endif
 
 
-#ifdef ENABLE_ASSERV
+#ifdef ENABLE_CONTROL_LOOPS
 
 typedef struct pid_data_t {
     float kp;

@@ -65,7 +65,7 @@ public:
     static bool get_state_##i();\
     static void stop_##i();
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 

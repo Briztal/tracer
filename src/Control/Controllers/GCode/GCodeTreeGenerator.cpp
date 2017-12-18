@@ -85,7 +85,7 @@ command_line_t **GCodeTreeGenerator::build_commands(uint16_t *nb_commands_p) {
         save_command_name(command_line, String(#name_).c_str());\
 
 //Create all commands
-#include <Config/gcode_interface_config.h>
+#include <Config/controller_gcode_config.h>
 
     //Un-define the macro for safety;
 #undef GCODE_COMMAND
@@ -151,7 +151,7 @@ uint16_t GCodeTreeGenerator::get_command_nb() {
 #define GCODE_COMMAND(name, function) i++;
 
     //Include the configuration file;
-#include <Config/gcode_interface_config.h>
+#include <Config/controller_gcode_config.h>
 
     //Un-define the macro for safety
 #undef GCODE_COMMAND

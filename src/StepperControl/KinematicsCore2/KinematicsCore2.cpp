@@ -20,6 +20,8 @@
 
 
 #include <config.h>
+#include <Config/stepper_control_config.h>
+
 
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
@@ -29,7 +31,6 @@
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Steppers.h>
-#include <Control/Control.h>
 
 //------------------------------------------- Initialisation --------------------------------------------
 

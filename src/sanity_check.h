@@ -73,6 +73,8 @@
  *      - FPU for Kernel2
  *      - 32 bits for kernel2
  */
+#include <Config/stepper_control_config.h>
+
 
 #ifdef ENABLE_STEPPER_CONTROL
 
