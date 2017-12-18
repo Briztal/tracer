@@ -127,6 +127,9 @@ void Kernel::initialise_hardware() {
 
 void Kernel::initialise_data() {
 
+    //Initialise the task scheduler;
+    TaskScheduler::initialise_data();
+
     //Initialise all enabled interfaces
     Control::initialise_data();
 

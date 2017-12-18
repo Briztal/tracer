@@ -35,6 +35,13 @@
 
 class TaskScheduler {
 
+    //-------------------------------------------- Parsing - execution cycle -------------------------------------------
+
+public:
+
+    //Initialise the scheduler in a safe state;
+    static void initialise_data();
+
 
     //-------------------------------------------- Parsing - execution cycle -------------------------------------------
 

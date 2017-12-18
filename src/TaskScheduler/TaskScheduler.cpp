@@ -30,6 +30,36 @@ PONEY
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>
 
+//------------------------------------------------- Init ---------------------------------------------------
+
+/*
+ * initialise_data : this function initialises the scheduler in a safe state;
+ */
+
+void TaskScheduler::initialise_data() {
+
+    //Reset the task pool, by nullifying the number of tasks stored in it, and is number of spaces;
+    pool_task_nb = 0;
+    pool_task_spaces = TASK_POOL_SIZE;
+
+    //Reset sequences lock counters;
+    memset(sequences_locked, 0, NB_TASK_SEQUENCES * sizeof(bool));
+
+    //Clear tasks sequences;
+    for (uint8_t sequence = 0; sequence < NB_TASK_SEQUENCES; sequence++) {
+        task_sequences[sequence]->clear();
+    }
+
+    //Reset the flood flag; //TODO REMOVE;
+    flood_enabled = false;
+
+    //Reset the log environment;
+    log_function = nullptr;
+    log_protocol = nullptr;
+
+}
+
+
 //--------------------------------------------------Type Verification---------------------------------------------------
 
 bool TaskScheduler::check_sequence_type(uint8_t type) {
@@ -586,9 +616,12 @@ void TaskScheduler::log(String message) {
 
 }
 
-//-----------------------------------------Static declarations and definitions------------------------------------------
+//----------------------------------------- Tasks queues creation ------------------------------------------
 
-Queue<task_t> **define_task_queue(Queue<task_t> **ptr) {
+/*
+ * instantiate_task_queues : this function will instantiate task queues in the provided array.
+ */
+Queue<task_t> **instantiate_task_queues(Queue<task_t> **ptr) {
 
 //task sequences definition
 #define TASK_SEQUENCE(i, size) ptr[i] = new Queue<task_t>(size);
@@ -599,6 +632,9 @@ Queue<task_t> **define_task_queue(Queue<task_t> **ptr) {
 
     return ptr;
 }
+
+
+//-----------------------------------------Static declarations and definitions------------------------------------------
 
 #define m TaskScheduler
 
@@ -612,22 +648,19 @@ uint8_t m::pool_task_nb = 0;
 //The number of tasks stored in the task pool
 uint8_t m::pool_task_spaces = TASK_POOL_SIZE;
 
-
 //Sequences lock counters definition
 bool t_ftflg[NB_TASK_SEQUENCES]{false};
 bool *const m::sequences_locked = t_ftflg;
 
 //task sequences declaration
 Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
-Queue<task_t> **const m::task_sequences = define_task_queue(t_tsks);
+Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
 
 bool m::flood_enabled = false;
 
-
-
 //The encoding function;
-void (*m::log_function)(Protocol *, String message);
+void (*m::log_function)(Protocol *, String message) = nullptr;
 
 //The communication log_protocol;
-Protocol *m::log_protocol;
+Protocol *m::log_protocol = nullptr;
 
