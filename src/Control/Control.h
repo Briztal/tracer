@@ -27,7 +27,7 @@
  *  interface.
  */
 
-#include "config.h"
+#include <Project/Config/control_config.h>
 #include <Control/Protocols/Protocol.h>
 
 

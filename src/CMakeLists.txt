@@ -25,6 +25,7 @@ include_directories(${PCP}/)
 add_library(project_config
 
         ${PCP}/config_file.h
+        ${PCP}/control_config.h
         ${PCP}/lcd_interface_config.h
         ${PCP}/terminal_interface_config.h
         ${PCP}/program_interface_config.h
@@ -39,6 +40,7 @@ add_library(project_config
 set(PIP "Project/InterfaceCommands")
 
 include_directories(${PIP}/)
+
 
 add_library(project_interfaces
 
@@ -214,8 +216,6 @@ add_library(sensors
 
 
         ${SP}/Sensors.h
-        ${SP}/Sensors.cpp
-
 
         ${SP}/Thermistors/Thermistors.h
         ${SP}/Thermistors/Thermistors.cpp
@@ -252,12 +252,12 @@ add_library(kinematics_cores
 
         ${KP}/_kinematics_data.h
 
-        ${KP}/MachineInterface.h
-        ${KP}/MachineInterface.cpp
-        ${KP}/TrajectoryTracer.h
-        ${KP}/TrajectoryTracer.cpp
         ${KP}/StepperController.h
         ${KP}/StepperController.cpp
+        ${KP}/TrajectoryTracer.h
+        ${KP}/TrajectoryTracer.cpp
+        ${KP}/Steppers.h
+        ${KP}/Steppers.cpp
         ${KP}/IncrementComputer.h
         ${KP}/IncrementComputer.cpp
         ${KP}/JerkPlanner.cpp
