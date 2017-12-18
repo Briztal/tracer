@@ -45,12 +45,12 @@ public:
     static void initialise_data();
 
 
-    //--------------------------------------------current_stepper_positions---------------------------------------------
+    //--------------------------------------------current_steppers_positions---------------------------------------------
 
 private:
 
     //The current positions of stepper motors
-    static float *const current_stepper_positions;
+    static float *const current_steppers_positions;
 
     //Remark : the current stepper position is the translation if the high level positions, by StepperAbstraction.
 

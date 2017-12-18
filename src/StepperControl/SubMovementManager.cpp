@@ -21,9 +21,11 @@
 #include "SubMovementManager.h"
 #include "StepperController.h"
 #include "TrajectoryTracer.h"
+#include "_kinematics_data.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <Control/Control.h>
+#include <Kernel.h>
 
 
 /*
@@ -33,7 +35,7 @@
 void SubMovementManager::initialise_data() {
 
     //Reset the current stepper position;
-    memset(current_stepper_positions, 0, NB_STEPPERS * sizeof(float));
+    memset(current_steppers_positions, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the sub movement data queue;
     sub_movement_queue.clear();
@@ -156,10 +158,12 @@ bool SubMovementManager::is_movement_processed() {
 void SubMovementManager::push_new_sub_movement() {
 
     if ((!sub_movement_queue.available_spaces()) || (movement_last_position_processed_flag)) {
+
         return;
+
     }
 
-    //Inistalise the queue flag;
+    //Initialise the queue flag;
     bool queue_flag = false;
 
     //Get the insertion address;
@@ -171,8 +175,8 @@ void SubMovementManager::push_new_sub_movement() {
         //Log if the flag is reset (error)
         std_out("ERROR in SubMovementManager::push_new_sub_movement : the insertion element is already assigned");
 
-        //Stop any movement now;
-        TrajectoryTracer::stop();
+        //Emergency stop
+        Kernel::emergency_stop();
 
         return;
 
@@ -214,7 +218,7 @@ void SubMovementManager::push_new_sub_movement() {
         std_out("ERROR in SubMovementManager::confirm_sub_movement : The insertion position is already allocated.");
 
         //Emergency stop
-        TrajectoryTracer::stop();
+        Kernel::emergency_stop();
 
     }
 
@@ -254,9 +258,10 @@ void SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
     //Get the high level position corresponding to the computed index
     get_new_position(local_index_candidate, sub_movement_data->candidate_high_level_positions);
 
+
     //Translate the high level position into steppers position;
     StepperController::translate(sub_movement_data->candidate_high_level_positions,
-                                sub_movement_data->future_steppers_positions);
+                                 sub_movement_data->future_steppers_positions);
 
     //Call the Kinematics Manager, to fill the kernel-reserved part of the data.
     Kinematics::initialise_sub_movement(sub_movement_data);
@@ -272,11 +277,12 @@ bool SubMovementManager::confirm_sub_movement(sub_movement_data_t *sub_movement_
 
 
     //Get the steppers step_distances, high level step_distances, and the maximal stepper and distance
-    float max_distance = get_steppers_distances(current_stepper_positions, sub_movement_data);
+    float max_distance = get_steppers_distances(current_steppers_positions, sub_movement_data);
 
     //Distance Validity_Verification : fail if an error is detected
-    if (distance_bounds_error(max_distance))
+    if (distance_bounds_error(max_distance)) {
         return false;
+    }
 
     //Update the index
     index = sub_movement_data->index_candidate;
@@ -362,14 +368,14 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
 
         uint8_t int_dist;
 
-
         //get absolute distance
         if (distance < 0) {
             distance = -distance;
             dir_signature |= axis_signatures[stepper];
-            int_dist = (uint8_t) ((uint32_t) p - (uint32_t) d);
+            int_dist = (uint8_t) ((int32_t) p - (int32_t) d);
         } else {
-            int_dist = (uint8_t) ((uint32_t) d - (uint32_t) p);
+
+            int_dist = (uint8_t) ((int32_t) d - (int32_t) p);
         }
 
 
@@ -418,8 +424,8 @@ sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
         //if the queue is empty : error
         std_out("ERROR : IN SubMovementManager::read_next_sub_movement : THE SUB_MOVEMENT QUEUE IS EMPTY");
 
-        //Emergency stop;
-        TrajectoryTracer::stop();
+        //Emergency stop
+        Kernel::emergency_stop();
 
         //Fail
         return 0;
@@ -438,8 +444,8 @@ sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
             //Log;
             std_out("ERROR : IN SubMovementManager::read_next_sub_movement : the reading element was not allocated");
 
-            //Emergency stop;
-            TrajectoryTracer::stop();
+            //Emergency stop
+            Kernel::emergency_stop();
 
             //Fail;
             return 0;
@@ -466,8 +472,8 @@ void SubMovementManager::discard_sub_movement() {
         //Log;
         std_out("ERROR : IN SubMovementManager::discard_sub_movement : the reading element was not allocated");
 
-        //Emergency stop;
-        TrajectoryTracer::stop();
+        //Emergency stop
+        Kernel::emergency_stop();
 
     }
 
@@ -557,7 +563,7 @@ void SubMovementManager::update_end_jerk_distances(const sig_t negative_signatur
 
 //Current stepper position;
 float t_cur_pos[NB_STEPPERS]{0};
-float *const m::current_stepper_positions = t_cur_pos;
+float *const m::current_steppers_positions = t_cur_pos;
 
 //movement data queue;
 Queue<sub_movement_data_t> m::sub_movement_queue(SUB_MOVEMENT_DATA_QUEUE_SIZE);

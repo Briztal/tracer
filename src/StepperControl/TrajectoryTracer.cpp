@@ -45,7 +45,7 @@ void TrajectoryTracer::initialise_data() {
     started = false;
 
     //Reset status flags;
-    emergency_stop_flag = stop_programmed = final_sub_movement_started = movement_queue_lock_flag = false;
+    stop_programmed = final_sub_movement_started = movement_queue_lock_flag = false;
 
     //Clear the movement data queue;
     movement_data_queue.clear();
@@ -163,9 +163,6 @@ void TrajectoryTracer::start() {
     stop_programmed = false;
     final_sub_movement_started = false;
 
-    //Disable the emergency stop;
-    emergency_stop_flag = false;
-
     //Initialise the K2Physics for the first movement;
     process_next_movement();
 
@@ -182,7 +179,7 @@ void TrajectoryTracer::start() {
     started = true;
 
     //Start the interrupt sequence.
-    if (!emergency_stop_flag) {
+    if (started) {
         enable_stepper_interrupt();
     }
 
@@ -203,9 +200,6 @@ void TrajectoryTracer::stop() {
 
     //Disable the stepper timer, now that the interrupt is disabled;
     disable_stepper_timer();
-
-    //Trigger an emergency stop, in case stop was called during the movement routine (in case of movement errors);
-    emergency_stop_flag = true;
 
     //Stop all currently enabled tools;
     stop_tools();
@@ -250,7 +244,7 @@ void TrajectoryTracer::stop() {
 void TrajectoryTracer::emergency_stop() {
 
     //Trigger an emergency stop : will stop and deprogram any interrupt in execution.
-    emergency_stop_flag = true;
+    started = false;
 
     //Interrupt the movement routing, by stopping the interrupt sequence;
     disable_stepper_interrupt()
@@ -261,11 +255,9 @@ void TrajectoryTracer::emergency_stop() {
     //Stop all currently enabled tools;
     stop_tools();
 
-    //Mark the movement routine as stopped;
-    started = false;
-
     //Enable the movement enqueuing;
     movement_queue_lock_flag = false;
+
 
     debug("Emergency Stop triggered\n");
 
@@ -353,6 +345,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     current_movement->movement_initialisation = movement_initialisation;
     current_movement->movement_finalisation = movement_finalisation;
     current_movement->jerk_point = false;
+
 
     //Reset the flag;
     queue_flag = false;
@@ -649,7 +642,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
 
     std_out("PREPARING FIRST");
 
-    //Push the first sub_movement (increment pre-processed to be correct);
+    //Push the first sub_movement (increment pre-processed supposed to be correct);
     SubMovementManager::push_new_sub_movement();
 
     //Step 1 : Get a new position to reach;
@@ -682,7 +675,8 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     //Discard the current sub_movement in the sub-movements queue;
     SubMovementManager::discard_sub_movement();
 
-    //Push as much sub_movements as possible;
+
+
     SubMovementManager::fill_sub_movement_queue();
 
 }
@@ -776,7 +770,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     set_stepper_int_function(finish_sub_movement);
 
     //Re-enable the stepper interrupt :
-    if (!emergency_stop_flag) {
+    if (started) {
         enable_stepper_interrupt();
     }
 
@@ -962,7 +956,7 @@ void TrajectoryTracer::finish_sub_movement() {
                 final_sub_movement_started = true;
 
                 //re-interrupt on this function, as no more process is required;
-                if (!emergency_stop_flag) {
+                if (started) {
                     enable_stepper_interrupt();
                 }
 
@@ -1003,7 +997,7 @@ void TrajectoryTracer::finish_sub_movement() {
 
     }
 
-    if (!emergency_stop_flag) {
+    if (started) {
         enable_stepper_interrupt();
     }
 }
@@ -1077,9 +1071,6 @@ void TrajectoryTracer::update_tools_powers(float speed) {
 
 //The machine state;
 volatile bool m::started = false;
-
-//The emergency stop flag;
-volatile bool m::emergency_stop_flag = false;
 
 //The stop flag;
 bool m::stop_programmed = false;

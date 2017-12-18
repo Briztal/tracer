@@ -138,7 +138,7 @@ task_state_t StepperController::linear_movement(float *destination) {
 
 
 
-//----------------------------------------------current_stepper_positions-----------------------------------------------
+//----------------------------------------------current_steppers_positions-----------------------------------------------
 
 /*
  * get_current_position : this function provides the current position to any external process.

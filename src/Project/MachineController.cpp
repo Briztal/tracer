@@ -25,6 +25,7 @@
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Steppers.h>
 #include <StepperControl/TrajectoryTracer.h>
+#include <Control/Control.h>
 
 //-------------------------------------------------Movement-------------------------------------------------------------
 

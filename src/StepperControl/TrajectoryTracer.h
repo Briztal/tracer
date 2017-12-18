@@ -62,9 +62,6 @@ private :
     //the stop flag : enabled when all sub_movements have been processed;
     static bool stop_programmed;
 
-    //A boolean to stop the machine at any time;
-    static volatile bool emergency_stop_flag;
-
 
     //------------------------------------------- Movement_queue_management --------------------------------------------
 
