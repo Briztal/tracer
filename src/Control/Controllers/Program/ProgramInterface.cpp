@@ -64,7 +64,7 @@ void PI::initialise_aliases() {
     name##_id[indice+1] = 0;\
     name##_size = indice+(uint8_t)1;
 
-#include <Project/Config/program_interface_config.h>
+#include <Config/program_interface_config.h>
 
 }
 
@@ -337,7 +337,7 @@ void PI::process(char *command, uint8_t size) {
 
             return;
 
-#include <Project/Config/program_interface_config.h>
+#include <Config/program_interface_config.h>
 
         default:
             return;
@@ -550,7 +550,7 @@ task_state_t PI::send_tree_structure() {
     add_string_out(#name);\
     send_packet();
 
-#include <Project/Config/program_interface_config.h>
+#include <Config/program_interface_config.h>
 
 
     prepare_structure_packet();
@@ -572,7 +572,7 @@ task_state_t PI::send_tree_structure() {
     char *const PI::name##_id = tmp##name;\
 
 
-#include <Project/Config/program_interface_config.h>
+#include <Config/program_interface_config.h>
 
 
 bool PI::parsing_began = false;

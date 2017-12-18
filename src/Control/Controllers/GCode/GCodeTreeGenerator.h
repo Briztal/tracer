@@ -22,13 +22,13 @@
 #ifndef TRACER_GCODETREEGENERATOR_H
 #define TRACER_GCODETREEGENERATOR_H
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeTree.h"
 #include "GCodeTree.h"
-#include "Project/Config/gcode_interface_config.h"
+#include "Config/gcode_interface_config.h"
 
 typedef struct command_line_t {
 

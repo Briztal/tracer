@@ -22,13 +22,13 @@
 #ifndef CODE_TERMINAL_INTERFACE
 #define CODE_TERMINAL_INTERFACE
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
-#include "Project/Config/terminal_interface_config.h"
+#include "Config/terminal_interface_config.h"
 #include <Control/Controllers/_controller_data.h>
 #include <Control/Protocols/Protocol.h>
 #include "TerminalTree.h"

@@ -19,9 +19,10 @@
 */
 
 
-#include "config.h"
+#include <Config/control_config.h>
 
 #ifdef ENABLE_GCODE_INTERFACE
+
 #include <Control/Controllers/GCode/GCode.h>
 #include "GCodeCommands.h"
 #include <EEPROM/EEPROMStorage.h>

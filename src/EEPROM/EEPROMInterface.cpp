@@ -149,7 +149,7 @@ void EEPROMInterface::print_stored_data() {
     //Custom data
 #define EEPROM_VARIABLE(name, default_value) std_out("\t"+str(#name)+" : "+str(ES::custom_data.name));
 
-#include <Project/Config/eeprom_config.h>
+#include <Config/eeprom_config.h>
 
 #undef EEPROM_VARIABLE
 
@@ -361,7 +361,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
 #define EEPROM_VARIABLE(name, default_val) tree->sub_nodes[custom_index] = new EEPROMNode(new String(#name), 0, custom_index, (&ES::custom_data.name));
 
-#include <Project/Config/eeprom_config.h>
+#include <Config/eeprom_config.h>
 
 #undef EEPROM_VARIABLE
 

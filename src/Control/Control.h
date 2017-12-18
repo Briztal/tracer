@@ -27,8 +27,9 @@
  *  interface.
  */
 
-#include <Project/Config/control_config.h>
 #include <Control/Protocols/Protocol.h>
+
+#include <Config/control_config.h>
 
 
 #ifdef ENABLE_TERMINAL_INTERFACE

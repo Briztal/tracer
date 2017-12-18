@@ -22,8 +22,7 @@
 #ifndef TRACER_TERMINALARGUMENTS_H
 #define TRACER_TERMINALARGUMENTS_H
 
-
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 

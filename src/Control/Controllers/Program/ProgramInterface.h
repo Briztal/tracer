@@ -34,7 +34,7 @@
 
 #define PI Program
 
-#include "Project/Config/program_interface_config.h"
+#include "Config/program_interface_config.h"
 
 
 
@@ -195,7 +195,7 @@ private:
     static void send_##name();
 
 
-#include <Project/Config/program_interface_config.h>
+#include <Config/program_interface_config.h>
 
 
 };

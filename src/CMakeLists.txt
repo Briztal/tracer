@@ -18,7 +18,7 @@ add_library(project
 #--------------------------------------------PROJECT CONFIG-------------------------------------------------------------
 
 
-set(PCP "Project/Config")
+set(PCP "Config")
 
 include_directories(${PCP}/)
 

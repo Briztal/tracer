@@ -18,9 +18,13 @@
 
 */
 
+#include <Config/control_config.h>
+
+#ifdef ENABLE_GCODE_INTERFACE
+
+#include <Config/gcode_interface_config.h>
 
 #include <DataStructures/StringUtils.h>
-#include <Project/Config/gcode_interface_config.h>
 #include <hardware_language_abstraction.h>
 #include "Control/Control.h"
 #include "GCodeArguments.h"
@@ -315,3 +319,5 @@ argument_t *const GCodeArguments::arguments = t_gcode_arguments;
 
 //Number of arguments in a sequence
 uint8_t GCodeArguments::nb_identifiers = 0;
+
+#endif

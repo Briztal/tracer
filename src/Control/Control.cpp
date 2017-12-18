@@ -34,7 +34,7 @@ void Control::initialise_hardware() {
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission) transmission::begin();
 
     //Expand the initialise_hardware;
-#include <config.h>
+#include <Config/control_config.h>
 
     //Undef the macro for safety;
 #undef EXTERNAL_CONTROL
@@ -94,12 +94,12 @@ void Control::initialise_external_controllers() {
     /*Eventually delete the pointer*/\
     if ((p = protocols[i]) != nullptr) { delete p;};\
     /*Create a new protocol;*/\
-    protocols[i++] = p = new protocol((uint8_t)buffer, transmission::available, transmission::write, transmission::read);\
+    protocols[i++] = p = new protocol((uint8_t)(buffer), transmission::available, transmission::write, transmission::read);\
     /*Initialise the new protocol;*/\
     controller::initialise_data(p);
 
     //Expand the initialise_hardware;
-#include <config.h>
+#include <Config/control_config.h>
 
     //Undef the macro for safety;
 #undef EXTERNAL_CONTROL
@@ -148,10 +148,10 @@ void Control::read_external_controllers() {
                         return;\
                     }\
                     /*Read all data or a packet in the protocol*/\
-                    protocol->decode_data();\
+                    (protocol)->decode_data();\
                     /*Re-iterate the loop if data is still available;*/\
-                    if(protocol->parsing_ready()) {\
-                        controller::parse(protocol->get_data());\
+                    if((protocol)->parsing_ready()) {\
+                        controller::parse((protocol)->get_data());\
                         keep_on = true;\
                     }\
                 /*Do not break, as we must interrogate other interfaces.*/\
@@ -177,7 +177,7 @@ void Control::read_external_controllers() {
         QUERY_INTERFACE(controller, p);
 
         //Expand the processing;
-#include <config.h>
+#include <Config/control_config.h>
 
         //Undef the macro for safety;
 #undef EXTERNAL_CONTROL

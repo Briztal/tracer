@@ -17,7 +17,8 @@
   along with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include <config.h>
+
+#include <Config/control_config.h>
 
 #ifdef ENABLE_GCODE_INTERFACE
 
@@ -50,14 +51,12 @@ void GCode::initialise_data(Protocol *protocol) {
     //Create a new command tree;
     command_tree = GCodeTreeGenerator::generate_tree();
 
-
 }
 
 
 
 /*
  * The following function displays a logo at the initialisation of the code.
- *
  */
 
 void GCode::init_message() {

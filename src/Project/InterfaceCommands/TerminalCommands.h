@@ -18,7 +18,7 @@
 
 */
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
@@ -53,7 +53,7 @@ public:
 
 #define CREATE_CALLABLE_LEAF(i, name, ...) CREATE_LEAF(i, name)
 
-#include <Project/Config/terminal_interface_config.h>
+#include <Config/terminal_interface_config.h>
 
 #undef GO_UPPER
 #undef GO_LOWER

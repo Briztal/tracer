@@ -18,7 +18,7 @@
 
 */
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_GCODE_INTERFACE
 
@@ -40,7 +40,7 @@ public :
 #define GCODE_COMMAND(command, name)\
     static task_state_t name(char *);
 
-#include <Project/Config/gcode_interface_config.h>
+#include <Config/gcode_interface_config.h>
 
 #undef GCODE_COMMAND
 

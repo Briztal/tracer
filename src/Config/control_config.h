@@ -1,5 +1,5 @@
 /*
-  parser_config.h - Part of TRACER
+  control_config.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -31,7 +31,7 @@
 
 
 //Uncomment this line to enable the terminal interface.
-//#define ENABLE_TERMINAL_INTERFACE
+#define ENABLE_TERMINAL_INTERFACE
 
 //Uncomment this line to enable the gcode interface.
 #define ENABLE_GCODE_INTERFACE
@@ -67,6 +67,6 @@
 
 #ifdef EXTERNAL_CONTROL
 
-EXTERNAL_CONTROL(GCode, ClearText, 100, usb_serial)
+EXTERNAL_CONTROL(Terminal, ClearText, 100, usb_serial)
 
 #endif

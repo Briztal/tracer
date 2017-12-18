@@ -22,6 +22,11 @@
 #define TRACER_GCODEARGUMENTS_H
 
 
+#include <Config/control_config.h>
+
+#ifdef ENABLE_GCODE_INTERFACE
+
+
 #include <DataStructures/ArgumentsContainer.h>
 #include <Control/Controllers/_controller_data.h>
 
@@ -102,3 +107,5 @@ private:
 
 
 #endif //TRACER_GCODEARGUMENTS_H
+
+#endif

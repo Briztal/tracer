@@ -44,7 +44,7 @@
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
 
-#include <Project/Config/geometry.cpp>
+#include <Config/geometry.cpp>
 
 
 //---------------------------------------------------- Init -----------------------------------------------------

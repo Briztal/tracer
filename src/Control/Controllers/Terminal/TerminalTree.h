@@ -29,7 +29,7 @@
 #ifndef TRACER_NODE_H
 #define TRACER_NODE_H
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 

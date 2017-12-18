@@ -18,13 +18,14 @@
 
 */
 
-#include <config.h>
+#include <Config/control_config.h>
+
 #ifdef ENABLE_GCODE_INTERFACE
 
 #ifndef GCODEINTERFACE
 #define GCODEINTERFACE
 
-#include <Project/Config/gcode_interface_config.h>
+#include <Config/gcode_interface_config.h>
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
 #include <TaskScheduler/TaskScheduler.h>

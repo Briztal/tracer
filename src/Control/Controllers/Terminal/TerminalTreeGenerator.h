@@ -23,7 +23,7 @@
 #define TRACER_TERMINALTREEGENERATOR_H
 
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 

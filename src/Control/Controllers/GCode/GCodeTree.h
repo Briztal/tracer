@@ -29,7 +29,7 @@
 #ifndef TRACER_GCodeNode_H
 #define TRACER_GCodeNode_H
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_GCODE_INTERFACE
 

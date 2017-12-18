@@ -18,7 +18,7 @@
 
 */
 
-#include <config.h>
+#include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
@@ -47,7 +47,7 @@ String *TerminalTreeGenerator::build_tree_summary(String *tree_summary) {
 
 #define CREATE_LEAF(...) tree_summary->append((char)1);
 
-#include "Project/Config/terminal_interface_config.h"
+#include "Config/terminal_interface_config.h"
 
 #undef GO_UPPER
 
@@ -144,7 +144,7 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
     current_tree->set_child(current_index++, new TerminalTree(new String(#name), 0, new String(#desc), TerminalCommands::function), &tree_flag);\
     command_counter++;
 
-#include "Project/Config/terminal_interface_config.h"
+#include "Config/terminal_interface_config.h"
 
 #undef GO_LOWER
 
