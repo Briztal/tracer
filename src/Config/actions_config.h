@@ -18,7 +18,7 @@
 
 */
 
-/* Binary Actions (on - off)
+/* Binary Actuators (on - off)
  * For each actuator you want to control in on-off mode, put one line like behind and provide the four required parameter
  * BINARY(i, name, powerPin, enableValue)
  */
@@ -29,7 +29,7 @@
 #endif
 
 
-/* Continuous Actions : a power command, output in [|0, 255|]
+/* Continuous Actuators : a power command, output in [|0, 255|]
  * For each actuator you want to control in linear, put one line like behind and provide the three required parameter
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
@@ -47,15 +47,18 @@ CONTINUOUS(5,   cooling,    23,     100)
 
 #endif
 
-/* Servomotor Actions
+/* Servomotor Actuators
  * For each servo you want to control, put one line like behind and provide the three required parameter
  * SERVO(i, name, dataPin, minValue, maxValue)
  */
 
-#define NB_SERVOS 0
+#define NB_SERVOS 1
+
+#define SERVO_PERIOD_US 20
+
 #ifdef SERVO
 
-//SERVO(0, servo, 4, 0, 1)
+SERVO(0, servo, 4, 0, 1, 1.5, 2.5)
 
 #endif
 

@@ -14,7 +14,7 @@ class Thermistors {
 
 public :
 
-    //GPIO Init
+    //Actuators Init
     static void initialise_hardware();
 
     //Data initialise_data : no static fields or output to reset;

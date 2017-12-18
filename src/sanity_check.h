@@ -56,17 +56,6 @@
 
 
 /*
- * Control loops checking.
- *  We must verify that there are enough timers for the required control loops number
- *
- */
-
-#if (NB_CONTROL_LOOP_TIMERS < NB_LOOPS)
-#error You have required too much control loops (NB_LOOPS) in your configuration file. Your board supports at most NB_CONTROL_LOOP_TIMERS loops.
-#endif
-
-
-/*
  * Stepper Control Kernel checking.
  *  we must check the following flags :
  *      - EEPROM for all kernels

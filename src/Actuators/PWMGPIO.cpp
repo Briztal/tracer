@@ -1,5 +1,5 @@
 /*
-  ContinuousActions.cpp - Part of TRACER
+  PWMGPIO.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,7 +18,7 @@
 
 */
 
-#include "ContinuousActions.h"
+#include "PWMGPIO.h"
 #include <hardware_language_abstraction.h>
 #include <EEPROM/EEPROMStorage.h>
 #include <Control/Control.h>
@@ -27,10 +27,10 @@
 //------------------------------------------- Init -------------------------------------------
 
 /*
- * initialise_hardware : this function sets GPIO mode to output for every pwm.
+ * initialise_hardware : this function sets Actuators mode to output for every pwm.
  */
 
-void ContinuousActions::initialise_hardware() {
+void PWMGPIO::initialise_hardware() {
 
     //Disable every PWM.
 
@@ -48,7 +48,7 @@ void ContinuousActions::initialise_hardware() {
  * initialise_hardware : this function initialises all PWMs.
  */
 
-void ContinuousActions::initialise_data() {
+void PWMGPIO::initialise_data() {
 
     //Disable every PWM.
 
@@ -68,7 +68,7 @@ void ContinuousActions::initialise_data() {
  * set_power : this function sets a particular action's power.
  */
 
-void ContinuousActions::set_power(uint8_t action, float power) {
+void PWMGPIO::set_power(uint8_t action, float power) {
 
     //Verify the the action exists
     if (action >= NB_CONTINUOUS)
@@ -95,7 +95,7 @@ void ContinuousActions::set_power(uint8_t action, float power) {
  * get_state : returns a particular action's state.
  */
 
-bool ContinuousActions::get_state(uint8_t action) {
+bool PWMGPIO::get_state(uint8_t action) {
 
     //Verify the the action exists;
     if (action >= NB_CONTINUOUS) {
@@ -115,7 +115,7 @@ bool ContinuousActions::get_state(uint8_t action) {
  * stop : this function stops a particular action.
  */
 
-void ContinuousActions::stop(uint8_t action) {
+void PWMGPIO::stop(uint8_t action) {
 
     //Verify the the action exists
     if (action >= NB_CONTINUOUS)
@@ -140,7 +140,7 @@ void ContinuousActions::stop(uint8_t action) {
 //------------------------------------------- Setup by action -------------------------------------------
 
 #define CONTINUOUS(i, name, pin, ...) \
-void ContinuousActions::set_power_##i (float power) {\
+void PWMGPIO::set_power_##i (float power) {\
     /*Get the maximum value;*/\
     float max = EEPROMStorage::continuous_data[i].max;\
     \
@@ -161,12 +161,12 @@ void ContinuousActions::set_power_##i (float power) {\
 }\
 \
 /*Get the state of a particular action (by id);*/\
-bool ContinuousActions::get_state_##i () {\
+bool PWMGPIO::get_state_##i () {\
     return states[i];\
 }\
 \
 /*Stop a particular action, by id;*/\
-void ContinuousActions::stop_##i() {\
+void PWMGPIO::stop_##i() {\
     debug("STOPPING");\
     analog_write(pin,0);\
     states[i] = false;\
@@ -181,4 +181,4 @@ void ContinuousActions::stop_##i() {\
 //------------------------------------------- States -------------------------------------------
 
 bool t_b_cont[NB_CONTINUOUS];
-bool *const ContinuousActions::states = t_b_cont;
+bool *const PWMGPIO::states = t_b_cont;

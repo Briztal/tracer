@@ -46,11 +46,11 @@ void ControlLoops::initialisation_function_temperature() {
 
 void ControlLoops::loop_function_temperature() {
 
-    disable_loop_interrupt_0();
+    disable_loop_0_interrupt();
 
     TemperatureController::temperature_regulation();
 
-    enable_loop_interrupt_0();
+    enable_loop_0_interrupt();
 
 }
 

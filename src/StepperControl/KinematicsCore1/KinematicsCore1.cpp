@@ -153,7 +153,7 @@ float KinematicsCore1::compute_us_time_for_sub_movement(k1_sub_movement_data *su
 
         //STEP_AND_WAIT;
 
-        //Actions setting
+        //Actuators setting
         //K1Physics::setActionsSpeeds(); TODO
 
         sub_movement_time = new_sub_movement_time;

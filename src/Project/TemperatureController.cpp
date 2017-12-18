@@ -57,7 +57,7 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
         } else {
 
            //Disable the hotend
-            ContinuousActions::set_power(hotend_id, 0);
+            PWMGPIO::set_power(hotend_id, 0);
 
             //Mark the hotend as disabled
             hotends_enabled[hotend_id] = false;
@@ -158,7 +158,7 @@ task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
             //If the bed must be disabled
 
             //Disable the hotend
-            ContinuousActions::set_power_5(0);
+            PWMGPIO::set_power_5(0);
 
             //Mark the regulation as disabled
             hotbed_state.enabled = false;
@@ -245,7 +245,7 @@ void TemperatureController::temperature_regulation() {
         float output = PID::compute_##name(error);\
         \
         /*Set the power output.*/\
-        ContinuousActions::set_power_##i(output);\
+        PWMGPIO::set_power_##i(output);\
         \
     }
 
@@ -265,7 +265,7 @@ void TemperatureController::temperature_regulation() {
 /*
  * regulation_finalisation : this function is called when the temperature regulation is aborted.
  *
- *  It resets targets, PIDs, and Actions.
+ *  It resets targets, PIDs, and Actuators.
  *
  */
 
@@ -281,11 +281,11 @@ void TemperatureController::regulation_finalisation() {
     PID::reset_all();
 
     //Set all powers to zero
-    ContinuousActions::set_power_0(0);
-    ContinuousActions::set_power_1(0);
-    ContinuousActions::set_power_2(0);
-    ContinuousActions::set_power_3(0);
-    ContinuousActions::set_power_4(0);
+    PWMGPIO::set_power_0(0);
+    PWMGPIO::set_power_1(0);
+    PWMGPIO::set_power_2(0);
+    PWMGPIO::set_power_3(0);
+    PWMGPIO::set_power_4(0);
 
 }
 

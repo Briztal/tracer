@@ -74,8 +74,8 @@ Task pool :
 
         | 1  2  3  5  6  _  _  _  _  _  _  _  |
 
-        With this procedure, we are sure that a task at the index i in the task pool has been added before tasks > i,
-            and after tasks < i.
+        With this procedure, we are sure that a task at the index timer_index in the task pool has been added before tasks > timer_index,
+            and after tasks < timer_index.
 
 
 When the scheduler receives a task with a non-255 type it enqueues it in the appropriate sequence.

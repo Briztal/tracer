@@ -29,13 +29,13 @@
 #include <stdint.h>
 #include <config.h>
 
-class ContinuousActions {
+class PWMGPIO {
 
     //------------------------------------------- Init -------------------------------------------
 
 public:
 
-    //Set GPIO mode;
+    //Set Actuators mode;
     static void initialise_hardware();
 
     //initialise all PWMs to zero:

@@ -31,7 +31,7 @@
 #include "Steppers.h"
 #include "IncrementComputer.h"
 #include "TrajectoryTracer.h"
-#include <Actions/ContinuousActions.h>
+#include <Actuators/PWMGPIO.h>
 #include <hardware_language_abstraction.h>
 
 #if (KERNEL == 0)
@@ -51,12 +51,12 @@
 //---------------------------------------------------- Init -----------------------------------------------------
 
 /*
- * Initialise the steppers GPIO;
+ * Initialise the steppers Actuators;
  */
 
 void StepperController::initialise_hardware() {
 
-    //The only class that requires hardware initialisation is the Stepper class. Tool are Continuous Actions;
+    //The only class that requires hardware initialisation is the Stepper class. Tool are Continuous Actuators;
     Steppers::initialise_hardware();
 
 }

@@ -554,12 +554,12 @@ task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
         if (new_state.enabled) {
 
             //If the cooling must be enabled, enable it.
-            ContinuousActions::set_power_5(cooling_state.power);
+            PWMGPIO::set_power_5(cooling_state.power);
 
         } else {
 
             //If the cooling must be stopped, stop it.
-            ContinuousActions::stop_0();
+            PWMGPIO::stop_0();
 
         }
     }

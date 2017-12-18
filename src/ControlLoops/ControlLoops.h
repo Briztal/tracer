@@ -36,16 +36,16 @@ public:\
     /*enable function, enables the loop (interrupt and timer).*/\
     static inline void enable_##name(){\
         initialisation_function_##name();\
-        setup_loop_interrupt_##indice(loop_function_##name, period_ms);\
+        setup_loop_##indice##_interrupt(loop_function_##name, period_ms);\
     }\
     /*disable function, disables the loop (interrupt and timer).*/\
     static inline void disable_##name(){\
         finalisation_function_##name();\
-        disable_loop_interrupt_##indice();\
+        disable_loop_##indice##_interrupt();\
     }\
     /*state function : returns true if the loop is enabled.*/\
     static inline bool is_active_##name() {\
-        return is_loop_enabled_##indice();\
+        return is_loop_##indice##_enabled();\
     }\
     \
 private:\

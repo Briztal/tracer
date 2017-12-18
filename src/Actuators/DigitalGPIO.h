@@ -1,5 +1,5 @@
 /*
-  ServoActions.h -  Part of TRACER
+  BinaryActions.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,32 +18,33 @@
 
 */
 
-#ifndef CODE_SERVOACTIONS_H
-#define CODE_SERVOACTIONS_H
+#ifndef CODE_BINARYACTIONS_H
+#define CODE_BINARYACTIONS_H
 
-/*
-#include "../External/Servo.h"
 
-class ServoActions {
+class DigitalGPIO {
+
+public :
+
+    //Set up GPIOs in output mode;
+    static void initialise_hardware();
+
+    //Reset Actuators to zero;
+    static void initialise_data();
 
 public:
 
-#define SERVO(k1_position_indice, name, pin, beginning, ending) \
-    static void set##k1_position_indice(float f);
+    //Set and reset pins;
+#define BINARY(i, name, pin, ev) \
+    static void enable##i();\
+    static void disable##i();
 
-#include "../config_files.h"
-#undef SERVO
+#include <Config/actions_config.h>
 
-private:
+#undef BINARY
 
-#define SERVO(k1_position_indice, name, pin, beginning, ending) \
-    static Servo* servo##k1_position_indice;
-
-#include "../config_files.h"
-#undef SERVO
-
-    void initialise_hardware();
 };
 
-*/
-#endif //CODE_SERVOACTIONS_H
+#endif //CODE_BINARYACTIONS_H
+
+

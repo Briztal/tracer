@@ -43,7 +43,7 @@ class StepperController {
 
 public:
 
-    //Initialise the steppers GPIO;
+    //Initialise the steppers Actuators;
     static void initialise_hardware();
 
     //Initialise all modules;

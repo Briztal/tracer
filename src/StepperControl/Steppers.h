@@ -34,10 +34,10 @@ class Steppers {
 
 public:
 
-    //Initialise GPIO
+    //Initialise Actuators
     static void initialise_hardware();
 
-    //Reset GPIO
+    //Reset Actuators
     static void initialise_data();
 
 

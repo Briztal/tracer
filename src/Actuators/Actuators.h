@@ -21,15 +21,15 @@
 #ifndef TRACER_ACTIONS_H
 #define TRACER_ACTIONS_H
 
-#include "BinaryActions.h"
-#include "ContinuousActions.h"
+#include "DigitalGPIO.h"
+#include "PWMGPIO.h"
 
 /*
  * This class is a simple formalisation. I use it to centralise hardware and
  *  data initialisation for all Action classes
  */
 
-class Actions {
+class Actuators {
 
 public:
 
@@ -37,13 +37,13 @@ public:
     static inline void initialise_hardware() {
 
         //Initialise Binary actions;
-        BinaryActions::initialise_hardware();
+        DigitalGPIO::initialise_hardware();
 
         //Initialise Binary actions;
-        ContinuousActions::initialise_hardware();
+        PWMGPIO::initialise_hardware();
 
         //Initialise Binary actions;
-        //TODO ServoActions::initialise_hardware();
+        //TODO Servo::initialise_hardware();
 
     }
 
@@ -51,13 +51,13 @@ public:
     static inline void initialise_data() {
 
         //Initialise Binary actions;
-        BinaryActions::initialise_data();
+        DigitalGPIO::initialise_data();
 
         //Initialise Binary actions;
-        ContinuousActions::initialise_data();
+        PWMGPIO::initialise_data();
 
         //Initialise Binary actions;
-        //TODO ServoActions::initialise_data();
+        //TODO Servo::initialise_data();
 
     }
 };

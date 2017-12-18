@@ -26,7 +26,7 @@
 #include <StepperControl/TrajectoryTracer.h>
 #include <Control/Control.h>
 #include <Sensors/Sensors.h>
-#include <Actions/Actions.h>
+#include <Actuators/Actuators.h>
 #include <StepperControl/StepperController.h>
 #include "Kernel.h"
 
@@ -100,7 +100,7 @@ void Kernel::initialise_hardware() {
     Control::initialise_hardware();
 
     //Initialise actions;
-    Actions::initialise_hardware();
+    Actuators::initialise_hardware();
 
     //Initialise Sensors
     Sensors::initialise_hardware();
@@ -134,7 +134,7 @@ void Kernel::initialise_data() {
     Control::initialise_data();
 
     //Initialise actions;
-    Actions::initialise_data();
+    Actuators::initialise_data();
 
     //Initialise Sensors
     Sensors::initialise_data();

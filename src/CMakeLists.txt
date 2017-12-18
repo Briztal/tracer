@@ -174,7 +174,7 @@ add_library(protocols
 #-------------------------------------------------ACTIONS---------------------------------------------------------------
 
 
-set(AP "Actions")
+set(AP "Actuators")
 include_directories(${AP}/)
 
 add_library(actions

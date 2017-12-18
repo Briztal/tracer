@@ -18,18 +18,18 @@
 
 */
 
-#include "BinaryActions.h"
+#include "DigitalGPIO.h"
 
 
-#include "../hardware_language_abstraction.h"
+#include <hardware_language_abstraction.h>
 
 
 
 /*
- * This function will set up GPIO in the correct mode;
+ * This function will set up Actuators in the correct mode;
  */
 
-void BinaryActions::initialise_hardware() {
+void DigitalGPIO::initialise_hardware() {
 
     //Set the pin in output mode;
 #define BINARY(i, name, pin, ev) pin_mode_output(pin, 0);
@@ -41,9 +41,9 @@ void BinaryActions::initialise_hardware() {
 }
 
 /*
- * This function will reset GPIO at their zero value;
+ * This function will reset Actuators at their zero value;
  */
-void BinaryActions::initialise_data() {
+void DigitalGPIO::initialise_data() {
 
     //Write a logical zero in the pin;
 #define BINARY(i, name, pin, ev) digital_write(pin, 0);

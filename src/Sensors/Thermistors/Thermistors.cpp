@@ -25,7 +25,7 @@
 //------------------------------------------- Init -------------------------------------------
 
 /*
- * initialise_hardware : this function sets all Thermistors GPIO to input mode;
+ * initialise_hardware : this function sets all Thermistors Actuators to input mode;
  */
 
 void Thermistors::initialise_hardware() {

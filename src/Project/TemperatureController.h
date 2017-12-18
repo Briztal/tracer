@@ -33,7 +33,7 @@
 
 #include <Sensors/Thermistors/Thermistors.h>
 #include <ControlLoops/PID.h>
-#include <Actions/ContinuousActions.h>
+#include <Actuators/PWMGPIO.h>
 #include "TemperatureController.h"
 #include <TaskScheduler/TaskScheduler.h>
 

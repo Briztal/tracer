@@ -27,7 +27,7 @@
 #include "SubMovementManager.h"
 #include <Control/Control.h>
 #include <StepperControl/StepperController.h>
-#include <Actions/ContinuousActions.h>
+#include <Actuators/PWMGPIO.h>
 #include <StepperControl/Steppers.h>
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>

@@ -72,10 +72,6 @@
 #define HL_EEPROM_FLAG
 
 
-//------------------------------------------------INITIALISATION--------------------------------------------------------
-
-//initialise_hardware function : this function initialises the hardware, and disables timers
-void hl_init();
 
 //----------------------------------------------------STRING------------------------------------------------------------
 
@@ -113,8 +109,9 @@ void hl_init();
 #define sqrt_float(f) sqrtf(f)
 #define sqrt_long(l) sqrtf(l)
 
-#define min(a,b) (((a)<(b)) ? (a) : (b))
-#define max(a,b) (((a)<(b)) ? (b) : (a))
+#define min(a, b) (((a)<(b)) ? (a) : (b))
+#define max(a, b) (((a)<(b)) ? (b) : (a))
+
 
 //--------------------------------------------------INTERRUPTS----------------------------------------------------------
 
@@ -147,126 +144,122 @@ static inline static void delay_ms(uint16_t time_ms){
 }*/
 #define delay_us(us) delayMicroseconds(us)
 
-//--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
-//The frequency of the timer :
-#define STEPPER_TIMER_FREQUENCY (float) 1000000.0
+//--------------------------------------- Timers ----------------------------------------------
 
-#define STEPPER_TIMER_TICS_PER_UNIT ((float) ((float) F_BUS / STEPPER_TIMER_FREQUENCY ))
+#define TICS_PER_UNIT(frequency) ((float) ((float) F_BUS / (frequency) ))
 
-#define STEPPER_TIMER_MAX_PERIOD ((float) (UINT32_MAX / STEPPER_TIMER_TICS_PER_UNIT))
+#define MAX_PERIOD(frequency) ((float) (UINT32_MAX / TICS_PER_UNIT(frequency)))
 
-//Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
-#define set_stepper_int_period(period_timer_unit)\
-     {PIT_LDVAL0 = (uint32_t) (((uint32_t)period_timer_unit > STEPPER_TIMER_MAX_PERIOD) ?\
-        STEPPER_TIMER_MAX_PERIOD : (STEPPER_TIMER_TICS_PER_UNIT * (period_timer_unit - (float) 1.0)));};
+#define PERIOD_TO_RELOAD(period_timer_unit, frequency) ((uint32_t) (((uint32_t)(period_timer_unit) > MAX_PERIOD(frequency)) ? MAX_PERIOD(frequency) : (TICS_PER_UNIT(frequency) * ((period_timer_unit) - (float) 1.0))))
 
-//Enabling interrupt
-#define enable_stepper_interrupt() PIT_TCTRL0 |= PIT_TCTRL_TIE;
+// /Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
+#define SET_INTERRUPT_PERIOD(period_timer_unit, frequency, timer_index) {PIT_LDVAL##timer_index = PERIOD_TO_RELOAD(period_timer_unit, frequency);};
 
+#define SET_INTERRUPT_RELOAD(reload, timer_index) {PIT_LDVAL##timer_index = reload;};
 
-//Disabling interrupt
-#define disable_stepper_interrupt() PIT_TCTRL0 &= ~PIT_TCTRL_TIE;
-
-
-//Enabling timer
-#define enable_stepper_timer() PIT_TCTRL0 |= PIT_TCTRL_TEN;
+#define ENABLE_INTERRUPT(timer_index) PIT_TCTRL##timer_index |= PIT_TCTRL_TIE;
+#define IS_LOOP_ENABLED(timer_index)  ((PIT_TCTRL##timer_index & PIT_TCTRL_TIE)&(PIT_TCTRL##timer_index & PIT_TCTRL_TEN))
+#define DISABLE_INTERRUPT(timer_index) PIT_TCTRL##timer_index &= 5;
+#define ENABLE_TIMER(timer_index) PIT_TCTRL##timer_index |= PIT_TCTRL_TEN;
+#define DISABLE_TIMER(timer_index) PIT_TCTRL##timer_index &= 6;
+#define TIMER_FLAG_GET(timer_index) PIT_TFLG##timer_index
+#define TIMER_FLAG_RESET(timer_index) PIT_TFLG##timer_index = PIT_TFLG_TIF;
+#define CLEAN_INTERRUPT(timer_index) {disable_timer_##timer_index(); disable_interrupt_##timer_index();};
 
 
-//Disabling timer
-#define disable_stepper_timer() PIT_TCTRL0 &= ~PIT_TCTRL_TEN;
+//Define the period setters for all 4 timers;
+#define set_int_period_0(period) SET_INTERRUPT_PERIOD(period, TIMER_0_FREQUENCY, 0)
+#define set_int_period_1(period) SET_INTERRUPT_PERIOD(period, TIMER_1_FREQUENCY, 1)
+#define set_int_period_2(period) SET_INTERRUPT_PERIOD(period, TIMER_2_FREQUENCY, 2)
+#define set_int_period_3(period) SET_INTERRUPT_PERIOD(period, TIMER_3_FREQUENCY, 3)
 
+//Define the reload converters for all 4 timers;
+#define period_to_reload_0(reload) PERIOD_TO_RELOAD(reload, 0)
+#define period_to_reload_1(reload) PERIOD_TO_RELOAD(reload, 1)
+#define period_to_reload_2(reload) PERIOD_TO_RELOAD(reload, 2)
+#define period_to_reload_3(reload) PERIOD_TO_RELOAD(reload, 3)
 
-//Flag management
-#define stepper_int_flag PIT_TFLG0
-#define stepper_int_flag_clear() PIT_TFLG0 = PIT_TFLG_TIF;
-
-
-//Function setting
-void set_stepper_int_function(void (*f)());
-
-
-//Complete setup (long)
-void setup_stepper_interrupt(void (*function)(void), uint32_t period_us);
-
-
-//Complete clean
-#define clean_stepper_interrupt() {disable_stepper_interrupt();disable_stepper_timer();}
-
-
-//---------------------------------------Control_loops_Milliseconds_Timers----------------------------------------------
-
-#define NB_CONTROL_LOOP_TIMERS 3
-
-//Period macros
-
-#define MS_TICS_PER_MS (uint32_t) (F_BUS / 1000)
-
-#define MS_TIMER_MAX_PERIOD (uint32_t) (UINT32_MAX / MS_TICS_PER_MS)
-
-
-//Loops periods settings
-#define SET_LOOP_PERIOD(i, period_ms)\
-     {PIT_LDVAL##i = ((uint32_t)period_ms > MS_TIMER_MAX_PERIOD) ?\
-        MS_TIMER_MAX_PERIOD :  (uint32_t) ((MS_TICS_PER_MS) * (uint32_t)period_ms - 1);};
-
-#define ENABLE_LOOP_INTERRUPT(i) PIT_TCTRL##i |= PIT_TCTRL_TIE;
-#define DISABLE_LOOP_INTERRUPT(i) PIT_TCTRL##i &= 5;
-#define ENABLE_LOOP_TIMER(i) PIT_TCTRL##i |= PIT_TCTRL_TEN;
-#define DISABLE_LOOP_TIMER(i) PIT_TCTRL##i &= 6;
-#define CLEAN_LOOP_INTERRUPT(i) {disable_loop_timer_##i(); disable_loop_interrupt_##i();};
-#define IS_LOOP_ENABLED(i)  ((PIT_TCTRL##i & PIT_TCTRL_TIE)&(PIT_TCTRL##i & PIT_TCTRL_TEN))
-
-#define set_loop_int_period_0(period_ms) SET_LOOP_PERIOD(1, period_ms)
-#define set_loop_int_period_1(period_ms) SET_LOOP_PERIOD(2, period_ms)
-#define set_loop_int_period_2(period_ms) SET_LOOP_PERIOD(3, period_ms)
-
+//Define the reload setters for all 4 timers;
+#define set_int_reload_0(reload) SET_INTERRUPT_RELOAD(reload, 0)
+#define set_int_reload_1(reload) SET_INTERRUPT_RELOAD(reload, 1)
+#define set_int_reload_2(reload) SET_INTERRUPT_RELOAD(reload, 2)
+#define set_int_reload_3(reload) SET_INTERRUPT_RELOAD(reload, 3)
 
 //Enabling loop interrupts
-#define enable_loop_interrupt_0() ENABLE_LOOP_INTERRUPT(1)
-#define enable_loop_interrupt_1() ENABLE_LOOP_INTERRUPT(2)
-#define enable_loop_interrupt_2() ENABLE_LOOP_INTERRUPT(3)
+#define enable_interrupt_0() ENABLE_INTERRUPT(0)
+#define enable_interrupt_1() ENABLE_INTERRUPT(1)
+#define enable_interrupt_2() ENABLE_INTERRUPT(2)
+#define enable_interrupt_3() ENABLE_INTERRUPT(3)
 
 
 //Disabling loops interrupts
-#define disable_loop_interrupt_0() DISABLE_LOOP_INTERRUPT(1)
-#define disable_loop_interrupt_1() DISABLE_LOOP_INTERRUPT(2)
-#define disable_loop_interrupt_2() DISABLE_LOOP_INTERRUPT(3)
+#define disable_interrupt_0() DISABLE_INTERRUPT(0)
+#define disable_interrupt_1() DISABLE_INTERRUPT(1)
+#define disable_interrupt_2() DISABLE_INTERRUPT(2)
+#define disable_interrupt_3() DISABLE_INTERRUPT(3)
 
-
-//Loops states
-#define is_loop_enabled_0() IS_LOOP_ENABLED(0)
-#define is_loop_enabled_1() IS_LOOP_ENABLED(1)
-#define is_loop_enabled_2() IS_LOOP_ENABLED(2)
 
 //Enabling loop timers
-#define enable_loop_timer_0() ENABLE_LOOP_TIMER(1)
-#define enable_loop_timer_1() ENABLE_LOOP_TIMER(2)
-#define enable_loop_timer_2() ENABLE_LOOP_TIMER(3)
+#define enable_timer_0() ENABLE_TIMER(0)
+#define enable_timer_1() ENABLE_TIMER(1)
+#define enable_timer_2() ENABLE_TIMER(2)
+#define enable_timer_3() ENABLE_TIMER(3)
 
 
 //Disabling loop timers
-#define disable_loop_timer_0() DISABLE_LOOP_TIMER(1)
-#define disable_loop_timer_1() DISABLE_LOOP_TIMER(2)
-#define disable_loop_timer_2() DISABLE_LOOP_TIMER(3)
+#define disable_timer_0() DISABLE_TIMER(0)
+#define disable_timer_1() DISABLE_TIMER(1)
+#define disable_timer_2() DISABLE_TIMER(2)
+#define disable_timer_3() DISABLE_TIMER(3)
+
+
+//Controlling if loop is enabled
+#define is_timer_loop_enabled_0() ENABLE_TIMER(0)
+#define is_timer_loop_enabled_1() ENABLE_TIMER(1)
+#define is_timer_loop_enabled_2() ENABLE_TIMER(2)
+#define is_timer_loop_enabled_3() ENABLE_TIMER(3)
+
+
+//get flags
+#define timer_flag_0() TIMER_FLAG_GET(0)
+#define timer_flag_1() TIMER_FLAG_GET(1)
+#define timer_flag_2() TIMER_FLAG_GET(2)
+#define timer_flag_3() TIMER_FLAG_GET(3)
+
+
+//get flags
+#define reset_timer_flag_0() TIMER_FLAG_RESET(0)
+#define reset_timer_flag_1() TIMER_FLAG_RESET(1)
+#define reset_timer_flag_2() TIMER_FLAG_RESET(2)
+#define reset_timer_flag_3() TIMER_FLAG_RESET(3)
 
 
 //Function setting
-void set_loop_function_0(void (*f)());
-void set_loop_function_1(void (*f)());
-void set_loop_function_2(void (*f)());
+void set_interrupt_function_0(void (*f)());
+
+void set_interrupt_function_1(void (*f)());
+
+void set_interrupt_function_2(void (*f)());
+
+void set_interrupt_function_3(void (*f)());
 
 
 // Complete setups (long)
-void setup_loop_interrupt_0(void (*function)(void), uint32_t period_ms);
-void setup_loop_interrupt_1(void (*function)(void), uint32_t period_ms);
-void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
+void setup_interrupt_0(void (*function)(void), uint32_t period_ms);
+
+void setup_interrupt_1(void (*function)(void), uint32_t period_ms);
+
+void setup_interrupt_2(void (*function)(void), uint32_t period_ms);
+
+void setup_interrupt_3(void (*function)(void), uint32_t period_ms);
 
 
 //Complete cleans : disables timers and interrupts
-#define clean_loop_interrupt_0() CLEAN_LOOP_INTERRUPT(0)
-#define clean_loop_interrupt_1() CLEAN_LOOP_INTERRUPT(1)
-#define clean_loop_interrupt_2() CLEAN_LOOP_INTERRUPT(2)
+#define clean_interrupt_0() CLEAN_INTERRUPT(0)
+#define clean_interrupt_1() CLEAN_INTERRUPT(1)
+#define clean_interrupt_2() CLEAN_INTERRUPT(2)
+#define clean_interrupt_3() CLEAN_INTERRUPT(3)
 
 
 //------------------------------------------------PHYSICAL LINKS--------------------------------------------------------
@@ -275,11 +268,11 @@ void setup_loop_interrupt_2(void (*function)(void), uint32_t period_ms);
 #define SERIAL_CLASS_ADAPTER(name, serial)\
 class name {\
 public:\
-    static inline void begin() {serial.begin(115200);}\
-    static inline uint16_t available() {return (uint16_t)serial.available();}\
-    static inline void write(char c) {serial.print(c);}\
-    static inline char read() {return (char)serial.read();}\
-    static inline void send_str(string_t c) {serial.print(c);}\
+    static inline void begin() {(serial).begin(115200);}\
+    static inline uint16_t available() {return (uint16_t)(serial).available();}\
+    static inline void write(char c) {(serial).print(c);}\
+    static inline char read() {return (char)(serial).read();}\
+    static inline void send_str(string_t c) {(serial).print(c);}\
 };
 
 /*
@@ -288,8 +281,11 @@ public:\
 
 
 SERIAL_CLASS_ADAPTER(usb_serial, Serial)
+
 SERIAL_CLASS_ADAPTER(serial1, Serial1)
+
 SERIAL_CLASS_ADAPTER(serial2, Serial2)
+
 SERIAL_CLASS_ADAPTER(serial3, Serial3)
 
 

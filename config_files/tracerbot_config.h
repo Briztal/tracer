@@ -155,7 +155,7 @@ LOOP_FUNCTION(1, ts,    105);
 //TODO DOC ABOUT I MEANING (need to have an indice to process data from logger)
 
 
-/* Binary Actions (on - off)
+/* Binary Actuators (on - off)
  * For each actuator you want to control in on-off mode, put one line like behind and provide the four required parameter
  * BINARY(i, name, powerPin, enableValue)
  */
@@ -168,7 +168,7 @@ BINARY(1, binary2, 9, 1)
 #endif
 
 
-/* Continuous Actions : a power command, output in [|0, 255|]
+/* Continuous Actuators : a power command, output in [|0, 255|]
  * For each actuator you want to control in linear, put one line like behind and provide the three required parameter
  * CONTINUOUS(i, name, powerPin, maxValue)
  */
@@ -183,7 +183,7 @@ CONTINUOUS(2, continuous3, 8, 600)
 
 #endif
 
-/* Servomotor Actions
+/* Servomotor Actuators
  * For each servo you want to control, put one line like behind and provide the three required parameter
  * SERVO(i, name, dataPin, minValue, maxValue)
  */

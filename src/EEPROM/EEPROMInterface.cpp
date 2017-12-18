@@ -41,10 +41,10 @@
  *      1 : Loops
  *          indice :
  *              period_ms
- *      2 : Continuous Actions
+ *      2 : Continuous Actuators
  *          indice
  *              maximum
- *      3 : Servo Actions
+ *      3 : Servo Actuators
  *          indice
  *              minimum
  *              maximum
@@ -127,8 +127,8 @@ void EEPROMInterface::print_stored_data() {
 
     std_out("\n---------------------\n");
 
-    //Continuous Actions
-    std_out("Continuous Actions : \n");
+    //Continuous Actuators
+    std_out("Continuous Actuators : \n");
     for (int continuous = 0; continuous < NB_CONTINUOUS; continuous++) {
         continuous_data_t *data = ES::continuous_data + continuous;
         std_out("\tContinuous " + str(continuous) + " : maximum : \t" + str(data->max));
@@ -136,8 +136,8 @@ void EEPROMInterface::print_stored_data() {
 
     std_out("\n---------------------\n");
 
-    //Servo Actions
-    std_out("Servo Actions : \n");
+    //Servo Actuators
+    std_out("Servo Actuators : \n");
     for (int servo = 0; servo < NB_SERVOS; servo++) {
         servo_data_t *data = ES::servos_data + servo;
         std_out("Loop " + str(servo));
@@ -227,7 +227,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     EEPROMNode *tree2;
     uint8_t root_id = 0;
 
-    //-------------------Actions-------------------
+    //-------------------Actuators-------------------
 
     //Continuous actions
 
@@ -552,7 +552,7 @@ void EEPROMInterface::send_structure() {
 
 #endif
 
-    //---------------------------------------------Continuous Actions---------------------------------------------
+    //---------------------------------------------Continuous Actuators---------------------------------------------
 
     EEPROM_LOWER(CONTINUOUS_CAT, binaries);
     //For each Continuous Action, mark a case for the maximum value.
@@ -565,7 +565,7 @@ void EEPROMInterface::send_structure() {
 
     EEPROM_UPPER;
 
-    //---------------------------------------------Servo Actions---------------------------------------------
+    //---------------------------------------------Servo Actuators---------------------------------------------
     EEPROM_LOWER(SERVO_CAT, continuous);
     //For each Servo Action, mark a case for the minimum and maximum values.
 #define SERVO(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, min_value);EEPROM_LEAF(1, max_value);EEPROM_UPPER;

@@ -250,7 +250,7 @@ private:
 //The delay_us macros, used in the function below.
 
 #define WAIT\
-    while(!stepper_int_flag) {}\
+    while(!stepper_int_flag()) {}\
         stepper_int_flag_clear();
 
 #define CTE TrajectoryTracer

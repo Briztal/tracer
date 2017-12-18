@@ -19,7 +19,7 @@
 */
 
 #include "EEPROMStorage.h"
-#include "../Actions/ContinuousActions.h"
+#include <Actuators/PWMGPIO.h>
 
 #include <Config/stepper_control_config.h>
 #include <Config/actions_config.h>
@@ -109,11 +109,11 @@ bool EEPROMStorage::extract_profile() {
 
 #endif
 
-    //Write Continuous Actions maximums :
+    //Write Continuous Actuators maximums :
     read_data(index, NB_CONTINUOUS * sizeof(continuous_data_t), (uint8_t*)continuous_data);
 
 
-    //Write Servo Actions minimums and maximums :
+    //Write Servo Actuators minimums and maximums :
     read_data(index, NB_SERVOS * sizeof(servo_data_t), (uint8_t*)servos_data);
 
 
@@ -162,11 +162,11 @@ void EEPROMStorage::write_profile() {
 
 #endif
 
-    //Write Continuous Actions maximums :
+    //Write Continuous Actuators maximums :
     write_data(index, NB_CONTINUOUS * sizeof(continuous_data_t), (uint8_t*) continuous_data);
 
 
-    //Write Servo Actions minimums and maximums :
+    //Write Servo Actuators minimums and maximums :
     write_data(index, NB_SERVOS * sizeof(servo_data_t), (uint8_t*) servos_data);
 
 
@@ -238,7 +238,7 @@ void EEPROMStorage::set_default_profile() {
 
 #undef PID
 
-    //Control loops periods
+    //Control loops reloads
 #define  LOOP_FUNCTION(index, name, period_ms)\
     loop_periods[index] = period_ms;
 
@@ -249,7 +249,7 @@ void EEPROMStorage::set_default_profile() {
 #endif
 
 
-    //---------------------------------------------Actions---------------------------------------------
+    //---------------------------------------------Actuators---------------------------------------------
 
     //Continuous ending
 #define CONTINUOUS(i, name, powerPin, maxValue)\
@@ -263,7 +263,7 @@ void EEPROMStorage::set_default_profile() {
     
     servo_data_t *servo_p;
 
-#define SERVO(i, name, dataPin, minValue, maxValue)\
+#define SERVO(i, name, dataPin, minValue, maxValue, p_min, p_max)\
     servo_p = servos_data+(i);\
     servo_p->min = minValue;\
     servo_p->max = maxValue;
@@ -309,7 +309,7 @@ float *const m::loop_periods = tlp;
 
 #endif
 
-//Actions
+//Actuators
 continuous_data_t tcnt[NB_CONTINUOUS];
 continuous_data_t *const m::continuous_data = tcnt;
 

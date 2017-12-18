@@ -36,8 +36,8 @@
  *
  *      - PIDs (kp, ki, kd);
  *      - Control Loops (period_ms)
- *      - Continuous Actions (ending)
- *      - Servo Actions(min and ending)
+ *      - Continuous Actuators (ending)
+ *      - Servo Actuators(min and ending)
  *      - Stepper Motors (sizes, steps/unit, regulation_speed, acceleration)
  *      - Cartesian Speed Groups (steps/mm, regulation_speed, acceleration ...)
  *      - Custom data you may have specified in your config_files.h
@@ -108,7 +108,7 @@ public :
 #endif
 
 
-    //--------------------------------------------------Actions---------------------------------------------------------
+    //--------------------------------------------------Actuators---------------------------------------------------------
 
 public :
 
