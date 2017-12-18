@@ -37,7 +37,7 @@ public:
     static inline void initialise_hardware() {
 
         //Initialise Binary actions;
-        //TODO BinaryActions::initialise_hardware();
+        BinaryActions::initialise_hardware();
 
         //Initialise Binary actions;
         ContinuousActions::initialise_hardware();
@@ -51,7 +51,7 @@ public:
     static inline void initialise_data() {
 
         //Initialise Binary actions;
-        //TODO BinaryActions::initialise_data();
+        BinaryActions::initialise_data();
 
         //Initialise Binary actions;
         ContinuousActions::initialise_data();

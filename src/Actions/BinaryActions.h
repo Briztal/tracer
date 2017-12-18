@@ -24,8 +24,17 @@
 
 class BinaryActions {
 
+public :
+
+    //Set up GPIOs in output mode;
+    static void initialise_hardware();
+
+    //Reset GPIO to zero;
+    static void initialise_data();
+
 public:
 
+    //Set and reset pins;
 #define BINARY(i, name, pin, ev) \
     static void enable##i();\
     static void disable##i();
