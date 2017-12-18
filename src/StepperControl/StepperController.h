@@ -1,5 +1,5 @@
 /*
-  StepperController.h - Part of TRACER
+  StepperAbstraction.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,85 +18,145 @@
 
 */
 
+
+/*
+ * StepperController : this class is the interface between the kernel and the
+ *
+ *  It is also in charge of the current position storage.
+ *
+ */
+
 #include <config.h>
+#include <stdint.h>
+#include <TaskScheduler/task_state_t.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef CODE_STEPPER_CONTROLLER_H
-#define CODE_STEPPER_CONTROLLER_H
+#ifndef TRACER_STEPPER_ABSTRACTION_H
+#define TRACER_STEPPER_ABSTRACTION_H
 
-#include <stdint.h>
 
 class StepperController {
 
+    //---------------------------------------------------- Init -----------------------------------------------------
 
 public:
 
-    //Initialise pins
-    static void init();
+    //Initialise the steppers GPIO;
+    static void initialise_hardware();
 
+    //Initialise all modules;
+    static void initialise_data();
 
-    //-------------------------------------------------------Power------------------------------------------------------
-
-public:
-
-    //Enable a specific group of steppers, and disable the others.
-    static void enable(sig_t signature);
-
-    //Enable all steppers
-    static void enable();
-
-    //Disable all steppers
-    static void disable();
-
-
-    //----------------------------------------------------Directions----------------------------------------------------
-
-public:
-
-    //Set the directions of all steppers, according to signatures
-    static void set_directions(sig_t negative_signatures);
 
 private:
 
-    //The current direction signature
-    static sig_t direction_signature;
+    //Initialise local data;
+    static void _initialise_data();
 
 
-    //--------------------------------------------------------Step------------------------------------------------------
-
-public:
-
-    //Step a specific group of steppers
-    static void fastStep(sig_t id);
-
-
-    //----------------------------------------------------Position log--------------------------------------------------
-
-    //Only if the position log is enabled
-#ifdef position_log
+    //----------------------------------------------------Movements-----------------------------------------------------
 
 public:
 
-    //Send the position through the main interface
-    static void send_position();
+    //The basic linear movement, from the current position to the destination position;
+    static task_state_t linear_movement(float *destination);
 
-private:
+    //If the selected kernel is kernel2, then we must register other movements;
+    //TODO
 
-    //Increment and position for every stepper
-#define STEPPER(i, ...) \
-    static int32_t incr##i;\
-    public:static int32_t pos##i;\
 
-#include  <config.h>
+    //--------------------------------------------current_stepper_positions---------------------------------------------
 
-#undef STEPPER
+public :
 
-#endif
+    //The function to get the current position;
+    static void get_current_position(float *const position);
+
+    //The function to update the current position;
+    static void update_position(const float *const new_position);
+
+
+private :
+
+    //The current high level position;
+    static float *current_position;
+
+
+    //------------------------------------------Coordinate_Systems_Translation------------------------------------------
+
+public:
+
+    //The function to translate a high level position into stepper positions;
+    static void translate(const float *const hl_coordinates, float *const steppers_coordinates);
+
+    //The function to get stepper positions for a particular trajectory at a particular point;
+    static void get_stepper_positions_for(void (*trajectory_function)(float, float*), float point, float *steppers_positions);
+
+
+    //-------------------------------------------------Speed_Management-------------------------------------------------
+
+public :
+
+    //The function to get the current speed group;
+    static uint8_t get_speed_group();
+
+    //The function to set the current speed group;
+    static void set_speed_group(uint8_t speed_group);
+
+    //The function to get the current regulation_speed, for the current regulation_speed group;
+    static float get_speed();
+
+    //The function to get the current regulation_speed, for the speed group provided;
+    static float get_speed(uint8_t speed_group);
+
+    //The function to set the regulation_speed for the provided regulation_speed group;
+    static task_state_t set_speed_for_group(uint8_t speed_group, float new_speed);
+
+    //function to compute the high level movement distance for a particular speed group;
+    static float get_movement_distance_for_group(uint8_t speed_group, const float *const distances);
+
+
+private :
+
+    //The regulation_speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the regulation_speed group j. Compiler constant.
+    static const int8_t *const speed_groups_indices;
+
+    //the current target speeds, indexed on speed groups
+    static float *const speeds;
+
+    //the maximum speeds, indexed on speed groups
+    static float *const max_speeds;
+
+    //The current speed group
+    static uint8_t speed_group;
+
+
+    //-------------------------------------------------Tools_Management-------------------------------------------------
+
+public :
+
+    //Set the energy density for a particular tool;
+    static void set_energy_density(uint8_t tool_index, float power);
+
+    //Get the signature of tools enabled, and appropriate energy densities
+    static sig_t get_tools_data(float *energy_densities);
+
+    //Update functions that will be used to control power in real time;
+    static uint8_t set_tools_updating_function(sig_t tools_signature, void (**updating_functions)(float));
+
+    //Stop all tools;
+    static void stop_tools(sig_t stop_signature);
+
+
+private :
+
+    //Energy densities;
+    static float *tools_energy_densities;
 
 };
 
 
-#endif
+#endif //TRACER_STEPPER_ABSTRACTION_H
 
 #endif

@@ -24,7 +24,7 @@
 
 #include <interface.h>
 #include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/StepperController.h>
+#include <StepperControl/Steppers.h>
 #include "LinearMovement.h"
 
 
@@ -159,7 +159,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
     //Calculate and fill the regulation_speed data
     SpeedPlanner::pre_set_speed_axis(max_axis, distsmm, sqrt_sq_dist_sum, dists, regulation_speed, PROCESSING_STEPS);
 
-    TrajectoryExecuter::fill_processors(initialise_motion, StepperController::fastStep, process_position, process_speed);
+    TrajectoryExecuter::fill_processors(initialise_motion, Steppers::fastStep, process_position, process_speed);
 
     return max_axis;
 
@@ -168,7 +168,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
 
 void LinearMovement::step_and_delay(uint8_t sig) {
     //simple_delay(delay0);
-    StepperController::fastStep(sig);
+    Steppers::fastStep(sig);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ void LinearMovement::enqueue_movement(uint32_t *dists) {
 }
 
 /*
- * The position processing initialise_data function : it sets parameters required to process position :
+ * The position processing initialise_hardware function : it sets parameters required to process position :
  *  - slopes
  *  - shift_nb
  */

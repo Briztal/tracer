@@ -25,14 +25,14 @@
 #include "../../../config.h"
 #include "EEPROM/EEPROMStorage.h"
 #include "HomingMovement.h"
-#include "../../StepperController.h"
+#include "StepperControl/Steppers.h"
 
 #define step 10
 
 void HomingMovement::move() {
 
     //Enable all steppers
-    StepperController::enable(255);
+    Steppers::enable(255);
 
     //First step is to generate the signature for all axis;
     sig_t signature = 0;
@@ -43,8 +43,8 @@ void HomingMovement::move() {
 #define STEPPER(i, sig, rel, ...) \
         if (!rel) {\
             signature|=sig;\
-            StepperController::setDir##i(true);\
-            StepperController::setDir##i(false);\
+            Steppers::setDir##i(true);\
+            Steppers::setDir##i(false);\
         }
 
 #include "../../../config_files.h"
@@ -70,12 +70,12 @@ void HomingMovement::move() {
     /*
     while (signature) {
         for (int s = 0; s < step - 1; s++) {
-            StepperController::fastStep(signature);
+            Steppers::fastStep(signature);
             timeline += delay;
             while (micros() < timeline) {}
         }
 
-        StepperController::fastStep(signature);
+        Steppers::fastStep(signature);
 
         signature = readEndStops();
         delay = getMaxDelay(signature, delays);

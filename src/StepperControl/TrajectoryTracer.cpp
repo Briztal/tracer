@@ -26,13 +26,70 @@
 #include "IncrementComputer.h"
 #include "SubMovementManager.h"
 #include <Control/Control.h>
-#include <StepperControl/MachineInterface.h>
-#include <Actions/ContinuousActions.h>
 #include <StepperControl/StepperController.h>
+#include <Actions/ContinuousActions.h>
+#include <StepperControl/Steppers.h>
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <StepperControl/JerkPlanner.h>
 #include <Kernel.h>
+
+
+/*
+ * initialise_data : this function initialises the class to a safe state;
+ */
+
+void TrajectoryTracer::initialise_data() {
+
+    //Reset the state;
+    started = false;
+
+    //Reset status flags;
+    emergency_stop_flag = stop_programmed = final_sub_movement_started = movement_queue_lock_flag = false;
+
+    //Clear the movement data queue;
+    movement_data_queue.clear();
+
+    //Reset signature arrays;
+    memset(es0, 0, 8 * sizeof(sig_t));
+    memset(es1, 0, 8 * sizeof(sig_t));
+
+    //Reset elementary signature environment;
+    saved_elementary_signatures = es0;
+    is_es_0 = true;
+
+    //Reset the future trajectory index;
+    saved_trajectory_index = 0;
+
+    //Reset the current trajectory index;
+    trajectory_index = 0;
+
+    //The future direction signature;
+    next_direction_signature = 0;
+
+    //Reset the movement change environment;
+    movement_switch_flag = false;
+    movement_switch_counter = 0;
+
+    //Reset the function called when the current movement will be finalised;
+    movement_finalisation = nullptr;
+
+    //Reset the current step period;
+    delay_us = 0;
+
+    //Reset the current number of tool;
+    tools_nb = 0;
+
+    //Reset the current energy density array
+    tools_energy_densities = tools_energy_densities_storage;
+
+    //Reset the index of the next energy density array in the queue;
+    next_tools_powers_index = 0;
+
+    //Reset the currently enabled tools signature;
+    current_tools_signature = 0;
+
+}
 
 //--------------------------------------------- Movement queue management ----------------------------------------------
 
@@ -97,10 +154,10 @@ void TrajectoryTracer::start() {
 
     debug("Movements procedure started.");
 
-    Kinematics::initialise_tracing_procedure();
+    Kinematics::start_tracing_procedure();
 
     //Enable all steppers;
-    StepperController::enable();
+    Steppers::enable();
 
     //Initialise the end booleans;
     stop_programmed = false;
@@ -128,7 +185,6 @@ void TrajectoryTracer::start() {
     if (!emergency_stop_flag) {
         enable_stepper_interrupt();
     }
-
 
 
 }
@@ -161,7 +217,7 @@ void TrajectoryTracer::stop() {
     movement_queue_lock_flag = false;
 
     //Display the steppers position;
-    StepperController::send_position();
+    Steppers::send_position();
 
     //Notify that the movement is stopped;
     debug("Movement Stopped");
@@ -253,7 +309,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
         //Send an error message.
         std_out("Error in TrajectoryTracer::enqueue_movement : "
-                         "The movement queue was locked when the function was called.");
+                        "The movement queue was locked when the function was called.");
 
         //Emergency stop;
         Kernel::emergency_stop();
@@ -303,14 +359,14 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //Set the current insertion position in the linear_powers storage, as the same position than in movement_data_queue;
     float *tools_linear_powers =
-            tools_linear_powers_storage + NB_CONTINUOUS * movement_data_queue.get_insertion_index(&queue_flag);
+            tools_energy_densities_storage + NB_CONTINUOUS * movement_data_queue.get_insertion_index(&queue_flag);
 
     //Integrity check :
     if (!queue_flag) {
 
         //Log;
         std_out("Error in TrajectoryTracer::enqueue_movement : "
-                         "The element at the insertion index was already allocated.");
+                        "The element at the insertion index was already allocated.");
 
         //Emergency Stop;
         Kernel::emergency_stop();
@@ -321,7 +377,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     }
 
     //Get the action signature and fill the linear_powers storage.
-    current_movement->tools_signatures = MachineInterface::get_tools_data(tools_linear_powers);
+    current_movement->tools_signatures = StepperController::get_tools_data(tools_linear_powers);
 
 
 
@@ -338,7 +394,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //---------------Kinematics variable data-----------------
 
-    //Let the kinematics manager initialise_data kinetics data;
+    //Let the kinematics manager initialise_hardware kinetics data;
     Kinematics::initialise_kinetics_data(current_movement);
 
 
@@ -440,7 +496,7 @@ void TrajectoryTracer::discard_movement() {
 
         //Log;
         std_out("Error in TrajectoryTracer::discard_movement : "
-                         "The discarded element was not allocated.");
+                        "The discarded element was not allocated.");
 
         //Emergency stop;
         Kernel::emergency_stop();
@@ -750,7 +806,7 @@ sig_t *TrajectoryTracer::initialise_sub_movement() {
     saved_trajectory_index = trajectory_index;
 
     //Set the correct direction;
-    StepperController::set_directions(next_direction_signature);
+    Steppers::set_directions(next_direction_signature);
 
     //update the interrupt period with the float delay_us, that is computed to provide the most accurate period;
     set_stepper_int_period(delay_us);
@@ -846,7 +902,7 @@ int k2_position_indice = 4;
  *  This procedure comprises the following steps :
  *      - change the trajectory function;
  *      - change the trajectory variables (beginning, ending, index)
- *      - initialise_data the new movement
+ *      - initialise_hardware the new movement
  *
  *
  *
@@ -865,7 +921,7 @@ void TrajectoryTracer::finish_sub_movement() {
     disable_stepper_interrupt();
 
     //Get the correct signature;
-    StepperController::fastStep(saved_elementary_signatures[trajectory_array[saved_trajectory_index]]);
+    Steppers::fastStep(saved_elementary_signatures[trajectory_array[saved_trajectory_index]]);
 
     //If the current sub_movement is finished :
     if (!saved_trajectory_index--) {
@@ -972,13 +1028,13 @@ void TrajectoryTracer::update_tools_data(const movement_data_t *movement) {
     sig_t stop_signature = current_tools_signature & (~next_tools_signature);
 
     //Stop these tools;
-    MachineInterface::stop_tools(stop_signature);
+    StepperController::stop_tools(stop_signature);
 
     //Update the tool number and the update functions;
-    tools_nb = MachineInterface::set_tools_updating_function(next_tools_signature, tools_update_functions);
+    tools_nb = StepperController::set_tools_updating_function(next_tools_signature, tools_update_functions);
 
     //update linear powers;
-    tools_linear_powers = tools_linear_powers_storage + NB_CONTINUOUS * next_tools_powers_index;
+    tools_energy_densities = tools_energy_densities_storage + NB_CONTINUOUS * next_tools_powers_index;
 
     //update the tools signature;
     current_tools_signature = next_tools_signature;
@@ -1008,7 +1064,7 @@ void TrajectoryTracer::update_tools_powers(float speed) {
 
     //Update each tool power with the value 'regulation_speed * linear_power';
     for (uint8_t action = 0; action < tools_nb; action++) {
-        (*tools_update_functions[action])(tools_linear_powers[action] * speed);
+        (*tools_update_functions[action])(tools_energy_densities[action] * speed);
     }
 
 }
@@ -1019,21 +1075,25 @@ void TrajectoryTracer::update_tools_powers(float speed) {
 //TODO COMMENT
 #define m TrajectoryTracer
 
-//Acceleration Fields
-
+//The machine state;
 volatile bool m::started = false;
 
-//
+//The emergency stop flag;
 volatile bool m::emergency_stop_flag = false;
 
-
+//The stop flag;
 bool m::stop_programmed = false;
+
+//The final sub_movement flag;
 bool m::final_sub_movement_started = false;
+
+//The lock flag of the movement queue;
 bool m::movement_queue_lock_flag = false;
 
-
+//The movement data queue;
 Queue<movement_data_t> m::movement_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
+//The trajectory array;
 uint8_t ctraj[255] = {
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 5,
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 6,
@@ -1043,42 +1103,63 @@ uint8_t ctraj[255] = {
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 6,
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 5,
         0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0};
-
 const uint8_t *const m::trajectory_array = ctraj;
 
-sig_t tces0[8], tces1[8];
+//Signature switch buffers
+sig_t tces0[8]{0}, tces1[8]{0};
 sig_t *const m::es0 = tces0, *const m::es1 = tces1;
 bool m::is_es_0;
 
+//The elementary signature array;
+sig_t *m::saved_elementary_signatures = tces0;
+
+//Trajectory beginning indices;
 const uint8_t ctti[8]{0, 2, 6, 14, 30, 62, 126, 254};
 const uint8_t *const m::trajectory_beginning_indices = ctti;
 
-sig_t *m::saved_elementary_signatures = tces0;
-uint8_t m::saved_trajectory_index;
-uint8_t m::trajectory_index;
+//The future trajectory index;
+uint8_t m::saved_trajectory_index = 0;
 
-sig_t m::next_direction_signature;
+//The current trajectory index;
+uint8_t m::trajectory_index = 0;
 
-void (*m::movement_finalisation)();
+//The future direction signature;
+sig_t m::next_direction_signature = 0;
 
+//The flag for a future movement change;
+bool m::movement_switch_flag = false;
+
+//The number of sub_movements before movement change;
+uint8_t m::movement_switch_counter = 0;
+
+//The function called when the current movement will be finalised;
+void (*m::movement_finalisation)() = nullptr;
+
+//The current step period;
 float m::delay_us = 0;
 
-uint8_t m::tools_nb;
+//The current number of tool;
+uint8_t m::tools_nb = 0;
 
+//The array of functions;
 void (*k2tf[NB_CONTINUOUS]);
 
 void (**m::tools_update_functions)(float) = (void (**)(float)) k2tf;
 
+//Queue for tools energy densities
 float t_a_ls[NB_CONTINUOUS * MOVEMENT_DATA_QUEUE_SIZE];
-float *const m::tools_linear_powers_storage = t_a_ls;
+float *const m::tools_energy_densities_storage = t_a_ls;
 
-float *m::tools_linear_powers;
+//The current energy density array
+float *m::tools_energy_densities = t_a_ls;
 
+//The index of the next energy density array in the queue;
 uint8_t m::next_tools_powers_index = 0;
+
+//Currently enabled tools;
 sig_t m::current_tools_signature = 0;
 
-bool m::movement_switch_flag = false;
-uint8_t m::movement_switch_counter = 0;
+
 
 
 #undef m

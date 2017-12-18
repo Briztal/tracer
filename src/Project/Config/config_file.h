@@ -30,10 +30,10 @@
 
 
 //Uncomment this line to enable the terminal interface.
-#define ENABLE_TERMINAL_INTERFACE
+//#define ENABLE_TERMINAL_INTERFACE
 
 //Uncomment this line to enable the gcode interface.
-//#define ENABLE_GCODE_INTERFACE
+#define ENABLE_GCODE_INTERFACE
 
 //Uncomment this line to enable the program interface.
 //#define ENABLE_PROGRAM_INTERFACE
@@ -66,7 +66,7 @@
 
 #ifdef EXTERNAL_CONTROL
 
-EXTERNAL_CONTROL(Terminal, ClearText, 100, usb_serial)
+EXTERNAL_CONTROL(GCode, ClearText, 100, usb_serial)
 
 #endif
 
@@ -411,6 +411,10 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 //The maximum number of pre-processable movements.
 #define MOVEMENT_DATA_QUEUE_SIZE 20
+
+
+//The maximum number of pre-processable movements.
+#define SUB_MOVEMENT_DATA_QUEUE_SIZE 40
 
 //The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
 #define MAX_CURVE_POINTS 5

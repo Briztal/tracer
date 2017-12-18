@@ -20,11 +20,14 @@
 
 #include <Sensors/Thermistors/Thermistors.h>
 #include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/StepperController.h>
+#include <StepperControl/Steppers.h>
 #include <ControlLoops/ControlLoops.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Control/Control.h>
+#include <Sensors/Sensors.h>
+#include <Actions/Actions.h>
+#include <StepperControl/StepperController.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -33,7 +36,7 @@
 /*
  * start : this function is called once, by main only. It is the project's entry point.
  *
- *  It will call initialise_data, and then call iterate indefinitely.
+ *  It will call initialise_hardware, and then call iterate indefinitely.
  */
 
 void Kernel::start() {
@@ -69,18 +72,6 @@ void Kernel::start() {
     //Initialise the environment;
     initialise_data();
 
-    /*
-    while (true) {
-
-        digitalWrite(13, !(bool) digitalRead(13));
-        delay(1000);
-        GCode::echo("SUUS");
-
-    }
-
-     */
-
-
     //Logo and initialise_hardware message
     Control::initialisation_message();
 
@@ -97,7 +88,7 @@ void Kernel::start() {
 /*
  * initialise_hardware : this function is called once, by start only. It is the project initialisation function.
  *
- *  As its name suggests, it will initialise_data every module of the code.
+ *  As its name suggests, it will initialise_hardware every module of the code.
  */
 
 void Kernel::initialise_hardware() {
@@ -108,16 +99,16 @@ void Kernel::initialise_hardware() {
     //Initialise all enabled interfaces
     Control::initialise_hardware();
 
-    //Initialise Thermistors
-    Thermistors::init();
+    //Initialise actions;
+    Actions::initialise_hardware();
 
-    //Initialise the EEPROM data
-    EEPROMStorage::init();
+    //Initialise Sensors
+    Sensors::initialise_hardware();
 
-    //Initialise the StepperController module only if it is enabled
+    //Initialise the SteppersController module only if it is enabled
 #ifdef ENABLE_STEPPER_CONTROL
 
-    StepperController::init();
+    StepperController::initialise_hardware();
 
 #endif
 
@@ -131,13 +122,30 @@ void Kernel::initialise_hardware() {
 /*
  * initialise_hardware : this function is called once, by start only. It is the project initialisation function.
  *
- *  As its name suggests, it will initialise_data every module of the code.
+ *  As its name suggests, it will initialise_hardware every module of the code.
  */
 
 void Kernel::initialise_data() {
 
     //Initialise all enabled interfaces
     Control::initialise_data();
+
+    //Initialise actions;
+    Actions::initialise_data();
+
+    //Initialise Sensors
+    Sensors::initialise_data();
+
+    //Initialise the EEPROM data
+    EEPROMStorage::initialise_data();
+
+
+    //Initialise the SteppersController module only if it is enabled
+#ifdef ENABLE_STEPPER_CONTROL
+
+    StepperController::initialise_data();
+
+#endif
 
 }
 

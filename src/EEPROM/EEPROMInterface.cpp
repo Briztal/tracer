@@ -408,7 +408,7 @@ bool EEPROMInterface::search_tree_by_string(char *data_in, float **data) {
         //If the current word matches the current_tree's name
         if (!strcmp(c, word)) {
 
-            //Re-initialise_data the current data
+            //Re-initialise_hardware the current data
             current_tree = current_sub_tree;
             sub_nodes = current_tree->sub_nodes;
 

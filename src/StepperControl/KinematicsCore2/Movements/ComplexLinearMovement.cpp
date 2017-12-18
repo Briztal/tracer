@@ -25,7 +25,7 @@
 
 #include "ComplexLinearMovement.h"
 
-#include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Kernel.h>
 #include <Control/Control.h>
@@ -124,7 +124,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
         }
 
         //Update the final position
-        MachineInterface::update_position(destination);
+        StepperController::update_position(destination);
 
 
         //Start the Movement if not already done.
@@ -155,7 +155,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
 
 
     //Get the current position
-    MachineInterface::get_current_position(position);
+    StepperController::get_current_position(position);
 
     //Initialise the maximum axis and maximum distance.
     uint8_t max_axis = 0;

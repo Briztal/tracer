@@ -116,7 +116,7 @@ void PI::prepare_EEPROM_packet() {
 //--------------------------------------------------Packet Emission-----------------------------------------------------
 
 /*
- * prepare_data_out : the function to init a the next outgoing packet.
+ * prepare_data_out : the function to initialise_data a the next outgoing packet.
  *
  * It sets the command id bytes, and initialises the data_out size.
  */
@@ -407,7 +407,7 @@ void PI::accept_data() {
             //If a BEGIN_CHAR has just been detected :
 
             if (r == BEGIN_CHAR) {
-                //Second time initialise_hardware byte is detected : not a initialise_data symbol.
+                //Second time initialise_hardware byte is detected : not a initialise_hardware symbol.
 
                 //Clear the flag
                 first_detected = false;

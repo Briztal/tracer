@@ -48,7 +48,7 @@ class EEPROMStorage {
 
 public :
 
-    static void init();
+    static void initialise_data();
 
     //----------------------------------------------EEPROM methods------------------------------------------------------
 

@@ -1,4 +1,32 @@
 
+//TODO ERROR :
+
+// COMMAND : G01 Z200
+ok
+// debug Movements procedure started.
+// PREPARING FIRST
+// ERROR : IN SubMovementManager::read_next_sub_movement : THE SUB_MOVEMENT QUEUE IS EMPTY
+// pos : 0 0
+// pos : 1 0
+// pos : 2 0
+// pos : 3 0
+// pos : 4 0
+// pos : 5 0
+// pos : 6 0
+// pos : 7 0
+// pos : 8 0
+
+Diagnosis : negative positions are problematic;
+
+
+//TODO EMERGENCY STOP DOESN'T WORK, BECAUSE THE FIELD IS RESET BEFORE A NEW INTERRUPTION OCCURS.
+    -> INITIALISE EMERGENCY STOP A TRUE (REMOVE EMERGENCY STOP, USE STOP INSTEAD)
+    -> DELAY BEFORE RETURNING EMERGENCY_STOP;
+
+//TODO MAKE AN INITIALISATION FUNCTION IN ControlLoops
+
+//TODO INITIALISATION FOR SERVOS
+
 //TODO PID_AUTOTUNE
 
 //TODO SD SUPPORT

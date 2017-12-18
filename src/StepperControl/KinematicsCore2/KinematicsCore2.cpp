@@ -27,13 +27,36 @@
 #include "K2Physics.h"
 
 #include <StepperControl/TrajectoryTracer.h>
-#include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
+#include <StepperControl/Steppers.h>
 #include <Control/Control.h>
 
+//------------------------------------------- Initialisation --------------------------------------------
+
+/*
+ * initialise_data : this function intialises the module and its physics manager to a safe state;
+ */
+
+void KinematicsCore2::initialise_data() {
+
+    //Reset the high level position;
+    memset(current_hl_position, 0, NB_AXIS * sizeof(float));
+
+    //Reset the speed group;
+    movement_speed_group = 0;
+
+    //Reset the regulation speed;
+    next_regulation_speed = 0;
+
+    //Initialise the physics manager;
+    K2Physics::initialise_data();
+
+}
 
 
-void KinematicsCore2::initialise_tracing_procedure() {
+//------------------------------------------- Start --------------------------------------------
+
+void KinematicsCore2::start_tracing_procedure() {
     K2Physics::start();
 }
 
@@ -52,8 +75,8 @@ void KinematicsCore2::initialise_tracing_procedure() {
 void KinematicsCore2::initialise_kinetics_data(k2_movement_data *movement_data) {
 
     //Initialisation of regulation_speed variables
-    movement_data->speed = MachineInterface::get_speed();
-    movement_data->speed_group = MachineInterface::get_speed_group();
+    movement_data->speed = StepperController::get_speed();
+    movement_data->speed_group = StepperController::get_speed_group();
 
 }
 
@@ -117,7 +140,8 @@ void KinematicsCore2::initialise_sub_movement(k2_sub_movement_data *sub_movement
     }
 
     //Compute the movement distance for the current regulation_speed group
-    sub_movement_data->movement_distance = MachineInterface::get_movement_distance_for_group(movement_speed_group, high_level_distances);
+    sub_movement_data->movement_distance = StepperController::get_movement_distance_for_group(movement_speed_group,
+                                                                                              high_level_distances);
 
 
     //Update the regulation_speed for the real-time processor
@@ -160,7 +184,7 @@ float KinematicsCore2::compute_us_time_for_first_sub_movement(k2_sub_movement_da
     TrajectoryTracer::update_tools_powers(working_carriage_speed);
     //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
-    return (float)1000000 * time;
+    return (float) 1000000 * time;
 
 }
 
@@ -206,7 +230,7 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
     TrajectoryTracer::update_tools_powers(working_carriage_speed);
     //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
 
-    return (float)1000000 * time;
+    return (float) 1000000 * time;
 }
 
 
@@ -225,7 +249,7 @@ void KinematicsCore2::send_position() {
 
     //Send the current high level position
     //CI::send_position(current_hl_position);
-    //StepperController::send_position();
+    //Steppers::send_position();
 
 
 }
@@ -240,7 +264,7 @@ float *const KinematicsCore2::current_hl_position = t_rl_pos;
 //Speed group for the current movement
 uint8_t KinematicsCore2::movement_speed_group = 0;
 
-//Regulation speed for the current movement
+//Regulation speed for the next movement
 float KinematicsCore2::next_regulation_speed = 0;
 
 

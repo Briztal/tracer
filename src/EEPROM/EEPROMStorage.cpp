@@ -24,12 +24,12 @@
 
 
 /*
- * initialise_data : this function initialises properly the EEPROM cache :
+ * initialise_hardware : this function initialises properly the EEPROM cache :
  *  It reads the profile saved in the EEPROM, and if it is corrupted, resets the default profile.
  *
  */
 
-void EEPROMStorage::init() {
+void EEPROMStorage::initialise_data() {
     set_default_profile();
     write_profile();
 

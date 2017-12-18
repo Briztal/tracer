@@ -9,8 +9,19 @@
 
 class Thermistors {
 
+
+    //------------------------------------------- Init -------------------------------------------
+
 public :
-    static void init();
+
+    //GPIO Init
+    static void initialise_hardware();
+
+    //Data initialise_data : no static fields or output to reset;
+    static void initialise_data() {}
+
+
+    //------------------------------------------- Getters -------------------------------------------
 
 #define THERMISTOR(i, name, pin, type)\
 public:\
@@ -22,16 +33,20 @@ private:\
 
 #include <config.h>
 
-
 #undef THERMISTOR
+
+
+    //------------------------------------------- Temperature Processing -------------------------------------------
 
 private:
 
     //Get the temperature for a reading, a lookup table and its size, and the previous index read_data.
-    static float get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index);
+    static float
+    get_temperature(const int16_t read_value, const float *const table, const uint8_t size, uint8_t *v_index);
 
     //Make a linear approximation of the ordinate,  with two given points and an abscissa.
-    static float linear_approximation(const int16_t x0, const int16_t x1, const int16_t x,  const float y0, const float y1);
+    static float
+    linear_approximation(const int16_t x0, const int16_t x1, const int16_t x, const float y0, const float y1);
 
 };
 

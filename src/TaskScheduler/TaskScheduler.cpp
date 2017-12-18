@@ -26,7 +26,7 @@ PONEY
 #include "TaskScheduler.h"
 
 #include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/StepperController.h>
+#include <StepperControl/Steppers.h>
 #include <ControlLoops/ControlLoops.h>
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>

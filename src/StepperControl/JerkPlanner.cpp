@@ -25,7 +25,7 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 
-#include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
 #include <StepperControl/_kinematics_data.h>
 #include <EEPROM/EEPROMStorage.h>
 #include "JerkPlanner.h"
@@ -122,7 +122,7 @@ void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement
     void (*trajectory_function)(float, float *) = current_movement->pre_process_trajectory_function;
 
     //Get the jerk position;
-    MachineInterface::get_stepper_positions_for(trajectory_function, beginning, stepper_positions);
+    StepperController::get_stepper_positions_for(trajectory_function, beginning, stepper_positions);
 
     //cache var for jerk pos;
     int32_t *jerk_pos = previous_movement->jerk_position;
@@ -164,7 +164,7 @@ void JerkPlanner::get_ending_jerk_ratios(float *final_steps_distances, const uin
 
     //First, determine the inverse of the high level distance for the sub_movement;
     float distance_inverse =
-            1 / MachineInterface::get_movement_distance_for_group(speed_group, final_steps_distances);
+            1 / StepperController::get_movement_distance_for_group(speed_group, final_steps_distances);
 
     //Then, update the end ratios :
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -185,10 +185,10 @@ void JerkPlanner::get_stepper_distances(const float p0, const float p1, void (*t
     float t0[NB_STEPPERS]{0}, t1[NB_STEPPERS]{0};
 
     //Get the stepper position for the point p0;
-    MachineInterface::get_stepper_positions_for(trajectory_function, p0, t0);
+    StepperController::get_stepper_positions_for(trajectory_function, p0, t0);
 
     //Get the stepper position for the point p1;
-    MachineInterface::get_stepper_positions_for(trajectory_function, p1, t1);
+    StepperController::get_stepper_positions_for(trajectory_function, p1, t1);
 
     //Get distances;
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -209,7 +209,7 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
 
     //First, determine the inverse of th high level distance for the sub_movement;
     float distance_inverse =
-            (float) 1 / MachineInterface::get_movement_distance_for_group(speed_group, initial_steps_distances);
+            (float) 1 / StepperController::get_movement_distance_for_group(speed_group, initial_steps_distances);
 
     //The maximum speed;
     float maximum_speed = 0;

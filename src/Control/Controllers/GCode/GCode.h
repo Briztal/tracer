@@ -40,7 +40,7 @@ public :
     //Send the initialisation message
     static void init_message();
 
-    //Data initialise_hardware function;
+    //Data initialisation function;
     static void initialise_data(Protocol *protocol);
 
 

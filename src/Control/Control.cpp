@@ -33,7 +33,7 @@ void Control::initialise_hardware() {
     //A macro that will initialise the interface for a giver control pipeline;
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission) transmission::begin();
 
-    //Expand the init;
+    //Expand the initialise_hardware;
 #include <config.h>
 
     //Undef the macro for safety;
@@ -62,7 +62,7 @@ void Control::initialisation_message() {
 
 
 /*
- * initialise_data : this function initialises data for all enabled controllers.
+ * initialise_hardware : this function initialises data for all enabled controllers.
  *
  *  It creates a new Protocol, and gives it to the controller, that will initialise its data accordingly;
  */
@@ -98,7 +98,7 @@ void Control::initialise_external_controllers() {
     /*Initialise the new protocol;*/\
     controller::initialise_data(p);
 
-    //Expand the init;
+    //Expand the initialise_hardware;
 #include <config.h>
 
     //Undef the macro for safety;

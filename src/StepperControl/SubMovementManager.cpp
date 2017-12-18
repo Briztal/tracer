@@ -1,13 +1,67 @@
-//
-// Created by root on 03/09/17.
-//
+/*
+  SubMovementManager.h - Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #include "SubMovementManager.h"
-#include "MachineInterface.h"
+#include "StepperController.h"
 #include "TrajectoryTracer.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <Control/Control.h>
+
+
+/*
+ * initialise all fields;
+ */
+
+void SubMovementManager::initialise_data() {
+
+    //Reset the current stepper position;
+    memset(current_stepper_positions, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the sub movement data queue;
+    sub_movement_queue.clear();
+
+    //Reset Indexation variables
+    index_limit = index = increment = 0;
+    positive_index_dir = false;
+
+    //Reset the trajectory function
+    get_new_position = nullptr;
+
+    //Reset the queue flag state
+    movement_last_position_processed_flag = false;
+
+    //Reset the end distances;
+    memset(end_distances, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the current end position;
+    memset(end_position, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the current jerk position;
+    memset(jerk_position, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the current jerk distances;
+    memset(jerk_distances, 0, NB_STEPPERS * sizeof(float));
+
+}
+
 
 /*
  * initialise_movement : this function is called when the current movement is finished.
@@ -201,7 +255,7 @@ void SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
     get_new_position(local_index_candidate, sub_movement_data->candidate_high_level_positions);
 
     //Translate the high level position into steppers position;
-    MachineInterface::translate(sub_movement_data->candidate_high_level_positions,
+    StepperController::translate(sub_movement_data->candidate_high_level_positions,
                                 sub_movement_data->future_steppers_positions);
 
     //Call the Kinematics Manager, to fill the kernel-reserved part of the data.
@@ -429,7 +483,7 @@ void SubMovementManager::update_end_position(const float *const new_hl_position)
 
     float stepper_end_position[NB_STEPPERS];
 
-    MachineInterface::translate(new_hl_position, stepper_end_position);
+    StepperController::translate(new_hl_position, stepper_end_position);
 
     if (TrajectoryTracer::started) {
         disable_stepper_interrupt();
@@ -501,13 +555,12 @@ void SubMovementManager::update_end_jerk_distances(const sig_t negative_signatur
 
 #define m SubMovementManager
 
-
 //Current stepper position;
 float t_cur_pos[NB_STEPPERS]{0};
 float *const m::current_stepper_positions = t_cur_pos;
 
 //movement data queue;
-Queue<sub_movement_data_t> m::sub_movement_queue(MOVEMENT_DATA_QUEUE_SIZE);
+Queue<sub_movement_data_t> m::sub_movement_queue(SUB_MOVEMENT_DATA_QUEUE_SIZE);
 
 
 //Indexation variables
@@ -515,7 +568,7 @@ float m::index_limit = 0, m::index = 0, m::increment = 0;
 bool m::positive_index_dir = false;
 
 //Trajectory function
-void (*m::get_new_position)(float, float *);
+void (*m::get_new_position)(float, float *) = nullptr;
 
 //Queue state
 bool m::movement_last_position_processed_flag = false;

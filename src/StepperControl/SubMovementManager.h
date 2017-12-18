@@ -1,6 +1,32 @@
-//
-// Created by root on 03/09/17.
-//
+/*
+  SubMovementManager.h - Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+/*
+ * SubMovementManager : This class handles the entire processing of a movement.
+ *
+ *  The Trajectory Tracer feeds it with movements, that are progressively processed.
+ *
+ *  It maintains a sub_movement queue full, so that the steppers can keep moving.
+ *
+ *  It also handles the proximity with and jerk points.
+ */
 
 #ifndef TRACER_SUBMOVEMENTMANAGER_H
 #define TRACER_SUBMOVEMENTMANAGER_H
@@ -11,9 +37,15 @@
 
 class SubMovementManager {
 
+    //------------------------------------------- initialisation --------------------------------------------
+
+public:
+
+    //Initialise all fields to their safe value;
+    static void initialise_data();
+
 
     //--------------------------------------------current_stepper_positions---------------------------------------------
-
 
 private:
 
@@ -23,13 +55,13 @@ private:
     //Remark : the current stepper position is the translation if the high level positions, by StepperAbstraction.
 
 
-//-----------------------------------------------Sub_movement_queue-------------------------------------------------
-
+    //-----------------------------------------------Sub_movement_queue-------------------------------------------------
 
 private:
 
     //The sub_movements queue
     static Queue<sub_movement_data_t> sub_movement_queue;
+
 
 public :
 
@@ -43,16 +75,15 @@ public :
 
     //-----------------------------------------Current_Movement_Variables-----------------------------------------------
 
-    static void display_distances();
-
 public :
 
-    //The function to initialise_data all movement variables, during the movement change.
+    static void display_distances();
+
+    //The function to initialise_hardware all movement variables, during the movement change.
     static uint8_t update_current_movement(movement_data_t *sub_movement_data);
 
 
 private :
-
 
     //The movement index and its limit
     static float index, index_limit;
@@ -76,6 +107,7 @@ private :
 
 
 public :
+
     /*
      * position pushing functions :
      *  As the pushing procedure is costly, it is divided in two procedures. They must be called one after the other
@@ -103,7 +135,6 @@ public :
     static void discard_sub_movement();
 
 
-
     //---------------------------------------High_level_and_Low_level_distances-----------------------------------------
 
 private :
@@ -113,8 +144,6 @@ private :
 
     //A constant array containing every axis signature
     static const sig_t *const axis_signatures;
-
-
 
 
     //---------------------------------------------------End_Distances--------------------------------------------------
@@ -153,6 +182,7 @@ public:
 
     //the stepper jerk step_distances;
     static int32_t *const jerk_distances;
+
 
 private:
 

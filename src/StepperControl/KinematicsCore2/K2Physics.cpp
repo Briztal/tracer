@@ -30,17 +30,56 @@
 
 #include <hardware_language_abstraction.h>
 #include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
+
+//------------------------------------------- Initialisation --------------------------------------------
+
+/*
+ * initialise_data : this function initialises the module in a safe state;
+ */
+
+void K2Physics::initialise_data() {
+
+    //Reset the deceleration flag;
+    deceleration_required = false;
+
+    //Reset the global regulation_speed;
+    last_time = 0;
+
+    //Reset the steppers speed;
+    memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the deceleration distances;
+    memset(deceleration_distances, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the deceleration constants;
+    memset(deceleration_constants, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the delta constants;
+    memset(delta_speed_constants, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the speed constants;
+    memset(max_speed_constants, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the jerk offsets;
+    memset(jerk_offsets, 0, NB_STEPPERS * sizeof(float));
+
+}
+
+//------------------------------------------- Start --------------------------------------------
+
+/*
+ * start : this function initialises correctly the speed constants;
+ */
 
 void K2Physics::start() {
 
-    //initialise_data speeds and step_distances to zeros.
+    //initialise_hardware speeds and step_distances to zeros.
     memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
     memset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
 
     //Pre compute the regulation_speed constants
     pre_compute_speed_constants();
-
 
 }
 
@@ -48,7 +87,8 @@ void K2Physics::start() {
 //-----------------------------------------------Speed_Management-------------------------------------------------------
 
 /*
- * TODO
+ * get_first_sub_movement_time : this function determines the correct time, for the first sub movement
+ *  passed in argument.
  */
 
 float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_data) {
@@ -62,10 +102,11 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
     float regulation_time = movement_distance / speed;
 
     //The final time
-
     float min_time = 0;
+
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
+        //Get the maximum speed for the stepper
         float maximum_speed = EEPROMStorage::steppers_data[stepper].jerk * EEPROMStorage::steppers_data[stepper].steps;
 
         //update the minimum time :
@@ -77,10 +118,13 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
 
     }
 
+    //Extract the new regulation time;
     float new_time = (regulation_time > min_time) ? regulation_time : min_time;
 
+    //Update the last regulation time;
     last_time = new_time;
 
+    //Complete with the determines time;
     return new_time;
 
 }
@@ -365,10 +409,9 @@ void K2Physics::pre_compute_speed_constants() {
 
 bool m::deceleration_required = false;
 
-//bool m::jerk_flag = true;
 
 //Global regulation_speed
-float m::last_time;
+float m::last_time = 0;
 
 
 //Steppers speeds
@@ -399,6 +442,7 @@ float *const m::max_speed_constants = t_msp_const;
 //The stepper jerk offsets;
 uint32_t k2jot[NB_STEPPERS]{0};
 uint32_t *const m::jerk_offsets = k2jot;
+
 
 
 #undef m

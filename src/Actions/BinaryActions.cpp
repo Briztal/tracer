@@ -33,7 +33,7 @@ void BinaryActions::disable##i() {\
 }
 
 
-#include "../config.h"
+#include <config.h>
 
 #undef BINARY
 

@@ -38,19 +38,23 @@
 
 class IncrementComputer {
 
+    //-------------------------------------------- Compute Increments --------------------------------------------
+
 public:
 
+    //Compute beginning and ending increments for the given movement;
     static bool determine_increments(movement_data *movement);
 
 
+    //-------------------------------------------- Two private functions --------------------------------------------
 
 private :
 
+    //Compute the increment for a point of a curve;
     static float extract_increment(void (*get_position)(float, float *), float point, float incr);
 
+    //Get the maximal distance between the pair of given points;
     static uint32_t get_max_dist(float *p0, float *p1);
-
-
 
 };
 

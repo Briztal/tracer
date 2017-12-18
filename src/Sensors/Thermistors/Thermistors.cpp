@@ -21,7 +21,14 @@
 #include "Thermistors.h"
 #include <hardware_language_abstraction.h>
 
-void Thermistors::init() {
+
+//------------------------------------------- Init -------------------------------------------
+
+/*
+ * initialise_hardware : this function sets all Thermistors GPIO to input mode;
+ */
+
+void Thermistors::initialise_hardware() {
 
 #define THERMISTOR(i, name, pin, ...)\
     pin_mode_input(pin);
@@ -31,6 +38,10 @@ void Thermistors::init() {
 #undef THERMISTOR
 
 }
+
+
+//------------------------------------------- Getters -------------------------------------------
+
 
 #define THERMISTOR(i, name, pin, type)\
 /* Variable for the i-th index
@@ -73,6 +84,9 @@ float Thermistors::get_temperature_##name() {\
 #include <config.h>
 
 #undef THERMISTOR
+
+
+//------------------------------------------- Temperature Processing -------------------------------------------
 
 
 /*

@@ -33,7 +33,7 @@ class EmbeddedInterface {
 
 public:
 
-    //method to init the serial and setup control interrupts.
+    //method to initialise_hardware the serial and setup control interrupts.
     static void begin();
 
     //refresh the screen.

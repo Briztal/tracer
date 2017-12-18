@@ -42,9 +42,14 @@
 
 class TrajectoryTracer {
 
+    //-------------------------------------------- Initalisation ---------------------------------------------
 
-    //-------------------------------------------- module status ---------------------------------------------
+public:
 
+    static void initialise_data();
+
+
+    //-------------------------------------------- Module status ---------------------------------------------
 
 public :
 
@@ -61,7 +66,7 @@ private :
     static volatile bool emergency_stop_flag;
 
 
-    //------------------------------------------- movement_queue_management --------------------------------------------
+    //------------------------------------------- Movement_queue_management --------------------------------------------
 
 public:
 
@@ -153,10 +158,10 @@ private:
     //next sub_movement processing;
     static void prepare_next_sub_movement();
 
-    //Method to initialise_data a sub_movement;
+    //Method to initialise_hardware a sub_movement;
     static sig_t *initialise_sub_movement();
 
-    //Method to initialise_data the first sub movement of the movement procedure;
+    //Method to initialise_hardware the first sub movement of the movement procedure;
     static void prepare_first_sub_movement();
 
 
@@ -222,10 +227,10 @@ private:
     static uint8_t tools_nb;
 
     //The action linear power array;
-    static float *tools_linear_powers;
+    static float *tools_energy_densities;
 
     //The container of action linear power arrays;
-    static float *const tools_linear_powers_storage;
+    static float *const tools_energy_densities_storage;
 
     //The variables for action data update;
     static uint8_t next_tools_powers_index;
@@ -254,7 +259,7 @@ private:
 #define CTE TrajectoryTracer
 
 #define STEP_AND_WAIT \
-    StepperController::fastStep(CTE::saved_elementary_signatures[CTE::trajectory_array[CTE::saved_trajectory_index--]]);\
+    Steppers::fastStep(CTE::saved_elementary_signatures[CTE::trajectory_array[CTE::saved_trajectory_index--]]);\
     WAIT
 
 

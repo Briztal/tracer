@@ -22,8 +22,8 @@
 #include <EEPROM/EEPROMStorage.h>
 #include "MachineController.h"
 #include "TemperatureController.h"
-#include <StepperControl/MachineInterface.h>
 #include <StepperControl/StepperController.h>
+#include <StepperControl/Steppers.h>
 #include <StepperControl/TrajectoryTracer.h>
 
 //-------------------------------------------------Movement-------------------------------------------------------------
@@ -86,7 +86,7 @@ task_state_t MachineController::home() {
     check_carriage(3, axis_positions[0], axis_positions[3], &t);
 
     //Set the reference carriage, that will determine the movement speed.
-    MachineInterface::set_speed_group(t.carriage_id);
+    StepperController::set_speed_group(t.carriage_id);
 
     //No need to set the regulation speed, ad it is already set.
 
@@ -94,7 +94,7 @@ task_state_t MachineController::home() {
     axis_positions[0] = axis_positions[1] = axis_positions[2] = axis_positions[3] = 0;
 
     //Move
-    return MachineInterface::linear_movement(axis_positions);
+    return StepperController::linear_movement(axis_positions);
 
 }
 
@@ -112,7 +112,7 @@ void MachineController::set_reference_carriage(uint8_t id, float x, float y, car
     data->carriage_id = id;
 
     //Use the formula to determine the time
-    data->time = sqrt_float(x * x + y * y) / MachineInterface::get_speed(id);
+    data->time = sqrt_float(x * x + y * y) / StepperController::get_speed(id);
 
 }
 
@@ -132,7 +132,7 @@ void MachineController::check_carriage(uint8_t id, float x, float y, carriage_da
     //Determine the speed corresponding to this movement, knowing the movement time
     float speed = distance / data->time;
 
-    float reg_speed = MachineInterface::get_speed(id);
+    float reg_speed = StepperController::get_speed(id);
 
     //If the speed exceeds the carriage's regulation speed, then set [id] as the reference carriage.
     if (speed > reg_speed) {
@@ -259,7 +259,7 @@ void MachineController::persist_coords(movement_state_t *coords) {
 
 task_state_t MachineController::move_mode_0(movement_state_t *coords) {
 
-    MachineInterface::set_speed_group(extrusion_state.working_carriage);
+    StepperController::set_speed_group(extrusion_state.working_carriage);
 
     bool x0, y0;
 
@@ -312,7 +312,7 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
     //sanity_check(position);
 
     //Plan movement.
-    task_state_t state = MachineInterface::linear_movement(axis_positions);
+    task_state_t state = StepperController::linear_movement(axis_positions);
 
     return state;
 }
@@ -410,12 +410,12 @@ task_state_t MachineController::enable_steppers(bool enable) {
     if (enable) {
 
         //Enable all steppers
-        StepperController::enable();
+        Steppers::enable();
 
     } else {
 
         //Disable all steppers
-        StepperController::disable();
+        Steppers::disable();
 
     }
 
@@ -459,7 +459,7 @@ task_state_t MachineController::set_carriages_state(carriages_state_t new_state)
     if (flag) {\
         \
         /*Change the speed for i'th carriage*/\
-        MachineInterface::set_speed_for_group(speed_group, new_speed);\
+        StepperController::set_speed_for_group(speed_group, new_speed);\
         \
         /*Fail if the function failed.*/\
         if (state!=complete) return state;\

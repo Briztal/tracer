@@ -212,6 +212,11 @@ include_directories(${SP}/)
 
 add_library(sensors
 
+
+        ${SP}/Sensors.h
+        ${SP}/Sensors.cpp
+
+
         ${SP}/Thermistors/Thermistors.h
         ${SP}/Thermistors/Thermistors.cpp
         ${SP}/Thermistors/thermistor_data.h

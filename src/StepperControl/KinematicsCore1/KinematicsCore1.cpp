@@ -27,7 +27,7 @@
 
 #include <StepperControl/TrajectoryTracer.h>
 #include <hardware_language_abstraction.h>
-#include <StepperControl/StepperController.h>
+#include <StepperControl/Steppers.h>
 #include <interface.h>
 #include <EEPROM/EEPROMStorage.h>
 
@@ -179,7 +179,7 @@ void KinematicsCore1::send_position() {
 
     //Send the current high level position
     CI::send_position(current_hl_position);
-    //StepperController::send_position();
+    //Steppers::send_position();
 
 }
 

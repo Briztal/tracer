@@ -24,11 +24,19 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "IncrementComputer.h"
-#include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
 #include <Control/Control.h>
 
 #define DEFAULT_ABSOLUTE_INCREMENT (float) 0.01
 
+
+/*
+ * determine_increments : this function is the only public method of the class.
+ *
+ * It computes the increment for initial and final positions, for the given movement
+ *
+ * It handles the micro movement case.
+ */
 
 bool IncrementComputer::determine_increments(movement_data *movement) {
 
@@ -54,7 +62,8 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
     if (((min_increment > 0) && (min + min_increment > max)) || ((min_increment < 0) && (min + min_increment < max))) {
 
         //Send an error message
-        std_out("ERROR : THE MOVEMENT PROVIDED IS A MICRO MOVEMENT, AND WILL BE IGNORED.");
+        std_out("Warning in IncrementComputer::determine_increments  : "
+                        "The movement is a micro movement, and will be ignored.");
 
         //ignore movement
         return false;
@@ -93,10 +102,10 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     float initial_positions[NB_AXIS], positions[NB_AXIS];
 
     //Get the initial stepper position
-    MachineInterface::get_stepper_positions_for(get_position, point, initial_positions);
+    StepperController::get_stepper_positions_for(get_position, point, initial_positions);
 
     //Get the candidate stepper_position
-    MachineInterface::get_stepper_positions_for(get_position, point + increment, positions);
+    StepperController::get_stepper_positions_for(get_position, point + increment, positions);
 
     //get the distance between the initial distance and the candidate position.
     uint32_t d = get_max_dist(initial_positions, positions);
@@ -114,7 +123,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
         increment *= ftarget / (float) d;
 
         //Get the new candidate stepper_position
-        MachineInterface::get_stepper_positions_for(get_position, point + increment, positions);
+        StepperController::get_stepper_positions_for(get_position, point + increment, positions);
 
         //get the distance between the initial distance and the new candidate position.
         d = get_max_dist(initial_positions, positions);
@@ -136,7 +145,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
 uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
 
-    //initialise_data the maimum distance
+    //initialise_hardware the maimum distance
     uint32_t max_dist = 0;
 
     //for each stepper

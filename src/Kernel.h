@@ -34,7 +34,7 @@ public:
     /*
      * start : this function is called once, by main only. It is the project's entry point.
      *
-     *  It will call initialise_data, and then call iterate indefinitely.
+     *  It will call initialise_hardware, and then call iterate indefinitely.
      */
 
     static void start();
@@ -59,7 +59,7 @@ private:
 
 
     /*
-     * initialise_data : this function is called after the restoration point. It resets every module's processing
+     * initialise_hardware : this function is called after the restoration point. It resets every module's processing
      *
      *  environment.
      */

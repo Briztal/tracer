@@ -31,20 +31,35 @@
 
 class ContinuousActions {
 
+    //------------------------------------------- Init -------------------------------------------
+
 public:
 
-    //initialise_data all PWMs
-    static void init();
+    //Set GPIO mode;
+    static void initialise_hardware();
 
-    //Set an action's power
+    //initialise all PWMs to zero:
+    static void initialise_data();
+
+    //------------------------------------------- Setup by id -------------------------------------------
+
+public:
+
+    //Set an action's power;
     static void set_power(uint8_t action, float power);
 
-    //get an action's state
+    //get an action's state;
     static bool get_state(uint8_t action);
 
-    //stop an acion.
+    //stop an acion;
     static void stop(uint8_t action);
 
+
+    //------------------------------------------- Setup by action -------------------------------------------
+
+public:
+
+    //Set power,
 #define CONTINUOUS(i, name, pin, max) \
     static void set_power_##i(float f);\
     static bool get_state_##i();\
@@ -54,10 +69,14 @@ public:
 
 #undef CONTINUOUS
 
+
+    //------------------------------------------- States -------------------------------------------
+
 private:
 
     //PWMs states
     static bool *const states;
+
 };
 
 

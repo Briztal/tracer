@@ -30,7 +30,7 @@
 
 
 /*
- * initialise_data : this function initialises the serial, and sets up the command processing environment.
+ * initialise_hardware : this function initialises the serial, and sets up the command processing environment.
  */
 
 void Terminal::initialise_data(Protocol *protocol) {
@@ -229,7 +229,7 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
 
     //Display the last correct node's content.
 
-    //initialise_data an empty string
+    //initialise_hardware an empty string
     String s = "";
 
     //Fill it with the name and description of direct children

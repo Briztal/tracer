@@ -76,7 +76,7 @@ void K1Physics::initialise_kinetics_data(k1_movement_data *movement_data) {
 /*
  * load_pre_process_kinetics_data : this function loads a new movement.
  *
- *  It must save the evolution factor, and initialise_data the new evolution factor to 1;
+ *  It must save the evolution factor, and initialise_hardware the new evolution factor to 1;
  *
  *  It also must save the first sub movement distance in the
  */
