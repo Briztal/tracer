@@ -30,6 +30,7 @@
 #include <EEPROM/EEPROMInterface.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
+#include <Actuators/Servo.h>
 #include <Control/Control.h>
 
 

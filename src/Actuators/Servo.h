@@ -36,9 +36,6 @@ public:
     //Set the output of a servo at a particular value;
     static void write(uint8_t id, float value);
 
-    //Start the routine;
-    static void start();
-
     //Disable a servo by id;
     static void stop(uint8_t id);
 
@@ -47,6 +44,9 @@ public:
 
 
 private:
+
+    //Start the routine;
+    static void start();
 
     //Set the output of a servo at a particular value;
     static void write_us(uint8_t id, float us_period);
@@ -60,6 +60,9 @@ private:
     //The status flag;
     static volatile bool started;
 
+    //the disable flag;
+    static volatile bool write_flag;
+
     //States;
     static bool *states;
 
@@ -70,11 +73,15 @@ private:
     static uint8_t *pins;
 
     //Current pin;
+    static uint8_t last_pin;
+
+    //Current pin;
     static uint8_t current_pin;
 
     //The complement to all delays;
     static uint32_t complement;
 
+    //The servo being processed currently;
     static uint8_t current_servo;
 
 };

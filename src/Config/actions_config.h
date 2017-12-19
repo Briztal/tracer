@@ -47,18 +47,20 @@ CONTINUOUS(5,   cooling,    23,     100)
 
 #endif
 
+
 /* Servomotor Actuators
  * For each servo you want to control, put one line like behind and provide the three required parameter
  * SERVO(i, name, dataPin, minValue, maxValue)
  */
 
-#define NB_SERVOS 1
+#define NB_SERVOS 2
 
-#define SERVO_PERIOD_US 20
+#define SERVO_PERIOD_US 20000
 
 #ifdef SERVO
 
-SERVO(0, servo, 4, 0, 1, 1.5, 2.5)
+SERVO(0, servo, 0, 0, 1, 1500, 2500)
+SERVO(1, servoo, 1, 0, 1, 1500, 2500)
 
 #endif
 

@@ -23,6 +23,7 @@
 
 #include "DigitalGPIO.h"
 #include "PWMGPIO.h"
+#include "Servo.h"
 
 /*
  * This class is a simple formalisation. I use it to centralise hardware and
@@ -43,7 +44,7 @@ public:
         PWMGPIO::initialise_hardware();
 
         //Initialise Binary actions;
-        //TODO Servo::initialise_hardware();
+        Servo::initialise_hardware();
 
     }
 
@@ -57,7 +58,7 @@ public:
         PWMGPIO::initialise_data();
 
         //Initialise Binary actions;
-        //TODO Servo::initialise_data();
+        Servo::initialise_data();
 
     }
 };

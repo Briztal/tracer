@@ -147,16 +147,18 @@ static inline static void delay_ms(uint16_t time_ms){
 
 //--------------------------------------- Timers ----------------------------------------------
 
-#define TICS_PER_UNIT(frequency) ((float) ((float) F_BUS / (frequency) ))
+#define TICS_PER_UNIT(timer_index) ((float) ((float) F_BUS / (TIMER_##timer_index##_FREQUENCY) ))
 
-#define MAX_PERIOD(frequency) ((float) (UINT32_MAX / TICS_PER_UNIT(frequency)))
+#define MAX_UNIT(timer_index) ((float) (UINT32_MAX / TICS_PER_UNIT(timer_index)))
 
-#define PERIOD_TO_RELOAD(period_timer_unit, frequency) ((uint32_t) (((uint32_t)(period_timer_unit) > MAX_PERIOD(frequency)) ? MAX_PERIOD(frequency) : (TICS_PER_UNIT(frequency) * ((period_timer_unit) - (float) 1.0))))
-
-// /Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
-#define SET_INTERRUPT_PERIOD(period_timer_unit, frequency, timer_index) {PIT_LDVAL##timer_index = PERIOD_TO_RELOAD(period_timer_unit, frequency);};
+#include "Arduino.h"
+#define UNIT_TO_TICS(unit_period, timer_index) ((uint32_t) (((uint32_t) (unit_period) > MAX_UNIT(timer_index)) ? UINT32_MAX - 1 : (TICS_PER_UNIT(timer_index) * (float) (unit_period)  - (float) 1.0)));
 
 #define SET_INTERRUPT_RELOAD(reload, timer_index) {PIT_LDVAL##timer_index = reload;};
+
+// /Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
+#define SET_INTERRUPT_PERIOD(period_timer_unit, timer_index) {SET_INTERRUPT_RELOAD(UNIT_TO_TICS(period_timer_unit, timer_index), timer_index);};
+
 
 #define ENABLE_INTERRUPT(timer_index) PIT_TCTRL##timer_index |= PIT_TCTRL_TIE;
 #define IS_LOOP_ENABLED(timer_index)  ((PIT_TCTRL##timer_index & PIT_TCTRL_TIE)&(PIT_TCTRL##timer_index & PIT_TCTRL_TEN))
@@ -169,16 +171,16 @@ static inline static void delay_ms(uint16_t time_ms){
 
 
 //Define the period setters for all 4 timers;
-#define set_int_period_0(period) SET_INTERRUPT_PERIOD(period, TIMER_0_FREQUENCY, 0)
-#define set_int_period_1(period) SET_INTERRUPT_PERIOD(period, TIMER_1_FREQUENCY, 1)
-#define set_int_period_2(period) SET_INTERRUPT_PERIOD(period, TIMER_2_FREQUENCY, 2)
-#define set_int_period_3(period) SET_INTERRUPT_PERIOD(period, TIMER_3_FREQUENCY, 3)
+#define set_int_period_0(period) SET_INTERRUPT_PERIOD(period, 0)
+#define set_int_period_1(period) SET_INTERRUPT_PERIOD(period, 1)
+#define set_int_period_2(period) SET_INTERRUPT_PERIOD(period, 2)
+#define set_int_period_3(period) SET_INTERRUPT_PERIOD(period, 3)
 
 //Define the reload converters for all 4 timers;
-#define period_to_reload_0(reload) PERIOD_TO_RELOAD(reload, 0)
-#define period_to_reload_1(reload) PERIOD_TO_RELOAD(reload, 1)
-#define period_to_reload_2(reload) PERIOD_TO_RELOAD(reload, 2)
-#define period_to_reload_3(reload) PERIOD_TO_RELOAD(reload, 3)
+#define period_to_reload_0(period) UNIT_TO_TICS(period, 0)
+#define period_to_reload_1(period) UNIT_TO_TICS(period, 1)
+#define period_to_reload_2(period) UNIT_TO_TICS(period, 2)
+#define period_to_reload_3(period) UNIT_TO_TICS(period, 3)
 
 //Define the reload setters for all 4 timers;
 #define set_int_reload_0(reload) SET_INTERRUPT_RELOAD(reload, 0)
