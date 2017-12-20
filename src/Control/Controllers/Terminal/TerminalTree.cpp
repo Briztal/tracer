@@ -47,7 +47,7 @@ TerminalTree::~TerminalTree() {
 
     }
 
-    //delete the children array
+    //delete the nb_children array
     delete[] children;
 
 }

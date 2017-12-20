@@ -105,7 +105,7 @@ private:
 
     static string_t *sub_nodes_names;
 
-    static uint8_t sub_nodes_nb;
+    static uint8_t children;
 
      */
 

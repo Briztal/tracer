@@ -156,7 +156,7 @@ void Terminal::parse(char *message) {
         if (!strcmp(node_identifier, command_identifier)) {
 
             //A matching sub_node has been found. It can be a single
-            //Update the current node and the current children array.
+            //Update the current node and the current nb_children array.
             current_node = current_sub_node;
 
             //if the new node is not a leaf, check sub nodes
@@ -222,7 +222,7 @@ void Terminal::parse(char *message) {
 /*uint8_t
  * log_parsing_error : displays a message, after a parsing problem.
  *
- *  It displays the node's children.
+ *  It displays the node's nb_children.
  */
 
 void Terminal::log_parsing_error(const TerminalTree *const log_node) {
@@ -232,7 +232,7 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
     //initialise_hardware an empty string
     String s = "";
 
-    //Fill it with the name and description of direct children
+    //Fill it with the name and description of direct nb_children
     for (uint8_t i = 0; i < log_node->nb_children; i++) {
 
         //Create a flag to check the execution of the command;

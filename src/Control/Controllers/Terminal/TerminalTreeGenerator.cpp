@@ -33,7 +33,7 @@
  *  - 1 means create_leaf
  *  - 2 means go_lower
  *
- *  This string is used to determine the number of children of a particular node.
+ *  This string is used to determine the number of nb_children of a particular node.
  */
 
 void TerminalTreeGenerator::build_tree_summary(String *tree_summary) {
@@ -100,7 +100,7 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
      * Procedure for a go_lower :
      *  - save the index
      *  - save the current node
-     *  - get the children number for the current node;
+     *  - get the nb_children number for the current node;
      *  - create a new current node
      *  - increment the depth;
      */
@@ -157,7 +157,7 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
 
 
 /*
- * get_sub_nodes_nb : this function determines the number of direct children of a particular indice in the children
+ * get_sub_nodes_nb : this function determines the number of direct nb_children of a particular indice in the nb_children
  *  string.
  */
 

@@ -20,7 +20,7 @@
 
 #include "EEPROMInterface.h"
 #include "EEPROMStorage.h"
-#include "EEPROMNode.h"
+#include "EEPROMTree.h"
 #include <DataStructures/StringUtils.h>
 #include <Control/Control.h>
 
@@ -163,13 +163,13 @@ void EEPROMInterface::print_stored_data() {
 
 
 /*
- * get_root_sub_nodes_nb : this function calculates the number of children of the root EEPROMNode.
+ * get_root_children_nb : this function calculates the number of nb_children of the root EEPROMTree.
  *
  *  It makes nothing but verifying that modules are enabled, and adding integers to the total amount if so.
  *
  */
 
-uint8_t get_root_sub_nodes_nb() {
+uint8_t get_root_children_nb() {
 
     //Continuous actions;
     //Servo actions;
@@ -193,22 +193,22 @@ uint8_t get_root_sub_nodes_nb() {
 
 }
 
-void display(EEPROMNode *node, uint8_t t) {
+void display(EEPROMTree *node, uint8_t t) {
 
     Serial.println("child : "+String(t)+" "+String(*(node->name)));
 
-    if (node->sub_nodes_nb == 0) {
+    if (node->nb_children == 0) {
         Serial.println("dick");
         return;
 
     }
-    EEPROMNode** sub_nodes = node->sub_nodes;
+    EEPROMTree** children = node->children;
 
     t++;
     //Check every sub_node
-    for (uint8_t i = 0; i < node->sub_nodes_nb; i++) {
+    for (uint8_t i = 0; i < node->nb_children; i++) {
 
-        EEPROMNode * n = (*(sub_nodes + i));
+        EEPROMTree * n = (*(children + i));
 
         display(n, t);
 
@@ -218,13 +218,13 @@ void display(EEPROMNode *node, uint8_t t) {
 
 
 
-EEPROMNode *EEPROMInterface::build_tree() {
+EEPROMTree *EEPROMInterface::build_tree() {
 
     //First, create the root tree
-    EEPROMNode *root = new EEPROMNode(new String("eeprom"), get_root_sub_nodes_nb(), 0, 0);
+    EEPROMTree *root = new EEPROMTree(new String("eeprom"), 0, nullptr, get_root_children_nb());
 
-    EEPROMNode *tree;
-    EEPROMNode *tree2;
+    EEPROMTree *tree;
+    EEPROMTree *tree2;
     uint8_t root_id = 0;
 
     //-------------------Actuators-------------------
@@ -232,17 +232,17 @@ EEPROMNode *EEPROMInterface::build_tree() {
     //Continuous actions
 
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("continuous"), NB_CONTINUOUS, root_id, nullptr);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("continuous"), root_id, nullptr, NB_CONTINUOUS);
+    root->children[root_id] = tree;
 
     //Add the sub nodes
-#define CONTINUOUS(i, name, ...) tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, &((ES::continuous_data+i)->max));
+#define CONTINUOUS(i, name, ...) tree->children[i] = new EEPROMTree(new String(#name), i, &((ES::continuous_data+i)->max), 0);
 
 #include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
-    //Incr the root id
+    //Increment the root id
     root_id++;
 
     //------------------
@@ -250,20 +250,20 @@ EEPROMNode *EEPROMInterface::build_tree() {
     //Servo actions
 
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("servo"), NB_SERVOS, root_id, 0);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("servo"), root_id, nullptr, NB_SERVOS);
+    root->children[root_id] = tree;
 
     //Add the sub nodes
 #define SERVO(i, name, ...) \
-    tree->sub_nodes[i] = tree2 = new EEPROMNode(new String(#name), 2, i, 0);\
-    tree2->sub_nodes[0] = new EEPROMNode(new String("min"), 0, 0, &((ES::servos_data+i)->min));\
-    tree2->sub_nodes[1] = new EEPROMNode(new String("max"), 0, 1, &((ES::servos_data+i)->max));
+    tree->children[i] = tree2 = new EEPROMTree(new String(#name), i, nullptr, 2);\
+    tree2->children[0] = new EEPROMTree(new String("min"), 0, &((ES::servos_data+i)->min), 0);\
+    tree2->children[1] = new EEPROMTree(new String("max"), 1, &((ES::servos_data+i)->max), 0);
 
 #include <Config/actions_config.h>
 
 #undef SERVO
 
-    //Incr the root id
+    //Increment the root id
     root_id++;
 
 
@@ -273,21 +273,21 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
     //PIDs
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("pid"), NB_PIDS, root_id, 0);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("pid"), root_id, nullptr, NB_PIDS);
+    root->children[root_id] = tree;
 
     //Add the sub nodes
 #define PID(i, name, ...) \
-    tree->sub_nodes[i] = tree2 = new EEPROMNode(new String(#name), 3, i,0);\
-    tree2->sub_nodes[0] = new EEPROMNode(new String("kp"), 0, 0, &((ES::pids_data+i)->kp));\
-    tree2->sub_nodes[1] = new EEPROMNode(new String("ki"), 0, 1, &((ES::pids_data+i)->ki));\
-    tree2->sub_nodes[2] = new EEPROMNode(new String("kd"), 0, 2, &((ES::pids_data+i)->kd));
+    tree->children[i] = tree2 = new EEPROMTree(new String(#name), i, nullptr, 3);\
+    tree2->children[0] = new EEPROMTree(new String("kp"), 0, &((ES::pids_data+i)->kp), 0);\
+    tree2->children[1] = new EEPROMTree(new String("ki"), 1, &((ES::pids_data+i)->ki), 0);\
+    tree2->children[2] = new EEPROMTree(new String("kd"), 2, &((ES::pids_data+i)->kd), 0);
 
 #include <Config/control_loops_config.h>
 
 #undef PID
 
-    //Incr the root id
+    //Increment the root id
     root_id++;
 
     //------------------
@@ -295,18 +295,18 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
     //Loops
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("loop"), NB_PIDS, root_id, 0);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("loop"), root_id, nullptr, NB_PIDS);
+    root->children[root_id] = tree;
 
     //Add the sub nodes
 #define LOOP_FUNCTION(i, name, ...)\
-    tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, (ES::loop_periods+i));
+    tree->children[i] = new EEPROMTree(new String(#name), i, (ES::loop_periods+i), 0);
 
 #include <Config/control_loops_config.h>
 
 #undef LOOP_FUNCTION
 
-    //Incr the root id
+    //Increment the root id
     root_id++;
 
 #endif
@@ -318,39 +318,39 @@ EEPROMNode *EEPROMInterface::build_tree() {
 
     //Stepper data
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("stepper"), NB_STEPPERS, root_id, 0);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("stepper"), root_id, nullptr, NB_STEPPERS);
+    root->children[root_id] = tree;
 
     //Add the sub nodes
 #define STEPPER(i, ...) \
-    tree->sub_nodes[i] = tree2 = new EEPROMNode(new String(#i), 5, i,0);\
-    tree2->sub_nodes[0] = new EEPROMNode(new String("size"),    0, 0, &((ES::steppers_data+i)->size));\
-    tree2->sub_nodes[1] = new EEPROMNode(new String("steps"),   0, 1, &((ES::steppers_data+i)->steps));\
-    tree2->sub_nodes[2] = new EEPROMNode(new String("speed"),   0, 2, &((ES::steppers_data+i)->maximum_speed));\
-    tree2->sub_nodes[3] = new EEPROMNode(new String("acc"),     0, 3, &((ES::steppers_data+i)->acceleration));\
-    tree2->sub_nodes[4] = new EEPROMNode(new String("jerk"),    0, 4, &((ES::steppers_data+i)->jerk));
+    tree->children[i] = tree2 = new EEPROMTree(new String(#i), i ,nullptr, 5);\
+    tree2->children[0] = new EEPROMTree(new String("size"),     0, &((ES::steppers_data+i)->size), 0);\
+    tree2->children[1] = new EEPROMTree(new String("steps"),    1, &((ES::steppers_data+i)->steps), 0);\
+    tree2->children[2] = new EEPROMTree(new String("speed"),    2, &((ES::steppers_data+i)->maximum_speed), 0);\
+    tree2->children[3] = new EEPROMTree(new String("acc"),      3, &((ES::steppers_data+i)->acceleration), 0);\
+    tree2->children[4] = new EEPROMTree(new String("jerk"),     4, &((ES::steppers_data+i)->jerk), 0);
 
 #include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
-    //Incr the root id
+    //Increment the root id
     root_id++;
 
 
     //Cartesian groups
     //Create the tree, and add it to root
-    tree = new EEPROMNode(new String("loop"), NB_CARTESIAN_GROUPS, root_id, 0);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("loop"), root_id, nullptr, NB_CARTESIAN_GROUPS);
+    root->children[root_id] = tree;
 
     //Add the sub nodes
-#define CARTESIAN_GROUP(i, name, ...) tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, (ES::group_maximum_speeds+i));
+#define CARTESIAN_GROUP(i, name, ...) tree->children[i] = new EEPROMTree(new String(#name), i, (ES::group_maximum_speeds+i), 0);
 
 #include <Config/stepper_control_config.h>
 
 #undef CARTESIAN_GROUP
 
-    //Incr the root id
+    //Increment the root id
     root_id++;
 
 #endif
@@ -358,12 +358,12 @@ EEPROMNode *EEPROMInterface::build_tree() {
     //-------------------Custom parameters-------------------
 
 
-    tree = new EEPROMNode(new String("custom"), sizeof(custom_data_t) / sizeof(float), root_id, 0);
-    root->sub_nodes[root_id] = tree;
+    tree = new EEPROMTree(new String("custom"), root_id, nullptr, sizeof(custom_data_t) / sizeof(float));
+    root->children[root_id] = tree;
 
     uint8_t custom_index = 0;
 
-#define EEPROM_VARIABLE(name, default_val) tree->sub_nodes[custom_index] = new EEPROMNode(new String(#name), 0, custom_index, (&ES::custom_data.name));
+#define EEPROM_VARIABLE(name, default_val) tree->children[custom_index] = new EEPROMTree(new String(#name), custom_index, (&ES::custom_data.name), 0);
 
 #include <Config/eeprom_config.h>
 
@@ -376,10 +376,10 @@ EEPROMNode *EEPROMInterface::build_tree() {
 bool EEPROMInterface::search_tree_by_string(char *data_in, float **data) {
 
     //Initialise the current current_tree to the root;
-    EEPROMNode *current_tree = eeprom_tree;
-    EEPROMNode *current_sub_tree;
+    EEPROMTree *current_tree = eeprom_tree;
+    EEPROMTree *current_sub_tree;
 
-    EEPROMNode **sub_nodes = current_tree->sub_nodes;
+    EEPROMTree **children = current_tree->children;
 
     //char name_buffer[EEPROM_NAMES_MAX_LENGTH];
 
@@ -404,8 +404,8 @@ bool EEPROMInterface::search_tree_by_string(char *data_in, float **data) {
     }
 
     //Check every sub_node
-    for (i = 0; i < current_tree->sub_nodes_nb; i++) {
-        current_sub_tree = sub_nodes[i];
+    for (i = 0; i < current_tree->nb_children; i++) {
+        current_sub_tree = children[i];
 
         const char *c = (*current_sub_tree->name).c_str();
 
@@ -414,10 +414,10 @@ bool EEPROMInterface::search_tree_by_string(char *data_in, float **data) {
 
             //Re-initialise_hardware the current data
             current_tree = current_sub_tree;
-            sub_nodes = current_tree->sub_nodes;
+            children = current_tree->children;
 
             //if the new node is not a leaf, check sub nodes
-            if (current_tree->sub_nodes_nb) {
+            if (current_tree->nb_children) {
 
                 //check the new node
                 goto node_check;
@@ -443,12 +443,12 @@ bool EEPROMInterface::search_tree_by_string(char *data_in, float **data) {
 
 }
 
-void EEPROMInterface::search_log(EEPROMNode *node) {
+void EEPROMInterface::search_log(EEPROMTree *node) {
 
     String s = "Suggestions for " + *node->name + " : ";
 
-    for (uint8_t i = 0; i < node->sub_nodes_nb; i++) {
-        s += *node->sub_nodes[i]->name + ", ";
+    for (uint8_t i = 0; i < node->nb_children; i++) {
+        s += *node->children[i]->name + ", ";
     }
 
     std_out(s);
@@ -643,4 +643,4 @@ void EEPROMInterface::send_structure() {
 
 #endif
 
-EEPROMNode *EEPROMInterface::eeprom_tree = build_tree();
+EEPROMTree *EEPROMInterface::eeprom_tree = build_tree();

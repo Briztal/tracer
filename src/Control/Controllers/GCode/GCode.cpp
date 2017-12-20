@@ -157,7 +157,7 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
         if (command_char == tree_id) {
 
             //A matching sub_node has been found. It can be a single
-            //Update the current node and the current children array.
+            //Update the current node and the current nb_children array.
             current_tree = current_child;
 
             //if the new node is not a leaf, check sub nodes
@@ -461,7 +461,7 @@ Protocol *m::output_protocol;
 
           Count the number of different chars at position [index] in commands beginning with the prefix.
 
-          Create a tree with the given number of children;
+          Create a tree with the given number of nb_children;
 
           If the prefix matches the line at [line number] (info may be given by the counting function),
               add the function to the tree, and increment the line number.

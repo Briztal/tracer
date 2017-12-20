@@ -391,10 +391,10 @@ GCodeTree *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t
 
     //----------------------------- Prefix Computation -----------------------------
 
-    //Local var for the number of children of the current tree.
+    //Local var for the number of nb_children of the current tree.
     uint8_t nb_children = 0;
 
-    //Count the number of children, and save the flag. It shows if the current line belongs to the current tree.
+    //Count the number of nb_children, and save the flag. It shows if the current line belongs to the current tree.
     bool matching_command = count_children(commands, nb_commands, *current_line, prefix, &nb_children);
 
 
@@ -424,10 +424,10 @@ GCodeTree *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t
 
     }
 
-    //Increment the index, so that children focus on next chars.
+    //Increment the index, so that nb_children focus on next chars.
     index++;
 
-    //Fill the tree with all determined children.
+    //Fill the tree with all determined nb_children.
     for (uint8_t child_id = 0; child_id < nb_children; child_id++) {
 
         //Build the sub_tree and add it to the current tree.
@@ -457,7 +457,7 @@ GCodeTree *GCodeTreeGenerator::generate_tree(command_line_t **commands, uint16_t
 
 
 /*
- * count_children : this is used to count the number of direct children of a tree represented by its prefix.
+ * count_children : this is used to count the number of direct nb_children of a tree represented by its prefix.
  *
  *  More explicitly, it counts the number of different chars right after [prefix], in lines of the [command]
  *      array, until it examines a string that doesn't start with [prefix].
@@ -484,7 +484,7 @@ GCodeTreeGenerator::count_children(command_line_t **commands, uint16_t nb_comman
     }
 
     /*
-     * As a node can contain at most 256 children, we will here declare a local array of 256 spaces,
+     * As a node can contain at most 256 nb_children, we will here declare a local array of 256 spaces,
      * to contain the found_chars characters.
      * This will not mess with the stack, as this function is only called at the program initialisation, before
      * the main loop.
@@ -523,7 +523,7 @@ GCodeTreeGenerator::count_children(command_line_t **commands, uint16_t nb_comman
                 //Declare a flag;
                 bool duplicate = false;
 
-                //For all found_chars children
+                //For all found_chars nb_children
                 for (uint8_t found_child = 0; found_child < children_counter; found_child++) {
 
                     //If the char has already been encountered :
@@ -544,7 +544,7 @@ GCodeTreeGenerator::count_children(command_line_t **commands, uint16_t nb_comman
                     //Save the found char
                     found_chars[children_counter] = c;
 
-                    //Increment the number of found children.
+                    //Increment the number of found nb_children.
                     children_counter++;
 
                 }
@@ -566,7 +566,7 @@ GCodeTreeGenerator::count_children(command_line_t **commands, uint16_t nb_comman
     //A jump label for the end, to avoid duplicating the end code.
     end:
 
-    //Update the number of children found_chars;
+    //Update the number of nb_children found_chars;
     *nb_children = children_counter;
 
     //Return the boolean flag;

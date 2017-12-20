@@ -21,7 +21,7 @@
 #ifndef TRACER_EEPROMINTERFACE_H
 #define TRACER_EEPROMINTERFACE_H
 
-#include "EEPROMNode.h"
+#include "EEPROMTree.h"
 
 #include <Control/Controllers/Terminal/TerminalTree.h>
 
@@ -31,7 +31,7 @@ public:
 
     static void print_stored_data();
 
-    static EEPROMNode *build_tree();
+    static EEPROMTree *build_tree();
 
     static bool read_data_by_string(char *id_string, float *f);
 
@@ -46,11 +46,11 @@ public:
 
 private:
 
-    static EEPROMNode *eeprom_tree;
+    static EEPROMTree *eeprom_tree;
 
     static bool search_tree_by_string(char *data_in, float **data);
 
-    static void search_log(EEPROMNode *node);
+    static void search_log(EEPROMTree *node);
 
 };
 

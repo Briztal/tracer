@@ -50,11 +50,11 @@ public:
     //The name of the tree
     const char name;
 
+    //The number of nb_children trees
+    const uint8_t nb_children;
+
     //The function called from this tree.
     task_state_t (*const function)(char *);
-
-    //The number of children trees
-    const uint8_t nb_children;
 
     //Assign a sub_tree. Fails if the child is already assigned.
     void set_child(uint8_t id, GCodeTree *child, bool *success);
@@ -65,7 +65,7 @@ public:
 private:
 
     /*
-     * As verifying that a sub_tree is allocated before accessing it, we will store our children in structs.
+     * As verifying that a sub_tree is allocated before accessing it, we will store our nb_children in structs.
      */
 
     struct gcode_child_container_t {
@@ -74,10 +74,10 @@ private:
         bool allocated = false;
 
         //The tree;
-        GCodeTree *tree;
+        GCodeTree *tree = nullptr;
     };
 
-    //The array of structs containing children.
+    //The array of structs containing nb_children.
     gcode_child_container_t *children;
 
 };

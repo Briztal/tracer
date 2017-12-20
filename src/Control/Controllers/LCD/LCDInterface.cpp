@@ -105,9 +105,9 @@ void EmbeddedInterface::select_node() {
     selection_history[depth++] = current_selection;
 
     //update the node and the selection variables
-    current_node = current_node->sub_nodes[current_selection];
+    current_node = current_node->children[current_selection];
     current_selection = 0;
-    max_current_selection = current_node->sub_nodes_nb;
+    max_current_selection = current_node->nb_children;
 
 }
 
@@ -126,7 +126,7 @@ void EmbeddedInterface::go_back() {
     //update the node and the selection variables
     current_node = node_history[--depth];
     current_selection = selection_history[depth];
-    max_current_selection = current_node->sub_nodes_nb;
+    max_current_selection = current_node->nb_children;
 
 }
 
@@ -147,7 +147,7 @@ void EmbeddedInterface::select_root() {
     //update the node and the selection variables
     current_node = node_history[0];
     current_selection = 0;
-    max_current_selection = current_node->sub_nodes_nb;
+    max_current_selection = current_node->nb_children;
 
 }
 

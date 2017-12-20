@@ -30,7 +30,7 @@
 GCodeTree::GCodeTree(char name, uint8_t nb_children, task_state_t (*const f)(char *)) :
 
         //Initialise all fields.
-        name(name), function(f), nb_children(nb_children), children(new gcode_child_container_t[nb_children]){
+        name(name), nb_children(nb_children), function(f), children(new gcode_child_container_t[nb_children]){
 
 }
 
@@ -49,7 +49,7 @@ GCodeTree::~GCodeTree() {
 
     }
 
-    //delete the children array
+    //delete the nb_children array
     delete[] children;
 
 }
