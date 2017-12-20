@@ -36,7 +36,7 @@
  *  This string is used to determine the number of children of a particular node.
  */
 
-String *TerminalTreeGenerator::build_tree_summary(String *tree_summary) {
+void TerminalTreeGenerator::build_tree_summary(String *tree_summary) {
 
     //Set the initial go_lower
     tree_summary->append((char) 2);

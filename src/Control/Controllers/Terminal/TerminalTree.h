@@ -50,14 +50,15 @@ public:
     //The name of the command : a single non-spaced word.
     const String *const name;
 
+    //The number of children
+    const uint8_t nb_children;
+
     //The description
     const string_t *const description;
 
     //The function to execute
     task_state_t (*const function)(char *);
 
-    //The number of children
-    const uint8_t nb_children;
 
     //Assign a sub_tree. Fails if the child is already assigned.
     void set_child(uint8_t id, TerminalTree *child, bool *success);

@@ -79,7 +79,7 @@ private:
     };
 
     //A state structure derived of coordinate struct
-    struct hl_coord_state_t : hl_coord_t {
+    struct hl_coord_flags_t {
 
         //Add flags
         bool x_flag = false;
@@ -87,6 +87,22 @@ private:
         bool z_flag = false;
         bool e_flag = false;
 
+    };
+
+    //A state structure derived of coordinate struct
+    struct hl_coord_state_t : hl_coord_t, hl_coord_flags_t {};
+
+
+public :
+
+    /*
+     * The homing state structure. It contains a flag for all steppers
+     */
+
+    struct home_state_t : hl_coord_flags_t{
+
+        //It only adds a flag for endstops usage;
+        bool endstops_flag = false;
     };
 
 
@@ -227,10 +243,10 @@ public:
 
 public:
 
-    static task_state_t home();
+    static task_state_t home(home_state_t state);
 
-    //A scheduler for the cooling homing functione
-GENERATE_SCHEDULER(home, 0);
+    //A scheduler for the cooling homing function
+GENERATE_SCHEDULER(home, 0, home_state_t, state);
 
 private:
 

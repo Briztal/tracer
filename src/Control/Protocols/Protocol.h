@@ -29,43 +29,47 @@ class Protocol {
 public:
 
     Protocol()  :
+            data_available(nullptr), write_data(nullptr), read_data(nullptr),
             buffer_size(0), command_size(0), data_spaces(0), corrupted_packet(false),
-            data_in_0(new char[0]),
-            data_available(nullptr), read_data(nullptr), write_data(nullptr) {
+            data_in_0(new char[0])
+             {
 
         //Initialise the data pointer to the first case;
         data_in = data_in_0;
 
     }
 
-    Protocol(uint8_t size, uint16_t (*const available_f)(void), void (*const write_f)(char),
-                         char (*const read_f)(void)) :
+    Protocol(uint8_t size, uint16_t (*const available_f)(), void (*const write_f)(char),
+                         char (*const read_f)()) :
+            data_available(available_f), write_data(write_f), read_data(read_f),
             buffer_size(size), command_size(size), data_spaces(size), corrupted_packet(false),
-            data_in_0(new char[size]),
-            data_available(available_f), read_data(read_f), write_data(write_f) {
+            data_in_0(new char[size])
+             {
 
         //Initialise the data pointer to the first case;
         data_in = data_in_0;
 
     }
+
+    virtual ~Protocol() {};
 
     //read all available_data;
-    virtual void decode_data() {}
+    virtual void decode_data() = 0;
 
     //Encode a string of char;
-    virtual void encode_data(String data) {}
+    virtual void encode_data(String data) = 0;
 
     //Read_data data on the data_link;
-    virtual void decode_char(char data) {}
+    virtual void decode_char(char data) = 0;
 
     //Get a pointer to the data;
-    virtual char *get_data() {}
+    virtual char *get_data() = 0;
 
     //Can the data be parsed ?
-    virtual bool parsing_ready() {}
+    virtual bool parsing_ready()  = 0;
 
     //Reset the reading/parsing environment;
-    virtual void reset() {}
+    virtual void reset() = 0;
 
 
     //----------------------------------------- Special Methods -----------------------------------------
@@ -73,13 +77,13 @@ public:
 protected:
 
     //The method to know how many bytes are available;
-    uint16_t (*const data_available)(void) = 0;
+    uint16_t (*const data_available)();
 
     //The method to write_data a char;
-    void (*const write_data)(char) = 0;
+    void (*const write_data)(char);
 
     //The method to read_data a char;
-    char (*const read_data)() = 0;
+    char (*const read_data)();
 
 
 protected :

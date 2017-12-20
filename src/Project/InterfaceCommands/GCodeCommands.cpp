@@ -149,6 +149,9 @@ task_state_t GCodeCommands::home(char *arguments) {
     //Parse arguments
     PARSE_ARGUMENTS(arguments);
 
+    //Declare the structure;
+    MachineController::home_state_t state;
+
     //If the home must use endstops
     if (CHECK_ARGUMENT('E')) {
 
@@ -157,8 +160,11 @@ task_state_t GCodeCommands::home(char *arguments) {
     } else {
         //If the movement must just be a line to zero
 
+        //Reset the flag;
+        state.endstops_flag = false;
+
         //Schedule a reset of the carriages
-        MachineController::home_scheduled_0();
+        MachineController::home_scheduled_0(state);
 
     }
 

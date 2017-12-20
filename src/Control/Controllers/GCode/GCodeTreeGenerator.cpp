@@ -298,7 +298,7 @@ void GCodeTreeGenerator::sort_commands(command_line_t **commands, uint16_t nb_co
 
         //A jump label, to go to the end of a fall directly from the switch statement.
         iteration_limit:
-        sorted_index;
+        asm("nop");
 
     } while (sorted_index-- != minimum_index);
 

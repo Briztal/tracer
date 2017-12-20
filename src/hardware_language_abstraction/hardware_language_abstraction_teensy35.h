@@ -109,8 +109,8 @@
 #define sqrt_float(f) sqrtf(f)
 #define sqrt_long(l) sqrtf(l)
 
-#define min(a, b) (((a)<(b)) ? (a) : (b))
-#define max(a, b) (((a)<(b)) ? (b) : (a))
+#define minimum(a, b) (((a)<(b)) ? (a) : (b))
+#define maximum(a, b) (((a)<(b)) ? (b) : (a))
 
 
 //--------------------------------------------------INTERRUPTS----------------------------------------------------------

@@ -57,12 +57,11 @@ class Queue {
     };
 
 public:
-
     /*
      * Constructor : initialises all arguments
      */
     Queue(uint8_t size) :
-            size(size), content(new queue_object_t[size]), max_index((const uint8_t) (size - 1)), nb_spaces(size) {}
+            size(size), max_index((const uint8_t) (size - 1)), content(new queue_object_t[size]), nb_spaces(size) {}
 
 
     String display() {
@@ -342,14 +341,20 @@ public:
 
 private:
 
+    //The size of the queue;
     const uint8_t size;
+
+    //The maximum index (size - 1);
     const uint8_t max_index;
 
+    //The array of queue objects;
     queue_object_t *const content;
 
+    //The reading and insertion indices, initialised at zero;
     uint8_t reading_index = 0;
     uint8_t insertion_index = 0;
 
+    //The number of objects and spaces in the queue;
     uint8_t nb_objects = 0;
     uint8_t nb_spaces;
 

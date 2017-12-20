@@ -7,7 +7,7 @@
 
 EEPROMNode::EEPROMNode(string_t *name, uint8_t sub_nodes_nb, uint8_t index, float *const data) :
 
-        sub_nodes_nb(sub_nodes_nb), name(name), index(index), data(data)
+        name(name), sub_nodes_nb(sub_nodes_nb),index(index), data(data)
 
 {
     sub_nodes = (EEPROMNode **) malloc(sub_nodes_nb * sizeof(EEPROMNode *));

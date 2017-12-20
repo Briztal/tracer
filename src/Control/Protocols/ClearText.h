@@ -32,6 +32,8 @@ public :
     //Constructor;
     ClearText(uint8_t size, uint16_t (*const available_f)(void), void (*const write_f)(char), char (*const read_f)(void));
 
+    ~ClearText() {};
+
     //read all available_data;
     void decode_data();
 

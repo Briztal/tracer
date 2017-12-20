@@ -73,6 +73,8 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
 
     }
 
+    return complete;
+
 
 }
 

@@ -43,7 +43,7 @@ struct interface_data_t {
  *  A simple struct that will be used in the arguments parsing for GCode and Terminal Control.
  */
 
-typedef struct argument_t {
+struct argument_t {
     //The identfier of an argument
     char identifier;
 

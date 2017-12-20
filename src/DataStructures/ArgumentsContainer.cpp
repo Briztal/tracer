@@ -26,8 +26,8 @@
 
 //TODO COMMENT
 ArgumentsContainer::ArgumentsContainer(uint8_t args_size, uint8_t nb_args) :
-        args_size(args_size), nb_args(nb_args), available_cases(new bool[nb_args]), nb_spaces(nb_args),
-        arguments(new char[args_size * nb_args]) {
+        args_size(args_size), nb_args(nb_args), arguments(new char[args_size * nb_args]),
+        nb_spaces(nb_args),  available_cases(new bool[nb_args]) {
 
 
 }
@@ -37,7 +37,7 @@ uint8_t ArgumentsContainer::available_spaces() {
 }
 
 
-uint8_t ArgumentsContainer::insert_argument(char ** insertion_pointer) {
+uint8_t ArgumentsContainer::insert_argument(char **insertion_pointer) {
 
     if (!nb_spaces)
         return 0;
@@ -59,6 +59,8 @@ uint8_t ArgumentsContainer::insert_argument(char ** insertion_pointer) {
 
         }
     }
+
+    return 0;
 }
 
 
@@ -92,7 +94,7 @@ bool ArgumentsContainer::insert_argument(const char *args, uint8_t *index_p) {
 
                     //Display an error message
                     std_out("WARNING IN ArgumentsContainer::insert_argument : the argument_t was too big"
-                                     " for the container.");
+                                    " for the container.");
 
                     //Fail
                     return false;
@@ -100,7 +102,7 @@ bool ArgumentsContainer::insert_argument(const char *args, uint8_t *index_p) {
                 }
 
                 //Copy the current char.
-                *dest++=c;
+                *dest++ = c;
 
                 //update the current char.
                 c = *(args++);

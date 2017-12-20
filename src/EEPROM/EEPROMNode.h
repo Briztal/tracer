@@ -14,8 +14,6 @@ public:
 
     EEPROMNode(string_t *name, uint8_t sub_nodes_nb, uint8_t id, float *const data);
 
-    EEPROMNode ** sub_nodes;
-
     const String *name;
 
     const uint8_t sub_nodes_nb;
@@ -23,6 +21,9 @@ public:
     const uint8_t index;
 
     float *const data;
+
+    EEPROMNode ** sub_nodes;
+
 
 };
 

@@ -281,7 +281,7 @@ task_state_t StepperController::set_speed_for_group(uint8_t speed_group, float n
 
 
     //update speeds with the minimum of regulation_speed and the maximum regulation_speed
-    speeds[speed_group] = min(max_speed, new_speed);
+    speeds[speed_group] = minimum(max_speed, new_speed);
 
     //Task completed
     return complete;
@@ -365,7 +365,7 @@ sig_t StepperController::get_tools_data(float *energy_densities) {
         sig |= ((sig_t)1<<(i));\
     }
 
-#include <Config/stepper_control_config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 

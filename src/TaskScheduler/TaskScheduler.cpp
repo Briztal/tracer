@@ -509,7 +509,7 @@ void TaskScheduler::process_task_sequences() {
                     }
 
                     //If the executed task must be reprogrammed
-                    if ((execute_task(task) == reprogram)) {
+                    if (!execute_task(task)) {
 
                         //Disable this sequence's processing
                         process[sequence_id] = false;
@@ -587,8 +587,20 @@ bool TaskScheduler::execute_task(task_t *task) {
     //If the task must be reprogrammed,
     if (state != reprogram) {
 
-        //Free the memory occupied by the task.
+        /*
+         * The line below deletes a void *, and so will generate the following warning :
+         *
+         *      warning: deleting 'void*' is undefined [-Wdelete-incomplete]
+         *
+         * As dynamic args are dynamically allocated, this operation is secure.
+         */
+
+#pragma GCC diagnostic ignored "-Wdelete-incomplete"
+
+//Free the memory occupied by the task.
         delete (task->dynamic_args);
+
+#pragma GCC diagnostic pop
 
         //Succeed.
         return true;

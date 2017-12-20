@@ -1076,6 +1076,7 @@ This does not match the normal thermistor behaviour so we need to set the follow
 // Calculated using 1kohm pullup, voltage divider math, and manufacturer provided temp/resistance
 // Advantage: More resolution and better linearity from 150C to 200C
 #define SEMITEC_100_1K_SIZE 32
+
 #define SEMITEC_100_1K_TABLE {\
   {1, 500},\
   {76, 300},\
@@ -1108,5 +1109,6 @@ This does not match the normal thermistor behaviour so we need to set the follow
   {1010, 30},\
   {1015, 20},\
   {1018, 10},\
-  {1020, 0}\
-};
+  {1020, 0}};
+
+

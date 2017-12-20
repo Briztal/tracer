@@ -119,7 +119,7 @@ public:
     /*
      * The hotbed state structure : This structure is used to modify hotbed's state (activity and temperature)
      */
-    typedef struct hotbed_state_t {
+    struct hotbed_state_t {
 
         //Flags
         bool enabled_flag = false, temperature_flag = false;

@@ -238,7 +238,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     //Add the sub nodes
 #define CONTINUOUS(i, name, ...) tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, &((ES::continuous_data+i)->max));
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef CONTINUOUS
 
@@ -259,7 +259,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     tree2->sub_nodes[0] = new EEPROMNode(new String("min"), 0, 0, &((ES::servos_data+i)->min));\
     tree2->sub_nodes[1] = new EEPROMNode(new String("max"), 0, 1, &((ES::servos_data+i)->max));
 
-#include <config.h>
+#include <Config/actions_config.h>
 
 #undef SERVO
 
@@ -283,7 +283,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     tree2->sub_nodes[1] = new EEPROMNode(new String("ki"), 0, 1, &((ES::pids_data+i)->ki));\
     tree2->sub_nodes[2] = new EEPROMNode(new String("kd"), 0, 2, &((ES::pids_data+i)->kd));
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef PID
 
@@ -302,7 +302,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
 #define LOOP_FUNCTION(i, name, ...)\
     tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, (ES::loop_periods+i));
 
-#include <config.h>
+#include <Config/control_loops_config.h>
 
 #undef LOOP_FUNCTION
 
@@ -330,7 +330,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     tree2->sub_nodes[3] = new EEPROMNode(new String("acc"),     0, 3, &((ES::steppers_data+i)->acceleration));\
     tree2->sub_nodes[4] = new EEPROMNode(new String("jerk"),    0, 4, &((ES::steppers_data+i)->jerk));
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 
@@ -346,7 +346,7 @@ EEPROMNode *EEPROMInterface::build_tree() {
     //Add the sub nodes
 #define CARTESIAN_GROUP(i, name, ...) tree->sub_nodes[i] = new EEPROMNode(new String(#name), 0, i, (ES::group_maximum_speeds+i));
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef CARTESIAN_GROUP
 

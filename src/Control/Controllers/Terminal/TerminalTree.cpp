@@ -25,7 +25,7 @@
 #include "TerminalTree.h"
 
 TerminalTree::TerminalTree(string_t *name, uint8_t nb_children, string_t *description, task_state_t (*const f)(char *))
-        : nb_children(nb_children), name(name), description(description), function(f),
+        :  name(name), nb_children(nb_children), description(description), function(f),
           children(new terminal_child_container_t[nb_children]) {}
 
 

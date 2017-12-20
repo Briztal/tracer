@@ -35,7 +35,7 @@ void HomingMovement::move() {
     Steppers::enable(255);
 
     //First step is to generate the signature for all axis;
-    sig_t signature = 0;
+    //sig_t signature = 0;
 
     //TODO DIRECTIONS : 0 quand C'est en increment... Ca va pas !!
 

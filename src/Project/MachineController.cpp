@@ -73,29 +73,39 @@
  *          then this carriage becomes the reference
  */
 
-task_state_t MachineController::home() {
+task_state_t MachineController::home(home_state_t state) {
 
-    //Initialise the reference carriage data
-    carriage_data t = carriage_data();
+    if (state.endstops_flag) {
 
-    //Initialise the reference carriage.
-    set_reference_carriage(0, axis_positions[0], axis_positions[2], &t);
+        std_out("Endstops not supported for instance.");
 
-    //Verify carriages 1, 2 and 3.
-    check_carriage(1, axis_positions[1], axis_positions[2], &t);
-    check_carriage(2, axis_positions[1], axis_positions[3], &t);
-    check_carriage(3, axis_positions[0], axis_positions[3], &t);
+        return complete;
 
-    //Set the reference carriage, that will determine the movement speed.
-    StepperController::set_speed_group(t.carriage_id);
+    } else {
 
-    //No need to set the regulation speed, ad it is already set.
+        //Initialise the reference carriage data
+        carriage_data t = carriage_data();
 
-    //Zero all carriages
-    axis_positions[0] = axis_positions[1] = axis_positions[2] = axis_positions[3] = 0;
+        //Initialise the reference carriage.
+        set_reference_carriage(0, axis_positions[0], axis_positions[2], &t);
 
-    //Move
-    return StepperController::linear_movement(axis_positions);
+        //Verify carriages 1, 2 and 3.
+        check_carriage(1, axis_positions[1], axis_positions[2], &t);
+        check_carriage(2, axis_positions[1], axis_positions[3], &t);
+        check_carriage(3, axis_positions[0], axis_positions[3], &t);
+
+        //Set the reference carriage, that will determine the movement speed.
+        StepperController::set_speed_group(t.carriage_id);
+
+        //No need to set the regulation speed, ad it is already set.
+
+        //Zero all carriages
+        axis_positions[0] = axis_positions[1] = axis_positions[2] = axis_positions[3] = 0;
+
+        //Move
+        return StepperController::linear_movement(axis_positions);
+
+    }
 
 }
 
@@ -398,7 +408,7 @@ task_state_t MachineController::set_current_position(offsets_state_t new_positio
     CHECK_AXIS(z);
     CHECK_AXIS(e);
 
-#undef CHECK_AXIS;
+#undef CHECK_AXIS
 
     return complete;
 }
@@ -438,44 +448,47 @@ task_state_t MachineController::enable_steppers(bool enable) {
 
 task_state_t MachineController::set_carriages_state(carriages_state_t new_state) {
 
-    //Initialise a state, that will be updated at each modification.
+    //Initialise a state, that will be updated at each modification;
     task_state_t state = complete;
 
     //if the working extruder must be changed :
     if (new_state.working_carriage_flag) {
 
-        //Change the working extruder
+        //Change the working extruder;
         state = set_working_extruder(new_state.working_carriage);
 
-        //Fail if the function failed.
+        //Fail if the function failed;
         if (state != complete) return state;
 
 
     }
 
-        //As next blocs only focus on each carriage's speed, always the same way, we will use a macro.
+        //As next blocs only focus on each carriage's speed, always the same way, we will use a macro;
 
 #define SPEED_MODIFICATION(speed_group, flag, new_speed) \
     /*if the working extruder must be changed : */\
     if (flag) {\
         \
-        /*Change the speed for i'th carriage*/\
+        /*Change the speed for i'th carriage;*/\
         StepperController::set_speed_for_group(speed_group, new_speed);\
         \
-        /*Fail if the function failed.*/\
+        /*Fail if the function failed;*/\
         if (state!=complete) return state;\
         \
     }
 
-    //Eventually modify the speed for the current carriage
+    //Eventually modify the speed for the current carriage;
     SPEED_MODIFICATION(extrusion_state.working_carriage, new_state.working_carriage_speed_flag,
                        new_state.working_carriage_speed)
 
-    //Eventually modify the speed for every carriage
+    //Eventually modify the speed for every carriage;
     SPEED_MODIFICATION(new_state.nominative_carriage, new_state.nominative_speed_mod_flag, new_state.nominative_speed)
 
-    //For safety and good practices, undef the macro.
+    //For safety and good practices, undef the macro;
 #undef SPEED_MODIFICATION
+
+    //Complete;
+    return complete;
 
 }
 

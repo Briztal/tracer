@@ -207,7 +207,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
     //TODO MAX SPEED CHECKING
 
     //Cache vars
-    float min = movement_data->beginning, max = movement_data->ending;
+    float min = movement_data->beginning, maximum = movement_data->ending;
     float min_increment = movement_data->beginning_increment, max_increment = movement_data->ending_increment;
 
     //Get delay_us numerators
@@ -215,8 +215,8 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
                                                 min + min_increment, &movement_data->reference_axis,
                                                 &movement_data->acceleration_step);
 
-    float dn_deceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, max,
-                                                max + max_increment, 0, 0);
+    float dn_deceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, maximum,
+                                                maximum + max_increment, 0, 0);
 
     //Save the acceleration delay_us numerators. The other is not used in real time.
     movement_data->acceleration_delay_numerator = dn_acceleration;

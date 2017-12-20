@@ -5,7 +5,7 @@
 #include <Control/Protocols/Protocol.h>
 #include "task_state_t.h"
 
-typedef struct task_t {
+struct task_t {
 
     /*
      * The type of the task :
