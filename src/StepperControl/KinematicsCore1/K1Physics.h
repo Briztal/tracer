@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL==1)
+#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION==1)
 
 #ifndef TRACER_REAL_TIME_PROCESS_H
 #define TRACER_REAL_TIME_PROCESS_H

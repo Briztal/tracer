@@ -18,6 +18,30 @@
 
 */
 
+/*
+ * hl_config : this file configures the hardware abstraction layer.
+ *
+ *  In this file, you must :
+ *
+ *      - Configure timer interrupts;
+ *      - Set interrupt priorities;
+ */
+
+
+/*
+ * Timer interrupt frequencies :
+ *
+ *  For every timer you want to use (timers are indexed from 0 to n-1, n being the number of timers),
+ *      please define a macro names TIMER_N_FREQUENCY (replace N with the index)
+ *      with the desired interrupt frequency;
+ *
+ *  You must set these frequencies accordingly with timer allocation, as module may require a particular frequency :
+ *      - the stepper module requires a 1MHz frequency;
+ *      - the servo module requires a 1MHz frequency;
+ *      - control loops require a 1KHz frequency;
+ *
+ */
+
 //Timer 0 and 1 will count on microseconds, at 1MHz
 #define TIMER_0_FREQUENCY 1000000
 #define TIMER_1_FREQUENCY 1000000
@@ -25,6 +49,42 @@
 //Timer 2 and 3 will count on milliseconds, at 1KHz
 #define TIMER_2_FREQUENCY 1000
 #define TIMER_3_FREQUENCY 1000
+
+
+
+/*
+ * Timer allocations :
+ *
+ *  As some modules require the use of a timer, you must manually link functions they use to the
+ *      appropriate timer functions (macros are advised);
+ *
+ *  Even if all functions are not required by all modules, I advise you to implement all functions,
+ *      for safety. You should simply copy the next section, and replace [name] and [index] with (resp)
+ *      the module name and the timer index.
+ *
+ *  Module names are :
+ *      - stepper for the stepper module;
+ *      - servo for the servo module;
+ *      - loop_i for the i-th control loop of the control-loops module;
+
+ Code section to copy :
+
+
+#define [name]_period_to_reload(period) period_to_reload_[index](period);
+#define set_[name]_int_period(period) set_int_period_[index](period);
+#define set_[name]_int_reload(reload) set_int_reload_[index](reload);
+#define enable_[name]_interrupt() enable_interrupt_[index]();
+#define disable_[name]_interrupt() disable_interrupt_[index]();
+#define enable_[name]_timer() enable_timer_[index]();
+#define disable_[name]_timer() disable_timer_[index]();
+#define [name]_int_flag() timer_flag_[index]()
+#define [name]_int_flag_clear() reset_timer_flag_[index]();
+#define set_[name]_int_function(f) set_interrupt_function_[index](f);
+#define setup_[name]_interrupt(f, period) setup_interrupt_[index](f, period);
+#define clean_[name]_interrupt() clean_interrupt_[index]();
+#define is_[name]_loop_enabled() is_timer_loop_enabled_[index]();
+
+ */
 
 
 /*
@@ -43,7 +103,7 @@
 #define set_stepper_int_function(f) set_interrupt_function_0(f);
 #define setup_stepper_interrupt(f, period) setup_interrupt_0(f, period);
 #define clean_stepper_interrupt() clean_interrupt_0();
-#define is_stepper_loop_enabled() is_timer_loop_enabled_1();
+#define is_stepper_loop_enabled() is_timer_loop_enabled_0();
 
 
 /*
@@ -81,7 +141,7 @@
 #define set_loop_0_int_function(f) set_interrupt_function_2(f);
 #define setup_loop_0_interrupt(f, period) setup_interrupt_2(f, period);
 #define clean_loop_0_interrupt() clean_interrupt_2();
-#define is_loop_0_enabled() is_timer_loop_enabled_1();
+#define is_loop_0_enabled() is_timer_loop_enabled_2();
 
 
 /*
@@ -100,14 +160,17 @@
 #define set_loop_1_int_function(f) set_interrupt_function_3(f);
 #define setup_loop_1_interrupt(f, period) setup_interrupt_3(f, period);
 #define clean_loop_1_interrupt() clean_interrupt_3();
-#define is_loop_1_enabled() is_timer_loop_enabled_1();
+#define is_loop_1_enabled() is_timer_loop_enabled_3();
 
 
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
 
-//Initialisation function : set the correct priorities, enable interrupts, and disables timers and interrupts
+/*
+ * Interrupts initialisation function : set the correct priorities, enable interrupts,
+ *  and disables timers and interrupts
+ */
 
 #define init_interrupts() {\
     SIM_SCGC6 |= SIM_SCGC6_PIT; __asm__ volatile("nop");PIT_MCR = 1;\

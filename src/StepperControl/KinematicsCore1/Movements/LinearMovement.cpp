@@ -22,7 +22,7 @@
 #include <Config/stepper_control_config.h>
 
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 0)
+#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 0)
 
 #include <interface.h>
 #include <EEPROM/EEPROMStorage.h>

@@ -21,10 +21,10 @@
 /* EEPROM custom data definition : for each variable you need to save in EEPROM, write_data the following line
  *  with the appropriate parameters;
  *
- * EEPROM_VARIABLE(name, default_value)
+ *  EEPROM_VARIABLE(name, default_value)
  *
- * This unction will create a float variable with the name provided in the EPROMStorage class,
- *  that will be saved in EEPROM, and take the default value provided
+ *  This function will create a float variable with the name provided in the EPROMStorage class,
+ *      that will be saved in EEPROM, and take the default value provided
  */
 
 #if defined(EEPROM_VARIABLE)

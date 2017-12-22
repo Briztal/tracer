@@ -18,19 +18,32 @@
 
 */
 
-/* This section sets up the asserv code structure.
+/*
+ * This section sets up the asserv code structure.
  * The structure is composed of external parameters, representing the information you possess about your environment,
  * and PIDs, computing data computed from external parameters. PID Outputs can be computed, to call actions.
  */
 
 
-/* PID : a PID.
- * For each PID, put one line like behind and provide the three required parameter
- * PID(indice, name, kp, ki, kd)
+/*
+ * PID : simple PID utilities;
  */
 
 //Set the number of PIDs
 #define NB_PIDS 5
+
+/*
+ * For each PID, put one line like behind and provide the three required parameter
+ *
+ * PID(i, name, kp, ki, kd)
+ *
+ *  - i :   the index of the PID, used to control it in the code;
+ *              Indices start at 0 and are strictly consecutive;
+ *  - name : the name you choose to give to the PID;
+ *  - kp :  the default kp value;
+ *  - ki :  the default ki value;
+ *  - kd :  the default kd value;
+ */
 
 #ifdef PID
 
@@ -44,15 +57,32 @@ PID(4, hotbed, 20, 0, 0)
 
 
 /*
- * Loop Functions : a interrupt called function
- * For each loop function, put one line like behind and provide the two required parameter
- * LOOP_FUNCTION(indice, name, period_ms)
+ * Loop Functions : interrupt called functions
  */
 
+//Set the number of loops;
 #define NB_LOOPS 1
 
+/*
+ *
+ * For each loop function, put one line like behind and provide the two required parameter
+ *
+ * LOOP_FUNCTION(i, name, period_ms)
+ *
+ *
+ *  - i :           the index of the PID, used to control it in the code;
+ *                      Indices start at 0 and are strictly consecutive;
+ *  - name :        the name you choose to give to the PID;
+ *  - period_ms :   the period of the loop function;
+ */
+
 #ifdef LOOP_FUNCTION
+//Use LOOP_FUNCTION here
 
 LOOP_FUNCTION(0, temperature, 10)
 
 #endif
+
+
+//DO NOT CHANGE THIS : the control loop timers control frequency (1KHz)
+#define TIMER_LOOP_FREQUENCY 1000

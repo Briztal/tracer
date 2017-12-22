@@ -23,65 +23,7 @@
 /*
  * The GCode Interface configuration file.
  *
- * This file defines the behaviour of the parser. You can personalise the following parameters :
- *      - The commands (G101, M1 commands for example).
- *      - The Parameters you can pass (X, Y, Z, A, B, etc...)
- *      - The function a special command triggers (ex : in Reprap GCode, G1 triggers a linear enqueue_movement function)
- *
- * Command are created with a simple tree. For example, to include next commands :
- *      G0, G1, M1, M2, G10, M225 and G5D0
- *
- *      You would define the following tree :
- *
- *      G
- *      -- 0 -> g0
- *      -- 1 -> g1
- *      ----- 0 -> g10
- *      -- 5
- *      ----- D
- *      -------- 0 -> g520
- *      M
- *      -- 1 -> m1
- *      -- 2 -> m2
- *      ----- 2
- *      -------- 5 -> m225
- *
- * Where nodes followed by * effectively trigger commands (note that final nodes must always trigger a command)
- *
- * This structure is a little bit hard to initially approach, but it has two major advantages :
- *      - It allows to define all types of commands (1F5EF for example).
- *      - The code generated with it is REALLY more optimised than a typical GCode parser like.
- *          For example, in Marlin, there are two switch (M and G) over all commands indices.
- *          These code practices are extremely inefficient.
- *          Here, at every node, a switch is made over the direct children.
- *
- * To define the command tree, you have access to the three following commands :
- *      COMMAND(k1_position_indice, fname)           : defines a leaf node, that triggers a method in MachineController::fname
- *      GO_LOWER_COMMAND(k1_position_indice, fname)  : defines a non leaf node that triggers MachineController::fname if it terminates a GCode (ex : G1 upper), and go to its level
- *      GO_LOWER(k1_position_indice)                 : defines a non leaf node, that does not trigger any function, and goes to its level
- *      GO_UPPER()                  : returns to the parent node level
- *
- *
- * For example, to effectively implement the tree mentioned above, you may write_data the following commands :
- *
- * GO_LOWER('G')
- * COMMAND('0', g0)
- * GO_LOWER_COMMAND('1', g1)
- * COMMAND('0', g10)
- * GO_UPPER()
- * GO_LOWER('5')
- * GO_LOWER('D')
- * GO_LOWER_COMMAND('0', g520)
- * GO_UPPER()
- * GO_UPPER()
- * GO_UPPER()
- * GO_LOWER('M')
- * GO_LOWER('1', m1)
- * GO_LOWER_COMMAND('2', m2)
- * GO_LOWER('2')
- * COMMAND('5', m255)
- *
- *
+ * This file defines the behaviour and the size of the parser.
  */
 
 
@@ -101,7 +43,30 @@
 #define GCODE_MAX_SIZE 100
 
 
-#if defined(GCODE_COMMAND)
+/*
+ * The following section defines the language of the parser.
+ *
+ *  It contains all commands that will be supported by the parser.
+ *
+ *  To add a command, triggering a function in GCodeCommands, use the following command :
+ *
+ *  GCODE_COMMAND(command_name, function)
+ *
+ *      - command_name :    the name of the GCode Command (ex : G352)
+ *      - function :        the name of the function in GCodeCommands that must be called when the command is received.
+ *
+ *  For example, to call the member function "line" of GCodeCommands class when the command "G01" is called,
+ *      you will write :
+ *
+ *      GCODE_COMMAND(line, G01)
+ *
+ *
+ *  You can declare your commands in any order you desire, the only usage of this section is to build tree,
+ *      process that will involve sorting commands by name;
+ */
+
+#ifdef GCODE_COMMAND
+//Write your commands here
 
 //Movement
 GCODE_COMMAND(G00, home)

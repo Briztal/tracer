@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 1)
+#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 1)
 
 #include <math.h>
 #include <Actions/ContinuousActions.h>

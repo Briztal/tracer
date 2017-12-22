@@ -43,7 +43,7 @@
 #include <config.h>
 #include <Config/stepper_control_config.h>
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
+#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 2)
 
 
 #ifndef TRACER_KERNEL2_H

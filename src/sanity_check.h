@@ -33,7 +33,7 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef KERNEL
+#ifndef CORE_VERSION
 #error "The Kernel version is not defined in your config.h"
 #endif
 
@@ -41,10 +41,10 @@
 #error "KinematicsCores require the EEPROM support, and you board doesn't support it."
 #endif
 
-#if (KERNEL == 0)
+#if (CORE_VERSION == 0)
 //NO verification required, this kernel works on every damn thing...
 
-#elif ((KERNEL == 1) || (KERNEL == 2))
+#elif ((CORE_VERSION == 1) || (CORE_VERSION == 2))
 //KinematicsCore1 and KinematicsCoreV2 require a 32 bits processor with an FPU
 
 //FPU

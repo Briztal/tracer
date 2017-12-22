@@ -18,7 +18,15 @@
 
 */
 
-//A string naming your project
+
+/*
+ * The Terminal Interface configuration file.
+ *
+ * This file defines the behaviour and the size of the parser.
+ *
+ */
+
+//Put the name of your project here
 #define PROJECT_NAME "TRACER"
 
 //The maximal size of a command (id + arguments)
@@ -39,16 +47,69 @@
 //Uncomment this line to be prompted about Terminal Tasks execution.
 #define TERMINAL_EXECUTION_CONFIRMATION
 
+
+/*
+ * The following section defines the language of the parser.
+ *
+ *  This language is a tree, where every node is labeled by a word, and has a certain number of children.
+ *
+ *      For example, a simple language, supporting the three following commands :
+ *          move home       (+args) -> call home_function
+ *          move line of    (+args) -> call line_to_function
+ *          move line to    (+args) -> call line_of_function
+ *          halt            (+args) -> call halt_function
+ *
+ *      Will have its command tree like below :
+ *
+ *          move
+ *             |- home ------> home_function
+ *             |- line
+ *             |    |- of ---> line_of_function
+ *             |    |- to ---> line_to_function
+ *          halt ------------> halt_function
+ *
+ *  The aim of this section is to define the structure of the tree.
+ *
+ *  To do this, you can use the 3 following commands :
+ *
+ *      - CREATE_LEAF(command, name)    : Create a leaf labelled "command", triggering the member function "name"
+ *                              of the class TerminalCommands
+ *      - GO_LOWER(command) :   following lines will define children of an new node labeled "command";
+ *      - GO_UPPER() :          opposite of the previous command, terminate the section of the node defined by
+ *                                  the last GO_LOWER
+ *
+ *
+ *      For example, to build the tree in our previous example, we would write the following lines :
+ *
+ *      //Create a new node "move"
+ *      GO_LOWER(move)
+ *
+ *      //Declare a command "move home" triggering home_function
+ *      CREATE_LEAF(home, home_function)
+ *
+ *      //Create a new node "line"
+ *      GO_LOWER(line)
+ *
+ *      //Declare a command "move line of" triggering line_of_function
+ *      CREATE_LEAF(of, line_of_function)
+ *
+ *      //Declare a command "move line to" triggering line_to_function
+ *      CREATE_LEAF(to, line_to_function)
+ *
+ *      //Finish the section of node "line"
+ *      GO_UPPER()
+ *
+ *      //Finish the section of node "move"
+ *      GO_UPPER()
+ *
+ *
+ *      //Declare a command halt" triggering halt_to_function
+ *      CREATE_LEAF(halt, halt_function)
+ *
+ */
+
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)
-
-#ifndef REQUIRE_ARG
-#define REQUIRE_ARG(i, name)
-#endif
-
-#ifndef ALLOW_MULTIPLICITY
-#define ALLOW_MULTIPLICITY(c, name)
-#endif
-
+//Write your commands here
 
 //EEPROM
 CREATE_LEAF(eeprom, eeprom, manage_eeprom)
@@ -90,9 +151,6 @@ GO_UPPER()
 #undef GO_LOWER
 #undef GO_UPPER
 #undef CREATE_LEAF
-#undef CREATE_CALLABLE_LEAF
-#undef REQUIRE_ARG
-#undef ALLOW_MULTIPLICITY
 
 #endif
 

@@ -22,7 +22,7 @@
 #include <config.h>
 #include <Config/stepper_control_config.h>
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
+#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 2)
 
 #include "KinematicsCore2.h"
 #include "K2Physics.h"
@@ -182,7 +182,7 @@ float KinematicsCore2::compute_us_time_for_first_sub_movement(k2_sub_movement_da
     //Update tools powers
     float working_carriage_speed = sub_movement_data->movement_distance / time;
     TrajectoryTracer::update_tools_powers(working_carriage_speed);
-    //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
+    //TODO NOT CORE_VERSION'S JOB! THE CORE_VERSION MUST ONLY PROVIDE THE SPEED.
 
     return (float) 1000000 * time;
 
@@ -228,7 +228,7 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
     //Update tools powers
     float working_carriage_speed = sub_movement_data->movement_distance / time;
     TrajectoryTracer::update_tools_powers(working_carriage_speed);
-    //TODO NOT KERNEL'S JOB! THE KERNEL MUST ONLY PROVIDE THE SPEED.
+    //TODO NOT CORE_VERSION'S JOB! THE CORE_VERSION MUST ONLY PROVIDE THE SPEED.
 
     return (float) 1000000 * time;
 }

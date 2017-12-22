@@ -53,7 +53,8 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     //If the insertion failed
     if (!queue_flag) {
 
-        std_out("ERROR in ComplexLinearMovement::plan_movement : the insertion element is already allocated.");
+        //Error log
+        std_out("Error in ComplexLinearMovement::plan_movement : the insertion element is already allocated.");
 
         //Emergency stop
         Kernel::emergency_stop();
@@ -103,8 +104,6 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
                                                                     finalise_movement, get_position,
                                                                     get_real_time_position);
 
-    std_out("SSUUS CONTROL");
-
     //If the process has completed,
     if (enqueue_state == complete) {
 
@@ -117,7 +116,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
         if (!queue_flag) {
 
             //Log;
-            std_out("ERROR in ComplexLinearMovement::plan_movement : the previously controlled insertion element is now allocated.");
+            std_out("Error in ComplexLinearMovement::plan_movement : the previously controlled insertion element is now allocated.");
 
             //Emergency stop;
             Kernel::emergency_stop();
@@ -136,7 +135,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
 
     } else  {
 
-        std_out("\n\nERROR IN LINEAR_MOVEMENT\n\n");
+        std_out("\n\nError IN LINEAR_MOVEMENT\n\n");
     }
 
     return enqueue_state;
@@ -269,7 +268,7 @@ void ComplexLinearMovement::initialise_movement() {
     if (!queue_flag) {
 
         //Log
-        std_out("ERROR in ComplexLinearMovement::initialise_movement : the output element is not assigned.");
+        std_out("Error in ComplexLinearMovement::initialise_movement : the output element is not assigned.");
 
         //Emergency stop
         Kernel::emergency_stop();
@@ -311,7 +310,7 @@ void ComplexLinearMovement::finalise_movement() {
     if (!queue_flag) {
 
         //Log;
-        std_out("ERROR in ComplexLinearMovement::finalise_movement : the output element is not allocated.");
+        std_out("Error in ComplexLinearMovement::finalise_movement : the output element is not allocated.");
 
         //Emergency stop;
         Kernel::emergency_stop();

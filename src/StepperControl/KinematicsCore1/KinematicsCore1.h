@@ -20,7 +20,7 @@
 
 #include <config.h>
 
-#if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 1)
+#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 1)
 
 
 #ifndef TRACER_KERNEL1_H

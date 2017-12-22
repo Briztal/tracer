@@ -17,6 +17,11 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
+#include <config.h>
+
+#ifdef ENABLE_CONTROL_LOOPS
+
 #include "ControlLoops.h"
 #include <Project/TemperatureController.h>
 
@@ -66,5 +71,4 @@ void ControlLoops::finalisation_function_temperature() {
 
 }
 
-
-
+#endif

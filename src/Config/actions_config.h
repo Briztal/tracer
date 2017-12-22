@@ -18,9 +18,18 @@
 
 */
 
-/* Binary Actuators (on - off)
+/*
+ * Binary GPIO (on - off)
+ *
  * For each actuator you want to control in on-off mode, put one line like behind and provide the four required parameter
- * BINARY(i, name, powerPin, enableValue)
+ *
+ * BINARY(i, name, power_pin, enable)
+ *
+ *  - i :           the index of the servo, used to control the GPIO in the code (passed in argument);
+ *                      Indices start at 0 and are strictly consecutive;
+ *  - name :        the name you choose to give to the servo;
+ *  - power_pin :   the pin on which the pwm will be triggered;
+ *  - enable :      the boolean value of an enabled state;
  */
 
 #ifdef BINARY
@@ -29,9 +38,19 @@
 #endif
 
 
-/* Continuous Actuators : a power command, output in [|0, 255|]
+/*
+ * PWM GPIO : a power command, output in [|0, 255|]
+ *
  * For each actuator you want to control in linear, put one line like behind and provide the three required parameter
- * CONTINUOUS(i, name, powerPin, maxValue)
+ *
+ * CONTINUOUS(i, name, power_pin, max_value)
+ *
+ *  - i :           the index of the PWM, used to control the PWM in the code.
+ *                      Indices start at 0 and are strictly consecutive;
+ *  - name :        the name you choose to give to the servo;
+ *  - power_pin :   the pin on which the pwm will be triggered;
+ *  - max_value :   the maximum of the control value (as pwm is a power relay,
+ *                      the control value will be btw 0 and max_value
  */
 
 #define NB_CONTINUOUS 6
@@ -48,14 +67,30 @@ CONTINUOUS(5,   cooling,    23,     100)
 #endif
 
 
-/* Servomotor Actuators
- * For each servo you want to control, put one line like behind and provide the three required parameter
- * SERVO(i, name, dataPin, minValue, maxValue)
- */
 
+//------------------------------------------------ Servomotors ------------------------------------------------
+
+//The number of different servos
 #define NB_SERVOS 2
 
+//The total period of a servo cycle;
 #define SERVO_PERIOD_US 20000
+
+
+/*
+ * For each servo you want to control, put one line like behind and provide the three required parameter
+ *
+ * SERVO(i, name, data_pin, min_value, max_value)
+ *
+ *  - i :           the index of the servo, used to control the servo in the code (passed in argument);
+ *                      Indices start at 0 and are strictly consecutive;
+ *  - name :        the name you choose to give to the servo;
+ *  - data_pin :    the pin that will be used to communicate with the servo;
+ *  - min_value :   the lower bound of the control value
+ *  - max_value :   the upper bound of the control value
+ *  - min_period :  the lower bound of the control period, in us (typically 1500)
+ *  - max_period :   he upper bound of the control period, in us (typically 2500)
+ */
 
 #ifdef SERVO
 
@@ -63,4 +98,7 @@ SERVO(0, servo, 0, 0, 1, 1500, 2500)
 SERVO(1, servoo, 1, 0, 1, 1500, 2500)
 
 #endif
+
+//DO NOT CHANGE THIS : the servo timer control frequency (1KHz)
+#define TIMER_SERVO_FREQUENCY 1000000
 

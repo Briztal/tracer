@@ -21,6 +21,10 @@
 #ifndef TRACER_PIDS_H
 #define TRACER_PIDS_H
 
+#include <config.h>
+
+#ifdef ENABLE_CONTROL_LOOPS
+
 #include <stdint.h>
 
 class PID {
@@ -70,3 +74,5 @@ private:
 
 
 #endif //TRACER_PIDS_H
+
+#endif

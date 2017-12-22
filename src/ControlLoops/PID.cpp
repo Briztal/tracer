@@ -19,6 +19,10 @@
 
 */
 
+#include <config.h>
+
+#ifdef ENABLE_CONTROL_LOOPS
+
 #include "PID.h"
 
 #include <EEPROM/EEPROMStorage.h>
@@ -119,3 +123,5 @@ float *const PID::sums = t_pid_sums;
 //Lasts
 float t_pid_lasts[NB_PIDS];
 float *const PID::lasts = t_pid_lasts;
+
+#endif

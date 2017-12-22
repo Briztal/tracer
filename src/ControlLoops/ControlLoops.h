@@ -21,6 +21,11 @@
 #ifndef TRACER_CONTROLLOOPS_H
 #define TRACER_CONTROLLOOPS_H
 
+
+#include <config.h>
+
+#ifdef ENABLE_CONTROL_LOOPS
+
 #include <hardware_language_abstraction.h>
 
 class ControlLoops {
@@ -66,3 +71,5 @@ private:\
 
 
 #endif //TRACER_CONTROLLOOPS_H
+
+#endif;

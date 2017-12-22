@@ -18,8 +18,11 @@
 
 */
 
+/*
+ * This file configures the Stepper control module.
+ */
 
-//------------------------------------------------------Stepper Motors--------------------------------------------------
+//------------------------------------------------------ Steppers ------------------------------------------------------
 
 /*
  * The stepper motors are the physical actuators the module will manipulate. Each one represents a physical axis of
@@ -29,13 +32,22 @@
 //Number of stepper motors, must be set accordingly to the next lines
 #define NB_STEPPERS 9
 
-//Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters//TODO DOC
+/*
+ * Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters;
+ *
+ *  STEPPER(i, signature, relative, pin_step, pin_dir, positive_dir,  power_pin, enable_value, endstop_min_pin, on_value_min, endstop_max_pin, on_value_max)
+ *
+ *  - i : the index of the stepper. Indices start at 0, and are strictly consecutive;
+ *  - sig : the signature of the stepper : constant that must be set to 2 ^ i;
+ *  - pin_step : the pin used to trigger a step;
+ *  - pin_dir : the pin used to set the step direction;
+ *  - positive_dir : the boolean value for the positive direction (makes coordinates increase);
+ *  - power_pin : the pin used to power the steppers;
+ *  - enable_value : the boolean value to provide to power up steppers;
+ */
 
+//TODO VIRER RELATIVE, ENDSTOPS;
 #ifdef STEPPER
-
-//#define STEPPER(i, sig, r, ps, pd, dp,  pp, ve, pmi, vi, pma, va)
-
-//TODO DOC
 
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
 STEPPER(0,  1,      0,      7,      8,      LOW,    9,      LOW,    A21,    HIGH,   0,      HIGH)
@@ -51,9 +63,24 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
 #endif
 
 
-#ifdef STEPPER_DATA
 
-//STEPPER_DATA(i, j, si, st, sp, a)
+/*
+ * Steppers data settings : every stepper has data stored in the EEPROM. You must provide default values
+ *  for every stepper, using command STEPPER_DATA, and the same indexation than in the last paragraph;
+ *
+ * for each stepper of the machine, put one line like behind, and provide all parameters :
+ *
+ * STEPPER_DATA(id, letter, size, steps, speed, acceleration, jerk)
+ *
+ *  - i : the index of the stepper. Indices start at 0, and are strictly consecutive;
+ *  - steps : the default steps per unit for stepper i;
+ *  - speed : the default maximum speed for stepper i;
+ *  - acceleration : the default maximal acceleration for stepper i;
+ *  - jerk : the default maximum jerk for stepper i;
+ *
+ */
+
+#ifdef STEPPER_DATA
 
 //TODO REMOVE SIZE, letter
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
@@ -70,10 +97,41 @@ STEPPER_DATA(   8,  '3',    150.,   80.16,  1000.,   1000.,      20.)
 
 #endif
 
-//-----------------------------------------------------CARTESIAN_GROUPS-------------------------------------------------
+//---------------------------------------------------- Cartesian groups ------------------------------------------------
 
-//TODO DOC
+/*
+ * In order to regulate speed, you must specify all cartesian groups of your machine.
+ *
+ *  A cartesian group is a group of at most 3 coordinates, in which the global speed, that will be regulated,
+ *      can be defined as the norm of the speed vector, restricted to these coordinates.
+ *
+ *  WARNING : These coordinates are high level coordinates.
+ *
+ *  Stepper coordinates are images of high_level coordinates through the geometry_translate function.
+ *
+ *  They might have no physical meaning for stepper, but are used to control the machine.
+ *
+ *  Ex :
+ *      A polar machine har a polar stepper coordinate system, but can be controlled with a cartesian
+ *          high level coordinate system, as long as the translation from (x, y) to (theta, phi) is known,
+ *          and implemented in geometry_translate.
+ *
+ *      In this example, there will be one cartesian group, containing x and y axis;
+ */
+
+//The number of cartesian groups;
 #define NB_CARTESIAN_GROUPS 8
+
+
+/*
+ * To define a cartesian group, you may use the following command :
+ *
+ *  CARTESIAN_GROUP(id, s0, s1, s2, max_speed)
+ *      - i : the index of the cartesian group. Indices start at 0, and are strictly consecutive;
+ *      - s{0, 1, 2} : indices of steppers belonging to the group. If it contains less than 3 steppers,
+ *          pad with one or two -1;
+ *      - max_speed : the speed group's maximum speed;
+ */
 
 #ifdef CARTESIAN_GROUP
 
@@ -97,17 +155,19 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 #endif
 
-//-------------------------------------------------Kinematics Core Version---------------------------------------------
+//------------------------------------------------ Kinematics Core Version ---------------------------------------------
 
 /*
  * The version of the Stepper Control Kinematics TaskScheduler you want to use. You have 3 versions available :
- *  - 0 : KERNEL0, a basic kernel for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
- *  - 1 : KERNEL1, a faster kernel for 32 bits processors with FPU, for cartesian-by-group machines. Only lines available.
- *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.
+ *  - 0 : a basic algorithm for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
+ *  - 1 : a better algorithm for 32 bits processors with FPU;
+ *  - 2 : a more advanced algorithm for 32 bits processors with FPU. Recommended for complex machines;
  */
 
-#define KERNEL 2
+//The version of KinematicsCore
+#define CORE_VERSION 2
 
+//TODO AUTO_GENERATION
 #define movement_data_t k2_movement_data
 
 #define sub_movement_data_t k2_sub_movement_data
@@ -115,7 +175,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 #define Kinematics KinematicsCore2
 
 
-//------------------------------------------------- Distance Bounds---------------------------------------------
+//-------------------------------------------------- Distance Bounds ---------------------------------------------------
 
 //The minimum number of steps between two consecutive positions;
 #define MINIMUM_DISTANCE_LIMIT 8
@@ -126,7 +186,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 //The maximum number of steps between two consecutive positions;
 #define MAXIMUM_DISTANCE_LIMIT 14
 
-//-------------------------------------------------------Data types-----------------------------------------------------
+//------------------------------------------------------ Data types ----------------------------------------------------
 
 /* The signature type. The type size depends on the number of steppers you want to control. Set :
  *  - uint8_t for at most 8 steppers;
@@ -141,7 +201,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 #define delay_t uint32_t
 
 
-//-------------------------------------------------------Command System-------------------------------------------------
+//------------------------------------------------------ Command System ------------------------------------------------
 
 /*
  * The Control coordinate system is an abstraction layer, over the high level coordinate system, made to ease
@@ -172,12 +232,12 @@ COORD_INTERFACE_VARIABLE(y_max_sum, 400)
 #endif
 
 
-//----------------------------------------------------------Log---------------------------------------------------------
+//--------------------------------------------------------- Log --------------------------------------------------------
 
 //Log settings. Uncomment those lines to output (resp) position and overflow marker in Monitor
 #define position_log
 
-//---------------------------------------------------------Other--------------------------------------------------------
+//-------------------------------------------------------- Other -------------------------------------------------------
 
 //The maximum number of pre-processable movements.
 #define MOVEMENT_DATA_QUEUE_SIZE 20
@@ -187,3 +247,9 @@ COORD_INTERFACE_VARIABLE(y_max_sum, 400)
 
 //The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
 #define MAX_CURVE_POINTS 5
+
+
+//------------------------------------------------------ Frequency -----------------------------------------------------
+
+//DO NOT CHANGE THIS : the stepper timer control frequency (1KHz)
+#define TIMER_STEPPER_FREQUENCY 1000000

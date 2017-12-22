@@ -34,11 +34,11 @@
 
 #include "_kinematics_data.h"
 
-#if (KERNEL == 0)
+#if (CORE_VERSION == 0)
 #include <LinearMovement.h>
-#elif (KERNEL == 1)
+#elif (CORE_VERSION == 1)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
-#elif (KERNEL == 2)
+#elif (CORE_VERSION == 2)
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
@@ -125,11 +125,11 @@ void StepperController::_initialise_data() {
 
 task_state_t StepperController::linear_movement(float *destination) {
 
-#if (KERNEL == 0)
+#if (CORE_VERSION == 0)
     return LinearMovement::plan_movement(destination);
-#elif (KERNEL == 1)
+#elif (CORE_VERSION == 1)
     return ComplexLinearMovement::plan_movement(destination);
-#elif (KERNEL == 2)
+#elif (CORE_VERSION == 2)
     return ComplexLinearMovement::plan_movement(destination);
 #endif
 
