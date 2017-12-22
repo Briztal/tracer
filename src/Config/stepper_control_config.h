@@ -19,44 +19,10 @@
 */
 
 
-//-----------------------------------------------High Level Coordinate System-------------------------------------------
-
-/*
- * The high level coordinate system is the system you will use to send explicit coordinates. They will be interpreted
- *  by the kernel, who will trace you movements.
- *
- *  High level coordinates are not meant to have a physical meaning (a particular stepper orientation).
- *
- *  you must also define the translation from high level coordinates to stepper positions, in implementing
- *      the translate and revert methods in the MachineAbstraction class.
- *
- */
-
-//Number of axis in the high level coordinates system
-#define NB_AXIS 9
-
-//Axis settings : for each axis of the machine, put one line like behind, and provide all parameters//TODO DOC
-#ifdef AXIS
-
-//AXIS(i, j, si, st, sp, a)
-
-//      id, letter,)
-AXIS(   0,  'V')
-AXIS(   1,  'W')
-AXIS(   2,  'X')
-AXIS(   3,  'Y')
-AXIS(   4,  'Z')
-AXIS(   5,  'A')
-AXIS(   6,  'B')
-AXIS(   7,  'C')
-AXIS(   8,  'D')
-
-#endif
-
 //------------------------------------------------------Stepper Motors--------------------------------------------------
 
 /*
- * The stepper motors are the physical actuators the kernel will manipulate. Each one represents a physical axis of
+ * The stepper motors are the physical actuators the module will manipulate. Each one represents a physical axis of
  *      your machine.
  */
 
@@ -89,7 +55,7 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
 
 //STEPPER_DATA(i, j, si, st, sp, a)
 
-//TODO REMOVE SIZE
+//TODO REMOVE SIZE, letter
 //              id, letter, size,   steps,  speed,  acceler.,   jerk)
 STEPPER_DATA(   0,  '0',    170,    80.16,  1000,    1000,      20.)
 STEPPER_DATA(   1,  '1',    170.,   80.16,  1000.,   1000,      20.)
@@ -210,12 +176,6 @@ COORD_INTERFACE_VARIABLE(y_max_sum, 400)
 
 //Log settings. Uncomment those lines to output (resp) position and overflow marker in Monitor
 #define position_log
-
-//distance btw two position logs
-#ifdef position_log
-#define LOG_SPACE_MAX 5
-#endif
-
 
 //---------------------------------------------------------Other--------------------------------------------------------
 

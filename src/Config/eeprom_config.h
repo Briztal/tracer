@@ -18,24 +18,14 @@
 
 */
 
-//TODO DESCRIPTION
-
-/* EEPROM custom data definition : for each variable you need to save in EEPROM, write_data one of the following lines
+/* EEPROM custom data definition : for each variable you need to save in EEPROM, write_data the following line
+ *  with the appropriate parameters;
  *
- * EEPROM_BOOL(name, default_value)
- * EEPROM_INT8(name, default_value)
- * EEPROM_INT16(name, default_value)
- * EEPROM_INT32(name, default_value)
- * EEPROM_FLOAT(name, default_value)
+ * EEPROM_VARIABLE(name, default_value)
  *
- * Each one of these functions will create a variable of the specified type with the name provided
- *  in the EPROMStorage class, that will be saved in EEPROM, and take the default value provided
+ * This unction will create a float variable with the name provided in the EPROMStorage class,
+ *  that will be saved in EEPROM, and take the default value provided
  */
-
-
-//The maximum number of characters in the name of an eeprom variable (must be greater than 15)
-
-#define EEPROM_NAMES_MAX_LENGTH 15
 
 #if defined(EEPROM_VARIABLE)
 

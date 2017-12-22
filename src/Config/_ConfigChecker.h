@@ -48,12 +48,6 @@ private:
     static bool check_controllers(String *message);
 
     //Check the enabled controllers;
-    static bool check_eeprom(String *message);
-
-    //Check the enabled controllers;
-    static bool check_scheduler(String *message);
-
-    //Check the enabled controllers;
     static bool check_sensors(String *message);
 
     //Check the enabled controllers;

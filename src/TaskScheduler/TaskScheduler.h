@@ -135,7 +135,6 @@ private:
 
     //------------------------------------------ Log -----------------------------------------
 
-
 public:
 
     //Echo a message on the current log pipe; inline for efficiency.

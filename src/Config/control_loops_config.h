@@ -43,7 +43,8 @@ PID(4, hotbed, 20, 0, 0)
 #endif
 
 
-/* Loop Functions : a interrupt called function
+/*
+ * Loop Functions : a interrupt called function
  * For each loop function, put one line like behind and provide the two required parameter
  * LOOP_FUNCTION(indice, name, period_ms)
  */

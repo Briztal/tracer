@@ -30,6 +30,29 @@ PONEY
 #include <Project/MachineController.h>
 #include <StepperControl/TrajectoryTracer.h>
 
+
+
+//-------------------------------------------- Const variable init --------------------------------------------
+
+/*
+ * The number of task sequences is a constant, directly determinable by counting the number of times TASK_SEQUENCES
+ *  is written in the configuration file.
+ *
+ *  Instead of asking the user to provide it, what could lead to errors, we will use a compiler constant
+ *      determined directly using macro;
+ *
+ */
+#define TASK_SEQUENCE(...) 1 +
+
+const uint8_t NB_TASK_SEQUENCES =
+
+#include "Config/scheduler_config.h"
+
+        0;
+
+#undef TASK_SEQUENCE
+
+
 //------------------------------------------------- Init ---------------------------------------------------
 
 /*

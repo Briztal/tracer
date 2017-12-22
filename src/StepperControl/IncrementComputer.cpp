@@ -100,7 +100,7 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
 float IncrementComputer::extract_increment(void (*get_position)(float, float *), float point, float increment) {
 
     //Arrays initialisation
-    float initial_positions[NB_AXIS], positions[NB_AXIS];
+    float initial_positions[NB_STEPPERS], positions[NB_STEPPERS];
 
     //Get the initial stepper position
     StepperController::get_stepper_positions_for(get_position, point, initial_positions);

@@ -675,7 +675,7 @@ MachineController::hl_coord_t MachineController::current_position = MachineContr
 
 MachineController::hl_coord_t MachineController::offsets = MachineController::hl_coord_t();
 
-float tmpos[NB_AXIS];
+float tmpos[NB_STEPPERS];
 float *const MachineController::axis_positions = tmpos;
 
 

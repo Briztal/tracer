@@ -41,7 +41,7 @@
 void KinematicsCore2::initialise_data() {
 
     //Reset the high level position;
-    memset(current_hl_position, 0, NB_AXIS * sizeof(float));
+    memset(current_hl_position, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the speed group;
     movement_speed_group = 0;
@@ -131,12 +131,12 @@ void KinematicsCore2::load_real_time_jerk_data(const k2_movement_data *movement_
 
 void KinematicsCore2::initialise_sub_movement(k2_sub_movement_data *sub_movement_data) {
 
-    float high_level_distances[NB_AXIS];
+    float high_level_distances[NB_STEPPERS];
     float *candidate = sub_movement_data->candidate_high_level_positions;
     float *current = current_hl_position;
 
     //Compute the high level distances
-    for (uint8_t axis = 0; axis < NB_AXIS; axis++) {
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         high_level_distances[axis] = candidate[axis] - current[axis];
     }
 
@@ -159,7 +159,7 @@ void KinematicsCore2::accept_sub_movement(sub_movement_data_t *sub_movement_data
 
     float *new_hl_position = sub_movement_data->candidate_high_level_positions;
 
-    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
+    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_STEPPERS);
 
 }
 
@@ -258,7 +258,7 @@ void KinematicsCore2::send_position() {
 //-----------------------------------------Static declarations - definitions--------------------------------------------
 
 //Positions
-float t_rl_pos[NB_AXIS]{0};
+float t_rl_pos[NB_STEPPERS]{0};
 float *const KinematicsCore2::current_hl_position = t_rl_pos;
 
 

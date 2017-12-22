@@ -41,7 +41,7 @@
 task_state_t ComplexLinearMovement::plan_movement(const float *const destination) {
 
     //get the movement step_distances
-    float distances[NB_AXIS];
+    float distances[NB_STEPPERS];
 
     bool queue_flag = false;
 
@@ -167,7 +167,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
     bool null_move = true;
 
     //for each axis
-    for (uint8_t axis = 0; axis < NB_AXIS; axis++) {
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
 
         //get the distance
         float distance = destination[axis] - position[axis];
@@ -217,7 +217,7 @@ void ComplexLinearMovement::get_slopes(float *slopes, const float *const distanc
     slopes[max_axis] = 1;
 
     //determine slopes on other axis.
-    for (uint8_t axis = 0; axis < NB_AXIS; axis++) {
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
         if (axis != max_axis) {
             slopes[axis] = distances[axis] * inv_max_dist;
         }
@@ -241,7 +241,7 @@ void ComplexLinearMovement::get_position(float indice, float *positions) {
     positions[max_axis] = offsets[max_axis] + indice;
 
     //positions for other axis
-    for (int axis = 0; axis < NB_AXIS; axis++) {
+    for (int axis = 0; axis < NB_STEPPERS; axis++) {
         if (axis != max_axis) {
             positions[axis] = offsets[axis] + indice * slopes[axis];
         }
@@ -336,7 +336,7 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
     positions[max_axis] = offsets[max_axis] + index;
 
     //positions for other axis;
-    for (int axis = 0; axis < NB_AXIS; axis++) {
+    for (int axis = 0; axis < NB_STEPPERS; axis++) {
 
         if (axis != max_axis) {
             positions[axis] = offsets[axis] + index * slopes[axis];
@@ -353,13 +353,13 @@ void ComplexLinearMovement::get_real_time_position(float index, float *positions
 Queue<k2_linear_data> ComplexLinearMovement::linear_data_queue(MOVEMENT_DATA_QUEUE_SIZE);
 
 //Pre_processing data
-float t_ppof[NB_AXIS], t_ppsl[NB_AXIS];
+float t_ppof[NB_STEPPERS], t_ppsl[NB_STEPPERS];
 float *m::pre_process_offsets = t_ppof;
 float *m::pre_process_slopes = t_ppsl;
 uint8_t m::pre_process_max_axis = 0;
 
 //Real time data
-float t_rtof[NB_AXIS], t_rtsl[NB_AXIS];
+float t_rtof[NB_STEPPERS], t_rtsl[NB_STEPPERS];
 float *m::real_time_offsets = t_rtof;
 float *m::real_time_slopes = t_rtsl;
 uint8_t m::real_time_max_axis = 0;

@@ -46,6 +46,7 @@
 #endif
 
 #include <Config/geometry.h>
+#include <Config/actions_config.h>
 
 
 //---------------------------------------------------- Init -----------------------------------------------------
@@ -97,7 +98,7 @@ void StepperController::initialise_data() {
 void StepperController::_initialise_data() {
 
     //Reset high level positions to zero;
-    memset(current_position, 0, NB_AXIS * sizeof(float));
+    memset(current_position, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the speed group
     speed_group = 0;
@@ -147,7 +148,7 @@ task_state_t StepperController::linear_movement(float *destination) {
  */
 
 void StepperController::get_current_position(float *const position) {
-    memcpy(position, current_position, sizeof(float) * NB_AXIS);
+    memcpy(position, current_position, sizeof(float) * NB_STEPPERS);
 }
 
 
@@ -159,7 +160,7 @@ void StepperController::get_current_position(float *const position) {
 void StepperController::update_position(const float *const new_position) {
 
     //Update the current position
-    memcpy(current_position, new_position, sizeof(float) * NB_AXIS);
+    memcpy(current_position, new_position, sizeof(float) * NB_STEPPERS);
 
     //Update the low level's end point.
     SubMovementManager::update_end_position(new_position);
@@ -193,7 +194,7 @@ void StepperController::translate(const float *const hl_coordinates, float *cons
 void StepperController::get_stepper_positions_for(void (*get_position)(float, float *), float point, float *positions) {
 
     //Initialisa the local high level position array;
-    float hl_positions[NB_AXIS];
+    float hl_positions[NB_STEPPERS];
 
     //Get the initial high level position
     get_position(point, hl_positions);
@@ -420,7 +421,7 @@ void StepperController::stop_tools(sig_t stop_signature) {
 #define m StepperController
 
 //Positions
-float t_hl_pos[NB_AXIS]{0};
+float t_hl_pos[NB_STEPPERS]{0};
 float *m::current_position = t_hl_pos;
 
 //Speeds

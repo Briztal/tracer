@@ -145,7 +145,7 @@ typedef struct {
     uint8_t step_distances[NB_STEPPERS];
     float f_step_distances[NB_STEPPERS];
     float future_steppers_positions[NB_STEPPERS];
-    float candidate_high_level_positions[NB_AXIS];
+    float candidate_high_level_positions[NB_STEPPERS];
     sig_t direction_signature;
     float index_candidate;
 
@@ -244,7 +244,7 @@ typedef struct k2_sub_movement_data : sub_movement_data {
  */
 //TODO COMMENT THIS FILE PROPERLY
 typedef struct {
-    float offsets[NB_AXIS]; //4*NB_AXIS
+    float offsets[NB_STEPPERS]; //4*NB_AXIS
     float slopes[NB_STEPPERS]; //4 * (NB_AXIS + NB_STEPPERS)
     uint8_t max_axis; //4 * (NB_AXIS + NB_STEPPERS) + 1
     //--end : 4 * (NB_AXIS + NB_STEPPERS + 1) bytes--

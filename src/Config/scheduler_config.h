@@ -22,8 +22,6 @@
 //The following line defines the task pool size
 #define TASK_POOL_SIZE 20
 
-//The number of task sequences;
-#define NB_TASK_SEQUENCES 1
 
 /*
  * The following block defines the number of task sequences, their ID, their name and their size

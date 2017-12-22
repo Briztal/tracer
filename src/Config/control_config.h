@@ -40,7 +40,6 @@
 //#define ENABLE_PROGRAM_INTERFACE
 
 
-
 /*
  * The next lines focus on Control configuration. Control are static classes, meant only to interpret data.
  *
