@@ -75,6 +75,7 @@ private:
 
         //The tree;
         GCodeTree *tree = nullptr;
+
     };
 
     //The array of structs containing nb_children.

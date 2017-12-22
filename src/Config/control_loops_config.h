@@ -48,7 +48,7 @@ PID(4, hotbed, 20, 0, 0)
  * LOOP_FUNCTION(indice, name, period_ms)
  */
 
-#define NB_LOOPS 2
+#define NB_LOOPS 1
 
 #ifdef LOOP_FUNCTION
 

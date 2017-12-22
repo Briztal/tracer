@@ -295,7 +295,7 @@ EEPROMTree *EEPROMInterface::build_tree() {
 
     //Loops
     //Create the tree, and add it to root
-    tree = new EEPROMTree(new String("loop"), root_id, nullptr, NB_PIDS);
+    tree = new EEPROMTree(new String("loop"), root_id, nullptr, NB_LOOPS);
     root->children[root_id] = tree;
 
     //Add the sub nodes
@@ -340,7 +340,7 @@ EEPROMTree *EEPROMInterface::build_tree() {
 
     //Cartesian groups
     //Create the tree, and add it to root
-    tree = new EEPROMTree(new String("loop"), root_id, nullptr, NB_CARTESIAN_GROUPS);
+    tree = new EEPROMTree(new String("groups"), root_id, nullptr, NB_CARTESIAN_GROUPS);
     root->children[root_id] = tree;
 
     //Add the sub nodes

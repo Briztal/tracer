@@ -20,12 +20,18 @@
 
 #include "EEPROMTree.h"
 
+/*
+ * Constructor : this function initialises all fields;
+ */
 
 EEPROMTree::EEPROMTree(string_t *name, uint8_t index, float *const data, uint8_t nb_children) :
 
-        name(name), index(index), data(data), nb_children(nb_children), children(new EEPROMTree*[nb_children])
+        name(name), index(index), data(data), nb_children(nb_children), children(new EEPROMTree*[nb_children]) {}
 
-{}
+
+/*
+ * Destructor : this function removes all dynamic fields;
+ */
 
 EEPROMTree::~EEPROMTree() {
 

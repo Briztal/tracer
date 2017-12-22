@@ -12,6 +12,7 @@ inline void geometry_translate(const float *const hl_coordinates, float *const s
         steppers_coordinates[axis] = (EEPROMStorage::steppers_data[axis].steps * hl_coordinates[axis]);
 
     }
+
 }
 
 #endif

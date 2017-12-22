@@ -28,6 +28,7 @@
 #include <Sensors/Sensors.h>
 #include <Actuators/Actuators.h>
 #include <StepperControl/StepperController.h>
+#include <Config/_ConfigChecker.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -48,10 +49,14 @@ void Kernel::start() {
     //Set the flag o prevent multiple excutions;
     started = true;
 
+    //Check all configuration files;
+    check_config();
+
+    //Initialise the hardware;
+    initialise_hardware();
+
     //Setup the restoration jump buffer;
     int jump_state = setjmp(restoration_point);
-
-    initialise_hardware();
 
     //If the restoration point was already used, probabily due to an uncaught exception :
     if (jump_state) {
@@ -79,6 +84,62 @@ void Kernel::start() {
     run();
 
 
+}
+
+//------------------------------------------- Config checking -------------------------------------------
+
+/*
+ * check_config : this function will call _ConfigChecker, and blink the led and display the error message
+ *  if it fails;
+ */
+
+void Kernel::check_config() {
+
+    //Declare the error message;
+    string_t error_message = "";
+
+    //If the config is ok, return;
+    if (_ConfigChecker::check_config(&error_message)) {
+        return;
+    }
+
+    //If the config is not ok :
+
+    //Enable the led output;
+    pin_mode_output(13); //TODO LED IN HL_ABSTRACTION
+
+    //Enable all transmission layers.
+
+    //A macro to enable all interfaces;
+#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::begin();
+
+    //Initialise every interface;
+#include "Config/control_config.h"
+
+    //Undef the macro for safety;
+#undef EXTERNAL_CONTROL
+
+    delay_ms(2000);
+
+    //Infinite loop, as the code is badly configured;
+    while(true) {
+
+        //Blink the led;
+        digital_write(13, !digital_read(13));
+
+        //A macro to enable all interfaces;
+#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str("Error : "+error_message+"\n\n");
+
+        //Initialise every interface;
+#include "Config/control_config.h"
+
+        //Undef the macro for safety;
+#undef EXTERNAL_CONTROL
+
+        //Wait
+        delay_ms(1000);
+
+    }
 }
 
 

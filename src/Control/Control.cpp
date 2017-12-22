@@ -170,10 +170,11 @@ void Control::read_external_controllers() {
         //Protocol index;
         uint8_t i = 0;
 
+        Protocol *p;
 
         //Process or switch every controller;
 #define EXTERNAL_CONTROL(controller, protocol, ...) \
-        Protocol *p = protocols[i++];\
+        p = protocols[i++];\
         QUERY_INTERFACE(controller, p);
 
         //Expand the processing;

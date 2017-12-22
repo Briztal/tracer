@@ -45,6 +45,20 @@ private:
     static bool started;
 
 
+    //------------------------------------------- Config checking -------------------------------------------
+
+private:
+
+    /*
+     * check_config : this function is called once, by the start function.
+     *
+     *  It will call _ConfigChecker, and if it fails, make the led blink and display the error message
+     *      on all data links.
+     */
+
+    static void check_config();
+
+
     //------------------------------------------- Initialisation -------------------------------------------
 
 private:
