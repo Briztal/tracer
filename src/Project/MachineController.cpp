@@ -18,14 +18,16 @@
 
 */
 
-#include <EEPROM.h>
-#include <EEPROM/EEPROMStorage.h>
 #include "MachineController.h"
+
+#include <Control/Control.h>
+
+#include <EEPROM/EEPROMStorage.h>
 #include "TemperatureController.h"
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Steppers.h>
 #include <StepperControl/TrajectoryTracer.h>
-#include <Control/Control.h>
+#include <Actuators/PWMGPIO.h>
 
 //-------------------------------------------------Movement-------------------------------------------------------------
 

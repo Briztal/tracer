@@ -22,7 +22,6 @@
 #ifndef TRACER_ARGUMENTSCONTAINER_H
 #define TRACER_ARGUMENTSCONTAINER_H
 
-
 #include <cstdint>
 
 class ArgumentsContainer {

@@ -23,6 +23,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include "TerminalTreeGenerator.h"
+
 #include <Project/InterfaceCommands/TerminalCommands.h>
 
 //--------------------------------------------------Tree generation-----------------------------------------------------

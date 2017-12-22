@@ -11,7 +11,7 @@
  *      as Control share a same structure.
  *
  */
-struct interface_data_t {
+struct controller_data_t {
 
     /*
      * function : the function to execute. This function could have been directly scheduled,

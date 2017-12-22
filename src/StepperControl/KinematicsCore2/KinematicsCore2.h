@@ -49,7 +49,6 @@
 #ifndef TRACER_KERNEL2_H
 #define TRACER_KERNEL2_H
 
-#include <stdint.h>
 #include <StepperControl/_kinematics_data.h>
 
 

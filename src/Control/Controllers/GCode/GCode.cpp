@@ -23,6 +23,7 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCode.h"
+#include <TaskScheduler/TaskScheduler.h>
 #include "GCodeTreeGenerator.h"
 #include "GCodeArguments.h"
 #include <DataStructures/StringUtils.h>
@@ -180,7 +181,7 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
-                        interface_data_t *data = new interface_data_t();
+                        controller_data_t *data = new controller_data_t();
                         data->arguments_index = index;
                         data->function = current_tree->function;
 
@@ -242,7 +243,7 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
 task_state_t GCode::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
-    interface_data_t *data = (interface_data_t *) data_pointer;
+    controller_data_t *data = (controller_data_t *) data_pointer;
 
     //Cache var for arguments index.
     uint8_t arguments_index = data->arguments_index;
@@ -272,7 +273,7 @@ task_state_t GCode::execute_command(void *data_pointer) {
  *  As the terminal interface is a human-only interface, we will simply display a message to the user.
  */
 
-void GCode::confirm_command_execution(const interface_data_t *data) {
+void GCode::confirm_command_execution(const controller_data_t *data) {
 
     //Switch the return state.
     switch (data->return_state) {
@@ -284,7 +285,7 @@ void GCode::confirm_command_execution(const interface_data_t *data) {
 
             //If the task completed correctly
         case invalid_arguments:
-            log("WARNING Invalid Arguments");
+            log("WARNING : invalid arguments.");
             respond("ok");
             return;
 
@@ -295,7 +296,7 @@ void GCode::confirm_command_execution(const interface_data_t *data) {
 
             //If the task completed correctly
         default:
-            log("WARNING Unrecognised return state");
+            log("WARNING  : return state not recognise.");
             respond("ok");
             return;
 

@@ -23,14 +23,14 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "Control/Controllers/Terminal/Terminal.h"
+#include "Control/Control.h"
+
 #include "TerminalCommands.h"
 #include <EEPROM/EEPROMStorage.h>
 #include <Project/MachineController.h>
 #include <EEPROM/EEPROMInterface.h>
-#include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
-#include <StepperControl/TrajectoryTracer.h>
+#include <Sensors/Thermistors/Thermistors.h>
 
 
 task_state_t TerminalCommands::flood(char *) {

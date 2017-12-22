@@ -20,10 +20,9 @@
 
 #include "EEPROMInterface.h"
 #include "EEPROMStorage.h"
-#include "EEPROMTree.h"
+
 #include <DataStructures/StringUtils.h>
 #include <Control/Control.h>
-
 
 #include <Config/actions_config.h>
 #include <Config/control_loops_config.h>

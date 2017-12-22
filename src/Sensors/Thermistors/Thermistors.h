@@ -4,8 +4,8 @@
 
 
 #include <stdint.h>
-#include "thermistor_data.h"
 
+#include "thermistor_data.h"
 
 class Thermistors {
 

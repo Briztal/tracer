@@ -24,8 +24,10 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "IncrementComputer.h"
-#include <StepperControl/StepperController.h>
+
 #include <Control/Control.h>
+
+#include <StepperControl/StepperController.h>
 
 #define DEFAULT_ABSOLUTE_INCREMENT (float) 0.01
 

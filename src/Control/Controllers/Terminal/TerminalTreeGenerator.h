@@ -27,7 +27,6 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "hardware_language_abstraction.h"
 #include "TerminalTree.h"
 
 class TerminalTreeGenerator {

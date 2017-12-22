@@ -18,14 +18,15 @@
 
 */
 
+#ifndef CODE_STEPPER_CONTROLLER_H
+#define CODE_STEPPER_CONTROLLER_H
+
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef CODE_STEPPER_CONTROLLER_H
-#define CODE_STEPPER_CONTROLLER_H
-
 #include <stdint.h>
+
 #include <Config/stepper_control_config.h>
 
 

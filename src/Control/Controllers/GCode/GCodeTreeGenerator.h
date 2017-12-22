@@ -27,7 +27,6 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeTree.h"
-#include "GCodeTree.h"
 #include "Config/controller_gcode_config.h"
 
 typedef struct command_line_t {

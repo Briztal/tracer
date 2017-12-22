@@ -28,6 +28,7 @@
 #define TRACER_REAL_TIME_PROCESS_H
 
 #include <DataStructures/Queue.h>
+
 #include <StepperControl/_kinematics_data.h>
 
 class K2Physics {

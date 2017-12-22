@@ -31,10 +31,6 @@
 #define TRACER_CLOSEDLOOPS_H
 
 
-#include <Sensors/Thermistors/Thermistors.h>
-#include <ControlLoops/PID.h>
-#include <Actuators/PWMGPIO.h>
-#include "TemperatureController.h"
 #include <TaskScheduler/TaskScheduler.h>
 
 class TemperatureController {

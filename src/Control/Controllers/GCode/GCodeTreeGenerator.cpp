@@ -23,6 +23,7 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCodeTreeGenerator.h"
+
 #include <Project/InterfaceCommands/GCodeCommands.h>
 #include <Control/Control.h>
 

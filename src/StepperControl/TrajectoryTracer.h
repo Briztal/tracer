@@ -29,12 +29,12 @@
  *
  */
 
+#ifndef TRACER_TRAJECTORYEXECUTER_H
+#define TRACER_TRAJECTORYEXECUTER_H
+
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
-
-#ifndef TRACER_TRAJECTORYEXECUTER_H
-#define TRACER_TRAJECTORYEXECUTER_H
 
 #include "_kinematics_data.h"
 #include <DataStructures/Queue.h>

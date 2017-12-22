@@ -25,11 +25,10 @@
 #ifdef ENABLE_STEPPER_CONTROL
 
 #include "Steppers.h"
-#include <EEPROM/EEPROMStorage.h>
-#include <Config/stepper_control_config.h>
+
 #include <Control/Control.h>
 
-
+#include <Config/stepper_control_config.h>
 
 //-------------------------------------------------------Initialisation--------------------------------------------------
 
@@ -69,7 +68,7 @@ void Steppers::initialise_data() {
 void Steppers::enable(sig_t signature) {
 
 #define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
-    if (signature&sig) {\
+    if (signature&(sig)) {\
         digital_write(pinPower, LOW);\
     } else {\
         digital_write(pinPower, HIGH);\
@@ -142,14 +141,14 @@ void Steppers::set_directions(sig_t negative_signatures) {
 
 #ifdef position_log
 #define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
-    sig_dir = negative_signatures&sig;\
-    dir = direction_signature&sig;\
+    sig_dir = negative_signatures&(sig);\
+    dir = direction_signature&(sig);\
     if ((!sig_dir) && (!dir)) {\
-        direction_signature |= sig;\
+        direction_signature |= (sig);\
         digital_write(pinDir, dirp);\
         incr##i=1;\
     } else if (sig_dir && dir) {\
-        direction_signature &= ~sig;\
+        direction_signature &= ~(sig);\
         digital_write(pinDir, !dirp);\
         incr##i=-1;\
     }\
@@ -194,7 +193,7 @@ void Steppers::fastStep(sig_t id) {
 #ifdef position_log
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
-        if (id&sig) {\
+        if (id&(sig)) {\
             digital_write(pinStep, HIGH);\
         }
 
@@ -205,7 +204,7 @@ void Steppers::fastStep(sig_t id) {
     delay_us(1);
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
-        if (id&sig) {\
+        if (id&(sig)) {\
             pos##i += incr##i;\
             digital_write(pinStep, LOW);\
         }

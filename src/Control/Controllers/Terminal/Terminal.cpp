@@ -23,6 +23,9 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include "Terminal.h"
+
+#include <Config/controller_terminal_config.h>
+
 #include "TerminalTreeGenerator.h"
 #include "TerminalArguments.h"
 #include <Control/Control.h>
@@ -177,7 +180,7 @@ void Terminal::parse(char *message) {
 
 
                         //Create a struct in the heap to contain argument_t-related data.
-                        interface_data_t *data = new interface_data_t();
+                        controller_data_t *data = new controller_data_t();
                         data->arguments_index = index;
                         data->function = current_node->function;
 
@@ -280,7 +283,7 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
 task_state_t Terminal::execute_command(void *data_pointer) {
 
     //Get the terminal interface data back
-    interface_data_t *data = (interface_data_t *) data_pointer;
+    controller_data_t *data = (controller_data_t *) data_pointer;
 
     //Cache var for arguments index.
     uint8_t arguments_index = data->arguments_index;
@@ -313,7 +316,7 @@ task_state_t Terminal::execute_command(void *data_pointer) {
  *  As the terminal interface is a human-only interface, we will simply display a message to the user.
  */
 
-void Terminal::confirm_command_execution(const interface_data_t *data) {
+void Terminal::confirm_command_execution(const controller_data_t *data) {
 
 //The log will occur only if the command flag is set.
 

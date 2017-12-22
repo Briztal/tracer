@@ -22,7 +22,6 @@
 #include <config.h>
 #include <Config/stepper_control_config.h>
 
-
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
 #include "KinematicsCore2.h"

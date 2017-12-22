@@ -33,7 +33,7 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <hardware_language_abstraction.h>
+#include <stdint.h>
 #include <TaskScheduler/task_state_t.h>
 
 class GCodeTree {

@@ -23,15 +23,15 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <Control/Controllers/GCode/GCode.h>
+#include <Control/Control.h>
+
 #include "GCodeCommands.h"
+
 #include <EEPROM/EEPROMStorage.h>
 #include <Project/MachineController.h>
 #include <EEPROM/EEPROMInterface.h>
-#include <Sensors/Thermistors/Thermistors.h>
 #include <Project/TemperatureController.h>
-#include <Actuators/Servo.h>
-#include <Control/Control.h>
+#include <Sensors/Thermistors/Thermistors.h>
 
 
 task_state_t GCodeCommands::action(char *) {

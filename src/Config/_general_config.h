@@ -1,8 +1,3 @@
-//A string naming your project
-#define PROJECT_NAME "TRACER"
-
-///######################################################PARTS##########################################################
-
 /*
  * This section defines which Modules will be enabled in your project.
  * Disabling features you don't use will reduce the project's size.
@@ -15,5 +10,3 @@
 //Uncomment this line to enable the stepper control module
 #define ENABLE_STEPPER_CONTROL
 
-
-//###########################################STEPPER_CONTROLLER_SETTINGS###############################################

@@ -22,13 +22,11 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <Config/controller_gcode_config.h>
-
-#include <DataStructures/StringUtils.h>
-#include <hardware_language_abstraction.h>
-#include "Control/Control.h"
 #include "GCodeArguments.h"
 
+#include <Config/controller_gcode_config.h>
+#include <DataStructures/StringUtils.h>
+#include "Control/Control.h"
 
 /*
  * clear : this function resets the argument parsing environment;

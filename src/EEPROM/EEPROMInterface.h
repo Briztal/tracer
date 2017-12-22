@@ -23,8 +23,6 @@
 
 #include "EEPROMTree.h"
 
-#include <Control/Controllers/Terminal/TerminalTree.h>
-
 class EEPROMInterface {
 
 public:

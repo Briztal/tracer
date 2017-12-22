@@ -27,10 +27,7 @@
  *  interface.
  */
 
-#include <Control/Protocols/Protocol.h>
-
 #include <Config/control_config.h>
-
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 #include <Control/Controllers/Terminal/Terminal.h>

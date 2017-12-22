@@ -23,12 +23,12 @@ PONEY
 #include "TaskScheduler.h"
 
 #include <Kernel.h>
+
 #include <Control/Control.h>
 
-#include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/Steppers.h>
-#include <Project/MachineController.h>
-#include <StepperControl/TrajectoryTracer.h>
+#include <Project/MachineController.h>//TODO REMOVE
+
+#include <StepperControl/TrajectoryTracer.h>//TODO REMOVE
 
 
 

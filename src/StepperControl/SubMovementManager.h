@@ -31,8 +31,8 @@
 #ifndef TRACER_SUBMOVEMENTMANAGER_H
 #define TRACER_SUBMOVEMENTMANAGER_H
 
-
 #include <DataStructures/Queue.h>
+
 #include "_kinematics_data.h"
 
 class SubMovementManager {

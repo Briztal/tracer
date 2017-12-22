@@ -29,24 +29,21 @@
 #include "EEPROM/EEPROMStorage.h"
 #include "SubMovementManager.h"
 #include "Steppers.h"
-#include "IncrementComputer.h"
 #include "TrajectoryTracer.h"
 #include <Actuators/PWMGPIO.h>
-#include <hardware_language_abstraction.h>
+
+#include "_kinematics_data.h"
 
 #if (KERNEL == 0)
 #include <LinearMovement.h>
 #elif (KERNEL == 1)
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
-
 #elif (KERNEL == 2)
-
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
 #endif
 
 #include <Config/geometry.h>
-#include <Config/actions_config.h>
 
 
 //---------------------------------------------------- Init -----------------------------------------------------

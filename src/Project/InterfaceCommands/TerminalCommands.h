@@ -27,11 +27,6 @@
 #define TRACER_TREEINTERFACECOMMANDS_H
 
 
-#include <stdint.h>
-#include <Control/Controllers/_controller_data.h>
-#include <Control/Control.h>
-#include <TaskScheduler/TaskScheduler.h>
-#include <Control/Controllers/Terminal/TerminalArguments.h>
 
 
 class TerminalCommands {
@@ -64,6 +59,8 @@ public:
 
 };
 
+
+#include <Control/Controllers/Terminal/TerminalArguments.h>
 
 //TODO COMMENT AND COMMENT GCODEINTERFACECOMMANDS
 #define PARSE_ARGUMENTS(arguments) {if (!TerminalArguments::parse_arguments(arguments)) return invalid_arguments;}

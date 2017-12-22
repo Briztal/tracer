@@ -24,8 +24,8 @@
 
 #include <Config/scheduler_config.h>
 
-#include <sanity_check.h>
 #include <DataStructures/Queue.h>
+
 #include "_task_scheduler_data.h"
 
 //All files that include this library may require the generation of a scheduler.

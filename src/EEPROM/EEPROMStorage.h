@@ -21,9 +21,10 @@
 #ifndef CODE_SETTINGSPROFILEN_H
 #define CODE_SETTINGSPROFILEN_H
 
-#include <stdint.h>
 #include <config.h>
+
 #include "_eeprom_storage_data.h"
+
 #include <hardware_language_abstraction.h>
 
 

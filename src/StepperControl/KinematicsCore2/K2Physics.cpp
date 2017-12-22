@@ -24,15 +24,11 @@
 
 #if defined(ENABLE_STEPPER_CONTROL) && (KERNEL == 2)
 
+#include "K2Physics.h"
 
 #include <StepperControl/SubMovementManager.h>
 
-
-#include "K2Physics.h"
-
-#include <hardware_language_abstraction.h>
 #include <EEPROM/EEPROMStorage.h>
-#include <StepperControl/StepperController.h>
 
 //------------------------------------------- Initialisation --------------------------------------------
 

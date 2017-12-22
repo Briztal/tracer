@@ -19,12 +19,11 @@
 */
 
 
-#include <config.h>
-#ifdef ENABLE_STEPPER_CONTROL
-
 #ifndef TRACER_LINEAR_MOVEMENT_H
 #define TRACER_LINEAR_MOVEMENT_H
 
+#include <config.h>
+#ifdef ENABLE_STEPPER_CONTROL
 
 #include <DataStructures/Queue.h>
 #include <TaskScheduler/task_state_t.h>

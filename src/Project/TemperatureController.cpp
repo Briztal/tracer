@@ -21,6 +21,11 @@
 
 #include "TemperatureController.h"
 
+#include <Actuators/PWMGPIO.h>
+#include "ControlLoops/PID.h"
+#include <Sensors/Thermistors/Thermistors.h>
+
+
 //-------------------------------------------------------Hotends--------------------------------------------------------
 
 /*
@@ -28,7 +33,6 @@
  */
 
 task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) {
-
 
     //If the hotend_id was not provided, fail.
     if (!new_state.hotend_flag)  {

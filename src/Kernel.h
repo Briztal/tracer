@@ -21,6 +21,7 @@
 #ifndef TRACER_KERNEL_H
 #define TRACER_KERNEL_H
 
+#include <sanity_check.h>
 
 #include "setjmp.h"
 

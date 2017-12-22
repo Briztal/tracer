@@ -18,7 +18,6 @@
 
 */
 
-#include "_kinematics_data.h"
 #include "SubMovementManager.h"
 #include "StepperController.h"
 #include "TrajectoryTracer.h"

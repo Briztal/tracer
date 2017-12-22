@@ -22,40 +22,6 @@
 #include <config.h>
 
 /*
- * Control Interface checking.
- *  We must check that only one interface is the main one, and that the main interface is enabled.
- *
- */
-
-#ifdef MAIN_CI_TERMINAL
-#if defined(MAIN_CI_GCODE) || defined(MAIN_CI_PROGRAM)
-#error "You have two main interfaces selected. Please disable one."
-#endif
-#ifndef ENABLE_TERMINAL_INTERFACE
-#error "Your main interface (the TerminalInterface) is not enabled."
-#endif
-#endif
-
-#ifdef MAIN_CI_GCODE
-#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_PROGRAM)
-#error "You have two main interfaces selected. Please disable one."
-#endif
-#ifndef ENABLE_GCODE_INTERFACE
-#error "Your main interface (the GCodeInterface) is not enabled."
-#endif
-#endif
-
-#ifdef MAIN_CI_PROGRAM
-#if defined(MAIN_CI_TERMINAL) || defined(MAIN_CI_TERMINAL)
-#error "You have two main interfaces selected. Please disable one."
-#endif
-#ifndef ENABLE_PROGRAM_INTERFACE
-#error "Your main interface (the TreeInterface) is not enabled."
-#endif
-#endif
-
-
-/*
  * Stepper Control Kernel checking.
  *  we must check the following flags :
  *      - EEPROM for all kernels

@@ -21,7 +21,6 @@
 #ifndef TRACER_QUEUE_H
 #define TRACER_QUEUE_H
 
-#include <stdint.h>
 #include "hardware_language_abstraction.h"
 
 template<typename T>
@@ -48,7 +47,7 @@ class Queue {
     struct queue_object_t {
 
         //A flag, to notify whether the object has been allocated.
-        boolean allocated = false;
+        bool allocated = false;
 
         //The effective object we want to store.
         T object;

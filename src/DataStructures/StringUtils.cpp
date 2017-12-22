@@ -18,9 +18,7 @@
 
 */
 
-#include <cstdint>
 #include "StringUtils.h"
-#include <Control/Control.h>
 
 /*
  * copy_until_char : this function copies the char sequence in in_buffer in out_buffer char by char,
@@ -29,6 +27,7 @@
  *  When the copy is done, it null-terminates the copied sequence.
  *
  */
+
 /*
 uint8_t
 StringUtils::copy_until_char(char *in_buffer, char *out_buffer, uint8_t out_buffer_size, const char limit_char) {

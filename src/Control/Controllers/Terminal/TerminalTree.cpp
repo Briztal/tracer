@@ -20,9 +20,14 @@
 
 #include <Config/control_config.h>
 
+
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include "TerminalTree.h"
+
+/*
+ * Constructor : initialises all fields; with provided parameters;
+ */
 
 TerminalTree::TerminalTree(string_t *name, uint8_t nb_children, string_t *description, task_state_t (*const f)(char *))
         :  name(name), nb_children(nb_children), description(description), function(f),

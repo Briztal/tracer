@@ -40,13 +40,13 @@
  *
  */
 
+#ifndef TRACER_JERKPLANNER_H
+#define TRACER_JERKPLANNER_H
+
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-
-#ifndef TRACER_JERKPLANNER_H
-#define TRACER_JERKPLANNER_H
 
 
 #include "StepperControl/_kinematics_data.h"

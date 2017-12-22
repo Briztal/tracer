@@ -26,14 +26,9 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include <hardware_language_abstraction.h>
-#include <DataStructures/ArgumentsContainer.h>
-#include "Config/controller_terminal_config.h"
 #include <Control/Controllers/_controller_data.h>
 #include <Control/Protocols/Protocol.h>
 #include "TerminalTree.h"
-
-#define TI Terminal
 
 class Terminal {
 
@@ -66,7 +61,7 @@ private:
     static task_state_t execute_command(void *data_pointer);
 
     //Post execution function;
-    static void confirm_command_execution(const interface_data_t *data);
+    static void confirm_command_execution(const controller_data_t *data);
 
 
 private:

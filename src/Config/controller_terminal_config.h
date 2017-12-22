@@ -18,6 +18,9 @@
 
 */
 
+//A string naming your project
+#define PROJECT_NAME "TRACER"
+
 //The maximal size of a command (id + arguments)
 #define TERMINAL_MAX_SIZE 100
 

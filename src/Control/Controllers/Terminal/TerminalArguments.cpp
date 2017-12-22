@@ -23,9 +23,11 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include <DataStructures/StringUtils.h>
-#include <Control/Control.h>
 #include "TerminalArguments.h"
+
+#include "Config/controller_terminal_config.h"
+#include <Control/Control.h>
+#include <DataStructures/StringUtils.h>
 
 
 /*

@@ -26,15 +26,14 @@
  */
 
 
-#include <stdint.h>
-#include "_kinematics_data.h"
-
-#ifdef ENABLE_STEPPER_CONTROL
-
 #ifndef TRACER_INCREMENT_COMPUTER_H
 #define TRACER_INCREMENT_COMPUTER_H
 
+#include "config.h"
 
+#ifdef ENABLE_STEPPER_CONTROL
+
+#include "_kinematics_data.h"
 
 class IncrementComputer {
 
