@@ -52,6 +52,6 @@ PID(4, hotbed, 20, 0, 0)
 
 #ifdef LOOP_FUNCTION
 
-LOOP_FUNCTION(0, temperature, 10);
+LOOP_FUNCTION(0, temperature, 10)
 
 #endif

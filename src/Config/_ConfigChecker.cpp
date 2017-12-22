@@ -32,6 +32,9 @@ bool _ConfigChecker::check_config(String *message) {
     //Check transmission layers and control configuration;
     if (!check_transmission(message)) return false;
 
+    //Check transmission layers and control configuration;
+    if (!check_control_loops(message)) return false;
+
     return true;
 
 }
@@ -69,6 +72,25 @@ bool _ConfigChecker::check_actions(String *message) {
 
     }
 
+    /*
+     * Then, we will check if indices are consecutives;
+     */
+    counter = 0;
+
+    //A macro to count controls;
+#define CONTINUOUS(i, ...) \
+    if (counter != i) {\
+        *message = "PWM with index "#i" should have the index "+String(counter)+". Check actions_config.h";\
+        return false;\
+    }\
+    counter++;
+
+    //Count every control;
+#include "Config/actions_config.h"
+
+    //Undef the macro for safety;
+#undef CONTINUOUS
+
 
     //----------- Servos -----------
 
@@ -104,6 +126,25 @@ bool _ConfigChecker::check_actions(String *message) {
         return false;
 
     }
+
+    /*
+     * Then, we will check if indices are consecutives;
+     */
+    counter = 0;
+
+    //A macro to count controls;
+#define SERVO(i, ...) \
+    if (counter != i) {\
+        *message = "Servo with index "#i" should have the index "+String(counter)+". Check actions_config.h";\
+        return false;\
+    }\
+    counter++;
+
+    //Count every control;
+#include "Config/actions_config.h"
+
+    //Undef the macro for safety;
+#undef SERVO
 
     return true;
 
@@ -180,5 +221,106 @@ bool _ConfigChecker::check_transmission(String *message) {
     //If no error, succeed;
     return true;
 
+}
+
+
+bool _ConfigChecker::check_control_loops(String *message) {
+
+    /*
+     * First, we will check the number of control loops;
+     */
+
+    uint8_t counter =
+
+        //A macro to count controls;
+#define LOOP_FUNCTION(...) 1 +
+
+        //Count every control;
+#include "Config/control_loops_config.h"
+
+        //Undef the macro for safety;
+#undef LOOP_FUNCTION
+
+            0;
+
+    //Check the number of controls
+    if (counter != NB_LOOPS) {
+
+        //Return a message and fail;
+        *message = "the number of control loops specified doesn't match the listed loops. Check control_loops_config.h.";
+        return false;
+
+    }
+
+    /*
+     * Then, we will check if indices are consecutives;
+     */
+    counter = 0;
+
+    //A macro to count controls;
+#define LOOP_FUNCTION(i, ...) \
+    if (counter != i) {\
+        *message = "loop with index "#i" should have the index "+String(counter)+". Check control_loops_config.h";\
+        return false;\
+    }\
+    counter++;
+
+    //Count every control;
+#include "Config/control_loops_config.h"
+
+    //Undef the macro for safety;
+#undef LOOP_FUNCTION
+
+
+    /*
+     * Now, we will check the number of PIDs;
+     */
+    counter =
+
+            //A macro to count controls;
+#define PID(...) 1 +
+
+//Count every control;
+#include "Config/control_loops_config.h"
+
+    //Undef the macro for safety;
+#undef PID
+
+    0;
+
+    //Check the number of controls
+    if (counter != NB_PIDS) {
+
+        //Return a message and fail;
+        *message = "the number of control loops specified doesn't match the listed loops. Check control_loops_config.h.";
+        return false;
+
+    }
+
+    /*
+     * Then, we will check if indices are consecutives;
+     */
+    counter = 0;
+
+    //A macro to count controls;
+#define PID(i, ...) \
+    if (counter != i) {\
+        *message = "pid with index "#i" should have the index "+String(counter)+". Check control_loops_config.h";\
+        return false;\
+    }\
+    counter++;
+
+    //Count every control;
+#include "Config/control_loops_config.h"
+
+    //Undef the macro for safety;
+#undef PID
+
+    return true;
+}
+
+
+bool _ConfigChecker::check_controllers(String *message) {
+    return false;
 }
 

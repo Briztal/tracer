@@ -84,6 +84,25 @@
 #define is_loop_0_enabled() is_timer_loop_enabled_1();
 
 
+/*
+ * Another routine available.
+ */
+
+#define loop_1_period_to_reload(period) period_to_reload_3(period);
+#define set_loop_1_int_period(period) set_int_period_3(period);
+#define set_loop_1_int_reload(reload) set_int_reload_3(reload);
+#define enable_loop_1_interrupt() enable_interrupt_3();
+#define disable_loop_1_interrupt() disable_interrupt_3();
+#define enable_loop_1_timer() enable_timer_3();
+#define disable_loop_1_timer() disable_timer_3();
+#define loop_1_int_flag() timer_flag_3()
+#define loop_1_int_flag_clear() reset_timer_flag_3();
+#define set_loop_1_int_function(f) set_interrupt_function_3(f);
+#define setup_loop_1_interrupt(f, period) setup_interrupt_3(f, period);
+#define clean_loop_1_interrupt() clean_interrupt_3();
+#define is_loop_1_enabled() is_timer_loop_enabled_1();
+
+
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------
 
@@ -96,7 +115,7 @@
     NVIC_SET_PRIORITY(IRQ_PIT_CH1, 16);NVIC_ENABLE_IRQ(IRQ_PIT_CH1);\
     NVIC_SET_PRIORITY(IRQ_PIT_CH2, 32);NVIC_ENABLE_IRQ(IRQ_PIT_CH2);\
     NVIC_SET_PRIORITY(IRQ_PIT_CH3, 48);NVIC_ENABLE_IRQ(IRQ_PIT_CH3);\
-    clean_interrupt_0();clean_interrupt_1();clean_interrupt_2();clean_interrupt_2();}
+    clean_interrupt_0();clean_interrupt_1();clean_interrupt_2();clean_interrupt_3();}
 
 
 #define hl_init() init_interrupts();

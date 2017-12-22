@@ -63,7 +63,7 @@
  *
  */
 
-#define NB_CONTROLS 2
+#define NB_CONTROLS 1
 
 #ifdef EXTERNAL_CONTROL
 

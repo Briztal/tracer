@@ -41,11 +41,11 @@ private:
     //Check the enabled controllers;
     static bool check_transmission(String *message);
 
-    //Check the enabled controllers;
-    static bool check_controllers(String *message);
+    //Check the enabled control loops;
+    static bool check_control_loops(String *message);
 
     //Check the enabled controllers;
-    static bool check_control(String *message);
+    static bool check_controllers(String *message);
 
     //Check the enabled controllers;
     static bool check_eeprom(String *message);
