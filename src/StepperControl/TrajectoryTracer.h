@@ -36,9 +36,11 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "_kinematics_data.h"
 #include <DataStructures/Queue.h>
+
 #include <TaskScheduler/task_state_t.h>
+
+#include "_core_include.h"
 
 class TrajectoryTracer {
 

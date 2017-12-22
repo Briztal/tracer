@@ -32,16 +32,9 @@
 #include "TrajectoryTracer.h"
 #include <Actuators/PWMGPIO.h>
 
-#include "_kinematics_data.h"
+#include "_core_include.h"
 
-#if (CORE_VERSION == 0)
-#include <LinearMovement.h>
-#elif (CORE_VERSION == 1)
-#include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
-#elif (CORE_VERSION == 2)
-#include <StepperControl/KinematicsCore2/KinematicsCore2.h>
-#include <StepperControl/KinematicsCore2/Movements/ComplexLinearMovement.h>
-#endif
+#include "KinematicsCore2/Movements/ComplexLinearMovement.h"
 
 #include <Config/geometry.h>
 

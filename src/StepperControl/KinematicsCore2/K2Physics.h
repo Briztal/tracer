@@ -29,7 +29,8 @@
 
 #include <DataStructures/Queue.h>
 
-#include <StepperControl/_kinematics_data.h>
+#include <StepperControl/_core_include.h>
+
 
 class K2Physics {
 

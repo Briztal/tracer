@@ -167,14 +167,6 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 //The version of KinematicsCore
 #define CORE_VERSION 2
 
-//TODO AUTO_GENERATION
-#define movement_data_t k2_movement_data
-
-#define sub_movement_data_t k2_sub_movement_data
-
-#define Kinematics KinematicsCore2
-
-
 //-------------------------------------------------- Distance Bounds ---------------------------------------------------
 
 //The minimum number of steps between two consecutive positions;

@@ -47,10 +47,7 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-
-
-#include "StepperControl/_kinematics_data.h"
-
+#include "_core_include.h"
 
 class JerkPlanner {
 
