@@ -251,43 +251,4 @@ GO_UPPER()
 */
 
 
-
-
 #endif
-
-
-#define NB_PARAMETERS 9
-
-#ifdef GCODE_PARAMETER
-#undef F;
-
-/*
-    GCode Parameters :
-    place here all parameters you need in your commands, with this parameter scheme :
-    GCODE_PARAMETER_STATEMENT(indice, 'matching letter', matching letter)
-
-    Rules to follow :
-    - All indices must be consecutives;
-    - Matching letter mustn't collide with steppers letters;
-*/
-
-
-
-GCODE_PARAMETER(0,  'T',    T)
-GCODE_PARAMETER(1,  'S',    S)
-GCODE_PARAMETER(2,  'P',    P)
-GCODE_PARAMETER(3,  'X',    X)
-GCODE_PARAMETER(4,  'Y',    Y)
-GCODE_PARAMETER(5,  'Z',     Z)
-GCODE_PARAMETER(6,  'I',    I)
-GCODE_PARAMETER(7,  'J',    J)
-GCODE_PARAMETER(8,  'D',    D)
-GCODE_PARAMETER(9), 'H',    H)
-GCODE_PARAMETER(10, 'F',    F)
-GCODE_PARAMETER(11, 'R',    R)
-GCODE_PARAMETER(12, 'Q',    Q)
-GCODE_PARAMETER(13, 'E',    E)
-GCODE_PARAMETER(14, 'N',    N)
-
-#endif
-
