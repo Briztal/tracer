@@ -20,19 +20,32 @@
 
 #include <config.h>
 
+#include <Config/stepper_control_config.h>
+
 #if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION==1)
 
 #ifndef TRACER_REAL_TIME_PROCESS_H
 #define TRACER_REAL_TIME_PROCESS_H
 
 
-#include <StepperControl/_kinematics_data.h>
+#include <StepperControl/_core_include.h>
+
 #include <DataStructures/Queue.h>
+
 #include "SqrtFastComputer.h"
 
 
 class K1Physics {
 
+
+    //------------------------------------------- Initialisation --------------------------------------------
+
+public:
+
+    static void initialise_data();
+
+
+    //------------------------------------------- Start --------------------------------------------
 
 public:
 

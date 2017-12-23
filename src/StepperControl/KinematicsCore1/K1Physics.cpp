@@ -19,20 +19,93 @@
 */
 
 
+
 #include <config.h>
+
+#include <Config/stepper_control_config.h>
 
 #if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 1)
 
 #include <math.h>
-#include <Actions/ContinuousActions.h>
+#include <Actuators/PWMGPIO.h>
 #include <hardware_language_abstraction.h>
-#include <interface.h>
-#include <StepperControl/MachineInterface.h>
+#include <StepperControl/StepperController.h>
 #include <EEPROM/EEPROMStorage.h>
 #include "K1Physics.h"
 #include <StepperControl/SubMovementManager.h>
 #include <StepperControl/_kinematics_data.h>
 #include "mathProcess.hpp"
+
+
+void K1Physics::initialise_data() {
+
+    //The reference axis;
+    reference_axis = 0;
+
+    //The current speed group;
+    last_speed_group = 0;
+
+    //The evolution coefficient
+    evolution_coefficient = 1;
+
+    //Thelast evolution coefficient
+    saved_evolution_coefficient = 1;
+
+    last_movement_first_sub_movement_hl_distances = 0;
+
+    current_movement_first_sub_movement_hl_distances = 0;
+
+
+    //The stepper jerk offset;
+    jerk_distance_offset;
+
+    //The heuristic distance to the end point;
+    heuristic_end_distance;
+
+    //The offset heuristic distance to the next jerk point
+    offset_heuristic_jerk_distance;
+
+    //The jerk flag : if true, the jerk point proximity is checked in real time
+    watch_for_jerk_point;
+
+    //The acceleration_step
+    acceleration_step = 0;
+
+    //The acceleration distances's square_root
+    acceleration_speed_distance_sqrt = 0;
+
+    //The speed distances
+    deceleration_speed_distance = 0;
+    acceleration_speed_distance = 0;
+
+    //Delay numerator
+    acceleration_delay_numerator = 0;
+
+    //The acceleration distance sqrt fast computer
+    acceleration_distance_computer = SqrtFastComputer();
+
+    //The distances ratios.
+    deceleration_to_acceleration = 1;
+    acceleration_to_deceleration = 1;
+
+    //The current sub_movement time
+    sub_movement_time = 0;
+
+    //The current regulation (target) sub_movement time
+    regulation_sub_movement_time = 0;
+
+    //A flag to mention if the routine has just started.
+    first_movement = true;
+
+    //A flag to mention if the speed currently increases
+    speed_increasing_flag = true;
+
+    //A flag to disable the regulation for the current sub_movement.
+    no_regulation_flag = false;
+
+    //A flag to enable the speed regulation
+    speed_regulation_enabled = true;
+}
 
 
 void K1Physics::initialise_tracing_procedure() {
@@ -69,7 +142,7 @@ void K1Physics::initialise_kinetics_data(k1_movement_data *movement_data) {
     get_delay_numerator_data(movement_data);
 
     //compute the regulation delay_us;
-    get_sub_movement_time(movement_data, MachineInterface::get_speed_group(), MachineInterface::get_speed());
+    get_sub_movement_time(movement_data, StepperController::get_speed_group(), StepperController::get_speed());
 
 }
 
@@ -255,10 +328,10 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
     uint8_t max_axis;
 
     //get the positions for the minimal position
-    MachineInterface::get_stepper_positions_for(trajectory_function, p0, t_point);
+    StepperController::get_stepper_positions_for(trajectory_function, p0, t_point);
 
     //get the positions for the second minimal position
-    MachineInterface::get_stepper_positions_for(trajectory_function, p1, t_dist);
+    StepperController::get_stepper_positions_for(trajectory_function, p1, t_dist);
 
     //extract the distances and get the maximal_axis.
     max_axis = get_distances(t_point, t_dist);
@@ -407,13 +480,13 @@ void K1Physics::get_sub_movement_time(movement_data_t *movement_data, uint8_t sp
     get_distances(t_point, t_dist);
 
     //get and memorise the high level distance on and last speed groups.
-    float hl_sub_movement_distance_current_speed_group = MachineInterface::get_movement_distance_for_group(speed_group,
+    float hl_sub_movement_distance_current_speed_group = StepperController::get_movement_distance_for_group(speed_group,
                                                                                                            t_dist);
     movement_data->first_sub_movement_hl_distance_current_speed_group = hl_sub_movement_distance_current_speed_group;
 
     //get and memorise the high level distance on last speed groups.
     if (!first_movement) {
-        float hl_sub_movement_distance_last_speed_group = MachineInterface::get_movement_distance_for_group(
+        float hl_sub_movement_distance_last_speed_group = StepperController::get_movement_distance_for_group(
                 last_speed_group, t_dist);
         movement_data->first_sub_movement_hl_distance_last_speed_group = hl_sub_movement_distance_last_speed_group;
     }

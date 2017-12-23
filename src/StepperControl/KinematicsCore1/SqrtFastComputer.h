@@ -29,20 +29,31 @@ class SqrtFastComputer {
 
 public :
 
+    //Compute the square root using the sqrt function;
     uint16_t sqrt_slow(uint32_t primitive);
 
+    //Compute the sqrt using the fast way;
     uint16_t sqrt_fast(uint32_t primitive);
 
+    //Display all fields;
     void print_data();
 
 
 private :
 
+    //The last primitive passed;
     uint32_t primary = 0;
+
+    //The lower and upper bound of the primary before incr or decr of square root;
     uint16_t primary_inf = 1, primary_sup = 1;
+
+    //The current square root;
     uint16_t square_root = 0;
+
+    //The next increment of the primary;
     uint16_t primary_increment = 1;
 
+    //Compute the square root;
     uint16_t _sqrt_fast(bool dir, uint16_t increment);
 
 

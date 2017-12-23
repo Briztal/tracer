@@ -34,7 +34,7 @@
 
 #include "_core_include.h"
 
-#include "KinematicsCore2/Movements/ComplexLinearMovement.h"
+#include <StepperControl/Movements/ComplexLinearMovement.h>
 
 #include <Config/geometry.h>
 

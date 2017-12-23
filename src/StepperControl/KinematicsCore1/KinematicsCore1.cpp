@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#include <Config/stepper_control_config.h>
+
 #if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 1)
 
 #include "K1Physics.h"
@@ -28,10 +30,35 @@
 #include <StepperControl/TrajectoryTracer.h>
 #include <hardware_language_abstraction.h>
 #include <StepperControl/Steppers.h>
-#include <interface.h>
 #include <EEPROM/EEPROMStorage.h>
 
-void KinematicsCore1::initialise_tracing_procedure() {
+
+//------------------------------------------- Initialisation --------------------------------------------
+
+/*
+ * initialise_data : this function intialises the module and its physics manager to a safe state;
+ */
+
+void KinematicsCore1::initialise_data() {
+
+    //Reset the high level position;
+    memset(current_hl_position, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the current sub_movement time;
+    sub_movement_time = 0;
+
+    //Reset the high level positions;
+    memset(current_hl_position, 0, NB_STEPPERS * sizeof(float));
+
+    //Initialise the physics manager;
+    K1Physics::initialise_data();
+
+}
+
+//------------------------------------------- Start --------------------------------------------
+
+
+void KinematicsCore1::start_tracing_procedure() {
     K1Physics::initialise_tracing_procedure();
 }
 
@@ -120,7 +147,7 @@ void KinematicsCore1::accept_sub_movement(sub_movement_data_t *sub_movement_data
 
     float *new_hl_position = sub_movement_data->candidate_high_level_positions;
 
-    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_AXIS);
+    memcpy(current_hl_position, new_hl_position, sizeof(float) * NB_STEPPERS);
 
 }
 
@@ -178,7 +205,6 @@ float KinematicsCore1::compute_us_time_for_sub_movement(k1_sub_movement_data *su
 void KinematicsCore1::send_position() {
 
     //Send the current high level position
-    CI::send_position(current_hl_position);
     //Steppers::send_position();
 
 }
@@ -192,7 +218,7 @@ void KinematicsCore1::send_position() {
 float m::sub_movement_time;
 
 //The current position in the high level system.
-float t_c_hl_p_1[NB_AXIS]{0};
+float t_c_hl_p_1[NB_STEPPERS]{0};
 
 float *const m::current_hl_position = t_c_hl_p_1;
 

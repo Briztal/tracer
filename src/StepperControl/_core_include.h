@@ -41,7 +41,7 @@
 #elif (CORE_VERSION == 1)
 
 //Include the core 1 class;
-#include <StepperControl/KinematicsCore2/KinematicsCore1.h>
+#include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 
 //Define the core 1 movement data;
 #define movement_data_t k1_movement_data

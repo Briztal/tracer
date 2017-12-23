@@ -33,7 +33,20 @@ class KinematicsCore1 {
 
 public :
 
-    static void initialise_tracing_procedure();
+
+    //------------------------------------------- Initialisation --------------------------------------------
+
+public:
+
+    static void initialise_data();
+
+
+    //------------------------------------------------ start ------------------------------------------------
+
+public:
+
+    static void start_tracing_procedure();
+
 
     //-------------------------------------------Current high level position--------------------------------------------
 

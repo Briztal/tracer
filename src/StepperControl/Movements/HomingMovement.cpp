@@ -18,11 +18,10 @@
 
 */
 
-#include "../../../config.h"
+#include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "../../../config.h"
 #include "EEPROM/EEPROMStorage.h"
 #include "HomingMovement.h"
 #include "StepperControl/Steppers.h"
