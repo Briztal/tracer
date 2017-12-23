@@ -100,7 +100,6 @@ void Terminal::parse(char *message) {
     uint8_t i;
 
 
-
     //--------------------------Tree Iteration--------------------------
 
     //As the algorithm involves two for - while loops, we must use a goto label to restart with a new node.
@@ -111,7 +110,7 @@ void Terminal::parse(char *message) {
     //Remove unnecessary nb_spaces;
     message += StringUtils::lstrip(message, ' ');
 
-    //Update th beginninhg of the current command_identifier.
+    //Update th beginning of the current command_identifier.
     char *command_identifier = message;
 
     //get the first node identifier, in the command_identifier buffer
@@ -127,9 +126,6 @@ void Terminal::parse(char *message) {
         message++;
 
     }
-
-
-    std_out(String(message));
 
     //We now must compare each child of the current node, and compare its identifier with the read_data command identifier.
 

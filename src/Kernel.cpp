@@ -105,8 +105,11 @@ void Kernel::check_config() {
 
     //If the config is not ok :
 
+    //If a led is provided :
+#ifdef HL_LED_FLAG
     //Enable the led output;
-    pin_mode_output(13); //TODO LED IN HL_ABSTRACTION
+    pin_mode_output(LED_PIN); //TODO LED IN HL_ABSTRACTION
+#endif
 
     //Enable all transmission layers.
 
@@ -124,8 +127,11 @@ void Kernel::check_config() {
     //Infinite loop, as the code is badly configured;
     while(true) {
 
+        //If a led is provided :
+#ifdef HL_LED_FLAG
         //Blink the led;
-        digital_write(13, !digital_read(13));
+        digital_write(LED_PIN, !digital_read(LED_PIN));
+#endif
 
         //A macro to enable all interfaces;
 #define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str("Error : "+error_message+"\n\n");

@@ -46,8 +46,20 @@
  *  - enable_value : the boolean value to provide to power up steppers;
  */
 
-//TODO VIRER RELATIVE, ENDSTOPS;
 #ifdef STEPPER
+
+//      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab)
+STEPPER(0,  1,      0,      7,      8,      LOW,    9,      LOW)
+STEPPER(1,  2,      0,      10,     11,     LOW,    12,     LOW)
+STEPPER(2,  4,      0,      18,     17,     LOW,    16,     LOW)
+STEPPER(3,  8,      0,      15,     14,     LOW,    13,     LOW)
+STEPPER(4,  16,     0,      24,     25,     LOW,    26,     LOW)
+STEPPER(5,  32,     1,      27,     28,     LOW,    29,     LOW)
+STEPPER(6,  64,     1,      30,     31,     LOW,    32,     LOW)
+STEPPER(7,  128,    1,      39,     38,     LOW,    37,     LOW)
+STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW)
+
+/*
 
 //      id, sig,    relat.  pStep,  pDir,   dir+    pPower, vEnab,  pMin,   VMin,   pMax,   vMax)
 STEPPER(0,  1,      0,      7,      8,      LOW,    9,      LOW,    A21,    HIGH,   0,      HIGH)
@@ -59,6 +71,8 @@ STEPPER(5,  32,     1,      27,     28,     LOW,    29,     LOW,    0,      HIGH
 STEPPER(6,  64,     1,      30,     31,     LOW,    32,     LOW,    0,      HIGH,   0,      HIGH)
 STEPPER(7,  128,    1,      39,     38,     LOW,    37,     LOW,    0,      HIGH,   0,      HIGH)
 STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH,   0,      HIGH)
+
+*/
 
 #endif
 
@@ -82,17 +96,16 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
 
 #ifdef STEPPER_DATA
 
-//TODO REMOVE SIZE, letter
-//              id, letter, size,   steps,  speed,  acceler.,   jerk)
-STEPPER_DATA(   0,  '0',    170,    80.16,  1000,    1000,      20.)
-STEPPER_DATA(   1,  '1',    170.,   80.16,  1000.,   1000,      20.)
-STEPPER_DATA(   2,  '3',    150.,   80.16,  1000.,   1000,      20.)
-STEPPER_DATA(   3,  '3',    150.,   80.16,  1000.,   1000,      20.)
-STEPPER_DATA(   4,  '3',    150.,   80.16,  1000.,   1000.,      20.)
-STEPPER_DATA(   5,  '3',    150.,   80.16,  1000.,   1000.,      20.)
-STEPPER_DATA(   6,  '3',    150.,   80.16,  1000.,   1000.,      20.)
-STEPPER_DATA(   7,  '3',    150.,   80.16,  1000.,   1000.,      20.)
-STEPPER_DATA(   8,  '3',    150.,   80.16,  1000.,   1000.,      20.)
+//              id, steps,  speed,  acceler.,   jerk)
+STEPPER_DATA(   0,  80.16,  1000,    1000,      20.)
+STEPPER_DATA(   1,  80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   2,  80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   3,  80.16,  1000.,   1000,      20.)
+STEPPER_DATA(   4,  80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   5,  80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   6,  80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   7,  80.16,  1000.,   1000.,      20.)
+STEPPER_DATA(   8,  80.16,  1000.,   1000.,      20.)
 
 
 #endif
@@ -239,9 +252,3 @@ COORD_INTERFACE_VARIABLE(y_max_sum, 400)
 
 //The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
 #define MAX_CURVE_POINTS 5
-
-
-//------------------------------------------------------ Frequency -----------------------------------------------------
-
-//DO NOT CHANGE THIS : the stepper timer control frequency (1KHz)
-#define TIMER_STEPPER_FREQUENCY 1000000

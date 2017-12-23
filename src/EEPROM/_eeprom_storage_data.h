@@ -9,7 +9,6 @@
 
 //The stepper data structure : contains all data related to a stepper motor
 typedef struct stepper_data_t {
-    float size;
     float steps;
     float maximum_speed;
     float acceleration;

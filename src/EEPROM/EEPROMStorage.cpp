@@ -197,9 +197,8 @@ void EEPROMStorage::set_default_profile() {
 
     stepper_data_t *step_p;
 
-#define STEPPER_DATA(i, j, d_size, d_steps, d_speed, d_acc, d_jerk)\
+#define STEPPER_DATA(i, d_steps, d_speed, d_acc, d_jerk)\
     step_p = steppers_data+(i);\
-    step_p->size = d_size;\
     step_p->steps = d_steps;\
     step_p->maximum_speed = d_speed;\
     step_p->acceleration = d_acc;\

@@ -1,15 +1,5 @@
 //TODO COMMENT ArgumentContainer
 
-//TODO AUTO_GENERATION of movement_data_t, sub_movement_data_t, and Kinematics macros from stepper_control_config.h
-
-//TODO MAKE A MOVEMENT FOLDER
-
-//TODO REMOVE UNNECESSARY DATA IN STEPPER_CONTROL_CONFIG MACROS;
-
-//TODO LED IN HL_ABSTRACTION
-
-//TODO COMMENT DES FICHIERS DE CONFIG
-
 //TODO PID_AUTOTUNE
 
 //TODO SD SUPPORT

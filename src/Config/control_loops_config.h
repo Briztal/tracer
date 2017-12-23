@@ -83,6 +83,3 @@ LOOP_FUNCTION(0, temperature, 10)
 
 #endif
 
-
-//DO NOT CHANGE THIS : the control loop timers control frequency (1KHz)
-#define TIMER_LOOP_FREQUENCY 1000

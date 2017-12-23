@@ -99,6 +99,3 @@ SERVO(1, servoo, 1, 0, 1, 1500, 2500)
 
 #endif
 
-//DO NOT CHANGE THIS : the servo timer control frequency (1KHz)
-#define TIMER_SERVO_FREQUENCY 1000000
-

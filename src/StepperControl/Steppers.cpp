@@ -37,7 +37,7 @@
  */
 void Steppers::initialise_hardware() {
 
-#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve, pinEndMin, vi, pinEndMax, va)\
+#define STEPPER(i, sig, rel, pinStep, pinDir, dp, pinPower, ve)\
     pin_mode_output(pinPower);pin_mode_output(pinDir);pin_mode_output(pinStep);\
 
 
@@ -67,7 +67,7 @@ void Steppers::initialise_data() {
  */
 void Steppers::enable(sig_t signature) {
 
-#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, dp, ps, pd, pinPower, ve) \
     if (signature&(sig)) {\
         digital_write(pinPower, LOW);\
     } else {\
@@ -140,7 +140,7 @@ void Steppers::set_directions(sig_t negative_signatures) {
     bool dir;
 
 #ifdef position_log
-#define STEPPER(i, sig, rel, ps, pinDir, dirp, pp, ve, pmi, vi, pma, va) \
+#define STEPPER(i, sig, rel, ps, pinDir, dirp, ...) \
     sig_dir = negative_signatures&(sig);\
     dir = direction_signature&(sig);\
     if ((!sig_dir) && (!dir)) {\
@@ -192,7 +192,7 @@ void Steppers::fastStep(sig_t id) {
 
 #ifdef position_log
 
-#define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
+#define STEPPER(i, sig, rel, pinStep, ...)\
         if (id&(sig)) {\
             digital_write(pinStep, HIGH);\
         }
@@ -203,7 +203,7 @@ void Steppers::fastStep(sig_t id) {
 
     delay_us(1);
 
-#define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
+#define STEPPER(i, sig, rel, pinStep, ...)\
         if (id&(sig)) {\
             pos##i += incr##i;\
             digital_write(pinStep, LOW);\
@@ -268,6 +268,7 @@ sig_t m::direction_signature = 0;
 #undef STEPPER
 
 #ifdef position_log
+
 #define STEPPER(i, ...) \
     int32_t m::incr##i = 1;\
     int32_t m::pos##i = 0;

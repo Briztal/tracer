@@ -83,7 +83,6 @@ void EEPROMInterface::print_stored_data() {
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         stepper_data_t *data = ES::steppers_data + stepper;
         std_out("Stepper " + str(stepper));
-        std_out("\tsize : \t" + str(data->size));
         std_out("\tsteps : \t" + str(data->steps));
         std_out("\tending speed : \t" + str(data->maximum_speed));
         std_out("\tacceleration : \t" + str(data->acceleration));
@@ -289,8 +288,8 @@ EEPROMTree *EEPROMInterface::build_tree() {
     //Increment the root id
     root_id++;
 
-    //------------------
 
+    //------------------
 
     //Loops
     //Create the tree, and add it to root
@@ -323,7 +322,6 @@ EEPROMTree *EEPROMInterface::build_tree() {
     //Add the sub nodes
 #define STEPPER(i, ...) \
     tree->children[i] = tree2 = new EEPROMTree(new String(#i), i ,nullptr, 5);\
-    tree2->children[0] = new EEPROMTree(new String("size"),     0, &((ES::steppers_data+i)->size), 0);\
     tree2->children[1] = new EEPROMTree(new String("steps"),    1, &((ES::steppers_data+i)->steps), 0);\
     tree2->children[2] = new EEPROMTree(new String("speed"),    2, &((ES::steppers_data+i)->maximum_speed), 0);\
     tree2->children[3] = new EEPROMTree(new String("acc"),      3, &((ES::steppers_data+i)->acceleration), 0);\

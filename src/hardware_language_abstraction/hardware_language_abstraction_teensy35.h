@@ -57,20 +57,11 @@
 
 #define HL_FPU_FLAG
 
-#define HL_SERIAL_FLAG
-
-#define HL_CONTROL_LOOPS_FLAG
-
-#define HL_STEPPER_TIMER_FLAG
-
 #define HL_IO_FLAG
-
-#define HL_INTERRUPTS_FLAG
-
-#define HL_DELAY_FLAG
 
 #define HL_EEPROM_FLAG
 
+#define HL_LED_FLAG
 
 
 //----------------------------------------------------STRING------------------------------------------------------------
@@ -101,6 +92,10 @@
 #define pin_mode_input(i) pinMode(i, INPUT);
 
 #define pin_mode_output(i) pinMode(i, OUTPUT);
+
+//---------------------------------------------------- LED -------------------------------------------------------------
+
+#define LED_PIN 13
 
 
 //-----------------------------------------------------MATH-------------------------------------------------------------
