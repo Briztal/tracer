@@ -51,7 +51,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);
 
-    //verify that function and p arguments are provided.
+    //verify that function and p content are provided.
     REQUIRE_ONE_ARGUMENTS("prd");
 
     //If the default profile must be reset
@@ -146,7 +146,7 @@ task_state_t TerminalCommands::home(char *arguments) {
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
 
-    //Parse arguments
+    //Parse content
     PARSE_ARGUMENTS(arguments);
 
     //Declare the structure;
@@ -175,7 +175,7 @@ task_state_t TerminalCommands::home(char *arguments) {
 
 /*
  * line : this function draws a line to the provided position.
- *  It takes the following arguments  :
+ *  It takes the following content  :
  *
  *      -{x, y, z, e} : coordinates of the current carriage. Almost one is required.
  *      - r : (optionnal) all provided coordinates are relative.
@@ -306,7 +306,7 @@ task_state_t TerminalCommands::set_position(char *arguments) {
 /*
  * set_extrusion : this function modifies extrusion parameters.
  *
- *  It takes the folloging arguments :
+ *  It takes the folloging content :
  *      - c : changes the working carriage;
  *      - s : changes the speed for the carriages designed by c (or for the working carriage if c is not provided).
  *
@@ -374,7 +374,7 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
 /*
  * set_cooling : this function modifies the cooling state.
  *
- *  It takes the following arguments :
+ *  It takes the following content :
  *      -e : 0 means disable the cooling, other values will enable it.
  *      -p : modifies the cooling power (truncated between 0 and 100).
  */
@@ -422,7 +422,7 @@ task_state_t TerminalCommands::set_cooling(char *arguments) {
 /*
  * set_hotend : this function sets the state of a particular hotend.
  *
- *  It takes the following arguments :
+ *  It takes the following content :
  *      -h : the hotend to modify, mandatory.
  *      -e : 0 means disable the power on the hotend, other values will enable it.
  *      -t : sets the target temperature of the hotend.
@@ -479,7 +479,7 @@ task_state_t TerminalCommands::set_hotend(char *arguments) {
 /*
  * set_hotbed : this function sets the hotbed's state
  *
- *  It takes the following arguments :
+ *  It takes the following content :
  *      -e : 0 means disable the power on the hotbed, other values will enable it.
  *      -t : sets the target temperature of the hotbed.
  *

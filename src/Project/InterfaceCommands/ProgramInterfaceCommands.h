@@ -60,8 +60,8 @@ public:
 
 #define CREATE_LEAF(i, name, ...)\
     /*
-     * First, we will declare the method you will actually implement, that takes the index of the arguments in the
-     * arguments storage.
+     * First, we will declare the method you will actually implement, that takes the index of the content in the
+     * content storage.
      * You have 3 return codes you can use :
      *  - 0 : not enough space in the task pool. Task will be reprogrammed automatically.
      *  - 1 : argument_t error. A message with the correct syntax will be displayed.
@@ -72,12 +72,12 @@ public:
      * Then, we will declare and implement a pre_processor that eases your work.
      *   It starts by calling your implementation, passing only the argument_t index.
      *   If your command does not succeeds, it logs the syntax informato
-     * arguments storage.
+     * content storage.
      */\
     static task_state_t _##name(void *ptr) {\
         program_interface_data_t *data = (program_interface_data_t*) ptr;\
         task_state_t b = name(data->arguments_index);\
-        /*remove the arguments, and do not reprogram the task*/\
+        /*remove the content, and do not reprogram the task*/\
         if (b == complete) {ProgramInterface::validate_task(data->arguments_index);}\
         return b;\
     }

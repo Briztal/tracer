@@ -531,7 +531,7 @@ task_state_t MachineController::set_working_extruder(uint8_t carriage) {
             return complete;
     }
 
-    //If valid arguments :
+    //If valid content :
     extrusion_state.working_carriage = carriage;
 
     //Succeed.

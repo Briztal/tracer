@@ -80,7 +80,7 @@ void Terminal::init_message() {
 /*
  * parse : this function analyses the packet received, and parses the command part.
  *
- *  When it has found the TerminalCommand identified by this string, it saves the rest of the packet (the arguments part)
+ *  When it has found the TerminalCommand identified by this string, it saves the rest of the packet (the content part)
  *      in the argument_t storage, and then, schedules the execution of this function.
  *
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
@@ -171,7 +171,7 @@ void Terminal::parse(char *message) {
                     //The argument_t's index
                     uint8_t index;
 
-                    //Save the arguments sequence.
+                    //Save the content sequence.
                     if (TerminalArguments::insert_argument(message, &index)) {
 
 
@@ -182,7 +182,7 @@ void Terminal::parse(char *message) {
 
                         /*
                          * Schedule a type 255 (asap) task, to parse the required function,
-                         *  with data as arguments.
+                         *  with data as content.
                          */
 
                         TaskScheduler::schedule_task(255, execute_command, (void *) data, external_log, output_protocol);
@@ -265,15 +265,15 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
  * execute_command : this command eases the redaction of TerminalCommands :
  *
  *  Normally, if scheduled directly, a TerminalCommand receives a void *, that must be casted in a char *,
- *      the address of the arguments sequence. After the execution, if the command mustn't be reprogrammed,
- *      those arguments must be removed from the argument_t container.
+ *      the address of the content sequence. After the execution, if the command mustn't be reprogrammed,
+ *      those content must be removed from the argument_t container.
  *
  *      As this procedure is common to all TerminalCommands, this function's goal is to execute this procedure.
  *
  *  Now, a TerminalCommand receives a simple char *, and this function does the following :
- *      - extracting arguments (char *);
+ *      - extracting content (char *);
  *      - executing the TerminalCommand, passing these args.
- *      - eventually removing the arguments.
+ *      - eventually removing the content.
  */
 
 task_state_t Terminal::execute_command(void *data_pointer) {
@@ -281,10 +281,10 @@ task_state_t Terminal::execute_command(void *data_pointer) {
     //Get the terminal interface data back
     controller_data_t *data = (controller_data_t *) data_pointer;
 
-    //Cache var for arguments index.
+    //Cache var for content index.
     uint8_t arguments_index = data->arguments_index;
 
-    //Cache for arguments.
+    //Cache for content.
     char *arguments = TerminalArguments::get_argument(arguments_index);
 
     //Execute the required TerminalCommand function, and get the execution state
@@ -293,7 +293,7 @@ task_state_t Terminal::execute_command(void *data_pointer) {
     //Save the state
     data->return_state = state;
 
-    //Remove arguments arguments, if the task mustn't be reprogrammed
+    //Remove content content, if the task mustn't be reprogrammed
     if (state != reprogram) {
         TerminalArguments::remove_argument(arguments_index);
     }

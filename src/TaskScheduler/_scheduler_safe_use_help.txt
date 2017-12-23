@@ -22,8 +22,8 @@ I - Task
 
 A task is a simple struct, containing :
     - A task_state_t(*)(void *), a function pointer, taking a void *, and returning a task_state_t;
-        the void * is a pointer to the first case of the arguments
-    - a void *, a pointer to the first case of the arguments (must be stored in the heap).
+        the void * is a pointer to the first case of the content
+    - a void *, a pointer to the first case of the content (must be stored in the heap).
     - an uin8_t, the type of the task (see below)
 
 

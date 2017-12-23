@@ -51,7 +51,7 @@ void TerminalArguments::clear() {
  *
  *  -i0 arg0 -i1 arg1 ... -in argn
  *
- *  After the parsing, arguments can be get with the get_argument methods.
+ *  After the parsing, content can be get with the get_argument methods.
  *
  *  Remarks :
  *      - argi can be empty.
@@ -67,7 +67,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
 
     //First, reset the argument_t parsing structure :
 
-    //reset the arguments counter
+    //reset the content counter
     nb_identifiers = 0;
 
 
@@ -107,7 +107,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
             //Display an error message
             std_out(
                     "The TerminalArguments hasn't been configured to accept more than " + String(TERMINAL_MAX_ARGS_NB) +
-                    " arguments. Please check your terminal_interface_config.h file.");
+                    " content. Please check your terminal_interface_config.h file.");
 
             //Fail
             return false;
@@ -188,7 +188,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
         } else {
 
             //If the '-' was in a word, display an error message;
-            std_out("Invalid arguments, please do not use '-' in a word.");
+            std_out("Invalid content, please do not use '-' in a word.");
 
             //Fail;
             return false;
@@ -206,7 +206,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
         argument->arg = arg;
 
 
-        //Increase the number of parsed arguments
+        //Increase the number of parsed content
         nb_identifiers++;
 
         //If we have reached the end of the sequence
@@ -266,11 +266,11 @@ char *TerminalArguments::get_argument(char id) {
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ALL arguments contained
- *  in the arguments string have been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ALL content contained
+ *  in the content string have been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are arguments to check .
- *      ex "arp" triggers the checking for arguments a, r and p.
+ *  the identifier string is a string, where all letters are content to check .
+ *      ex "arp" triggers the checking for content a, r and p.
  */
 
 bool TerminalArguments::verify_all_identifiers_presence(const char *identifiers) {
@@ -294,18 +294,18 @@ bool TerminalArguments::verify_all_identifiers_presence(const char *identifiers)
 
     }
 
-    //All arguments are present, succeed.
+    //All content are present, succeed.
     return true;
 
 }
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ONE arguments contained
- *  in the arguments string has been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ONE content contained
+ *  in the content string has been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are arguments to check .
- *      ex "arp" triggers the checking for arguments a, r and p.
+ *  the identifier string is a string, where all letters are content to check .
+ *      ex "arp" triggers the checking for content a, r and p.
  */
 
 bool TerminalArguments::verify_one_identifiers_presence(const char *identifiers) {
@@ -363,7 +363,7 @@ bool TerminalArguments::verify_identifier_presence(char id) {
 argument_t terminal_arguments_t[TERMINAL_MAX_ARGS_NB];
 argument_t *const TerminalArguments::arguments = terminal_arguments_t;
 
-//Number of arguments in a sequence
+//Number of content in a sequence
 uint8_t TerminalArguments::nb_identifiers = 0;
 
 ArgumentsContainer TerminalArguments::arguments_storage = ArgumentsContainer(TERMINAL_MAX_ARGS_NB * (TERMINAL_MAX_WORD_SIZE + 4) + 1,

@@ -24,7 +24,9 @@
 #include <Control/Control.h>
 
 
-//TODO COMMENT
+/*
+ * ArgumentsContainer constructor : initialises all fields:
+ */
 ArgumentsContainer::ArgumentsContainer(uint8_t args_size, uint8_t nb_args) :
         args_size(args_size), nb_args(nb_args), arguments(new char[args_size * nb_args]),
         nb_spaces(nb_args),  available_cases(new bool[nb_args]) {
@@ -32,11 +34,22 @@ ArgumentsContainer::ArgumentsContainer(uint8_t args_size, uint8_t nb_args) :
 
 }
 
+/*
+ * available_spaces : returns the number of arguments that can be inserted before the
+ *  container gets full;
+ */
 uint8_t ArgumentsContainer::available_spaces() {
     return nb_spaces;
 }
 
 
+/*
+ * insert_argument : this function finds an empty case in the array, and updates
+ *  the insertion pointer pointer provided with the address of the case, so that the calling function can write
+ *  in it.
+ *
+ *  Finally, it returns
+ */
 uint8_t ArgumentsContainer::insert_argument(char **insertion_pointer) {
 
     if (!nb_spaces)

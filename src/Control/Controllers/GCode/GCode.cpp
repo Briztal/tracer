@@ -106,7 +106,7 @@ bool GCode::parse(char *message) {
 /*
  * parse : this function analyses the packet received, and parses the command part.
  *
- *  When it has found the GCodeCommand identified by this string, it saves the rest of the packet (the arguments part)
+ *  When it has found the GCodeCommand identified by this string, it saves the rest of the packet (the content part)
  *      in the argument storage, and then, schedules the execution of this function.
  *
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
@@ -169,14 +169,14 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
 
             } else {
 
-                //If arguments can be enqueued :
+                //If content can be enqueued :
                 if (GCodeArguments::available_spaces()) {
 
 
                     //The argument_t's index
                     uint8_t index;
 
-                    //Save the arguments sequence.
+                    //Save the content sequence.
                     if (GCodeArguments::insert_argument(arguments, &index)) {
 
 
@@ -188,7 +188,7 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
 
                         /*
                          * Schedule a type 255 (asap) task, to parse the required function,
-                         *  with data as arguments, the log function, and the output protocol;
+                         *  with data as content, the log function, and the output protocol;
                          */
 
                         TaskScheduler::schedule_task(255, execute_command, (void *) data, external_log, output_protocol);
@@ -229,15 +229,15 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
  * execute_command : this command eases the redaction of TerminalCommands :
  *
  *  Normally, if scheduled directly, a GCodeCommand receives a void *, that must be casted in a char *,
- *      the address of the arguments sequence. After the execution, if the command mustn't be reprogrammed,
- *      those arguments must be removed from the argument container.
+ *      the address of the content sequence. After the execution, if the command mustn't be reprogrammed,
+ *      those content must be removed from the argument container.
  *
  *      As this procedure is common to all GCodeCommands, this function's goal is to execute this procedure.
  *
  *  Now, a GCodeCommand receives a simple char *, and this function does the following :
- *      - extracting arguments (char *);
+ *      - extracting content (char *);
  *      - executing the GCodeCommand, passing these args.
- *      - eventually removing the arguments.
+ *      - eventually removing the content.
  */
 
 task_state_t GCode::execute_command(void *data_pointer) {
@@ -245,16 +245,16 @@ task_state_t GCode::execute_command(void *data_pointer) {
     //Get the terminal interface data back
     controller_data_t *data = (controller_data_t *) data_pointer;
 
-    //Cache var for arguments index.
+    //Cache var for content index.
     uint8_t arguments_index = data->arguments_index;
 
-    //Cache for arguments.
+    //Cache for content.
     char *arguments = GCodeArguments::get_argument(arguments_index);
 
     //Execute the required TerminalCommand function, and get the execution state
     const task_state_t state = (*data->function)(arguments);
 
-    /*remove arguments arguments, if the task mustn't be reprogrammed*/
+    /*remove content content, if the task mustn't be reprogrammed*/
     if (state != reprogram) {
         GCodeArguments::remove_argument(arguments_index);
     }
@@ -285,7 +285,7 @@ void GCode::confirm_command_execution(const controller_data_t *data) {
 
             //If the task completed correctly
         case invalid_arguments:
-            log("WARNING : invalid arguments.");
+            log("WARNING : invalid content.");
             respond("ok");
             return;
 
@@ -456,7 +456,7 @@ Protocol *m::output_protocol;
 
       ALgo a partir d'une liste triée.
 
-          arguments : line number, index.
+          content : line number, index.
 
           Get the command prexif (command from zero to index - 1)
 

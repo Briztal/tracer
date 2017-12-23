@@ -178,9 +178,9 @@ bool TaskScheduler::schedule_task(task_t *task) {
 /*
  * schedule_task : this function creates a task and adds it to the task pool.
  *
- *  It takes in arguments all parameters required to build a task, namely :
+ *  It takes in content all parameters required to build a task, namely :
  *      - function : the function to parse;
- *      - dynamic_args : a void *, addressing the first byte of the arguments. Those may be dynamic or static.
+ *      - dynamic_args : a void *, addressing the first byte of the content. Those may be dynamic or static.
  *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
  *      - type : the type of the task.
  */
@@ -602,7 +602,7 @@ bool TaskScheduler::execute_task(task_t *task) {
         if (task->log_protocol)
             log_protocol = task->log_protocol;
 
-        //call the function of the task by pointer, and provide the arguments of the task.
+        //call the function of the task by pointer, and provide the content of the task.
         state = (*(task->task))(task->dynamic_args);
 
     }

@@ -53,7 +53,7 @@ public:
 
 private:
 
-    //The arguments container;
+    //The content container;
     static ArgumentsContainer arguments_storage;
 
 
@@ -62,7 +62,7 @@ private:
 public:
 
     /*
-     * A Gcode Inteface command can accept an undefined number of arguments, in an argument sequence.
+     * A Gcode Inteface command can accept an undefined number of content, in an argument sequence.
      *
      *  An argument sequence is a sequence of word, where the first letter is the identifier, and
      *      the rest of the word is an eventual value, example
@@ -74,7 +74,7 @@ public:
      *
      */
 
-    //Parse the provided arguments, and save the data in the local buffer;
+    //Parse the provided content, and save the data in the local buffer;
     static bool parse_arguments(char *args_current_position);
 
     //Get the pointer to the required argument;
@@ -83,10 +83,10 @@ public:
     //Get a previously parsed argument_t if it exists;
     static float get_argument_value(char id);
 
-    //Verify that all arguments (defined by their arguments) have been provided (arguments is null terminated);
+    //Verify that all content (defined by their content) have been provided (content is null terminated);
     static bool verify_all_identifiers_presence(const char *identifiers);
 
-    //Verify that at least one argument_t (defined by their arguments) have been provided (arguments is null terminated);
+    //Verify that at least one argument_t (defined by their content) have been provided (content is null terminated);
     static bool verify_one_identifiers_presence(const char *identifiers);
 
     //verify that an argument_t identifier has be provided;
@@ -95,7 +95,7 @@ public:
 
 private:
 
-    //Number of arguments in a sequence;
+    //Number of content in a sequence;
     static uint8_t nb_identifiers;
 
     //Identifiers in a parsed argument_t sequence;

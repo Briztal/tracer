@@ -36,8 +36,8 @@ class TerminalCommands {
 public:
 
     /*
-     * Here is declared the method you will actually implement, that takes the index of the arguments in the
-     * arguments storage.
+     * Here is declared the method you will actually implement, that takes the index of the content in the
+     * content storage.
      */
 
 #define GO_UPPER(...)

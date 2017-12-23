@@ -67,7 +67,7 @@ private:
     //A signature for available cases : i-th bool means : 1 = available, 0 = not available;
     bool *available_cases;
 
-    
+
 
 };
 

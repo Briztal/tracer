@@ -35,11 +35,13 @@ class Queue {
 
 #define SAFE_DECR(i)\
     if (i) {\
-        i--;\
+        (i)--;\
     } else {\
-        i = max_index;\
+        (i) = max_index;\
     }\
 
+
+private:
 
 /*
  * This struct will be the basic object we will store in the queue.
@@ -52,15 +54,47 @@ class Queue {
         //The effective object we want to store.
         T object;
 
-
     };
+
+    //----------------------------------------------- Queue fields -----------------------------------------------------
+
+private:
+
+    //The size of the queue;
+    const uint8_t size;
+
+    //The maximum index (size - 1);
+    const uint8_t max_index;
+
+    //The array of queue objects;
+    queue_object_t *const content;
+
+    //The reading and insertion indices, initialised at zero;
+    uint8_t reading_index = 0;
+    uint8_t insertion_index = 0;
+
+    //The number of objects and spaces in the queue;
+    uint8_t nb_objects = 0;
+    uint8_t nb_spaces;
+
+
+    //----------------------------------------- Constructor, destructor -----------------------------------------
 
 public:
     /*
-     * Constructor : initialises all arguments
+     * Constructor : initialises all content
      */
-    Queue(uint8_t size) :
+    explicit Queue(uint8_t size) :
             size(size), max_index((const uint8_t) (size - 1)), content(new queue_object_t[size]), nb_spaces(size) {}
+
+
+    /*
+     * Destructor : deletes the content array;
+     */
+    ~Queue() {
+        delete[] content;
+    }
+    //--------------------------------------------- Vars display ---------------------------------------------
 
 
     String display() {
@@ -158,8 +192,6 @@ public:
 
 
         }
-
-        return;
 
     }
 
@@ -336,26 +368,6 @@ public:
 
 
     }
-    //----------------------------------------------- Queue fields -----------------------------------------------------
-
-private:
-
-    //The size of the queue;
-    const uint8_t size;
-
-    //The maximum index (size - 1);
-    const uint8_t max_index;
-
-    //The array of queue objects;
-    queue_object_t *const content;
-
-    //The reading and insertion indices, initialised at zero;
-    uint8_t reading_index = 0;
-    uint8_t insertion_index = 0;
-
-    //The number of objects and spaces in the queue;
-    uint8_t nb_objects = 0;
-    uint8_t nb_spaces;
 
 };
 

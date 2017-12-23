@@ -51,7 +51,7 @@ void GCodeArguments::clear() {
  *
  *  -i0 arg0 -i1 arg1 ... -in argn
  *
- *  After the parsing, arguments can be get with the get_argument methods.
+ *  After the parsing, content can be get with the get_argument methods.
  *
  *  Remarks :
  *      - argi can be empty.
@@ -64,7 +64,7 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
 
     //First, reset the argument parsing structure :
 
-    //reset the arguments counter
+    //reset the content counter
     nb_identifiers = 0;
 
     do {
@@ -93,7 +93,7 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
 
             //Display an error message
             std_out("The Terminal hasn't been configured to accept more than " + String(GCODE_MAX_ARGS_NB) +
-                     " arguments. Please check your terminal_interface_config.h file.");
+                     " content. Please check your terminal_interface_config.h file.");
 
             //Fail
             return false;
@@ -144,7 +144,7 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
         argument->identifier = argument_identifier;
         argument->arg = arg;
 
-        //Increase the number of parsed arguments
+        //Increase the number of parsed content
         nb_identifiers++;
 
         //If we have reached the end of the sequence
@@ -211,11 +211,11 @@ char *GCodeArguments::get_argument(char id) {
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ALL arguments contained
- *  in the arguments string have been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ALL content contained
+ *  in the content string have been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are arguments to check .
- *      ex "arp" triggers the checking for arguments a, r and p.
+ *  the identifier string is a string, where all letters are content to check .
+ *      ex "arp" triggers the checking for content a, r and p.
  */
 
 bool GCodeArguments::verify_all_identifiers_presence(const char *identifiers) {
@@ -239,18 +239,18 @@ bool GCodeArguments::verify_all_identifiers_presence(const char *identifiers) {
 
     }
 
-    //All arguments are present, succeed.
+    //All content are present, succeed.
     return true;
 
 }
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ONE arguments contained
- *  in the arguments string has been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ONE content contained
+ *  in the content string has been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are arguments to check .
- *      ex "arp" triggers the checking for arguments a, r and p.
+ *  the identifier string is a string, where all letters are content to check .
+ *      ex "arp" triggers the checking for content a, r and p.
  */
 
 bool GCodeArguments::verify_one_identifiers_presence(const char *identifiers) {
@@ -315,7 +315,7 @@ ArgumentsContainer GCodeArguments::arguments_storage = ArgumentsContainer(GCODE_
 argument_t t_gcode_arguments[GCODE_MAX_ARGS_NB];
 argument_t *const GCodeArguments::arguments = t_gcode_arguments;
 
-//Number of arguments in a sequence
+//Number of content in a sequence
 uint8_t GCodeArguments::nb_identifiers = 0;
 
 #endif
