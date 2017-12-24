@@ -57,16 +57,16 @@ void K1Physics::initialise_data() {
 
 
     //The stepper jerk offset;
-    jerk_distance_offset;
+    jerk_distance_offset = 0;
 
     //The heuristic distance to the end point;
-    heuristic_end_distance;
+    heuristic_end_distance = 0;
 
     //The offset heuristic distance to the next jerk point
-    offset_heuristic_jerk_distance;
+    offset_heuristic_jerk_distance = 0;
 
     //The jerk flag : if true, the jerk point proximity is checked in real time
-    watch_for_jerk_point;
+    watch_for_jerk_point = false;
 
     //The acceleration_step
     acceleration_step = 0;
@@ -518,7 +518,7 @@ void K1Physics::update_heuristic_end_distance() {
     distance=((uint32_t) (td<0) ? -td : td );\
     if (distance>dist) dist = distance;
 
-#include <config.h>
+#include <Config/stepper_control_config.h>
 
 #undef STEPPER
 

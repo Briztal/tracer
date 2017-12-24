@@ -177,12 +177,8 @@ void TrajectoryTracer::start() {
     MovementCoordinator::set_interrupt_period((uint32_t) delay_us);
     MovementCoordinator::set_interrupt_function(prepare_next_sub_movement);
 
-    debug("routine state : "+String(MovementCoordinator::started()));
-
     //Reserve the usage of the stepper routine
     MovementCoordinator::reserve();
-
-    debug("routine state : "+String(MovementCoordinator::started()));
 
     //Mark the movement procedure as started;
     started = true;
