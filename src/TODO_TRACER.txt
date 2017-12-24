@@ -1,7 +1,3 @@
-//TODO MAKE A STRING CLASS
-//TODO
-//TODO Rebuild the arguments container in ARRAY
-
 //TODO ENDSTOPS IN SENSORS
 
 //TODO PID_AUTOTUNE

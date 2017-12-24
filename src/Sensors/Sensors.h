@@ -21,6 +21,8 @@
 #ifndef TRACER_SENSORS_H
 #define TRACER_SENSORS_H
 
+#include "Endstops.h"
+
 /*
  * This class is a simple formalisation. I use it to centralise hardware and
  *  data initialisation for all sensor classes
@@ -33,6 +35,9 @@ public:
     //Initialise all sensors's hardware;
     static inline void initialise_hardware() {
 
+        //Initialise Endstops;
+        Endstops::initialise_hardware();
+
         //Initialise Thermistors;
         Thermistors::initialise_hardware();
 
@@ -40,6 +45,9 @@ public:
 
     //Initialise all sensors's data;
     static inline void initialise_data() {
+
+        //Initialise Endstops;
+        Endstops::initialise_data();
 
         //Initialise Thermistors;
         Thermistors::initialise_data();

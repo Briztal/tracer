@@ -26,7 +26,7 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <DataStructures/ArgumentsContainer.h>
+#include <Control/Controllers/ArgumentsContainer.h>
 #include <Control/Controllers/_controller_data.h>
 
 class GCodeArguments {

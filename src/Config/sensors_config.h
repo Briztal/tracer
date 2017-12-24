@@ -19,13 +19,16 @@
 */
 
 
-/* Thermistors :
+/*
+ * Thermistors :
  * For each thermistor you may want to include, add a line like the following :
  *
- * THERMISTOR(indice, type_table, type_size)
+ * THERMISTOR(index, name, data_pin, thermistor_type)
  *
- * where indices are strictly consecutive, starting by 0, and type_table and type_size are macros names,
- *      for your thermistor. Those are defined in thermistor_data.h.
+ *  - index : the thermistor index. Indices are strictly consecutive, starting by 0;
+ *  - name : the name your thermistor will be labeled with;
+ *  - data_pin : the pin used to acquire analog values;
+ *  - thermistor_type : the type of your thermistor. It must match one of types defined in thermistor_data.h.
  */
 
 #ifdef THERMISTOR
@@ -35,5 +38,30 @@ THERMISTOR(1, hotend_1, 22,     SEMITEC_100_47)
 THERMISTOR(2, hotend_2, 21,     SEMITEC_100_47)
 THERMISTOR(3, hotend_3, 20,     SEMITEC_100_47)
 THERMISTOR(4, hotbed,   19,     BED100K)
+
+#endif
+
+
+
+/*
+ * Endstops :
+ * For each thermistor you may want to include, add a line like the following :
+ *
+ *  THERMISTOR(index, data_pin, enable_value) :
+ *      - index : the index of the endstop. Indices are strictly consecutive, starting by 0;
+ *      - data_pin : the pin that will be used to acquire binary data;
+ *      - enable_value : the boolean value corresponding to the "enabled" state
+ *
+ * where indices are strictly consecutive, starting by 0, and type_table and type_size are macros names,
+ *      for your thermistor. Those are defined in thermistor_data.h.
+ */
+
+#ifdef ENDSTOP
+
+ENDSTOP(0, hotend_0, A26,    SEMITEC_100_47)
+ENDSTOP(1, hotend_1, 22,     SEMITEC_100_47)
+ENDSTOP(2, hotend_2, 21,     SEMITEC_100_47)
+ENDSTOP(3, hotend_3, 20,     SEMITEC_100_47)
+ENDSTOP(4, hotbed,   19,     BED100K)
 
 #endif
