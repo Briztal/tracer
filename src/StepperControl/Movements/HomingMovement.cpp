@@ -234,7 +234,7 @@ sig_t HomingMovement::read_endstops() {
         uint8_t index = endstops_indices[i];
 
         //If the bit at positon [index] is reset (if the [i-th] stepper must still move) :
-        if (!endstops_signature & (1 << index)) {
+        if (!(endstops_signature & (1 << index))) {
 
             //Set the [i]-th bit in the movement signature, so that stepper [i] keeps moving;
             movement_signature |= (1 << i);

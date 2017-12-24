@@ -68,8 +68,10 @@ public:
         set_stepper_int_function(f);
     }
 
+    //Reserve the access of the routine;
     static bool reserve();
 
+    //Stop the routine;
     static void stop();
 
 private :

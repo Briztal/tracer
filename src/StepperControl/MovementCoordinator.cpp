@@ -46,6 +46,10 @@ bool MovementCoordinator::reserve() {
     }
 }
 
+
+/*
+ * stop : this function stops the routine (interrupt + timer), and saves the stopped state;
+ */
 void MovementCoordinator::stop() {
 
     //Reset the start flag, so that no more interrupt is programmed;
@@ -61,4 +65,5 @@ void MovementCoordinator::stop() {
 
 
 //--------------------------------------- Static declarations - definitions ---------------------------------------
+
 volatile bool MovementCoordinator::started_flag = false;

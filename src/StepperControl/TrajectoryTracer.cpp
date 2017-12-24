@@ -721,10 +721,9 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Give the hand to the kernel who will compute the time_us for the sub-movement;
     float time_us = Kinematics::compute_us_time_for_sub_movement(sub_movement_data);
 
-
     //Wait for the next timer overflow;
     STEP_AND_WAIT
-    
+
 
     //-------------------Signature extraction-------------------
 
