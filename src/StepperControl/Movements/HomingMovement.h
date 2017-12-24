@@ -18,26 +18,60 @@
 
 */
 
+#ifndef TRACER_HOMINGMOTION_H
+#define TRACER_HOMINGMOTION_H
+
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#ifndef TRACER_HOMINGMOTION_H
-#define TRACER_HOMINGMOTION_H
 
-
-#include <stdbool.h>
 
 class HomingMovement {
+
 public:
 
-    static void move();
-
-    static sig_t readEndStops();
+    static void prepare_movement(uint32_t reset, uint8_t *endstops, uint32_t directions);
 
 private:
 
-    static uint32_t getMaxDelay(sig_t signature, uint32_t *delays);
+    //The function that steps the machine;
+    static void phase_1();
+
+
+private:
+
+    //The initial number of axis to reset;
+    static uint8_t nb_axis;
+
+    //The interrupt period;
+    static float step_period_us;
+
+    //The delays array
+    static float *const delays;
+
+    //The array of endstops indices;
+    static uint8_t *const endstops_indices;
+
+    //The movement signature;
+    static sig_t movement_signature;
+
+    //The step index;
+    static uint8_t step_index;
+
+
+
+private:
+
+    //Function to compute the delay for a movement involving specified steppers;
+    static float get_movement_delay(uint32_t signature, const float *const delays);
+
+    //Get a new movement signature;
+    static uint32_t read_endstops();
+
+    //Get the number of set bits in a signature;
+    static uint8_t cardinal(uint32_t signature);
+
 };
 
 #endif //TRACER_HOMINGMOTION_H

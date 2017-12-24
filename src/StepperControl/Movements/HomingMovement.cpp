@@ -19,6 +19,7 @@
 */
 
 #include <config.h>
+#include <StepperControl/TrajectoryTracer.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -28,109 +29,247 @@
 
 #define step 10
 
-void HomingMovement::move() {
+
+/*
+ * prepare_movement : this function will compute all data required to home the machine,
+ *  and start the movement interrupt routine;
+ */
+
+void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t directions) {
+
+    //If movements are enqueued, execute them before homing;
+    if (!TrajectoryTracer::started)
+        TrajectoryTracer::start();
+
+    //Wait for movement to be finished;
+    while (TrajectoryTracer::started);
+
+    //TODO LOCK THE TRAJECTORY TRACER;
+
+
+    /*
+     * Delays update :
+     *
+     * The delay for a stepper simply corresponds to its max jerk;
+     */
+
+    //For each stepper :
+    for (int axis = 0; axis < NB_STEPPERS; axis++) {
+
+        //Cache the appropriate stepper data;
+        stepper_data_t *data = EEPROMStorage::steppers_data + axis;
+
+        //Set the delay for the i-th stepper
+        delays[axis] = (uint32_t) (1000000 / (data->jerk * data->steps));
+    }
+
+
+    /*
+     * Fields udpate :
+     */
+
+    //First step is to generate the signature for all axis;
+    movement_signature = reset;
+
+    //Update the number of axis to reset, with the cardinal of the signature;
+    nb_axis = cardinal(reset);
+
+    //Copy the entire content of the endstops indices array;
+    memcpy(endstops_indices, endstops, nb_axis * sizeof(uint8_t));
+
+    //Initialise the step period;
+    step_period_us = get_movement_delay(reset, delays);
+
+
+    /*
+     * Steppers config :
+     */
+
+    //Set the steppers directions;
+    Steppers::set_directions(directions);
 
     //Enable all steppers
     Steppers::enable(255);
 
-    //First step is to generate the signature for all axis;
-    //sig_t signature = 0;
-
-    //TODO DIRECTIONS : 0 quand C'est en increment... Ca va pas !!
-
-    /*
-#define STEPPER(i, sig, rel, ...) \
-        if (!rel) {\
-            signature|=sig;\
-            Steppers::setDir##i(true);\
-            Steppers::setDir##i(false);\
-        }
-
-#include "../../../config_files.h"
-
-#undef STEPPER
-
-     */
+}
 
 
-    uint32_t delay = 100;//TODO AJUSTER LE DELAY EN FONCTION DE LA VITESSE DES AXES RESTANTS
-    //uint32_t timeline = micros();
+/*
+ * cardinal : this function counts the number of set bits in the signature;
+ */
 
-    uint32_t delays[NB_STEPPERS];
-    float speed;
-    uint32_t d;
-    for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        //regulation_speed = beginning(EEPROM::maximum_speeds[axis], EEPROM::accelerations[axis] * (float)0.05);
-        d = (uint32_t) (1000000 / (speed * EEPROMStorage::steppers_data[axis].steps));
-        delays[axis] = delay;
-        //delay_us = ending(delay_us, d);
-    }
+uint8_t HomingMovement::cardinal(sig_t signature) {
 
-    /*
+    //Initialise the counter;
+    uint8_t counter = 0;
+
+    //While all 1 have not all been counted :
     while (signature) {
-        for (int s = 0; s < step - 1; s++) {
-            Steppers::fastStep(signature);
-            timeline += delay;
-            while (micros() < timeline) {}
+
+        //If the last bit is a 1 :
+        if (signature & 1) {
+
+            //Increment the counter;
+            counter++;
+
         }
 
-        Steppers::fastStep(signature);
-
-        signature = readEndStops();
-        delay = getMaxDelay(signature, delays);
-        timeline += delay;
-        while (micros() < timeline) {}
-    }
-     */
-
-    for (int axis = 0; axis < NB_STEPPERS; axis++) {
-        //SpeedPlanner::positions[axis] = 0;
+        //Shift the signature;
+        signature >>= 1;
     }
 
-   // SpeedPlanner::send_position();
+    //Return the nb of 1 in the signature;
+    return counter;
 
 }
 
-uint32_t HomingMovement::getMaxDelay(sig_t signature, uint32_t *delays) {
-    uint32_t delay = 0;
-    int axis = 0;
-    for (; axis < NB_STEPPERS; axis++) {
+
+/*
+ * phase_1 : this function steps all remaining axis, and eventually updates the signature and delay.
+ *
+ *  Then, it re-sechedules itself;
+ */
+
+void HomingMovement::phase_1() {
+
+    //Disable the stepper interrupt for safety;
+    disable_stepper_interrupt();
+
+    //Step;
+    Steppers::fastStep(movement_signature);
+
+    //If we made [step] steps since last update :
+    if (!--step_index) {
+
+        //Reset the step index;
+        step_index = step;
+
+        //Update the signature;
+        movement_signature = read_endstops();
+
+        //update the delay;
+        step_period_us = get_movement_delay(movement_signature, delays);
+
+        //Update the interrupt period;
+        set_stepper_int_period(step_period_us);
+
+    }
+
+    //If steppers still need to move;
+    if (movement_signature) {
+
+        //Re-schedule the phase 1;
+        enable_stepper_interrupt();
+
+    } else {
+
+        return;
+        /*
+        //If steppers still need to move;
+
+        //Schedule the phase 1;
+        set_stepper_int_function(phase_2);
+        enable_stepper_interrupt();
+
+         TODO phase 2 and 3;
+         */
+
+    }
+
+}
+
+
+/*
+ * get_movement_delay : this function will compute the delay for the movement corresponding to the provided
+ *      signature, with the provided delay array;
+ */
+
+float HomingMovement::get_movement_delay(sig_t signature, const float *const delays) {
+
+    //Initialise the final delay to zero.
+    float delay = 0;
+
+    //For each axis :
+    for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
+
+        //If the stepper must move :
         if (signature & (uint32_t) 1) {
-            delay = delays[axis];
-            signature >>= 1;
-            axis++;
+
+            //Cache the delay for the current axis;
+            float new_delay = delays[axis];
+
+            //The final delay is the maximum of the max delay and the current axis delay;
+            delay = max(delay, new_delay);
+
             break;
         }
+
+        //Pass to the next axis;
         signature >>= 1;
+
     }
-    for (; axis < NB_STEPPERS; axis++) {
-        if (signature & (uint32_t) 1) {
-            //delay_us = ending(delay_us, delays[axis]);
-        }
-        signature >>= 1;
-    }
+
+    //Return the maximum delay;
     return delay;
 }
 
-sig_t HomingMovement::readEndStops() {
-    sig_t signature = 0;
 
-    /*
-#define STEPPER(i, sig, rel, ps, pd, dp, pp, ve, pinEndMin, minValue, pma, va)\
-    if (!rel) {\
-        if ((bool)digital_read(pinEndMin) == minValue) {\
-            signature|=sig;\
-        }\
+/*
+ * read_endstops : this function will compute the new movement signature, according to endstops data;
+ */
+
+sig_t HomingMovement::read_endstops() {
+
+    //Get the endstops_signature;
+    sig_t endstops_signature = 0;
+
+    //Initialise the movement signature;
+    sig_t movement_signature = 0;
+
+    //For every axis to reset :
+    for (uint8_t i = 0; i < nb_axis; i++) {
+
+        //Get the index of the stepper assigned to the current stepper;
+        uint8_t index = endstops_indices[i];
+
+        //If the bit at positon [index] is reset (if the [i-th] stepper must still move) :
+        if (!endstops_signature & (1 << index)) {
+
+            //Set the [i]-th bit in the movement signature, so that stepper [i] keeps moving;
+            movement_signature |= (1 << i);
+
+        }
     }
 
-#include "../../../config_files.h"
-
-#undef STEPPER
-     */
-
-    return signature;
+    //return the movement signature;
+    return movement_signature;
 
 }
+
+
+//------------------------------------ Static declarations - definitions ------------------------------------
+
+#define m HomingMovement
+
+//The initial number of axis to reset;
+uint8_t m::nb_axis = 0;
+
+//The interrupt period;
+float m::step_period_us = 0;
+
+//The delays array
+float t_hm_dels[NB_STEPPERS]{0};
+float *const m::delays = t_hm_dels;
+
+//The array of endstops indices;
+uint8_t t_hm_ed[NB_STEPPERS]{0};
+uint8_t *const m::endstops_indices = t_hm_ed;
+
+//The movement signature;
+sig_t m::movement_signature = 0;
+
+//The step index;
+uint8_t m::step_index = step;
 
 
 #endif

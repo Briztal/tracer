@@ -1,0 +1,11 @@
+
+#ifndef TRACER_MOVEMENTCOORDINATOR_H
+#define TRACER_MOVEMENTCOORDINATOR_H
+
+
+class MovementCoordinator {
+
+};
+
+
+#endif //TRACER_MOVEMENTCOORDINATOR_H

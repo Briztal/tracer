@@ -50,6 +50,7 @@ public:
     //Removes an argument;
     static inline void remove_argument(uint8_t index) {arguments_storage.remove_argument(index);}
 
+
 private:
 
     //The content sequences container

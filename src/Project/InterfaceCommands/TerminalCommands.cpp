@@ -217,7 +217,7 @@ task_state_t TerminalCommands::line(char *arguments) {
     //For safety, un-define the previously created macro.
 #undef CHECK_COORDINATE
 
-    //If the movement is absolute, move to the destination
+    //If the movement is absolute, prepare_movement to the destination
     if (CHECK_ARGUMENT('r')) {
 
         //Mark the movement to be relative.

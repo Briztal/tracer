@@ -192,7 +192,7 @@ void GCodeTreeGenerator::print_tree(const GCodeTree *tree) {
 void GCodeTreeGenerator::sort_commands(command_line_t **commands, uint16_t nb_commands) {
 
     /*
-     * To accomplish our two goals, we will use a reversed bubble sort (make elements move to the end of the array).
+     * To accomplish our two goals, we will use a reversed bubble sort (make elements prepare_movement to the end of the array).
      *
      * This sorting algorithm is adapted to the process.
      */
@@ -260,7 +260,7 @@ void GCodeTreeGenerator::sort_commands(command_line_t **commands, uint16_t nb_co
                     //First, nullify the command;
                     *current_name = '\0';
 
-                    //Next, we must move the moving command back to its initial position.
+                    //Next, we must prepare_movement the moving command back to its initial position.
 
                     //While we are not at the initial position
                     while (moving_index != sorted_index) {

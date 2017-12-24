@@ -99,7 +99,7 @@ public :
     //-------------------------------------------- Real time movement data ---------------------------------------------
 private :
 
-    //the delay_us for the next movement;
+    //the step_period_us for the next movement;
     static float delay_us;
 
 
@@ -249,7 +249,7 @@ private:
 };
 
 
-//The delay_us macros, used in the function below.
+//The step_period_us macros, used in the function below.
 
 #define WAIT\
     while(!stepper_int_flag()) {}\

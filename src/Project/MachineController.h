@@ -42,7 +42,7 @@
  *      carriage's speed, and another to modify the speed of a carriage by its id).
  *
  *  This solution is viable too, but as functions are scheduled, and we often want to call two related actions at the
- *      same time (for example, set the current speed AND move to a position with that speed), we would have often
+ *      same time (for example, set the current speed AND prepare_movement to a position with that speed), we would have often
  *      called functions simultaneously, what would have occupied more nb_spaces in the scheduler.
  *
  */
@@ -150,7 +150,7 @@ public:
      *  This structure is the union of structs coord_state_t (movement coordinates) and carriages_state_t.
      *
      *  The reason for this, is that when planning a movement, we also may want to set its speed, the carriage that
-     *      will move, etc...
+     *      will prepare_movement, etc...
      *
      *  The only data added, a flag determining whether the movement is relative or not.
      */

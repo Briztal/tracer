@@ -380,7 +380,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
     //The increment computer will determine the beginning and ending increment;
     if (!IncrementComputer::determine_increments(current_movement)) {
 
-        //If the increment computer detects a micro movement, the machine will not move;
+        //If the increment computer detects a micro movement, the machine will not prepare_movement;
         return complete;
 
     }
@@ -672,7 +672,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     process_signatures(sub_movement_distances, es0);
     is_es_0 = false;
 
-    //Determine the delay_us sub_movement_time_us for the next sub_movement :
+    //Determine the step_period_us sub_movement_time_us for the next sub_movement :
     delay_us = (sub_movement_time_us) / (float) trajectory_index;
 
 
@@ -731,7 +731,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Compute the step_signatures corresponding to the step_distances given by the kernel;
     process_signatures(elementary_distances, step_signatures);
 
-    //Determine the delay_us time_us for the next sub_movement;
+    //Determine the step_period_us time_us for the next sub_movement;
     delay_us = time_us / (float) trajectory_index;
 
     //Discard the current sub_movement in the sub-movements queue;
@@ -782,7 +782,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
 
 
 /*
- * initialise_sub_movement : sets the delay_us, the trajectory index, the steppers directions
+ * initialise_sub_movement : sets the step_period_us, the trajectory index, the steppers directions
  *      and returns the pointer to the elementary signatures processed before
  */
 
@@ -806,7 +806,7 @@ sig_t *TrajectoryTracer::initialise_sub_movement() {
     //Set the correct direction;
     Steppers::set_directions(next_direction_signature);
 
-    //update the interrupt period with the float delay_us, that is computed to provide the most accurate period;
+    //update the interrupt period with the float step_period_us, that is computed to provide the most accurate period;
     set_stepper_int_period(delay_us);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones.

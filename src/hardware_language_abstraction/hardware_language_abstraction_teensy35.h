@@ -26,7 +26,7 @@
  *
  * This file is made for : teensy35.
  *
- * Here are defined all function related to the hardware (serial, I2C, delay_us etc...), and toolchain
+ * Here are defined all function related to the hardware (serial, I2C, step_period_us etc...), and toolchain
  *
  * Those will depend on the processor and the toolchain you use
  *
@@ -120,7 +120,7 @@
 
 //----------------------------------------------------Delay-------------------------------------------------------------
 
-//Uncomment this line to provide delay_us support across LowLevel
+//Uncomment this line to provide step_period_us support across LowLevel
 
 /* The function to call to wait for a specified number of milliseconds
  *  void delay_ms(uint16_t time_ms);
@@ -132,9 +132,9 @@ static inline static void delay_ms(uint16_t time_ms){
 
 
 /* The function to call wait for a specified number of microseconds
- * void delay_us(uint16_t time_us);
+ * void step_period_us(uint16_t time_us);
  */
-/*static inline static void delay_us(uint16_t time_us){
+/*static inline static void step_period_us(uint16_t time_us){
 
 }*/
 #define delay_us(us) delayMicroseconds(us)

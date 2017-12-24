@@ -146,9 +146,9 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
 //--------------------------------------------------Pre-Processing--------------------------------------------------
 
 /*
- * get_distances : this function computes the current move's step_distances.
+ * get_distances : this function computes the current phase_1's step_distances.
  *
- * At the same time, it determines the maximum axis, and return "the current move is a null plan_movement".
+ * At the same time, it determines the maximum axis, and return "the current prepare_movement is a null plan_movement".
  *
  */
 
@@ -164,7 +164,7 @@ ComplexLinearMovement::get_distances(float *position, const float *destination, 
     uint8_t max_axis = 0;
     float max_dist = 0;
 
-    //boolean for null move detection
+    //boolean for null prepare_movement detection
     bool null_move = true;
 
     //for each axis

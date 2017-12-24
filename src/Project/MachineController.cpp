@@ -183,7 +183,7 @@ void MachineController::replace_coords(movement_state_t *coords) {
 
 
 /*
- * line : this function schedules a linear move to the given coordinates.
+ * line : this function schedules a linear prepare_movement to the given coordinates.
  *
  *  The destination position can be given in two ways :
  *      - absolute, real coordinates are given;
@@ -228,7 +228,7 @@ task_state_t MachineController::line(movement_state_t movement_state) {
 
     }
 
-    //Try to move to the specified position
+    //Try to prepare_movement to the specified position
     switch (mode) {
         case 0:
             state = move_mode_0(&movement_state);
@@ -350,7 +350,7 @@ void MachineController::sanity_check(float *position) {
     }
 
     /* Now we must check that the distance between carriages are sufficient to avoid contact. As opposed axis
-     *  move in opposite direction, we measure the sum of their coordinates.
+     *  prepare_movement in opposite direction, we measure the sum of their coordinates.
      */
 
     //We first check X axis :

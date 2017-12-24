@@ -151,5 +151,5 @@ void Endstops::read_endstops(uint8_t index) {
 //---------------------------------------------------- Static declaration - definition ----------------------------------------------------
 
 //Declare and init the states array;
-bool t_endst_states[NB_ENDSTOPS]{0};
+bool t_endst_states[NB_ENDSTOPS]{false};
 bool *const Endstops::states = t_endst_states;

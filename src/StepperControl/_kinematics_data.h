@@ -125,7 +125,7 @@ typedef struct kernel_movement_data {
 
 
     /*
-     * Tools data : the following signature determines which of tools will move during the movement.
+     * Tools data : the following signature determines which of tools will prepare_movement during the movement.
      */
 
     sig_t tools_signatures;

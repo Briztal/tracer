@@ -123,7 +123,7 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
 
         }
 
-        //Go to the word's end (if we are already, we will simply not move the position.
+        //Go to the word's end (if we are already, we will simply not prepare_movement the position.
         args_current_position += StringUtils::count_until_char(args_current_position, ' ');
 
         //If the word's end is '\0' (String terminated), plan the loop stop.

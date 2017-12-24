@@ -130,18 +130,18 @@ void K1Physics::initialise_tracing_procedure() {
 
 /*
  * initialise_kinetics_data : this function determines all kinetics data required by the kinetics regulation, namely :
- *      - delay_us numerators (acceleration, deceleration);
- *      - conversion ratios for delay_us numerators (both ways);
+ *      - step_period_us numerators (acceleration, deceleration);
+ *      - conversion ratios for step_period_us numerators (both ways);
  *      - regulation_sub_movement_time;
  *
  */
 
 void K1Physics::initialise_kinetics_data(k1_movement_data *movement_data) {
 
-    //Extract delay_us numerators and the conversion ratios;
+    //Extract step_period_us numerators and the conversion ratios;
     get_delay_numerator_data(movement_data);
 
-    //compute the regulation delay_us;
+    //compute the regulation step_period_us;
     get_sub_movement_time(movement_data, StepperController::get_speed_group(), StepperController::get_speed());
 
 }
@@ -179,10 +179,10 @@ void K1Physics::load_real_time_jerk_data(const k1_movement_data *movement_data) 
 
 /*
  * load_real_time_kinetics_data : this function updates the real time data, namely :
- *      - the acceleration delay_us numerator;
+ *      - the acceleration step_period_us numerator;
  *      - the acceleration/deceleration translation coefficients;
- *      - the regulation delay_us;
- *      - the current delay_us;
+ *      - the regulation step_period_us;
+ *      - the current step_period_us;
  *
  */
 void K1Physics::load_real_time_kinetics_data(const k1_movement_data *movement_data) {
@@ -190,7 +190,7 @@ void K1Physics::load_real_time_kinetics_data(const k1_movement_data *movement_da
     //Reference axis.
     reference_axis = movement_data->reference_axis;
 
-    //delay_us numerator;
+    //step_period_us numerator;
     acceleration_delay_numerator = movement_data->acceleration_delay_numerator;
 
     //Translation coefficients
@@ -205,7 +205,7 @@ void K1Physics::load_real_time_kinetics_data(const k1_movement_data *movement_da
     //acceleration_step
     acceleration_step = movement_data->acceleration_step;
 
-    //If we are at the first movement, we do not need to convert the current delay_us.
+    //If we are at the first movement, we do not need to convert the current step_period_us.
     if (first_movement) {
         first_movement = false;
         return;
@@ -268,8 +268,8 @@ void K1Physics::update_evolution_coefficient(float multiplier) {
 
 /*
  * get_delay_numerator_data : this function determines :
- *      - the acceleration delay_us numerator;
- *      - the deceleration delay_us numerator;
+ *      - the acceleration step_period_us numerator;
+ *      - the deceleration step_period_us numerator;
  *      - the square ratios, used to determine one speed distance from the other.
  */
 
@@ -283,7 +283,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
     float min = movement_data->beginning, maximum = movement_data->ending;
     float min_increment = movement_data->beginning_increment, max_increment = movement_data->ending_increment;
 
-    //Get delay_us numerators
+    //Get step_period_us numerators
     float dn_acceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, min,
                                                 min + min_increment, &movement_data->reference_axis,
                                                 &movement_data->acceleration_step);
@@ -291,7 +291,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
     float dn_deceleration = get_delay_numerator(movement_data->pre_process_trajectory_function, maximum,
                                                 maximum + max_increment, 0, 0);
 
-    //Save the acceleration delay_us numerators. The other is not used in real time.
+    //Save the acceleration step_period_us numerators. The other is not used in real time.
     movement_data->acceleration_delay_numerator = dn_acceleration;
 
 
@@ -316,7 +316,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
 
 
 /*
- * get_delay_numerator : this function computes the delay_us numerator for a couple of points and a trajectory function.
+ * get_delay_numerator : this function computes the step_period_us numerator for a couple of points and a trajectory function.
  *
  */
 float
@@ -341,16 +341,16 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
         *sav_max_distance = t_dist[max_axis];
     }
 
-    //finally, compute the delay_us numerator.
+    //finally, compute the step_period_us numerator.
     return _get_delay_numerator(max_axis, t_dist[max_axis]);
 }
 
 
 /*
- * _get_delay_numerator : this function computes (litteraly this time) the delay_us numerator, for a particular axis.
+ * _get_delay_numerator : this function computes (litteraly this time) the step_period_us numerator, for a particular axis.
  *
- *  The delay_us resulting from the division of this delay_us numerator by the acceleration distance
- *      is the delay_us for the SUB_MOVEMENT and not for the tic. That's why the distance in steps is
+ *  The step_period_us resulting from the division of this step_period_us numerator by the acceleration distance
+ *      is the step_period_us for the SUB_MOVEMENT and not for the tic. That's why the distance in steps is
  *      appearing in the formula.
  *
  */
@@ -359,7 +359,7 @@ float K1Physics::_get_delay_numerator(uint8_t stepper, float distance) {
 
     /*
      * FORMULA : D = 10^6 * distance / (steps * sqrt(2 * acceleration)) with :
-     *      - D : the delay_us numerator;
+     *      - D : the step_period_us numerator;
      *      - distance (steps) : the distance on the stepper;
      *      - steps (steps/unit) : the steps per unit of stepper;
      *      - acceleration (unit / s^2) : the acceleration on the stepper.
@@ -642,7 +642,7 @@ bool K1Physics::regulate_speed() {
         //Reached when the regulation_speed is too high and has been increased before, or too low and has been decreased before
         if (low_speed != speed_increasing_flag) {
 
-            //Set the delay_us to the target
+            //Set the step_period_us to the target
             sub_movement_time = regulation_sub_movement_time;
 
             //Updating the acceleration distance;

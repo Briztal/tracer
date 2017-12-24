@@ -225,7 +225,7 @@ void Steppers::fastStep(sig_t id) {
 
 #undef STEPPER
 
-    delay_us(2);
+    step_period_us(2);
 
 #define STEPPER(i, sig, rel, pinStep, pd, dp, pp, ve, pmi, vi, pma, va)\
         if (id&sig) {\
