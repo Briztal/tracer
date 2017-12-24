@@ -1,5 +1,5 @@
 /*
-  ComplexTrajectoryExecuter.cpp - Part of TRACER
+  TrajectoryTracer.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -25,6 +25,7 @@
 #include "TrajectoryTracer.h"
 #include "IncrementComputer.h"
 #include "SubMovementManager.h"
+#include "MovementCoordinator.h"
 #include <Control/Control.h>
 #include <StepperControl/StepperController.h>
 #include <Actuators/PWMGPIO.h>
@@ -136,12 +137,12 @@ bool TrajectoryTracer::queue_locked() {
 
 void TrajectoryTracer::start() {
 
-    //Don't execute if the movement is already started;
+    //Don't execute if the movement is already started_flag;
     if (started)
         return;
 
-    //Disable the stepper interrupt, to avoid interrupt re-call (causes stack overflow);
-    disable_stepper_interrupt();
+    //For safety, disable the stepper interrupt;
+    MovementCoordinator::disable_interrupt();
 
     if (!movement_data_queue.available_objects()) {
         //If no movements are in the queue, no need to start;
@@ -173,15 +174,21 @@ void TrajectoryTracer::start() {
     prepare_first_sub_movement();
 
     //Setup properly the interrupt procedure;
-    setup_stepper_interrupt(prepare_next_sub_movement, (uint32_t) delay_us);
+    MovementCoordinator::set_interrupt_period((uint32_t) delay_us);
+    MovementCoordinator::set_interrupt_function(prepare_next_sub_movement);
+
+    debug("routine state : "+String(MovementCoordinator::started()));
+
+    //Reserve the usage of the stepper routine
+    MovementCoordinator::reserve();
+
+    debug("routine state : "+String(MovementCoordinator::started()));
 
     //Mark the movement procedure as started;
     started = true;
 
     //Start the interrupt sequence.
-    if (started) {
-        enable_stepper_interrupt();
-    }
+    MovementCoordinator::enable_interrupt();
 
 
 }
@@ -195,11 +202,8 @@ void TrajectoryTracer::start() {
 
 void TrajectoryTracer::stop() {
 
-    //Interrupt the movement routing, by stopping the interrupt sequence;
-    disable_stepper_interrupt()
-
-    //Disable the stepper timer, now that the interrupt is disabled;
-    disable_stepper_timer();
+    //Stop the interrupt routine;
+    MovementCoordinator::stop();
 
     //Stop all currently enabled tools;
     stop_tools();
@@ -243,17 +247,14 @@ void TrajectoryTracer::stop() {
 
 void TrajectoryTracer::emergency_stop() {
 
-    //Trigger an emergency stop : will stop and deprogram any interrupt in execution.
-    started = false;
-
-    //Interrupt the movement routing, by stopping the interrupt sequence;
-    disable_stepper_interrupt()
-
-    //Disable the stepper timer, now that the interrupt is disabled;
-    disable_stepper_timer();
+    //Stop the interrupt routine;
+    MovementCoordinator::stop();
 
     //Stop all currently enabled tools;
     stop_tools();
+
+    //Mark the movement routine as stopped;
+    started = false;
 
     //Enable the movement enqueuing;
     movement_queue_lock_flag = false;
@@ -680,7 +681,6 @@ void TrajectoryTracer::prepare_first_sub_movement() {
     SubMovementManager::discard_sub_movement();
 
 
-
     SubMovementManager::fill_sub_movement_queue();
 
 }
@@ -689,7 +689,7 @@ void TrajectoryTracer::prepare_first_sub_movement() {
 void TrajectoryTracer::prepare_next_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow);
-    disable_stepper_interrupt();
+    MovementCoordinator::disable_interrupt();
 
     //-------------------Initialisation-------------------
 
@@ -724,7 +724,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
 
     //Wait for the next timer overflow;
     STEP_AND_WAIT
-
+    
 
     //-------------------Signature extraction-------------------
 
@@ -771,12 +771,10 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     exit:
 
     //Set the light interrupt function to give time_us to background processes;
-    set_stepper_int_function(finish_sub_movement);
+    MovementCoordinator::set_interrupt_function(finish_sub_movement);
 
     //Re-enable the stepper interrupt :
-    if (started) {
-        enable_stepper_interrupt();
-    }
+    MovementCoordinator::enable_interrupt();
 
 }
 
@@ -807,7 +805,7 @@ sig_t *TrajectoryTracer::initialise_sub_movement() {
     Steppers::set_directions(next_direction_signature);
 
     //update the interrupt period with the float step_period_us, that is computed to provide the most accurate period;
-    set_stepper_int_period(delay_us);
+    MovementCoordinator::set_interrupt_period(delay_us);
 
     //save the motion scheme computed previously, so that new values won't erase the current ones.
 
@@ -917,7 +915,7 @@ int k2_position_indice = 4;
 void TrajectoryTracer::finish_sub_movement() {
 
     //Disable the stepper interrupt for preventing infinite call (causes stack overflow);
-    disable_stepper_interrupt();
+    MovementCoordinator::disable_interrupt();
 
     //Get the correct signature;
     Steppers::fastStep(saved_elementary_signatures[trajectory_array[saved_trajectory_index]]);
@@ -961,9 +959,7 @@ void TrajectoryTracer::finish_sub_movement() {
                 final_sub_movement_started = true;
 
                 //re-interrupt on this function, as no more process is required;
-                if (started) {
-                    enable_stepper_interrupt();
-                }
+                MovementCoordinator::enable_interrupt();
 
                 //Complete;
                 return;
@@ -998,13 +994,11 @@ void TrajectoryTracer::finish_sub_movement() {
 
 
         //interrupt on the normal routine
-        set_stepper_int_function(prepare_next_sub_movement);
+        MovementCoordinator::set_interrupt_function(prepare_next_sub_movement);
 
     }
 
-    if (started) {
-        enable_stepper_interrupt();
-    }
+    MovementCoordinator::enable_interrupt();
 }
 
 
@@ -1154,8 +1148,6 @@ uint8_t m::next_tools_powers_index = 0;
 
 //Currently enabled tools;
 sig_t m::current_tools_signature = 0;
-
-
 
 
 #undef m

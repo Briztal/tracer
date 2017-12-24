@@ -177,7 +177,7 @@ void Servo::update_complement() {
         stop();
     } else {
 
-        //If active and not started :
+        //If active and not started_flag :
         if (!started) {
 
             //Start;
@@ -207,7 +207,7 @@ void Servo::start() {
     //Initialise the current pin;
     current_pin = *pins;
 
-    //Mark the routine started;
+    //Mark the routine started_flag;
     started = true;
 
     //Start the interrupt routine;

@@ -1,5 +1,5 @@
 /*
-  ComplexTrajectoryExecuter.h - Part of TRACER
+  TrajectoryTracer.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -53,7 +53,7 @@ public:
 
     //-------------------------------------------- Module status ---------------------------------------------
 
-public :
+private :
 
     //The state of the movement routine. Public because accessed by other modules.
     static volatile bool started;

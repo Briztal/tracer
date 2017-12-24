@@ -212,7 +212,7 @@ float TemperatureController::get_hotbed_temperature() {
 
 
 /*
- * regulation_init : this function is called when the temperatur eregulaton is started.
+ * regulation_init : this function is called when the temperatur eregulaton is started_flag.
  *
  *  It resets PIDs.
  *

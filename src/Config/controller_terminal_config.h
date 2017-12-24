@@ -93,7 +93,7 @@
  *      //Declare a command "move line of" triggering line_of_function
  *      CREATE_LEAF(of, line_of_function)
  *
- *      //Declare a command "phase_1 line to" triggering line_to_function
+ *      //Declare a command "move line to" triggering line_to_function
  *      CREATE_LEAF(to, line_to_function)
  *
  *      //Finish the section of node "line"
@@ -115,7 +115,7 @@
 CREATE_LEAF(eeprom, eeprom, manage_eeprom)
 
 //Movement
-GO_LOWER(phase_1, prepare_movement the machine)
+GO_LOWER(move, prepare_movement the machine)
 CREATE_LEAF(home, home, homes the machine)
 CREATE_LEAF(line, line, draw a line with the current carriage to the specified coordinates)
 GO_UPPER()

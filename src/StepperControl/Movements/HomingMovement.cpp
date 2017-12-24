@@ -20,6 +20,7 @@
 
 #include <config.h>
 #include <StepperControl/TrajectoryTracer.h>
+#include <StepperControl/MovementCoordinator.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
@@ -38,13 +39,13 @@
 void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t directions) {
 
     //If movements are enqueued, execute them before homing;
-    if (!TrajectoryTracer::started)
-        TrajectoryTracer::start();
+    TrajectoryTracer::start();
 
     //Wait for movement to be finished;
-    while (TrajectoryTracer::started);
+    while (MovementCoordinator::started());
 
-    //TODO LOCK THE TRAJECTORY TRACER;
+    //Reserve the usage of the stepper routine
+    MovementCoordinator::reserve();
 
 
     /*

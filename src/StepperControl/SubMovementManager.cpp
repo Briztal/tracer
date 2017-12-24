@@ -21,6 +21,7 @@
 #include "SubMovementManager.h"
 #include "StepperController.h"
 #include "TrajectoryTracer.h"
+#include "MovementCoordinator.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <Control/Control.h>
@@ -490,9 +491,8 @@ void SubMovementManager::update_end_position(const float *const new_hl_position)
 
     StepperController::translate(new_hl_position, stepper_end_position);
 
-    if (TrajectoryTracer::started) {
-        disable_stepper_interrupt();
-    }
+    //Disable the stepper routine for safety, as we will modify volatile data;
+    MovementCoordinator::disable_interrupt();
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         int32_t d = (int32_t) stepper_end_position[stepper];
@@ -500,9 +500,7 @@ void SubMovementManager::update_end_position(const float *const new_hl_position)
         end_position[stepper] = d;
     }
 
-    if (TrajectoryTracer::started) {
-        enable_stepper_interrupt()
-    }
+
 }
 
 
@@ -513,10 +511,8 @@ void SubMovementManager::update_end_position(const float *const new_hl_position)
 
 void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_position) {
 
-
-    if (TrajectoryTracer::started) {
-        disable_stepper_interrupt();
-    }
+    //Disable the stepper routine for safety, as we will modify volatile data;
+    MovementCoordinator::disable_interrupt();
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
         int32_t d = (int32_t) new_stepper_position[stepper];
@@ -524,9 +520,8 @@ void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_p
         jerk_position[stepper] = d;
     }
 
-    if (TrajectoryTracer::started) {
-        enable_stepper_interrupt()
-    }
+    //Re-enable the stepper routine (will take effect only if it was already started;
+    MovementCoordinator::enable_interrupt();
 }
 
 

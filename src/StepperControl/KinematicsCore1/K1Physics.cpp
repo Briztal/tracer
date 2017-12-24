@@ -94,7 +94,7 @@ void K1Physics::initialise_data() {
     //The current regulation (target) sub_movement time
     regulation_sub_movement_time = 0;
 
-    //A flag to mention if the routine has just started.
+    //A flag to mention if the routine has just started_flag.
     first_movement = true;
 
     //A flag to mention if the speed currently increases
@@ -834,7 +834,7 @@ delay_t m::sub_movement_time = 0;
 //The current regulation (target) sub_movement time
 delay_t m::regulation_sub_movement_time = 0;
 
-//A flag to mention if the routine has just started.
+//A flag to mention if the routine has just started_flag.
 bool m::first_movement = true;
 
 //A flag to mention if the speed currently increases
