@@ -28,7 +28,7 @@
 
 #include "TerminalTreeGenerator.h"
 #include "TerminalArguments.h"
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 #include <DataStructures/StringUtils.h>
 
 

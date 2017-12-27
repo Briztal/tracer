@@ -118,7 +118,7 @@ add_library(hardware
 
 #-----------------------------------------------INTERFACES--------------------------------------------------------------
 
-set(CCP "Control")
+set(CCP "Interaction")
 include_directories(${CCP}/)
 
 add_library(controllers
@@ -156,7 +156,7 @@ add_library(controllers
         )
 
 
-set(CPP "Control/Protocols")
+set(CPP "Interaction/Protocols")
 
 include_directories(${CPP}/)
 
@@ -188,7 +188,7 @@ add_library(actions
 
         )
 
-#---------------------------------------------Control Loops-------------------------------------------------------------
+#---------------------------------------------Interaction Loops-------------------------------------------------------------
 
 
 set(CLP "ControlLoops")

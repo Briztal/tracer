@@ -26,7 +26,6 @@
 #include <stdint.h>
 
 #include "StepperController.h"
-#include "EEPROM/EEPROMStorage.h"
 #include "SubMovementManager.h"
 #include "Steppers.h"
 #include "TrajectoryTracer.h"
@@ -61,6 +60,10 @@ void StepperController::initialise_data() {
 
     //Initialise Steppers;
     Steppers::initialise_data();
+
+    //Initialise the stepper data class
+    SteppersData::initialise_data();
+
 
     //IncrementComputer is a non_memory class. No need for init;
 

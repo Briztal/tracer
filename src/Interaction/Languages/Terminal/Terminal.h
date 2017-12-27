@@ -26,8 +26,8 @@
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include <Control/Controllers/_controller_data.h>
-#include <Control/Protocols/Protocol.h>
+#include <Interaction/Languages/_language_data.h>
+#include <Interaction/Protocols/Protocol.h>
 #include "TerminalTree.h"
 
 class Terminal {

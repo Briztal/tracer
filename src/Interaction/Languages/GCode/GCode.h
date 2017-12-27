@@ -25,8 +25,8 @@
 #ifndef GCODEINTERFACE
 #define GCODEINTERFACE
 
-#include <Control/Controllers/_controller_data.h>
-#include <Control/Protocols/Protocol.h>
+#include <Interaction/Languages/_language_data.h>
+#include <Interaction/Protocols/Protocol.h>
 #include "GCodeTree.h"
 
 class GCode {

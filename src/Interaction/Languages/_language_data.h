@@ -8,7 +8,7 @@
 /*
  * The interface data : this structure contains all required data to execute an Interface function, wheather it
  *  may come from Terminal, GCode, ProgramInterface, or any interface,
- *      as Control share a same structure.
+ *      as Interaction share a same structure.
  *
  */
 struct controller_data_t {
@@ -40,7 +40,7 @@ struct controller_data_t {
 
 
 /*
- *  A simple struct that will be used in the arguments parsing for GCode and Terminal Control.
+ *  A simple struct that will be used in the arguments parsing for GCode and Terminal Interaction.
  */
 
 struct argument_t {

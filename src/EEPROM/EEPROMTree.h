@@ -23,31 +23,87 @@
 
 #include <hardware_language_abstraction.h>
 
+#include <DataStructures/Tree.h>
+
 class EEPROMTree {
 
 
 public:
 
     //The Constructor;
-    EEPROMTree(string_t *name, uint8_t id, float *const data, uint8_t nb_children);
+    EEPROMTree(string_t *name, float *data);
 
     //The Destructor
     ~EEPROMTree();
 
+
+    //------------------------------------------- Getters -------------------------------------------
+
+    //Get the number of children;
+    const uint8_t getNbChildren();
+
+    //Get the name;
+    const String *getName();
+
+    //Get the pointed value;
+    const float getData();
+
+    //Get a child by index;
+    EEPROMTree *getChild(uint8_t child_index);
+
+    //Get a child by name;
+    EEPROMTree *getChild(char *child_name);
+
+
+    //------------------------------------------- Modifiers -------------------------------------------
+
+    //Modify the pointed value;
+    void setData(float value);
+
+    //Update the data pointer;
+    void setDataPointer(float *data_pointer);
+
+    //Add a child by name;
+    void addChild(char *name);
+
+    //Add a child by name;
+    void addChild(EEPROMTree *child);
+
+    //Get a child by index;
+    EEPROMTree *createChildIfAbsent(char *child_name);
+
+
+    //------------------------------------------- Info -------------------------------------------
+
+    //Display the tree;
+    String printTree();
+
+
+    //------------------------------------------- Fields -------------------------------------------
+
+private:
+
+    //The current number of children;
+    uint8_t nb_children;
+
+    //The chlidren array;
+    EEPROMTree **children;
+
     //The parameter name;
     const String *name;
 
-    //The current index;
-    const uint8_t index;
-
     //The pointer to the related data;
-    float *const data;
+    float *data;
 
-    //The number of sub trees;
-    const uint8_t nb_children;
 
-    //The sub trees;
-    EEPROMTree ** children;
+    //------------------------------------------- Private methods -------------------------------------------
+
+
+    //Compare strings
+    bool compareStrings(const char *string0, const char *string1);
+
+    //Realloc children, and create a new space;
+    bool _addChild();
 
 
 };

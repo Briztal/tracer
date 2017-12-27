@@ -22,7 +22,6 @@
 #include "TemperatureController.h"
 
 #include <Actuators/PWMGPIO.h>
-#include "ControlLoops/PID.h"
 #include <Sensors/Thermistors/Thermistors.h>
 
 
@@ -53,7 +52,7 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
         //if the hotend must be enabled
         if (new_state.enabled) {
             //Reset by id
-            PID::reset(hotend_id);
+            pid_hotends[hotend_id].reset();
 
             //Mark the hotend as enabled
              hotends_enabled[hotend_id] = true;
@@ -155,7 +154,7 @@ task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
         if (new_state.enabled) {
 
             //Reset by name
-            PID::reset_hotbed();
+            pid_hotbed.reset();
 
             //Mark the regulation as enabled
             hotbed_state.enabled = true;
@@ -212,16 +211,22 @@ float TemperatureController::get_hotbed_temperature() {
 
 
 /*
- * regulation_init : this function is called when the temperatur eregulaton is started_flag.
+ * regulation_init : this function is called when the temperature regulation is started_flag.
  *
- *  It resets PIDs.
+ *  It resets all PIDs.
  *
  */
 
 void TemperatureController::regulation_init() {
 
-    //Reset every PID.
-    PID::reset_all();
+    //Reset all hotends PIDs
+    pid_hotends[0].reset();
+    pid_hotends[1].reset();
+    pid_hotends[2].reset();
+    pid_hotends[3].reset();
+
+    //Reset the hotbed PID;
+    pid_hotbed.reset();
 
 }
 
@@ -236,7 +241,7 @@ void TemperatureController::regulation_init() {
 void TemperatureController::temperature_regulation() {
 
 
-#define TEMP_REGULATION(i, enabled, target, name) \
+#define TEMP_REGULATION(i, enabled, target, name, pid) \
     \
     /*If the regulation is enabled (flag set)*/\
     if ((enabled)) {\
@@ -248,22 +253,22 @@ void TemperatureController::temperature_regulation() {
         float error = (target) - temp;\
         \
         /*Get the power output*/\
-        float output = PID::compute_##name(error);\
+        float output = (pid).compute(error);\
         \
         /*Set the power output.*/\
         PWMGPIO::set_power_##i(output);\
         \
     }
 
-    TEMP_REGULATION(0, hotends_enabled[0], hotends_temps[0], hotend_0);
+    TEMP_REGULATION(0, hotends_enabled[0], hotends_temps[0], hotend_0, pid_hotends[0]);
 
-    TEMP_REGULATION(1, hotends_enabled[1], hotends_temps[1], hotend_1);
+    TEMP_REGULATION(1, hotends_enabled[1], hotends_temps[1], hotend_1, pid_hotends[1]);
 
-    TEMP_REGULATION(2, hotends_enabled[2], hotends_temps[2], hotend_2);
+    TEMP_REGULATION(2, hotends_enabled[2], hotends_temps[2], hotend_2, pid_hotends[2]);
 
-    TEMP_REGULATION(3, hotends_enabled[3], hotends_temps[3], hotend_3);
+    TEMP_REGULATION(3, hotends_enabled[3], hotends_temps[3], hotend_3, pid_hotends[3]);
 
-    TEMP_REGULATION(4, hotbed_state.enabled, hotbed_state.temperature, hotbed);
+    TEMP_REGULATION(4, hotbed_state.enabled, hotbed_state.temperature, hotbed, pid_hotbed);
 
 };
 
@@ -283,8 +288,14 @@ void TemperatureController::regulation_finalisation() {
     memset(hotends_enabled, 0, sizeof(bool) * 4);
     hotbed_state.temperature = 0;
 
-    //Reset all PIDs.
-    PID::reset_all();
+    //Reset all hotends PIDs
+    pid_hotends[0].reset();
+    pid_hotends[1].reset();
+    pid_hotends[2].reset();
+    pid_hotends[3].reset();
+
+    //Reset the hotbed PID;
+    pid_hotbed.reset();
 
     //Set all powers to zero
     PWMGPIO::set_power_0(0);
@@ -297,14 +308,18 @@ void TemperatureController::regulation_finalisation() {
 
 //-------------------------------------------Static declaration / definitions-------------------------------------------
 
+#define m TemperatureController
+
 //Declare and define the hotends state (flags and vars for activities and temperature targets).
 bool t_hotends_en[4];
 float t_hotends_temps[4];
 
-bool *const TemperatureController::hotends_enabled = t_hotends_en;
-float *const TemperatureController::hotends_temps = t_hotends_temps;
+bool *const m::hotends_enabled = t_hotends_en;
+float *const m::hotends_temps = t_hotends_temps;
 
 
 //Declare and define the hotbed state (flags and vars for activity and temperature target).
-TemperatureController::hotbed_state_t TemperatureController::hotbed_state = TemperatureController::hotbed_state_t();
+m::hotbed_state_t m::hotbed_state = m::hotbed_state_t();
 
+PID t_hot_pids[4];
+PID *m::pid_hotends = t_hot_pids, m::pid_hotbed;

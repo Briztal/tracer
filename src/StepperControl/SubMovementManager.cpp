@@ -24,7 +24,7 @@
 #include "MovementCoordinator.h"
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 #include <Kernel.h>
 
 
@@ -169,7 +169,7 @@ void SubMovementManager::push_new_sub_movement() {
     //Get the insertion address;
     sub_movement_data_t *sub_movement_data = sub_movement_queue.get_insertion_address(&queue_flag);
 
-    //Control the flag, for safety:
+    //Interaction the flag, for safety:
     if (!queue_flag) {
 
         //Log if the flag is reset (error)
@@ -211,7 +211,7 @@ void SubMovementManager::push_new_sub_movement() {
 
     sub_movement_queue.get_reading_address(&queue_flag);
 
-    //Control the flag for safety
+    //Interaction the flag for safety
     if (!queue_flag) {
 
         //Log
@@ -438,7 +438,7 @@ sub_movement_data_t *SubMovementManager::read_next_sub_movement() {
         //Get the reading adress
         sub_movement_data_t *address = sub_movement_queue.get_reading_address(&queue_flag);
 
-        //Control the data integrity
+        //Interaction the data integrity
         if (!queue_flag) {
 
             //Log;

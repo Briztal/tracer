@@ -273,12 +273,30 @@ GENERATE_SCHEDULER(line, 0, movement_state_t, coords);
 
 private:
 
+//------------------------------------------------------ Command System ------------------------------------------------
+
+    /*
+     * The coordinate interface data structure;
+     */
+
+    struct coordinate_interfaces_data_t{
+        float x0_offset = 10;
+        float x1_offset = 230;
+        float y0_offset = 10;
+        float y1_offset = 230;
+        float z_offset = 10;
+        float x_max_sum = 400;
+        float y_max_sum = 400;
+    };
+
+    //The coordinate interfaces variables;
+    static coordinate_interfaces_data_t coordinate_interfaces_data;
+
     //The current absolute high level machine coordinates : [x, y, z, e].
     static hl_coord_t current_position;
 
     //The current axis coordinates.
     static float *const axis_positions;
-
     //Replace coordinates with flags reset with current ones.
     static void replace_coords(movement_state_t *coords);
 

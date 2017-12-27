@@ -22,7 +22,7 @@
 #include "EEPROMStorage.h"
 
 #include <DataStructures/StringUtils.h>
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 #include <Config/actions_config.h>
 #include <Config/control_loops_config.h>
@@ -73,8 +73,6 @@
 
 //###############################################PRIMITIVE_WRITE_METHODS################################################
 
-
-
 void EEPROMInterface::print_stored_data() {
 
     //Stepper motors
@@ -115,8 +113,8 @@ void EEPROMInterface::print_stored_data() {
 
     std_out("\n---------------------\n");
 
-    //Control Loops
-    std_out("Control Loops : \n");
+    //Interaction Loops
+    std_out("Interaction Loops : \n");
     for (int loop = 0; loop < NB_LOOPS; loop++) {
         std_out("\tLoop " + str(loop) + ", period (ms) : \t" + str(ES::loop_periods[loop]));
     }
@@ -275,7 +273,7 @@ EEPROMTree *EEPROMInterface::build_tree() {
     root->children[root_id] = tree;
 
     //Add the sub nodes
-#define PID(i, name, ...) \
+#define GENERATE_PID(i, name, ...) \
     tree->children[i] = tree2 = new EEPROMTree(new String(#name), i, nullptr, 3);\
     tree2->children[0] = new EEPROMTree(new String("kp"), 0, &((ES::pids_data+i)->kp), 0);\
     tree2->children[1] = new EEPROMTree(new String("ki"), 1, &((ES::pids_data+i)->ki), 0);\
@@ -283,7 +281,7 @@ EEPROMTree *EEPROMInterface::build_tree() {
 
 #include <Config/control_loops_config.h>
 
-#undef PID
+#undef GENERATE_PID
 
     //Increment the root id
     root_id++;
@@ -525,20 +523,20 @@ void EEPROMInterface::send_structure() {
 
     EEPROM_LOWER(PID_CAT, pids);
 
-    //For each PID, mark a case for kp, ki, and kd.
-#define PID(i, ...)\
+    //For each StaticPID, mark a case for kp, ki, and kd.
+#define StaticPID(i, ...)\
     EEPROM_LOWER(i, i);EEPROM_LEAF(0, kp);EEPROM_LEAF(1, ki);EEPROM_LEAF(2, kd);EEPROM_UPPER;
 
 #include "../config.h"
 
-#undef PID
+#undef StaticPID
 
     EEPROM_UPPER;
 
-    //---------------------------------------------Control loops---------------------------------------------
+    //---------------------------------------------Interaction loops---------------------------------------------
 
     EEPROM_LOWER(LOOP_CAT, loops);
-    //For each Control loop, mark a case for the period.
+    //For each Interaction loop, mark a case for the period.
 #define LOOP_FUNCTION(indice, ...) EEPROM_LOWER(indice, indice);EEPROM_LEAF(0, period);EEPROM_UPPER;
 
 #include "../config.h"

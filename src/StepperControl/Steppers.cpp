@@ -26,7 +26,7 @@
 
 #include "Steppers.h"
 
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 #include <Config/stepper_control_config.h>
 
@@ -180,7 +180,7 @@ void Steppers::set_directions(sig_t negative_signatures) {
 //----------------------------------------------------------Step--------------------------------------------------------
 
 /*
- * fastStep : this function steps a specific group of stepper.
+ * fastStep : this function steps_per_unit a specific group of stepper.
  *
  * The argument_t is a signature, where the i-th bit means :
  *      - 1 : the i-th stepper must step;

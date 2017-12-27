@@ -35,7 +35,7 @@ public:
 
 private:
 
-    //The function that steps the machine;
+    //The function that steps_per_unit the machine;
     static void phase_1();
 
 

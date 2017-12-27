@@ -21,37 +21,37 @@
 /*
  * This section sets up the asserv code structure.
  * The structure is composed of external parameters, representing the information you possess about your environment,
- * and PIDs, computing data computed from external parameters. PID Outputs can be computed, to call actions.
+ * and PIDs, computing data computed from external parameters. GENERATE_PID Outputs can be computed, to call actions.
  */
 
 
 /*
- * PID : simple PID utilities;
+ * StaticPID : simple StaticPID utilities;
  */
 
 //Set the number of PIDs
 #define NB_PIDS 5
 
 /*
- * For each PID, put one line like behind and provide the three required parameter
+ * For each StaticPID, put one line like behind and provide the three required parameter
  *
- * PID(i, name, kp, ki, kd)
+ * StaticPID(i, name, kp, ki, kd)
  *
- *  - i :   the index of the PID, used to control it in the code;
+ *  - i :   the index of the StaticPID, used to control it in the code;
  *              Indices start at 0 and are strictly consecutive;
- *  - name : the name you choose to give to the PID;
+ *  - name : the name you choose to give to the StaticPID;
  *  - kp :  the default kp value;
  *  - ki :  the default ki value;
  *  - kd :  the default kd value;
  */
 
-#ifdef PID
+#ifdef GENERATE_PID
 
-PID(0, hotend_0, 20, 0, 0)
-PID(1, hotend_1, 20, 0, 0)
-PID(2, hotend_2, 20, 0, 0)
-PID(3, hotend_3, 20, 0, 0)
-PID(4, hotbed, 20, 0, 0)
+GENERATE_PID(0, hotend_0, 20, 0, 0)
+GENERATE_PID(1, hotend_1, 20, 0, 0)
+GENERATE_PID(2, hotend_2, 20, 0, 0)
+GENERATE_PID(3, hotend_3, 20, 0, 0)
+GENERATE_PID(4, hotbed, 20, 0, 0)
 
 #endif
 
@@ -70,9 +70,9 @@ PID(4, hotbed, 20, 0, 0)
  * LOOP_FUNCTION(i, name, period_ms)
  *
  *
- *  - i :           the index of the PID, used to control it in the code;
+ *  - i :           the index of the StaticPID, used to control it in the code;
  *                      Indices start at 0 and are strictly consecutive;
- *  - name :        the name you choose to give to the PID;
+ *  - name :        the name you choose to give to the StaticPID;
  *  - period_ms :   the period of the loop function;
  */
 

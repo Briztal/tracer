@@ -77,6 +77,9 @@ private:
     //PWMs states
     static bool *const states;
 
+    //PWM maximums;
+    static float *const maximums;
+
 };
 
 

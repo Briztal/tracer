@@ -27,7 +27,7 @@
 
 #include <Kernel.h>
 
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 #include <StepperControl/StepperController.h>
 
@@ -306,7 +306,7 @@ void ComplexLinearMovement::finalise_movement() {
     linear_data_queue.discard(&queue_flag);
 
 
-    //Control the status :
+    //Interaction the status :
     if (!queue_flag) {
 
         //Log;

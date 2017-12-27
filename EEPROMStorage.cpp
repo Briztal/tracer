@@ -227,7 +227,7 @@ void EEPROMStorage::set_default_profile() {
     //PIDs kp, ki, kd
     pid_data_t *pid_p;
 
-#define PID(i, name, d_kp, d_ki, d_kd)\
+#define GENERATE_PID(i, name, d_kp, d_ki, d_kd)\
     pid_p = pids_data+(i);\
     pid_p->kp = d_kp;\
     pid_p->ki = d_ki;\
@@ -235,9 +235,9 @@ void EEPROMStorage::set_default_profile() {
 
 #include <Config/control_loops_config.h>
 
-#undef PID
+#undef GENERATE_PID
 
-    //Control loops reloads
+    //Interaction loops reloads
 #define  LOOP_FUNCTION(index, name, period_ms)\
     loop_periods[index] = period_ms;
 

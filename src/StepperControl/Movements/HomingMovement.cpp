@@ -21,10 +21,10 @@
 #include <config.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <StepperControl/MovementCoordinator.h>
+#include <StepperControl/SteppersData.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include "EEPROM/EEPROMStorage.h"
 #include "HomingMovement.h"
 #include "StepperControl/Steppers.h"
 
@@ -58,10 +58,10 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
 
         //Cache the appropriate stepper data;
-        stepper_data_t *data = EEPROMStorage::steppers_data + axis;
+        stepper_data_t *data = SteppersData::steppers_data + axis;
 
         //Set the delay for the i-th stepper
-        delays[axis] = (uint32_t) (1000000 / (data->jerk * data->steps));
+        delays[axis] = (uint32_t) (1000000 / (data->jerk * data->steps_per_unit));
     }
 
 
@@ -126,7 +126,7 @@ uint8_t HomingMovement::cardinal(sig_t signature) {
 
 
 /*
- * phase_1 : this function steps all remaining axis, and eventually updates the signature and delay.
+ * phase_1 : this function steps_per_unit all remaining axis, and eventually updates the signature and delay.
  *
  *  Then, it re-sechedules itself;
  */
@@ -139,7 +139,7 @@ void HomingMovement::phase_1() {
     //Step;
     Steppers::fastStep(movement_signature);
 
-    //If we made [step] steps since last update :
+    //If we made [step] steps_per_unit since last update :
     if (!--step_index) {
 
         //Reset the step index;

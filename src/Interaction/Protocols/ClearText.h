@@ -23,7 +23,7 @@
 #define TRACER_CLEARTEXT_H
 
 #include "stdint.h"
-#include "Control/Protocols/Protocol.h"
+#include "Interaction/Protocols/Protocol.h"
 
 class ClearText : public Protocol {
 

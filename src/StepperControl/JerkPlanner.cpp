@@ -27,8 +27,8 @@
 
 #include <StepperControl/StepperController.h>
 #include <StepperControl/_kinematics_data.h>
-#include <EEPROM/EEPROMStorage.h>
 #include "JerkPlanner.h"
+#include "SteppersData.h"
 
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
@@ -223,15 +223,15 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
         float initial_jerk_ratio = initial_steps_distances[stepper] * distance_inverse;
 
         //determine the algebric ratio difference;
-        float algebric_difference = final_jerk_ratios[stepper] - initial_jerk_ratio;
+        float algebraic_difference = final_jerk_ratios[stepper] - initial_jerk_ratio;
 
         //extract the absolute difference;
-        if (algebric_difference < 0) algebric_difference = -algebric_difference;
+        if (algebraic_difference < 0) algebraic_difference = -algebraic_difference;
 
         //Get the maximum regulation_speed;
-        //Formula : regulation_speed(unit/s) < max_jerk(steps/s) / abs( final_ratio(steps/unit) - initial_ratio(steps/unit) ).
-        stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
-        float max_speed = data->jerk * data->steps / algebric_difference;
+        //Formula : regulation_speed(unit/s) < max_jerk(steps_per_unit/s) / abs( final_ratio(steps_per_unit/unit) - initial_ratio(steps_per_unit/unit) ).
+        stepper_data_t *data = SteppersData::steppers_data + stepper;
+        float max_speed = data->jerk * data->steps_per_unit / algebraic_difference;
 
         //Update the maximum regulation_speed;
         maximum_speed = (first) ? maximum_speed : ((maximum_speed < max_speed) ? maximum_speed : max_speed);
@@ -269,17 +269,17 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
         - V+ (unit/s)   : global speed after the jerk movement;
         - D- (unit)     : global distance of the sub movement before the jerk point;
         - D+ (unit)     : global distance of the sub movement after the jerk point;
-        - vi- (steps/s) : stepper motor i speed before the movement (steps/s);
-        - vi+ (steps/s) : stepper motor i speed after the movement (steps/s);
-        - si- (steps)   : stepper motor i distance for the sub movement before the jerk point;
-        - si+ (steps)   : stepper motor i distance for the sub movement after the jerk point;
-        - Ji (steps/s)  : jerk limit on stepper i;
+        - vi- (steps_per_unit/s) : stepper motor i speed before the movement (steps_per_unit/s);
+        - vi+ (steps_per_unit/s) : stepper motor i speed after the movement (steps_per_unit/s);
+        - si- (steps_per_unit)   : stepper motor i distance for the sub movement before the jerk point;
+        - si+ (steps_per_unit)   : stepper motor i distance for the sub movement after the jerk point;
+        - Ji (steps_per_unit/s)  : jerk limit on stepper i;
         - t- (s)        : the duration of the sub movement before the jerk point;
         - t+ (s)        : the duration of the sub movement after the jerk point;
 
     Prerequisites :
         V(unit/s) = D(unit/s) / t(s) <=> t(s) = D(unit) / V(unit/s);
-        vi(steps/s) = si(steps) / t(s);
+        vi(steps_per_unit/s) = si(steps_per_unit) / t(s);
 
 
     Proposition 1 : The global speed before a jerk point and after a jerk point is the same.

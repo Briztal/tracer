@@ -27,8 +27,7 @@
 #include "K2Physics.h"
 
 #include <StepperControl/SubMovementManager.h>
-
-#include <EEPROM/EEPROMStorage.h>
+#include <StepperControl/SteppersData.h>
 
 //------------------------------------------- Initialisation --------------------------------------------
 
@@ -105,7 +104,7 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         //Get the maximum speed for the stepper
-        float maximum_speed = EEPROMStorage::steppers_data[stepper].jerk * EEPROMStorage::steppers_data[stepper].steps;
+        float maximum_speed = SteppersData::steppers_data[stepper].jerk * SteppersData::steppers_data[stepper].steps_per_unit;
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
@@ -166,7 +165,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
         float act_speed = steppers_speeds[stepper];
 
         //Get the regulation_speed limit
-        //Formula : delta_speed = acceleration * steps * time; acceleration * steps is pre-computed (optimisation)
+        //Formula : delta_speed = acceleration * steps_per_unit * time; acceleration * steps_per_unit is pre-computed (optimisation)
         float max_delta_speed = delta_speed_constants[stepper] * last_time;
 
         //if the current stepper can stop, no processing is required :
@@ -269,7 +268,7 @@ void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time
             continue;
 
         //Compute the deceleration deceleration_distance on the stepper
-        //Formula : v * v / (2 * acceleration * steps); the denominator is pre-computed for optimisation purposes.
+        //Formula : v * v / (2 * acceleration * steps_per_unit); the denominator is pre-computed for optimisation purposes.
         uint32_t deceleration_distance = (uint32_t) (v * v * deceleration_constants[stepper]);
 
         //get the algebraic end distance.
@@ -316,14 +315,14 @@ void K2Physics::compute_jerk_offsets(float speed, k2_movement_data *previous_mov
         //Formula : max_stepper_speed = max_speed * stepper_distance / high_level_distance;
         float stepper_speed = speed * ending_jerk_ratios[stepper];
 
-        stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
+        stepper_data_t *data = SteppersData::steppers_data + stepper;
 
         //Get the deceleration distance offset :
-        //Formula : the deceleration distance for a stepper at the regulation_speed s (steps/s) is given by
-        //      s * s / (2 * acceleration (steps/s^2))
+        //Formula : the deceleration distance for a stepper at the regulation_speed s (steps_per_unit/s) is given by
+        //      s * s / (2 * acceleration (steps_per_unit/s^2))
         //TODO PRE-COMPUTATION OPTIMISATION
         jerk_distances_offsets[stepper] = (uint32_t) (stepper_speed * stepper_speed /
-                                                      (2 * data->acceleration * data->steps));
+                                                      (2 * data->acceleration * data->steps_per_unit));
 
     }
 
@@ -383,13 +382,13 @@ void K2Physics::update_jerk_offsets(const uint32_t *const new_offsets) {
 }
 
 
-//---------------------------------------------------Speed_Constants-----------steps-----------------------------------------
+//---------------------------------------------------Speed_Constants-----------steps_per_unit-----------------------------------------
 
 void K2Physics::pre_compute_speed_constants() {
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
-        float steps = data->steps;
+        stepper_data_t *data = SteppersData::steppers_data + stepper;
+        float steps = data->steps_per_unit;
         float as = data->acceleration * steps;
         max_speed_constants[stepper] = data->maximum_speed * steps;
         delta_speed_constants[stepper] = as;

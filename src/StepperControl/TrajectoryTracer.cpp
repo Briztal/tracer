@@ -26,7 +26,7 @@
 #include "IncrementComputer.h"
 #include "SubMovementManager.h"
 #include "MovementCoordinator.h"
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 #include <StepperControl/StepperController.h>
 #include <Actuators/PWMGPIO.h>
 #include <StepperControl/Steppers.h>
@@ -891,7 +891,7 @@ int k2_position_indice = 4;
  *      - if the last position of the current movement hasn't been processed, then start the sub_movement interrupt
  *      - if the last position has been processed, then load a new movement
  *
- *  This procedure comprises the following steps :
+ *  This procedure comprises the following steps_per_unit :
  *      - change the trajectory function;
  *      - change the trajectory variables (beginning, ending, index)
  *      - initialise_hardware the new movement

@@ -30,11 +30,11 @@
 #include <Config/control_config.h>
 
 #ifdef ENABLE_TERMINAL_INTERFACE
-#include <Control/Controllers/Terminal/Terminal.h>
+#include <Interaction/Languages/Terminal/Terminal.h>
 #endif
 
 #ifdef ENABLE_GCODE_INTERFACE
-#include <Control/Controllers/GCode/GCode.h>
+#include <Interaction/Languages/GCode/GCode.h>
 #endif
 
 #ifdef ENABLE_PROGRAM_INTERFACE
@@ -48,7 +48,7 @@
 #define std_out(s) TaskScheduler::log(s)
 
 
-class Control {
+class Interaction {
 
     //------------------------------------------------- Initialisation -------------------------------------------------
 

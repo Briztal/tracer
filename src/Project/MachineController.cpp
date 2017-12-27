@@ -20,9 +20,8 @@
 
 #include "MachineController.h"
 
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
-#include <EEPROM/EEPROMStorage.h>
 #include "TemperatureController.h"
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Steppers.h>
@@ -303,20 +302,20 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
 
     //Set the x position
     if (x0) {
-        axis_positions[0] = EEPROMStorage::coordinate_interface_data.x0_offset + x;
+        axis_positions[0] = coordinate_interfaces_data.x0_offset + x;
     } else {
-        axis_positions[1] = EEPROMStorage::coordinate_interface_data.x1_offset - x;
+        axis_positions[1] = coordinate_interfaces_data.x1_offset - x;
     }
 
     //Set the y position
     if (y0) {
-        axis_positions[2] = EEPROMStorage::coordinate_interface_data.y0_offset + y;
+        axis_positions[2] = coordinate_interfaces_data.y0_offset + y;
     } else {
-        axis_positions[3] = EEPROMStorage::coordinate_interface_data.y1_offset - y;
+        axis_positions[3] = coordinate_interfaces_data.y1_offset - y;
     }
 
     //Set the z position
-    axis_positions[4] = EEPROMStorage::coordinate_interface_data.z_offset - z;
+    axis_positions[4] = coordinate_interfaces_data.z_offset - z;
 
     //Set the extruder position
     axis_positions[5 + extrusion_state.working_carriage] = e;
@@ -356,7 +355,7 @@ void MachineController::sanity_check(float *position) {
     //We first check X axis :
 
     //Cache for the difference between the sum and the ending sum.
-    float difference = EEPROMStorage::coordinate_interface_data.x_max_sum - (position[0] + position[1]);
+    float difference = coordinate_interfaces_data.x_max_sum - (position[0] + position[1]);
 
     //If the sum is greater than the limit,
     if (difference) {
@@ -374,7 +373,7 @@ void MachineController::sanity_check(float *position) {
     //Same thing for Y axis :
 
     //Cache for the difference between the sum and the ending sum.
-    difference = EEPROMStorage::coordinate_interface_data.y_max_sum - (position[2] + position[3]);
+    difference = coordinate_interfaces_data.y_max_sum - (position[2] + position[3]);
 
     //If the sum is greater than the limit,
     if (difference) {
@@ -680,5 +679,6 @@ MachineController::hl_coord_t MachineController::offsets = MachineController::hl
 float tmpos[NB_STEPPERS];
 float *const MachineController::axis_positions = tmpos;
 
-
 uint8_t MachineController::mode = 0;
+
+MachineController::coordinate_interfaces_data_t MachineController::coordinate_interfaces_data;

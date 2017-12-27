@@ -200,7 +200,7 @@ float KinematicsCore2::compute_us_time_for_first_sub_movement(k2_sub_movement_da
  *
  * IMPORTANT : END_DISTANCE PROCESSING
  *
- *  It processes the next steps :
+ *  It processes the next steps_per_unit :
  *      - Process the next step_distances
  *      - Adjust the regulation_speed
  *      - set the new regulation_speed values

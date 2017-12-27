@@ -22,7 +22,7 @@
 #include <config.h>
 
 /*
- * Stepper Control Kernel checking.
+ * Stepper Interaction Kernel checking.
  *  we must check the following flags :
  *      - EEPROM for all kernels
  *      - FPU for Kernel2

@@ -26,7 +26,7 @@
 
 #include <Config/controller_gcode_config.h>
 #include <DataStructures/StringUtils.h>
-#include "Control/Control.h"
+#include "Interaction/Interaction.h"
 
 /*
  * clear : this function resets the argument parsing environment;

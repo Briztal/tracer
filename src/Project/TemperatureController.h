@@ -32,6 +32,7 @@
 
 
 #include <TaskScheduler/TaskScheduler.h>
+#include <ControlLoops/PID.h>
 
 class TemperatureController {
 
@@ -143,6 +144,15 @@ private:
 
     //The local hotbed state.
     static hotbed_state_t hotbed_state;
+
+
+    //--------------------------- PIDs ---------------------------
+
+    /*
+     * The next line declares all PIDs, for 4 hotends, and the hotbed;
+     */
+
+    static PID *pid_hotends, pid_hotbed;
 
 };
 

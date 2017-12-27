@@ -204,7 +204,7 @@ SERVO(2, servo3, 4, 0, 1)
 //-------------------------------------------------Kinematics TaskScheduler  Version---------------------------------------------
 
 /*
- * The version of the Stepper Control Kinematics TaskScheduler you want to use. You have 3 versions available :
+ * The version of the Stepper Interaction Kinematics TaskScheduler you want to use. You have 3 versions available :
  *  - 0 : KERNEL0, a basic kernel for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
  *  - 1 : KERNEL1, a faster kernel for 32 bits processors with FPU, for cartesian-by-group machines. Only lines available.
  *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.
@@ -221,7 +221,7 @@ SERVO(2, servo3, 4, 0, 1)
 //-------------------------------------------------------Command System-------------------------------------------------
 
 /*
- * The Control coordinate system is an abstraction layer, over the high level coordinate system, made to ease
+ * The Interaction coordinate system is an abstraction layer, over the high level coordinate system, made to ease
  *  the control of the machine. As high level axis can be numerous, this system allows you divide your axis in groups,
  *  for example, and to control them in groups.
  *

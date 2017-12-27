@@ -2,7 +2,7 @@
 #define TRACER_TASK_SCHEDULER_DATA_H
 
 
-#include <Control/Protocols/Protocol.h>
+#include <Interaction/Protocols/Protocol.h>
 #include "task_state_t.h"
 
 struct task_t {

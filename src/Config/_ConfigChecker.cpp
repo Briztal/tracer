@@ -286,13 +286,13 @@ bool _ConfigChecker::check_control_loops(String *message) {
     counter =
 
             //A macro to count controls;
-#define PID(...) 1 +
+#define GENERATE_PID(...) 1 +
 
 //Count every control;
 #include "Config/control_loops_config.h"
 
     //Undef the macro for safety;
-#undef PID
+#undef GENERATE_PID
 
     0;
 
@@ -311,7 +311,7 @@ bool _ConfigChecker::check_control_loops(String *message) {
     counter = 0;
 
     //A macro to count controls;
-#define PID(i, ...) \
+#define GENERATE_PID(i, ...) \
     if (counter != i) {\
         *message = "pid with index "#i" should have the index "+String(counter)+". Check control_loops_config.h";\
         return false;\
@@ -322,7 +322,7 @@ bool _ConfigChecker::check_control_loops(String *message) {
 #include "Config/control_loops_config.h"
 
     //Undef the macro for safety;
-#undef PID
+#undef GENERATE_PID
 
     //No error. Complete;
     return true;

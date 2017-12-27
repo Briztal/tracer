@@ -34,7 +34,6 @@ class ControlLoops {
     * Loop functions are routines that are called regularly with interrupts.
     *
     * They are defined by the function they call and the period related.
-    *
     */
 
 #define LOOP_FUNCTION(indice, name, period_ms) \

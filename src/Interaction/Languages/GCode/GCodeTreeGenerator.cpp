@@ -25,7 +25,7 @@
 #include "GCodeTreeGenerator.h"
 
 #include <Project/InterfaceCommands/GCodeCommands.h>
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 /*
  * generate_tree : this function generates the TerminalTree that will be used to parse commands.

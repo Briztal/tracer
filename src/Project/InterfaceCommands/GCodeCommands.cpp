@@ -23,13 +23,11 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 #include "GCodeCommands.h"
 
-#include <EEPROM/EEPROMStorage.h>
 #include <Project/MachineController.h>
-#include <EEPROM/EEPROMInterface.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
 
@@ -59,7 +57,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
         std_out("Reseting the EEPROM default profile.");
 
         //Reset
-        EEPROMStorage::set_default_profile();
+        //EEPROMStorage::set_default_profile();
 
     }
 
@@ -80,17 +78,18 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
             std_out("Writing " + String(path) + " to " + String(f));
 
             //write_data the variable
-            EEPROMInterface::write_data_by_string(path, f);
+            //EEPROMInterface::write_data_by_string(path, f);
 
         }
 
+        /*
         //Read and display the value.
         if (EEPROMInterface::read_data_by_string(path, &f)) {
 
             //Log message
             std_out("Value for " + String(path) + " : " + String(f));
 
-        }
+        }*/
 
     }
 
@@ -98,7 +97,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     if (CHECK_ARGUMENT('D')) {
 
         //Print the current profile.
-        EEPROMInterface::print_stored_data();
+        //EEPROMInterface::print_stored_data();
 
     }
 

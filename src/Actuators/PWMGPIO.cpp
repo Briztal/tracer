@@ -20,10 +20,7 @@
 
 #include "PWMGPIO.h"
 #include <hardware_language_abstraction.h>
-#include <EEPROM/EEPROMStorage.h>
-#include <Control/Control.h>
-
-
+#include <Interaction/Interaction.h>
 
 //------------------------------------------- Init -------------------------------------------
 
@@ -51,13 +48,18 @@ void PWMGPIO::initialise_hardware() {
 
 void PWMGPIO::initialise_data() {
 
-    //Disable every PWM.
+    //Reset the states array;
+    memset(states, 0, NB_CONTINUOUS * sizeof(bool));
 
+    //Disable a PWM, and set the default value for the maximum;
 #define CONTINUOUS(i, name, pin, max) \
+    maximums[i] = (float)(max);\
     analog_write(pin, 0);
 
+    //Initialise all PWMs
 #include <Config/actions_config.h>
 
+    //Undef the macro for safety;
 #undef CONTINUOUS
 
 }
@@ -143,7 +145,7 @@ void PWMGPIO::stop(uint8_t action) {
 #define CONTINUOUS(i, name, pin, ...) \
 void PWMGPIO::set_power_##i (float power) {\
     /*Get the maximum value;*/\
-    float max = EEPROMStorage::continuous_data[i].max;\
+    float max = maximums[i];\
     \
     /*Get the analog value for the power;*/\
     uint32_t analog_value = (uint32_t) (power * ((float) 255.0 / max));\
@@ -181,5 +183,10 @@ void PWMGPIO::stop_##i() {\
 
 //------------------------------------------- States -------------------------------------------
 
-bool t_b_cont[NB_CONTINUOUS];
+//Initialise the states array;
+bool t_b_cont[NB_CONTINUOUS]{false};
 bool *const PWMGPIO::states = t_b_cont;
+
+//Initialise the max array;
+float t_max_cont[NB_CONTINUOUS]{0};
+float *const PWMGPIO::maximums = t_max_cont;

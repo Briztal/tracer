@@ -350,7 +350,7 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
  * _get_delay_numerator : this function computes (litteraly this time) the step_period_us numerator, for a particular axis.
  *
  *  The step_period_us resulting from the division of this step_period_us numerator by the acceleration distance
- *      is the step_period_us for the SUB_MOVEMENT and not for the tic. That's why the distance in steps is
+ *      is the step_period_us for the SUB_MOVEMENT and not for the tic. That's why the distance in steps_per_unit is
  *      appearing in the formula.
  *
  */
@@ -358,17 +358,17 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
 float K1Physics::_get_delay_numerator(uint8_t stepper, float distance) {
 
     /*
-     * FORMULA : D = 10^6 * distance / (steps * sqrt(2 * acceleration)) with :
+     * FORMULA : D = 10^6 * distance / (steps_per_unit * sqrt(2 * acceleration)) with :
      *      - D : the step_period_us numerator;
-     *      - distance (steps) : the distance on the stepper;
-     *      - steps (steps/unit) : the steps per unit of stepper;
+     *      - distance (steps_per_unit) : the distance on the stepper;
+     *      - steps_per_unit (steps_per_unit/unit) : the steps_per_unit per unit of stepper;
      *      - acceleration (unit / s^2) : the acceleration on the stepper.
      *
      */
 
     stepper_data_t *data = EEPROMStorage::steppers_data + stepper;
 
-    return (float) 1000000 * distance / (sqrtf(2 * data->steps * data->acceleration));
+    return (float) 1000000 * distance / (sqrtf(2 * data->steps_per_unit * data->acceleration));
 }
 
 
@@ -434,7 +434,7 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
         stepper_data_t *data = EEPROMStorage::steppers_data+stepper;
-        float maximum_speed = data->steps * data->jerk;
+        float maximum_speed = data->steps_per_unit * data->jerk;
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
@@ -570,7 +570,7 @@ void K1Physics::compute_jerk_offsets(float speed, k1_movement_data *previous_mov
     //Determine the offset on the deceleration distance
     stepper_data_t *data = EEPROMStorage::steppers_data+ref_stepper;
     previous_movement->jerk_distance_offset = (uint32_t)
-            (stepper_speed * stepper_speed / (2 * data->steps * data->acceleration));
+            (stepper_speed * stepper_speed / (2 * data->steps_per_unit * data->acceleration));
 
 
 }

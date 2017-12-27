@@ -1,4 +1,3 @@
-
 /*
   PID.cpp - Part of TRACER
 
@@ -19,109 +18,75 @@
 
 */
 
-#include <config.h>
-
-#ifdef ENABLE_CONTROL_LOOPS
-
 #include "PID.h"
 
-#include <EEPROM/EEPROMStorage.h>
+/*
+ * Default constructor : initialises everything to zero;
+ */
+
+PID::PID() : last(0), sum(0), kp(0), ki(0), kd(0) {}
 
 
 /*
- * compute : this function computes a particular PID output for a given error.
- *
+ * Constructor : initialises last and sum;
  */
 
-float PID::compute(uint8_t pid, float error) {
+PID::PID(float kp, float ki, float kd) : last(0), sum(0), kp(kp), ki(ki), kd(kd) {}
 
-    //Verify the the pid exists.
-    if (pid >= NB_PIDS)
-        return 0;
 
-    //get-update the sum and get the last.
-    float s = (sums[pid] += error), l = lasts[pid];
+/*
+ * Destructor : no dynamic arguments to delete;
+ */
 
-    //Get the pid data related to the pid.
-    pid_data_t *data = EEPROMStorage::pids_data + pid;
+PID::~PID() = default;
 
-    //Compute the return value.
-    float ret = data->kp * error + data->ki * s + data->kd * (error - l);
 
-    //Update the last
-    lasts[pid] = error;
+/*
+ * reset : this function resets the GENERATE_PID;
+ */
 
-    //Return the return value.
+void PID::reset() {
+
+    //Clear the last error;
+    last = 0;
+
+    //Clear the error sum;
+    sum = 0;
+}
+
+/*
+ * set_constants : this function updates the kp, ki and kd constants;
+ */
+
+void PID::set_constants(float kp, float ki, float kd) {
+
+    //Update the kp;
+    this->kp = kp;
+
+    //Update the ki;
+    this->ki = ki;
+
+    //Update the kd;
+    this->kd = kd;
+}
+
+
+/*
+ * compute : this function computes the output for the provided error;
+ */
+
+float PID::compute(float error) {
+
+    //Update the sum, and cache the last error;
+    float s = (sum+=error), l = last;
+
+    //Determine the output value;
+    float ret = kp * error + ki * s + kd * (error - l);
+
+    //Update the last error;
+    last = error;
+
+    //Return the output value;
     return ret;
 
 }
-
-
-/*
- * reset : this function resets a particular PID.
- *
- */
-
-void PID::reset(uint8_t pid) {
-
-    //Verify the the pid exists.
-    if (pid >= NB_PIDS)
-        return;
-
-    //Zero the sum and the last.
-    sums[pid] = 0;
-    lasts[pid] = 0;
-
-}
-
-
-/*
- * reset_all : this function resets every PID.
- */
-void PID::reset_all() {
-
-    //Zero the sums array and the lasts array.
-    memset(sums, 0, sizeof(float) * NB_PIDS);
-    memset(lasts, 0, sizeof(float) * NB_PIDS);
-
-}
-
-
-/*
- * Name computing function :
- *
- *  These are function doing the same job that the couple of function upper, but are defined for each PID,
- *      and are called using the PID's name.
- *
- */
-
-#include "PID.h"
-
-#define PID(i, name, ...)\
-/*compute_ function : computes the output for a particular error*/\
-float PID::compute_##name(float error) {\
-    float s = (sums[i]+=error), l = lasts[i];\
-    pid_data_t *data = EEPROMStorage::pids_data + i;\
-    float ret = data->kp * error + data->ki * s + data->kd * (error - l);\
-    lasts[i] = error;\
-    return ret;\
-}\
-/*reset function : resets the sum and last to zero*/\
-void PID::reset_##name() {\
-    sums[i] = 0;\
-    lasts[i] = 0;\
-}
-
-#include <Config/control_loops_config.h>
-
-#undef PID
-
-//Sums
-float t_pid_sums[NB_PIDS];
-float *const PID::sums = t_pid_sums;
-
-//Lasts
-float t_pid_lasts[NB_PIDS];
-float *const PID::lasts = t_pid_lasts;
-
-#endif

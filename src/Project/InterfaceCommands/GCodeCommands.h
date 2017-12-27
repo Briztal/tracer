@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <Control/Controllers/GCode/GCodeArguments.h>
+#include <Interaction/Languages/GCode/GCodeArguments.h>
 #include <TaskScheduler/TaskScheduler.h>
 
 

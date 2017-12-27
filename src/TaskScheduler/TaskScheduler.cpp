@@ -24,7 +24,7 @@ PONEY
 
 #include <Kernel.h>
 
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 #include <Project/MachineController.h>//TODO REMOVE
 
@@ -325,7 +325,7 @@ uint8_t temp_zzz = 0;
 void TaskScheduler::iterate() {
 
     //Add as much tasks as possible in the pool;
-    Control::read_external_controllers();
+    Interaction::read_external_controllers();
 
     //Process non-sequential tasks in priority
     process_task_pool();

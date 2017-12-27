@@ -2,7 +2,7 @@
 #define TRACER_GEOMETRY_H
 
 #include <stdint.h>
-#include <EEPROM/EEPROMStorage.h>
+#include <StepperControl/SteppersData.h>
 
 
 /*
@@ -14,7 +14,7 @@ inline void geometry_translate(const float *const hl_coordinates, float *const s
 
     //0.8 us
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        steppers_coordinates[axis] = (EEPROMStorage::steppers_data[axis].steps * hl_coordinates[axis]);
+        steppers_coordinates[axis] = (SteppersData::steppers_data[axis].steps_per_unit * hl_coordinates[axis]);
 
     }
 

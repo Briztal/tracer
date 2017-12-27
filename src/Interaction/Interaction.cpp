@@ -19,16 +19,16 @@
 */
 
 #include "stdint.h"
-#include "Control.h"
+#include "Interaction.h"
 #include <TaskScheduler/TaskScheduler.h>
-#include <Control/Protocols/ClearText.h>
+#include <Interaction/Protocols/ClearText.h>
 
 
 /*
  * initialise_hardware : this function initialises all transmission layers;
  */
 
-void Control::initialise_hardware() {
+void Interaction::initialise_hardware() {
 
     //A macro that will initialise the interface for a giver control pipeline;
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission) transmission::begin();
@@ -39,6 +39,8 @@ void Control::initialise_hardware() {
     //Undef the macro for safety;
 #undef EXTERNAL_CONTROL
 
+    delay_ms(200);
+
 }
 
 
@@ -46,7 +48,7 @@ void Control::initialise_hardware() {
  * initialisation_message : this function triggers the init_message for all enabled controllers;
  */
 
-void Control::initialisation_message() {
+void Interaction::initialisation_message() {
 
     //A macro that will initialise the interface for a giver control pipeline;
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission)\
@@ -67,7 +69,7 @@ void Control::initialisation_message() {
  *  It creates a new Protocol, and gives it to the controller, that will initialise its data accordingly;
  */
 
-void Control::initialise_data() {
+void Interaction::initialise_data() {
 
     initialise_external_controllers();
 
@@ -80,7 +82,7 @@ void Control::initialise_data() {
  * initialise_external_controllers : this function initialises data for external controllers;
  */
 
-void Control::initialise_external_controllers() {
+void Interaction::initialise_external_controllers() {
 
     //Cache for the log_protocol;
     Protocol *p;
@@ -118,12 +120,12 @@ void Control::initialise_external_controllers() {
  *          This prevents from interrogating the first interface, and fulling the queue, and not being able to
  *          interrogate other interfaces.
  *
- *      - Control are interrogated in order, and all with the same priority.
+ *      - Interaction are interrogated in order, and all with the same priority.
  *          It means that if interface 0 is interrogated, the next interface to be interrogated will
  *          necessarily be interface 1.
  */
 
-void Control::read_external_controllers() {
+void Interaction::read_external_controllers() {
 
     //The number of interfaces to skip;
     static uint8_t skip_counter = 0;
@@ -188,11 +190,11 @@ void Control::read_external_controllers() {
 }
 
 
-void Control::read_internal_controllers() {
+void Interaction::read_internal_controllers() {
 
 
 }
 
 
 Protocol *t_prot_cont[NB_CONTROLS];
-Protocol **const Control::protocols = t_prot_cont;
+Protocol **const Interaction::protocols = t_prot_cont;

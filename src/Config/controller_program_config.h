@@ -55,7 +55,7 @@
  * These canals are automatically detected by the high level, and used by it to monitor specific functions of the machine.
  *
  * Those canals are :
- *  - asserv : the canal to monitor Control loops,
+ *  - asserv : the canal to monitor Interaction loops,
  *  - steppers
  *
  *

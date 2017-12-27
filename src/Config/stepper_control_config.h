@@ -84,10 +84,10 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
  *
  * for each stepper of the machine, put one line like behind, and provide all parameters :
  *
- * STEPPER_DATA(id, letter, size, steps, speed, acceleration, jerk)
+ * STEPPER_DATA(id, letter, size, steps_per_unit, speed, acceleration, jerk)
  *
  *  - i : the index of the stepper. Indices start at 0, and are strictly consecutive;
- *  - steps : the default steps per unit for stepper i;
+ *  - steps_per_unit : the default steps_per_unit per unit for stepper i;
  *  - speed : the default maximum speed for stepper i;
  *  - acceleration : the default maximal acceleration for stepper i;
  *  - jerk : the default maximum jerk for stepper i;
@@ -96,7 +96,7 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
 
 #ifdef STEPPER_DATA
 
-//              id, steps,  speed,  acceler.,   jerk)
+//              id, steps_per_unit,  speed,  acceler.,   jerk)
 STEPPER_DATA(   0,  80.16,  1000,    1000,      20.)
 STEPPER_DATA(   1,  80.16,  1000.,   1000,      20.)
 STEPPER_DATA(   2,  80.16,  1000.,   1000,      20.)
@@ -171,7 +171,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 //------------------------------------------------ Kinematics Core Version ---------------------------------------------
 
 /*
- * The version of the Stepper Control Kinematics TaskScheduler you want to use. You have 3 versions available :
+ * The version of the Stepper Interaction Kinematics TaskScheduler you want to use. You have 3 versions available :
  *  - 0 : a basic algorithm for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
  *  - 1 : a better algorithm for 32 bits processors with FPU;
  *  - 2 : a more advanced algorithm for 32 bits processors with FPU. Recommended for complex machines;
@@ -182,13 +182,13 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 //-------------------------------------------------- Distance Bounds ---------------------------------------------------
 
-//The minimum number of steps between two consecutive positions;
+//The minimum number of steps_per_unit between two consecutive positions;
 #define MINIMUM_DISTANCE_LIMIT 8
 
-//The ideal number of steps between two consecutive positions;
+//The ideal number of steps_per_unit between two consecutive positions;
 #define DISTANCE_TARGET 11
 
-//The maximum number of steps between two consecutive positions;
+//The maximum number of steps_per_unit between two consecutive positions;
 #define MAXIMUM_DISTANCE_LIMIT 14
 
 //------------------------------------------------------ Data types ----------------------------------------------------
@@ -204,37 +204,6 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 //The delay type
 #define delay_t uint32_t
-
-
-//------------------------------------------------------ Command System ------------------------------------------------
-
-/*
- * The Control coordinate system is an abstraction layer, over the high level coordinate system, made to ease
- *  the control of the machine. As high level axis can be numerous, this system allows you divide your axis in groups,
- *  for example, and to control them in groups.
- *
- *  To configure you layer of abstraction, you may require some persistent parameters, that will be saved in the
- *      EEPROM.
- *
- *  To create a persistent variable, you may use the following command :
- *
- *  COORD_INTERFACE_VARIABLE(name, default)
- *
- *  It will create a float, named "name", with the default value "default".
- *
- */
-
-#ifdef COORD_INTERFACE_VARIABLE
-
-COORD_INTERFACE_VARIABLE(x0_offset, 10)
-COORD_INTERFACE_VARIABLE(x1_offset, 230)
-COORD_INTERFACE_VARIABLE(y0_offset, 10)
-COORD_INTERFACE_VARIABLE(y1_offset, 230)
-COORD_INTERFACE_VARIABLE(z_offset, 10)
-COORD_INTERFACE_VARIABLE(x_max_sum, 400)
-COORD_INTERFACE_VARIABLE(y_max_sum, 400)
-
-#endif
 
 
 //--------------------------------------------------------- Log --------------------------------------------------------

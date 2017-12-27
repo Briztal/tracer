@@ -54,7 +54,7 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     //Move choice : a m
     if (absolute_distances[max_axis] < PROCESSING_STEPS) {
-        //ending distance < steps per elementary-plan_movement -> only one micro enqueue_movement
+        //ending distance < steps_per_unit per elementary-plan_movement -> only one micro enqueue_movement
         //TODO micro_move(absolute_distances);
     } else {
         //A enqueue_movement is indexed on an int value -> ending distance must not be > INT_OVF
@@ -92,11 +92,11 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
 
     //Order determination : Using an insertion sort on end_distances, and extract axis_data at the same time
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
-        float steps;
+        float steps_per_unit;
         int32_t steps_destination, distance;
 
-        steps = EEPROMStorage::steps[axis];
-        steps_destination = (int32_t) (destinations_t[axis] * steps);
+        steps_per_unit = EEPROMStorage::steps_per_unit[axis];
+        steps_destination = (int32_t) (destinations_t[axis] * steps_per_unit);
         distance = steps_destination - SpeedPlanner::positions[axis];
 
         //If distance is not null :
@@ -116,7 +116,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             enable_stepper_interrupt()
 
             //Millimeter relative step_distances computation
-            float relative_distances_mm = distsmm[axis] = (float) distance / steps;
+            float relative_distances_mm = distsmm[axis] = (float) distance / steps_per_unit;
             sq_dist_sum += relative_distances_mm * relative_distances_mm;
             
             /*

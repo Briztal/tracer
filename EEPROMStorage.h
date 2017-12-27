@@ -36,7 +36,7 @@
  * It stores data for :
  *
  *      - PIDs (kp, ki, kd);
- *      - Control Loops (period_ms)
+ *      - Interaction Loops (period_ms)
  *      - Continuous Actuators (ending)
  *      - Servo Actuators(min and ending)
  *      - Stepper Motors (sizes, steps/unit, regulation_speed, acceleration)
@@ -79,7 +79,7 @@ private :
 
 
 #ifdef ENABLE_STEPPER_CONTROL
-
+/*
 public :
 
     //Stepper motors data
@@ -91,6 +91,7 @@ public :
     //Coordinate interface structure
     static coordinate_interface_data_t coordinate_interface_data;
 
+ */
 #endif
 
 
@@ -100,12 +101,13 @@ public :
 
 public :
 
-    //PID data
+    /*
+    //GENERATE_PID data
     static pid_data_t *const pids_data;
 
-    //Control loops data
+    //Interaction loops data
     static float *const loop_periods;
-
+*/
 #endif
 
 
@@ -113,17 +115,18 @@ public :
 
 public :
 
+    /*
     //Continuous actions
     static continuous_data_t *const continuous_data;
 
     //Servo actions
     static servo_data_t *const servos_data;
-
+*/
 
     //------------------------------------------------Custom data-------------------------------------------------------
 
 public :
-    static custom_data_t custom_data;
+    //static custom_data_t custom_data;
 
 
 };

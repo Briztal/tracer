@@ -20,7 +20,7 @@
 
 #include "SqrtFastComputer.h"
 #include <hardware_language_abstraction.h>
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 
 /*

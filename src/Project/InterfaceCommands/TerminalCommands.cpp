@@ -21,14 +21,14 @@
 
 #include <Config/control_config.h>
 
+#include "EEPROM/EEPROM.h"
+
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "Control/Control.h"
+#include "Interaction/Interaction.h"
 
 #include "TerminalCommands.h"
-#include <EEPROM/EEPROMStorage.h>
 #include <Project/MachineController.h>
-#include <EEPROM/EEPROMInterface.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
 
@@ -48,6 +48,10 @@ task_state_t TerminalCommands::flood(char *) {
 
 task_state_t TerminalCommands::eeprom(char *arguments) {
 
+    //EEPROM::print_tree();
+
+    //return complete;
+
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);
 
@@ -60,7 +64,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         std_out("Reseting the EEPROM default profile.");
 
         //Reset
-        EEPROMStorage::set_default_profile();
+        //EEPROMStorage::set_default_profile();
 
     }
 
@@ -81,15 +85,17 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
             std_out("Writing " + String(path) + " to " + String(function));
 
             //write_data the variable
-            EEPROMInterface::write_data_by_string(path, function);
+            EEPROM::write_data_by_string(path, function);
 
-        }
+        } else {
 
-        //Read and display the value.
-        if (EEPROMInterface::read_data_by_string(path, &function)) {
+            //Read and display the value.
+            if (EEPROM::read_data_by_string(path, &function)) {
 
-            //Log message
-            std_out("Value for " + String(path) + " : " + String(function));
+                //Log message
+                std_out("Value for " + String(path) + " : " + String(function));
+
+            }
 
         }
 
@@ -99,7 +105,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     if (CHECK_ARGUMENT('d')) {
 
         //Print the current profile.
-        EEPROMInterface::print_stored_data();
+        //EEPROMInterface::print_stored_data();
 
     }
 

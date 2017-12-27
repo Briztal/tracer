@@ -25,7 +25,7 @@
 
 #include "IncrementComputer.h"
 
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 
 #include <StepperControl/StepperController.h>
 

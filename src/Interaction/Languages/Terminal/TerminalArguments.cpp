@@ -26,7 +26,7 @@
 #include "TerminalArguments.h"
 
 #include "Config/controller_terminal_config.h"
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 #include <DataStructures/StringUtils.h>
 
 

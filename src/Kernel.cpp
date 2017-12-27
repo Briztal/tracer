@@ -19,16 +19,16 @@
 */
 
 #include <Sensors/Thermistors/Thermistors.h>
-#include <EEPROM/EEPROMStorage.h>
 #include <StepperControl/Steppers.h>
 #include <ControlLoops/ControlLoops.h>
 #include <TaskScheduler/TaskScheduler.h>
 #include <StepperControl/TrajectoryTracer.h>
-#include <Control/Control.h>
+#include <Interaction/Interaction.h>
 #include <Sensors/Sensors.h>
 #include <Actuators/Actuators.h>
 #include <StepperControl/StepperController.h>
 #include <Config/_ConfigChecker.h>
+#include <EEPROM/EEPROM.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -78,7 +78,7 @@ void Kernel::start() {
     initialise_data();
 
     //Logo and initialise_hardware message
-    Control::initialisation_message();
+    Interaction::initialisation_message();
 
     //Call the main loop;
     run();
@@ -164,7 +164,7 @@ void Kernel::initialise_hardware() {
     hl_init();
 
     //Initialise all enabled interfaces
-    Control::initialise_hardware();
+    Interaction::initialise_hardware();
 
     //Initialise actions;
     Actuators::initialise_hardware();
@@ -194,20 +194,21 @@ void Kernel::initialise_hardware() {
 
 void Kernel::initialise_data() {
 
+    //Clear the EEPROM profile;
+    EEPROM::initialise_data();
+
     //Initialise the task scheduler;
     TaskScheduler::initialise_data();
 
+
     //Initialise all enabled interfaces
-    Control::initialise_data();
+    Interaction::initialise_data();
 
     //Initialise actions;
     Actuators::initialise_data();
 
     //Initialise Sensors
     Sensors::initialise_data();
-
-    //Initialise the EEPROM data
-    EEPROMStorage::initialise_data();
 
 
     //Initialise the SteppersController module only if it is enabled
@@ -216,6 +217,9 @@ void Kernel::initialise_data() {
     StepperController::initialise_data();
 
 #endif
+
+    //Lock the EEPROM tree;
+    EEPROM::lock_tree();
 
 }
 

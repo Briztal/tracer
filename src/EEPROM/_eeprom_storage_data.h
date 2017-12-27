@@ -6,16 +6,6 @@
 #include <config.h>
 
 #ifdef ENABLE_STEPPER_CONTROL
-
-//The stepper data structure : contains all data related to a stepper motor
-typedef struct stepper_data_t {
-    float steps;
-    float maximum_speed;
-    float acceleration;
-    float jerk;
-} stepper_data_t;
-
-
 //
 
 #define COORD_INTERFACE_VARIABLE(name, default_value) float name = default_value;

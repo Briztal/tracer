@@ -19,7 +19,7 @@
 */
 
 
-//------------------------------------------------- Control -------------------------------------------------
+//------------------------------------------------- Interaction -------------------------------------------------
 
 /*
  * Interface - data-link settings
@@ -41,7 +41,7 @@
 
 
 /*
- * The next lines focus on Control configuration. Control are static classes, meant only to interpret data.
+ * The next lines focus on Interaction configuration. Interaction are static classes, meant only to interpret data.
  *
  * In order to receive orders from th outside, a Controller must receive its data from a Protocol, that reads and decode
  *  data over transmission layers;
@@ -56,7 +56,7 @@
  *  CONTROL(controller, log_protocol, protocol_buffer_size, transmission_layer), where :
  *
  *      - controller is the name of a Controller class;
- *      - log_protocol is the name of a Protocol class (Control/Protocols);
+ *      - log_protocol is the name of a Protocol class (Interaction/Protocols);
  *      - protocol_buffer_size is the size of the Protocol class's input buffer;
  *      - transmission layer is the name of a transmission layer (hardware_language_abstraction_xxxx.h)
  *
