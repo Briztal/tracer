@@ -43,8 +43,6 @@ EEPROMTree::EEPROMTree(string_t *name, float *const data) : name(name), data(dat
 
 EEPROMTree::~EEPROMTree() {
 
-    Serial.println("DESTRUCTOR CALLED");
-
     //Delete each child;
     for (uint8_t child = 0; child < nb_children; child++) {
 
@@ -108,8 +106,6 @@ void EEPROMTree::addChild(EEPROMTree *child) {
 
         //Save the new child;
         children[nb_children - 1] = child;
-
-        Serial.println(*name + " added child : "+String(nb_children) +" "+*children[nb_children - 1]->name);
 
     }
 

@@ -54,6 +54,22 @@ public:
     float compute(float error);
 
 
+    //-------------------------------------------------- Constants --------------------------------------------------
+
+public:
+
+    //A struct to contain constants pointers;
+    struct PID_constants_t {
+        float *kp, *ki, *kd;
+    };
+
+    //Get the constant pointers;
+    PID_constants_t getConstants();
+
+    //Register the PID in the EEPROM;
+    void EEPROMRegister(char *path, const char *name);
+
+
     //-------------------------------------------------- Fields --------------------------------------------------
 
 private:

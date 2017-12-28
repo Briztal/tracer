@@ -36,10 +36,18 @@
 
 class TemperatureController {
 
+    //--------------------------- Data Initialisation ---------------------------
 
 public:
 
+    //Initialise the class in a safe state;
+    static void initialise_data();
+
+
     //---------------------------Interrupt regulation functions---------------------------
+
+public:
+
 
     //The function to initialise_hardware the temperature regulation routine
     static void regulation_init();

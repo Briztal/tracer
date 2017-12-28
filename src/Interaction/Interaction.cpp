@@ -55,7 +55,7 @@ void Interaction::initialisation_message() {
     controller::init_message();
 
     //Expand the message;
-#include <config.h>
+#include <Config/control_config.h>
 
     //Undef the macro for safety;
 #undef EXTERNAL_CONTROL

@@ -25,6 +25,51 @@
 #include <Sensors/Thermistors/Thermistors.h>
 
 
+//----------------------------------------------------- Data init ------------------------------------------------------
+
+
+/*
+ * initialise_data : this function initialises data in a safe state, and registers PID in the EEPROM;
+ */
+
+void TemperatureController::initialise_data() {
+
+    memset(hotends_enabled, 0, 4 * sizeof(bool));
+    memset(hotends_temps, 0, 4 * sizeof(float));
+
+    //Declare and define the hotbed state (flags and vars for activity and temperature target).
+    hotbed_state = hotbed_state_t();
+
+    //Reinit all PIDs;
+    pid_hotends[0] = PID(1, 0, 0);
+    pid_hotends[1] = PID(1, 0, 0);
+    pid_hotends[2] = PID(1, 0, 0);
+    pid_hotends[3] = PID(1, 0, 0);
+    pid_hotbed = PID(1, 0, 0);
+
+    //Cache the path;
+    char path[10];
+
+    //EEPROM init;
+
+    memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
+    pid_hotends[0].EEPROMRegister(path, "hotend_0");
+
+    memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
+    pid_hotends[1].EEPROMRegister(path, "hotend_1");
+
+    memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
+    pid_hotends[2].EEPROMRegister(path, "hotend_2");
+
+    memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
+    pid_hotends[3].EEPROMRegister(path, "hotend_3");
+
+    memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
+    pid_hotbed.EEPROMRegister(path, "hotbed");
+
+}
+
+
 //-------------------------------------------------------Hotends--------------------------------------------------------
 
 /*
@@ -311,8 +356,8 @@ void TemperatureController::regulation_finalisation() {
 #define m TemperatureController
 
 //Declare and define the hotends state (flags and vars for activities and temperature targets).
-bool t_hotends_en[4];
-float t_hotends_temps[4];
+bool t_hotends_en[4]{false};
+float t_hotends_temps[4]{0};
 
 bool *const m::hotends_enabled = t_hotends_en;
 float *const m::hotends_temps = t_hotends_temps;

@@ -18,6 +18,8 @@
 
 */
 
+#include <EEPROM/EEPROMTree.h>
+#include <EEPROM/EEPROM.h>
 #include "PID.h"
 
 /*
@@ -68,6 +70,44 @@ void PID::set_constants(float kp, float ki, float kd) {
 
     //Update the kd;
     this->kd = kd;
+}
+
+
+/*
+ * getConstants : this function
+ */
+
+PID::PID_constants_t PID::getConstants() {
+
+    //Initialise a struct;
+    PID::PID_constants_t constants =  PID::PID_constants_t();
+
+    //Update kp, ki, and kd;
+    constants.kp = &kp, constants.ki = &ki, constants.kd = &kd;
+
+    //Return the created struct;
+    return constants;
+
+}
+
+
+/*
+ * EEPROMRegister : this function registers the PID in the EEPROM;
+ */
+
+void PID::EEPROMRegister(char *path, const char *name) {
+
+    //Create the parent
+    EEPROMTree *tree = new EEPROMTree(new String(name), nullptr);
+
+    //Create sons;
+    tree->addChild(new EEPROMTree(new String("kp"), &kp));
+    tree->addChild(new EEPROMTree(new String("ki"), &ki));
+    tree->addChild(new EEPROMTree(new String("kd"), &kd));
+
+    //Register the tree in the EEPROM;
+    EEPROM::add_branch(path, tree);
+
 }
 
 

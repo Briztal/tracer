@@ -62,6 +62,36 @@
 
 
 /*
+ * initialise_data : this function initialises data in a safe state;
+ */
+
+void MachineController::initialise_data() {
+
+    //Reset the cooling state;
+    cooling_state = cooling_state_t();
+
+    //Reset the extrusion state;
+    extrusion_state = carriages_state_t();
+
+    //Reset the current position;
+    current_position = hl_coord_t();
+
+    //Reset the offset struct;
+    offsets = hl_coord_t();
+
+    //Reset the control position;
+    memset(axis_positions, 0, NB_STEPPERS * sizeof(float));
+
+    //Reset the current mode;
+    mode = 0;
+
+    //Reset coordinate interfaces;
+    coordinate_interfaces_data = coordinate_interfaces_data_t();
+
+}
+
+
+/*
  * home :
  *
  *  This function resets all axis to their zero coordinate, at the maximal speed that do not exceeds carriages
@@ -328,8 +358,6 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
 
     return state;
 }
-
-
 
 
 /*
@@ -626,7 +654,7 @@ const MachineController::cooling_state_t MachineController::get_cooling_state() 
 
 task_state_t MachineController::set_coord_interface_state(coord_interface_state_t new_state) {
 
-#define COORD_INTERFACE_VARIABLE(name,...)\
+#define COORD_INTERFACE_VARIABLE(name, ...)\
     if (new_state.name##_flag) {\
         EEPROMStorage::coordinate_interface_data.name = new_state.name;\
     }
@@ -650,7 +678,7 @@ const MachineController::coord_interface_state_t MachineController::get_coord_in
     coord_interface_state_t t;
 
 //Fill it
-#define COORD_INTERFACE_VARIABLE(name,...)\
+#define COORD_INTERFACE_VARIABLE(name, ...)\
     t.name##_flag = true;\
     t.name = EEPROMStorage::coordinate_interface_data.name;
 
@@ -681,4 +709,4 @@ float *const MachineController::axis_positions = tmpos;
 
 uint8_t MachineController::mode = 0;
 
-MachineController::coordinate_interfaces_data_t MachineController::coordinate_interfaces_data;
+MachineController::coordinate_interfaces_data_t MachineController::coordinate_interfaces_data = MachineController::coordinate_interfaces_data_t();

@@ -55,6 +55,17 @@
 
 class MachineController {
 
+
+    //--------------------------- Data Initialisation ---------------------------
+
+public:
+
+    //Initialise the class in a safe state;
+    static void initialise_data();
+
+
+    //--------------------------- Data structures  ---------------------------
+
 private:
 
     /*

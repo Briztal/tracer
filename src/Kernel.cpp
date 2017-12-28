@@ -29,6 +29,7 @@
 #include <StepperControl/StepperController.h>
 #include <Config/_ConfigChecker.h>
 #include <EEPROM/EEPROM.h>
+#include <Project/Project.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -200,7 +201,6 @@ void Kernel::initialise_data() {
     //Initialise the task scheduler;
     TaskScheduler::initialise_data();
 
-
     //Initialise all enabled interfaces
     Interaction::initialise_data();
 
@@ -217,6 +217,9 @@ void Kernel::initialise_data() {
     StepperController::initialise_data();
 
 #endif
+
+    //Finally, initialise the project;
+    Project::initialise_data();
 
     //Lock the EEPROM tree;
     EEPROM::lock_tree();
