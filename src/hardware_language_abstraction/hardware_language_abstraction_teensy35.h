@@ -212,10 +212,10 @@ static inline static void delay_ms(uint16_t time_ms){
 
 
 //Controlling if loop is enabled
-#define is_timer_loop_enabled_0() ENABLE_TIMER(0)
-#define is_timer_loop_enabled_1() ENABLE_TIMER(1)
-#define is_timer_loop_enabled_2() ENABLE_TIMER(2)
-#define is_timer_loop_enabled_3() ENABLE_TIMER(3)
+#define is_timer_loop_enabled_0() IS_LOOP_ENABLED(0)
+#define is_timer_loop_enabled_1() IS_LOOP_ENABLED(1)
+#define is_timer_loop_enabled_2() IS_LOOP_ENABLED(2)
+#define is_timer_loop_enabled_3() IS_LOOP_ENABLED(3)
 
 
 //get flags

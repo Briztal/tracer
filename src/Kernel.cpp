@@ -180,9 +180,6 @@ void Kernel::initialise_hardware() {
 
 #endif
 
-    //TODO MAKE AN INITIALISATION FUNCTION IN ControlLoops
-    //Enable the temperature regulation loop
-    ControlLoops::enable_temperature();
 
 }
 

@@ -28,46 +28,19 @@
 
 #include <hardware_language_abstraction.h>
 
-class ControlLoops {
-
-    /*
-    * Loop functions are routines that are called regularly with interrupts.
-    *
-    * They are defined by the function they call and the period related.
-    */
-
-#define LOOP_FUNCTION(indice, name, period_ms) \
-public:\
-    /*enable function, enables the loop (interrupt and timer).*/\
-    static inline void enable_##name(){\
-        initialisation_function_##name();\
-        setup_loop_##indice##_interrupt(loop_function_##name, period_ms);\
-    }\
-    /*disable function, disables the loop (interrupt and timer).*/\
-    static inline void disable_##name(){\
-        finalisation_function_##name();\
-        disable_loop_##indice##_interrupt();\
-    }\
-    /*state function : returns true if the loop is enabled.*/\
-    static inline bool is_active_##name() {\
-        return is_loop_##indice##_enabled();\
-    }\
-    \
-private:\
-    /*loop function : the function that is called when the interrupt occurs.*/\
-    static void loop_function_##name();\
-    /*initialisation_function : the function that is called when the loop is enabled.*/\
-    static void initialisation_function_##name();\
-    /*finalisation_function : the function that is called when the loop is disabled.*/\
-    static void finalisation_function_##name();\
-
-
-#include <Config/control_loops_config.h>
-
-#undef LOOP_FUNCTION
-
+//Define a macro to implement a loop class;
+#define GENERATE_LOOP(loop_index, timer_index)\
+class Loop##loop_index {\
+    public:\
+    static inline void start(void (*loop_f)(), float period_ms) {setup_interrupt_##timer_index(loop_f, period_ms);}\
+    static inline void stop() {disable_interrupt_##timer_index();}\
+    static inline bool active() {return (bool) is_timer_loop_enabled_##timer_index();}\
 };
 
+//Implement all loop classes;
+#include "Config/hl_config.h"
+
+#undef GENERATE_LOOP
 
 #endif //TRACER_CONTROLLOOPS_H
 

@@ -19,9 +19,7 @@
 */
 
 
-#include "TemperatureController.h"
-
-#include "ControlLoops/ControlLoops.h"
+#include "RegulationController.h"
 
 #include <Actuators/PWMGPIO.h>
 #include <Sensors/Thermistors/Thermistors.h>
@@ -34,7 +32,7 @@
  * initialise_data : this function initialises data in a safe state, and registers PID in the EEPROM;
  */
 
-void TemperatureController::initialise_data() {
+void RegulationController::initialise_data() {
 
     memset(hotends_enabled, 0, 4 * sizeof(bool));
     memset(hotends_temps, 0, 4 * sizeof(float));
@@ -69,13 +67,6 @@ void TemperatureController::initialise_data() {
     memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
     pid_hotbed.EEPROMRegister(path, "hotbed");
 
-
-    //Initialise the regulation;
-    regulation_init();
-
-    //Start the regulation loop;
-    Loop0::start(temperature_regulation, 10);
-
 }
 
 
@@ -85,7 +76,7 @@ void TemperatureController::initialise_data() {
  * enable_hotend_regulation : this function enables a particular hotend's regulation.
  */
 
-task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) {
+task_state_t RegulationController::set_hotends_state(hotend_state_t new_state) {
 
     //If the hotend_id was not provided, fail.
     if (!new_state.hotend_flag)  {
@@ -142,7 +133,7 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
  *  As hotends states are not stored in a state structure (too heavy to manipulate), a state is created and returned.
  */
 
-TemperatureController::hotend_state_t TemperatureController::get_hotend_state(uint8_t hotend_id) {
+RegulationController::hotend_state_t RegulationController::get_hotend_state(uint8_t hotend_id) {
 
     //Create a state with all flags to zero
     hotend_state_t state = hotend_state_t();
@@ -174,7 +165,7 @@ TemperatureController::hotend_state_t TemperatureController::get_hotend_state(ui
  * get_hotend_temperature : this function reads and returns the required hotend's temperature.
  */
 
-float TemperatureController::get_hotend_temperature(uint8_t hotend) {
+float RegulationController::get_hotend_temperature(uint8_t hotend) {
 
     switch (hotend) {
         case 0:
@@ -200,7 +191,7 @@ float TemperatureController::get_hotend_temperature(uint8_t hotend) {
  * enable_hotbed_regulation : this function enables the hotbed's regulation.
  */
 
-task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
+task_state_t RegulationController::set_hotbed_state(hotbed_state_t new_state) {
 
     if (new_state.enabled_flag) {
 
@@ -243,8 +234,8 @@ task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
  * get_hotbeds_state : this function will return a copy of the current hotbed state.
  */
 
-TemperatureController::hotbed_state_t TemperatureController::get_hotbeds_state() {
-    return TemperatureController::hotbed_state;
+RegulationController::hotbed_state_t RegulationController::get_hotbeds_state() {
+    return RegulationController::hotbed_state;
 }
 
 
@@ -252,7 +243,7 @@ TemperatureController::hotbed_state_t TemperatureController::get_hotbeds_state()
  * get_hotbed_temperature : this function reads and returns the temperature of the hotbed.
  */
 
-float TemperatureController::get_hotbed_temperature() {
+float RegulationController::get_hotbed_temperature() {
 
     //Simply read_data the hotbed thermistor value.
     return Thermistors::get_temperature_hotbed();
@@ -271,7 +262,7 @@ float TemperatureController::get_hotbed_temperature() {
  *
  */
 
-void TemperatureController::regulation_init() {
+void RegulationController::regulation_init() {
 
     //Reset all hotends PIDs
     pid_hotends[0].reset();
@@ -286,13 +277,13 @@ void TemperatureController::regulation_init() {
 
 
 /*
- * temperature_regulation : this function is the interrupt routine, called to regulate temperatures in the machine.
+ * regulation_loop : this function is the interrupt routine, called to regulate temperatures in the machine.
  *
  *  It checks if each thermistor is enabled, and if it is, regulated its temperature.
  *
  */
 
-void TemperatureController::temperature_regulation() {
+void RegulationController::regulation_loop() {
 
 
 #define TEMP_REGULATION(i, enabled, target, name, pid) \
@@ -334,7 +325,7 @@ void TemperatureController::temperature_regulation() {
  *
  */
 
-void TemperatureController::regulation_finalisation() {
+void RegulationController::regulation_finalisation() {
 
     //Set hotends and hotbed target to zero.
 
@@ -362,7 +353,7 @@ void TemperatureController::regulation_finalisation() {
 
 //-------------------------------------------Static declaration / definitions-------------------------------------------
 
-#define m TemperatureController
+#define m RegulationController
 
 //Declare and define the hotends state (flags and vars for activities and temperature targets).
 bool t_hotends_en[4]{false};

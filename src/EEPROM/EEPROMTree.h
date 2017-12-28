@@ -86,7 +86,7 @@ private:
     //The current number of children;
     uint8_t nb_children;
 
-    //The chlidren array;
+    //The children array;
     EEPROMTree **children;
 
     //The parameter name;

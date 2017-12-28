@@ -47,7 +47,6 @@ void EEPROM::initialise_data() {
 
 void EEPROM::write_tree() {
 
-    uint8_t index = 0;
 }
 
 void EEPROM::_write_tree() {

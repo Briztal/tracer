@@ -21,8 +21,6 @@
 
 #include "TemperatureController.h"
 
-#include "ControlLoops/ControlLoops.h"
-
 #include <Actuators/PWMGPIO.h>
 #include <Sensors/Thermistors/Thermistors.h>
 
@@ -68,13 +66,6 @@ void TemperatureController::initialise_data() {
 
     memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
     pid_hotbed.EEPROMRegister(path, "hotbed");
-
-
-    //Initialise the regulation;
-    regulation_init();
-
-    //Start the regulation loop;
-    Loop0::start(temperature_regulation, 10);
 
 }
 
