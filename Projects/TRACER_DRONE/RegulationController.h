@@ -19,9 +19,11 @@
 */
 
 /*
- * The regulation controller class.
+ * The temperature controller class.
  *
- *  This class manages different regulations of the drone
+ *  This class controls the machine's temperature regulations. It is built on the same structure than
+ *      MachineController (State Manager, see details in MachineController).
+ *
  */
 
 
@@ -31,10 +33,9 @@
 
 #include <TaskScheduler/TaskScheduler.h>
 #include <ControlLoops/PID.h>
-
+#include <ControlLoops/OrientationController.h>
 
 class RegulationController {
-
 
     //--------------------------- Data Initialisation ---------------------------
 
@@ -44,18 +45,25 @@ public:
     static void initialise_data();
 
 
-    //---------------------------Interrupt regulation functions---------------------------
+    //--------------------------- Interrupt regulation functions ---------------------------
 
 public:
 
-    //The function to initialise_hardware the temperature regulation routine
-    static void regulation_init();
+    //The function to initialise the control routine
+    static void control_init();
 
-    //Temperature regulation routine.
-    static void regulation_loop();
+    //The control routine.
+    static void control_function();
 
-    //The function to finalise the temperature regulation routine
-    static void regulation_finalisation();
+
+    //--------------------------- Control data ---------------------------
+
+private:
+
+    //The orientation controller;
+    static OrientationController orientation_controller;
+
+
 
 
 };

@@ -41,7 +41,7 @@ task_state_t GCodeCommands::action(char *) {
 }
 
 
-//--------------------------------------------------------EEPROM--------------------------------------------------------
+//--------------------------------------------------------EEPROMMap--------------------------------------------------------
 
 task_state_t GCodeCommands::eeprom(char *arguments) {
 
@@ -54,7 +54,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     //If the default profile must be reset
     if (CHECK_ARGUMENT('R')) {
 
-        std_out("Reseting the EEPROM default profile.");
+        std_out("Reseting the EEPROMMap default profile.");
 
         //Reset
         //EEPROMStorage::set_default_profile();

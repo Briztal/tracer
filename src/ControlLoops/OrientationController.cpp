@@ -20,6 +20,8 @@
 
 
 #include <cmath>
+#include <EEPROM/EEPROMTree.h>
+#include <EEPROM/EEPROMMap.h>
 
 #include "OrientationController.h"
 
@@ -81,16 +83,36 @@ void OrientationController::setTaget(float target_theta, float target_phi) {
 
 void OrientationController::getCorrectionVector(float current_theta, float current_phi, rotation_vector *vector) {
 
-    //Get the semi error on the r axis;
-    float error_r = semi_error_r - std::cos(target_theta) * target_phi;
+    float error_r, error_t;
 
-    //Get the semi error on the t axis;
-    float error_t = semi_error_t - std::sin(target_theta) * target_phi;
 
-    //Feed the r StaticPID with the r error;
-   vector->r = pid_r->compute(error_r);
+    //If both target and current phi.s are in zone 1 :
+    if (target_in_zone_1 && (current_phi > (float) M_PI_2)) {
 
-    //Feed the t StaticPID with the t error;
+        //The corrected angle;
+        float corrected_phi = ((float) M_PI - target_phi);
+
+        //Get the semi error on the r axis;
+        error_r = semi_error_r_1 - std::cos(target_theta) * corrected_phi;
+
+        //Get the semi error on the t axis;
+        error_t = semi_error_t_1 - std::sin(target_theta) * corrected_phi;
+
+    } else {
+        //If almost one phi is in zone 0 :
+
+        //Get the semi error on the r axis;
+        error_r = semi_error_r_0 - std::cos(target_theta) * target_phi;
+
+        //Get the semi error on the t axis;
+        error_t = semi_error_t_0 - std::sin(target_theta) * target_phi;
+
+    }
+
+    //Feed the r PID with the r error;
+    vector->r = pid_r->compute(error_r);
+
+    //Feed the t PID with the t error;
     vector->t = pid_t->compute(error_t);
 
 }
@@ -102,10 +124,54 @@ void OrientationController::getCorrectionVector(float current_theta, float curre
 
 void OrientationController::computeSemiErrors() {
 
+    //Update the zone :
+    target_in_zone_1 = (target_phi > (float) M_PI_2);
+
+    //Semi errors for case 0 :
+
     //Get the semi error on the r axis;
-    semi_error_r = std::cos(target_theta) * target_phi;
+    semi_error_r_0 = std::cos(target_theta) * target_phi;
 
     //Get the semi error on the t axis;
-    semi_error_t = std::sin(target_theta) * target_phi;
+    semi_error_t_0 = std::sin(target_theta) * target_phi;
+
+
+    //Semi errors for case 1, only if phi is in zone 1
+    if (target_in_zone_1) {
+
+        //The corrected angle;
+        float corrected_phi = ((float) M_PI - target_phi);
+
+        //Get the semi error on the r axis;
+        semi_error_r_1 = std::cos(target_theta) * corrected_phi;
+
+        //Get the semi error on the t axis;
+        semi_error_t_1 = std::sin(target_theta) * corrected_phi;
+
+    }
+
+}
+
+
+/*
+ * EEPROMRegister : this function registers the two PIDs in the EEPROMMap;
+ */
+
+void OrientationController::EEPROMRegister(char *path, const char *name) {
+
+    /*
+
+    //Create the parent
+    EEPROMTree *tree = new EEPROMTree(new String(name), nullptr);
+
+    //Create sons;
+    tree->addChild(new EEPROMTree(new String("kp"), &kp));
+    tree->addChild(new EEPROMTree(new String("ki"), &ki));
+    tree->addChild(new EEPROMTree(new String("kd"), &kd));
+
+    //Register the tree in the EEPROMMap;
+    EEPROMMap::add_branch(path, tree);
+
+     */
 
 }

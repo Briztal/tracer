@@ -21,7 +21,7 @@
 
 #include <Config/control_config.h>
 
-#include "EEPROM/EEPROM.h"
+#include "EEPROM/EEPROMMap.h"
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
@@ -44,11 +44,11 @@ task_state_t TerminalCommands::flood(char *) {
 }
 
 
-//--------------------------------------------------------EEPROM--------------------------------------------------------
+//--------------------------------------------------------EEPROMMap--------------------------------------------------------
 
 task_state_t TerminalCommands::eeprom(char *arguments) {
 
-    //EEPROM::print_tree();
+    //EEPROMMap::print_tree();
 
     //return complete;
 
@@ -61,7 +61,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     //If the default profile must be reset
     if (CHECK_ARGUMENT('r')) {
 
-        std_out("Reseting the EEPROM default profile.");
+        std_out("Reseting the EEPROMMap default profile.");
 
         //Reset
         //EEPROMStorage::set_default_profile();
@@ -85,12 +85,12 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
             std_out("Writing " + String(path) + " to " + String(function));
 
             //write_data the variable
-            EEPROM::write_data_by_string(path, function);
+            EEPROMMap::write_data_by_string(path, function);
 
         } else {
 
             //Read and display the value.
-            if (EEPROM::read_data_by_string(path, &function)) {
+            if (EEPROMMap::read_data_by_string(path, &function)) {
 
                 //Log message
                 std_out("Value for " + String(path) + " : " + String(function));

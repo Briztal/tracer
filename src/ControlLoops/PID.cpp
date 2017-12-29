@@ -19,7 +19,7 @@
 */
 
 #include <EEPROM/EEPROMTree.h>
-#include <EEPROM/EEPROM.h>
+#include <EEPROM/EEPROMMap.h>
 #include "PID.h"
 
 /*
@@ -92,21 +92,21 @@ PID::PID_constants_t PID::getConstants() {
 
 
 /*
- * EEPROMRegister : this function registers the PID in the EEPROM;
+ * EEPROMRegister : this function registers the PID in the EEPROMMap;
  */
 
 void PID::EEPROMRegister(char *path, const char *name) {
 
     //Create the parent
-    EEPROMTree *tree = new EEPROMTree(new String(name), nullptr);
+    EEPROMTree *tree = new EEPROMTree(new String(name), nullptr, 0);
 
-    //Create sons;
-    tree->addChild(new EEPROMTree(new String("kp"), &kp));
-    tree->addChild(new EEPROMTree(new String("ki"), &ki));
-    tree->addChild(new EEPROMTree(new String("kd"), &kd));
+    //Create sons; Default values will be the current ones;
+    tree->addChild(new EEPROMTree(new String("kp"), &kp, kp));
+    tree->addChild(new EEPROMTree(new String("ki"), &ki, ki));
+    tree->addChild(new EEPROMTree(new String("kd"), &kd, kd));
 
-    //Register the tree in the EEPROM;
-    EEPROM::add_branch(path, tree);
+    //Register the tree in the EEPROMMap;
+    EEPROMMap::add_branch(path, tree);
 
 }
 

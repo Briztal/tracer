@@ -77,7 +77,7 @@ public :
     //System packet preparation
     static void prepare_system_packet();
 
-    //EEPROM packet preparation
+    //EEPROMMap packet preparation
     static void prepare_EEPROM_packet();
 
 private :

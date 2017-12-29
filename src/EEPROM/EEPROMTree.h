@@ -31,7 +31,7 @@ class EEPROMTree {
 public:
 
     //The Constructor;
-    EEPROMTree(string_t *name, float *data);
+    EEPROMTree(string_t *name, float *, float default_value);
 
     //The Destructor
     ~EEPROMTree();
@@ -48,6 +48,9 @@ public:
     //Get the pointed value;
     const float getData();
 
+    //Update the data pointer;
+    float * getDataPointer();
+
     //Get a child by index;
     EEPROMTree *getChild(uint8_t child_index);
 
@@ -59,6 +62,12 @@ public:
 
     //Modify the pointed value;
     void setData(float value);
+
+    //Modify the pointed value;
+    void resetData();
+
+    //Modify the pointed value;
+    void resetTree();
 
     //Update the data pointer;
     void setDataPointer(float *data_pointer);
@@ -94,6 +103,9 @@ private:
 
     //The pointer to the related data;
     float *data;
+
+    //The data's default value;
+    float default_value;
 
 
     //------------------------------------------- Private methods -------------------------------------------

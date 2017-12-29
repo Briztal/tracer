@@ -129,43 +129,30 @@
 #define is_servo_loop_enabled() is_timer_loop_enabled_1();
 
 
-/*
- * The Temperature regulation timer will be attached to timer two.
- */
 
-#define loop_0_period_to_reload(period) period_to_reload_2(period);
-#define set_loop_0_int_period(period) set_int_period_2(period);
-#define set_loop_0_int_reload(reload) set_int_reload_2(reload);
-#define enable_loop_0_interrupt() enable_interrupt_2();
-#define disable_loop_0_interrupt() disable_interrupt_2();
-#define enable_loop_0_timer() enable_timer_2();
-#define disable_loop_0_timer() disable_timer_2();
-#define loop_0_int_flag() timer_flag_2()
-#define loop_0_int_flag_clear() reset_timer_flag_2();
-#define set_loop_0_int_function(f) set_interrupt_function_2(f);
-#define setup_loop_0_interrupt(f, period) setup_interrupt_2(f, period);
-#define clean_loop_0_interrupt() clean_interrupt_2();
-#define is_loop_0_enabled() is_timer_loop_enabled_2();
+
+
+//-------------------------------------------------------- Loops -------------------------------------------------------
 
 
 /*
- * Another routine available.
+ * If unallocated timers remain, you can generate loop classes with them.
+ *
+ * To do this, use the following line :
+ *
+ *  GENERATE_LOOP(loop_index, timer_index)
+ *
+ *      - loop_index : the index of the class (use 1 and class Loop1 will be generated);
+ *      - timer_index : the index of the timer;
  */
 
-#define loop_1_period_to_reload(period) period_to_reload_3(period);
-#define set_loop_1_int_period(period) set_int_period_3(period);
-#define set_loop_1_int_reload(reload) set_int_reload_3(reload);
-#define enable_loop_1_interrupt() enable_interrupt_3();
-#define disable_loop_1_interrupt() disable_interrupt_3();
-#define enable_loop_1_timer() enable_timer_3();
-#define disable_loop_1_timer() disable_timer_3();
-#define loop_1_int_flag() timer_flag_3()
-#define loop_1_int_flag_clear() reset_timer_flag_3();
-#define set_loop_1_int_function(f) set_interrupt_function_3(f);
-#define setup_loop_1_interrupt(f, period) setup_interrupt_3(f, period);
-#define clean_loop_1_interrupt() clean_interrupt_3();
-#define is_loop_1_enabled() is_timer_loop_enabled_3();
+#ifdef GENERATE_LOOP
 
+GENERATE_LOOP(0, 2)
+
+GENERATE_LOOP(1, 3)
+
+#endif
 
 
 //------------------------------------------------INITIALISATION--------------------------------------------------------

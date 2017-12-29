@@ -26,7 +26,8 @@
  * Constructor : this function initialises all fields;
  */
 
-EEPROMTree::EEPROMTree(string_t *name, float *const data) : name(name), data(data) {
+EEPROMTree::EEPROMTree(string_t *name, float *const data, float default_value) : name(name), data(data),
+                                                                                 default_value(default_value) {
 
     //Initialise the children pointer to nullptr;
     children = (EEPROMTree **) malloc(0);
@@ -88,7 +89,7 @@ void EEPROMTree::addChild(char *child_name) {
     if (_addChild()) {
 
         //Save the new child;
-        children[nb_children - 1] = new EEPROMTree(new String(child_name), nullptr);
+        children[nb_children - 1] = new EEPROMTree(new String(child_name), nullptr, 0);
 
     }
 }
@@ -210,7 +211,7 @@ EEPROMTree *EEPROMTree::createChildIfAbsent(char *child_name) {
         addChild(child_name);
 
         //Cache its pointer;
-        child = children[nb_children -1];
+        child = children[nb_children - 1];
 
     }
 
@@ -237,6 +238,17 @@ const float EEPROMTree::getData() {
 
 }
 
+/*
+ * getDatapointer : this function returns the data pointer's value;
+ */
+
+float *EEPROMTree::getDataPointer() {
+
+    //Return the value of data;
+    return data;
+
+}
+
 
 /*
  * setData : this function modifies the value addressed by data, if it is assigned;
@@ -254,6 +266,43 @@ void EEPROMTree::setData(float value) {
     //If data is nullptr, do nothing;
 
 }
+
+
+/*
+ * resetData : this function resets the float variable to its default value;
+ */
+
+void EEPROMTree::resetData() {
+
+    //If the pointer is not null :
+    if (data) {
+
+        //Reset the data to its default value;
+        *data = default_value;
+    }
+
+}
+
+
+/*
+ * resetTree : this function resets the whole tree's data;
+ */
+
+void EEPROMTree::resetTree() {
+
+    //First, reset the variable;;
+    resetData();
+
+    //Then, for each child :
+    for (uint8_t child_index = 0; child_index < nb_children; child_index++) {
+
+        //Reset its and all its children's data;
+        children[child_index]->resetTree();
+
+    }
+
+}
+
 
 /*
  * setData : this function modifies the value addressed by data, if it is assigned;
@@ -305,11 +354,9 @@ String EEPROMTree::printTree() {
     //Add the content of each child;
     for (uint8_t child = 0; child < nb_children; child++) {
 
-        s+= children[child]->printTree();
+        s += children[child]->printTree();
     }
 
     //Return the complete string;
     return s;
 }
-
-

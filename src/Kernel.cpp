@@ -28,7 +28,7 @@
 #include <Actuators/Actuators.h>
 #include <StepperControl/StepperController.h>
 #include <Config/_ConfigChecker.h>
-#include <EEPROM/EEPROM.h>
+#include <EEPROM/EEPROMMap.h>
 #include <Project/Project.h>
 #include "Kernel.h"
 
@@ -192,8 +192,8 @@ void Kernel::initialise_hardware() {
 
 void Kernel::initialise_data() {
 
-    //Clear the EEPROM profile;
-    EEPROM::initialise_data();
+    //Clear the EEPROMMap profile;
+    EEPROMMap::initialise_data();
 
     //Initialise the task scheduler;
     TaskScheduler::initialise_data();
@@ -218,8 +218,9 @@ void Kernel::initialise_data() {
     //Finally, initialise the project;
     Project::initialise_data();
 
-    //Lock the EEPROM tree;
-    EEPROM::lock_tree();
+    //Lock the EEPROMMap tree, and initialise data across the code if a relevant profile is found in the EEPROM;
+    EEPROMMap::lock_tree();
+
 
 }
 

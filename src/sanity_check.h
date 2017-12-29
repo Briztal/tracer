@@ -24,7 +24,7 @@
 /*
  * Stepper Interaction Kernel checking.
  *  we must check the following flags :
- *      - EEPROM for all kernels
+ *      - EEPROMMap for all kernels
  *      - FPU for Kernel2
  *      - 32 bits for kernel2
  */
@@ -38,7 +38,7 @@
 #endif
 
 #ifndef HL_EEPROM_FLAG
-#error "KinematicsCores require the EEPROM support, and you board doesn't support it."
+#error "KinematicsCores require the EEPROMMap support, and you board doesn't support it."
 #endif
 
 #if (CORE_VERSION == 0)

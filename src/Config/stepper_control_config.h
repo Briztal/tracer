@@ -35,7 +35,7 @@
 /*
  * Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters;
  *
- *  STEPPER(i, signature, relative, pin_step, pin_dir, positive_dir,  power_pin, enable_value, endstop_min_pin, on_value_min, endstop_max_pin, on_value_max)
+ *  STEPPER(i, signature, pin_step, pin_dir, positive_dir, power_pin, enable_value)
  *
  *  - i : the index of the stepper. Indices start at 0, and are strictly consecutive;
  *  - sig : the signature of the stepper : constant that must be set to 2 ^ i;
@@ -84,7 +84,7 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
  *
  * for each stepper of the machine, put one line like behind, and provide all parameters :
  *
- * STEPPER_DATA(id, letter, size, steps_per_unit, speed, acceleration, jerk)
+ * STEPPER_DATA(id, steps_per_unit, speed, acceleration, jerk)
  *
  *  - i : the index of the stepper. Indices start at 0, and are strictly consecutive;
  *  - steps_per_unit : the default steps_per_unit per unit for stepper i;

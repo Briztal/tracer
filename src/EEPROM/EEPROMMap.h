@@ -23,7 +23,7 @@
 
 #include "EEPROMTree.h"
 
-class EEPROM {
+class EEPROMMap {
 
     //--------------------------------------------- Initialisation -----------------------------------------------------
 
@@ -31,17 +31,6 @@ public:
 
     //Initialise the tree;
     static void initialise_data();
-
-    static void print_tree();
-
-
-    //------------------------------------------- EEPROM Interaction ---------------------------------------------------
-
-    //Save the data tree in the EEPROM;
-    static void write_tree();
-
-    //Read the data tree from the EEPROM;
-    static void read_tree();
 
     //--------------------------------------------- Tree population -----------------------------------------------------
 
@@ -66,12 +55,50 @@ private:
     static EEPROMTree *data_tree;
 
 
-    //----------------------------------------- Create a path in the data tree -----------------------------------------
-
 private:
 
     //Create a path if it is not present;
     static EEPROMTree *createIfAbsent(char *id_string);
+
+
+
+    //------------------------------------------- EEPROM Interaction ---------------------------------------------------
+
+public:
+
+    //Save the data tree in the EEPROM;
+    static void save_eeprom_data();
+
+    //Read the data tree from the EEPROM;
+    static bool load_eeprom_data();
+
+
+private:
+
+    //Hash the data tree in the hash array;
+    static void hash_tree();
+
+    //Hash a tree (recursive)
+    static void _hash_tree(EEPROMTree *tree, uint8_t *index_p);
+
+    //Verify that the hash in the hash array matches the one in the EEPROM;
+    static bool compare_hash();
+
+    //Write the hash in the EEPROM;
+    static bool write_hash();
+
+    //Load a tree's data from the EEPROM;
+    static bool _load_eeprom_data(EEPROMTree *tree, uint8_t *eeprom_index_p);
+
+    //Save a tree's data in the EEPROM;
+    static void _save_eeprom_data(EEPROMTree *tree, uint8_t *eeprom_index_p);
+
+
+private:
+
+    //The hash array;
+    static uint8_t *const hash_array;
+
 
 
     //-------------------------------------------- Search functions ----------------------------------------------------
@@ -84,17 +111,24 @@ public:
     //Write data
     static void write_data_by_string(char *id_string, float value);
 
-    //Log a bad research;
-    static void search_log(EEPROMTree *tree);
+    //Reset all the data tree;
+    static void reset();
+
+    //Reset a particular child;
+    static void reset(char *id_string);
+
+    //Print the content of a particular child;
+    static void print_tree(char *id_string);
+
 
 private:
+
+    //Log a bad research;
+    static void search_log(EEPROMTree *tree);
 
     //Search a tree by its path;
     static EEPROMTree *search_tree_by_string(char *data_in);
 
-    void _write_tree();
-
-    void hash_tree();
 };
 
 

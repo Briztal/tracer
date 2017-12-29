@@ -21,7 +21,7 @@
 
 #include <Config/control_config.h>
 
-#include "EEPROM/EEPROM.h"
+#include "EEPROM/EEPROMMap.h"
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
@@ -31,6 +31,7 @@
 #include <Project/MachineController.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
+#include <DataStructures/StringUtils.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -56,56 +57,81 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //verify that function and p content are provided.
-    REQUIRE_ONE_ARGUMENTS("prd");
+    REQUIRE_ONE_ARGUMENTS("p");
 
-    //If the default profile must be reset
-    if (CHECK_ARGUMENT('r')) {
+    //get the cache_path;
+    char *path = GET_ARG('p');
 
-        std_out("Reseting the EEPROM default profile.");
+    //Cache the cache_path, in case of multiple uses;
+    uint8_t size = StringUtils::length(path) + (uint8_t)1;
 
-        //Reset
-        //EEPROMStorage::set_default_profile();
+    //Declare the path cache;
+    char cache_path[size];
 
-    }
+    //Cache the path;
+    strncpy(cache_path, path, size);
 
-    //If a path was provided : read_data or write_data
-    if (CHECK_ARGUMENT('p')) {
-
-        char *path = GET_ARG('p');
-
-        float function;
-
-        //If the value must be written
-        if (CHECK_ARGUMENT('w')) {
-
-            //Extract the value to write_data
-            function = GET_ARG_VALUE('w');
-
-            //Log message
-            std_out("Writing " + String(path) + " to " + String(function));
-
-            //write_data the variable
-            EEPROM::write_data_by_string(path, function);
-
-        } else {
-
-            //Read and display the value.
-            if (EEPROM::read_data_by_string(path, &function)) {
-
-                //Log message
-                std_out("Value for " + String(path) + " : " + String(function));
-
-            }
-
-        }
-
-    }
 
     //If the profile must be printed
     if (CHECK_ARGUMENT('d')) {
 
+        //Cache the path;
+        strncpy(cache_path, path, size);
+
         //Print the current profile.
-        //EEPROMInterface::print_stored_data();
+        EEPROMMap::print_tree(cache_path);
+
+    }
+
+
+
+    //Reset the tree corresponding to the cache_path;
+    if (CHECK_ARGUMENT('r')) {
+        //If the default profile must be reset
+
+        std_out("Reseting the EEPROM default profile.");
+
+        //Cache the path;
+        strncpy(cache_path, path, size);
+
+        //Reset
+        EEPROMMap::reset(cache_path);
+
+    }
+
+
+
+    //In all cases, read the required value :
+
+    float read_value;
+
+    //Read and display the value.
+    if (EEPROMMap::read_data_by_string(cache_path, &read_value)) {
+
+        //Log message
+        std_out("Value for " + String(cache_path) + " : " + String(read_value));
+
+    } else {
+
+        //If the search is not successful, return invalid_args;
+        return invalid_arguments;
+
+    }
+
+    //If the value must be written
+    if (CHECK_ARGUMENT('w')) {
+
+        //Extract the value to write_data
+        float new_value = GET_ARG_VALUE('w');
+
+        //Log message
+        std_out("Writing " + String(cache_path) + " to " + String(new_value));
+
+        //Cache the path;
+        strncpy(cache_path, path, size);
+
+        //write the variable
+        EEPROMMap::write_data_by_string(cache_path, new_value);
 
     }
 

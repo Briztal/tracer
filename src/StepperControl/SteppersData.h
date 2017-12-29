@@ -39,7 +39,7 @@ class SteppersData {
 
 public:
 
-    //Initialise all data and register variables in EEPROM;
+    //Initialise all data and register variables in EEPROMMap;
     static void initialise_data();
 
     //Reset data to its default value;

@@ -11,7 +11,7 @@ The scheduler responds to the following criteria :
     - conserve the order for some groups of tasks. For example, all tasks concerning movement must be executed in their
         order of reception;
     - Allow some particular tasks to be executed as soon as possible. For example, an emergency stop, or a modification
-        in the EEPROM doesn't have to respect any order of execution, and must be processed as soon as possible.
+        in the EEPROMMap doesn't have to respect any order of execution, and must be processed as soon as possible.
 
 
 

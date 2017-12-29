@@ -369,6 +369,8 @@ public:
 
     }
 
+#undef SAFE_DECR
+
 };
 
 

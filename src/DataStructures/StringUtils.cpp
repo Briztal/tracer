@@ -87,6 +87,29 @@ StringUtils::copy_until_char(char *in_buffer, char *out_buffer, uint8_t out_buff
 */
 
 /*
+ * length : this function determines the length of the string (without the \0 comprised);
+ */
+
+uint8_t StringUtils::length(char *in_buffer) {
+
+    uint8_t char_count = 0;
+
+    //While the current char is not null;
+    while (*(in_buffer++)) {
+
+        //Increment the size of the copied buffer.
+        char_count++;
+    }
+
+    //Return the number of characters before the end of the string
+    return char_count;
+
+}
+
+
+//TODO RE-COMMENT, THIS IS THE OLD FUNCTION
+
+/*
  * count_until_char : this function copies the char sequence in in_buffer in out_buffer char by char,
  *  until it reads the limit char, or \0. This char is not copied to output_buffer.
  *

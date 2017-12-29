@@ -21,8 +21,6 @@
 #ifndef TRACER_PROJECT_H
 #define TRACER_PROJECT_H
 
-
-#include "MachineController.h"
 #include "RegulationController.h"
 
 class Project {
@@ -34,10 +32,8 @@ public:
     //Initialise the class in a safe state;
     static inline void initialise_data() {
 
-        //Initialise the machine controller;
-        MachineController::initialise_data();
 
-        //Initialise the temperature controller;
+        //Initialise the regulation controller;
         RegulationController::initialise_data();
 
     }

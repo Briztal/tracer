@@ -66,7 +66,7 @@ public:
     //Get the constant pointers;
     PID_constants_t getConstants();
 
-    //Register the PID in the EEPROM;
+    //Register the PID in the EEPROMMap;
     void EEPROMRegister(char *path, const char *name);
 
 

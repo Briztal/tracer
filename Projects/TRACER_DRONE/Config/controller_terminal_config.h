@@ -111,7 +111,7 @@
 #if defined(GO_LOWER) && defined(GO_UPPER) && defined(CREATE_LEAF)
 //Write your commands here
 
-//EEPROM
+//EEPROMMap
 CREATE_LEAF(eeprom, eeprom, manage_eeprom)
 
 //Movement

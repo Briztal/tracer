@@ -79,7 +79,7 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
 
 
 /*
- * Steppers data settings : every stepper has data stored in the EEPROM. You must provide default values
+ * Steppers data settings : every stepper has data stored in the EEPROMMap. You must provide default values
  *  for every stepper, using command STEPPER_DATA, and the same indexation than in the last paragraph;
  *
  * for each stepper of the machine, put one line like behind, and provide all parameters :

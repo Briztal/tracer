@@ -18,17 +18,4 @@
 
 */
 
-/* EEPROM custom data definition : for each variable you need to save in EEPROM, write_data the following line
- *  with the appropriate parameters;
- *
- *  EEPROM_VARIABLE(name, default_value)
- *
- *  This function will create a float variable with the name provided in the EPROMStorage class,
- *      that will be saved in EEPROM, and take the default value provided
- */
-
-#if defined(EEPROM_VARIABLE)
-
-EEPROM_VARIABLE(maximum_speed, 500);
-
-#endif
+#define EEPROM_HASH_SIZE 20

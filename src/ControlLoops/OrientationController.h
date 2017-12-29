@@ -62,10 +62,30 @@
  *          - target_theta = Tt, target_phi = Pt;
  *          - current_theta = T, current phi = P;
  *
- *      The Error vector in the (r, t) plan, (Er, Et) verifies the following formula :
+ *      A trivial error vector in the (r, t) plan, (Er, Et) would verify the following formula :
  *
  *          Er = cos(Tt) * Pt - cos(T) * P;
  *          Et = sin(Tt) * Pt - sin(T) * P;
+ *
+ *      However, according to this formula, when both targets and positions are at phi = pi, the error is not null,
+ *          and depends on theta. It needs to be developed a little bit.
+ *
+ *      However, this formula does its job well when almost one phi coordinate is below pi/2;
+ *
+ *      As a consequence, the error vector verifies the formula below :
+ *
+ *
+ *      If one phi (target or current) is <= pi/2 (case 0) :
+ *
+ *          Er = cos(Tt) * Pt - cos(T) * P;
+ *          Et = sin(Tt) * Pt - sin(T) * P;
+ *
+ *      If both phi.s are > pi/2 (case 1) :
+ *
+ *          Er = cos(Tt) * (pi - Pt) - cos(T) * (pi - P);
+ *          Et = sin(Tt) * (pi - Pt) - sin(T) * (pi - P);
+ *
+ *          (The behaviour in the > pi / 2 area is the symmetric of the behaviour in the <= pi / 2 zone;
  *
  *      After this calculation, two PIDs (PID_r, PID_t) are feed with appropriate error values.
  *
@@ -124,8 +144,14 @@ private:
     //The target position, in the spherical coordinates;
     float target_theta, target_phi;
 
-    //The semi-errors : cos(Tt) * Pt and sin(Tt) * Pt;
-    float semi_error_r, semi_error_t;
+    //The angular zone of target and current phi.s : 0 = below pi / 2, 1 = beyond pi / 2;
+    bool target_in_zone_1, zone_current;
+
+    //The semi-errors for case 0 : cos(Tt) * Pt and sin(Tt) * Pt;
+    float semi_error_r_0, semi_error_t_0;
+
+    //The semi-errors for case 1 : cos(Tt) * (pi - Pt) and sin(Tt) * (pi - Pt);
+    float semi_error_r_1, semi_error_t_1;
 
     //PIDs :
     PID *pid_r, *pid_t;
@@ -137,6 +163,14 @@ private:
 
     //Update semi_errors;
     void computeSemiErrors();
+
+
+    //----------------------------------- EEPROMMap Registration ---------------------------------------
+
+public:
+
+    //Register PIDs in the EEPROMMap;
+    void EEPROMRegister(char *path, const char *name);
 
 };
 
