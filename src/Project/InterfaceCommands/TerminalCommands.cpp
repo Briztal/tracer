@@ -57,66 +57,19 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     PARSE_ARGUMENTS(arguments);
 
     //verify that function and p content are provided.
-    REQUIRE_ONE_ARGUMENTS("p");
+    REQUIRE_ONE_ARGUMENTS("n");
 
     //get the cache_path;
-    char *path = GET_ARG('p');
+    char *name = GET_ARG('n');
 
     //Cache the cache_path, in case of multiple uses;
-    uint8_t size = StringUtils::length(path) + (uint8_t)1;
+    uint8_t size = StringUtils::length(name) + (uint8_t)1;
 
-    //Declare the path cache;
+    //Declare the name cache;
     char cache_path[size];
 
-    //Cache the path;
-    strncpy(cache_path, path, size);
-
-
-    //If the profile must be printed
-    if (CHECK_ARGUMENT('d')) {
-
-        //Cache the path;
-        strncpy(cache_path, path, size);
-
-        //Print the current profile.
-        EEPROMMap::print_tree(cache_path);
-
-    }
-
-
-
-    //Reset the tree corresponding to the cache_path;
-    if (CHECK_ARGUMENT('r')) {
-        //If the default profile must be reset
-
-        std_out("Reseting the EEPROM default profile.");
-
-        //Cache the path;
-        strncpy(cache_path, path, size);
-
-        //Reset
-        EEPROMMap::reset(cache_path);
-
-    }
-
-
-
-    //In all cases, read the required value :
-
-    float read_value;
-
-    //Read and display the value.
-    if (EEPROMMap::read_data_by_string(cache_path, &read_value)) {
-
-        //Log message
-        std_out("Value for " + String(cache_path) + " : " + String(read_value));
-
-    } else {
-
-        //If the search is not successful, return invalid_args;
-        return invalid_arguments;
-
-    }
+    //Cache the name;
+    strncpy(cache_path, name, size);
 
     //If the value must be written
     if (CHECK_ARGUMENT('w')) {
@@ -127,11 +80,57 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         //Log message
         std_out("Writing " + String(cache_path) + " to " + String(new_value));
 
-        //Cache the path;
-        strncpy(cache_path, path, size);
-
         //write the variable
         EEPROMMap::write_data_by_string(cache_path, new_value);
+
+        //Cache the name;
+        strncpy(cache_path, name, size);
+
+    }
+
+
+    //If the value must be printed
+    if (CHECK_ARGUMENT('p')) {
+
+        float read_value;
+
+        //Read and display the value.
+        if (EEPROMMap::read_data_by_string(cache_path, &read_value)) {
+
+            //Log message
+            std_out("Value for " + String(name) + " : " + String(read_value));
+
+        }
+
+        //Cache the name;
+        strncpy(cache_path, name, size);
+
+    }
+
+
+    //If the profile must be printed
+    if (CHECK_ARGUMENT('d')) {
+
+        //Print the current profile.
+        EEPROMMap::print_tree(cache_path);
+
+        //Cache the name;
+        strncpy(cache_path, name, size);
+
+    }
+
+
+    //Reset the tree corresponding to the cache_path;
+    if (CHECK_ARGUMENT('r')) {
+        //If the default profile must be reset
+
+        std_out("Reseting the EEPROM default profile.");
+
+        //Cache the name;
+        strncpy(cache_path, name, size);
+
+        //Reset
+        EEPROMMap::reset(cache_path);
 
     }
 

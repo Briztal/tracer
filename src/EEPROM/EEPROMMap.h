@@ -111,9 +111,6 @@ public:
     //Write data
     static void write_data_by_string(char *id_string, float value);
 
-    //Reset all the data tree;
-    static void reset();
-
     //Reset a particular child;
     static void reset(char *id_string);
 
@@ -127,7 +124,7 @@ private:
     static void search_log(EEPROMTree *tree);
 
     //Search a tree by its path;
-    static EEPROMTree *search_tree_by_string(char *data_in);
+    static EEPROMTree *search_tree_by_string(char *data_in, const bool authorise_non_leafs);
 
 };
 

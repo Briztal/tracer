@@ -493,8 +493,8 @@ void EEPROMMap::_save_eeprom_data(EEPROMTree *tree, uint8_t *eeprom_index_p) {
 
 bool EEPROMMap::read_data_by_string(char *id_string, float *f) {
 
-    //Get the required tree;
-    EEPROMTree *tree = search_tree_by_string(id_string);
+    //Get the required tree among leafs;
+    EEPROMTree *tree = search_tree_by_string(id_string, false);
 
     //If the tree is not null
     if (tree) {
@@ -514,8 +514,8 @@ bool EEPROMMap::read_data_by_string(char *id_string, float *f) {
 
 void EEPROMMap::write_data_by_string(char *id_string, float value) {
 
-    //Get the required tree;
-    EEPROMTree *tree = search_tree_by_string(id_string);
+    //Get the required tree among leafs;
+    EEPROMTree *tree = search_tree_by_string(id_string, false);
 
     //If the tree is not null :
     if (tree) {
@@ -529,31 +529,19 @@ void EEPROMMap::write_data_by_string(char *id_string, float value) {
 
 
 /*
- * reset : this function resets all data that has been registered;
- */
-
-void EEPROMMap::reset() {
-
-    //Reset the whole data tree;
-    data_tree->resetTree();
-
-}
-
-
-/*
  * reset : this function resets a particular variable;
  */
 
 void EEPROMMap::reset(char *id_string) {
 
-    //Get the required tree;
-    EEPROMTree *tree = search_tree_by_string(id_string);
+    //Get the required tree. Non-leafs are authorised;
+    EEPROMTree *tree = search_tree_by_string(id_string, true);
 
     //If the tree is not null :
     if (tree) {
 
         //reset its variable;
-        tree->resetData();
+        tree->resetTree();
 
     }
 
@@ -566,8 +554,8 @@ void EEPROMMap::reset(char *id_string) {
 
 void EEPROMMap::print_tree(char *id_string) {
 
-    //Get the required tree;
-    EEPROMTree *tree = search_tree_by_string(id_string);
+    //Get the required tree. Non-leafs are authorised;
+    EEPROMTree *tree = search_tree_by_string(id_string, true);
 
     //If the tree is not null :
     if (tree) {
@@ -586,7 +574,7 @@ void EEPROMMap::print_tree(char *id_string) {
  *  If it doesn't exist, it returns 0;
  */
 
-EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in) {
+EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in, const bool authorise_non_leafs) {
 
     //Initialise the current current_tree to the root;
     EEPROMTree *current_tree = data_tree;
@@ -607,7 +595,14 @@ EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in) {
     word = data_in;
 
     //Go to the next word;
-    data_in += StringUtils::count_until_char(data_in, ' ');
+    uint8_t word_size= StringUtils::count_until_char(data_in, ' ');
+
+    //If non leafs are authorised, and string identifier is finished, return the current tree;
+    if (authorise_non_leafs && !word_size)
+        return current_tree;
+
+    //Update the current char;
+    data_in += word_size;
 
     //Increment the next char if the string is not finished;
     if (*data_in) {
