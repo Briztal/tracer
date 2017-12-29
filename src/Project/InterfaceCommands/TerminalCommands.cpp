@@ -134,6 +134,15 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
 
     }
 
+    //Save the EEPROM if required;
+    if (CHECK_ARGUMENT('s')) {
+
+        //Save;
+        EEPROMMap::save_eeprom_data();
+
+        std_out("Data saved in the EEPROM;");
+    }
+
     //Succeed
     return complete;
 

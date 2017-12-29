@@ -144,11 +144,8 @@ void EEPROMMap::lock_tree() {
     //Hash the tree;
     hash_tree();
 
-    save_eeprom_data();
-
     //Try to oad the tree data;
     bool b = load_eeprom_data();
-    //TODO SET_DEFAULT;
 
     //If the loading failed, save the current tree;
     if (!b) {
