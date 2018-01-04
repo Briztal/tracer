@@ -129,7 +129,7 @@ void Steppers::disable() {
  *
  *  The argument_t is a signature, where the i-th bit means :
  *      - 1 : negative direction for the i-th stepper
- *      - 0 : positive direction for the i-th stepper
+ *      - 0 : positive_rotation direction for the i-th stepper
  *
  */
 

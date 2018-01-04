@@ -41,7 +41,7 @@
  *  - sig : the signature of the stepper : constant that must be set to 2 ^ i;
  *  - pin_step : the pin used to trigger a step;
  *  - pin_dir : the pin used to set the step direction;
- *  - positive_dir : the boolean value for the positive direction (makes coordinates increase);
+ *  - positive_dir : the boolean value for the positive_rotation direction (makes coordinates increase);
  *  - power_pin : the pin used to power the steppers;
  *  - enable_value : the boolean value to provide to power up steppers;
  */

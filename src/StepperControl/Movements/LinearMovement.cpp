@@ -121,7 +121,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
             
             /*
              * Direction : builds the direction signature :
-             * binary where the nth msb is 0 if axis n is positive, 1 if direction is negative
+             * binary where the nth msb is 0 if axis n is positive_rotation, 1 if direction is negative
              */
 
             if (distance < 0) {

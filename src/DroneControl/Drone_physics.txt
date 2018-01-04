@@ -1,0 +1,144 @@
+This file describes the main equations that determine the behaviour of a flying drone.
+
+
+The drone will be assimilated to a set of motors, at determined coordinates and orientations, exerting a given traction
+    collinear to their direction axis;
+
+Every motor / helix will have the same characteristics;
+
+
+
+A Motor Mi is only described by :
+
+    its variable parameters (xi, yi, zi, kv_i, n_i, alpha_i, phi_i, t_i, c_i)
+        - xi : the abscissa of the motor;
+        - yi : the ordinate of the motor;
+        - zi : the height of the motor;
+        - n_i : the motor's rotation speed;
+        - phi_i : the polar angle of the motor's axis, with x axis as origin;
+        - alpha_i : the azimuth of the motor's axis, with z axis as origin;
+
+
+        (The position is being expressed in cartesian coordinates, and the axis orientation is being expressed
+        in spherical coordinates);
+
+    its constant parameters (t_i, c_i, k_i, v_i, max_i)
+        - t_i and c_i : see below;
+        - kv_i : the ratio rotation_speed / voltage;
+        - v_i : the maximal command voltage;
+        - max_i : the maximal value of the command signal;
+
+
+
+
+Power command :
+
+    The voltage is delivered to motors via a power signal p_i, comprised between 0 and max_i.
+
+    This power commands will cause the motor to rotate, and we will suppose that there is a linear relation between
+        the power command, and the rotation speed of the motor :
+
+        n_i = kv_i * voltage_i;
+
+    Though, the voltage verifies the following formula :
+
+        voltage_i = max_voltage_i / max_i * p_i;
+
+
+    If we combine these formulas, we obtain the relation between rotation speed and command signal :
+
+        n_i = ( kv_i * max_voltage / max_i ) * p_i;
+
+    To simplify the calculation, that is already heavy, we will define the rotation coefficient Ri :
+
+        R_i = kv_i * max_voltage_i / max_i;
+
+        coefficient verifying : n_i = R_i * p_i;
+
+
+
+
+
+The rotation of the motor will have two quantified effects :
+
+    - A traction, whose norm will be approximated using the following formula :
+            T = t_i * n_i^2;
+         => T = t_i * R_i^2 * p_i^2
+
+
+    - A torque, whose norm will be approximated using the following formula :
+            C = c_i * n_i^2;
+         => C = c_i * R_i^2 * p_i^2
+
+
+    where t_i and c_i are two constants, proper to the motor, determined experimentally.
+
+
+
+The Traction T(tx, ty, tz), verifies the following equation :
+
+        tx = cos(phi_i) * sin(theta_i) * t_i * R_i^2 * p_i^2;
+
+        ty = sin(phi_i) * sin(theta_i) * t_i * R_i^2 * p_i^2;
+
+        tz = cos(theta_i) * t_i * R_i^2 * p_i^2;
+
+
+The Torque C(cx, cy, cz), verifies the following equation :
+
+        cx = cos(phi_i) * sin(theta_i) * c_i * R_i^2 * p_i^2;
+
+        cy = sin(phi_i) * sin(theta_i) * c_i * R_i^2 * p_i^2;
+
+        cz = cos(theta_i) * c_i * R_i^2 * p_i^2;
+
+
+
+
+
+Dynamics :
+
+
+Forces : the drone is submitted to a resultant of forces F(fx, fy, fz), that verify :
+
+    fx = sum{i} ( tx_i ) =  sum{i} ( cos(phi_i) * sin(theta_i) * t_i * R_i^2 * p_i^2 );
+
+    fy = sum{i} ( ty_i ) =  sum{i} ( sin(phi_i) * sin(theta_i) * t_i * R_i^2 * p_i^2);
+
+    fz = sum{i} ( tz_i ) =  sum{i} ( cos(theta_i) * t_i * R_i^2 * p_i^2 );
+
+    (fundamental principle of dynamics)
+
+
+Momentums :
+
+    The drone is submitted to torques created by its motor's rotations, and to a momentum M(mx, my, mz),
+    created by motors traction;
+
+    If we apply the kinetics momentum theorem, we obtain :
+
+    mx = sum{i} (-s_i * cx_i + y_i * tz_i - z_i * ty_i)
+
+    my = sum{i} (s_i * cy_i + z_i * tx_i - x_i * tz_i)
+
+    mz = sum{i} (-s_i * cz_i + x_i * ty_i - y_i * tx_i)
+
+
+    where s_i = 1 if the motor turns in the positive direction;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

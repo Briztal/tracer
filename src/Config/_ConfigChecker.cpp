@@ -498,8 +498,8 @@ bool _ConfigChecker::check_stepper_control(String *message) {
     }
 
     /*
-     * Then, we will check if indices are consecutives, if all positive motor index refer to an existing stepper,
-     *  and if all maximum speeds are strictly positive;
+     * Then, we will check if indices are consecutives, if all positive_rotation motor index refer to an existing stepper,
+     *  and if all maximum speeds are strictly positive_rotation;
      */
     counter = 0;
 

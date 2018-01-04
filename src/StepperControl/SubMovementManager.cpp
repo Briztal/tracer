@@ -336,7 +336,7 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
 /*
  * get_steppers_distances : this function determines the distance between a position and a target, for all stepper.
  *
- * It also computes the direction signature, as step_distances are positive numbers, and saves the maximum stepper
+ * It also computes the direction signature, as step_distances are positive_rotation numbers, and saves the maximum stepper
  *      and the maximum distance.
  */
 

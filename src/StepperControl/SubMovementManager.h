@@ -91,7 +91,7 @@ private :
     //The index increment
     static float increment;
 
-    //The index direction flag : true if the increment is positive.
+    //The index direction flag : true if the increment is positive_rotation.
     static bool positive_index_dir;
 
     //The trajectory function for the current movement
@@ -155,7 +155,7 @@ public:
     *      destination      end_distance<0        pos           -> +
     *
     *  if movement direction is
-    *      positive, (-> +), end distance decreases
+    *      positive_rotation, (-> +), end distance decreases
     *      negative, (- <-), end distance increases
     *
     *  if new destination is
@@ -165,7 +165,7 @@ public:
 
     /*  Axis direction conventions :
      *      1    : negative direction (- <-)
-     *      0   : positive direction (-> +)
+     *      0   : positive_rotation direction (-> +)
      */
 
     //End position update
