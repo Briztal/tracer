@@ -94,7 +94,7 @@ protected:
 
 
     //Add a single motor to the model and return its index;
-    uint8_t addMotor(float x, float y, float z, float theta, float phi, bool rotation_dir, uint8_t servo_index);
+    uint8_t addMotor(motor_data_t *motor_data);
 
     //Add a relation between motors;
     void addRelation();
@@ -146,21 +146,34 @@ private:
     };
 
     //The number of single motors;
-    uint8_t nb_single_motors;
+    uint8_t nbMotors;
 
     //The declared single motors;
     motor_data_t *motors;
 
+    //The power matrix;
+    Matrix *powerMatrix;
 
-    void freeMotorsArrays();
+    //The number of coordinates;
+    uint8_t nbCoordinates;
 
-    bool computeMotorsMatrix();
+    //The initialisation flag : will be used to verify if the initialisation procedure was completed;
+    bool initFlag;
 
-    bool checkMotorNumber(coordinate_system_t *coordinate_system);
 
-    bool computeMotorsMatrix(coordinate_system_t *coordinaes);
+    void resetMotorsArray();
 
-    bool checkMotorNumber(coordinate_system_t *coordinate_system, uint8_t nb_motors);
+    Matrix *computeMotorsMatrix(coordinate_system_t *coordinaes);
+
+    uint8_t getCoordinatesNumber(coordinate_system_t *coordinate_system);
+
+    bool checkControl(Matrix *m, coordinate_system_t *coordinates, float threshold);
+
+    float infiniteNorm(float *matrix_line, uint8_t size);
+
+    float infiniteNorm(const float *matrix_line, uint8_t size);
+
+    long failSafe();
 };
 
 

@@ -19,6 +19,7 @@
 */
 
 #include <string.h>
+#include <Interaction/Interaction.h>
 
 #include "Matrix.h"
 
@@ -231,4 +232,38 @@ void Matrix::sumLine(const uint8_t line_index, const float *line, const float mu
 
     }
 
+}
+
+
+/*
+ * getLine : this function returns a pointer to the required line;
+ */
+
+const float *Matrix::getLine(const uint8_t line_index) {
+
+    //If the line is invalid, return the line zero for safety;
+    if (invalid_line(line_index)) {
+
+        //Log;
+        std_out("Error in Matrix::getLine : the requested line doesn't exist. Returning line zero.");
+
+        //Fail
+        return data_array;
+
+    }
+
+    //Return the appropriate line index;
+    return data_array + width * line_index;
+
+}
+
+
+/*
+ * invert : this function will attempt to invert the matrix using a gauss pivot algorithm;
+ *
+ *  If the matrix is not invertible, it will return a null pointer;
+ */
+
+Matrix *Matrix::invert() {
+    return nullptr;
 }

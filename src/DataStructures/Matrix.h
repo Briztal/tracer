@@ -60,6 +60,8 @@ public:
 
     void setLine(const uint8_t line_index);
 
+    const float *getLine(const uint8_t line_index);
+
 
     //-------------------------- Fields --------------------------
 
@@ -73,6 +75,14 @@ protected:
 
     //The data array;
     float *const data_array;
+
+
+    //-------------------------- derived constructors  --------------------------
+
+public:
+
+    Matrix *invert();
+
 
 };
 
