@@ -165,6 +165,31 @@ void Matrix::setLine(const uint8_t line_index, const float *line, const float mu
 }
 
 
+
+/*
+ * sumLine : sums the dst line to the src line;
+ */
+
+void Matrix::sumLine(const uint8_t dest_line, const uint8_t src_line) {
+
+    //If the required line is outside the array, fail;
+    if (invalid_line(dest_line) || invalid_line(src_line))
+        return;
+
+    //Cache the pointer to the first coefficient to modify
+    float *src_p = data_array + width * dest_line;
+    float *dst_p = data_array + width * src_line;
+
+    //Sum every coefficient to the required line :
+    for (uint8_t column_index = 0; column_index < width; column_index++) {
+
+        //Sum the src value to the destination one, and update both data pointer;
+        *(dst_p++) += (*(src_p++));
+
+    }
+
+}
+
 /*
  * sumLine : sums the line coefficient by coefficient to the [line_index]-th line of the matrix;
  */

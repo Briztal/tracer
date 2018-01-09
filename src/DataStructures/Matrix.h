@@ -55,6 +55,9 @@ public:
     void setCoefficient(uint8_t line_index, uint8_t column_index, float new_value);
 
     //Sum a whole line with the given one;
+    void sumLine(const uint8_t dest_line, const uint8_t src_line);
+
+    //Sum a whole line with the given one;
     void sumLine(const uint8_t line_index, const float *line, const float multiplier);
 
     //Set a line of the matrix to the given one;

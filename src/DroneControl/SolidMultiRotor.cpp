@@ -57,8 +57,8 @@ SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked
 
     }
 
-    //Now, compute the matrix;
-    Matrix *matrix = computeMotorsMatrix(&coordinate_system);
+    //Now, compute the controlMatrix;
+    Matrix *controlMatrix = computeMotorsMatrix(&coordinate_system);
 
 
     //TODO THRESHOLD ? 
@@ -72,13 +72,13 @@ SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked
     //TODO
 
     //Then, check if some dimensions can't be controlled;
-    bool drone_controllable = checkControl(matrix, &coordinate_system, 1);
+    bool drone_controllable = checkControl(controlMatrix, &coordinate_system, 1);
 
     //If one coordinate is not controllable, fail;
     if (!drone_controllable) {
 
         //Log;
-        std_out("Error in SolidMultiRotor::SolidMultiRotor : One line in the equation matrix is below the "
+        std_out("Error in SolidMultiRotor::SolidMultiRotor : One line in the equation controlMatrix is below the "
                         "provided threshold.");
 
         //Fail safely;
@@ -110,19 +110,20 @@ SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked
 
 
     /*
-     * Now, we will getInverse the matrix, to obtain the power matrix.
+     * Now, we will getInverse the controlMatrix, to obtain the power controlMatrix.
      *
-     *  This matrix will give us motor powers in function of regulation coordinates;
+     *  This controlMatrix will give us motor powers in function of regulation coordinates;
      */
 
 
-    /*TODO REMOVE
+    //Attempt to invert the control controlMatrix;
+    powerMatrix = controlMatrix->getInverse();
 
-    //If the matrix is not invertible :
-    if (matrix->determinant == 0) {
+    //If the controlMatrix is not invertible :
+    if (powerMatrix == nullptr) {
 
         //Log;
-        std_out("Error in SolidMultiRotor::SolidMultiRotor : The control matrix is not inversible");
+        std_out("Error in SolidMultiRotor::SolidMultiRotor : The control controlMatrix is not inversible");
 
         //Fail safely;
         failSafe();
@@ -130,10 +131,9 @@ SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked
         //Stop;
         return;
     }
-    */
 
-    //Determine the power matrix;
-    powerMatrix = matrix->getInverse();
+    //Determine the power controlMatrix;
+    powerMatrix = controlMatrix->getInverse();
 
     //Log;
     std_out("SolidMultiRotor instance properly initialised and ready.");

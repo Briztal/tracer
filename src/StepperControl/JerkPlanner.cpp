@@ -262,7 +262,7 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
      Definition 2 : jerk limit Ji. A stepper mustn't have its speed changing more than its jerk limit in a brief time
         period.
 
-        Equation (E1) : |vi+ - vi-| < Ji;
+        CoefficientArray (E1) : |vi+ - vi-| < Ji;
 
     Notations :
         - V- (unit/s)   : global speed before the jerk movement;
