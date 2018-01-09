@@ -109,7 +109,7 @@ void Kernel::check_config() {
     //If a led is provided :
 #ifdef HL_LED_FLAG
     //Enable the led output;
-    pin_mode_output(LED_PIN); //TODO LED IN HL_ABSTRACTION
+    pin_mode_output(LED_PIN);
 #endif
 
     //Enable all transmission layers.
@@ -195,11 +195,11 @@ void Kernel::initialise_data() {
     //Clear the EEPROMMap profile;
     EEPROMMap::initialise_data();
 
-    //Initialise the task scheduler;
-    TaskScheduler::initialise_data();
-
     //Initialise all enabled interfaces
     Interaction::initialise_data();
+
+    //Initialise the task scheduler;
+    TaskScheduler::initialise_data();
 
     //Initialise actions;
     Actuators::initialise_data();

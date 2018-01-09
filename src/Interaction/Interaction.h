@@ -63,7 +63,6 @@ public:
     //Initialise all interfaces data (fields and processing environment);
     static void initialise_data();
 
-
 private:
 
     //Initialise controllers
@@ -85,6 +84,16 @@ private:
 
     //The log_protocol array;
     static Protocol **const protocols;
+
+
+    //------------------------------------------------- Default log -------------------------------------------------
+
+
+public:
+
+    static Protocol *get_default_protocol();
+
+    static void *get_default_log_function();
 
 };
 

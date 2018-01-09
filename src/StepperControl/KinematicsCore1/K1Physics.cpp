@@ -306,7 +306,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
 
     //--------coefficient to get ld from la--------
 
-    //divide dn_a by dn_d
+    //divideBy dn_a by dn_d
     tmp = dn_deceleration / dn_acceleration;
 
     //FORMULA : ld = (Dd / Da)^2 * la

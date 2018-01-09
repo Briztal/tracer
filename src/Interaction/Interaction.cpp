@@ -109,6 +109,51 @@ void Interaction::initialise_external_controllers() {
 }
 
 
+Protocol *Interaction::get_default_protocol() {
+
+#include <Config/control_config.h>
+
+#ifdef STD_OUT_PROTOCOL
+
+    uint8_t i = 0;
+
+#define EXTERNAL_CONTROL(...) i++;
+
+#include <Config/control_config.h>
+
+#undef EXTERNAL_CONTROL
+
+    if (STD_OUT_PROTOCOL < i)
+        return protocols[STD_OUT_PROTOCOL];
+
+#endif
+
+    return nullptr;
+
+}
+
+
+void *Interaction::get_default_log_function() {
+
+#include <Config/control_config.h>
+
+#ifdef STD_OUT_PROTOCOL
+
+    uint8_t i = STD_OUT_PROTOCOL;
+
+#define EXTERNAL_CONTROL(language, log_protocol, protocol_buffer_size, transmission_layer)\
+    if (!(i--)) return (void *) language::external_log;
+
+#include <Config/control_config.h>
+
+#undef EXTERNAL_CONTROL
+
+#endif
+
+    return nullptr;
+}
+
+
 /*
  * read_external_controllers : this function will read_data all interfaces, in order to schedule new tasks.
  *
@@ -198,3 +243,4 @@ void Interaction::read_internal_controllers() {
 
 Protocol *t_prot_cont[NB_CONTROLS];
 Protocol **const Interaction::protocols = t_prot_cont;
+

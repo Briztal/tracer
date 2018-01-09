@@ -27,6 +27,7 @@
 #include <StepperControl/Steppers.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Actuators/PWMGPIO.h>
+#include <DataStructures/Matrix.h>
 
 //-------------------------------------------------Movement-------------------------------------------------------------
 
@@ -87,6 +88,7 @@ void MachineController::initialise_data() {
 
     //Reset coordinate interfaces;
     coordinate_interfaces_data = coordinate_interfaces_data_t();
+
 
 }
 

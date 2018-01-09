@@ -140,6 +140,7 @@ public:
     //Echo a message on the current log pipe; inline for efficiency.
     static void log(String message);
 
+
 private:
 
     //The encoding function;
@@ -148,6 +149,11 @@ private:
     //The communication log_protocol;
     static Protocol *log_protocol;
 
+    //The encoding function;
+    static void (*default_log_function)(Protocol *, String message);
+
+    //The communication log_protocol;
+    static Protocol *default_log_protocol;
 
 
 };

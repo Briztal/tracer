@@ -32,6 +32,7 @@
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <DataStructures/StringUtils.h>
+#include <DataStructures/Matrix.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -44,6 +45,13 @@ task_state_t TerminalCommands::flood(char *) {
 
 }
 
+
+task_state_t TerminalCommands::action(char *) {
+
+    return complete;
+
+
+}
 
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
@@ -63,7 +71,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
     char *name = GET_ARG('n');
 
     //Cache the cache_path, in case of multiple uses;
-    uint8_t size = StringUtils::length(name) + (uint8_t)1;
+    uint8_t size = StringUtils::length(name) + (uint8_t) 1;
 
     //Declare the name cache;
     char cache_path[size];

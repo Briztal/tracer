@@ -76,9 +76,16 @@ void TaskScheduler::initialise_data() {
     //Reset the flood flag; //TODO REMOVE;
     flood_enabled = false;
 
+
+    //Initialise the default log environment;
+    default_log_function = (void (*)(Protocol *,const String)) Interaction::get_default_log_function();
+
+    //Initialise the default protocol;
+    default_log_protocol = Interaction::get_default_protocol();
+
     //Reset the log environment;
-    log_function = nullptr;
-    log_protocol = nullptr;
+    log_function = default_log_function;
+    log_protocol = default_log_protocol;
 
 }
 
@@ -200,11 +207,24 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
     //Set the type;
     task.type = type;
 
-    //Set the log function;
-    task.log_function = log_function;
 
-    //Set the log protocol;
-    task.log_protocol = protocol;
+    if (log_function && log_protocol) {
+
+        //Set the log function;
+        task.log_function = log_function;
+
+        //Set the log protocol;
+        task.log_protocol = protocol;
+
+    } else {
+
+        //Set the log function;
+        task.log_function = default_log_function;
+
+        //Set the log protocol;
+        task.log_protocol = default_log_protocol;
+
+    }
 
     //Call the scheduling function and return whether the task was successfully scheduled;
     return schedule_task(&task);
@@ -698,4 +718,11 @@ void (*m::log_function)(Protocol *, String message) = nullptr;
 
 //The communication log_protocol;
 Protocol *m::log_protocol = nullptr;
+
+//The default log function
+void (*m::default_log_function)(Protocol *, String message);
+
+//The default log_protocol;
+Protocol *m::default_log_protocol;
+
 

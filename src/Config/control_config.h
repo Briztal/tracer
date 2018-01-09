@@ -53,9 +53,9 @@
  *  To create a log_protocol objetc, based on a transmission layer, and piped into a controller,
  *      you may add one line like below :
  *
- *  CONTROL(controller, log_protocol, protocol_buffer_size, transmission_layer), where :
+ *  EXTERNAL_CONTROL(language, log_protocol, protocol_buffer_size, transmission_layer), where :
  *
- *      - controller is the name of a Controller class;
+ *      - language is the name of a Language class;
  *      - log_protocol is the name of a Protocol class (Interaction/Protocols);
  *      - protocol_buffer_size is the size of the Protocol class's input buffer;
  *      - transmission layer is the name of a transmission layer (hardware_language_abstraction_xxxx.h)
@@ -69,3 +69,5 @@
 EXTERNAL_CONTROL(Terminal, ClearText, 100, usb_serial)
 
 #endif
+
+#define STD_OUT_PROTOCOL 0

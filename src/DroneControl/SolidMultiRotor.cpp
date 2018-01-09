@@ -110,10 +110,13 @@ SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked
 
 
     /*
-     * Now, we will invert the matrix, to obtain the power matrix.
+     * Now, we will getInverse the matrix, to obtain the power matrix.
      *
      *  This matrix will give us motor powers in function of regulation coordinates;
      */
+
+
+    /*TODO REMOVE
 
     //If the matrix is not invertible :
     if (matrix->determinant == 0) {
@@ -127,9 +130,10 @@ SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked
         //Stop;
         return;
     }
+    */
 
     //Determine the power matrix;
-    powerMatrix = matrix->invert();
+    powerMatrix = matrix->getInverse();
 
     //Log;
     std_out("SolidMultiRotor instance properly initialised and ready.");
@@ -157,7 +161,7 @@ SolidMultiRotor::~SolidMultiRotor() {
  * failSafe : this function will reset properly all processing data after an init failure;
  */
 
-SolidMultiRotor::failSafe() {
+void SolidMultiRotor::failSafe() {
 
     //First, delete the power matrix for safety;
     delete powerMatrix;

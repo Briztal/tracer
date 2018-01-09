@@ -35,6 +35,8 @@
 
 #include "stdint.h"
 
+#include "DataStructures/Matrix.h"
+
 class SolidMultiRotor {
 
 
@@ -92,28 +94,6 @@ protected:
 
 protected:
 
-
-    //Add a single motor to the model and return its index;
-    uint8_t addMotor(motor_data_t *motor_data);
-
-    //Add a relation between motors;
-    void addRelation();
-
-
-private:
-
-    //The motors lock flag : when it is set, no motors can be added, but relations can;
-    bool motors_locked;
-
-
-    //------------------------------- Computation -------------------------------
-
-    //Compute powers for all motors;
-    void computePowers(float x, float y, float z, float pitch, float roll, float yaw);
-
-
-private:
-
     /*
      * The structure that will contain all data related to one motor;
      */
@@ -145,6 +125,28 @@ private:
 
     };
 
+    //Add a single motor to the model and return its index;
+    uint8_t addMotor(motor_data_t *motor_data);
+
+    //Add a relation between motors;
+    void addRelation();
+
+
+private:
+
+    //The motors lock flag : when it is set, no motors can be added, but relations can;
+    bool motors_locked;
+
+
+    //------------------------------- Computation -------------------------------
+
+    //Compute powers for all motors;
+    void computePowers(float x, float y, float z, float pitch, float roll, float yaw);
+
+
+private:
+
+
     //The number of single motors;
     uint8_t nbMotors;
 
@@ -173,7 +175,7 @@ private:
 
     float infiniteNorm(const float *matrix_line, uint8_t size);
 
-    long failSafe();
+    void failSafe();
 };
 
 

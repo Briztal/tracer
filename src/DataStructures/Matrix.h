@@ -26,10 +26,11 @@
  * The Matrix class. It represents a simple matrix, and handles math operations on it;
  */
 
-
-#include "stdint.h"
+#include "hardware_language_abstraction.h"
 
 class Matrix {
+
+    //-------------------------- Constructors --------------------------
 
 public:
 
@@ -42,30 +43,56 @@ public:
     //The destructor : deletes the data array;
     ~Matrix();
 
-    //Create a sub_matrix;
-    Matrix *subMatrix(uint8_t new_height, uint8_t new_width);
 
+    //-------------------------- Coefficient manipulation --------------------------
 
-    //-------------------------- Computation --------------------------
+public:
 
+    //Get a the value of a given coefficient;
     float getCoefficient(uint8_t line_index, uint8_t column_index);
 
+    //Set the value of a given coefficient;
     void setCoefficient(uint8_t line_index, uint8_t column_index, float new_value);
 
+    //Sum a whole line with the given one;
     void sumLine(const uint8_t line_index, const float *line, const float multiplier);
 
-    void reset();
-
+    //Set a line of the matrix to the given one;
     void setLine(const uint8_t line_index, const float *line, const float multiplier);
 
-    void setLine(const uint8_t line_index);
+    //Reset a single line in the matrix;
+    void resetLine(const uint8_t line_index);
 
+    //Get a pointer to a line of the matrix;
     const float *getLine(const uint8_t line_index);
+
+    //Reset the matrix to a null matrix. Doesn't change the size, only resets all coefficients to zero;
+    void reset();
+
+
+    //-------------------------- Matrices Operations --------------------------
+
+public:
+
+    //Compute the cofactor at a given position;
+    float getCofactor(uint8_t line, uint8_t column);
+
+    //Transpose the matrix;
+    void transpose();
+
+    //Divide all coefficients by a given denominator;
+    void divideBy(float denominator);
+
+
+private:
+
+    //Compute a particular minor;
+    float getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size);
 
 
     //-------------------------- Fields --------------------------
 
-protected:
+private:
 
     //Height;
     const uint8_t height;
@@ -81,8 +108,22 @@ protected:
 
 public:
 
-    Matrix *invert();
+    //Compute the inverse of the matrix;
+    Matrix *getInverse();
 
+    //Compute the cofactor matrix;
+    Matrix *getCofactorMatrix();
+
+    //Create a sub_matrix;
+    Matrix *subMatrix(uint8_t new_height, uint8_t new_width);
+
+
+    //-------------------------- String --------------------------
+
+public:
+
+    //Create a string that display the matrix;
+    String toString();
 
 };
 

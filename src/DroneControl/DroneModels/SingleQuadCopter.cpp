@@ -6,7 +6,6 @@
 
 void SingleQuadCopter::createMotors() {
 
-    addMotor()
 
 }
 
