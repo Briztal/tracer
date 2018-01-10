@@ -22,6 +22,7 @@
 #ifndef TRACER_EQUATION_H
 #define TRACER_EQUATION_H
 
+#include <WString.h>
 #include "stdint.h"
 
 class CoefficientArray {
@@ -76,6 +77,7 @@ public:
     //Multiply all coefficients by the given factor
     void multiply(float factor);
 
+    String toString();
 };
 
 

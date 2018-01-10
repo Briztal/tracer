@@ -33,6 +33,7 @@
 #include <Sensors/Thermistors/Thermistors.h>
 #include <DataStructures/StringUtils.h>
 #include <DataStructures/Matrix.h>
+#include <DroneControl/LinearSystem.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -47,6 +48,63 @@ task_state_t TerminalCommands::flood(char *) {
 
 
 task_state_t TerminalCommands::action(char *) {
+
+
+
+    /*
+
+     LinearSystem system = LinearSystem(4, 3);
+
+    float t0[4] {1, 1, 1, 1};
+    float t1[4] {0, 1, 0, -1};
+    float t2[4] {1, 0, -1, 0};
+    float t30[3] {1, 0, 0}, t31[4]{1, -1, 1, -1};
+
+    system.addSimpleEquation(0, t0, 4);
+    system.addSimpleEquation(1, t1, 4);
+    system.addSimpleEquation(2, t2, 4);
+    system.addEquation(t30, 3, t31, 4);
+
+     */
+
+    /*
+    LinearSystem system = LinearSystem(4, 3);
+
+    float t00[3] {1, 0, 1},t01[4] {2, 1, 0, 1};
+    float t1[4] {0, 1, 0, -1};
+    float t2[4] {1, 0, -1, 0};
+    float t30[3] {1, 0, 0}, t31[4]{1, -1, 1, -1};
+
+    system.addEquation(t00, 3, t01, 4);
+    system.addSimpleEquation(1, t1, 4);
+    system.addSimpleEquation(2, t2, 4);
+    system.addEquation(t30, 3, t31, 4);
+
+    */
+    ///*
+    LinearSystem system = LinearSystem(5, 4);
+
+    float t0[5] {1,1,1,1, 1};
+    float t1[5] {1,0,-1,0,1};
+    float t2[5] {0,1,0,-1,-1};
+    float t3[5] {1,-1,1,-1,1};
+    float t40[4] {0,0, 0, 0}, t41[5]{1,0,0,1,-1};
+
+    system.addSimpleEquation(0, t0, 5);
+    system.addSimpleEquation(1, t1, 5);
+    system.addSimpleEquation(2, t2, 5);
+    system.addSimpleEquation(3, t3, 5);
+    system.addEquation(t40, 4, t41, 5);
+
+    //*/
+
+    Matrix *m = system.solveSystem();
+
+    if (m != nullptr) {
+        std_out(m->toString());
+    } else {
+        std_out("Failed to solve the system");
+    }
 
     return complete;
 

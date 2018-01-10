@@ -27,11 +27,12 @@
 
 class LinearSystem {
 
-
     //----------------------------------------- Initialisation -----------------------------------------
 
+public:
+
     //Constructor;
-    LinearSystem(uint8_t height, uint8_t width);
+    LinearSystem(uint8_t nbInputs, uint8_t nbOutputs);
 
     //Destructor;
     ~LinearSystem();
@@ -71,11 +72,12 @@ private:
 
     };
 
+    //The current number of equations saved;
+    uint8_t nbEquations;
+
     //The equation array;
     equation_t *equations;
 
-    //The current number of equations saved;
-    uint8_t nbEquations;
 
 
     //----------------------------------------- Resolution -----------------------------------------
@@ -86,15 +88,23 @@ public:
     Matrix *solveSystem();
 
 
-    uint8_t solveLeftMember();
+private:
 
-    bool normalise(const uint8_t equation_index, const uint8_t coefficient_index);
+    //Solve the left members system;
+    uint8_t solveLeftMembersSystem();
 
-    bool normalise(const uint8_t equation_index, const uint8_t coefficient_index, float normalisation_value);
+    //Normalise an equation;
+    //bool normalise(const uint8_t equation_index, const uint8_t coefficient_index, float normalisation_value);
 
+    //Extract the matrix related to the right members system;
     Matrix *extractMatrix();
 
-    void sumLastColumns(const uint8_t sum_count, Matrix *matrix);
+    //Sum the last columns of the matrix;
+    void mergePseudoCoordinated(const uint8_t nb_parts, Matrix *matrix);
+
+    void display();
+
+    float findAndSwitch(uint8_t equation_index, const uint8_t nb_equations);
 };
 
 

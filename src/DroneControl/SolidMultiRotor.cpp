@@ -23,8 +23,8 @@
 #include <DataStructures/Matrix.h>
 #include "SolidMultiRotor.h"
 
-SolidMultiRotor::SolidMultiRotor() : nbMotors(0), motors(nullptr), motors_locked(false), initFlag(false),
-                                     powerMatrix(new Matrix()), nbCoordinates(0) {
+SolidMultiRotor::SolidMultiRotor() : motors_locked(false), nbMotors(0), motors(nullptr), powerMatrix(new Matrix()),
+                                     nbCoordinates(0), initFlag(false) {
 
     //Create a coordinate system struct;
     coordinate_system_t coordinate_system = coordinate_system_t();
@@ -429,6 +429,8 @@ Matrix *SolidMultiRotor::computeMotorsMatrix(coordinate_system_t *coordinaes) {
 
     }
 
+    return matrix;
+
 }
 
 
@@ -501,5 +503,7 @@ float SolidMultiRotor::infiniteNorm(const float *matrix_line, uint8_t size) {
         if (max_value < value) max_value = value;
 
     }
+
+    return max_value;
 
 }

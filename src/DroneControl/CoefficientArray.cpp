@@ -18,9 +18,11 @@
 
 */
 
-#include <math.h>
 #include "CoefficientArray.h"
 
+#include <math.h>
+
+#include "hardware_language_abstraction.h"
 
 /*
  * Some macros to help with index and coefficients management;
@@ -36,7 +38,7 @@
  * Constructor : initialises the coefficients array;
  */
 
-CoefficientArray::CoefficientArray(uint8_t size) : size(size), coefficients(new float[size]) {}
+CoefficientArray::CoefficientArray(uint8_t size) : size(size), coefficients(new float[size]{0}) {}
 
 
 /*
@@ -75,9 +77,7 @@ void CoefficientArray::setCoefficient(uint8_t index, float new_value) {
         return;
 
     //Modify the value only if it is not nan;
-    if (!isnanf(new_value)) {
-        coefficients[index] = new_value;
-    }
+    coefficients[index] = new_value;
 
 }
 
@@ -94,9 +94,7 @@ void CoefficientArray::setCoefficients(const float *coefficients, uint8_t size) 
         float new_coefficient = coefficients[index];
 
         //Modify the value only if it is not nan;
-        if (!isnanf(new_coefficient)) {
-            this->coefficients[index] = new_coefficient;
-        }
+        this->coefficients[index] = new_coefficient;
 
     }
 
@@ -153,5 +151,19 @@ void CoefficientArray::multiply(float factor) {
         this->coefficients[index] *= factor;
 
     }
+
+}
+
+String CoefficientArray::toString() {
+
+    String s = "";
+
+    for (uint8_t coeff_index = 0; coeff_index < size; coeff_index++) {
+
+        s += String(coefficients[coeff_index]) + " ";
+
+    }
+
+    return s;
 
 }

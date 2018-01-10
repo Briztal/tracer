@@ -128,6 +128,7 @@ public:
     //Create a string that display the matrix;
     String toString();
 
+    void divideLineBy(uint8_t line_index, float factor);
 };
 
 

@@ -71,6 +71,8 @@ Matrix::Matrix(uint8_t height, uint8_t width) : height(height), width(width), da
     //Initialise the whole matrix to zero;
     reset();
 
+    std_out("sizes : " + String(this->height) + " " + String(this->width));
+
 }
 
 
@@ -165,7 +167,6 @@ void Matrix::setLine(const uint8_t line_index, const float *line, const float mu
 }
 
 
-
 /*
  * sumLine : sums the dst line to the src line;
  */
@@ -176,9 +177,11 @@ void Matrix::sumLine(const uint8_t dest_line, const uint8_t src_line) {
     if (invalid_line(dest_line) || invalid_line(src_line))
         return;
 
+    std_out("valid lines");
+
     //Cache the pointer to the first coefficient to modify
-    float *src_p = data_array + width * dest_line;
-    float *dst_p = data_array + width * src_line;
+    float *src_p = data_array + width * src_line;
+    float *dst_p = data_array + width * dest_line;
 
     //Sum every coefficient to the required line :
     for (uint8_t column_index = 0; column_index < width; column_index++) {
@@ -233,6 +236,30 @@ const float *Matrix::getLine(const uint8_t line_index) {
 
     //Return the appropriate line index;
     return data_array + width * line_index;
+
+}
+
+
+void Matrix::divideLineBy(uint8_t line_index, float factor) {
+
+    //If the line index is invalid, do nothing;
+    if (invalid_line(line_index)) {
+        return;
+    }
+
+    //Invert the factor;
+    factor = (float) 1 / factor;
+
+    //Cache the pointer to the first coefficient to modify
+    float *coefficient_p = data_array + width * line_index;
+
+    //Divide every coefficient of the required line :
+    for (uint8_t column_index = 0; column_index < width; column_index++) {
+
+        //Divide the coefficient;
+        *(coefficient_p++) *= factor;
+
+    }
 
 }
 
@@ -467,7 +494,7 @@ Matrix *Matrix::getInverse() {
     float determinant = 0;
 
     //For each position of the first line :
-    for (uint8_t column_index = 0; column_index<width; column_index++) {
+    for (uint8_t column_index = 0; column_index < width; column_index++) {
 
         //Multiply the two coefficients, and add the result to the determinant;
         determinant += get_coeff(0, column_index) * cofactorMatrix->getCoefficient(0, column_index);
@@ -485,6 +512,8 @@ Matrix *Matrix::getInverse() {
 
     }
 
+    /*
+
     //Display the original matrix;
     std_out("Original matrix :\n" + toString());
 
@@ -492,19 +521,25 @@ Matrix *Matrix::getInverse() {
     std_out("Determinant : "+String(determinant));
 
     //Display the cofactor matrix;
-    std_out("Cofactors matrix :\n" + cofactorMatrix->toString());
+    std_out("Cofactors matrix :\n" + cofactorMatrix->display());
 
+     */
     //Transpose the cofactor matrix;
     cofactorMatrix->transpose();
 
-    //Display the cofactor matrix;
-    std_out("Transposed cofactors matrix :\n" + cofactorMatrix->toString());
 
+    /*
+    //Display the cofactor matrix;
+    std_out("Transposed cofactors matrix :\n" + cofactorMatrix->display());
+
+     */
     //Divide the cofactor matrix by the determinant to get the inverted matrix;
     cofactorMatrix->divideBy(determinant);
 
+    /*
     //Display the cofactor matrix;
-    std_out("inverted matrix : \n" + cofactorMatrix->toString());
+    std_out("inverted matrix : \n" + cofactorMatrix->display());
+     */
 
     //Return the inverted matrix;
     return cofactorMatrix;
@@ -573,8 +608,7 @@ Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) {
             float coeff = get_coeff(line_index, column_index);
 
             //Copy the coefficient in the new instance;
-            set_coeff(line_index, column_index, coeff, new_matrix);
-
+            new_matrix->setCoefficient(line_index, column_index, coeff);
         }
 
     }
@@ -588,7 +622,7 @@ Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) {
 
 
 /*
- * toString : this function creates a string that contains the matrix.
+ * display : this function creates a string that contains the matrix.
  */
 String Matrix::toString() {
 
