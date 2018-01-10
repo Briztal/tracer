@@ -69,15 +69,17 @@ public:
 public:
 
     //Add the given equation to our equation;
-    void addEquation(CoefficientArray *equation);
+    void addArray(CoefficientArray *array);
 
     //Add the given equation multiplied by the given coefficient to our equation;
-    void addEquation(float coefficient, CoefficientArray *equation);
+    void addArray(float factor, CoefficientArray *array);
 
     //Multiply all coefficients by the given factor
     void multiply(float factor);
 
+    //Create a string displaying the content of the array;
     String toString();
+
 };
 
 

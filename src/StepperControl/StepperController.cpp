@@ -78,7 +78,7 @@ void StepperController::initialise_data() {
     //Initialise the Kinematics Core;
     Kinematics::initialise_data();
 
-    //Finally, initialise local data;
+    //Finally, solve local data;
     _initialise_data();
 
 }

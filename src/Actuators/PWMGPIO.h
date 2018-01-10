@@ -38,7 +38,7 @@ public:
     //Set Actuators mode;
     static void initialise_hardware();
 
-    //initialise all PWMs to zero:
+    //solve all PWMs to zero:
     static void initialise_data();
 
     //------------------------------------------- Setup by id -------------------------------------------

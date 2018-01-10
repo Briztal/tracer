@@ -35,7 +35,9 @@
 
 #include "stdint.h"
 
-#include "DataStructures/Matrix.h"
+#include <LinearSolver/Matrix.h>
+
+#include <LinearSolver/LinearSystem.h>
 
 class SolidMultiRotor {
 
@@ -86,8 +88,15 @@ protected:
     virtual void createMotors() = 0;
 
     //The method to create relations;
-    virtual void createRelations() = 0;
+    virtual void createRelations(LinearSystem *s) = 0;
 
+
+    //----------------------------------- Resolution -----------------------------------
+
+protected:
+
+    //Solve the physical control system;
+    void solve();
 
 
     //------------------------------- Model configuration -------------------------------
@@ -126,10 +135,8 @@ protected:
     };
 
     //Add a single motor to the model and return its index;
-    uint8_t addMotor(motor_data_t *motor_data);
+    void addMotor(motor_data_t *motor_data);
 
-    //Add a relation between motors;
-    void addRelation();
 
 
 private:
@@ -138,23 +145,21 @@ private:
     bool motors_locked;
 
 
-    //------------------------------- Computation -------------------------------
+    //------------------------------- Fields -------------------------------
 
-    //Compute powers for all motors;
-    void computePowers(float x, float y, float z, float pitch, float roll, float yaw);
+protected:
+
+    //The power matrix, used for computation and so shared with sub-classes;
+    Matrix *powerMatrix;
 
 
 private:
-
 
     //The number of single motors;
     uint8_t nbMotors;
 
     //The declared single motors;
     motor_data_t *motors;
-
-    //The power matrix;
-    Matrix *powerMatrix;
 
     //The number of coordinates;
     uint8_t nbCoordinates;
@@ -163,19 +168,19 @@ private:
     bool initFlag;
 
 
-    void resetMotorsArray();
+    //------------------------------- Computation -------------------------------
 
-    Matrix *computeMotorsMatrix(coordinate_system_t *coordinaes);
+    void resetMotorsArray();
 
     uint8_t getCoordinatesNumber(coordinate_system_t *coordinate_system);
 
-    bool checkControl(Matrix *m, coordinate_system_t *coordinates, float threshold);
-
-    float infiniteNorm(float *matrix_line, uint8_t size);
+    bool checkControl(const Matrix *m, coordinate_system_t *coordinates, float threshold);
 
     float infiniteNorm(const float *matrix_line, uint8_t size);
 
     void failSafe();
+
+    void addMotorsEquations(coordinate_system_t *coordinates, LinearSystem *system);
 };
 
 

@@ -32,8 +32,9 @@
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <DataStructures/StringUtils.h>
-#include <DataStructures/Matrix.h>
-#include <DroneControl/LinearSystem.h>
+#include <LinearSolver/Matrix.h>
+#include <LinearSolver/LinearSystem.h>
+#include <DroneControl/DroneModels/SingleQuadCopter.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -63,7 +64,7 @@ task_state_t TerminalCommands::action(char *) {
     system.addSimpleEquation(0, t0, 4);
     system.addSimpleEquation(1, t1, 4);
     system.addSimpleEquation(2, t2, 4);
-    system.addEquation(t30, 3, t31, 4);
+    system.addArray(t30, 3, t31, 4);
 
      */
 
@@ -75,13 +76,13 @@ task_state_t TerminalCommands::action(char *) {
     float t2[4] {1, 0, -1, 0};
     float t30[3] {1, 0, 0}, t31[4]{1, -1, 1, -1};
 
-    system.addEquation(t00, 3, t01, 4);
+    system.addArray(t00, 3, t01, 4);
     system.addSimpleEquation(1, t1, 4);
     system.addSimpleEquation(2, t2, 4);
-    system.addEquation(t30, 3, t31, 4);
+    system.addArray(t30, 3, t31, 4);
 
     */
-    ///*
+    /*
     LinearSystem system = LinearSystem(5, 4);
 
     float t0[5] {1,1,1,1, 1};
@@ -96,7 +97,6 @@ task_state_t TerminalCommands::action(char *) {
     system.addSimpleEquation(3, t3, 5);
     system.addEquation(t40, 4, t41, 5);
 
-    //*/
 
     Matrix *m = system.solveSystem();
 
@@ -105,6 +105,11 @@ task_state_t TerminalCommands::action(char *) {
     } else {
         std_out("Failed to solve the system");
     }
+
+
+    */
+
+    SingleQuadCopter *copter = new SingleQuadCopter();
 
     return complete;
 

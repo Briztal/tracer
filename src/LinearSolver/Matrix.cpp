@@ -94,7 +94,7 @@ Matrix::~Matrix() {
  * getCoefficient : returns the value of the coefficient at (line_index, column_index);
  */
 
-float Matrix::getCoefficient(uint8_t line_index, uint8_t column_index) {
+float Matrix::getCoefficient(uint8_t line_index, uint8_t column_index) const {
 
     //If the required value is outside the array, return zero by default;
     if (outside_array(line_index, column_index)) {
@@ -120,49 +120,6 @@ void Matrix::setCoefficient(uint8_t line_index, uint8_t column_index, float new_
 
     //Update the value of the required coefficient in our instance;
     set_coeff(line_index, column_index, new_value, this);
-
-}
-
-
-/*
- * resetLine : this function sets the entire required line to zero;
- */
-
-void Matrix::resetLine(const uint8_t line_index) {
-
-    //If the required line is outside the array, fail;
-    if (invalid_line(line_index))
-        return;
-
-    //Cache the pointer to the first coefficient to modify
-    float *coefficient_p = data_array + width * line_index;
-
-    //Reset all coefficients;
-    memset(coefficient_p, 0, width * sizeof(float));
-
-}
-
-
-/*
- * resetLine : sets the line coefficient by coefficient to the [line_index]-th line of the matrix;
- */
-
-void Matrix::setLine(const uint8_t line_index, const float *line, const float multiplier) {
-
-    //If the required line is outside the array, fail;
-    if (invalid_line(line_index))
-        return;
-
-    //Cache the pointer to the first coefficient to modify
-    float *coefficient_p = data_array + width * line_index;
-
-    //For every coefficient to the required line :
-    for (uint8_t column_index = 0; column_index < width; column_index++) {
-
-        //Set the current coefficient's value as the required value, and update both data pointer;
-        *(coefficient_p++) = multiplier * (*(line++));
-
-    }
 
 }
 
@@ -218,27 +175,32 @@ void Matrix::sumLine(const uint8_t line_index, const float *line, const float mu
 
 
 /*
- * getLine : this function returns a pointer to the required line;
+ * setLine : sets the line coefficient by coefficient to the [line_index]-th line of the matrix;
  */
 
-const float *Matrix::getLine(const uint8_t line_index) {
+void Matrix::setLine(const uint8_t line_index, const float *line, const float multiplier) {
 
-    //If the line is invalid, return the line zero for safety;
-    if (invalid_line(line_index)) {
+    //If the required line is outside the array, fail;
+    if (invalid_line(line_index))
+        return;
 
-        //Log;
-        std_out("Error in Matrix::getLine : the requested line doesn't exist. Returning line zero.");
+    //Cache the pointer to the first coefficient to modify
+    float *coefficient_p = data_array + width * line_index;
 
-        //Fail
-        return data_array;
+    //For every coefficient to the required line :
+    for (uint8_t column_index = 0; column_index < width; column_index++) {
+
+        //Set the current coefficient's value as the required value, and update both data pointer;
+        *(coefficient_p++) = multiplier * (*(line++));
 
     }
 
-    //Return the appropriate line index;
-    return data_array + width * line_index;
-
 }
 
+
+/*
+ * divideLineBy : divide all coefficients by [factor];
+ */
 
 void Matrix::divideLineBy(uint8_t line_index, float factor) {
 
@@ -265,13 +227,43 @@ void Matrix::divideLineBy(uint8_t line_index, float factor) {
 
 
 /*
- * reset : sets all coefficients to zero;
+ * getLine : this function returns a pointer to the required line;
  */
 
-void Matrix::reset() {
+const float *Matrix::getLine(const uint8_t line_index) const {
 
-    //Hard reset;
-    memset(data_array, 0, height * width * sizeof(float));
+    //If the line is invalid, return the line zero for safety;
+    if (invalid_line(line_index)) {
+
+        //Log;
+        std_out("Error in Matrix::getLine : the requested line doesn't exist. Returning line zero.");
+
+        //Fail
+        return data_array;
+
+    }
+
+    //Return the appropriate line index;
+    return data_array + width * line_index;
+
+}
+
+
+/*
+ * resetLine : this function sets the entire required line to zero;
+ */
+
+void Matrix::resetLine(const uint8_t line_index) {
+
+    //If the required line is outside the array, fail;
+    if (invalid_line(line_index))
+        return;
+
+    //Cache the pointer to the first coefficient to modify
+    float *coefficient_p = data_array + width * line_index;
+
+    //Reset all coefficients;
+    memset(coefficient_p, 0, width * sizeof(float));
 
 }
 
@@ -283,7 +275,7 @@ void Matrix::reset() {
  * getCofactor : this function determines the cofactor at the given position;
  */
 
-float Matrix::getCofactor(uint8_t line, uint8_t column) {
+float Matrix::getCofactor(uint8_t line, uint8_t column) const {
 
     //If the line index of the column index are outside the matrix, return 0 for safety;
     if (invalid_column(column) && invalid_line(line))
@@ -323,7 +315,7 @@ float Matrix::getCofactor(uint8_t line, uint8_t column) {
  *  size : the size of the sub-matrix;
  */
 
-float Matrix::getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size) {
+float Matrix::getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size) const {
 
     if (line == disabled_line)
         line++;
@@ -470,6 +462,18 @@ void Matrix::divideBy(float denominator) {
 }
 
 
+/*
+ * reset : sets all coefficients to zero;
+ */
+
+void Matrix::reset() {
+
+    //Hard reset;
+    memset(data_array, 0, height * width * sizeof(float));
+
+}
+
+
 //----------------------------------------------- Derived constructors  ------------------------------------------------
 
 
@@ -479,7 +483,7 @@ void Matrix::divideBy(float denominator) {
  *  If the matrix is not invertible, it will return a null pointer;
  */
 
-Matrix *Matrix::getInverse() {
+Matrix *Matrix::getInverse() const {
 
     //First, check that the matrix is a square matrix;
     if (height != width) {
@@ -551,7 +555,7 @@ Matrix *Matrix::getInverse() {
  * getCofactorMatrix : this function computes and returns the cofactor matrix, associated with [this] matrix;
  */
 
-Matrix *Matrix::getCofactorMatrix() {
+Matrix *Matrix::getCofactorMatrix() const {
 
     if (height != width) {
         std_out("ERROR in Matrix::getInverse() : the matrix is not a square matrix;");
@@ -587,7 +591,7 @@ Matrix *Matrix::getCofactorMatrix() {
  *  All data is copied.
  */
 
-Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) {
+Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) const {
 
     //First, let's check that the required dimensions fit in our instance. If not, return an zero-size matrix;
     if ((new_height > height) || (new_width > width))
@@ -624,7 +628,7 @@ Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) {
 /*
  * display : this function creates a string that contains the matrix.
  */
-String Matrix::toString() {
+String Matrix::toString() const {
 
     //Create the return string;
     String s = "";

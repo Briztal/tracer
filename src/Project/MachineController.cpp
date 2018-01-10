@@ -22,12 +22,10 @@
 
 #include <Interaction/Interaction.h>
 
-#include "TemperatureController.h"
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Steppers.h>
 #include <StepperControl/TrajectoryTracer.h>
 #include <Actuators/PWMGPIO.h>
-#include <DataStructures/Matrix.h>
 
 //-------------------------------------------------Movement-------------------------------------------------------------
 

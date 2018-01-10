@@ -21,6 +21,9 @@
 #include <Interaction/Interaction.h>
 #include "LinearSystem.h"
 
+
+//--------------------------------------------------- Initialisation ---------------------------------------------------
+
 /*
  * Constructor : initialises the equation array;
  */
@@ -63,6 +66,8 @@ LinearSystem::~LinearSystem() {
 }
 
 
+//---------------------------------------------------- Equations add ---------------------------------------------------
+
 /*
  * addSimpleEquation : add an equation, whose left member comprises only one variable, with the coefficient to 1;
  */
@@ -89,7 +94,7 @@ void LinearSystem::addSimpleEquation(uint8_t left_index, float *right_member, ui
 
 
 /*
- * addEquation : add an equation;
+ * addArray : add an equation;
  */
 
 void LinearSystem::addEquation(const float *left_member, const uint8_t left_member_size, const float *right_member,
@@ -114,6 +119,10 @@ void LinearSystem::addEquation(const float *left_member, const uint8_t left_memb
 }
 
 
+
+//----------------------------------------------------- Resolution -----------------------------------------------------
+
+
 /*
  * solveSystem : this function solves the equation system, or returns a 0-size matrix if it cannot be solved;
  */
@@ -126,8 +135,8 @@ Matrix *LinearSystem::solveSystem() {
         //Log;
         std_out("Error in LinearSystem::solveSystem : all equations have not been provided.");
 
-        //Fail returning an empty matrix;
-        return new Matrix();
+        //Fail returning an null matrix;
+        return nullptr;
 
     }
 
@@ -135,7 +144,7 @@ Matrix *LinearSystem::solveSystem() {
 
 
     //Then, extract the matrix of the right members system;
-    Matrix *firstMatrix = extractMatrix();
+    const Matrix *firstMatrix = extractMatrix();
 
     std_out("First matrix : \n" + firstMatrix->toString());
 
@@ -155,13 +164,13 @@ Matrix *LinearSystem::solveSystem() {
         //Log;
         std_out("Error in LinearSystem::solveSystem : The left members system couldn't be solved.");
 
-        //Fail returning an empty matrix;
-        return new Matrix();
+        //Fail returning a null matrix;
+        return nullptr;
 
     }
 
     //Then, extract the matrix of the right members system;
-    Matrix *systemMatrix = extractMatrix();
+    const Matrix *systemMatrix = extractMatrix();
 
     std_out("system matrix : \n" + systemMatrix->toString());
 
@@ -191,8 +200,8 @@ Matrix *LinearSystem::solveSystem() {
         //Log;
         std_out("Error in LinearSystem::solveSystem : Couldn't extract the sub-matrix.");
 
-        //Fail returning an empty matrix;
-        return new Matrix();
+        //Fail returning a null matrix;
+        return nullptr;
 
     }
 
@@ -283,8 +292,8 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
                 continue;
 
             //Add the current equation multiplied by the sub_factor to the sub_equation;;
-            sub_equation->left_member->addEquation(sub_factor, equation->left_member);
-            sub_equation->right_member->addEquation(sub_factor, equation->right_member);
+            sub_equation->left_member->addArray(sub_factor, equation->left_member);
+            sub_equation->right_member->addArray(sub_factor, equation->right_member);
 
         }
     }
@@ -323,8 +332,8 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
                 continue;
 
             //Add the current equation multiplied by the sub_factor to the sub_equation;;
-            sub_equation->left_member->addEquation(sub_factor, equation->left_member);
-            sub_equation->right_member->addEquation(sub_factor, equation->right_member);
+            sub_equation->left_member->addArray(sub_factor, equation->left_member);
+            sub_equation->right_member->addArray(sub_factor, equation->right_member);
 
 
             std_out("intermediary : ");
@@ -347,14 +356,14 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
     equation_t *equation = equations + gauss_stop_index;
 
     //For every line:
-    for (uint8_t line_index = gauss_stop_index + (uint8_t)1; line_index < nb_equations; line_index++) {
+    for (uint8_t line_index = gauss_stop_index + (uint8_t) 1; line_index < nb_equations; line_index++) {
 
         //Cache the current equation
         equation_t *sub_equation = equations + line_index;
 
         //Add the gauss stop equation to the current one;
-        sub_equation->left_member->addEquation(equation->left_member);
-        sub_equation->right_member->addEquation(equation->right_member);
+        sub_equation->left_member->addArray(equation->left_member);
+        sub_equation->right_member->addArray(equation->right_member);
 
     }
 
@@ -420,193 +429,10 @@ float LinearSystem::findAndSwitch(uint8_t equation_index, const uint8_t nb_equat
 
 
 /*
-
-uint8_t LinearSystem::solveLeftMembersSystem() {
-
-    //Cache the number of equations;
-    const uint8_t nb_equations = nbInputs;
-
-    //First, we will apply the gauss pivot algorithm for the first nbOutputs-1 lines.
-
-    //Cache the iteration counter;
-    const uint8_t nb_iterations = nbOutputs;
-
-    std_out("init : ");
-    std_out(toString());
-
-    //The first step is to normalise each line for a valid coefficient, and to eliminate it in next lines;
-
-    //For each line :
-    for (uint8_t equation_index = 0; equation_index < nb_iterations; equation_index++) {
-
-        //Get the pointer to the current equation;
-        equation_t *equation = equations + equation_index;
-
-        //Get the [equation_index]-th coefficient of the left member;
-        float factor = equation->left_member->getCoefficient(equation_index);
-
-        //If the factor is null, we must look for another equation that has its factor not null
-        if (!factor) {
-
-            //Declare the switch index;
-            uint8_t switch_index = equation_index + (uint8_t) 1;
-
-            while (true) {
-
-                //If no valid equation was found, the system cannot be solved;
-                if (switch_index == nb_equations) {
-                    return 0;
-                }
-
-                //Get the next coefficient of the left member;
-                factor = (++equation)->left_member->getCoefficient(equation_index);
-
-                //If a non null factor is found, stop iterating;
-                if (factor)
-                    break;
-
-                //Increment the new index;
-                switch_index++;
-            }
-
-            //Switch the equations at equation_index and switch_index.
-
-            //Cache the equation at switch position;
-            equation_t eq_cache = *equation;
-
-            //modify the equation at switch position;
-            *equation = equations[equation_index];
-
-            //Modify the equation at equation_index position;
-            equations[equation_index] = eq_cache;
-
-            equation = equations + equation_index;
-
-        }
-
-        //Now, we must normalise the current line.
-
-        //Cache the inverse of the factor;
-        float inverse = (float)1 / factor;
-
-        //Divide the current equation by the factor;
-        equation->left_member->multiply(inverse);
-        equation->right_member->multiply(inverse);
-
-
-        //Now, we must eliminate the coefficient in all following equations.
-
-        //For each of the following equations :
-        for (uint8_t sub_equation_index = equation_index + (uint8_t) 1; sub_equation_index < nbEquations; sub_equation_index++) {
-
-            //Cache the equation :
-            equation_t *sub_equation = equations + sub_equation_index;
-
-            //Cache the opposite of the [equation_index]-th coefficient,;
-            float sub_factor = -sub_equation->left_member->getCoefficient(equation_index);
-
-            if (!sub_factor)
-                continue;
-
-            //Add the current equation multiplied by the sub_factor to the sub_equation;;
-            sub_equation->left_member->addEquation(sub_factor, equation->left_member);
-            sub_equation->right_member->addEquation(sub_factor, equation->right_member);
-
-        }
-
-    }
-
-    std_out("step 1 : ");
-    std_out(toString());
-
-    //Cache the index of the last equation we focused on;
-    const uint8_t last_index = nbOutputs - (uint8_t) 1;
-
-
-    //The next step is to repeat the process in the inverse order, to obtain the identity matrix;
-
-    std_out("last : "+String(last_index));
-
-    std_out("step 2 : ");
-    std_out(toString());
-
-    //For each line :
-    for (uint8_t line_index = last_index; line_index > 0; line_index--) {
-
-        //Get the pointer to the current equation;
-        equation_t *equation = equations + line_index;
-
-        //Now, we must eliminate the coefficient in all following equations.
-
-        //For each of the following equations :
-        for (uint8_t sub_line_index = line_index - (uint8_t) 1; sub_line_index > 0; sub_line_index--) {
-
-            //Cache the sub equation :
-            equation_t *sub_equation = equations + sub_line_index;
-
-            //Cache the opposite of the [line_index]-th coefficient,;
-            float sub_factor = -sub_equation->left_member->getCoefficient(line_index);
-
-            std_out("sub_factor "+String(sub_line_index)+"-"+String(line_index)+" : "+String(sub_factor));
-
-            if (!sub_factor)
-                continue;
-
-            //Add the current equation multiplied by the sub_factor to the sub_equation;;
-            sub_equation->left_member->addEquation(sub_factor, equation->left_member);
-            sub_equation->right_member->addEquation(sub_factor, equation->right_member);
-
-        }
-
-    }
-
-
-    std_out("final step : ");
-    display();
-
-    //Return the number of lines to sum after the resolution;
-    return 1;
-
-}
-*/
-
-
-/*
- * normalise : this function will normalise the given equation, so that the [coefficient_index]'s coefficient
- *  is set to [normalisation_value] after;
- */
-/*
-bool LinearSystem::normalise(const uint8_t equation_index, const uint8_t coefficient_index, float normalisation_value) {
-
-    //Cache the equation pointer;
-    equation_t *equation = equations + equation_index;
-
-    //Get the value of the only remaining coefficient;
-    float factor = equation->left_member->getCoefficient(coefficient_index);
-
-    //If the factor is null, fail;
-    if (factor == 0) {
-        return false;
-    }
-
-    //Invert the factor;
-    factor = normalisation_value / factor;
-
-    //Normalise the left member;
-    equation->left_member->multiply(factor);
-
-    //Divide the right member;
-    equation->right_member->multiply(factor);
-
-    return true;
-}*/
-
-
-/*
  * extractMatrix : this function will extract the matrix corresponding to the right members system;
  */
 
-Matrix *LinearSystem::extractMatrix() {
+const Matrix *LinearSystem::extractMatrix() const {
 
     //First, cache the size of the matrix;
     const uint8_t nb_equations = nbInputs;
@@ -679,6 +505,11 @@ void LinearSystem::mergePseudoCoordinated(const uint8_t nb_parts, Matrix *matrix
 
 }
 
+//------------------------------------------------------ Display -------------------------------------------------------
+
+/*
+ * display : this function prints the content of all equations, using stdout;
+ */
 
 void LinearSystem::display() {
 

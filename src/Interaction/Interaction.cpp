@@ -30,7 +30,7 @@
 
 void Interaction::initialise_hardware() {
 
-    //A macro that will initialise the interface for a giver control pipeline;
+    //A macro that will solve the interface for a giver control pipeline;
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission) transmission::begin();
 
     //Expand the initialise_hardware;
@@ -50,7 +50,7 @@ void Interaction::initialise_hardware() {
 
 void Interaction::initialisation_message() {
 
-    //A macro that will initialise the interface for a giver control pipeline;
+    //A macro that will solve the interface for a giver control pipeline;
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission)\
     controller::init_message();
 
@@ -66,7 +66,7 @@ void Interaction::initialisation_message() {
 /*
  * initialise_hardware : this function initialises data for all enabled controllers.
  *
- *  It creates a new Protocol, and gives it to the controller, that will initialise its data accordingly;
+ *  It creates a new Protocol, and gives it to the controller, that will solve its data accordingly;
  */
 
 void Interaction::initialise_data() {
@@ -91,7 +91,7 @@ void Interaction::initialise_external_controllers() {
     uint8_t i = 0;
 
 
-    //A macro that will initialise the i-th log_protocol, memorise it, and give it to the controller;
+    //A macro that will solve the i-th log_protocol, memorise it, and give it to the controller;
 #define EXTERNAL_CONTROL(controller, protocol, buffer, transmission)\
     /*Eventually delete the pointer*/\
     if ((p = protocols[i]) != nullptr) { delete p;};\

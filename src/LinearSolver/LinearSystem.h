@@ -21,9 +21,9 @@
 #ifndef TRACER_LINEARSOLVER_H
 #define TRACER_LINEARSOLVER_H
 
-#include <DataStructures/Matrix.h>
-#include "stdint.h"
 #include "CoefficientArray.h"
+
+#include "Matrix.h"
 
 class LinearSystem {
 
@@ -79,7 +79,6 @@ private:
     equation_t *equations;
 
 
-
     //----------------------------------------- Resolution -----------------------------------------
 
 public:
@@ -87,24 +86,30 @@ public:
     //Compute the resolution matrix;
     Matrix *solveSystem();
 
+    //Extract the matrix related to the right members system;
+    const Matrix *extractMatrix() const;
+
 
 private:
 
     //Solve the left members system;
     uint8_t solveLeftMembersSystem();
 
-    //Normalise an equation;
-    //bool normalise(const uint8_t equation_index, const uint8_t coefficient_index, float normalisation_value);
+    //Find an equation that has a non null coefficient, and switch it with the current position;
+    float findAndSwitch(uint8_t equation_index, const uint8_t nb_equations);
 
-    //Extract the matrix related to the right members system;
-    Matrix *extractMatrix();
 
     //Sum the last columns of the matrix;
     void mergePseudoCoordinated(const uint8_t nb_parts, Matrix *matrix);
 
+
+    //----------------------------------------- Display -----------------------------------------
+
+public:
+
+    //Display the content of equations;
     void display();
 
-    float findAndSwitch(uint8_t equation_index, const uint8_t nb_equations);
 };
 
 

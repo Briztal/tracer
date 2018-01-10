@@ -29,7 +29,7 @@
 
 
 /*
- * initialise all fields;
+ * solve all fields;
  */
 
 void SubMovementManager::initialise_data() {

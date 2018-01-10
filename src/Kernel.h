@@ -67,7 +67,7 @@ private:
     /*
      * initialise_hardware : this function is called once, by start only. It is the hardware initialisation function.
      *
-     *  As its name suggests, it will initialise the hardware for all interfaces.
+     *  As its name suggests, it will solve the hardware for all interfaces.
      */
 
     static void initialise_hardware();

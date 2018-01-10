@@ -49,7 +49,7 @@ public:
 public:
 
     //Get a the value of a given coefficient;
-    float getCoefficient(uint8_t line_index, uint8_t column_index);
+    float getCoefficient(uint8_t line_index, uint8_t column_index) const;
 
     //Set the value of a given coefficient;
     void setCoefficient(uint8_t line_index, uint8_t column_index, float new_value);
@@ -63,14 +63,14 @@ public:
     //Set a line of the matrix to the given one;
     void setLine(const uint8_t line_index, const float *line, const float multiplier);
 
+    //Divide an entire line by a given factor;
+    void divideLineBy(uint8_t line_index, float factor);
+
     //Reset a single line in the matrix;
     void resetLine(const uint8_t line_index);
 
     //Get a pointer to a line of the matrix;
-    const float *getLine(const uint8_t line_index);
-
-    //Reset the matrix to a null matrix. Doesn't change the size, only resets all coefficients to zero;
-    void reset();
+    const float *getLine(const uint8_t line_index) const;
 
 
     //-------------------------- Matrices Operations --------------------------
@@ -78,7 +78,7 @@ public:
 public:
 
     //Compute the cofactor at a given position;
-    float getCofactor(uint8_t line, uint8_t column);
+    float getCofactor(uint8_t line, uint8_t column) const;
 
     //Transpose the matrix;
     void transpose();
@@ -86,11 +86,13 @@ public:
     //Divide all coefficients by a given denominator;
     void divideBy(float denominator);
 
+    //Reset the matrix to a null matrix. Doesn't change the size, only resets all coefficients to zero;
+    void reset();
 
 private:
 
     //Compute a particular minor;
-    float getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size);
+    float getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size) const;
 
 
     //-------------------------- Fields --------------------------
@@ -112,13 +114,13 @@ private:
 public:
 
     //Compute the inverse of the matrix;
-    Matrix *getInverse();
+    Matrix *getInverse() const;
 
     //Compute the cofactor matrix;
-    Matrix *getCofactorMatrix();
+    Matrix *getCofactorMatrix() const;
 
     //Create a sub_matrix;
-    Matrix *subMatrix(uint8_t new_height, uint8_t new_width);
+    Matrix *subMatrix(uint8_t new_height, uint8_t new_width) const;
 
 
     //-------------------------- String --------------------------
@@ -126,9 +128,8 @@ public:
 public:
 
     //Create a string that display the matrix;
-    String toString();
+    String toString() const;
 
-    void divideLineBy(uint8_t line_index, float factor);
 };
 
 

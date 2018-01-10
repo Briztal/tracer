@@ -55,7 +55,7 @@ CoefficientArray::~CoefficientArray() {
 //--------------------------------------------- Coefficients manipulation ----------------------------------------------
 
 /*
- * getCoefficient : returns the coefficient at the given index;
+ * getCoefficient : returns the coefficient at [index];
  */
 
 float CoefficientArray::getCoefficient(uint8_t index) {
@@ -69,6 +69,11 @@ float CoefficientArray::getCoefficient(uint8_t index) {
 
 }
 
+
+/*
+ * setCoefficient : set the coefficient a [index] to [new_value];
+ */
+
 void CoefficientArray::setCoefficient(uint8_t index, float new_value) {
 
 
@@ -80,6 +85,11 @@ void CoefficientArray::setCoefficient(uint8_t index, float new_value) {
     coefficients[index] = new_value;
 
 }
+
+
+/*
+ * setCoefficients : copy the content of [coefficients] into our array;
+ */
 
 void CoefficientArray::setCoefficients(const float *coefficients, uint8_t size) {
 
@@ -101,13 +111,22 @@ void CoefficientArray::setCoefficients(const float *coefficients, uint8_t size) 
 }
 
 
-void CoefficientArray::addEquation(CoefficientArray *equation) {
+//------------------------------------------- CoefficientArray manipulation --------------------------------------------
+
+/*
+ * addArray : add an entire array;
+ */
+
+void CoefficientArray::addArray(CoefficientArray *array) {
+
+    //The size to copy is the minimum of both sizes.
+    uint8_t size = (this->size < array->size) ? this->size : array->size;
 
     //For each value in the coefficients array :
     for (uint8_t index = 0; index < size; index++) {
 
         //Cache the new coefficient;
-        float new_coefficient = equation->coefficients[index];
+        float new_coefficient = array->coefficients[index];
 
         //Modify the value only if it is not nan;
         if (!isnanf(new_coefficient)) {
@@ -118,31 +137,34 @@ void CoefficientArray::addEquation(CoefficientArray *equation) {
 
 }
 
-void CoefficientArray::addEquation(float coefficient, CoefficientArray *equation) {
 
-    //If the coefficient is nan, do nothing;
-    if (isnanf(coefficient))
-        return;
+/*
+ * addArray : add an entire array, coefficient by coefficient, multiplied by the given factor;
+ */
+
+void CoefficientArray::addArray(float factor, CoefficientArray *array) {
+
+    //The size to copy is the minimum of both sizes.
+    uint8_t size = (this->size < array->size) ? this->size : array->size;
 
     //For each value in the coefficients array :
     for (uint8_t index = 0; index < size; index++) {
 
-        //Cache the new coefficient;
-        float new_coefficient = equation->coefficients[index];
+        //Cache the new factor;
+        float new_coefficient = array->coefficients[index];
 
         //Modify the value only if it is not nan;
-        if (!isnanf(new_coefficient)) {
-            this->coefficients[index] += coefficient * new_coefficient;
-        }
+        this->coefficients[index] += factor * new_coefficient;
 
     }
 }
 
-void CoefficientArray::multiply(float factor) {
 
-    //If the coefficient is nan, do nothing;
-    if (isnanf(factor))
-        return;
+/*
+ * multiply : multiplies all coefficients by the given factor;
+ */
+
+void CoefficientArray::multiply(float factor) {
 
     //For each value in the coefficients array :
     for (uint8_t index = 0; index < size; index++) {
@@ -154,16 +176,25 @@ void CoefficientArray::multiply(float factor) {
 
 }
 
+
+/*
+ * toString : create a string that displays the content of the arrat;
+ */
+
 String CoefficientArray::toString() {
 
+    //Initialise a String;
     String s = "";
 
+    //For each coefficient :
     for (uint8_t coeff_index = 0; coeff_index < size; coeff_index++) {
 
+        //Add its string value to the string, followed by a space;
         s += String(coefficients[coeff_index]) + " ";
 
     }
 
+    //Return the string;
     return s;
 
 }

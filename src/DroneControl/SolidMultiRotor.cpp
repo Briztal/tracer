@@ -20,11 +20,56 @@
 
 #include <malloc.h>
 #include <Interaction/Interaction.h>
-#include <DataStructures/Matrix.h>
+#include <LinearSolver/Matrix.h>
+#include <LinearSolver/LinearSystem.h>
 #include "SolidMultiRotor.h"
 
-SolidMultiRotor::SolidMultiRotor() : motors_locked(false), nbMotors(0), motors(nullptr), powerMatrix(new Matrix()),
-                                     nbCoordinates(0), initFlag(false) {
+
+
+
+//TODO
+//TODO
+//TODO
+//TODO
+//TODO
+//TODO REBUILD THIS CLASS
+//TODO
+//TODO
+//TODO
+//TODO
+
+
+/*
+ * Constructor : only initialises all fields;
+ */
+
+SolidMultiRotor::SolidMultiRotor() : motors_locked(false), powerMatrix(new Matrix()), nbMotors(0), motors(nullptr),
+                                     nbCoordinates(0), initFlag(false) {}
+
+
+/*
+ * Destructor : frees the motor array, and deletes the matrix;
+ */
+
+SolidMultiRotor::~SolidMultiRotor() {
+
+    //Free the motors arrays;
+    resetMotorsArray();
+
+    //TODO FREE RELATIONS;
+
+}
+
+
+/*
+ * solve : this function will solve the drone's equation system.
+ */
+
+void SolidMultiRotor::solve() {
+
+    /*
+    * Init;
+    */
 
     //Create a coordinate system struct;
     coordinate_system_t coordinate_system = coordinate_system_t();
@@ -39,7 +84,7 @@ SolidMultiRotor::SolidMultiRotor() : motors_locked(false), nbMotors(0), motors(n
     motors_locked = true;
 
     //Verify that enough motors have been added
-    uint8_t nb_coordinates = getCoordinatesNumber(&coordinate_system);
+    const uint8_t nb_coordinates = getCoordinatesNumber(&coordinate_system);
 
     //If there are not enough motors, fail
     if (nbMotors < nb_coordinates) {
@@ -57,9 +102,26 @@ SolidMultiRotor::SolidMultiRotor() : motors_locked(false), nbMotors(0), motors(n
 
     }
 
-    //Now, compute the controlMatrix;
-    Matrix *controlMatrix = computeMotorsMatrix(&coordinate_system);
 
+    /*
+     * System resolution;
+     */
+
+    //Create the linear system that will represent our physical model;
+    LinearSystem *system = new LinearSystem(nb_coordinates, nbMotors);
+
+    //Now, add the motors equations to the system;
+    addMotorsEquations(&coordinate_system, system);
+
+    //Then, let the sub-class add its own relations;
+    createRelations(system);
+
+
+    const Matrix *control_matrix = system->extractMatrix();
+
+    /*
+     * Threshold control;
+     */
 
     //TODO THRESHOLD ? 
 
@@ -72,7 +134,7 @@ SolidMultiRotor::SolidMultiRotor() : motors_locked(false), nbMotors(0), motors(n
     //TODO
 
     //Then, check if some dimensions can't be controlled;
-    bool drone_controllable = checkControl(controlMatrix, &coordinate_system, 1);
+    bool drone_controllable = checkControl(control_matrix, &coordinate_system, 1);
 
     //If one coordinate is not controllable, fail;
     if (!drone_controllable) {
@@ -90,71 +152,34 @@ SolidMultiRotor::SolidMultiRotor() : motors_locked(false), nbMotors(0), motors(n
     }
 
 
-    //TODO RELATIONS;
-    //if the number of coordinates doesn't match the number of motors :
-    if (nb_coordinates != nbMotors) {
-
-        //Log;
-        std_out("Error in SolidMultiRotor::SolidMultiRotor : You provided " + String(nbMotors) +
-                " but your coordinate system comprises " + String(nb_coordinates) +
-                " coordinates, and relations are not supported for instance. Please remove " +
-                String(nb_coordinates - nbMotors) + " motors.");
-
-        //Fail safely;
-        failSafe();
-
-        //Stop;
-        return;
-
-    }
-
-
     /*
-     * Now, we will getInverse the controlMatrix, to obtain the power controlMatrix.
-     *
-     *  This controlMatrix will give us motor powers in function of regulation coordinates;
+     * System resolution;
      */
 
+    //Solve the system, and get the control matrix;
+    powerMatrix = system->solveSystem();
 
-    //Attempt to invert the control controlMatrix;
-    powerMatrix = controlMatrix->getInverse();
-
-    //If the controlMatrix is not invertible :
     if (powerMatrix == nullptr) {
 
         //Log;
-        std_out("Error in SolidMultiRotor::SolidMultiRotor : The control controlMatrix is not inversible");
+        std_out("Error in SolidMultiRotor::SolidMultiRotor : Failed to solve the system.");
 
         //Fail safely;
         failSafe();
 
         //Stop;
         return;
-    }
 
-    //Determine the power controlMatrix;
-    powerMatrix = controlMatrix->getInverse();
+    }
 
     //Log;
     std_out("SolidMultiRotor instance properly initialised and ready.");
 
     //Finally, mark the initialisation as finished and properly executed;
     initFlag = true;
-}
-
-
-/*
- * Destructor : frees the motor array, and deletes the matrix;
- */
-
-SolidMultiRotor::~SolidMultiRotor() {
-
-    //Free the motors arrays;
-    resetMotorsArray();
-
-    //TODO FREE RELATIONS;
 
 }
+
 
 
 /*
@@ -185,7 +210,7 @@ void SolidMultiRotor::failSafe() {
  *      in this new space;
  */
 
-uint8_t SolidMultiRotor::addMotor(motor_data_t *motor_data) {
+void SolidMultiRotor::addMotor(motor_data_t *motor_data) {
 
     //If the geometry is locked, fail;
     if (motors_locked) {
@@ -194,7 +219,7 @@ uint8_t SolidMultiRotor::addMotor(motor_data_t *motor_data) {
         std_out("Error in SolidMultiRotor::addMotor : the geometry is locked, no motors can be added anymore.");
 
         //Return the default index;
-        return 0;
+        return;
 
     }
 
@@ -266,7 +291,7 @@ uint8_t SolidMultiRotor::getCoordinatesNumber(coordinate_system_t *coordinate_sy
 
 
 /*
- * computeMotorsMatrix : This function will compute the first lines of the resolution matrix;
+ * addMotorsEquations : This function will compute the first lines of the resolution matrix;
 
     The following lines must be added :
 
@@ -298,22 +323,31 @@ Momentum :
 
  */
 
-Matrix *SolidMultiRotor::computeMotorsMatrix(coordinate_system_t *coordinaes) {
+void SolidMultiRotor::addMotorsEquations(coordinate_system_t *coordinates, LinearSystem *system) {
 
-    //First, cache the number of motors;
-    const uint8_t size = nbMotors;
+    //Cache the number of motors;
+    const uint8_t nb_motors = nbMotors;
 
-    //Then, create the problem's matrix : a square matrix of the problem's size;
-    Matrix *matrix = new Matrix(size, size);
+    //Cache the number of control coordinates;
+    const uint8_t nb_coordinates = getCoordinatesNumber(coordinates);
+
+    /*
+     * Then, create the motor equations array.
+     * Equations are simple (left member comprise only a 1), so a 2D array is sufficient
+     */
+    float right_member_array[nb_coordinates * nb_motors];
+
+    //Then, define a macro to ease the coefficient set;
+#define set_coeff(line, column, value) right_member_array[nb_coordinates * (line) + (column)] = (value);
 
     //Now, let's add all equation's coefficients for each motor;
-    for (uint8_t column_index = 0; column_index < size; column_index++) {
+    for (uint8_t motor_index = 0; motor_index < nb_motors; motor_index++) {
 
-        //First, initialise a row counter;
-        uint8_t line_index = 0;
+        //First, solve a row counter;
+        uint8_t coordinate_index = 0;
 
         //Cache the motor data pointer;
-        motor_data_t *data = motors + column_index;
+        motor_data_t *data = motors + motor_index;
 
         /*
          * The R_i coefficient will be used for all computations involving this motors;
@@ -355,23 +389,35 @@ Matrix *SolidMultiRotor::computeMotorsMatrix(coordinate_system_t *coordinaes) {
 
 
         //Add the coefficient of the x translation equation, if it is enabled;
-        if (coordinaes->x_en) {
+        if (coordinates->x_en) {
 
-            matrix->setCoefficient(line_index++, column_index, tx);
+            //Set the x coefficient;
+            set_coeff(coordinate_index, motor_index, tx);
+
+            //Move to the next coordinate
+            coordinate_index++;
 
         }
 
         //Add the coefficient of the y translation equation, if it is enabled;
-        if (coordinaes->y_en) {
+        if (coordinates->y_en) {
 
-            matrix->setCoefficient(line_index++, column_index, ty);
+            //Set the y coefficient;
+            set_coeff(coordinate_index, motor_index, ty);
+
+            //Move to the next coordinate
+            coordinate_index++;
 
         }
 
         //Add the coefficient of the z translation equation, if it is enabled;
-        if (coordinaes->z_en) {
+        if (coordinates->z_en) {
 
-            matrix->setCoefficient(line_index++, column_index, tz);
+            //Set the z coefficient;
+            set_coeff(coordinate_index, motor_index, tz);
+
+            //Move to the next coordinate
+            coordinate_index++;
 
         }
 
@@ -395,41 +441,61 @@ Matrix *SolidMultiRotor::computeMotorsMatrix(coordinate_system_t *coordinaes) {
         float cz = rz * c_R2;
 
         //X momentum (roll) : add the coefficient of the x momentum equation, if it is enabled;
-        if (coordinaes->roll_en) {
+        if (coordinates->roll_en) {
 
             //The roll verifies : -s_i * cx_i + y_i * tz_i - z_i * ty_i
             float roll = -s * cx + data->y * tz - data->z * ty;
 
             //Set the roll coefficient;
-            matrix->setCoefficient(line_index++, column_index, roll);
+            set_coeff(coordinate_index, motor_index, roll);
+
+            //Move to the next coordinate
+            coordinate_index++;
 
         }
 
         //Y momentum (pitch) : add the coefficient of the y momentum equation, if it is enabled;
-        if (coordinaes->pitch_en) {
+        if (coordinates->pitch_en) {
 
             //The pitch verifies : s_i * cy_i + z_i * tx_i - x_i * tz_i
             float pitch = s * cy + data->z * tx - data->x * tz;
 
             //Set the pitch coefficient;
-            matrix->setCoefficient(line_index++, column_index, pitch);
+            set_coeff(coordinate_index, motor_index, pitch);
+
+            //Move to the next coordinate
+            coordinate_index++;
 
         }
 
         //Z momentum (yaw) : add the coefficient of the z momentum equation, if it is enabled;
-        if (coordinaes->yaw_en) {
+        if (coordinates->yaw_en) {
 
             //The yaw verifies : -s_i * cz_i + x_i * ty_i - y_i * tx_i
             float yaw = -s * cz + data->x * ty - data->y * tx;
 
-            //Set the pitch coefficient;
-            matrix->setCoefficient(line_index, column_index, yaw);
+            //Set the yaw coefficient;
+            set_coeff(coordinate_index, motor_index, yaw);
+
+            //Move to the next coordinate
+            coordinate_index++;
 
         }
 
     }
 
-    return matrix;
+
+    /*
+     * Now that we have filled the equation array, we will transmit these equations to the linear system;
+     */
+
+    //For every equation :
+    for (uint8_t coordinate_index = 0; coordinate_index < nb_coordinates; coordinate_index++) {
+
+        //The equation is simple (only one 1 coefficient in the left member), pass only the [coordinate_index]-th line;
+        system->addSimpleEquation(coordinate_index, right_member_array + (coordinate_index * nb_motors), nb_motors);
+
+    }
 
 }
 
@@ -440,9 +506,9 @@ Matrix *SolidMultiRotor::computeMotorsMatrix(coordinate_system_t *coordinaes) {
  * An coordinate will be controllable if the coefficients of its line  in its control matrix are great enough;
  */
 
-bool SolidMultiRotor::checkControl(Matrix *m, coordinate_system_t *coordinates, float threshold) {
+bool SolidMultiRotor::checkControl(const Matrix *m, coordinate_system_t *coordinates, float threshold) {
 
-    //As the line format is not known without the coordinate system struct, initialise a line counter;
+    //As the line format is not known without the coordinate system struct, solve a line counter;
     uint8_t line_counter = 0;
 
     //As all coordinates get checked the same way, we will do it using a macro;
@@ -487,7 +553,7 @@ bool SolidMultiRotor::checkControl(Matrix *m, coordinate_system_t *coordinates, 
 
 float SolidMultiRotor::infiniteNorm(const float *matrix_line, uint8_t size) {
 
-    //As we want to determine the maximum of a positive set of float, initialise a max_variable to zero;
+    //As we want to determine the maximum of a positive set of float, solve a max_variable to zero;
     float max_value = 0;
 
     //Iterate [size] times;
