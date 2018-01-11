@@ -33,8 +33,6 @@
  */
 
 
-#include "stdint.h"
-
 #include <LinearSolver/Matrix.h>
 
 #include <LinearSolver/LinearSystem.h>
@@ -49,8 +47,8 @@ protected:
     //Constructor;
     SolidMultiRotor();
 
-    //Destructor;
-    ~SolidMultiRotor();
+     //Destructor;
+     virtual ~SolidMultiRotor();
 
     //------------------------------- Virtual methods -------------------------------
 
@@ -95,8 +93,8 @@ protected:
 
 protected:
 
-    //Solve the physical control system;
-    void solve();
+     //Solve the physical control system;
+     virtual void solve();
 
 
     //------------------------------- Model configuration -------------------------------
@@ -106,37 +104,74 @@ protected:
     /*
      * The structure that will contain all data related to one motor;
      */
-    struct motor_data_t {
+    class MotorData {
+
+    public:
+
+        //A simple constructor, setting regular position values;
+        MotorData(float x, float y, float z, bool direction,
+                  float traction_coeff, float torque_coeff,
+                  float kV, float voltage,
+                  float max_signal, uint8_t servo_index) :
+
+                x(x), y(y), z(z), theta(0), phi(0), rotation_direction(direction),
+                traction_coefficient(traction_coeff), torque_coefficient(torque_coeff),
+                kV(kV), voltage(voltage), max_signal(max_signal), servo_index(servo_index)
+        {}
+
+
+        //The most complete constructor, setting all coefficients;
+        MotorData(float x, float y, float z, float theta, float phi, bool direction,
+                  float traction_coeff, float torque_coeff,
+                  float kV, float voltage,
+                  float max_signal, uint8_t servo_index) :
+
+                x(x), y(y), z(z), theta(theta), phi(phi), rotation_direction(direction),
+                traction_coefficient(traction_coeff), torque_coefficient(torque_coeff),
+                kV(kV), voltage(voltage), max_signal(max_signal), servo_index(servo_index)
+        {}
+
+    public:
+
+        //------------------- Position constants -------------------
 
         //Motor coordinates;
-        float x = 0, y = 0, z = 0;
+        float x, y, z;
 
         //Motor orientation
-        float theta = 0, phi = 0;
+        float theta, phi;
 
-        //The motor's Kv;
-        float kV = 1000;
+        //Does the motor turns in trigonometric direction?
+        bool rotation_direction;
+
+        //------------------- Dynamics constants -------------------
 
         //The motor's traction and torque coefficients;
-        float traction_coefficient = 1, torque_coefficient = 1;
+        float traction_coefficient;
+
+        float torque_coefficient;
+
+        //------------------- Voltage values -------------------
+        //The motor's Kv;
+        float kV;
 
         //The power voltage;
-        float voltage = 11;
+        float voltage;
 
-        //Does the motor turns in positive_rotation direction?
-        bool rotation_direction = false;
+
+        //------------------- Command values -------------------
 
         //The maximum signal value;
-        float max_signal = 255;
+        float max_signal;
 
         //The index of the servo controlling the motor;
-        uint8_t servo_index = 0;
+        uint8_t servo_index;
+
 
     };
 
     //Add a single motor to the model and return its index;
-    void addMotor(motor_data_t *motor_data);
-
+    void addMotor(MotorData *motor_data);
 
 
 private:
@@ -159,7 +194,7 @@ private:
     uint8_t nbMotors;
 
     //The declared single motors;
-    motor_data_t *motors;
+    MotorData **motors;
 
     //The number of coordinates;
     uint8_t nbCoordinates;

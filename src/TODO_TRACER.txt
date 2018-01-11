@@ -1,3 +1,7 @@
+//TODO Verify that all data are deleted !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//TODO REBUILD MAKEFILE
+
 //TODO UN-STATIFY MOVEMENT CLASSES
 
 

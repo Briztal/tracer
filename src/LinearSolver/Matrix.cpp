@@ -71,8 +71,6 @@ Matrix::Matrix(uint8_t height, uint8_t width) : height(height), width(width), da
     //Initialise the whole matrix to zero;
     reset();
 
-    std_out("sizes : " + String(this->height) + " " + String(this->width));
-
 }
 
 
@@ -133,8 +131,6 @@ void Matrix::sumLine(const uint8_t dest_line, const uint8_t src_line) {
     //If the required line is outside the array, fail;
     if (invalid_line(dest_line) || invalid_line(src_line))
         return;
-
-    std_out("valid lines");
 
     //Cache the pointer to the first coefficient to modify
     float *src_p = data_array + width * src_line;

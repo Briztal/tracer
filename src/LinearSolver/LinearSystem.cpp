@@ -75,8 +75,14 @@ LinearSystem::~LinearSystem() {
 void LinearSystem::addSimpleEquation(uint8_t left_index, float *right_member, uint8_t right_member_size) {
 
     //If no more equation can be added, fail;
-    if (nbEquations == nbInputs)
+    if (nbEquations == nbInputs) {
+
+        //Log;
+        std_out("Error in LinearSystem::addSimpleEquation : the linear system is full;");
+
         return;
+
+    }
 
     //First, cache the current equation's pointer;
     equation_t *equation_p = equations + nbEquations;
@@ -101,8 +107,14 @@ void LinearSystem::addEquation(const float *left_member, const uint8_t left_memb
                                const uint8_t right_member_size) {
 
     //If no more equation can be added, fail;
-    if (nbEquations == nbInputs)
+    if (nbEquations == nbInputs) {
+
+        //Log;
+        std_out("Error in LinearSystem::addEquation : the linear system is full;");
+
         return;
+
+    }
 
     //First, cache the current equation's pointer;
     equation_t *equation_p = equations + nbEquations;
@@ -129,6 +141,19 @@ void LinearSystem::addEquation(const float *left_member, const uint8_t left_memb
 
 Matrix *LinearSystem::solveSystem() {
 
+
+    //If all equations have not been added :
+    if (nbOutputs > nbInputs) {
+
+        //Log;
+        std_out("Error in LinearSystem::solveSystem : the has more outputs than inputs, and so is unsolvable.");
+
+        //Fail returning an null matrix;
+        return nullptr;
+
+    }
+
+
     //If all equations have not been added :
     if (nbEquations != nbInputs) {
 
@@ -140,23 +165,9 @@ Matrix *LinearSystem::solveSystem() {
 
     }
 
-
-
-
-    //Then, extract the matrix of the right members system;
-    const Matrix *firstMatrix = extractMatrix();
-
-    std_out("First matrix : \n" + firstMatrix->toString());
-
-    delete firstMatrix;
-
-    //TODO REMOVE
-
-
-
-
     //Solve the left member system, and get the number of columns to sum after the resolution;
     uint8_t sum_counter = solveLeftMembersSystem();
+
 
     //If the left member system could'nt be solved :
     if (sum_counter == 0) {
@@ -169,20 +180,19 @@ Matrix *LinearSystem::solveSystem() {
 
     }
 
+
     //Then, extract the matrix of the right members system;
     const Matrix *systemMatrix = extractMatrix();
 
-    std_out("system matrix : \n" + systemMatrix->toString());
+    //std_out("system matrix : \n" + systemMatrix->toString());
 
     //Invert the matrix;
     Matrix *inverseMatrix = systemMatrix->getInverse();
 
-    std_out("inverse matrix : \n" + inverseMatrix->toString());
+    //std_out("inverse matrix : \n" + inverseMatrix->toString());
 
     //Delete the system matrix;
     delete systemMatrix;
-
-    std_out("sum_counter " + String(sum_counter));
 
     //Sum last columns of the matrix;
     mergePseudoCoordinated(sum_counter, inverseMatrix);
@@ -241,9 +251,6 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
 
     //Cache the iteration counter;
     const uint8_t nb_iterations = nbOutputs;
-
-    std_out("init : ");
-    //display();
 
     //The first step is to normalise each line for a valid coefficient, and to eliminate it in next lines;
 
@@ -304,11 +311,6 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
 
     //The next step is to repeat the process in the inverse order, to obtain the identity matrix;
 
-    std_out("last : " + String(gauss_stop_index));
-
-    std_out("step 2 : ");
-    display();
-
     //For each line :
     for (uint8_t line_index = gauss_stop_index; line_index > 0; line_index--) {
 
@@ -326,18 +328,12 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
             //Cache the opposite of the [line_index]-th coefficient,;
             float sub_factor = -sub_equation->left_member->getCoefficient(line_index);
 
-            std_out("sub_factor " + String(sub_line_index) + "-" + String(line_index) + " : " + String(sub_factor));
-
             if (!sub_factor)
                 continue;
 
             //Add the current equation multiplied by the sub_factor to the sub_equation;;
             sub_equation->left_member->addArray(sub_factor, equation->left_member);
             sub_equation->right_member->addArray(sub_factor, equation->right_member);
-
-
-            std_out("intermediary : ");
-            display();
 
         }
 
@@ -367,8 +363,8 @@ uint8_t LinearSystem::solveLeftMembersSystem() {
 
     }
 
-    std_out("final : ");
-    display();
+    //std_out("final system: ");
+    //display();
 
 
     //Return the number of lines to sum after the resolution;
@@ -486,8 +482,6 @@ void LinearSystem::mergePseudoCoordinated(const uint8_t nb_parts, Matrix *matrix
 
     //For all [nb_parts - 1] last columns :
     for (uint8_t line_counter = sum_index + (uint8_t) 1; line_counter < size; line_counter++) {
-
-        std_out("Sum " + String(line_counter) + " to " + String(sum_index));
 
         //Add the line to the one at index sum_index;
         matrix->sumLine(sum_index, line_counter);

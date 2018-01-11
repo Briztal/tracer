@@ -38,7 +38,7 @@ Power command :
     This power commands will cause the motor to rotate, and we will suppose that there is a linear relation between
         the power command, and the rotation speed of the motor :
 
-        n_i = kv_i * voltage_i;
+        n_i = kv_i * voltage_i; k_i : (r/m)/V
 
     Though, the voltage verifies the following formula :
 
@@ -71,7 +71,7 @@ The rotation of the motor will have two quantified effects :
          => C = c_i * R_i^2 * p_i^2
 
 
-    where t_i and c_i are two constants, proper to the motor, determined experimentally.
+    where t_i (N/(r/min)) and c_i ((N.m)/(r/min)) are two constants, proper to the motor, determined experimentally.
 
 
 

@@ -18,25 +18,12 @@
 
 */
 
-#include <malloc.h>
+#include "SolidMultiRotor.h"
 #include <Interaction/Interaction.h>
 #include <LinearSolver/Matrix.h>
 #include <LinearSolver/LinearSystem.h>
-#include "SolidMultiRotor.h"
 
 
-
-
-//TODO
-//TODO
-//TODO
-//TODO
-//TODO
-//TODO REBUILD THIS CLASS
-//TODO
-//TODO
-//TODO
-//TODO
 
 
 /*
@@ -56,7 +43,7 @@ SolidMultiRotor::~SolidMultiRotor() {
     //Free the motors arrays;
     resetMotorsArray();
 
-    //TODO FREE RELATIONS;
+    delete powerMatrix;
 
 }
 
@@ -83,6 +70,7 @@ void SolidMultiRotor::solve() {
     //Provide any other motor to be added;
     motors_locked = true;
 
+
     //Verify that enough motors have been added
     const uint8_t nb_coordinates = getCoordinatesNumber(&coordinate_system);
 
@@ -108,7 +96,7 @@ void SolidMultiRotor::solve() {
      */
 
     //Create the linear system that will represent our physical model;
-    LinearSystem *system = new LinearSystem(nb_coordinates, nbMotors);
+    LinearSystem *system = new LinearSystem(nbMotors, nb_coordinates);
 
     //Now, add the motors equations to the system;
     addMotorsEquations(&coordinate_system, system);
@@ -116,22 +104,14 @@ void SolidMultiRotor::solve() {
     //Then, let the sub-class add its own relations;
     createRelations(system);
 
-
+    //Now, extract the control matrix, for the threshold check;
     const Matrix *control_matrix = system->extractMatrix();
+
+
 
     /*
      * Threshold control;
      */
-
-    //TODO THRESHOLD ? 
-
-    //TODO
-    //TODO
-    //TODO
-    //TODO POWER RATIOS IN EQUATIONS ! POWER BTW 0 and 1, that will allow the threshold check!!
-    //TODO
-    //TODO
-    //TODO
 
     //Then, check if some dimensions can't be controlled;
     bool drone_controllable = checkControl(control_matrix, &coordinate_system, 1);
@@ -152,12 +132,21 @@ void SolidMultiRotor::solve() {
     }
 
 
+
+    //The control matrix is not used after this, so we will delete it;
+    delete control_matrix;
+
+
     /*
      * System resolution;
      */
 
     //Solve the system, and get the control matrix;
     powerMatrix = system->solveSystem();
+
+    //Delete the system;
+    delete system;
+
 
     if (powerMatrix == nullptr) {
 
@@ -204,19 +193,19 @@ void SolidMultiRotor::failSafe() {
 
 
 /*
- * addMotor : this function adds a motor to the motors array.
+ * setRegistered : this function adds a motor to the motors array.
  *
  *  It starts by adding one space to the array using realloc, and then copies the content of the motor data
  *      in this new space;
  */
 
-void SolidMultiRotor::addMotor(motor_data_t *motor_data) {
+void SolidMultiRotor::addMotor(MotorData *motor_data) {
 
     //If the geometry is locked, fail;
     if (motors_locked) {
 
         //Log
-        std_out("Error in SolidMultiRotor::addMotor : the geometry is locked, no motors can be added anymore.");
+        std_out("Error in SolidMultiRotor::setRegistered : the geometry is locked, no motors can be added anymore.");
 
         //Return the default index;
         return;
@@ -227,7 +216,7 @@ void SolidMultiRotor::addMotor(motor_data_t *motor_data) {
     uint8_t new_index = nbMotors++;
 
     //Try to reallocate the array;
-    void *new_ptr = realloc(motors, nbMotors * sizeof(motor_data_t));
+    void *new_ptr = realloc(motors, nbMotors * sizeof(MotorData *));
 
     //If the reallocation failed :
     if (!new_ptr) {
@@ -236,15 +225,19 @@ void SolidMultiRotor::addMotor(motor_data_t *motor_data) {
         nbMotors = new_index;
 
         //Log
-        std_out("Error in SolidMultiRotor::addMotor : the reallocation failed.");
+        std_out("Error in SolidMultiRotor::setRegistered : the reallocation failed.");
 
         //Fail with default value;
-        return 0;
+        return;
 
     }
 
+    //Update the motor array
+    motors = (MotorData **)(new_ptr);
+
     //Copy the new motor data at the new position;
-    motors[new_index] = *motor_data;
+    motors[new_index] = motor_data;
+
 
 }
 
@@ -347,13 +340,13 @@ void SolidMultiRotor::addMotorsEquations(coordinate_system_t *coordinates, Linea
         uint8_t coordinate_index = 0;
 
         //Cache the motor data pointer;
-        motor_data_t *data = motors + motor_index;
+        MotorData *data = motors[motor_index];
 
         /*
          * The R_i coefficient will be used for all computations involving this motors;
          *         R_i = kv_i * max_voltage_i / max_i;
          */
-        float R = data->kV + data->voltage / data->max_signal;
+        float R = data->kV * data->voltage / data->max_signal;
 
         //Cache the square of R;
         float R2 = R * R;
@@ -477,9 +470,6 @@ void SolidMultiRotor::addMotorsEquations(coordinate_system_t *coordinates, Linea
             //Set the yaw coefficient;
             set_coeff(coordinate_index, motor_index, yaw);
 
-            //Move to the next coordinate
-            coordinate_index++;
-
         }
 
     }
@@ -524,7 +514,7 @@ bool SolidMultiRotor::checkControl(const Matrix *m, coordinate_system_t *coordin
             \
             /*Log;*/\
             std_out("Error in SolidMultiRotor::checkControl : the "#coordinate\
-                "coordinate line's norm is below the given threshold");\
+                " coordinate line's norm is below the given threshold");\
             \
             /*Fail;*/\
             return false;\

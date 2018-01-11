@@ -1,5 +1,5 @@
 /*
-  SingleQuadCopter.h - Part of TRACER
+  DroneTest.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,29 +18,23 @@
 
 */
 
+#ifndef TRACER_DRONETEST_H
+#define TRACER_DRONETEST_H
 
-#ifndef TRACER_SINGLEQUADCOPTER_H
-#define TRACER_SINGLEQUADCOPTER_H
+#include <DroneControl/MultiRotors/Generics/SinglePentaCopter.h>
 
-
-#include <DroneControl/SolidMultiRotor.h>
-#include <LinearSolver/LinearSystem.h>
-
-class SingleQuadCopter : SolidMultiRotor {
+class DroneTest : public SinglePentaCopter {
 
 public:
 
-    SingleQuadCopter();
-
-
-private:
-    void setCoordinateSystem(coordinate_system_t *coordinate_system) override;
-
     void createMotors() override;
 
-    void createRelations(LinearSystem *system) override;
+    void solve() override {SinglePentaCopter::solve();}
+
+private:
+    void createRelations(LinearSystem *s) override;
 
 };
 
 
-#endif //TRACER_SINGLEQUADCOPTER_H
+#endif //TRACER_DRONETEST_H
