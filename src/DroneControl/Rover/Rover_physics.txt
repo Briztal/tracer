@@ -1,0 +1,106 @@
+This file describes the main equations that determine the behaviour of a rover.
+
+A Rover will be assimilated to a set of motorised wheels.
+
+
+Referential :
+
+We will define an arbitrary point, 0, in the rover referential, that will be the reference for momentum;
+
+    The referential will be (0, ux>, uy>), where
+        - ux> is unitary and defines the front view of the rover;
+        - uy> is unitary and defines the left view of the rover;
+
+    Each wheel will rotate over a given axis, let's name ur> the positive rotation vector;
+    If we name un> the unitary normal vector to the reference plane, we can define the unitary direction vector ud> as :
+
+    ud> = (normalised) ur> ^ un>;
+
+    We will define the angle phi, as the polar angle of this vector.
+        This angle is referenced by ux>, and belongs to [0; 2Pi[;
+
+    Each wheel can potentially slide (like a holonom wheel);
+        We can now define the movement vector um> :
+            - um> is unitary;
+            - um> has the direction where the wheel is less likely to slide;
+            - theta, the angle between ud> and um> belongs to [-Pi/; Pi/2[
+
+
+
+Each motorised wheel being fully described by the following parameters:
+
+    - x_i (m)       : the abscissa of the contact point;
+    - y_i (m)       : the ordinate of the contact point;
+    - r_i (m)       : the radius of the wheel;
+    - phi_i (rad)   : the polar angle of the wheel's ud_i>
+    - theta_i (rad) : the angle between the wheel's ud_i> and um_i>
+    - w_i (r/s)     : the rotation speed of the motor;
+
+
+Each motorised wheel will have three effects on the rover's kinetics :
+
+    - A speed in the x direction (see below for proof):
+
+        Sx_i = 2 * Pi * r_i * cos(theta_i) * cos(phi_i + theta_i) * w_i;
+
+
+    - A speed in the y direction (see below for proof):
+
+        Sy_i = 2 * Pi * r_i * cos(theta_i) * sin(phi_i + theta_i) * w_i;
+
+
+    - A Kinetics Momentum, directed by uz> (definition) :
+
+        Mz_i = x_i * Sy_i - y_i * Sx_i
+
+
+
+To determine the Rover's kinetics, we must sum the effects :
+
+    The global x speed :
+
+        Sx = Sum_i(Sx_i) = Sum_i( 2 * Pi * r_i * cos(theta_i) * cos(phi_i + theta_i) * w_i );
+
+
+    The global y speed :
+
+        Sy = Sum_t(Sy_i) = Sum_i( 2 * Pi * r_i * sin(theta_i) * sin(phi_i + theta_i) * w_i );
+
+
+    The global momentum :
+
+        M = Sum_i(m_i) = Sum_i( x_i * Sy_i - y_i * Sx_i );
+
+
+We obtain a matrix system, with the rotations speeds as inputs, and kinetics constraints (speeds and momentum)
+ as outputs;
+
+
+If this system can be solved (maybe motor constraints must be added of there are more than 3 motors),
+    the inverse of the system will give us the rotations speeds in function of kinetics constraints.
+
+
+
+//-------------------------- Kinetics proof --------------------------
+
+First, the norm of the speed of the wheel at the contact point verifies :
+
+    ||Vc>|| =  2 * Pi * R * |w|
+
+
+To obtain the speed IMPOSED by the wheel, we will project this speed in the direction where
+    it is less likely to slide. The resultant norm is :
+
+    ||Vi>|| = 2 * Pi * R * cos(theta) * |w|
+
+
+If we express this vector in the (x, y) coordinate system, we obtain :
+
+    Vi =  x| 2 * Pi * R * cos(theta) * cos(theta + phi) * w;
+          y| 2 * Pi * R * cos(theta) * sin(theta + phi) * w;
+
+
+
+
+
+

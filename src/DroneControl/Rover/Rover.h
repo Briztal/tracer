@@ -1,54 +1,24 @@
-/*
-  SimpleMultiRotor.h - Part of TRACER
+//
+// Created by root on 11/01/18.
+//
 
-  Copyright (c) 2017 Raphaël Outhier
+#ifndef TRACER_ROVER_H
+#define TRACER_ROVER_H
 
-  TRACER is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  TRACER is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
-
-#ifndef TRACER_MULTIROTOR_H
-#define TRACER_MULTIROTOR_H
-
-/*
- * The SolidMultiRotor class.
- *
- *  This class regulates the power for all drones that conform to the following model :
- *
- *      - at least one single motor;
- *      - more than (>=) 4 motors;
- *      - all motors are fixed, and push vertically in the drone's referential
- */
-
-
-#include <LinearSolver/Matrix.h>
 
 #include <LinearSolver/LinearSystem.h>
 
-class SolidMultiRotor {
-
+class Rover {
 
     //------------------------------- Init -------------------------------
 
 protected:
 
     //Constructor;
-    SolidMultiRotor();
+    Rover();
 
-     //Destructor;
-     virtual ~SolidMultiRotor();
+    //Destructor;
+    virtual ~Rover();
 
     //------------------------------- Virtual methods -------------------------------
 
@@ -93,8 +63,8 @@ protected:
 
 protected:
 
-     //Solve the physical control system;
-     virtual void solve();
+    //Solve the physical control system;
+    virtual void solve();
 
 
     //------------------------------- Model configuration -------------------------------
@@ -104,12 +74,12 @@ protected:
     /*
      * The structure that will contain all data related to one motor;
      */
-    class MRMotorData {
+    class RoverMotorData {
 
     public:
 
         //A simple constructor, setting regular position values;
-        MRMotorData(float x, float y, float z, bool direction,
+        RoverMotorData(float x, float y, bool direction,
                   float traction_coeff, float torque_coeff,
                   float kV, float voltage,
                   float max_signal, uint8_t servo_index) :
@@ -121,7 +91,7 @@ protected:
 
 
         //The most complete constructor, setting all coefficients;
-        MRMotorData(float x, float y, float z, float theta, float phi, bool direction,
+        RoverMotorData(float x, float y, float z, float theta, float phi, bool direction,
                   float traction_coeff, float torque_coeff,
                   float kV, float voltage,
                   float max_signal, uint8_t servo_index) :
@@ -171,7 +141,7 @@ protected:
     };
 
     //Add a single motor to the model and return its index;
-    void addMotor(MRMotorData *motor_data);
+    void addMotor(RoverMotorData *motor_data);
 
 
 private:
@@ -194,7 +164,7 @@ private:
     uint8_t nbMotors;
 
     //The declared single motors;
-    MRMotorData **motors;
+    RoverMotorData **motors;
 
     //The number of coordinates;
     uint8_t nbCoordinates;
@@ -219,4 +189,4 @@ private:
 };
 
 
-#endif //TRACER_MULTIROTOR_H
+#endif //TRACER_ROVER_H

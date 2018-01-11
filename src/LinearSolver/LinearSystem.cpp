@@ -43,6 +43,7 @@ LinearSystem::LinearSystem(uint8_t nbInputs, uint8_t nbOutputs) :
 
 }
 
+
 /*
  * Destructor : deletes all equations and equation array;
  */
@@ -199,7 +200,6 @@ Matrix *LinearSystem::solveSystem() {
 
     //Finally, extract the relevant sub-matrix of the inverse matrix;
     Matrix *sub_matrix = inverseMatrix->subMatrix(nbInputs, nbOutputs);
-
 
     //Delete the inverse matrix;
     delete inverseMatrix;

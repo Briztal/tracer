@@ -481,9 +481,13 @@ void Matrix::reset() {
 
 Matrix *Matrix::getInverse() const {
 
-    //First, check that the matrix is a square matrix;
+    //If the matrix is not a square matrix;
     if (height != width) {
+
+        //Log;
         std_out("ERROR in Matrix::getInverse() : the matrix is not a square matrix;");
+
+        //Fail;
         return nullptr;
     }
 
@@ -553,9 +557,15 @@ Matrix *Matrix::getInverse() const {
 
 Matrix *Matrix::getCofactorMatrix() const {
 
+    //If the matrix is not a square matrix :
     if (height != width) {
+
+        //Log;
         std_out("ERROR in Matrix::getInverse() : the matrix is not a square matrix;");
+
+        //Fail;
         return nullptr;
+
     }
 
     //Create a new matrix;
@@ -591,7 +601,7 @@ Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) con
 
     //First, let's check that the required dimensions fit in our instance. If not, return an zero-size matrix;
     if ((new_height > height) || (new_width > width))
-        return new Matrix();
+        return nullptr;
 
     //First, create a new matrix in the heap;
     Matrix *new_matrix = new Matrix(new_height, new_width);

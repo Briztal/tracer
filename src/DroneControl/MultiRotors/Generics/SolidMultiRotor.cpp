@@ -24,8 +24,6 @@
 #include <LinearSolver/LinearSystem.h>
 
 
-
-
 /*
  * Constructor : only initialises all fields;
  */
@@ -41,7 +39,7 @@ SolidMultiRotor::SolidMultiRotor() : motors_locked(false), powerMatrix(new Matri
 SolidMultiRotor::~SolidMultiRotor() {
 
     //Free the motors arrays;
-    resetMotorsArray();
+    deleteMotorsArray();
 
     delete powerMatrix;
 
@@ -108,7 +106,6 @@ void SolidMultiRotor::solve() {
     const Matrix *control_matrix = system->extractMatrix();
 
 
-
     /*
      * Threshold control;
      */
@@ -116,8 +113,14 @@ void SolidMultiRotor::solve() {
     //Then, check if some dimensions can't be controlled;
     bool drone_controllable = checkControl(control_matrix, &coordinate_system, 1);
 
+    //The control matrix is not used after this, so we will delete it;
+    delete control_matrix;
+
     //If one coordinate is not controllable, fail;
     if (!drone_controllable) {
+
+        //Delete the equation system;
+        delete system;
 
         //Log;
         std_out("Error in SolidMultiRotor::SolidMultiRotor : One line in the equation controlMatrix is below the "
@@ -131,10 +134,6 @@ void SolidMultiRotor::solve() {
 
     }
 
-
-
-    //The control matrix is not used after this, so we will delete it;
-    delete control_matrix;
 
 
     /*
@@ -170,7 +169,6 @@ void SolidMultiRotor::solve() {
 }
 
 
-
 /*
  * failSafe : this function will reset properly all processing data after an init failure;
  */
@@ -184,7 +182,7 @@ void SolidMultiRotor::failSafe() {
     nbCoordinates = 0;
 
     //Reset the motors array;
-    resetMotorsArray();
+    deleteMotorsArray();
 
     //Reset the init flag;
     initFlag = false;
@@ -199,7 +197,7 @@ void SolidMultiRotor::failSafe() {
  *      in this new space;
  */
 
-void SolidMultiRotor::addMotor(MotorData *motor_data) {
+void SolidMultiRotor::addMotor(MRMotorData *motor_data) {
 
     //If the geometry is locked, fail;
     if (motors_locked) {
@@ -216,7 +214,7 @@ void SolidMultiRotor::addMotor(MotorData *motor_data) {
     uint8_t new_index = nbMotors++;
 
     //Try to reallocate the array;
-    void *new_ptr = realloc(motors, nbMotors * sizeof(MotorData *));
+    void *new_ptr = realloc(motors, nbMotors * sizeof(MRMotorData *));
 
     //If the reallocation failed :
     if (!new_ptr) {
@@ -233,7 +231,7 @@ void SolidMultiRotor::addMotor(MotorData *motor_data) {
     }
 
     //Update the motor array
-    motors = (MotorData **)(new_ptr);
+    motors = (MRMotorData **) (new_ptr);
 
     //Copy the new motor data at the new position;
     motors[new_index] = motor_data;
@@ -243,12 +241,22 @@ void SolidMultiRotor::addMotor(MotorData *motor_data) {
 
 
 /*
- * resetMotorsArray : this function frees the entire motors array, and resets its size to zero;
+ * deleteMotorsArray : this function frees the entire motors array, and resets its size to zero;
  */
 
-void SolidMultiRotor::resetMotorsArray() {
+void SolidMultiRotor::deleteMotorsArray() {
 
-    //free the single motors array;
+    //First, free all motors.
+
+    //For each motor data :
+    for (uint8_t motor_index = 0; motor_index < nbMotors; motor_index++) {
+
+        //Delete the motor data;
+        delete motors[motor_index];
+
+    }
+
+    //Now, delete the pointer array;
     free(motors);
 
     //Nullify the single motors array;
@@ -340,7 +348,7 @@ void SolidMultiRotor::addMotorsEquations(coordinate_system_t *coordinates, Linea
         uint8_t coordinate_index = 0;
 
         //Cache the motor data pointer;
-        MotorData *data = motors[motor_index];
+        MRMotorData *data = motors[motor_index];
 
         /*
          * The R_i coefficient will be used for all computations involving this motors;
