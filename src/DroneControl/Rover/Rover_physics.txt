@@ -1,6 +1,6 @@
 This file describes the main equations that determine the behaviour of a rover.
 
-A Rover will be assimilated to a set of motorised wheels.
+A MatrixRover will be assimilated to a set of motorised wheels.
 
 
 Referential :
@@ -55,7 +55,7 @@ Each motorised wheel will have three effects on the rover's kinetics :
 
 
 
-To determine the Rover's kinetics, we must sum the effects :
+To determine the MatrixRover's kinetics, we must sum the effects :
 
     The global x speed :
 
@@ -64,7 +64,7 @@ To determine the Rover's kinetics, we must sum the effects :
 
     The global y speed :
 
-        Sy = Sum_t(Sy_i) = Sum_i( 2 * Pi * r_i * sin(theta_i) * sin(phi_i + theta_i) * w_i );
+        Sy = Sum_t(Sy_i) = Sum_i( 2 * Pi * r_i * cos(theta_i) * sin(phi_i + theta_i) * w_i );
 
 
     The global momentum :
@@ -91,16 +91,13 @@ First, the norm of the speed of the wheel at the contact point verifies :
 To obtain the speed IMPOSED by the wheel, we will project this speed in the direction where
     it is less likely to slide. The resultant norm is :
 
-    ||Vi>|| = 2 * Pi * R * cos(theta) * |w|
+    ||V_i>|| = 2 * Pi * R * cos(theta) * |w|
 
 
 If we express this vector in the (x, y) coordinate system, we obtain :
 
-    Vi =  x| 2 * Pi * R * cos(theta) * cos(theta + phi) * w;
-          y| 2 * Pi * R * cos(theta) * sin(theta + phi) * w;
+    V_i =   x| 2 * Pi * R * cos(theta) * cos(theta + phi) * w;
+            y| 2 * Pi * R * cos(theta) * sin(theta + phi) * w;
 
 
-
-
-
-
+Which completes the proof.

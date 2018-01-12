@@ -33,7 +33,7 @@
 #include <Sensors/Thermistors/Thermistors.h>
 #include <DataStructures/StringUtils.h>
 #include <DroneControl/MultiRotors/Generics/SingleQuadCopter.h>
-#include <DroneControl/MultiRotors/DroneTest.h>
+#include <DroneControl/DroneTest.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -60,10 +60,6 @@ task_state_t TerminalCommands::action(char *) {
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
 task_state_t TerminalCommands::eeprom(char *arguments) {
-
-    //EEPROM::print_tree();
-
-    //return complete;
 
     //Parse Arguments
     PARSE_ARGUMENTS(arguments);

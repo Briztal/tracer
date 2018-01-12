@@ -1,5 +1,5 @@
 /*
-  SingleQuadCopter.h - Part of TRACER
+  TriRover.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,30 +18,28 @@
 
 */
 
+#ifndef TRACER_TRIROVER_H
+#define TRACER_TRIROVER_H
 
-#ifndef TRACER_SINGLEQUADCOPTER_H
-#define TRACER_SINGLEQUADCOPTER_H
 
-
-#include <DroneControl/MultiRotors/MatrixMultiRotor/SolidMultiRotor.h>
+#include <DroneControl/Rover/MatrixRover/MatrixRover.h>
 
 #include <DroneControl/MotorRegisterer.h>
 
 #include <LinearSolver/LinearSystem.h>
 
 
-class SingleQuadCopter : public SolidMultiRotor, private MotorRegisterer {
-
+class TriRover : public MatrixRover, private MotorRegisterer {
 
     //-------------------------------- Initialisation --------------------------------
 
 public:
 
     //Constructor;
-    SingleQuadCopter();
+    TriRover();
 
     //Destructor;
-    ~SingleQuadCopter() override;
+    ~TriRover() override;
 
 
     //-------------------------------- Inherited methods from SolidMultiRotor --------------------------------
@@ -49,7 +47,7 @@ public:
 private:
 
     //Set the common (z, pitch, roll, yaw) coordinate system;
-    void setCoordinateSystem(MultiRotorCoordinateSystem *coordinate_system) override;
+    void setCoordinateSystem(RoverCoordinateSystem *coordinate_system) override;
 
     //No relations to add;
     void createRelations(LinearSystem *system) override {}
@@ -63,11 +61,11 @@ protected:
     void createMotors() override = 0;
 
     //The function to register a motor;
-    void registerMotor(uint8_t motor_index, float x, float y, float z, bool direction, float traction_coeff, float torque_coeff,
-                       float kV, float voltage, float max_signal, uint8_t servo_index);
+    void
+    registerMotor(uint8_t motor_index, float x, float y, float phi, float theta, float radius, uint8_t servo_index);
 
 
 };
 
 
-#endif //TRACER_SINGLEQUADCOPTER_H
+#endif //TRACER_TRIROVER_H

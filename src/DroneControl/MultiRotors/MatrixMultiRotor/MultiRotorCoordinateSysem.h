@@ -1,5 +1,5 @@
 /*
-  DroneTest.h - Part of TRACER
+  MultiRotorCoordinateSystem.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,23 +18,37 @@
 
 */
 
-#ifndef TRACER_DRONETEST_H
-#define TRACER_DRONETEST_H
 
-#include <DroneControl/MultiRotors/Generics/SinglePentaCopter.h>
+#ifndef TRACER_MULTIROTORMOTORDATA_H
+#define TRACER_MULTIROTORMOTORDATA_H
 
-class DroneTest : public SinglePentaCopter {
+
+class MultiRotorCoordinateSystem {
 
 public:
 
-    void createMotors() override;
+    //Create a default constructor, that will initialise all to false
+    MultiRotorCoordinateSystem() = default;
 
-    void solve() override {SinglePentaCopter::solve();}
+    //Enable the x control;
+    bool x_en = false;
 
-private:
-    void createRelations(LinearSystem *s) override;
+    //Enable the y control;
+    bool y_en = false;
+
+    //Enable the z control;
+    bool z_en = false;
+
+    //Enable the pitch control;
+    bool pitch_en = false;
+
+    //Enable the roll control;
+    bool roll_en = false;
+
+    //Enable the yaw control;
+    bool yaw_en = false;
 
 };
 
 
-#endif //TRACER_DRONETEST_H
+#endif //TRACER_MULTIROTORMOTORDATA_H

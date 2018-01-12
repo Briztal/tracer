@@ -30,7 +30,6 @@
 SingleHexaCopter::SingleHexaCopter() : SolidMultiRotor(), MotorRegisterer(6) {}
 
 
-
 /*
  * Destructor : deletes the registered motors array;
  */
@@ -42,7 +41,7 @@ SingleHexaCopter::~SingleHexaCopter() = default;
  * setCoordinateSystem : enable all 6 coordinates;
  */
 
-void SingleHexaCopter::setCoordinateSystem(SolidMultiRotor::coordinate_system_t *coordinate_system) {
+void SingleHexaCopter::setCoordinateSystem(MultiRotorCoordinateSystem *coordinate_system) {
 
     //Enable all x, y, z, pitch, roll and yaw;
     coordinate_system->z_en = true;
@@ -59,9 +58,9 @@ void SingleHexaCopter::setCoordinateSystem(SolidMultiRotor::coordinate_system_t 
  * setRegistered : register a motor for the hexa-copter. All parameters must be provided;
  */
 
-void SingleHexaCopter::registerMotor(uint8_t motor_index, float x, float y, float z, float theta, float phi, bool direction,
-                               float traction_coeff, float torque_coeff, float kV, float voltage,
-                               float max_signal, uint8_t servo_index) {
+void SingleHexaCopter::registerMotor(uint8_t motor_index, float x, float y, float z, float phi, float theta,
+                                     bool direction, float traction_coeff, float torque_coeff, float kV, float voltage,
+                                     float max_signal, uint8_t servo_index) {
 
 
     //If the [index]-th motor is already registered, or doesn't exist :
@@ -76,8 +75,8 @@ void SingleHexaCopter::registerMotor(uint8_t motor_index, float x, float y, floa
     }
 
     //Create the motor data with all provided values, leaving z, theta and phi to zero;
-    MRMotorData *motor_data =
-            new MRMotorData(x, y, z, theta, phi, direction, traction_coeff, torque_coeff, kV, voltage,max_signal, servo_index);
+    MultiRotorMotorData *motor_data = new MultiRotorMotorData
+            (x, y, z, phi, theta, direction, traction_coeff, torque_coeff, kV, voltage, max_signal, servo_index);
 
     //Register the motor;
     SolidMultiRotor::addMotor(motor_data);

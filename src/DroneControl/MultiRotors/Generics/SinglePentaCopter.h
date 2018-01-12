@@ -23,13 +23,14 @@
 #define TRACER_SINGLEPENTACOPTER_H
 
 
-#include <DroneControl/MultiRotors/Generics/SolidMultiRotor.h>
 
 #include <DroneControl/MotorRegisterer.h>
 
 #include <LinearSolver/LinearSystem.h>
 
-class SinglePentaCopter : private SolidMultiRotor, private MotorRegisterer {
+#include <DroneControl/MultiRotors/MatrixMultiRotor/SolidMultiRotor.h>
+
+class SinglePentaCopter : public SolidMultiRotor, private MotorRegisterer {
 
 
     //-------------------------------- Initialisation --------------------------------
@@ -48,16 +49,10 @@ public:
 private:
 
     //Set the common (z, pitch, roll, yaw) coordinate system;
-    void setCoordinateSystem(coordinate_system_t *coordinate_system) override;
+    void setCoordinateSystem(MultiRotorCoordinateSystem *coordinate_system) override;
 
     //No relations to add;
     void createRelations(LinearSystem *system) override = 0;
-
-
-protected:
-
-    //The solve method will be inherited;
-    void solve() override {SolidMultiRotor::solve();}
 
 
     //-------------------------------- Functions delegated to the sub-class --------------------------------

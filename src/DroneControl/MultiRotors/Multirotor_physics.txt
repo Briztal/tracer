@@ -10,13 +10,13 @@ Every motor / helix will have the same characteristics;
 
 A Motor Mi is only described by :
 
-    its variable parameters (xi, yi, zi, kv_i, n_i, alpha_i, phi_i, t_i, c_i)
+    its variable parameters (xi, yi, zi, kv_i, n_i, phi_i, theta_i, t_i, c_i)
         - xi : the abscissa of the motor;
         - yi : the ordinate of the motor;
         - zi : the height of the motor;
         - n_i : the motor's rotation speed;
         - phi_i : the polar angle of the motor's axis, with x axis as origin;
-        - alpha_i : the azimuth of the motor's axis, with z axis as origin;
+        - theta_i : the azimuth of the motor's axis, with z axis as origin;
 
 
         (The position is being expressed in cartesian coordinates, and the axis orientation is being expressed

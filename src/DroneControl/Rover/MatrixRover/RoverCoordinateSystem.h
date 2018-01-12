@@ -1,5 +1,5 @@
 /*
-  DroneTest.cpp - Part of TRACER
+  RoverCoordinateSystem.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,23 +18,26 @@
 
 */
 
-#include "DroneTest.h"
 
-void DroneTest::createMotors() {
+#ifndef TRACER_ROVERCOORDINATESYSTEM_H
+#define TRACER_ROVERCOORDINATESYSTEM_H
 
-    registerMotor(0, 1, 1, 0, true, 1, 1, 1, 1, 1, 0);
-    registerMotor(1, 1, -1, 1, false, 1, 1, 1, 1, 1, 0);
-    registerMotor(2, -1, -1, 0, true, 1, 1, 1, 1, 1, 0);
-    registerMotor(3, -1, 1, -1, false, 1, 1, 1, 1, 1, 0);
-    registerMotor(4, 0, 1, -1, false, 1, 1, 1, 1, 1, 0);
+class RoverCoordinateSystem {
 
-}
+public:
 
+    //Create a default constructor, that will initialise all to false
+    RoverCoordinateSystem() = default;
 
+    //Enable the x control;
+    bool x_en = false;
 
-void DroneTest::createRelations(LinearSystem *s) {
+    //Enable the y control;
+    bool y_en = false;
 
-    float t0[4]{0, 0, 0, 0}, t1[5]{1, 0, 0, 1, 2};
-    s->addEquation(t0, 4, t1, 5);
+    //Enable the yaw control;
+    bool yaw_en = false;
 
-}
+};
+
+#endif //TRACER_ROVERCOORDINATESYSTEM_H

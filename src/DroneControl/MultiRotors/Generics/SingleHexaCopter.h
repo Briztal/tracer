@@ -22,7 +22,7 @@
 #define TRACER_HEXACOPTER_H
 
 
-#include <DroneControl/MultiRotors/Generics/SolidMultiRotor.h>
+#include <DroneControl/MultiRotors/MatrixMultiRotor/SolidMultiRotor.h>
 
 #include <DroneControl/MotorRegisterer.h>
 
@@ -47,16 +47,10 @@ public:
 private:
 
     //Set the common (z, pitch, roll, yaw) coordinate system;
-    void setCoordinateSystem(coordinate_system_t *coordinate_system) override;
+    void setCoordinateSystem(MultiRotorCoordinateSystem *coordinate_system) override;
 
     //No relations to add;
     void createRelations(LinearSystem *system) override {}
-
-
-protected:
-
-    //The solve method will be inherited;
-    void solve() override {SolidMultiRotor::solve();}
 
 
     //-------------------------------- Functions delegated to the sub-class --------------------------------

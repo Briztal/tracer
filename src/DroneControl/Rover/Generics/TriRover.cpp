@@ -1,5 +1,5 @@
 /*
-  SingleQuadCopter.cpp - Part of TRACER
+  TriRover.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,33 +18,32 @@
 
 */
 
-#include <Interaction/Interaction.h>
-#include "SingleQuadCopter.h"
+
+#include "TriRover.h"
 
 
 /*
  * Constructor : calls the SolidMultiRotor constructor, ans solves the control model;
  */
 
-SingleQuadCopter::SingleQuadCopter() : SolidMultiRotor(), MotorRegisterer(4) {}
+TriRover::TriRover() : MatrixRover(), MotorRegisterer(3) {}
 
 
 /*
  * Destructor : deletes the registered motors array;
  */
 
-SingleQuadCopter::~SingleQuadCopter() = default;
+TriRover::~TriRover() = default;
 
 /*
  * setCoordinateSystem : set the common (z, pitch, roll, yaw) coordinate system;
  */
 
-void SingleQuadCopter::setCoordinateSystem(MultiRotorCoordinateSystem *coordinate_system) {
+void TriRover::setCoordinateSystem(RoverCoordinateSystem *coordinate_system) {
 
     //Enable only z, pitch, roll and yaw;
-    coordinate_system->z_en = true;
-    coordinate_system->pitch_en = true;
-    coordinate_system->roll_en = true;
+    coordinate_system->x_en = true;
+    coordinate_system->y_en = true;
     coordinate_system->yaw_en = true;
 
 }
@@ -54,16 +53,15 @@ void SingleQuadCopter::setCoordinateSystem(MultiRotorCoordinateSystem *coordinat
  * setRegistered : register a motor for the quadcopter (no z, phi or theta).
  */
 
-void SingleQuadCopter::registerMotor(uint8_t motor_index, float x, float y, float z, bool direction,
-                                     float traction_coeff, float torque_coeff, float kV, float voltage,
-                                     float max_signal, uint8_t servo_index) {
+void TriRover::registerMotor(uint8_t motor_index, float x, float y, float phi, float theta, float radius,
+                             uint8_t servo_index) {
 
 
     //If the [index]-th motor is already registered, or doesn't exist :
     if (isRegistered(motor_index)) {
 
         //Log;
-        std_out("Error in SingleQuadCopter::setRegistered : the index is incorrect, or the motor has already been added.");
+        std_out("Error in TriRover::setRegistered : the index is incorrect, or the motor has already been added.");
 
         //Fail;
         return;
@@ -71,11 +69,10 @@ void SingleQuadCopter::registerMotor(uint8_t motor_index, float x, float y, floa
     }
 
     //Create the motor data with all provided values, leaving z, theta and phi to zero;
-    MultiRotorMotorData *motor_data = new MultiRotorMotorData
-            (x, y, z, 0, 0, direction, traction_coeff, torque_coeff, kV, voltage,max_signal, servo_index);
+    RoverMotorData *motor_data = new RoverMotorData(x, y, phi, theta, radius, servo_index);
 
     //Register the motor;
-    SolidMultiRotor::addMotor(motor_data);
+    MatrixRover::addMotor(motor_data);
 
     //Mark the motor as registered;
     setRegistered(motor_index);

@@ -40,7 +40,7 @@ SinglePentaCopter::~SinglePentaCopter() = default;
  * setCoordinateSystem : set the common (z, pitch, roll, yaw) coordinate system;
  */
 
-void SinglePentaCopter::setCoordinateSystem(SolidMultiRotor::coordinate_system_t *coordinate_system) {
+void SinglePentaCopter::setCoordinateSystem(MultiRotorCoordinateSystem *coordinate_system) {
 
     //Enable only z, pitch, roll and yaw;
     coordinate_system->z_en = true;
@@ -72,8 +72,8 @@ void SinglePentaCopter::registerMotor(uint8_t motor_index, float x, float y, flo
     }
 
     //Create the motor data with all provided values, leaving z, theta and phi to zero;
-    MRMotorData *motor_data =
-            new MRMotorData(x, y, z, 0, 0, direction, traction_coeff, torque_coeff, kV, voltage,max_signal, servo_index);
+    MultiRotorMotorData *motor_data = new MultiRotorMotorData
+            (x, y, z, 0, 0, direction, traction_coeff, torque_coeff, kV, voltage,max_signal, servo_index);
 
     //Register the motor;
     SolidMultiRotor::addMotor(motor_data);
