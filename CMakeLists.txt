@@ -65,4 +65,4 @@ if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.piolibdeps)
     )
 endif()
 
-add_executable(${PROJECT_NAME} ${SRC_LIST})
+add_executable(${PROJECT_NAME} ${SRC_LIST} src/TaskScheduler/EventManager/EventManager.cpp src/TaskScheduler/EventManager/EventManager.h src/TaskScheduler/EventManager/EventTaskList.cpp src/TaskScheduler/EventManager/EventTaskList.h)
