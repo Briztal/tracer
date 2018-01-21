@@ -24,14 +24,26 @@ include_directories(${PCP}/)
 
 add_library(project_config
 
-        ${PCP}/config_file.h
+        ${PCP}/_ConfigChecker.h
+        ${PCP}/_ConfigChecker.cpp
+
+        ${PCP}/_general_config.h
+        ${PCP}/actions_config.h
         ${PCP}/control_config.h
-        ${PCP}/lcd_interface_config.h
-        ${PCP}/terminal_interface_config.h
-        ${PCP}/program_interface_config.h
-        ${PCP}/gcode_interface_config.h
-        ${PCP}/geometry.cpp
-        ${PCP}/eeprom_config.h)
+        ${PCP}/control_loops_config.h
+        ${PCP}/controller_gcode_config.h
+        ${PCP}/controller_lcd_config.h
+        ${PCP}/controller_lcd_config.h
+        ${PCP}/controller_program_config.h
+        ${PCP}/controller_terminal_config.h
+        ${PCP}/eeprom_config.h
+        ${PCP}/geometry.h
+        ${PCP}/hl_config.h
+        ${PCP}/scheduler_config.h
+        ${PCP}/sensors_config.h
+        ${PCP}/stepper_control_config.h
+
+        )
 
 
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
@@ -88,18 +100,15 @@ add_library(scheduler
 
 
 set(EEP "EEPROM")
-
 include_directories(${EEP}/)
 
-add_library(core
+add_library(EEPROM
 
-        ${EEP}/EEPROMStorage.h
-        ${EEP}/EEPROMStorage.cpp
-        ${EEP}/EEPROMNode.h
-        ${EEP}/EEPROMNode.cpp
-        ${EEP}/EEPROMInterface.h
-        ${EEP}/EEPROMInterface.cpp
-        ${EEP}/_eeprom_storage_data.h
+        ${EEP}/EEPROMTree.h
+        ${EEP}/EEPROMTree.cpp
+
+        ${EEP}/EEPROMMap.h
+        ${EEP}/EEPROMMap.cpp
 
         )
 
@@ -118,40 +127,43 @@ add_library(hardware
 
 #-----------------------------------------------INTERFACES--------------------------------------------------------------
 
-set(CCP "Interaction")
+set(CIP "Interaction")
+set(CLP "Interaction/Languages")
+set(CPP "Interaction/Protocols")
 include_directories(${CCP}/)
 
-add_library(controllers
-
-        ${CCP}/Control.cpp
-        ${CCP}/Control.h
 
 
-        ${CCP}/Controllers/_controller_data.h
+add_library(interaction
+
+        ${CIP}/Interaction.cpp
+        ${CIP}/Interaction.h
+
+        ${CLP}/_language_data.h
 
         #Terminal
-        ${CCP}/Controllers/Terminal/Terminal.h
-        ${CCP}/Controllers/Terminal/Terminal.cpp
-        ${CCP}/Controllers/Terminal/TerminalTree.h
-        ${CCP}/Controllers/Terminal/TerminalTree.cpp
-        ${CCP}/Controllers/Terminal/TerminalArguments.h
-        ${CCP}/Controllers/Terminal/TerminalArguments.cpp
-        ${CCP}/Controllers/Terminal/TerminalTreeGenerator.h
-        ${CCP}/Controllers/Terminal/TerminalTreeGenerator.cpp
+        ${CLP}/Terminal/Terminal.h
+        ${CLP}/Terminal/Terminal.cpp
+        ${CLP}/Terminal/TerminalTree.h
+        ${CLP}/Terminal/TerminalTree.cpp
+        ${CLP}/Terminal/TerminalArguments.h
+        ${CLP}/Terminal/TerminalArguments.cpp
+        ${CLP}/Terminal/TerminalTreeGenerator.h
+        ${CLP}/Terminal/TerminalTreeGenerator.cpp
 
         #ProgramInterface
-        ${CCP}/Controllers/Program/ProgramInterface.h
-        ${CCP}/Controllers/Program/ProgramInterface.cpp
+        ${CLP}/Program/ProgramInterface.h
+        ${CLP}/Program/ProgramInterface.cpp
 
         #GcodeInterface
-        ${CCP}/Controllers/GCode/GCode.h
-        ${CCP}/Controllers/GCode/GCode.cpp
-        ${CCP}/Controllers/GCode/GCodeTree.h
-        ${CCP}/Controllers/GCode/GCodeTree.cpp
-        ${CCP}/Controllers/GCode/GCodeTreeGenerator.h
-        ${CCP}/Controllers/GCode/GCodeTreeGenerator.cpp
-        ${CCP}/Controllers/GCode/GCodeArguments.h
-        ${CCP}/Controllers/GCode/GCodeArguments.cpp
+        ${CLP}/GCode/GCode.h
+        ${CLP}/GCode/GCode.cpp
+        ${CLP}/GCode/GCodeTree.h
+        ${CLP}/GCode/GCodeTree.cpp
+        ${CLP}/GCode/GCodeTreeGenerator.h
+        ${CLP}/GCode/GCodeTreeGenerator.cpp
+        ${CLP}/GCode/GCodeArguments.h
+        ${CLP}/GCode/GCodeArguments.cpp
         
         )
 
@@ -177,31 +189,103 @@ add_library(protocols
 set(AP "Actuators")
 include_directories(${AP}/)
 
-add_library(actions
+add_library(actuators
 
-        ${AP}/ServoActions.h
-        ${AP}/ServoActions.cpp
-        ${AP}/BinaryActions.h
-        ${AP}/BinaryActions.cpp
-        ${AP}/ContinuousActions.h
-        ${AP}/ContinuousActions.cpp
+        ${AP}/actuators.h
+        ${AP}/DigitalGPIO.h
+        ${AP}/DigitalGPIO.cpp
+        ${AP}/PWMGpio.h
+        ${AP}/PWMGpio.cpp
+        ${AP}/Servo.h
+        ${AP}/Servo.cpp
+
+        )
+
+
+
+#------------------------------------------------- LinearSolver ---------------------------------------------------------------
+
+
+set(LsP "LinearSolver")
+include_directories(${LsP}/)
+
+add_library(linearSolver
+
+        ${LsP}/CoefficientArray.h
+        ${LsP}/CoefficientArray.cpp
+
+        ${LsP}/LinearSystem.h
+        ${LsP}/LinearSystem.cpp
+
+        ${LsP}/Matrix.h
+        ${LsP}/Matrix.cpp
+
+        )
+
+
+
+#------------------------------------------------- LinearSolver ---------------------------------------------------------------
+
+
+set(DcP "DroneControl")
+set(DMrP "DroneControl/MultiRotors")
+set(DRoP "DroneControl/Rover")
+
+include_directories(${LsP}/)
+include_directories(${DMrP}/)
+include_directories(${DRoP}/)
+
+add_library(droneControl
+
+        ${DcP}/DroneTest.h
+        ${DcP}/DroneTest.cpp
+        ${DcP}/MatrixDrone.h
+        ${DcP}/MatrixDrone.cpp
+        ${DcP}/MotorRegisterer.h
+        ${DcP}/MotorRegisterer.cpp
+
+
+        ${DMrP}/Generics/SingleHexaCopter.h
+        ${DMrP}/Generics/SingleHexaCopter.cpp
+        ${DMrP}/Generics/SinglePentaCopter.h
+        ${DMrP}/Generics/SinglePentaCopter.cpp
+        ${DMrP}/Generics/SingleQuadCopter.h
+        ${DMrP}/Generics/SingleQuadCopter.cpp
+        ${DMrP}/MatrixMultiRotor/MultiRotorCoordinateSysem.h
+        ${DMrP}/MatrixMultiRotor/MultiRotorMotorData.h
+        ${DMrP}/MatrixMultiRotor/SolidMultiRotor.h
+        ${DMrP}/MatrixMultiRotor/SolidMultiRotor.cpp
+
+        ${DRoP}/Generics/TriRover.h
+        ${DRoP}/Generics/TriRover.cpp
+
+
+        ${DRoP}/MatrixRover/RoverCoordinateSystem.h
+        ${DRoP}/MatrixRover/RoverMotorData.h
+        ${DRoP}/MatrixRover/MatrixRover.h
+        ${DRoP}/MatrixRover/MatrixRover.cpp
+
+
+
 
         )
 
 #---------------------------------------------Interaction Loops-------------------------------------------------------------
 
 
-set(CLP "ControlLoops")
+set(ClP "ControlLoops")
 
 include_directories(${CLP}/)
 
 add_library(asserv
 
-        ${CLP}/PID.h
-        ${CLP}/PID.cpp
+        ${ClP}/ControlLoops.h
 
-        ${CLP}/ControlLoops.cpp
-        ${CLP}/ControlLoops.h
+        ${ClP}/OrientationController.cpp
+        ${ClP}/OrientationController.h
+
+        ${ClP}/PID.cpp
+        ${ClP}/PID.h
 
         )
 
@@ -214,11 +298,17 @@ include_directories(${SP}/)
 
 add_library(sensors
 
-
         ${SP}/Sensors.h
 
         ${SP}/Thermistors/Thermistors.h
         ${SP}/Thermistors/Thermistors.cpp
+
+        ${SP}/Accelerometers/MPU6050/MPU6050.h
+        ${SP}/Accelerometers/MPU6050/MPU6050.cpp
+
+        ${SP}/Endstops.h
+        ${SP}/Endstops.cpp
+
         ${SP}/Thermistors/thermistor_data.h
 
         )
@@ -233,8 +323,8 @@ add_library(datastructures
         ${DP}/Queue.h
         ${DP}/Queue.cpp
 
-        ${DP}/ArgumentsContainer.h
-        ${DP}/ArgumentsContainer.cpp
+        ${DP}/Tree.h
+        ${DP}/Tree.cpp
 
         ${DP}/StringUtils.h
         ${DP}/StringUtils.cpp
@@ -242,7 +332,7 @@ add_library(datastructures
         )
 
 
-#-------------------------------------------------Kinematics Cores------------------------------------------------------
+#------------------------------------------------- Stepper Control ------------------------------------------------------
 
 
 set(KP "StepperControl")
@@ -254,12 +344,22 @@ add_library(kinematics_cores
 
         ${KP}/StepperController.h
         ${KP}/StepperController.cpp
+
         ${KP}/TrajectoryTracer.h
         ${KP}/TrajectoryTracer.cpp
+
         ${KP}/Steppers.h
         ${KP}/Steppers.cpp
+
+        ${KP}/SteppersData.h
+        ${KP}/SteppersData.cpp
+
         ${KP}/IncrementComputer.h
         ${KP}/IncrementComputer.cpp
+
+        ${KP}/MovementCoordinator.cpp
+        ${KP}/MovementCoordinator.h
+
         ${KP}/JerkPlanner.cpp
         ${KP}/JerkPlanner.h
 
@@ -267,76 +367,62 @@ add_library(kinematics_cores
         ${KP}/SubMovementManager.h)
 
 
-#-------------------------------------------------Core 1---------------------------------------------------------------
+#------------------------------------------------- Core 1 --------------------------------------------------------------
 
-set(K1P "StepperControl/KinematicsCore1")
-set(K1LP "StepperControl/KinematicsCore1/Movements")
-set(K1NP "StepperControl/KinematicsCore1/NonLinearMovements")
+set(KC1P "StepperControl/KinematicsCore1")
 
-include_directories(${K1P}/)
-include_directories(${K1LP}/)
-include_directories(${K1NP}/)
+include_directories(${KC1P}/)
 
 add_library(core1
 
         #general
-        ${K1P}/mathProcess.hpp
-        ${K1P}/mathProcess.cpp
-        ${K1P}/KinematicsCore1.h
-        ${K1P}/KinematicsCore1.cpp
-        ${K1P}/K1Physics.h
-        ${K1P}/K1Physics.cpp
-        ${K1P}/SqrtFastComputer.h
-        ${K1P}/SqrtFastComputer.cpp
-
-        #Linear Movements
-        ${K1LP}/HomingMovement.h
-        ${K1LP}/HomingMovement.cpp
-        ${K1LP}/LinearMovement.h
-        ${K1LP}/LinearMovement.cpp
+        ${KC1P}/mathProcess.hpp
+        ${KC1P}/mathProcess.cpp
+        ${KC1P}/KinematicsCore1.h
+        ${KC1P}/KinematicsCore1.cpp
+        ${KC1P}/K1Physics.h
+        ${KC1P}/K1Physics.cpp
+        ${KC1P}/SqrtFastComputer.h
+        ${KC1P}/SqrtFastComputer.cpp
 
         )
 
 
 #-------------------------------------------------Core 1---------------------------------------------------------------
 
-set(K2P "StepperControl/KinematicsCore2")
-set(K2MP "StepperControl/KinematicsCore2/Movements")
+set(Kc2P "StepperControl/KinematicsCore2")
 
 include_directories(${K2P}/)
 
 add_library(core2
 
         #core2
-        ${K2P}/KinematicsCore2.cpp
-        ${K2P}/KinematicsCore2.h
-        ${K2P}/K2Physics.h
-        ${K2P}/K2Physics.cpp
-
-
-        #movements
-        ${K2MP}/ComplexLinearMovement.h
-        ${K2MP}/ComplexLinearMovement.cpp
+        ${Kc2P}/KinematicsCore2.cpp
+        ${Kc2P}/KinematicsCore2.h
+        ${Kc2P}/K2Physics.h
+        ${Kc2P}/K2Physics.cpp
 
         )
 
-#--------------------------------------------------LINK----------------------------------------------------------------
+#------------------------------------------------- Movements ---------------------------------------------------------------
 
-target_link_libraries(core actions)
-target_link_libraries(core interface)
-target_link_libraries(actions external)
-target_link_libraries(core asserv)
+set(SMP "StepperControl/Movements")
 
-target_link_libraries(kinematics_cores datastructures)
-target_link_libraries(core1 datastructures)
-target_link_libraries(core2 datastructures)
+include_directories(${SMP}/)
 
-target_link_libraries(core kinematics_cores)
-target_link_libraries(kinematics_cores interface)
-target_link_libraries(kinematics_cores core)
+add_library(movements
 
-target_link_libraries(core datastructures)
-target_link_libraries(kinematics_cores datastructures)
+
+        ${SMP}/ComplexLinearMovement.cpp
+        ${SMP}/ComplexLinearMovement.h
+
+        ${SMP}/LinearMovement.cpp
+        ${SMP}/LinearMovement.h
+
+        ${SMP}/HomingMovement.h
+        ${SMP}/HomingMovement.cpp
+
+        )
 
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
