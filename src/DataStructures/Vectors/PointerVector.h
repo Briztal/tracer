@@ -329,10 +329,10 @@ bool PointerVector<T>::resize(uint8_t new_size) {
     }
 
     //Then, reallocate the task array, to contain one more element;
-    void *new_array = realloc(elements, size);
+    void *new_array = realloc(elements, new_size);
 
     //If the reallocation failed :
-    if (!new_array) {
+    if (!new_array && new_size) {
 
         //Log;
         std_out("Error in PointerVector::resize : the reallocation failed;");

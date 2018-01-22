@@ -34,7 +34,7 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include <stdint.h>
-#include <TaskScheduler/task_state_t.h>
+#include <Kernel/TaskScheduler/task_state_t.h>
 
 class GCodeTree {
 

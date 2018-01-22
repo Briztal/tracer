@@ -50,7 +50,7 @@
 //The maximum size of a data in one word of data (for Terminal)
 #define MAX_WORD_SIZE 50
 
-//######################################################TaskScheduler############################################################
+//######################################################Kernel############################################################
 
 //The following line defines the task pool size
 #define TASK_POOL_SIZE 20
@@ -201,10 +201,10 @@ SERVO(2, servo3, 4, 0, 1)
 //###########################################STEPPER_CONTROLLER_SETTINGS###############################################
 
 #ifdef ENABLE_STEPPER_CONTROL
-//-------------------------------------------------Kinematics TaskScheduler  Version---------------------------------------------
+//-------------------------------------------------Kinematics Kernel  Version---------------------------------------------
 
 /*
- * The version of the Stepper Interaction Kinematics TaskScheduler you want to use. You have 3 versions available :
+ * The version of the Stepper Interaction Kinematics Kernel you want to use. You have 3 versions available :
  *  - 0 : KERNEL0, a basic kernel for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
  *  - 1 : KERNEL1, a faster kernel for 32 bits processors with FPU, for cartesian-by-group machines. Only lines available.
  *  - 2 : KERNEL2, a more advanced kernel for 32 bits processors with FPU, for non-cartesian machines. Any king of trajectory available.

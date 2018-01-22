@@ -20,7 +20,7 @@
 
 #include "stdint.h"
 #include "Interaction.h"
-#include <TaskScheduler/TaskScheduler.h>
+#include <Kernel/TaskScheduler/TaskScheduler.h>
 #include <Interaction/Protocols/ClearText.h>
 
 

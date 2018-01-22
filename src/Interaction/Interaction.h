@@ -41,7 +41,7 @@
 #include <Communication/ProgramInterface/ProgramInterface.h>
 #endif
 
-#include <TaskScheduler/TaskScheduler.h>
+#include <Kernel/TaskScheduler/TaskScheduler.h>
 
 #define debug(s) TaskScheduler::log(String("debug ") + s);
 

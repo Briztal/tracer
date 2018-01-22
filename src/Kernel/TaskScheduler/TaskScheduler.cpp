@@ -22,7 +22,7 @@ PONEY
 
 #include "TaskScheduler.h"
 
-#include <Kernel.h>
+#include <Kernel/Kernel.h>
 
 #include <Interaction/Interaction.h>
 
@@ -158,7 +158,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
         if (!queue_flag) {
 
             //Log
-            std_out("ERROR in TaskScheduler::schedule_task : failed to copy the task in the queue.");
+            std_out("ERROR in Kernel::schedule_task : failed to copy the task in the queue.");
 
             //Emergency stop
             Kernel::emergency_stop();
@@ -343,9 +343,6 @@ uint8_t temp_yyy = 0;
 uint8_t temp_zzz = 0;
 
 void TaskScheduler::iterate() {
-
-    //Add as much tasks as possible in the pool;
-    Interaction::read_external_controllers();
 
     //Process non-sequential tasks in priority
     process_task_pool();
@@ -541,7 +538,7 @@ void TaskScheduler::process_task_sequences() {
                     if (!queue_flag) {
 
                         //Log
-                        std_out("ERROR in TaskScheduler::process_task_sequences : "
+                        std_out("ERROR in Kernel::process_task_sequences : "
                                          "the reading element is not allocated.");
 
                         //Emergency stop
@@ -571,7 +568,7 @@ void TaskScheduler::process_task_sequences() {
                         if (!queue_flag) {
 
                             //Log
-                            std_out("ERROR in TaskScheduler::process_task_sequences : "
+                            std_out("ERROR in Kernel::process_task_sequences : "
                                              "the discarded element was not allocated.");
 
                             //Emergency stop

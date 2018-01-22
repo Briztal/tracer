@@ -51,7 +51,7 @@
 #define TRACER_COORDINATESINTERFACE_H
 
 
-#include <TaskScheduler/TaskScheduler.h>
+#include <Kernel/TaskScheduler/TaskScheduler.h>
 
 class MachineController {
 

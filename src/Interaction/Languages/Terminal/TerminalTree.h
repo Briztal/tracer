@@ -34,7 +34,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <hardware_language_abstraction.h>
-#include <TaskScheduler/task_state_t.h>
+#include <Kernel/TaskScheduler/task_state_t.h>
 
 
 class TerminalTree {

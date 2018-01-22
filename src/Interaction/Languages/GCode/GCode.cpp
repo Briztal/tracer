@@ -23,7 +23,7 @@
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include "GCode.h"
-#include <TaskScheduler/TaskScheduler.h>
+#include <Kernel/TaskScheduler/TaskScheduler.h>
 #include "GCodeTreeGenerator.h"
 #include "GCodeArguments.h"
 #include <DataStructures/StringUtils.h>

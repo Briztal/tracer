@@ -35,8 +35,11 @@ public:
     //Add a task;
     bool add(T new_element) override;
 
-    //Remove a task by object;
-    void remove(T element);
+    //Remove a task by object, return true if it was removed;
+    bool remove(T element);
+
+    //Remove a task by object, return true if it was removed, and eventually save its old index;
+    bool remove(T element, uint8_t *old_index);
 
 };
 
@@ -73,21 +76,59 @@ bool ValueSet<T>::add(T new_element) {
 }
 
 
-template<class T>
-void ValueSet<T>::remove(T element) {
+/*
+ * remove : search for the given element in the set, and if it is found, it return true;
+ *
+ *  If not, return false;
+ */
 
-    //First, we must determine the eventual index of the element;
+
+
+template<class T>
+bool ValueSet<T>::remove(T element) {
+
+    //The eventual index to remove;
     uint8_t index = 0;
 
     //If the element is not present :
     if (!ValueVector<T>::isElementPresent(element, &index)) {
 
         //Fail, nothing to remove;
-        return;
+        return false;
 
     }
 
+    //Remove the element by index;
     ValueVector<T>::remove(index);
+
+    //An element has been deleted, return true;
+    return true;
+
+}
+
+
+/*
+ * remove : search for the given element in the set, and if it is found, save its index, and return true;
+ *
+ *  If not, return false;
+ */
+
+template<class T>
+bool ValueSet<T>::remove(T element, uint8_t *old_index) {
+
+    //If the element is not present :
+    if (!ValueVector<T>::isElementPresent(element, old_index)) {
+
+        //Fail, nothing to remove;
+        return false;
+
+    }
+
+    //Remove the element by index;
+    ValueVector<T>::remove(*old_index);
+
+    //An element has been deleted, return true;
+    return true;
 
 }
 

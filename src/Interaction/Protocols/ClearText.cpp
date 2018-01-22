@@ -77,7 +77,7 @@ void ClearText::decode_char(char read_char) {
 
     }
 
-    //If the recieved char is a line feed or a working_extruder return :
+    //If the received char is a line feed or a working_extruder return :
     if (read_char < 32) {
 
         //If the received packet was too long for the input buffer :

@@ -25,7 +25,7 @@
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <Interaction/Interaction.h>
-#include <Kernel.h>
+#include <Kernel/Kernel.h>
 
 
 /*

@@ -47,10 +47,10 @@ public:
     static void add_event(const char *name);
 
     //Register a function to a particular event;
-    static void register_to_event(const char *name, void (*function)());
+    static void register_to_event(const char *name, task_state_t (*function)(void *));
 
     //Un-register a function to a particular event;
-    static void un_register_to_event(const char *name, void (*function)());
+    static void un_register_to_event(const char *name, task_state_t (*function)(void *));
 
     //Un-register a function to all events;
     static void un_register_to_all(void (*function)());
@@ -64,6 +64,17 @@ private:
     static bool search_event(const char *event, uint8_t *found_index);
 
 
+    //------------------------------------- Event management -------------------------------------
+
+public:
+
+    //Trigger a particular event;
+    static void trigger_event(const char *event_name);
+
+    //Process all triggered events;
+    static void process_events();
+
+
     //------------------------------------- Fields -------------------------------------
 
 private:
@@ -71,6 +82,8 @@ private:
     //Registered events;
     static PointerVector<SystemEvent> *system_events;
 
+    //Triggered events;
+    static ValueSet<uint8_t> *triggered_events;
 
 };
 

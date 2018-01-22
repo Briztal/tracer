@@ -31,7 +31,7 @@
  *  - a set of tasks;
  */
 
-typedef void (*task_pointer_t)();
+typedef task_state_t (*task_pointer_t)(void *);
 
 
 class SystemEvent {
@@ -69,6 +69,14 @@ public:
     const char *getName();
 
 
+    //-------------------------------- Task Scheduling --------------------------------
+
+public:
+
+    //Schedule the next task on the list;
+    bool scheduleNextTask();
+
+
     //-------------------------------- Fields --------------------------------
 
 private:
@@ -78,6 +86,10 @@ private:
 
     //The event's tasks;
     ValueSet<task_pointer_t> *tasks;
+
+    //The index of the next task to schedule;
+    uint8_t task_to_schedule;
+
 
 };
 

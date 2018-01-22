@@ -72,8 +72,8 @@ include_directories(.)
 
 add_library(tracer_config
 
-        Kernel.h
-        Kernel.cpp
+        Kernel/Kernel.h
+        Kernel/Kernel.cpp
 
         config.h
         parameters_indices.h
@@ -84,7 +84,7 @@ add_library(tracer_config
 
 #-----------------------------------------------SCHEDULER---------------------------------------------------------------
 
-set(TP "TaskScheduler")
+set(TP "Kernel")
 
 include_directories(${TP}/)
 

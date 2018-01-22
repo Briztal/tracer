@@ -21,7 +21,10 @@
 #include <Sensors/Thermistors/Thermistors.h>
 #include <StepperControl/Steppers.h>
 #include <ControlLoops/ControlLoops.h>
-#include <TaskScheduler/TaskScheduler.h>
+
+#include <Kernel/TaskScheduler/TaskScheduler.h>
+#include <Kernel/EventManager/EventManager.h>
+
 #include <StepperControl/TrajectoryTracer.h>
 #include <Interaction/Interaction.h>
 #include <Sensors/Sensors.h>
@@ -234,7 +237,34 @@ void Kernel::initialise_data() {
  *  It calls a Scheduler iteration , and eventually executes user defined routines.
  */
 
+task_state_t suus(void *) {
+
+    std_out("SUUS");
+
+    return complete;
+
+}
+
+task_state_t suus2(void *) {
+
+    std_out("SUUS2");
+
+    return complete;
+
+}
+
+
 void Kernel::run() {
+
+    EventManager::add_event("SUUS");
+
+    EventManager::add_event("SUUS2");
+
+    EventManager::register_to_event("SUUS", suus);
+
+    EventManager::register_to_event("SUUS2", suus);
+
+    EventManager::register_to_event("SUUS2", suus2);
 
     while (true) {
 
@@ -242,13 +272,26 @@ void Kernel::run() {
 
         /*
          * Trigger an iteration of the task scheduler :
-         *  - read_data all available interfaces until TaskScheduler is full or interface buffers are empties;
+         *  - read_data all available interfaces until Kernel is full or interface buffers are empties;
          *  - execute all possible tasks in the task pool;
          *  - execute all possible tasks in all sequences;
          */
 
+        //Add as much tasks as possible in the pool from external controllers;
+        Interaction::read_external_controllers();
+
+        //Execute all scheduled tasks;
         TaskScheduler::iterate();
 
+        //Process events;
+        EventManager::process_events();
+
+
+        EventManager::trigger_event("SUUS");
+        EventManager::trigger_event("SUUS2");
+
+
+        delay(500);
 
     }
 

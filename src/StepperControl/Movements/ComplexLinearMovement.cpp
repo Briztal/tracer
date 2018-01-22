@@ -25,7 +25,7 @@
 
 #include "ComplexLinearMovement.h"
 
-#include <Kernel.h>
+#include <Kernel/Kernel.h>
 
 #include <Interaction/Interaction.h>
 

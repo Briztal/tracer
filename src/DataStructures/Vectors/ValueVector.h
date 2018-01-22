@@ -62,7 +62,7 @@ public:
 protected:
 
     //Verify that a element is present in the array and eventually save its index;
-    bool isElementPresent(void (*old_element)(), uint8_t *index);
+    bool isElementPresent(T old_element, uint8_t *index);
 
 
     //-------------------------------------- Getters --------------------------------------
@@ -177,7 +177,7 @@ T ValueVector<T>::remove(uint8_t index) {
 
     //If the index is invalid, stop here;
     if (index >= size)
-        return nullptr;
+        return T();
 
     //Cache the current size
     const uint8_t size = this->size;
@@ -197,7 +197,7 @@ T ValueVector<T>::remove(uint8_t index) {
     uint8_t new_size = size - (uint8_t) 1;
 
     //Clear the last element to avoid deletion;
-    elements[new_size] = nullptr;
+    elements[new_size] = T();
 
     //If the reallocation failed
     if (!resize(new_size)) {
@@ -244,7 +244,7 @@ void ValueVector<T>::clear() {
  */
 
 template<class T>
-bool ValueVector<T>::isElementPresent(void (*old_task)(), uint8_t *index) {
+bool ValueVector<T>::isElementPresent(T old_task, uint8_t *index) {
 
     //Search for the task in the array;
     for (uint8_t task_index = 0; task_index < size; task_index++) {
@@ -293,7 +293,7 @@ T ValueVector<T>::getElement(uint8_t index) {
 
     //If the index is invalid
     if (index >= size)
-        return nullptr;
+        return T();
 
     //If the index is valid, return the appropriate task
     return elements[index];
@@ -343,11 +343,11 @@ bool ValueVector<T>::resize(uint8_t new_size) {
 
     }
 
-    //Then, reallocate the task array, to contain one more element;
-    void *new_array = realloc(elements, size);
+    //Then, reallocate the task array, to contain the required amount of elements;
+    void *new_array = realloc(elements, new_size);
 
     //If the reallocation failed :
-    if (!new_array) {
+    if (!new_array && new_size) {
 
         //Log;
         std_out("Error in ValueVector::resize : the reallocation failed;");

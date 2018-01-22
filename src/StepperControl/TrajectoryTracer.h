@@ -38,7 +38,7 @@
 
 #include <DataStructures/Queue.h>
 
-#include <TaskScheduler/task_state_t.h>
+#include <Kernel/TaskScheduler/task_state_t.h>
 
 #include "_core_include.h"
 
