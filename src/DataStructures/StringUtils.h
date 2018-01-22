@@ -43,7 +43,8 @@ public :
     //Get the number of words in the string;
     static uint8_t get_nb_words(char *in_buffer);
 
-
+    //Compare the two strings, and return true if they are the same;
+    static bool strcmp(const char *string0, const char *string1);
 
 };
 

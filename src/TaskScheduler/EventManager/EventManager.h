@@ -21,12 +21,56 @@
 #ifndef TRACER_EVENTMANAGER_H
 #define TRACER_EVENTMANAGER_H
 
+#include <DataStructures/Vectors/ValueSet.h>
+#include <DataStructures/Vectors/PointerVector.h>
+
+#include "stdint.h"
+
+#include "SystemEvent.h"
+
 
 class EventManager {
 
+    //------------------------------------- Initialisation -------------------------------------
+
+private:
+
+    //Initialise data in a safe state;
+    static void initialise_data();
 
 
-    static
+    //------------------------------------- Builders -------------------------------------
+
+public:
+
+    //Add an event;
+    static void add_event(const char *name);
+
+    //Register a function to a particular event;
+    static void register_to_event(const char *name, void (*function)());
+
+    //Un-register a function to a particular event;
+    static void un_register_to_event(const char *name, void (*function)());
+
+    //Un-register a function to all events;
+    static void un_register_to_all(void (*function)());
+
+
+    //------------------------------------- Name search -------------------------------------
+
+private:
+
+    //Get the index of an event by its name;
+    static bool search_event(const char *event, uint8_t *found_index);
+
+
+    //------------------------------------- Fields -------------------------------------
+
+private:
+
+    //Registered events;
+    static PointerVector<SystemEvent> *system_events;
+
 
 };
 

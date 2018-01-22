@@ -191,11 +191,11 @@ include_directories(${AP}/)
 
 add_library(actuators
 
-        ${AP}/actuators.h
+        ${AP}/Actuators.h
         ${AP}/DigitalGPIO.h
         ${AP}/DigitalGPIO.cpp
-        ${AP}/PWMGpio.h
-        ${AP}/PWMGpio.cpp
+        ${AP}/PWMGPIO.h
+        ${AP}/PWMGPIO.cpp
         ${AP}/Servo.h
         ${AP}/Servo.cpp
 

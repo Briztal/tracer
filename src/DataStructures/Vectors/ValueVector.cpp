@@ -1,5 +1,5 @@
 /*
-  scheduler_config.h - Part of TRACER
+  ValueVector.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -17,33 +17,3 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
-
-//The following line defines the task pool size
-#define TASK_POOL_SIZE 20
-
-
-/*
- * The following block defines the number of task sequences, their ID, their name and their size
- *  (the maximal number of pending task they can contain).
- */
-
-//TASK_SEQUENCE(id, size)
-#ifdef TASK_SEQUENCE
-
-TASK_SEQUENCE(0, 20)
-
-#endif
-
-
-
-/*
- * Events config;
- */
-
-
-//The maximum number of events;
-#define MAX_NB_EVENTS 10
-
-//The maximum number of tasks per event;
-#define MAX_TASKS_PER_EVENT 10

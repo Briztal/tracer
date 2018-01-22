@@ -1,5 +1,5 @@
 /*
-  scheduler_config.h - Part of TRACER
+  ValueSet.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -19,31 +19,5 @@
 */
 
 
-//The following line defines the task pool size
-#define TASK_POOL_SIZE 20
+#include "ValueSet.h"
 
-
-/*
- * The following block defines the number of task sequences, their ID, their name and their size
- *  (the maximal number of pending task they can contain).
- */
-
-//TASK_SEQUENCE(id, size)
-#ifdef TASK_SEQUENCE
-
-TASK_SEQUENCE(0, 20)
-
-#endif
-
-
-
-/*
- * Events config;
- */
-
-
-//The maximum number of events;
-#define MAX_NB_EVENTS 10
-
-//The maximum number of tasks per event;
-#define MAX_TASKS_PER_EVENT 10
