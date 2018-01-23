@@ -45,14 +45,18 @@
 #define TIMER_STEPPER_FREQUENCY 1000000
 #define TIMER_SERVO_FREQUENCY 1000000
 #define TIMER_LOOP_FREQUENCY 1000
+#define TIMER_TASK_PROGRAMMER_FREQUENCY 1
 
 //Timer 0 and 1 will count on microseconds, at 1MHz
 #define TIMER_0_FREQUENCY TIMER_STEPPER_FREQUENCY
 #define TIMER_1_FREQUENCY TIMER_SERVO_FREQUENCY
 
-//Timer 2 and 3 will count on milliseconds, at 1KHz
-#define TIMER_2_FREQUENCY TIMER_LOOP_FREQUENCY
+//Timer 2 will count on seconds, at 1Hz;
+#define TIMER_2_FREQUENCY TIMER_TASK_PROGRAMMER_FREQUENCY
+
+//Timer 3 will count on milliseconds, at 1KHz
 #define TIMER_3_FREQUENCY TIMER_LOOP_FREQUENCY
+
 
 
 
@@ -69,7 +73,7 @@
  *  Module names are :
  *      - stepper for the stepper module;
  *      - servo for the servo module;
- *      - loop_i for the i-th control loop of the control-loops module;
+ *      - taskprog for the task programmer module;
 
  Code section to copy :
 
@@ -129,6 +133,24 @@
 #define is_servo_loop_enabled() is_timer_loop_enabled_1();
 
 
+/*
+ * The task programmer timer will be attached to timer one.
+ */
+
+#define taskprog_period_to_reload(period) period_to_reload_2(period);
+#define set_taskprog_int_period(period) set_int_period_2(period);
+#define set_taskprog_int_reload(reload) set_int_reload_2(reload);
+#define enable_taskprog_interrupt() enable_interrupt_2();
+#define disable_taskprog_interrupt() disable_interrupt_2();
+#define enable_taskprog_timer() enable_timer_2();
+#define disable_taskprog_timer() disable_timer_2();
+#define taskprog_int_flag() timer_flag_2()
+#define taskprog_int_flag_clear() reset_timer_flag_2();
+#define set_taskprog_int_function(f) set_interrupt_function_2(f);
+#define setup_taskprog_interrupt(f, period) setup_interrupt_2(f, period);
+#define clean_taskprog_interrupt() clean_interrupt_2();
+#define is_taskprog_loop_enabled() is_timer_loop_enabled_2();
+
 
 
 
@@ -148,9 +170,7 @@
 
 #ifdef GENERATE_LOOP
 
-GENERATE_LOOP(0, 2)
-
-GENERATE_LOOP(1, 3)
+GENERATE_LOOP(0, 3)
 
 #endif
 

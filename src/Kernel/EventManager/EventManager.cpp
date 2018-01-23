@@ -33,6 +33,9 @@ void EventManager::initialise_data() {
     //Delete all events;
     system_events->clear();
 
+    //Delete all triggered events;
+    triggered_events->clear();
+
 }
 
 
@@ -101,7 +104,7 @@ void EventManager::register_to_event(const char *name, task_state_t (*function)(
  * un_register_to_event : this function will un-register the given function to the event matching the given name;
  */
 
-void EventManager::un_register_to_event(const char *name, task_state_t (*function)(void *)) {
+void EventManager::un_register_to_event(const char *name, task_pointer_t function) {
 
     //Declare a search index;
     uint8_t index = 0;
@@ -127,16 +130,16 @@ void EventManager::un_register_to_event(const char *name, task_state_t (*functio
  * un_register_to_all : this function will un-register the given function to all events;
  */
 
-void EventManager::un_register_to_all(void (*function)()) {
+void EventManager::un_register_to_all(task_pointer_t function) {
 
     //Cache the number of events;
     const uint8_t nb_events = system_events->getSize();
     
     //For each event : 
     for (uint8_t event_index = 0; event_index < nb_events; event_index++) {
-        
-        //Un Register the provided function to the event's tasks;
-        system_events->getElement(event_index)->removeAllTasks();
+
+        //Un-register the provided function to the event's tasks;
+        system_events->getElement(event_index)->removeTask(function);
         
     }
     
@@ -213,48 +216,52 @@ void EventManager::trigger_event(const char *event_name) {
 
 void EventManager::process_events() {
 
+    //While spaces are available in the scheduler and events are triggered :
+    while(TaskScheduler::available_spaces(255) && triggered_events->getSize()) {
 
-    //For every triggered event index (vector is modified during iteration, so size not const) :
-    for (uint8_t triggered_event_index = 0; triggered_event_index < triggered_events->getSize(); triggered_event_index++) {
+        //For every triggered event index (vector is modified during iteration, so size not const) :
+        for (uint8_t triggered_event_index = 0;
+             triggered_event_index < triggered_events->getSize(); triggered_event_index++) {
 
-        //If no more spaces are available in the scheduler, complete;
-        if (!TaskScheduler::available_spaces(255))
-            return;
+            //If no more spaces are available in the scheduler, complete;
+            if (!TaskScheduler::available_spaces(255))
+                return;
 
-        //Get the system event;
-        uint8_t event_index = triggered_events->getElement(triggered_event_index);
+            //Get the system event;
+            uint8_t event_index = triggered_events->getElement(triggered_event_index);
 
-        //Cache the event, to check for nullity;
-        SystemEvent *event = system_events->getElement(event_index);
+            //Cache the event, to check for nullity;
+            SystemEvent *event = system_events->getElement(event_index);
 
-        //If the event is nullptr :
-        if (event == nullptr) {
+            //If the event is nullptr :
+            if (event == nullptr) {
 
-            //Log;
-            std_out("Error in EventManager::process_events : an event index points to nullptr event;");
+                //Log;
+                std_out("Error in EventManager::process_events : an event index points to nullptr event;");
 
-            //Remove the index;
-            triggered_events->remove(event_index);
+                //Remove the index;
+                triggered_events->remove(event_index);
 
-            //Decrease the counter, to re-iterate on the same one.
-            triggered_event_index--;
+                //Decrease the counter, to re-iterate on the same one.
+                triggered_event_index--;
+
+            }
+
+            //Execute the task;
+            bool event_processed = event->scheduleNextTask();
+
+            //If all event's tasks have been processed :
+            if (event_processed) {
+
+                //Remove the index;
+                triggered_events->remove(event_index);
+
+                //Decrease the counter, to re-iterate on the same one.
+                triggered_event_index--;
+
+            }
 
         }
-
-        //Execute the task;
-        bool event_processed = event->scheduleNextTask();
-
-        //If all event's tasks have been processed :
-        if (event_processed) {
-
-            //Remove the index;
-            triggered_events->remove(event_index);
-
-            //Decrease the counter, to re-iterate on the same one.
-            triggered_event_index--;
-
-        }
-
     }
 
 }

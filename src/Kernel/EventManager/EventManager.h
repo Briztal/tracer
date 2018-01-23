@@ -33,7 +33,7 @@ class EventManager {
 
     //------------------------------------- Initialisation -------------------------------------
 
-private:
+public:
 
     //Initialise data in a safe state;
     static void initialise_data();
@@ -53,10 +53,11 @@ public:
     static void un_register_to_event(const char *name, task_state_t (*function)(void *));
 
     //Un-register a function to all events;
-    static void un_register_to_all(void (*function)());
+    static void un_register_to_all(task_pointer_t);
 
 
     //------------------------------------- Name search -------------------------------------
+
 
 private:
 

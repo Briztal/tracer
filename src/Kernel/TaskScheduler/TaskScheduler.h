@@ -22,7 +22,7 @@
 #ifndef PROJECT_SYSTEM_H
 #define PROJECT_SYSTEM_H
 
-#include <Config/scheduler_config.h>
+#include <Config/kernel_config.h>
 
 #include <DataStructures/Queue.h>
 

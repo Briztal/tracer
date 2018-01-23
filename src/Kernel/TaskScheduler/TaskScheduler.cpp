@@ -46,7 +46,7 @@ PONEY
 
 const uint8_t NB_TASK_SEQUENCES =
 
-#include "Config/scheduler_config.h"
+#include "Config/kernel_config.h"
 
         0;
 
@@ -678,7 +678,7 @@ Queue<task_t> **instantiate_task_queues(Queue<task_t> **ptr) {
 //task sequences definition
 #define TASK_SEQUENCE(i, size) ptr[i] = new Queue<task_t>(size);
 
-#include <Config/scheduler_config.h>
+#include <Config/kernel_config.h>
 
 #undef TASK_SEQUENCE
 

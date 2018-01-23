@@ -1,5 +1,5 @@
 /*
-  scheduler_config.h - Part of TRACER
+  kernel_config.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,6 +18,10 @@
 
 */
 
+
+/*
+ * -------------------------------------------------- Task Scheduler ---------------------------------------------------
+ */
 
 //The following line defines the task pool size
 #define TASK_POOL_SIZE 20
@@ -38,7 +42,7 @@ TASK_SEQUENCE(0, 20)
 
 
 /*
- * Events config;
+ * --------------------------------------------------- Event Manager ---------------------------------------------------
  */
 
 
@@ -47,3 +51,11 @@ TASK_SEQUENCE(0, 20)
 
 //The maximum number of tasks per event;
 #define MAX_TASKS_PER_EVENT 10
+
+
+/*
+ * -------------------------------------------------- Task Programmer --------------------------------------------------
+ */
+
+//The maximum number of simultaneous programmed tasks;
+#define MAX_PROGRAMMED_TASKS 10

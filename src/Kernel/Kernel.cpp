@@ -33,6 +33,7 @@
 #include <Config/_ConfigChecker.h>
 #include <EEPROM/EEPROMMap.h>
 #include <Project/Project.h>
+#include <Kernel/TaskProgrammer/TaskProgrammer.h>
 #include "Kernel.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -167,6 +168,9 @@ void Kernel::initialise_hardware() {
     //Initialise the hardware and the framework
     hl_init();
 
+    //Initialise the tasl programmer;
+    TaskProgrammer::intialise_hardware();
+
     //Initialise all enabled interfaces
     Interaction::initialise_hardware();
 
@@ -204,6 +208,12 @@ void Kernel::initialise_data() {
     //Initialise the task scheduler;
     TaskScheduler::initialise_data();
 
+    //Initalise the event manager;
+    EventManager::initialise_data();
+
+    //Initialise the task programmer;
+    TaskProgrammer::initialise_data();
+
     //Initialise actions;
     Actuators::initialise_data();
 
@@ -237,34 +247,7 @@ void Kernel::initialise_data() {
  *  It calls a Scheduler iteration , and eventually executes user defined routines.
  */
 
-task_state_t suus(void *) {
-
-    std_out("SUUS");
-
-    return complete;
-
-}
-
-task_state_t suus2(void *) {
-
-    std_out("SUUS2");
-
-    return complete;
-
-}
-
-
 void Kernel::run() {
-
-    EventManager::add_event("SUUS");
-
-    EventManager::add_event("SUUS2");
-
-    EventManager::register_to_event("SUUS", suus);
-
-    EventManager::register_to_event("SUUS2", suus);
-
-    EventManager::register_to_event("SUUS2", suus2);
 
     while (true) {
 
@@ -286,12 +269,8 @@ void Kernel::run() {
         //Process events;
         EventManager::process_events();
 
-
-        EventManager::trigger_event("SUUS");
-        EventManager::trigger_event("SUUS2");
-
-
-        delay(500);
+        //Process programmed tasks;
+        TaskProgrammer::process_tasks();
 
     }
 
