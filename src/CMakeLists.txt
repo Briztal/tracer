@@ -273,7 +273,7 @@ add_library(droneControl
 #---------------------------------------------Interaction Loops-------------------------------------------------------------
 
 
-set(ClP "ControlLoops")
+set(ClP "ControlSystem")
 
 include_directories(${CLP}/)
 

@@ -155,7 +155,6 @@ static inline static void delay_ms(uint16_t time_ms){
 // /Period setting : WARNING, the period is expressed into timer unit, a subdivision of a microsecond
 #define SET_INTERRUPT_PERIOD(period_timer_unit, timer_index) {SET_INTERRUPT_RELOAD(UNIT_TO_TICS(period_timer_unit, timer_index), timer_index);};
 
-
 #define ENABLE_INTERRUPT(timer_index) PIT_TCTRL##timer_index |= PIT_TCTRL_TIE;
 #define IS_LOOP_ENABLED(timer_index)  ((PIT_TCTRL##timer_index & PIT_TCTRL_TIE)&(PIT_TCTRL##timer_index & PIT_TCTRL_TEN))
 #define DISABLE_INTERRUPT(timer_index) PIT_TCTRL##timer_index &= 5;

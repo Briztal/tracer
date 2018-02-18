@@ -20,7 +20,7 @@
 
 #include <Sensors/Thermistors/Thermistors.h>
 #include <StepperControl/Steppers.h>
-#include <ControlLoops/ControlLoops.h>
+#include <ControlSystem/ControlLoops.h>
 
 #include <Kernel/TaskScheduler/TaskScheduler.h>
 #include <Kernel/EventManager/EventManager.h>

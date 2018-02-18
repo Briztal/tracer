@@ -21,7 +21,7 @@
 
 #include "TemperatureController.h"
 
-#include "ControlLoops/ControlLoops.h"
+#include "ControlSystem/ControlLoops.h"
 
 #include <Actuators/PWMGPIO.h>
 #include <Sensors/Thermistors/Thermistors.h>

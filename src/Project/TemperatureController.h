@@ -32,7 +32,7 @@
 
 
 #include <Kernel/TaskScheduler/TaskScheduler.h>
-#include <ControlLoops/PID.h>
+#include <ControlSystem/PID.h>
 
 class TemperatureController {
 

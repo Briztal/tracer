@@ -93,6 +93,35 @@
 
 
 /*
+ * Constructor : initialises data arrays;
+ */
+
+MPU6050::MPU6050() : accelerometer_data(new int16_t[3]), gyrometer_data(new int16_t[3]) {
+
+    //Initialise the hardware;
+    initialise_hardware();
+
+    //Initialise fields;
+    initialise_data();
+
+}
+
+
+/*
+ * Destructor : deletes all dynamic fields (data arrays);
+ */
+
+MPU6050::~MPU6050() {
+
+    //Delete the accelerometer array;
+    delete[] accelerometer_data;
+
+    //Delete the accelerometer array;
+    delete[] gyrometer_data;
+}
+
+
+/*
  * initialise_hardware : this function will initialise the connection and the chip;
  */
 
@@ -188,11 +217,12 @@ void MPU6050::reset_mpu() {
 
 void MPU6050::initialise_data() {
 
-    //Reset the acceleration vector;
-    memset(acceleration_vector, 0, 3 * sizeof(float));
+    //Reset the accelerometer array;
+    memset(accelerometer_data, 0, 3 * sizeof(int16_t));
 
-    //Reset theta and phi
-    acceleration_phi = acceleration_theta = 0;
+    //Reset the gyrometer array;
+    memset(gyrometer_data, 0, 3 * sizeof(int16_t));
+
 
 }
 
@@ -273,7 +303,7 @@ void MPU6050::read_int16s(uint8_t address, uint8_t nb_ints, int16_t *int_array) 
 
 
     //Read data incoming from the chip during the default period;
-    size_t bytes_received = Wire.requestFrom(MPU_ADDRESS, 6, I2C_STOP, MPU6050_TIMEOUT_US);
+    size_t bytes_received = Wire.requestFrom(MPU_ADDRESS, nb_bytes, I2C_STOP, MPU6050_TIMEOUT_US);
 
     //If the incorrect number of bytes were received : (shift to multiply by 2);
     if (bytes_received != nb_bytes) {
@@ -346,7 +376,7 @@ bool MPU6050::check_byte(uint8_t address, const uint8_t data) {
 
 
 /*
- * write_bits : Write the [length] first bits of [data] in [adress] in the chip, offseted of [offset];
+ * write_bits : Write the [length] first bits of [data] in [address] in the chip, offseted of [offset];
  */
 
 void MPU6050::write_bits(uint8_t address, uint8_t data, uint8_t offset, uint8_t length) {
@@ -392,31 +422,50 @@ void MPU6050::write_bits(uint8_t address, uint8_t data, uint8_t offset, uint8_t 
 }
 
 
-//----------------------------------------------------- Computation ----------------------------------------------------
+/*
+ * get_accelerometer_data : gets both accelerometer and gyrometer data;
+ */
+
+void MPU6050::compute_data() {
+
+    //Compute acceleration values;
+    compute_accelerometer_data();
+
+    //Read gyrometer values;
+    compute_gyrometer_data();
+}
 
 
 /*
- * compute_acceleration_angles : this function get data from the chip, computes acceleration angles, and returns them;
+ * compute_accelerometer_data : this function queries the accelerometer data;
  */
 
-void MPU6050::compute_acceleration_angles(float *phi, float *theta) {
+void MPU6050::compute_accelerometer_data() {
 
     //Read acceleration values;
-    read_int16s(MPU_ACCEL_MEASURE, 6, acceleration_vector);
+    read_int16s(MPU_ACCEL_MEASURE, 6, accelerometer_data);
 
-    //Cache vars :
-    float acc_x = (float) acceleration_vector[0];
-    float acc_y = (float) acceleration_vector[1];
-    float acc_z = (float) acceleration_vector[2];
+    //Substract offsets;
+    accelerometer_data[0] -= accelerometer_offsets[0];
+    accelerometer_data[1] -= accelerometer_offsets[1];
+    accelerometer_data[2] -= accelerometer_offsets[2];
 
-    //Get the norm of the vector
-    float norm = sqrtf(acc_x * acc_x + acc_y * acc_y + acc_z * acc_z);
+}
 
-    //Determine phi
-    *phi = acceleration_phi = atanf(acc_y / acc_x);
 
-    //Determine theta
-    *theta = acceleration_theta = acosf(norm / acc_z);
+/*
+ * compute_gyrometer_data : this function queries the accelerometer data;
+ */
+
+void MPU6050::compute_gyrometer_data() {
+
+    //Read gyrometer values;
+    read_int16s(MPU_GYRO_MEASURE, 6, gyrometer_data);
+
+    //Substract offsets;
+    gyrometer_data[0] -= gyrometer_offsets[0];
+    gyrometer_data[1] -= gyrometer_offsets[1];
+    gyrometer_data[2] -= gyrometer_offsets[2];
 
 }
 
@@ -424,157 +473,52 @@ void MPU6050::compute_acceleration_angles(float *phi, float *theta) {
 //------------------------------------------------- Data transmission --------------------------------------------------
 
 /*
- * get_acceleration_angles : this function returns acceleration angles from caches in the class;
+ * get_acceleration_values : this function returns acceleration coordinates from caches in the class;
  */
 
-void MPU6050::get_acceleration_angles(float *phi, float *theta) {
-
-    //SImply update both angles;
-    *phi = acceleration_phi;
-    *theta = acceleration_theta;
-
-}
-
-
-/*
- * get_acceleration_angles : this function returns acceleration coordinates from caches in the class;
- */
-
-void MPU6050::get_acceleration_vector(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
+void MPU6050::get_accelerometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
 
     //Simply update the three variables;
-    *acc_x = acceleration_vector[0];
-    *acc_y = acceleration_vector[1];
-    *acc_z = acceleration_vector[2];
+    *acc_x = accelerometer_data[0];
+    *acc_y = accelerometer_data[1];
+    *acc_z = accelerometer_data[2];
 
 }
-
-//----------------------------------------- Static declarations - definitions ------------------------------------------
-
-
-
-//The acceleration angle;
-int16_t mpu_acc_vec[3]{0};
-int16_t *MPU6050::acceleration_vector = mpu_acc_vec;
-
-//The acceleration vector's polar angle (x origin);
-float MPU6050::acceleration_phi = 0;
-
-//The acceleration vector's azimuth angle (z origin);
-float MPU6050::acceleration_theta = 0;
 
 
 /*
-
-void MPU6050::reset() {
-    angles[0] = accelAngleX;
-    angles[1] = accelAngleY;
-    angles[2] = 0;
-}
-
+ * get_acceleration_array: this function copies the acceleration array ;
  */
 
-/*
+void MPU6050::get_accelerometer_array(int16_t *array) {
 
-void MPU6050::computeGyroAngle() {
-
-    read_int16s(MPU_GYRO_MEASURE, 6, gyroRaws);
-
-    for (int i = 0; i < 3; i++) {
-        gyroSpeeds[i] = (gyroRaws[i] / MPU_GYRO_DIVIDER) - gyroErrors[i];
-        angles[i] = angles[i] + dt * gyroSpeeds[i];
-    }
-
-    //angle Z dans [-pi;pi]
-    float buffer = fmodf(angles[2] + 180, 360);
-    if (buffer < 0) {
-        buffer += 360;
-    }
-    angles[2] = buffer - 180;
-}
-
- */
-
-
-
-/*
-
-void MPU6050::computeErrors() {
-
-
-    for (int i = 0; i < N_ERROR; i++) {
-        read_int16s(MPU_GYRO_MEASURE, 3, gyroRaws);
-
-        for (int i = 0; i < 3; i++) {
-            gyroErrors[i] = gyroErrors[i] + gyroRaws[i] / MPU_GYRO_DIVIDER;
-        }
-    }
-
-    for (int i = 0; i < 3; i++) {
-        gyroErrors[i] = gyroErrors[i] / N_ERROR;
-    }
-    std_out("Mean gyro errors:");
-    Serial.print("X:\t");
-    std_out(gyroErrors[0], 10);
-    Serial.print("Y:\t");
-    std_out(gyroErrors[1], 10);
-    Serial.print("Z:\t");
-    std_out(gyroErrors[2], 10);
+    //Fast copy;
+    memcpy(array, accelerometer_data, 3 * sizeof(int16_t));
 
 }
 
 
- */
 /*
-void MPU6050::update() {
-    static uint32_t thisMeasure = 0;
-    static uint32_t lastMeasure = 0;
-    thisMeasure = micros();
-    //if (thisMeasure - lastMeasure > MPU_PERIOD) {
-    dt = (float) (thisMeasure - lastMeasure) / 1000000;
-
-    //Updating and computing angles
-    computeGyroAngle();
-    computeAccelAngle();
-
-    //The filter itself(it can't help with Z axis)
-    angles[0] = FILTER_GYRO * angles[0] + FILTER_ACCEL * accelAngleX;
-    angles[1] = FILTER_GYRO * angles[1] + FILTER_ACCEL * accelAngleY;
-
-    //TODO:magnetometer for angle Z correction, otherwise ~ 0.5degrees/minutes of drift
-
-    //printAngles();
-
-    lastMeasure = thisMeasure;
-    //}
-}
-
+ * get_acceleration_values : this function returns acceleration coordinates from caches in the class;
  */
 
+void MPU6050::get_gyrometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
 
-/*
-void MPU6050::printAngles() {
-
-    std_out("\nAngles:");
-    Serial.print("X:\t");
-    std_out(angles[0]);
-    Serial.print("Y:\t");
-    std_out(angles[1]);
-    Serial.print("Z:\t");
-    std_out(angles[2]);
+    //Simply update the three variables;
+    *acc_x = gyrometer_data[0];
+    *acc_y = gyrometer_data[1];
+    *acc_z = gyrometer_data[2];
 
 }
 
- */
 
 /*
-void MPU6050::read_bytes(uint8_t address, float* values)
-{
-	int16_t intvalues[3];
-	read_bytes(address, intvalues);
+ * get_acceleration_array: this function copies the acceleration array ;
+ */
 
-	for (int i = 0; i < 3; i++) {
-		values[i] = intvalues[i];
-	}
-}*/
+void MPU6050::get_gyrometer_array(int16_t *array) {
 
+    //Fast copy;
+    memcpy(array, gyrometer_data, 3 * sizeof(int16_t));
+
+}

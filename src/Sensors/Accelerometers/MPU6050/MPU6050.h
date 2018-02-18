@@ -31,20 +31,24 @@ class MPU6050 {
 
 public:
 
+    MPU6050();
+
+    ~MPU6050();
+
     //Initialise the connection and the sensor;
-    static void initialise_hardware();
+    void initialise_hardware();
 
     //Initialise all fields to a safe state;
-    static void initialise_data();
+    void initialise_data();
 
 
 private:
 
     //Reset the connection;
-    static void reset_connection();
+    void reset_connection();
 
     //Reset the chip;
-    static void reset_mpu();
+    void reset_mpu();
 
 
     //----------------------------------- Interaction with the chip -----------------------------------
@@ -52,54 +56,69 @@ private:
 private:
 
     //Read a single byte at the given address [address];
-    static uint8_t read_byte(uint8_t address);
+    uint8_t read_byte(uint8_t address);
 
     //Read 6 bytes at [adress]
-    static void read_int16s(uint8_t address, uint8_t nb_ints, int16_t *int_array);
+    void read_int16s(uint8_t address, uint8_t nb_ints, int16_t *int_array);
 
     //Write [data] at the address [address];
-    static void write_byte(uint8_t address, uint8_t data);
+    void write_byte(uint8_t address, uint8_t data);
 
     //Check that the byte at [address] is [data];
-    static bool check_byte(uint8_t address, const uint8_t data);
-
-
-    //----------------------------------- Data manipulation -----------------------------------
-
-private:
+    bool check_byte(uint8_t address, const uint8_t data);
 
     //Write the [length] first bits of [data] in [adress] in the chip, offseted of [offset];
-    static void write_bits(uint8_t address, uint8_t data, uint8_t offset, uint8_t length);
+    void write_bits(uint8_t address, uint8_t data, uint8_t offset, uint8_t length);
 
 
-    //----------------------------------- Computation -----------------------------------
+    //----------------------------------- Data Query -----------------------------------
 
-    //Compute the acceleration's theta and phi;
-    static void compute_acceleration_angles(float *phi, float *theta);
+public:
+
+    //Query accelerometer data:
+    void compute_accelerometer_data();
+
+    //Query gyrometer data;
+    void compute_gyrometer_data();
+
+    //Query both accelerometer and gyrometer data;
+    void compute_data();
 
 
     //----------------------------------- Data transmission -----------------------------------
 
-    //Get the acceleration angles;
-    static void get_acceleration_angles(float *phi, float *theta);
+public:
 
-    //Get the acceleration vector;
-    static void get_acceleration_vector(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z);
+    //Get the acceleration values;
+    void get_accelerometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z);
+
+    //Get the acceleration array;
+    void get_accelerometer_array(int16_t *array);
+
+    //Get the gyrometer values;
+    void get_gyrometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z);
+
+    //Get the gyrometer array;
+    void get_gyrometer_array(int16_t *array);
+
 
 
     //----------------------------------- Fields -----------------------------------
 
 private:
 
-    //The acceleration vector;
-    static int16_t *acceleration_vector;
+    //The accelerometer array;
+    int16_t *accelerometer_data;
 
-    //The acceleration vector's polar angle (x origin);
-    static float acceleration_phi;
+    //The accelerometer offsets array;
+    int16_t *accelerometer_offsets;
 
-    //The acceleration vector's azimuth angle (z origin);
-    static float acceleration_theta;
 
+    //The gyrometer array;
+    int16_t *gyrometer_data;
+
+    //The gyrometer offsets array;
+    int16_t *gyrometer_offsets;
 
 
 };

@@ -34,6 +34,7 @@
 #include <DataStructures/StringUtils.h>
 #include <DroneControl/MultiRotors/Generics/SingleQuadCopter.h>
 #include <DroneControl/DroneTest.h>
+#include <Sensors/Accelerometers/MPU6050/MPU6050.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -614,6 +615,39 @@ task_state_t TerminalCommands::temp_test(char *) {
     std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
     std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
 
+
+    return complete;
+}
+
+
+
+
+task_state_t TerminalCommands::testacc(char *) {
+
+    MPU6050 *mpu = new MPU6050();
+
+    mpu->initialise_hardware();
+
+    mpu->initialise_data();
+
+    int16_t accelero[3]{0}, gyro[3]{0};
+
+
+    while(true) {
+
+        mpu->compute_data();
+
+        mpu->get_accelerometer_array(accelero);
+
+        mpu->get_gyrometer_array(gyro);
+
+        std_out("ax : "+String(accelero[0])+" ay "+String(accelero[1])+" az "+String(accelero[2]));
+
+        std_out("gx : "+String(gyro[0])+" gy "+String(gyro[1])+" gz "+String(gyro[2]));
+
+        delay(500);
+
+    }
 
     return complete;
 }
