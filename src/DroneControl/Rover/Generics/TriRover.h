@@ -26,7 +26,7 @@
 
 #include <DroneControl/MotorRegisterer.h>
 
-#include <LinearSolver/LinearSystem.h>
+#include <Math/LinearSystem.h>
 
 
 class TriRover : public MatrixRover, private MotorRegisterer {

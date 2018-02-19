@@ -21,7 +21,7 @@
 #ifndef TRACER_MATRIXDRONE_H
 #define TRACER_MATRIXDRONE_H
 
-#include <LinearSolver/LinearSystem.h>
+#include <Math/LinearSystem.h>
 #include <Interaction/Interaction.h>
 
 

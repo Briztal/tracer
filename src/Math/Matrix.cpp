@@ -75,6 +75,56 @@ Matrix::Matrix(uint8_t height, uint8_t width) : height(height), width(width), da
 
 
 /*
+ * Copy constructor : duplicates entirely a matrix;
+ */
+
+Matrix::Matrix(const Matrix *const src) : height(src->height), width(src->width),
+                                          data_array(new float[src->height * src->width]) {
+
+    //Copy the entire data array;
+    memcpy(data_array, src->data_array, height * width * sizeof(float));
+
+}
+
+
+/*
+ * Copy constructor with size : create a new matrix, initialised to zero, and copy all possible coefficients from
+ *  the given one;
+ */
+
+Matrix::Matrix(uint8_t height, uint8_t width, const Matrix *const src) : height(height), width(width),
+                                                                         data_array(new float[height * width]) {
+
+    //Copy the entire data array;
+    reset();
+
+    //Determine minimal height and width;
+    uint8_t min_width = (width < src->width) ? width : src->width;
+    uint8_t min_height = (height < src->height) ? height : src->height;
+
+    //Copy all coefficients.
+
+    //for each line shared between matrices :
+    for (uint8_t line_index = 0; line_index < min_height; line_index++) {
+
+        //Cache the index;
+        uint8_t this_index = width * line_index;
+        uint8_t src_index = src->width * line_index;
+
+        //for each column shared between matrices :
+        for (uint8_t column_index = 0; column_index < min_width; column_index++, this_index++, src_index++) {
+
+            //Copy the coefficient at [line_index, column_index];
+            data_array[this_index] = src->data_array[src_index];
+
+        }
+
+    }
+
+}
+
+
+/*
  * Destructor : deletes data_array;
  */
 
@@ -82,6 +132,41 @@ Matrix::~Matrix() {
 
     //Delete the array;
     delete[] data_array;
+
+}
+
+//--------------------------------------------------- Matrix models ----------------------------------------------------
+
+/*
+ * setIdentityMatrix : this function will reset the matrix to zero and insert 1s in the main diagonal;
+ */
+
+void Matrix::setIdentityMatrix(Matrix *dst) {
+
+    //Reset all data to zero;
+    dst->reset();
+
+    //Determine the minimum of height and width;
+    uint8_t diagonal_max = (dst->height < dst->width) ? dst->height : dst->width;
+
+    //Set all diag coeffs to 1;
+
+    //A basic formula to get diagonal indices is to start with zero and increment by width + 1;
+    uint8_t increment = dst->width + (uint8_t) 1;
+
+    //Cache the initial case of dst"s data array;
+    float *diag_pointer = dst->data_array;
+
+    //For every coeffcient of the diagonal;
+    for (uint8_t diag_index = diagonal_max; diag_index--;) {
+
+        //Set the coefficient to 1;
+        *diag_pointer = 1;
+
+        //Increment the diag pointer in order to reach the next diagonal coefficient;
+        diag_pointer += increment;
+
+    }
 
 }
 
@@ -255,7 +340,7 @@ void Matrix::resetLine(const uint8_t line_index) {
     if (invalid_line(line_index))
         return;
 
-    //Cache the pointer to the first coefficient to modify
+    //Cache the pointer to the first coefficient to modify;
     float *coefficient_p = data_array + width * line_index;
 
     //Reset all coefficients;
@@ -263,6 +348,28 @@ void Matrix::resetLine(const uint8_t line_index) {
 
 }
 
+
+/*
+ * setTo : this function will copy the content of src into our instance;
+ */
+
+void Matrix::setTo(const Matrix *const src) {
+
+    //If matrices have different sizes
+    if ((src->width != width) || (src->height != height)) {
+
+        //Log;
+        std_out("Error in Matrix::setTo : matrices have different sizes.");
+
+        //Fail
+        return;
+
+    }
+
+    //Fast copy;
+    memcpy(data_array, src->data_array, height * width * sizeof(float));
+
+}
 
 //------------------------------------------------ Matrices Operations -------------------------------------------------
 
@@ -470,7 +577,208 @@ void Matrix::reset() {
 }
 
 
-//----------------------------------------------- Derived constructors  ------------------------------------------------
+//----------------------------------------------- Inter-matrix operations ----------------------------------------------
+
+/*
+ * multiply : this function will multiply A and B  (A x B) and store the result in R;
+ */
+
+void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *const R) {
+
+    //First, we have to check that A and B can be multiplied, ie A's width is B's height;
+    if (A->width != B->height) {
+
+        //Log;
+        std_out("Error in Matrix::multiply : A and B can't be multiplied;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Then, we must check that A * B and R have the same size,
+    // ie A and R have the same height, and B and R have the same width;
+    if ((A->height != R->height) || (B->width != R->width)) {
+
+        //Log;
+        std_out("Error in Matrix::multiply : A*B and R don't have the same size;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Initialise bounds an depth;
+    const uint8_t height = A->height, width = B->width, depth = A->width;
+
+    //Initialise the R data pointer;
+    float *R_ptr = R->data_array;
+
+    //For each line :
+    for (uint8_t line_index = height; line_index--;) {
+
+        //For each column:
+        for (uint8_t colum_index = width; colum_index--;) {
+
+            //Initialise the result to zero;
+            float result = 0;
+
+            //Determine the index of the first case of A's [line_index]'s line. Will be incremented of 1;
+            float *A_ptr = A->data_array + line_index * depth;
+
+            //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
+            float *B_ptr = B->data_array + colum_index;
+
+            //For every layer :
+            for (uint8_t layer_index = depth; layer_index--;A_ptr++, B_ptr+=width) {
+
+                //Sum the value corresponding to the layer;
+                result += *A_ptr * *B_ptr;
+
+                //Increment indices at iteration end;
+
+            }
+
+            //Set the value of R[line][column] to result and increment R's data pointer;
+            *(R_ptr++) = result;
+
+        }
+
+    }
+
+}
+
+void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix *const R) {
+
+    //First, we have to check that A and B can be multiplied, ie A's width is B's height;
+    if (A->width != B->height) {
+
+        //Log;
+        std_out("Error in Matrix::multiply : A and B can't be multiplied;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Then, we must check that A * B and R have the same size,
+    // ie A and R have the same height, and B and R have the same width;
+    if ((A->height != R->height) || (B->width != R->width)) {
+
+        //Log;
+        std_out("Error in Matrix::multiply : A*B and R don't have the same size;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Initialise bounds an depth;
+    const uint8_t height = A->height, width = B->width, depth = A->width;
+
+    //Initialise the R data pointer;
+    float *R_ptr = R->data_array;
+
+    //For each line :
+    for (uint8_t line_index = height; line_index--;) {
+
+        //For each column:
+        for (uint8_t colum_index = width; colum_index--;) {
+
+            //Initialise the result to zero;
+            float result = 0;
+
+            //Determine the index of the first case of A's [line_index]'s line. Will be incremented of 1;
+            float *A_ptr = A->data_array + line_index * depth;
+
+            //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
+            float *B_ptr = B->data_array + colum_index;
+
+            //For every layer :
+            for (uint8_t layer_index = depth; layer_index--;A_ptr++, B_ptr+=width) {
+
+                //Sum the value corresponding to the layer;
+                result += *A_ptr * *B_ptr;
+
+                //Increment indices at iteration end;
+
+            }
+
+            //Set the value of R[line][column] to result and increment R's data pointer;
+            *(R_ptr++) += result;
+
+        }
+
+    }
+
+}
+
+void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, Matrix *const R) {
+
+    //First, we have to check that A and B can be multiplied, ie A's width is B's height;
+    if (A->width != B->height) {
+
+        //Log;
+        std_out("Error in Matrix::multiply : A and B can't be multiplied;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Then, we must check that A * B and R have the same size,
+    // ie A and R have the same height, and B and R have the same width;
+    if ((A->height != R->height) || (B->width != R->width)) {
+
+        //Log;
+        std_out("Error in Matrix::multiply : A*B and R don't have the same size;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Initialise bounds an depth;
+    const uint8_t height = A->height, width = B->width, depth = A->width;
+
+    //Initialise the R data pointer;
+    float *R_ptr = R->data_array;
+
+    //For each line :
+    for (uint8_t line_index = height; line_index--;) {
+
+        //For each column:
+        for (uint8_t colum_index = width; colum_index--;) {
+
+            //Initialise the result to zero;
+            float result = 0;
+
+            //Determine the index of the first case of A's [line_index]'s line. Will be incremented of 1;
+            float *A_ptr = A->data_array + line_index * depth;
+
+            //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
+            float *B_ptr = B->data_array + colum_index;
+
+            //For every layer :
+            for (uint8_t layer_index = depth; layer_index--;A_ptr++, B_ptr+=width) {
+
+                //Sum the value corresponding to the layer;
+                result += *A_ptr * *B_ptr;
+
+                //Increment indices at iteration end;
+
+            }
+
+            //Set the value of R[line][column] to result and increment R's data pointer;
+            *(R_ptr++) -= result;
+
+        }
+
+    }
+}
+
+
+//------------------------------------------------ Derived constructors ------------------------------------------------
 
 
 /*

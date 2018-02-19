@@ -33,9 +33,9 @@
  */
 
 
-#include <LinearSolver/Matrix.h>
+#include <Math/Matrix.h>
 
-#include <LinearSolver/LinearSystem.h>
+#include <Math/LinearSystem.h>
 
 #include <DroneControl/MatrixDrone.h>
 

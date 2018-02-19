@@ -1,0 +1,86 @@
+The Kalman filter is a recursive estimator, that will at first predict a state, get a measure,
+    and compute the new state, depending on incertitude on state and measure.
+
+    We will maintain across the algorithm the following set of variables :
+        - X : the state (vector);
+        - P : the covariance matrix of the error on state (matrix);
+        - M : the measure (vector);
+
+    We will also use three constant matrices :
+        - H : the translation matrix, used to compute the measure from the state;
+        - Q : The covariance matrix of the process noise;
+        - R : The covariance matrix of the measure noise;
+
+
+Step 0 : the prediction.
+
+    The current state X of the system is known (initial state given, or previously computed).
+
+    A prediction is made, from this current state :
+
+        X+ = A * X (vector)
+
+    The covariance matrix is updated, as the random variable of the state is known to follow the following rule :
+        VX+ = A * VX + Pn (Random variable)
+            with VX is the random variable of the state, Pn is a centered gaussian random variable,
+            representing the process noise;
+
+        P+ = A * P * At + Q (matrix)
+            with At the transposed of A, Q the covariance matrix of the process noise;
+
+
+
+Step 1 : Measure.
+
+    A new measure M is made.
+
+    The prediction is translated to a prediction on the measure, with the linear relation :
+        M+ = H * X+ (vector);
+            with H the translation matrix of state to measure, M+ the predicted measure, X+ the predicted state;
+
+    The innovation is given by :
+        Y = M - M+ = M - H * X (vector)
+            with M the new measure;
+
+
+
+Step 2 : Computation.
+
+    We now determine the covariance matrix of the innovation, as the random variable of the measure is known
+        to follow the following rule :
+
+        VM = H * VX + Mn (Random variable)
+
+        with VX is the random variable of the state, VM the random variable of the measure, Mn is a centered gaussian
+            random variable, representing the measure noise;
+
+        S = H * P+ * Ht + R (matrix)
+
+        with S the covariance matrix of the innovation, P+ the updated covariance matrix, R the covariance matrix of
+            the measure noise;
+
+
+    Then, we determine the optimal Kalman gain :
+
+        K = P+ * Ht * S-1 (matrix)
+
+        with P+ the updated covariance matrix, Ht the transposed of H, S-1 the inverse of S;
+
+
+
+Step 3 : Update.
+
+    We can now update the current state, with the following formula :
+
+        newX = X+ - K * Y (vector)
+
+        with newX the new state, X+ the predicted state, K the Kalman gain, Y the innovation;
+
+
+    Finally, we can update the covariance matrix with the following formula :
+
+        newP = (I - K * H) * P+ (matrix)
+
+        with I the identity matrix, K the Kalman gain, H the transformation matrix, P+ the covariance of the predicted
+            state;
+

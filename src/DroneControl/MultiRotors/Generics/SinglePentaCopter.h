@@ -26,7 +26,7 @@
 
 #include <DroneControl/MotorRegisterer.h>
 
-#include <LinearSolver/LinearSystem.h>
+#include <Math/LinearSystem.h>
 
 #include <DroneControl/MultiRotors/MatrixMultiRotor/SolidMultiRotor.h>
 

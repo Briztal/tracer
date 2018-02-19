@@ -27,7 +27,7 @@
 
 #include "RoverCoordinateSystem.h"
 
-#include <LinearSolver/LinearSystem.h>
+#include <Math/LinearSystem.h>
 
 #include <DroneControl/MatrixDrone.h>
 
@@ -42,7 +42,7 @@ protected:
     MatrixRover();
 
     //Destructor;
-    virtual ~MatrixRover();
+    ~MatrixRover() override;
 
     //------------------------------- Virtual methods -------------------------------
 
@@ -50,22 +50,22 @@ protected:
 protected:
 
     //Set the coordinates that will figure in the coordinate system;
-    virtual void setCoordinateSystem(RoverCoordinateSystem *coordinate_system) = 0;
+    void setCoordinateSystem(RoverCoordinateSystem *coordinate_system) override = 0;
 
     //The method to create motors;
-    virtual void createMotors() = 0;
+    void createMotors() override = 0;
 
     //The method to create relations;
-    virtual void createRelations(LinearSystem *s) = 0;
+    void createRelations(LinearSystem *s) override = 0;
 
 
     //------------------------------- Overridden methods -------------------------------
 
     //Count the number of enabled coordinates in the coordinate system;
-    uint8_t getCoordinatesNumber(RoverCoordinateSystem *coordinate_system);
+    uint8_t getCoordinatesNumber(RoverCoordinateSystem *coordinate_system) override;
 
     //Add all motors equations;
-    void addMotorsEquations(RoverCoordinateSystem *, LinearSystem*);
+    void addMotorsEquations(RoverCoordinateSystem *, LinearSystem*) override;
 
 
     //------------------------------- Theta format -------------------------------
@@ -74,7 +74,7 @@ protected:
     float thetaFormat(float theta);
     
     //Check that all enabled coordinates are controllable;
-    bool checkControl(const Matrix *m, RoverCoordinateSystem *coordinates);
+    bool checkControl(const Matrix *m, RoverCoordinateSystem *coordinates) override;
 
 };
 

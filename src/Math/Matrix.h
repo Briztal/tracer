@@ -40,11 +40,37 @@ public:
     //The constructor : takes sizes in argument, and initialises the data array;
     Matrix(uint8_t height, uint8_t width);
 
+    //The copy constructor : takes a matrix, and duplicates it entirely;
+    explicit Matrix(const Matrix *const src);
+
+    //The copy constructor with size specs : creates a matrix with the given size and copies all possible coeffs;
+    Matrix(uint8_t height, uint8_t width, const Matrix *const src);
+
     //The destructor : deletes the data array;
     ~Matrix();
 
 
-    //-------------------------- Coefficient manipulation --------------------------
+    //-------------------------- Matrix models --------------------------
+
+    //Identity matrix constructor. Will reset and set 1s in diagonal;
+    static void setIdentityMatrix(Matrix *dst);
+
+
+    //-------------------------- Fields --------------------------
+
+private:
+
+    //Height;
+    const uint8_t height;
+
+    //Width;
+    const uint8_t width;
+
+    //The data array;
+    float *const data_array;
+
+
+    //-------------------------- Coefficient-wise operations --------------------------
 
 public:
 
@@ -53,6 +79,7 @@ public:
 
     //Set the value of a given coefficient;
     void setCoefficient(uint8_t line_index, uint8_t column_index, float new_value);
+
 
     //Sum a whole line with the given one;
     void sumLine(const uint8_t dest_line, const uint8_t src_line);
@@ -73,15 +100,8 @@ public:
     const float *getLine(const uint8_t line_index) const;
 
 
-    //-------------------------- Matrices Operations --------------------------
-
-public:
-
-    //Compute the cofactor at a given position;
-    float getCofactor(uint8_t line, uint8_t column) const;
-
-    //Transpose the matrix;
-    void transpose();
+    //Copy the content of src in our data array;
+    void setTo(const Matrix *const src);
 
     //Divide all coefficients by a given denominator;
     void divideBy(float denominator);
@@ -89,24 +109,45 @@ public:
     //Reset the matrix to a null matrix. Doesn't change the size, only resets all coefficients to zero;
     void reset();
 
+
+    //-------------------------- Minor, cofactors and determinant --------------------------
+
+public:
+
+    //Compute the cofactor at a given position;
+    float getCofactor(uint8_t line, uint8_t column) const;
+
+
 private:
 
-    //Compute a particular minor;
+    //Compute a particular minor; not public, because optimised for cofactor computation;
     float getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size) const;
 
 
-    //-------------------------- Fields --------------------------
+    //-------------------------- Square matrices operations --------------------------
 
-private:
+public:
 
-    //Height;
-    const uint8_t height;
+    //Transpose the matrix;
+    void transpose();
 
-    //Width;
-    const uint8_t width;
 
-    //The data array;
-    float *const data_array;
+    //-------------------------- Inter-matrix operations --------------------------
+
+    //R <- A * B; sizes are checked;
+    static void multiply(const Matrix *const A, const Matrix *const B, Matrix *const R);
+
+    //R <- R + A * B; sizes are checked;
+    static void multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix *const R);
+
+    //R <- R - A * B; sizes are checked;
+    static void multiplyAndSubtract(const Matrix *const A, const Matrix *const B, Matrix *const R);
+
+
+    //-------------------------- Linear operation --------------------------
+
+    //Apply the linear operation represented by the matrix on the vector;
+    void apply(const float *const inputVector, float *outputVector) const;
 
 
     //-------------------------- derived constructors  --------------------------
