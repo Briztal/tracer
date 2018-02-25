@@ -32,8 +32,10 @@ class KalmanFilter {
 public:
 
     //Constructor : takes sizes, initial and constant values, and rebuilds them safely;
-    KalmanFilter(uint8_t state_size, uint8_t measure_size, float *initial_state, Matrix *initial_P, Matrix *A,
-                 Matrix *H, Matrix *Q, Matrix *R);
+    KalmanFilter(uint8_t state_size, uint8_t measure_size, Matrix *A, Matrix *H, Matrix *Q, Matrix *R);
+
+    //Sets the current state estimated, and its covariance matrix;
+    void setInitialState(float *initial_state, Matrix *initial_covariance_matrix);
 
     //Destructor : deletes all matrices;
     ~KalmanFilter();
@@ -51,6 +53,8 @@ public:
 
 private:
 
+    bool stateInitialised;
+
     //The current state;
     float *x;
 
@@ -64,11 +68,11 @@ private:
 
     //The prediction matrix, used to compute the prediction of the next state, and its transposed;
     const Matrix *const A;
-    Matrix *const At;
+    const Matrix * At;
 
     //The transformation matrix, used to compute the measure from the state, and its transposed;
     const Matrix *const H;
-    Matrix *const Ht;
+    const Matrix *Ht;
 
     //The covariance matrix of the process noise;
     const Matrix *const Q;

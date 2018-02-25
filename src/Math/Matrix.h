@@ -157,6 +157,9 @@ public:
     //Compute the inverse of the matrix;
     Matrix *getInverse() const;
 
+    //Compute the transposed of the matrix;
+    Matrix *getTransposed() const;
+
     //Compute the cofactor matrix;
     Matrix *getCofactorMatrix() const;
 

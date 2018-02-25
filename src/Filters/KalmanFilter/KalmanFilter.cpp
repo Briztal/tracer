@@ -19,6 +19,7 @@
 */
 
 
+#include <Interaction/Interaction.h>
 #include "KalmanFilter.h"
 
 
@@ -28,14 +29,13 @@
  * Constructor : takes sizes, initial and constant values, and rebuilds them safely;
  */
 
-KalmanFilter::KalmanFilter(uint8_t stateSize, uint8_t measureSize, float *initialState, Matrix *initialP, Matrix *A,
+KalmanFilter::KalmanFilter(uint8_t stateSize, uint8_t measureSize, Matrix *A,
                            Matrix *H, Matrix *Q, Matrix *R)
         : stateSize(stateSize), measureSize(measureSize),
-          x(new float[stateSize]), P(new Matrix(initialP)),
+          stateInitialised(false),
+          x(new float[stateSize]),
           A(new Matrix(stateSize, stateSize, A)),
-          At(new Matrix(stateSize, stateSize, A)),
           H(new Matrix(measureSize, stateSize, H)),
-          Ht(new Matrix(measureSize, stateSize, H)),
           Q(new Matrix(stateSize, stateSize, Q)),
           R(new Matrix(measureSize, measureSize, R)),
 
@@ -45,15 +45,37 @@ KalmanFilter::KalmanFilter(uint8_t stateSize, uint8_t measureSize, float *initia
           KG_temp_S(new Matrix(measureSize, measureSize)),
           KG_temp(new Matrix(stateSize, measureSize)) {
 
-    //Transposed matrices have been built but not transposed.
-    At->transpose();
-    Ht->transpose();
 
-    //All matrices have been properly copied, but the initial state hasn't. We must copy it.
-    memcpy(x, initialState, stateSize * sizeof(float));
+    //Transposed matrices have been built but not transposed.
+    At = A->getTransposed();
+    Ht = H->getTransposed();
+
+
+
+
 
 }
 
+void KalmanFilter::setInitialState(float *initial_state, Matrix *initial_covariance_matrix) {
+
+    //All matrices have been properly copied, but the initial state hasn't. We must copy it.
+    memcpy(x, initial_state, stateSize * sizeof(float));
+
+    //If the state was initialised, the covariance matrix was created :
+    if (stateInitialised) {
+
+        //Delete the covariance matrix;
+        delete P;
+
+        //Mar the state as initialised;
+        stateInitialised = true;
+
+    }
+
+    //Create the new covariance matrix;
+    P = new Matrix(initial_covariance_matrix);
+
+}
 
 /*
  * All internal data has been instantiated at construction time, so we can delete them safely;
@@ -217,7 +239,7 @@ void KalmanFilter::computeKalmanGain(Matrix *newP, Matrix *kalmanGain) {
     Matrix *S = KG_temp_S;
 
     //Set S as a copy of Q;
-    S->setTo(Q);
+    S->setTo(R);
 
     //Cache the first temp matrix;
     Matrix *temp = KG_temp;
@@ -248,13 +270,14 @@ void
 KalmanFilter::update(const float *const newState, const float *const innovation, Matrix *newP, Matrix *kalmanGain) {
 
     //Compute K * Y and save it in innovation;
-    H->apply(innovation, x);
+    kalmanGain->apply(innovation, x);
+
 
     //For every coordinate of the innovation :
-    for (uint8_t i = 0; i < measureSize; i++) {
+    for (uint8_t i = 0; i < stateSize; i++) {
 
         //Compute the i-th coordinate of X+ - K * Y and save it in innovation;
-        x[i] = newState[i] - x[i];
+        x[i] = newState[i] + x[i];
 
     }
 

@@ -72,7 +72,7 @@ Step 3 : Update.
 
     We can now update the current state, with the following formula :
 
-        newX = X+ - K * Y (vector)
+        newX = X+ + K * Y (vector)
 
         with newX the new state, X+ the predicted state, K the Kalman gain, Y the innovation;
 

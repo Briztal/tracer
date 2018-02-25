@@ -35,6 +35,7 @@
 #include <DroneControl/MultiRotors/Generics/SingleQuadCopter.h>
 #include <DroneControl/DroneTest.h>
 #include <Sensors/Accelerometers/MPU6050/MPU6050.h>
+#include <Filters/KalmanFilter/KalmanFilter.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -622,7 +623,7 @@ task_state_t TerminalCommands::temp_test(char *) {
 
 
 
-task_state_t TerminalCommands::testacc(char *) {
+task_state_t TerminalCommands::test_mpu(char *) {
 
     MPU6050 *mpu = new MPU6050();
 
@@ -650,6 +651,12 @@ task_state_t TerminalCommands::testacc(char *) {
     }
 
     return complete;
+}
+
+
+task_state_t TerminalCommands::test_kalman(char *) {
+
+
 }
 
 

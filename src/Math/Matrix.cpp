@@ -615,10 +615,10 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *cons
     float *R_ptr = R->data_array;
 
     //For each line :
-    for (uint8_t line_index = height; line_index--;) {
+    for (uint8_t line_index = 0; line_index < height; line_index++) {
 
         //For each column:
-        for (uint8_t colum_index = width; colum_index--;) {
+        for (uint8_t column_index = 0; column_index < width; column_index++) {
 
             //Initialise the result to zero;
             float result = 0;
@@ -627,10 +627,10 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *cons
             float *A_ptr = A->data_array + line_index * depth;
 
             //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
-            float *B_ptr = B->data_array + colum_index;
+            float *B_ptr = B->data_array + column_index;
 
             //For every layer :
-            for (uint8_t layer_index = depth; layer_index--;A_ptr++, B_ptr+=width) {
+            for (uint8_t layer_index = depth; layer_index--; A_ptr++, B_ptr += width) {
 
                 //Sum the value corresponding to the layer;
                 result += *A_ptr * *B_ptr;
@@ -680,10 +680,10 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
     float *R_ptr = R->data_array;
 
     //For each line :
-    for (uint8_t line_index = height; line_index--;) {
+    for (uint8_t line_index = 0; line_index < height; line_index++) {
 
         //For each column:
-        for (uint8_t colum_index = width; colum_index--;) {
+        for (uint8_t column_index = 0; column_index < width; column_index++) {
 
             //Initialise the result to zero;
             float result = 0;
@@ -692,10 +692,10 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
             float *A_ptr = A->data_array + line_index * depth;
 
             //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
-            float *B_ptr = B->data_array + colum_index;
+            float *B_ptr = B->data_array + column_index;
 
             //For every layer :
-            for (uint8_t layer_index = depth; layer_index--;A_ptr++, B_ptr+=width) {
+            for (uint8_t layer_index = depth; layer_index--; A_ptr++, B_ptr += width) {
 
                 //Sum the value corresponding to the layer;
                 result += *A_ptr * *B_ptr;
@@ -714,8 +714,7 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
 }
 
 void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, Matrix *const R) {
-
-    //First, we have to check that A and B can be multiplied, ie A's width is B's height;
+//First, we have to check that A and B can be multiplied, ie A's width is B's height;
     if (A->width != B->height) {
 
         //Log;
@@ -745,10 +744,10 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, M
     float *R_ptr = R->data_array;
 
     //For each line :
-    for (uint8_t line_index = height; line_index--;) {
+    for (uint8_t line_index = 0; line_index < height; line_index++) {
 
         //For each column:
-        for (uint8_t colum_index = width; colum_index--;) {
+        for (uint8_t column_index = 0; column_index < width; column_index++) {
 
             //Initialise the result to zero;
             float result = 0;
@@ -757,10 +756,10 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, M
             float *A_ptr = A->data_array + line_index * depth;
 
             //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
-            float *B_ptr = B->data_array + colum_index;
+            float *B_ptr = B->data_array + column_index;
 
             //For every layer :
-            for (uint8_t layer_index = depth; layer_index--;A_ptr++, B_ptr+=width) {
+            for (uint8_t layer_index = depth; layer_index--; A_ptr++, B_ptr += width) {
 
                 //Sum the value corresponding to the layer;
                 result += *A_ptr * *B_ptr;
@@ -775,6 +774,50 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, M
         }
 
     }
+
+}
+//-------------------------------------------------- Linear operation --------------------------------------------------
+
+/*
+ * apply : determines the output vector for a given input vector;
+ */
+
+void Matrix::apply(const float *const inputVector, float *outputVector) const {
+
+    //Cache the current line value;
+    float *line_ptr = data_array;
+
+    //Cache the width;
+    const uint8_t width = this->width;
+
+    //For each line;
+    for (uint8_t line_index = height; line_index--;) {
+
+        //Initialise the result;
+        float result = 0;
+
+        //Cache for the output case
+        const float *i_ptr = inputVector;
+
+        //Cache for the current case in the data array;
+        float *m_ptr = line_ptr;
+
+        //For each column :
+        for (uint8_t column_index = width; column_index--;) {
+
+            //Multiply both values and add it to the result;
+            result += *(i_ptr++) * *(m_ptr++);
+
+        }
+
+        //Save the result;
+        *(outputVector++) = result;
+
+        //Increment the width pointer;
+        line_ptr += width;
+
+    }
+
 }
 
 
@@ -855,6 +898,46 @@ Matrix *Matrix::getInverse() const {
 
     //Return the inverted matrix;
     return cofactorMatrix;
+
+}
+
+
+/*
+ * getTransposed : this function computes the transposed of the the matrix and returns it;
+ */
+
+Matrix *Matrix::getTransposed() const {
+
+    //First, create the new matrix;
+    Matrix *m = new Matrix(width, height);
+
+    //Our data pointer;
+    const float *data_pointer = data_array;
+
+    //Cache the width of m;
+    const uint8_t m_width = height;
+
+    //For every row : (m_width = height, more optimised like this);
+    for (uint8_t row_index = 0; row_index < m_width; row_index++) {
+
+        float *output_pointer = m->data_array + row_index;
+
+        //For every coefficient in the line :
+        for (uint8_t column_index = width; column_index--;) {
+
+
+            //Set the m[column_index, row_index] to our data;
+            *output_pointer = *(data_pointer++);
+
+            //Increase the output pointer of height (go one line below)
+            output_pointer += height;
+
+        }
+
+    }
+
+    //Return the transposed matrix;
+    return m;
 
 }
 
