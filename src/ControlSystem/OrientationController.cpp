@@ -23,21 +23,21 @@
 #include <EEPROM/EEPROMTree.h>
 #include <EEPROM/EEPROMMap.h>
 
-#include "OrientationController.h"
+#include "OldOrientationController.h"
 
 
 /*
  * Constructor : initialises target position;
  */
 
-OrientationController::OrientationController() : target_theta(0), target_phi(0), pid_r(new PID()), pid_t(new PID()) {}
+OldOrientationController::OldOrientationController() : target_theta(0), target_phi(0), pid_r(new PID()), pid_t(new PID()) {}
 
 
 /*
  * Destructor : delete the two PIDs;
  */
 
-OrientationController::~OrientationController() {
+OldOrientationController::~OldOrientationController() {
 
     //Delete the r PID;
     delete pid_r;
@@ -51,7 +51,7 @@ OrientationController::~OrientationController() {
  * reset : resets all data at initialisation state;
  */
 
-void OrientationController::reset() {
+void OldOrientationController::reset() {
 
     //Reset targets;
     target_phi = target_theta = 0;
@@ -66,7 +66,7 @@ void OrientationController::reset() {
  * setTaget : updates the target position with the provided values;
  */
 
-void OrientationController::setTaget(float target_theta, float target_phi) {
+void OldOrientationController::setTaget(float target_theta, float target_phi) {
 
     //Update the theta coordinate;
     this->target_theta = target_theta;
@@ -81,7 +81,7 @@ void OrientationController::setTaget(float target_theta, float target_phi) {
  * getCorrectionVector : computes the correction vector corresponding to the current position;
  */
 
-void OrientationController::getCorrectionVector(float current_theta, float current_phi, rotation_vector *vector) {
+void OldOrientationController::getCorrectionVector(float current_theta, float current_phi, rotation_vector *vector) {
 
     float error_r, error_t;
 
@@ -122,7 +122,7 @@ void OrientationController::getCorrectionVector(float current_theta, float curre
  * computeSemiErrors : this function determines semi-error associates to the current target;
  */
 
-void OrientationController::computeSemiErrors() {
+void OldOrientationController::computeSemiErrors() {
 
     //Update the zone :
     target_in_zone_1 = (target_phi > (float) M_PI_2);
@@ -157,7 +157,7 @@ void OrientationController::computeSemiErrors() {
  * EEPROMRegister : this function registers the two PIDs in the EEPROMMap;
  */
 
-void OrientationController::EEPROMRegister(char *path, const char *name) {
+void OldOrientationController::EEPROMRegister(char *path, const char *name) {
 
     /*
 

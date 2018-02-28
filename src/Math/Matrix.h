@@ -46,7 +46,7 @@ public:
     //The copy constructor with size specs : creates a matrix with the given size and copies all possible coeffs;
     Matrix(uint8_t height, uint8_t width, const Matrix *const src);
 
-    //The destructor : deletes the data array;
+    virtual //The destructor : deletes the data array;
     ~Matrix();
 
 
@@ -66,11 +66,20 @@ private:
     //Width;
     const uint8_t width;
 
+
+protected:
+
     //The data array;
     float *const data_array;
 
 
+public:
+
+    //Getter;
+    float *getDataArray();
+
     //-------------------------- Coefficient-wise operations --------------------------
+
 
 public:
 
@@ -103,6 +112,9 @@ public:
     //Copy the content of src in our data array;
     void setTo(const Matrix *const src);
 
+    //Subtract the given matrix to our data array;
+    void subtract(const Matrix *const src);
+
     //Divide all coefficients by a given denominator;
     void divideBy(float denominator);
 
@@ -128,7 +140,7 @@ private:
 
 public:
 
-    //Transpose the matrix;
+    virtual //Transpose the matrix;
     void transpose();
 
 

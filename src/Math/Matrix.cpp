@@ -171,6 +171,15 @@ void Matrix::setIdentityMatrix(Matrix *dst) {
 }
 
 
+/*
+ * getDataArray : returns the data array;
+ */
+
+float *Matrix::getDataArray() {
+    return data_array;
+}
+
+
 //---------------------------------------------- Coefficient Manipulation ----------------------------------------------
 
 /*
@@ -368,6 +377,37 @@ void Matrix::setTo(const Matrix *const src) {
 
     //Fast copy;
     memcpy(data_array, src->data_array, height * width * sizeof(float));
+
+}
+
+
+/*
+ * subtract : subtract coefficient by coefficient;
+ */
+
+void Matrix::subtract(const Matrix *const src) {
+
+    //If both matrices dimensions are not equal :
+    if ((height != src->height) || (width != src->width)) {
+
+        //Log:
+        std_out("Error in Matrix::subtract : matrices don't have same sizes;");
+
+        //Fail;
+        return;
+
+    }
+
+    //Cache both arrays;
+    float *array = data_array, *s_array = src->data_array;
+
+    //Subtract coefficient by coefficient;
+    for (uint8_t coefficient_index = height * width; coefficient_index--;) {
+
+        //Subtract the value of src;
+        *(array++) -= *(s_array++);
+
+    }
 
 }
 

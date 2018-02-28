@@ -1,5 +1,5 @@
 /*
-  OrientationController.h - Part of TRACER
+  OrientationController.cpp - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -17,41 +17,3 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
-
-#ifndef TRACER_ORIENTATIONCONTROLLE_H
-#define TRACER_ORIENTATIONCONTROLLE_H
-
-
-#include "PID.h"
-#include "../Math/Matrix.h"
-
-
-class OrientationController {
-
-
-    //----------------------------------- Init ---------------------------------------
-
-public:
-
-    //Constructor;
-    OrientationController();
-
-    //Destructor;
-    ~OrientationController();
-
-    //Reset all data;
-    void reset();
-
-
-    //----------------------------------- Computation ---------------------------------------
-
-public:
-
-    //Set the target theta and phi;
-    void setTaget(Matrix *target);
-
-};
-
-
-#endif //TRACER_ORIENTATIONCONTROLLE_H
