@@ -426,7 +426,7 @@ task_state_t GCodeCommands::set_cooling(char *arguments) {
  *  It takes the following content :
  *      -h : the hotend to modify, mandatory.
  *      -e : 0 means disable the power on the hotend, other values will enable it.
- *      -t : sets the target temperature of the hotend.
+ *      -t : sets the targetVector temperature of the hotend.
  *
  *      -e or -t must be provided.
  */
@@ -482,7 +482,7 @@ task_state_t GCodeCommands::set_hotend(char *arguments) {
  *
  *  It takes the following content :
  *      -e : 0 means disable the power on the hotbed, other values will enable it.
- *      -t : sets the target temperature of the hotbed.
+ *      -t : sets the targetVector temperature of the hotbed.
  *
  *      -e or -t must be provided.
  */

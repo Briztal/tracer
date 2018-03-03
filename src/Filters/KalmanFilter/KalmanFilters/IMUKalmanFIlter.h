@@ -22,7 +22,7 @@ class IMUKalmanFIlter {
     Matrix *getPredictionMatrix(float time);
 
     //Build a transformation matrix;
-    Matrix *getTranformationMatrix(float conversion_factor);
+    Matrix *getTransformationMatrix(float conversion_factor);
 
     //Destructor;
     ~IMUKalmanFIlter();
@@ -36,10 +36,10 @@ class IMUKalmanFIlter {
     //------------------------------------------------- Iteration -------------------------------------------------
 
     //Update the internal model with a new set of measures;
-    void update(float *accelero_data, float *gyro_data);
+    void update(Vector3D *sum_forces, float *const gyro_data);
 
     //Get current gravity angles;
-    void getGravityAngles(float *angles);
+    void getGravity(Vector3D *gravity);
 
     //Get current rotation speeds;
     void getGyroSpeeds(float *speed);
@@ -48,11 +48,11 @@ class IMUKalmanFIlter {
     void getAccelerations(float *accelerations);
 
 
-    //------------------------------------------------- Filters -------------------------------------------------
+    //------------------------------------------------- KalmanFilters -------------------------------------------------
 
 private:
 
-    //Filters for all axis;
+    //KalmanFilters for all axis;
     KalmanFilter **filters;
 
 
@@ -61,7 +61,7 @@ private:
 private:
 
     //Gravity angles;
-    float *const gravityAngles;
+    Vector3D gravity;
 
     //Angular speeds;
     float *const angularSpeeds;

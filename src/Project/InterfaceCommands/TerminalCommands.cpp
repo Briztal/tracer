@@ -35,7 +35,11 @@
 #include <DroneControl/MultiRotors/Generics/SingleQuadCopter.h>
 #include <DroneControl/DroneTest.h>
 #include <Sensors/Accelerometers/MPU6050/MPU6050.h>
-#include <Filters/KalmanFilter/KalmanFilter.h>
+#include <Math/3D/RotationMatrix3D.h>
+#include <ControlSystem/DataConversion/OrientationConversion/Orientation2DToRotation.h>
+#include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
+#include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
+#include <Filters/KalmanFilter/KalmanFilters/IMUKalmanFIlter.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -475,7 +479,7 @@ task_state_t TerminalCommands::set_cooling(char *arguments) {
  *  It takes the following content :
  *      -h : the hotend to modify, mandatory.
  *      -e : 0 means disable the power on the hotend, other values will enable it.
- *      -t : sets the target temperature of the hotend.
+ *      -t : sets the targetVector temperature of the hotend.
  *
  *      -e or -t must be provided.
  */
@@ -531,7 +535,7 @@ task_state_t TerminalCommands::set_hotend(char *arguments) {
  *
  *  It takes the following content :
  *      -e : 0 means disable the power on the hotbed, other values will enable it.
- *      -t : sets the target temperature of the hotbed.
+ *      -t : sets the targetVector temperature of the hotbed.
  *
  *      -e or -t must be provided.
  */
@@ -621,8 +625,6 @@ task_state_t TerminalCommands::temp_test(char *) {
 }
 
 
-
-
 task_state_t TerminalCommands::test_mpu(char *) {
 
     MPU6050 *mpu = new MPU6050();
@@ -634,7 +636,34 @@ task_state_t TerminalCommands::test_mpu(char *) {
     int16_t accelero[3]{0}, gyro[3]{0};
 
 
-    while(true) {
+    /*
+    Matrix *process_noise = new Matrix(3, 3);
+    Matrix *measure_noise = new Matrix(3, 3);
+
+    Matrix::setIdentityMatrix(process_noise);
+    process_noise->divideBy(100);
+
+    Matrix::setIdentityMatrix(measure_noise);
+    measure_noise->divideBy(100);
+
+    std_out(process_noise->toString());
+
+    std_out(measure_noise->toString());
+
+
+    float initial[3] {0, 0, 0};
+
+    Matrix *initialP = new Matrix(3, 3);
+    Matrix::setIdentityMatrix(initialP);
+
+    initialP->divideBy(10);
+
+     */
+
+    IMUKalmanFIlter *filter = new IMUKalmanFIlter()
+
+
+    while (true) {
 
         mpu->compute_data();
 
@@ -642,9 +671,19 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
         mpu->get_gyrometer_array(gyro);
 
-        std_out("ax : "+String(accelero[0])+" ay "+String(accelero[1])+" az "+String(accelero[2]));
+        //std_out("ax : " + String(accelero[0]) + " ay " + String(accelero[1]) + " az " + String(accelero[2]));
 
-        std_out("gx : "+String(gyro[0])+" gy "+String(gyro[1])+" gz "+String(gyro[2]));
+        //std_out("gx : " + String(gyro[0]) + " gy " + String(gyro[1]) + " gz " + String(gyro[2]));
+
+        Vector3D v0 = Vector3D(accelero[0], accelero[1], accelero[2]);
+
+        float ax, ay, az;
+
+        Vector3DToAngles::convert(&v0, &ax, &ay, &az);
+
+        AnglesToVector3D::convert(ax, ay, az, &v0);
+
+        std_out("Vector "+ String(v0.x, 5) + " " + String(v0.y, 5) + " " + String(v0.z, 5));
 
         delay(500);
 
@@ -656,6 +695,48 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
 task_state_t TerminalCommands::test_kalman(char *) {
 
+    return complete;
+
+}
+
+
+task_state_t TerminalCommands::test_rotation(char *) {
+
+    Vector3D v0 = Vector3D(-1, 0, 0);
+
+    Orientation2DToRotation converter = Orientation2DToRotation();
+
+    converter.setTaget(&v0);
+
+    v0.x = 1;
+
+    rotation_data_t data = rotation_data_t();
+
+    converter.compute(&v0, &data);
+
+    std_out("Angle : " + String(data.rotation_angle));
+
+    std_out(" x : " + String(data.rotation_vector.x) + " y : " + String(data.rotation_vector.y) + " z : " +
+            String(data.rotation_vector.z));
+
+    return complete;
+
+}
+
+
+task_state_t TerminalCommands::test_angles(char *) {
+
+    Vector3D v0 = Vector3D(0, -23, 1);
+
+    float ax, ay, az;
+
+    Vector3DToAngles::convert(&v0, &ax, &ay, &az);
+
+    AnglesToVector3D::convert(ax, ay, az, &v0);
+
+    std_out("Vector "+ String(v0.x, 5) + " " + String(v0.y, 5) + " " + String(v0.z, 5));
+
+    return complete;
 
 }
 

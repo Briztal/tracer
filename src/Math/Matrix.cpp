@@ -69,7 +69,7 @@ Matrix::Matrix() : height(0), width(0), data_array(nullptr) {
 Matrix::Matrix(uint8_t height, uint8_t width) : height(height), width(width), data_array(new float[height * width]) {
 
     //Initialise the whole matrix to zero;
-    reset();
+    setToNull();
 
 }
 
@@ -96,7 +96,7 @@ Matrix::Matrix(uint8_t height, uint8_t width, const Matrix *const src) : height(
                                                                          data_array(new float[height * width]) {
 
     //Copy the entire data array;
-    reset();
+    setToNull();
 
     //Determine minimal height and width;
     uint8_t min_width = (width < src->width) ? width : src->width;
@@ -137,25 +137,37 @@ Matrix::~Matrix() {
 
 //--------------------------------------------------- Matrix models ----------------------------------------------------
 
+
+/*
+ * reset : sets all coefficients to zero;
+ */
+
+void Matrix::setToNull() {
+
+    //Hard reset;
+    memset(data_array, 0, height * width * sizeof(float));
+
+}
+
 /*
  * setIdentityMatrix : this function will reset the matrix to zero and insert 1s in the main diagonal;
  */
 
-void Matrix::setIdentityMatrix(Matrix *dst) {
+void Matrix::setToIdentity() {
 
     //Reset all data to zero;
-    dst->reset();
+    this->setToNull();
 
     //Determine the minimum of height and width;
-    uint8_t diagonal_max = (dst->height < dst->width) ? dst->height : dst->width;
+    uint8_t diagonal_max = (this->height < this->width) ? this->height : this->width;
 
     //Set all diag coeffs to 1;
 
     //A basic formula to get diagonal indices is to start with zero and increment by width + 1;
-    uint8_t increment = dst->width + (uint8_t) 1;
+    uint8_t increment = this->width + (uint8_t) 1;
 
-    //Cache the initial case of dst"s data array;
-    float *diag_pointer = dst->data_array;
+    //Cache the initial case of this"s data array;
+    float *diag_pointer = this->data_array;
 
     //For every coeffcient of the diagonal;
     for (uint8_t diag_index = diagonal_max; diag_index--;) {
@@ -605,25 +617,15 @@ void Matrix::divideBy(float denominator) {
 }
 
 
-/*
- * reset : sets all coefficients to zero;
- */
-
-void Matrix::reset() {
-
-    //Hard reset;
-    memset(data_array, 0, height * width * sizeof(float));
-
-}
 
 
 //----------------------------------------------- Inter-matrix operations ----------------------------------------------
 
 /*
- * multiply : this function will multiply A and B  (A x B) and store the result in R;
+ * multiply : this function will multiply A and B  (A x B) and store the result in this;
  */
 
-void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *const R) {
+void Matrix::multiply(const Matrix *const A, const Matrix *const B) {
 
     //First, we have to check that A and B can be multiplied, ie A's width is B's height;
     if (A->width != B->height) {
@@ -636,12 +638,12 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *cons
 
     }
 
-    //Then, we must check that A * B and R have the same size,
-    // ie A and R have the same height, and B and R have the same width;
-    if ((A->height != R->height) || (B->width != R->width)) {
+    //Then, we must check that A * B and this have the same size,
+    // ie A and this have the same height, and B and this have the same width;
+    if ((A->height != this->height) || (B->width != this->width)) {
 
         //Log;
-        std_out("Error in Matrix::multiply : A*B and R don't have the same size;");
+        std_out("Error in Matrix::multiply : A*B and this don't have the same size;");
 
         //Fail;
         return;
@@ -651,8 +653,8 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *cons
     //Initialise bounds an depth;
     const uint8_t height = A->height, width = B->width, depth = A->width;
 
-    //Initialise the R data pointer;
-    float *R_ptr = R->data_array;
+    //Initialise the this data pointer;
+    float *R_ptr = this->data_array;
 
     //For each line :
     for (uint8_t line_index = 0; line_index < height; line_index++) {
@@ -679,7 +681,7 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *cons
 
             }
 
-            //Set the value of R[line][column] to result and increment R's data pointer;
+            //Set the value of this[line][column] to result and increment this's data pointer;
             *(R_ptr++) = result;
 
         }
@@ -688,7 +690,7 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B, Matrix *cons
 
 }
 
-void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix *const R) {
+void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B) {
 
     //First, we have to check that A and B can be multiplied, ie A's width is B's height;
     if (A->width != B->height) {
@@ -701,12 +703,12 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
 
     }
 
-    //Then, we must check that A * B and R have the same size,
-    // ie A and R have the same height, and B and R have the same width;
-    if ((A->height != R->height) || (B->width != R->width)) {
+    //Then, we must check that A * B and this have the same size,
+    // ie A and this have the same height, and B and this have the same width;
+    if ((A->height != this->height) || (B->width != this->width)) {
 
         //Log;
-        std_out("Error in Matrix::multiply : A*B and R don't have the same size;");
+        std_out("Error in Matrix::multiply : A*B and this don't have the same size;");
 
         //Fail;
         return;
@@ -716,8 +718,8 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
     //Initialise bounds an depth;
     const uint8_t height = A->height, width = B->width, depth = A->width;
 
-    //Initialise the R data pointer;
-    float *R_ptr = R->data_array;
+    //Initialise the this data pointer;
+    float *R_ptr = this->data_array;
 
     //For each line :
     for (uint8_t line_index = 0; line_index < height; line_index++) {
@@ -744,7 +746,7 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
 
             }
 
-            //Set the value of R[line][column] to result and increment R's data pointer;
+            //Set the value of this[line][column] to result and increment this's data pointer;
             *(R_ptr++) += result;
 
         }
@@ -753,7 +755,7 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix
 
 }
 
-void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, Matrix *const R) {
+void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B) {
 //First, we have to check that A and B can be multiplied, ie A's width is B's height;
     if (A->width != B->height) {
 
@@ -765,12 +767,12 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, M
 
     }
 
-    //Then, we must check that A * B and R have the same size,
-    // ie A and R have the same height, and B and R have the same width;
-    if ((A->height != R->height) || (B->width != R->width)) {
+    //Then, we must check that A * B and this have the same size,
+    // ie A and this have the same height, and B and this have the same width;
+    if ((A->height != this->height) || (B->width != this->width)) {
 
         //Log;
-        std_out("Error in Matrix::multiply : A*B and R don't have the same size;");
+        std_out("Error in Matrix::multiply : A*B and this don't have the same size;");
 
         //Fail;
         return;
@@ -780,8 +782,8 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, M
     //Initialise bounds an depth;
     const uint8_t height = A->height, width = B->width, depth = A->width;
 
-    //Initialise the R data pointer;
-    float *R_ptr = R->data_array;
+    //Initialise the this data pointer;
+    float *R_ptr = this->data_array;
 
     //For each line :
     for (uint8_t line_index = 0; line_index < height; line_index++) {
@@ -808,7 +810,7 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B, M
 
             }
 
-            //Set the value of R[line][column] to result and increment R's data pointer;
+            //Set the value of this[line][column] to result and increment this's data pointer;
             *(R_ptr++) -= result;
 
         }

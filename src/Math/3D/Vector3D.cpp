@@ -1,6 +1,23 @@
-//
-// Created by root on 2/28/18.
-//
+/*
+  Vector3D.cpp - Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 
 #include "Vector3D.h"
 #include <math.h>
@@ -119,15 +136,12 @@ void Vector3D::divide(float coefficient) {
  * vectorProduct : this function will compute the vector product of the provided couple;
  */
 
-Vector3D *Vector3D::vectorProduct(Vector3D *v0, Vector3D *v1) {
+void Vector3D::vectorProduct(Vector3D *v0, Vector3D *v1) {
 
     //Compute all coordinates;
-    float x = v0->y * v1->z - v0->z * v1->y;
-    float y = v0->z * v1->x - v0->x * v1->z;
-    float z = v0->x * v1->y - v0->y * v1->x;
-
-    //Store coordinates in a new vector and return its pointer;
-    return new Vector3D(0, 0, 0);
+    x = v0->y * v1->z - v0->z * v1->y;
+    y = v0->z * v1->x - v0->x * v1->z;
+    z = v0->x * v1->y - v0->y * v1->x;
 
 }
 

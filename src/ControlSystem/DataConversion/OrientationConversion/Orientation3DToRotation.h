@@ -1,5 +1,5 @@
 /*
-  OrientationController.h - Part of TRACER
+  Orientation3DToRotation.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -19,15 +19,19 @@
 */
 
 
-#ifndef TRACER_ORIENTATIONCONTROLLE_H
-#define TRACER_ORIENTATIONCONTROLLE_H
+#ifndef TRACER_ORIENTATION3DTOROTATION_H
+#define TRACER_ORIENTATION3DTOROTATION_H
 
 
-#include "PID.h"
-#include "../Math/Matrix.h"
+#include "../../PID.h"
+#include "../../../Math/Matrix.h"
+
+#include "Math/3D/Vector3D.h"
+#include "Math/3D/RotationMatrix3D.h"
+#include "../../../Math/rotation_data.h"
 
 
-class OrientationController {
+class Orientation3DToRotation {
 
 
     //----------------------------------- Init ---------------------------------------
@@ -35,10 +39,10 @@ class OrientationController {
 public:
 
     //Constructor;
-    OrientationController();
+    Orientation3DToRotation();
 
     //Destructor;
-    ~OrientationController();
+    ~Orientation3DToRotation();
 
     //Reset all data;
     void reset();
@@ -48,10 +52,25 @@ public:
 
 public:
 
-    //Set the target theta and phi;
-    void setTaget(Matrix *target);
+    //Set the target orientation;
+    void setTaget(Vector3D *v0, Vector3D *v1);
+
+    //Compute the rotation data for the given orientation;
+    void compute(Vector3D *current_v0, Vector3D *current_v1, rotation_data_t *rotation_data);
+
+
+    //----------------------------------- Fields ---------------------------------------
+
+private:
+
+    //The targetVector orientation
+    RotationMatrix3D *targetOrientation;
+
+    //Temp matrices;
+    RotationMatrix3D *currentOrientation;
+    RotationMatrix3D *finalTransformation;
 
 };
 
 
-#endif //TRACER_ORIENTATIONCONTROLLE_H
+#endif //TRACER_ORIENTATION3DTOROTATION_H

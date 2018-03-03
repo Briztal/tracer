@@ -445,11 +445,6 @@ void MPU6050::compute_accelerometer_data() {
     //Read acceleration values;
     read_int16s(MPU_ACCEL_MEASURE, 6, accelerometer_data);
 
-    //Substract offsets;
-    accelerometer_data[0] -= accelerometer_offsets[0];
-    accelerometer_data[1] -= accelerometer_offsets[1];
-    accelerometer_data[2] -= accelerometer_offsets[2];
-
 }
 
 
@@ -461,11 +456,6 @@ void MPU6050::compute_gyrometer_data() {
 
     //Read gyrometer values;
     read_int16s(MPU_GYRO_MEASURE, 6, gyrometer_data);
-
-    //Substract offsets;
-    gyrometer_data[0] -= gyrometer_offsets[0];
-    gyrometer_data[1] -= gyrometer_offsets[1];
-    gyrometer_data[2] -= gyrometer_offsets[2];
 
 }
 

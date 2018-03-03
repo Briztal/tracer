@@ -145,6 +145,8 @@ CREATE_LEAF(stepper, stepper_test, moves the stepper 0 at constant speed)
 CREATE_LEAF(temp, temp_test, reads temps on every thermistor)
 CREATE_LEAF(acc, test_mpu, accelerometer test)
 CREATE_LEAF(kalman, test_kalman, kalman filter test)
+CREATE_LEAF(rotation, test_rotation, rotation matrix test)
+CREATE_LEAF(angles, test_angles, angles conversion test)
 CREATE_LEAF(flood, flood, flood the movement manager)
 CREATE_LEAF(action, action, flood the movement manager)
 

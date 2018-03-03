@@ -39,7 +39,7 @@ void TemperatureController::initialise_data() {
     memset(hotends_enabled, 0, 4 * sizeof(bool));
     memset(hotends_temps, 0, 4 * sizeof(float));
 
-    //Declare and define the hotbed state (flags and vars for activity and temperature target).
+    //Declare and define the hotbed state (flags and vars for activity and temperature targetVector).
     hotbed_state = hotbed_state_t();
 
     //Reinit all PIDs;
@@ -336,7 +336,7 @@ void TemperatureController::temperature_regulation() {
 
 void TemperatureController::regulation_finalisation() {
 
-    //Set hotends and hotbed target to zero.
+    //Set hotends and hotbed targetVector to zero.
 
     memset(hotends_temps, 0, sizeof(float) * 4);
     memset(hotends_enabled, 0, sizeof(bool) * 4);
@@ -372,7 +372,7 @@ bool *const m::hotends_enabled = t_hotends_en;
 float *const m::hotends_temps = t_hotends_temps;
 
 
-//Declare and define the hotbed state (flags and vars for activity and temperature target).
+//Declare and define the hotbed state (flags and vars for activity and temperature targetVector).
 m::hotbed_state_t m::hotbed_state = m::hotbed_state_t();
 
 PID t_hot_pids[4];

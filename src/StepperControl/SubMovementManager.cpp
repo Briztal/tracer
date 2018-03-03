@@ -148,7 +148,7 @@ bool SubMovementManager::is_movement_processed() {
  *
  *      If not, the position is discarded.
  *
- *      In all cases, the increment is updated to converge to the distance target.
+ *      In all cases, the increment is updated to converge to the distance targetVector.
  *
  *      Notes :
  *          - The distance is given by the maximum of all step_distances on each stepper.
@@ -304,7 +304,7 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
 
     float up_error = (max_distance >= MAXIMUM_DISTANCE_LIMIT);
 
-    //Increment adjustment according to the target
+    //Increment adjustment according to the targetVector
     if ((uint16_t) max_distance != (uint16_t) DISTANCE_TARGET) {
 
         //get the distance ratio
@@ -334,7 +334,7 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
 
 
 /*
- * get_steppers_distances : this function determines the distance between a position and a target, for all stepper.
+ * get_steppers_distances : this function determines the distance between a position and a targetVector, for all stepper.
  *
  * It also computes the direction signature, as step_distances are positive_rotation numbers, and saves the maximum stepper
  *      and the maximum distance.

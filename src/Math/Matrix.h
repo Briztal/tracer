@@ -52,8 +52,11 @@ public:
 
     //-------------------------- Matrix models --------------------------
 
-    //Identity matrix constructor. Will reset and set 1s in diagonal;
-    static void setIdentityMatrix(Matrix *dst);
+    //Reset the matrix to a null matrix. Doesn't change the size, only resets all coefficients to zero;
+    void setToNull();
+
+    virtual //Identity matrix constructor. Will reset and set 1s in diagonal;
+    void setToIdentity();
 
 
     //-------------------------- Fields --------------------------
@@ -118,9 +121,6 @@ public:
     //Divide all coefficients by a given denominator;
     void divideBy(float denominator);
 
-    //Reset the matrix to a null matrix. Doesn't change the size, only resets all coefficients to zero;
-    void reset();
-
 
     //-------------------------- Minor, cofactors and determinant --------------------------
 
@@ -140,20 +140,22 @@ private:
 
 public:
 
-    virtual //Transpose the matrix;
-    void transpose();
+     //Transpose the matrix;
+     virtual void transpose();
 
 
     //-------------------------- Inter-matrix operations --------------------------
 
-    //R <- A * B; sizes are checked;
-    static void multiply(const Matrix *const A, const Matrix *const B, Matrix *const R);
+public:
 
-    //R <- R + A * B; sizes are checked;
-    static void multiplyAndAdd(const Matrix *const A, const Matrix *const B, Matrix *const R);
+    virtual //this <- A * B; sizes are checked;
+    void multiply(const Matrix *const A, const Matrix *const B);
 
-    //R <- R - A * B; sizes are checked;
-    static void multiplyAndSubtract(const Matrix *const A, const Matrix *const B, Matrix *const R);
+    //this <- R + A * B; sizes are checked;
+    void multiplyAndAdd(const Matrix *const A, const Matrix *const B);
+
+    //this <- R - A * B; sizes are checked;
+    void multiplyAndSubtract(const Matrix *const A, const Matrix *const B);
 
 
     //-------------------------- Linear operation --------------------------
@@ -183,7 +185,7 @@ public:
 
 public:
 
-    //Create a string that display the matrix;
+    virtual //Create a string that display the matrix;
     String toString() const;
 
 };

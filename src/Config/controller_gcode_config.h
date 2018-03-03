@@ -28,7 +28,7 @@
 
 
 //The maximum command depth : in our example, the two largest commands are G5D0 and M225 -> GCODE_MAX_DEPTH of 4
-#define GCODE_MAX_DEPTH 3
+#define GCODE_MAX_DEPTH 5
 
 //The maximum number of arguments in a GCodeCommand.
 #define GCODE_MAX_ARGS_NB 6

@@ -194,7 +194,7 @@ private :
     //The current sub_movement time
     static delay_t sub_movement_time;
 
-    //The current regulation (target) sub_movement time
+    //The current regulation (targetVector) sub_movement time
     static delay_t regulation_sub_movement_time;
 
     //A flag to mention if the tracing routine has just begun.

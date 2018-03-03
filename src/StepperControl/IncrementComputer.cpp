@@ -116,7 +116,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     //cache float var for distance_target
     float ftarget = (float) DISTANCE_TARGET;
 
-    //correct the increment until it gives a position at the target distance.
+    //correct the increment until it gives a position at the targetVector distance.
     while (d != DISTANCE_TARGET) {
 
         //Catch the case where d becomes 0.
@@ -133,7 +133,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
     }
 
-    //return the increment that gives a position at the target distance of the initial position.
+    //return the increment that gives a position at the targetVector distance of the initial position.
     return increment;
 
 }

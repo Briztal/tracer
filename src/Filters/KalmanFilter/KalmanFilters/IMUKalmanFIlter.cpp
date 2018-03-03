@@ -3,6 +3,8 @@
 //
 
 #include <Interaction/Interaction.h>
+#include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
+#include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
 #include "IMUKalmanFIlter.h"
 
 /*
@@ -11,7 +13,7 @@
 
 IMUKalmanFIlter::IMUKalmanFIlter(float *conversion_factors, float measure_period, Matrix **process_noises,
                                  Matrix **measure_noises) 
-        : gravityAngles(new float[3]), angularSpeeds(new float[3]) {
+        : gravity(new Vector3D(1,0,0)), angularSpeeds(new float[3]) {
 
 
     /*
@@ -50,10 +52,14 @@ IMUKalmanFIlter::IMUKalmanFIlter(float *conversion_factors, float measure_period
     for (uint8_t i = 0; i < 3; i++) {
 
         //Initialise the transformation matrix with the correct factor;
-        transformation = getTranformationMatrix(conversion_factors[i]);
+        transformation = getTransformationMatrix(conversion_factors[i]);
 
         //Initialise the i-th filter, with
         filters[i] = new KalmanFilter(3, 2, prediction, transformation, process_noises[i], measure_noises[i]);
+
+        //TODO ENLEVER
+        float initial[2]{0};
+        filters[i]->setInitialState(initial, process_noises[i]);
 
         //Delete the transformation matrix;
         delete transformation;
@@ -64,6 +70,7 @@ IMUKalmanFIlter::IMUKalmanFIlter(float *conversion_factors, float measure_period
     delete prediction;
 
 }
+
 
 /*
  * Destructor : this function deletes the three kalman filters;
@@ -96,7 +103,7 @@ Matrix *IMUKalmanFIlter::getPredictionMatrix(float time) {
 
     Matrix *prediction = new Matrix(3, 3);
 
-    Matrix::setIdentityMatrix(prediction);
+    prediction->setToIdentity();
 
     prediction->setCoefficient(1, 0, time);
 
@@ -108,7 +115,7 @@ Matrix *IMUKalmanFIlter::getPredictionMatrix(float time) {
 
 
 /*
- * getTranformationMatrix : this function will build the following matrix : 
+ * getTransformationMatrix : this function will build the following matrix :
  * 
  * 
  *   | sr  0   sr |
@@ -118,7 +125,7 @@ Matrix *IMUKalmanFIlter::getPredictionMatrix(float time) {
  *   
  */
 
-Matrix *IMUKalmanFIlter::getTranformationMatrix(float conversion_factor) {
+Matrix *IMUKalmanFIlter::getTransformationMatrix(float conversion_factor) {
 
     Matrix *transformation = new Matrix(2, 3);
 
@@ -143,7 +150,13 @@ void IMUKalmanFIlter::setInitialData(float *accelerometer_averages, float *gyro_
 }
 
 
-void IMUKalmanFIlter::update(float *accelero_data, float *gyro_data) {
+void IMUKalmanFIlter::update(Vector3D *sum_forces, float *const gyro_data) {
+
+    //Declare the gravity angles;
+    float gravity_angles[3];
+
+    //Convert the acceleration vector to angles;
+    Vector3DToAngles::convert(sum_forces, gravity_angles, gravity_angles + 1, gravity_angles + 2);
 
     //Declare an array of two floats, to contain measures for all axis;
     float measure[2]{0};
@@ -153,17 +166,14 @@ void IMUKalmanFIlter::update(float *accelero_data, float *gyro_data) {
 
         //Update measure array;
         measure[0] = gyro_data[axis_index];
-        measure[1] = accelero_data[axis_index];
+        measure[1] = gravity_angles[axis_index];
 
         //Update the filter;
         filters[axis_index]->compute(measure);
 
     }
 
-    //Now we will read and compute data from filters;
-    
-    //Gravity data from filters;
-    float gravity_data[3];
+    //Now we will read data from filters;
 
     //For each axis :
     for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {
@@ -175,13 +185,12 @@ void IMUKalmanFIlter::update(float *accelero_data, float *gyro_data) {
         angularSpeeds[axis_index] = measure[0];
 
         //Copy the gravity angle into the local array;
-        gravity_data[axis_index] = measure[1];
+        gravity_angles[axis_index] = measure[1];
 
     }
 
-    //Now, we must compute the gravity's polar angle and azimuth;
-
-    //TODO
+    //Now, we must compute the gravity's coordinates;
+    AnglesToVector3D::convert(*gravity_angles, gravity_angles[1], gravity_angles[2], &gravity);
 
 }
 
@@ -190,10 +199,12 @@ void IMUKalmanFIlter::update(float *accelero_data, float *gyro_data) {
  * getGravityAngles : copies local gravity angles to external array;
  */
 
-void IMUKalmanFIlter::getGravityAngles(float *angles) {
+void IMUKalmanFIlter::getGravity(Vector3D *gravity_c) {
 
-    //Fast copy;
-    memcpy(angles, gravityAngles, 2 * sizeof(float));
+    //Copy all coordinates;
+    gravity_c->x = gravity.x;
+    gravity_c->y = gravity.y;
+    gravity_c->z = gravity.z;
 
 }
 

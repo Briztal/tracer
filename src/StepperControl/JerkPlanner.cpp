@@ -295,7 +295,7 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
             - t+ = D+ / V
             - t- = D- / V
 
-    Definition 3 : target speed. The target speed Vt, for a jerk point, is the maximum speed that allow all steppers to
+    Definition 3 : targetVector speed. The targetVector speed Vt, for a jerk point, is the maximum speed that allow all steppers to
         stay beyond their jerk limit.
 
 

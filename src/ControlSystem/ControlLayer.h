@@ -27,10 +27,10 @@
  * A control layer represents a layer of control in your control scheme, and is defined by the following data :
  *
  *  - a child control layer, can be null;
- *  - a regulation action : given a target (float *), and a current position, it calls its child with computed data, or
+ *  - a regulation action : given a targetVector (float *), and a current position, it calls its child with computed data, or
  *      makes an action (sends a command to an actuator, sets data in RAM, etc...)
  *  - a set of modes. Target can be expressed in a system that is different of the one used to determine the action;
- *      The mode determines how target will be translated;
+ *      The mode determines how targetVector will be translated;
  *
  *
  *  As a programmer, your job is to implement the conversion translation function, the mode setting function, and
@@ -94,7 +94,7 @@ protected:
     //The sub-class, that is controlled by us.
     ControlLayer *child;
 
-    //The current target of the layer;
+    //The current targetVector of the layer;
     float *target;
 
     //The current position of the layer;

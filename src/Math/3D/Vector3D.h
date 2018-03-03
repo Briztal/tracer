@@ -1,6 +1,22 @@
-//
-// Created by root on 2/28/18.
-//
+/*
+  Vector3D.h - Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #ifndef TRACER_VECTOR3D_H
 #define TRACER_VECTOR3D_H
@@ -49,11 +65,13 @@ public:
     //---------------- External operations ----------------
 
     //Compute the vector product of the provided couple;
-    static Vector3D * vectorProduct(Vector3D *v0, Vector3D *v1);
+    void vectorProduct(Vector3D *v0, Vector3D *v1);
 
     //Compute the dot product of the provided couple;
     static float dotProduct(Vector3D *v0, Vector3D *v1);
 
+
+    //----------------
 
 public:
 

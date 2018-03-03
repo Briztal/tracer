@@ -126,7 +126,7 @@ private :
     //The regulation_speed groups indices {i_k} where i_(3j+k) (0<=k<3) if the k_th indice of the regulation_speed group j. Compiler constant.
     static const int8_t *const speed_groups_indices;
 
-    //the current target speeds, indexed on speed groups
+    //the current targetVector speeds, indexed on speed groups
     static float *const speeds;
 
     //the maximum speeds, indexed on speed groups

@@ -201,10 +201,10 @@ void KalmanFilter::predict(float *newState, Matrix *newP) {
     Matrix *temp = state_square_temp;
 
     //Multiply A and P and save the result in temp;
-    Matrix::multiply(A, P, temp);
+    temp->multiply(A, P);
 
     //Multiply AP and At and add the result to newP
-    Matrix::multiplyAndAdd(temp, At, newP);
+    newP->multiplyAndAdd(temp, At);
 
 }
 
@@ -245,10 +245,10 @@ void KalmanFilter::computeKalmanGain(Matrix *newP, Matrix *kalmanGain) {
     Matrix *temp = KG_temp;
 
     //Multiply P+ and Ht;
-    Matrix::multiply(newP, Ht, temp);
+    temp->multiply(newP, Ht);
 
     //Multiply H and P+ * Ht and sum the result to S;
-    Matrix::multiplyAndAdd(H, temp, S);
+    S->multiplyAndAdd(H, temp);
 
     //Compute the inverse of S;
     Matrix *Si = S->getInverse();
@@ -256,7 +256,7 @@ void KalmanFilter::computeKalmanGain(Matrix *newP, Matrix *kalmanGain) {
     //temp0 still contains P+ * Ht;
 
     //Multiply P+ * Ht and S-1 into the kalman gain matrix;
-    Matrix::multiply(temp, Si, kalmanGain);
+    kalmanGain->multiply(temp, Si);
 
 
 }
@@ -285,13 +285,13 @@ KalmanFilter::update(const float *const newState, const float *const innovation,
     Matrix *temp = state_square_temp;
 
     //Set temp to the identity matrix;
-    Matrix::setIdentityMatrix(temp);
+    temp->setToIdentity();
 
     //Subtract K * H to the Identity matrix;
-    Matrix::multiplyAndSubtract(kalmanGain, H, temp);
+    temp->multiplyAndSubtract(kalmanGain, H);
 
     //Compute (I - K * h ) * P+ and save it in P;
-    Matrix::multiply(temp, newP, P);
+    P->multiply(temp, newP);
 
 }
 

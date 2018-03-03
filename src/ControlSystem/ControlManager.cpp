@@ -147,7 +147,7 @@ bool ControlManager::setMode(uint8_t stageIndex, uint8_t newMode) {
     //Verify that the required stage exists;
     if (stageIndex < getSize()) {
 
-        //Update the target for the required stage;
+        //Update the targetVector for the required stage;
         return getElement(stageIndex)->controlLayer->setMode(newMode);
 
     }
@@ -158,7 +158,7 @@ bool ControlManager::setMode(uint8_t stageIndex, uint8_t newMode) {
 
 
 /*
- * setTarget : sets the target for the given control layer;
+ * setTarget : sets the targetVector for the given control layer;
  */
 
 void ControlManager::setTarget(uint8_t stageIndex, float *target) {
@@ -166,7 +166,7 @@ void ControlManager::setTarget(uint8_t stageIndex, float *target) {
     //Verify that the required stage exists;
     if (stageIndex < getSize()) {
 
-        //Update the target for the required stage;
+        //Update the targetVector for the required stage;
         getElement(stageIndex)->controlLayer->setTarget(target);
 
     }

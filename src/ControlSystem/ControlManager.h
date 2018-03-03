@@ -78,7 +78,7 @@ private:
 
 public:
 
-    //Update the target of a given stage;
+    //Update the targetVector of a given stage;
     void initialise();
 
 
@@ -89,7 +89,7 @@ public:
     //Update the mode of the given stage
     bool setMode(uint8_t stageIndex, uint8_t newMode);
 
-    //Update the target of the given stage;
+    //Update the targetVector of the given stage;
     void setTarget(uint8_t stageIndex, float *target);
 
 };

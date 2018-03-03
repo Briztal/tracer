@@ -91,7 +91,7 @@ void K1Physics::initialise_data() {
     //The current sub_movement time
     sub_movement_time = 0;
 
-    //The current regulation (target) sub_movement time
+    //The current regulation (targetVector) sub_movement time
     regulation_sub_movement_time = 0;
 
     //A flag to mention if the routine has just started_flag.
@@ -638,11 +638,11 @@ bool K1Physics::regulate_speed() {
         bool low_speed = (sub_movement_time > regulation_sub_movement_time);
 
 
-        //We must verify that the target hasn't been reached
+        //We must verify that the targetVector hasn't been reached
         //Reached when the regulation_speed is too high and has been increased before, or too low and has been decreased before
         if (low_speed != speed_increasing_flag) {
 
-            //Set the step_period_us to the target
+            //Set the step_period_us to the targetVector
             sub_movement_time = regulation_sub_movement_time;
 
             //Updating the acceleration distance;
@@ -650,7 +650,7 @@ bool K1Physics::regulate_speed() {
             acceleration_speed_distance = acceleration_speed_distance_sqrt * acceleration_speed_distance_sqrt;
             update_deceleration_distances();
 
-            //mark the target as reached
+            //mark the targetVector as reached
             speed_regulation_enabled = false;
 
             //The sub_movement time was updated.
@@ -831,7 +831,7 @@ float m::acceleration_to_deceleration = 1;
 //The current sub_movement time
 delay_t m::sub_movement_time = 0;
 
-//The current regulation (target) sub_movement time
+//The current regulation (targetVector) sub_movement time
 delay_t m::regulation_sub_movement_time = 0;
 
 //A flag to mention if the routine has just started_flag.
