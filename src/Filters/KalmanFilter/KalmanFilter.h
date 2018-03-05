@@ -32,10 +32,13 @@ class KalmanFilter {
 public:
 
     //Constructor : takes sizes, initial and constant values, and rebuilds them safely;
-    KalmanFilter(uint8_t state_size, uint8_t measure_size, Matrix *A, Matrix *H, Matrix *Q, Matrix *R);
+    KalmanFilter(uint8_t state_size, uint8_t measure_size);
+
+    //Initialisation function.
+    void initialise(const Matrix &prediction_matrix, const Matrix &transformation_matrix, const Matrix &process_noise, const Matrix &measure_noise);
 
     //Sets the current state estimated, and its covariance matrix;
-    void setInitialState(float *initial_state, Matrix *initial_covariance_matrix);
+    void setInitialState(const float *initial_state, const Matrix &initial_covariance_matrix);
 
     //Destructor : deletes all matrices;
     ~KalmanFilter();
@@ -55,11 +58,13 @@ private:
 
     bool stateInitialised;
 
+    bool matricesInitialised;
+
     //The current state;
-    float *x;
+    float *const x;
 
     //The covariance matrix of the current state;
-    Matrix *P;
+    Matrix P;
 
 
     //------------------------ Constant Matrices ------------------------
@@ -67,34 +72,39 @@ private:
 private:
 
     //The prediction matrix, used to compute the prediction of the next state, and its transposed;
-    const Matrix *const A;
-    const Matrix * At;
+    Matrix A;
+    Matrix At;
 
     //The transformation matrix, used to compute the measure from the state, and its transposed;
-    const Matrix *const H;
-    const Matrix *Ht;
+    Matrix H;
+    Matrix Ht;
 
     //The covariance matrix of the process noise;
-    const Matrix *const Q;
+    Matrix Q;
 
     //The covariance matrix of the measure noise;
-    const Matrix *const R;
+    Matrix R;
 
 
     //------------------------ Temporary Matrices ------------------------
 
     //The intermediary P matrix; square of size stateSize;
-    Matrix *const P_temp;
+    Matrix P_temp;
 
     //The intermediary square matrix, of size stateSize;;
-    Matrix *const state_square_temp;// = new Matrix(stateSize, stateSize);
+    Matrix state_square_temp;// = new Matrix(stateSize, stateSize);
 
-
-    //The S Matrix in the KG computation; square of size measureSize;
-    Matrix *const KG_temp_S;// = new Matrix(Q);
+    //The matrix in the KG computation; size measureSize x stateSize;
+    Matrix KG;// = new Matrix(measureSize, stateSize);
 
     //The first temporary matrix in the KG computation; size measureSize x stateSize;
-    Matrix *const KG_temp;// = new Matrix(measureSize, stateSize);
+    Matrix KG_temp;// = new Matrix(measureSize, stateSize);
+
+    //The S Matrix in the KG computation; square of size measureSize;
+    Matrix KG_temp_S;// = new Matrix(Q);
+
+    //The inverse of S Matrix in the KG computation; square of size measureSize;
+    Matrix KG_temp_Si;// = new Matrix(Q);
 
 
     //------------------------ Processing ------------------------
@@ -102,22 +112,23 @@ private:
 public:
 
     //Compute a new state, with a new value;
-    void compute(const float *const newMeasure);
+    void compute(const float *const measure);
 
 
 private:
 
     //Predict the new value of the state;
-    void predict(float *newState, Matrix *newP);
+    void predict(float *prediction, Matrix &prediction_P);
 
     //Compute the innovation;
-    void computeInnovation(float *newState, const float *const measure, float *innovation);
+    void computeInnovation(const float *const prediction, const float *const measure, float *innovation);
 
     //compute the Kalman Gain
-    void computeKalmanGain(Matrix *newP, Matrix *kalmanGain);
+    void computeKalmanGain(const Matrix &prediction_P, Matrix &kalmanGain);
 
     //Update the state with all computed values;
-    void update(const float *const newState, const float *const innovation, Matrix *newP, Matrix *kalmanGain);
+    void update(const float *const prediction, const float *const innovation, const Matrix &prediction_P,
+                const Matrix &kalmanGain);
 
 
     //------------------------ Query ------------------------

@@ -1,5 +1,5 @@
 /*
-  ValueVector.h - Part of TRACER
+  PointerVector.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -20,53 +20,47 @@
 
 
 /*
- * The ValueVector template class : a Vector class, storing objects by value;
+ * The PointerVector template class : a Vector class, storing pointers to objects;
  *
- * Elements are stored by value, contiguously.
+ * Elements must be pointers to objects, as the class handles itself deletion of unused elements;
  *
- * For storage by pointer, please check the ValueVector Class
+ * For storage by value, please check the ValueVector Class
  */
 
-#ifndef TRACER_TVECTOR_H
-#define TRACER_TVECTOR_H
+#ifndef TRACER_POINTERVECTOR_H
+#define TRACER_POINTERVECTOR_H
 
 #include "stdint.h"
 
 template<typename T>
-class ValueVector {
+class PointerVector {
 
     //-------------------------------------- Initialisation --------------------------------------
 
 public:
 
     //Constructor;
-    explicit ValueVector(uint8_t max_size);
+    explicit PointerVector(uint8_t max_size);
 
     //Destructor;
-    virtual ~ValueVector();
+    virtual ~PointerVector();
 
 
     //-------------------------------------- Builders --------------------------------------
 
 public:
 
-    virtual //Add a new element to the list;
-    bool add(T new_element);
+    //Add a new element to the list;
+    bool add(T *new_element);
 
     //Remove a element from the list if it is present;
-    T remove(uint8_t index);
+    T *remove(uint8_t index);
 
     //Remove all element;
     void clear();
 
-protected:
-
-    //Verify that a element is present in the array and eventually save its index;
-    bool isElementPresent(T old_element, uint8_t *index);
-
 
     //-------------------------------------- Getters --------------------------------------
-
 
 public:
 
@@ -74,10 +68,10 @@ public:
     uint8_t getSize();
 
     //Get a particular element;
-    T getElement(uint8_t index);
+    T *getElement(uint8_t index);
 
     //Set a particular element;
-    T setElement(uint8_t index, T new_element);
+    T *setElement(uint8_t index, T *new_element);
 
 
     //-------------------------------------- Resizing --------------------------------------
@@ -99,15 +93,19 @@ private:
     uint8_t max_size;
 
     //Items to execute;
-    T *elements;
+    T **elements;
 
 };
+
+
 
 
 
 #include <malloc.h>
 
 #include <Interaction/Interaction.h>
+
+#include "PointerContainer.h"
 
 
 //--------------------------------------------------- Initialisation ---------------------------------------------------
@@ -117,15 +115,15 @@ private:
  */
 
 template<class T>
-ValueVector<T>::ValueVector(uint8_t max_size) : size(0), max_size(max_size), elements(nullptr) {}
+PointerVector<T>::PointerVector(uint8_t max_size) : size(0), max_size(max_size), elements(nullptr) {}
 
 
 /*
- * Destructor : frees the elements array;
+ * Destructor : deletes every element and frees the dynamic tasks array;
  */
 
 template<class T>
-ValueVector<T>::~ValueVector() {
+PointerVector<T>::~PointerVector() {
 
     clear();
 
@@ -142,7 +140,7 @@ ValueVector<T>::~ValueVector() {
  */
 
 template<class T>
-bool ValueVector<T>::add(T new_element) {
+bool PointerVector<T>::add(T *new_element) {
 
 
     //Increment the size;
@@ -173,17 +171,17 @@ bool ValueVector<T>::add(T new_element) {
  */
 
 template<class T>
-T ValueVector<T>::remove(uint8_t index) {
+T *PointerVector<T>::remove(uint8_t index) {
 
     //If the index is invalid, stop here;
     if (index >= size)
-        return T();
+        return nullptr;
 
     //Cache the current size
     const uint8_t size = this->size;
 
     //Cache the appropriate element;
-    T element = elements[index];
+    T *element = elements[index];
 
     //For every task after index;
     for (uint8_t shift_index = index + (uint8_t) 1; shift_index < size; index++, shift_index++) {
@@ -197,7 +195,7 @@ T ValueVector<T>::remove(uint8_t index) {
     uint8_t new_size = size - (uint8_t) 1;
 
     //Clear the last element to avoid deletion;
-    elements[new_size] = T();
+    elements[new_size] = nullptr;
 
     //If the reallocation failed
     if (!resize(new_size)) {
@@ -218,8 +216,15 @@ T ValueVector<T>::remove(uint8_t index) {
  */
 
 template<class T>
-void ValueVector<T>::clear() {
+void PointerVector<T>::clear() {
 
+    //First, delete each element;
+    for (uint8_t element_index = 0; element_index < size; element_index++) {
+
+        //Delete the element;
+        delete elements[element_index];
+
+    }
 
     //First, realloc tasks_array to zero-size;
     void *new_ptr = realloc(elements, 0);
@@ -228,43 +233,12 @@ void ValueVector<T>::clear() {
     if (new_ptr) {
 
         //Update the task pointer;
-        elements = (T*) new_ptr;
+        elements = (T**) new_ptr;
 
         //Update the size;
         size = 0;
 
     }
-}
-
-
-/*
- * isElementPresent : this function return true if the given task is already present in the queue;
- *
- *  If it finds the task, it saves its index in the given variable;
- */
-
-template<class T>
-bool ValueVector<T>::isElementPresent(T old_task, uint8_t *index) {
-
-    //Search for the task in the array;
-    for (uint8_t task_index = 0; task_index < size; task_index++) {
-
-        //If a matching task is found
-        if (elements[task_index] == old_task) {
-
-            //Update the index;
-            *index = task_index;
-
-            //Complete;
-            return true;
-
-        }
-
-    }
-
-    //Fail;
-    return false;
-
 }
 
 
@@ -276,7 +250,7 @@ bool ValueVector<T>::isElementPresent(T old_task, uint8_t *index) {
  */
 
 template<class T>
-uint8_t ValueVector<T>::getSize() {
+uint8_t PointerVector<T>::getSize() {
 
     //Return the size lol;
     return size;
@@ -289,11 +263,11 @@ uint8_t ValueVector<T>::getSize() {
  */
 
 template<class T>
-T ValueVector<T>::getElement(uint8_t index) {
+T *PointerVector<T>::getElement(uint8_t index) {
 
     //If the index is invalid
     if (index >= size)
-        return T();
+        return nullptr;
 
     //If the index is valid, return the appropriate task
     return elements[index];
@@ -306,7 +280,7 @@ T ValueVector<T>::getElement(uint8_t index) {
  */
 
 template<class T>
-T ValueVector<T>::setElement(uint8_t index, T new_element) {
+T *PointerVector<T>::setElement(uint8_t index, T *new_element) {
 
     //If the index is invalid
     if (index >= size)
@@ -327,30 +301,41 @@ T ValueVector<T>::setElement(uint8_t index, T new_element) {
 /*
  * resize : this function will attempt to resize the array to the provided size;
  *
+ * It will automatically delete removed elements, and initialise added elements to nullptr;
  */
 
 template<class T>
-bool ValueVector<T>::resize(uint8_t new_size) {
+bool PointerVector<T>::resize(uint8_t new_size) {
 
     //If the maximum number of tasks is reached :
     if (new_size >= max_size) {
 
         //Log;
-        std_out("Error in ValueVector::resize : the requested size is superior to the maximum size;");
+        std_out("Error in PointerVector::resize : the requested size is superior to the maximum size;");
 
         //Fail;
         return false;
 
     }
 
-    //Then, reallocate the task array, to contain the required amount of elements;
+    //First, we must delete objects comprised in [|new_size, size|[.
+
+    //For every element :
+    for (uint8_t element_index = new_size; element_index < size; element_index++) {
+
+        //Delete the element;
+        delete elements[element_index];
+
+    }
+
+    //Then, reallocate the task array, to contain one more element;
     void *new_array = realloc(elements, new_size);
 
     //If the reallocation failed :
     if (!new_array && new_size) {
 
         //Log;
-        std_out("Error in ValueVector::resize : the reallocation failed;");
+        std_out("Error in PointerVector::resize : the reallocation failed;");
 
         //Fail;
         return false;
@@ -361,8 +346,18 @@ bool ValueVector<T>::resize(uint8_t new_size) {
     //If the reallocation completed :
 
     //Update the tasks array;
-    elements = (T*) new_array;
+    elements = (T**) new_array;
 
+
+    //Finally, we must initialise pointers comprised in [|size, new_size|[ to nullptr;
+
+    //For every element :
+    for (uint8_t element_index = size; element_index < new_size; element_index++) {
+
+        //Initialise the element to nullptr;
+        elements[element_index] = nullptr;
+
+    }
 
     //Update the size;
     size = new_size;
@@ -373,4 +368,4 @@ bool ValueVector<T>::resize(uint8_t new_size) {
 
 }
 
-#endif //TRACER_EVENTelementLIST_H
+#endif

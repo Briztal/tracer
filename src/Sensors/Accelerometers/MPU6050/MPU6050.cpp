@@ -96,7 +96,7 @@
  * Constructor : initialises data arrays;
  */
 
-MPU6050::MPU6050() : accelerometer_data(new int16_t[3]), gyrometer_data(new int16_t[3]) {
+MPU6050::MPU6050() : accelerometer_data(0,0,1), gyrometer_data(0,0,0) {
 
     //Initialise the hardware;
     initialise_hardware();
@@ -113,11 +113,6 @@ MPU6050::MPU6050() : accelerometer_data(new int16_t[3]), gyrometer_data(new int1
 
 MPU6050::~MPU6050() {
 
-    //Delete the accelerometer array;
-    delete[] accelerometer_data;
-
-    //Delete the accelerometer array;
-    delete[] gyrometer_data;
 }
 
 
@@ -218,10 +213,10 @@ void MPU6050::reset_mpu() {
 void MPU6050::initialise_data() {
 
     //Reset the accelerometer array;
-    memset(accelerometer_data, 0, 3 * sizeof(int16_t));
+    accelerometer_data.reset();
 
     //Reset the gyrometer array;
-    memset(gyrometer_data, 0, 3 * sizeof(int16_t));
+    gyrometer_data.reset();
 
 
 }
@@ -433,6 +428,7 @@ void MPU6050::compute_data() {
 
     //Read gyrometer values;
     compute_gyrometer_data();
+
 }
 
 
@@ -442,8 +438,20 @@ void MPU6050::compute_data() {
 
 void MPU6050::compute_accelerometer_data() {
 
+    int16_t accelerometer_raws[3]{0};
+
     //Read acceleration values;
-    read_int16s(MPU_ACCEL_MEASURE, 6, accelerometer_data);
+    read_int16s(MPU_ACCEL_MEASURE, 6, accelerometer_raws);
+
+
+    //Convert data to unitary vector
+    accelerometer_data.set(0, (float) accelerometer_raws[0]);
+    accelerometer_data.set(0, (float) accelerometer_raws[1]);
+    accelerometer_data.set(0, (float) accelerometer_raws[2]);
+
+    //Normalise the vector;
+
+    std_out(accelerometer_data.toString());
 
 }
 
@@ -454,8 +462,19 @@ void MPU6050::compute_accelerometer_data() {
 
 void MPU6050::compute_gyrometer_data() {
 
+    float ratio = ((float) 1000  * (float) M_2_PI) / ((float) 65536 * (float(180)));
+
+    int16_t gyrometer_raws[3]{0};
+
     //Read gyrometer values;
-    read_int16s(MPU_GYRO_MEASURE, 6, gyrometer_data);
+    read_int16s(MPU_GYRO_MEASURE, 6, gyrometer_raws);
+
+    //Convert data to unitary vector
+    gyrometer_data.set(0, gyrometer_raws[0] * ratio);
+    gyrometer_data.set(1, gyrometer_raws[1] * ratio);
+    gyrometer_data.set(2,  gyrometer_raws[2] * ratio);
+
+    std_out(gyrometer_data.toString());
 
 }
 
@@ -466,24 +485,10 @@ void MPU6050::compute_gyrometer_data() {
  * get_acceleration_values : this function returns acceleration coordinates from caches in the class;
  */
 
-void MPU6050::get_accelerometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
+void MPU6050::get_accelerometer_data(Angles3D &output) {
 
     //Simply update the three variables;
-    *acc_x = accelerometer_data[0];
-    *acc_y = accelerometer_data[1];
-    *acc_z = accelerometer_data[2];
-
-}
-
-
-/*
- * get_acceleration_array: this function copies the acceleration array ;
- */
-
-void MPU6050::get_accelerometer_array(int16_t *array) {
-
-    //Fast copy;
-    memcpy(array, accelerometer_data, 3 * sizeof(int16_t));
+    output.clone(output);
 
 }
 
@@ -492,23 +497,9 @@ void MPU6050::get_accelerometer_array(int16_t *array) {
  * get_acceleration_values : this function returns acceleration coordinates from caches in the class;
  */
 
-void MPU6050::get_gyrometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z) {
+void MPU6050::get_gyrometer_data(Triplet &output) {
 
     //Simply update the three variables;
-    *acc_x = gyrometer_data[0];
-    *acc_y = gyrometer_data[1];
-    *acc_z = gyrometer_data[2];
-
-}
-
-
-/*
- * get_acceleration_array: this function copies the acceleration array ;
- */
-
-void MPU6050::get_gyrometer_array(int16_t *array) {
-
-    //Fast copy;
-    memcpy(array, gyrometer_data, 3 * sizeof(int16_t));
+    output.clone(output);
 
 }

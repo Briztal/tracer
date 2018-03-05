@@ -5,69 +5,87 @@
 #include <Interaction/Interaction.h>
 #include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
 #include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
+#include <DataStructures/CoordinateSystems/Angles3D.h>
 #include "IMUKalmanFIlter.h"
+
+
+
+/*
+Matrix *process_noise = new Matrix(3, 3);
+Matrix *measure_noise = new Matrix(3, 3);
+
+Matrix::setIdentityMatrix(process_noise);
+process_noise->divideBy(100);
+
+Matrix::setIdentityMatrix(measure_noise);
+measure_noise->divideBy(100);
+
+std_out(process_noise->toString());
+
+std_out(measure_noise->toString());
+
+
+float initial[3] {0, 0, 0};
+
+Matrix *initialP = new Matrix(3, 3);
+Matrix::setIdentityMatrix(initialP);
+
+initialP->divideBy(10);
+
+ */
 
 /*
  * Constructor : initialises filters, with adequate matrices;
  */
 
-IMUKalmanFIlter::IMUKalmanFIlter(float *conversion_factors, float measure_period, Matrix **process_noises,
-                                 Matrix **measure_noises) 
-        : gravity(new Vector3D(1,0,0)), angularSpeeds(new float[3]) {
+IMUKalmanFIlter::IMUKalmanFIlter(float measure_period, Matrix **process_noises,
+                                 Matrix **measure_noises)
+        : gravity(Vector3D(1, 0, 0)), angularSpeeds() {
+
+    gravity = Vector3D(1,0,0);
+
+    initialise(measure_period, process_noises, measure_noises);
+
+}
 
 
-    /*
-    Matrix *process_noise = new Matrix(3, 3);
-    Matrix *measure_noise = new Matrix(3, 3);
 
-    Matrix::setIdentityMatrix(process_noise);
-    process_noise->divideBy(100);
+/*
+ * Simplified constructor : same conversion factor, process noise and measure noise for all axis;;
+ */
 
-    Matrix::setIdentityMatrix(measure_noise);
-    measure_noise->divideBy(100);
+IMUKalmanFIlter::IMUKalmanFIlter(float measure_period, Matrix &process_noise, Matrix &measure_noise)
+        : gravity(0,0,0), angularSpeeds(0,0,0) {
 
-    std_out(process_noise->toString());
+    //Create a temp array containing tree times the process noise pointer;
+    Matrix *process_noises[3]{&process_noise, &process_noise, &process_noise};
 
-    std_out(measure_noise->toString());
+    //Create a temp array containing tree times the process measure pointer;
+    Matrix *measure_noises[3]{&measure_noise, &measure_noise, &measure_noise};
+
+    //Initialise all data;
+    initialise(measure_period, process_noises, measure_noises);
+
+}
 
 
-    float initial[3] {0, 0, 0};
+/*
+ * initialise : this function will initialise all data;
+ */
 
-    Matrix *initialP = new Matrix(3, 3);
-    Matrix::setIdentityMatrix(initialP);
-
-    initialP->divideBy(10);
-
-     */
-
-    //The prediction matrix will be the same for all three axis;
-    Matrix *prediction = getPredictionMatrix(measure_period);
-
-    //The transformation matrix depends on the conversion factor of each axis, not defined here;
-    Matrix *transformation;
-
-    //To ease the initialisation process, we will iterate over all three axis;
+void IMUKalmanFIlter::initialise(float measure_period, Matrix **process_noises, Matrix **measure_noises) {
 
     //For each axis (x, y, z) :
     for (uint8_t i = 0; i < 3; i++) {
 
-        //Initialise the transformation matrix with the correct factor;
-        transformation = getTransformationMatrix(conversion_factors[i]);
-
         //Initialise the i-th filter, with
-        filters[i] = new KalmanFilter(3, 2, prediction, transformation, process_noises[i], measure_noises[i]);
+        filters[i].initialise(measure_period, *process_noises[i], *measure_noises[i]);
 
-        //TODO ENLEVER
+                //TODO ENLEVER
         float initial[2]{0};
-        filters[i]->setInitialState(initial, process_noises[i]);
-
-        //Delete the transformation matrix;
-        delete transformation;
+        filters[i].setInitialState(initial, *process_noises[i]);
 
     }
-
-    //Now, we must delete the prediction matrix;
-    delete prediction;
 
 }
 
@@ -76,121 +94,65 @@ IMUKalmanFIlter::IMUKalmanFIlter(float *conversion_factors, float measure_period
  * Destructor : this function deletes the three kalman filters;
  */
 
-IMUKalmanFIlter::~IMUKalmanFIlter() {
-
-    //Delete all three filters;
-    for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {
-
-        delete filters[axis_index];
-
-    }
-
-}
-
-
-/*
- * getPredictionMatrix : this function will build the following matrix : 
- * 
- * 
- *      | 1  0  0 |
- *      | t  1  0 |
- *      | 0  0  1 |
- *              
- *      with t = time;
- */
-
-Matrix *IMUKalmanFIlter::getPredictionMatrix(float time) {
-
-    Matrix *prediction = new Matrix(3, 3);
-
-    prediction->setToIdentity();
-
-    prediction->setCoefficient(1, 0, time);
-
-    std_out("Prediction Matrix :");
-
-    std_out(prediction->toString());
-
-}
-
-
-/*
- * getTransformationMatrix : this function will build the following matrix :
- * 
- * 
- *   | sr  0   sr |
- *   | 0   1   0  | 
- *   
- *   with sr = conversion factor;
- *   
- */
-
-Matrix *IMUKalmanFIlter::getTransformationMatrix(float conversion_factor) {
-
-    Matrix *transformation = new Matrix(2, 3);
-
-    transformation->setCoefficient(0, 0, conversion_factor);
-    transformation->setCoefficient(1, 1, 1);
-    transformation->setCoefficient(0, 2, conversion_factor);
-
-    std_out("Transformation Matrix :");
-
-    std_out(transformation->toString());
-
-}
+IMUKalmanFIlter::~IMUKalmanFIlter() {}
 
 
 /*
  * setInitialData : this function will set initial data for all three kalman filters
  */
-void IMUKalmanFIlter::setInitialData(float *accelerometer_averages, float *gyro_biais_averages) {
+void IMUKalmanFIlter::setInitialData(Vector3D &accelerometer_averages, Angles3D &gyro_biais_averages) {
 
     //TODO.
 
 }
 
 
-void IMUKalmanFIlter::update(Vector3D *sum_forces, float *const gyro_data) {
+void IMUKalmanFIlter::update(Vector3D &sum_forces, Triplet &gyro_data) {
 
     //Declare the gravity angles;
-    float gravity_angles[3];
+    Angles3D gravity_angles;
 
     //Convert the acceleration vector to angles;
-    Vector3DToAngles::convert(sum_forces, gravity_angles, gravity_angles + 1, gravity_angles + 2);
+    Vector3DToAngles::convert(sum_forces, gravity_angles);
 
-    //Declare an array of two floats, to contain measures for all axis;
-    float measure[2]{0};
+    const float *const gyro = gyro_data.get_data();
+    const float *const angles_p = gravity_angles.get_data();
+
+    std_out("angles : "+String(gravity_angles.toString()));
 
     //Update all filters;
     for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {
 
-        //Update measure array;
-        measure[0] = gyro_data[axis_index];
-        measure[1] = gravity_angles[axis_index];
-
         //Update the filter;
-        filters[axis_index]->compute(measure);
+        filters[axis_index].compute(angles_p[axis_index], gyro[axis_index]);
+
+        //TODO REMOVE
+        break;
 
     }
+
+
+
 
     //Now we will read data from filters;
 
     //For each axis :
     for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {
 
+        float angle, speed, biais;
         //Get the computed state from the filter;
-        filters[axis_index]->getState(measure);
+        filters[axis_index].getState(angle, speed, biais);
 
         //Copy the angular speed into the class's array;
-        angularSpeeds[axis_index] = measure[0];
+        angularSpeeds.set(axis_index, angle);
 
         //Copy the gravity angle into the local array;
-        gravity_angles[axis_index] = measure[1];
+        gravity_angles.set(axis_index, speed);
 
     }
 
     //Now, we must compute the gravity's coordinates;
-    AnglesToVector3D::convert(*gravity_angles, gravity_angles[1], gravity_angles[2], &gravity);
+    AnglesToVector3D::convert(gravity_angles, gravity);
 
 }
 
@@ -199,12 +161,10 @@ void IMUKalmanFIlter::update(Vector3D *sum_forces, float *const gyro_data) {
  * getGravityAngles : copies local gravity angles to external array;
  */
 
-void IMUKalmanFIlter::getGravity(Vector3D *gravity_c) {
+void IMUKalmanFIlter::getGravity(Vector3D &gravity_c) {
 
     //Copy all coordinates;
-    gravity_c->x = gravity.x;
-    gravity_c->y = gravity.y;
-    gravity_c->z = gravity.z;
+    gravity_c.clone(gravity);
 
 }
 
@@ -213,10 +173,9 @@ void IMUKalmanFIlter::getGravity(Vector3D *gravity_c) {
  * getGyroSpeeds : copies local angular speeds to external array;
  */
 
-void IMUKalmanFIlter::getGyroSpeeds(float *speeds) {
+void IMUKalmanFIlter::getGyroSpeeds(Triplet &speeds) {
 
-    //Fast copy;
-    memcpy(speeds, angularSpeeds, 3 * sizeof(float));
+    speeds.clone(angularSpeeds);
 
 }
 

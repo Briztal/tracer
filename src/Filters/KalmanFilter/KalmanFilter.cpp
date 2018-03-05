@@ -29,92 +29,112 @@
  * Constructor : takes sizes, initial and constant values, and rebuilds them safely;
  */
 
-KalmanFilter::KalmanFilter(uint8_t stateSize, uint8_t measureSize, Matrix *A,
-                           Matrix *H, Matrix *Q, Matrix *R)
+KalmanFilter::KalmanFilter(uint8_t stateSize, uint8_t measureSize)
         : stateSize(stateSize), measureSize(measureSize),
+          matricesInitialised(false),
           stateInitialised(false),
           x(new float[stateSize]),
-          A(new Matrix(stateSize, stateSize, A)),
-          H(new Matrix(measureSize, stateSize, H)),
-          Q(new Matrix(stateSize, stateSize, Q)),
-          R(new Matrix(measureSize, measureSize, R)),
+          P(Matrix(stateSize, stateSize, false)),
+          A(Matrix(stateSize, stateSize, false)),
+          At(Matrix(stateSize, stateSize, false)),
+          H(Matrix(measureSize, stateSize, false)),
+          Ht(Matrix(stateSize, measureSize, false)),
+          Q(Matrix(stateSize, stateSize, false)),
+          R(Matrix(measureSize, measureSize, false)),
+
+          P_temp(Matrix(stateSize, stateSize, false)),
+          state_square_temp(Matrix(stateSize, stateSize, false)),
+          KG(Matrix(stateSize, measureSize, false)),
+          KG_temp(Matrix(stateSize, measureSize, false)),
+          KG_temp_S(Matrix(measureSize, measureSize, false)),
+          KG_temp_Si(Matrix(measureSize, measureSize, false)) {}
 
 
-          P_temp(new Matrix(stateSize, stateSize)),
-          state_square_temp(new Matrix(stateSize, stateSize)),
-          KG_temp_S(new Matrix(measureSize, measureSize)),
-          KG_temp(new Matrix(stateSize, measureSize)) {
+/*
+ * initialise : this function initialises all matrices;
+ */
 
+void KalmanFilter::initialise(const Matrix &prediction_matrix, const Matrix &transformation_matrix,
+                              const Matrix &process_noise, const Matrix &measure_noise) {
+
+    if (matricesInitialised) {
+
+        //Log;
+        std_out("Error in KalmanFilter::initialise : attempted to initialise twice;");
+
+        //Abort;
+        return;
+
+    }
+
+    A.setTo(prediction_matrix);
+    H.setTo(transformation_matrix);
+    Q.setTo(process_noise);
+    R.setTo(measure_noise);
 
     //Transposed matrices have been built but not transposed.
-    At = A->getTransposed();
-    Ht = H->getTransposed();
+    At.setTransposed(prediction_matrix);
+    Ht.setTransposed(transformation_matrix);
 
+    matricesInitialised = true;
 
-
+    /*
+    std_out("A\n"+A->toString());
+    std_out("H\n"+H->toString());
+    std_out("Q\n"+Q->toString());
+    std_out("R\n"+R->toString());
+     */
 
 
 }
 
-void KalmanFilter::setInitialState(float *initial_state, Matrix *initial_covariance_matrix) {
+
+void KalmanFilter::setInitialState(const float *initial_state, const Matrix &initial_covariance_matrix) {
+
+    if (!matricesInitialised) {
+
+        //Log;
+        std_out("Error in KalmanFilter::setInitialState : matrices have not been initialised;");
+
+        //Abort;
+        return;
+
+    }
+
+    if (stateInitialised) {
+
+        //Log;
+        std_out("Error in KalmanFilter::setInitialState : attempted to initialise twice;");
+
+        //Abort;
+        return;
+
+    }
 
     //All matrices have been properly copied, but the initial state hasn't. We must copy it.
     memcpy(x, initial_state, stateSize * sizeof(float));
 
-    //If the state was initialised, the covariance matrix was created :
-    if (stateInitialised) {
-
-        //Delete the covariance matrix;
-        delete P;
-
-        //Mar the state as initialised;
-        stateInitialised = true;
-
-    }
+    //Mark the state as initialised;
+    stateInitialised = true;
 
     //Create the new covariance matrix;
-    P = new Matrix(initial_covariance_matrix);
+    P.setTo(initial_covariance_matrix);
 
 }
+
 
 /*
  * All internal data has been instantiated at construction time, so we can delete them safely;
  */
+
 
 KalmanFilter::~KalmanFilter() {
 
     //Delete the state vector;
     delete[] x;
 
-    //Delete the state covariance matrix;
-    delete P;
-
-    //Delete the prediction matrix;
-    delete A;
-
-    //Delete the transposed of the prediction matrix;
-    delete At;
-
-    //Delete the transformation matrix;
-    delete H;
-
-    //Delete the transposed of the transformation matrix;
-    delete Ht;
-
-    //Delete the process noise matrix;
-    delete Q;
-
-    //Delete the measure noise matrix;
-    delete R;
-
-
-    //Temp matrices :
-
-    delete P_temp;
-    delete state_square_temp;
-    delete KG_temp_S;
-    delete KG_temp;
 }
+
 
 //----------------------------------------------------- Computation ----------------------------------------------------
 
@@ -122,23 +142,35 @@ KalmanFilter::~KalmanFilter() {
  * Compute : this function will execute all steps described in the doc file in the current folder;
  */
 
-void KalmanFilter::compute(const float *const newMeasure) {
+void KalmanFilter::compute(const float *const measure) {
+
+    //If the filter hasn't been initialised :
+    if (!stateInitialised) {
+
+        //Log :
+        std_out("Error in KalmanFilter::compute : the filter hasn't been initialised;");
+
+        //Fail;
+        return;
+
+    }
 
     //First, create a local array that will contain the predicted state;.
-    float newState[stateSize];
+    float prediction[stateSize];
 
     //Then, create a local matrix for the covariance matrix of the predicted state;
-    Matrix *newP = P_temp;
-
+    Matrix &prediction_P = P_temp;
 
     /*
      * Step 0 : Prediction.
      *
-     * Predict the new state and update the new covariance matrix;
+     * Predict the state and update the covariance matrix;
      */
 
-    predict(newState, newP);
+    predict(prediction, prediction_P);
 
+    std_out("prediction : " + String(prediction[0]) + " " + String(prediction[1]));
+    std_out("measure : " + String(measure[0]) + " " + String(measure[1]));
 
     /*
      * Step 1 : Measure.
@@ -150,8 +182,7 @@ void KalmanFilter::compute(const float *const newMeasure) {
     float innovation[measureSize];
 
     //Compute the innovation;
-    computeInnovation(newState, newMeasure, innovation);
-
+    computeInnovation(prediction, measure, innovation);
 
     /*
      * Step 2 : Computation.
@@ -159,11 +190,8 @@ void KalmanFilter::compute(const float *const newMeasure) {
      * We will compute the kalman gain;
      */
 
-    //Create a local matrix to contain the kalman gain;
-    Matrix *kalmanGain = new Matrix(stateSize, measureSize);
-
     //Compute the kalman gain;
-    computeKalmanGain(newP, kalmanGain);
+    computeKalmanGain(prediction_P, KG);
 
 
     /*
@@ -173,7 +201,7 @@ void KalmanFilter::compute(const float *const newMeasure) {
      */
 
     //Update the state;
-    update(newState, innovation, newP, kalmanGain);
+    update(prediction, innovation, prediction_P, KG);
 
 }
 
@@ -182,10 +210,10 @@ void KalmanFilter::compute(const float *const newMeasure) {
  * predict : this function predicts the next state and computes its covariance matrix;
  */
 
-void KalmanFilter::predict(float *newState, Matrix *newP) {
+void KalmanFilter::predict(float *prediction, Matrix &prediction_P) {
 
     //Determine the next state, by applying A to the current state;
-    A->apply(x, newState);
+    A.apply(x, prediction);
 
 
     /*
@@ -194,17 +222,17 @@ void KalmanFilter::predict(float *newState, Matrix *newP) {
      * P+ = A * P * At + Q (matrix)
      */
 
-    //Initialise a new matrix to A;
-    newP->setTo(Q);
+    //Initialise the prediction covatiance matrix to the process noise;
+    prediction_P.setTo(Q);
 
     //Cache the temp matrix;
-    Matrix *temp = state_square_temp;
+    Matrix& temp = state_square_temp;
 
     //Multiply A and P and save the result in temp;
-    temp->multiply(A, P);
+    temp.multiply(A, P);
 
-    //Multiply AP and At and add the result to newP
-    newP->multiplyAndAdd(temp, At);
+    //Multiply AP and At and add the result to prediction_P
+    prediction_P.multiplyAndAdd(temp, At);
 
 }
 
@@ -213,16 +241,16 @@ void KalmanFilter::predict(float *newState, Matrix *newP) {
  * computeInnovation : this function computes the innovation from the measure and the current state;
  */
 
-void KalmanFilter::computeInnovation(float *newState, const float *const newMeasure, float *innovation) {
+void KalmanFilter::computeInnovation(const float *const prediction, const float *const measure, float *innovation) {
 
     //Compute H * X and save it in innovation;
-    H->apply(newState, innovation);
+    H.apply(prediction, innovation);
 
     //For every coordinate of the innovation :
     for (uint8_t i = 0; i < measureSize; i++) {
 
         //Compute the i-th coordinate of M - H * X and save it in innovation;
-        innovation[i] = newMeasure[i] - innovation[i];
+        innovation[i] = measure[i] - innovation[i];
 
     }
 
@@ -233,65 +261,66 @@ void KalmanFilter::computeInnovation(float *newState, const float *const newMeas
  * computeKalmanGain : this function will compute the Kalman Gain for the covariance matrix of the predicted state;
  */
 
-void KalmanFilter::computeKalmanGain(Matrix *newP, Matrix *kalmanGain) {
+void KalmanFilter::computeKalmanGain(const Matrix &prediction_P, Matrix & kalmanGain) {
 
     //Cache S and Si;
-    Matrix *S = KG_temp_S;
+    Matrix &S = KG_temp_S;
+    Matrix &Si = KG_temp_Si;
 
     //Set S as a copy of Q;
-    S->setTo(R);
+    S.setTo(R);
 
     //Cache the first temp matrix;
-    Matrix *temp = KG_temp;
+    Matrix &temp = KG_temp;
 
     //Multiply P+ and Ht;
-    temp->multiply(newP, Ht);
+    temp.multiply(prediction_P, Ht);
 
     //Multiply H and P+ * Ht and sum the result to S;
-    S->multiplyAndAdd(H, temp);
+    S.multiplyAndAdd(H, temp);
 
     //Compute the inverse of S;
-    Matrix *Si = S->getInverse();
+    S.getInverse(Si);
 
     //temp0 still contains P+ * Ht;
 
     //Multiply P+ * Ht and S-1 into the kalman gain matrix;
-    kalmanGain->multiply(temp, Si);
-
+    kalmanGain.multiply(temp, Si);
 
 }
 
 
 /*
- * update : this function will compute the new state and its covariance matrix;
+ * update : this function will compute the next state and its covariance matrix;
  */
 
 void
-KalmanFilter::update(const float *const newState, const float *const innovation, Matrix *newP, Matrix *kalmanGain) {
+KalmanFilter::update(const float *const prediction, const float *const innovation, const Matrix &prediction_P,
+                     const Matrix &kalmanGain) {
 
     //Compute K * Y and save it in innovation;
-    kalmanGain->apply(innovation, x);
+    kalmanGain.apply(innovation, x);
 
 
     //For every coordinate of the innovation :
     for (uint8_t i = 0; i < stateSize; i++) {
 
         //Compute the i-th coordinate of X+ - K * Y and save it in innovation;
-        x[i] = newState[i] + x[i];
+        x[i] = prediction[i] + x[i];
 
     }
 
     //Cache the temp matrix;
-    Matrix *temp = state_square_temp;
+    Matrix &temp = state_square_temp;
 
     //Set temp to the identity matrix;
-    temp->setToIdentity();
+    temp.setToIdentity();
 
     //Subtract K * H to the Identity matrix;
-    temp->multiplyAndSubtract(kalmanGain, H);
+    temp.multiplyAndSubtract(kalmanGain, H);
 
     //Compute (I - K * h ) * P+ and save it in P;
-    P->multiply(temp, newP);
+    P.multiply(temp, prediction_P);
 
 }
 

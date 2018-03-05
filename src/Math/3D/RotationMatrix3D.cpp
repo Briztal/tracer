@@ -29,7 +29,7 @@
  * Default constructor : initialises to the identity matrix;
  */
 
-RotationMatrix3D::RotationMatrix3D() : Matrix(3, 3) {
+RotationMatrix3D::RotationMatrix3D() : Matrix(3, 3, false) {
 
     //Set the newly created matrix to the identity (no rotation);
     setToIdentity();
@@ -42,7 +42,7 @@ RotationMatrix3D::RotationMatrix3D() : Matrix(3, 3) {
  *  u0 and u1 the normalised vectors from v0 and v1;
  */
 
-RotationMatrix3D::RotationMatrix3D(Vector3D *v0, Vector3D *v1) : Matrix(3, 3) {
+RotationMatrix3D::RotationMatrix3D(Vector3D &v0, Vector3D &v1) : Matrix(3, 3, false) {
 
     buildFromVectors(v0, v1);
 
@@ -53,17 +53,17 @@ RotationMatrix3D::RotationMatrix3D(Vector3D *v0, Vector3D *v1) : Matrix(3, 3) {
  * Duplicator : simply calls the Matrix class's duplicator;
  */
 
-RotationMatrix3D::RotationMatrix3D(RotationMatrix3D *rotationMatrix3D) : Matrix(rotationMatrix3D) {}
+RotationMatrix3D::RotationMatrix3D(RotationMatrix3D &rotationMatrix3D) : Matrix(rotationMatrix3D, true) {}
 
 
 /*
  * buildFromVectors : this function will build the rotation matrix from the given couple of vectors;
  */
 
-void RotationMatrix3D::buildFromVectors(Vector3D *v0, Vector3D *v1) {
+void RotationMatrix3D::buildFromVectors(Vector3D &v0, Vector3D &v1) {
 
     //If one of the vector is the null vector :
-    if ((!v0->normalise()) || (!v1->normalise())) {
+    if ((!v0.normalise()) || (!v1.normalise())) {
 
         //Log;
         std_out("Error in RotationMatrix3D::RotationMatrix3D : one of the vector is null vector; "
@@ -75,32 +75,32 @@ void RotationMatrix3D::buildFromVectors(Vector3D *v0, Vector3D *v1) {
     }
 
     //First, we will modify v1 so that it is orthogonal to v0;
-    float dot = Vector3D::dotProduct(v0, v1);
+    float dot = v0.dotProduct(v1);
 
     //Determine the difference to apply;
     Vector3D diff = Vector3D(v0);
     diff.multiply(dot);
 
     //Modify v1 to be orthogonal to v0;
-    v1->subtract(&diff);
+    v1.subtract(diff);
 
     //Re-normalise v1;
-    v1->normalise();
+    v1.normalise();
 
     //Determine the last vector of the base;
     Vector3D v2(0, 0, 0);
     v2.vectorProduct(v0, v1);
 
     //Copy all data in the matrix;
-    data_array[0] = v0->x;
-    data_array[1] = v1->x;
-    data_array[2] = v2.x;
-    data_array[3] = v0->y;
-    data_array[4] = v1->y;
-    data_array[5] = v2.y;
-    data_array[6] = v0->z;
-    data_array[7] = v1->z;
-    data_array[8] = v2.z;
+    data_array[0] = v0.get(0);
+    data_array[1] = v1.get(0);
+    data_array[2] = v2.get(0);
+    data_array[3] = v0.get(0);
+    data_array[4] = v1.get(0);
+    data_array[5] = v2.get(0);
+    data_array[6] = v0.get(0);
+    data_array[7] = v1.get(0);
+    data_array[8] = v2.get(0);
 
 }
 
@@ -109,7 +109,7 @@ void RotationMatrix3D::buildFromVectors(Vector3D *v0, Vector3D *v1) {
  * compose : this function will multiply (on the left or on the right) the given matrix;
  */
 
-void RotationMatrix3D::compose(const RotationMatrix3D *const A, const RotationMatrix3D *const B) {
+void RotationMatrix3D::compose(const RotationMatrix3D &A, const RotationMatrix3D &B) {
 
     //right multiplication : rot <- this * A;
     multiply(A, B);
@@ -213,7 +213,7 @@ Vector3D RotationMatrix3D::getRotationAxis2(float rotation_angle) {
  * getRotationData : this function will determine the rotation axis and angle;
  */
 
-float RotationMatrix3D::getRotationData(Vector3D *vector) {
+float RotationMatrix3D::getRotationData(Vector3D &vector) {
 
 
     /*
@@ -250,7 +250,8 @@ float RotationMatrix3D::getRotationData(Vector3D *vector) {
     if (angle < ANGULAR_THRESHOLD) {
 
         //Set vertical vector;
-        vector->z = 1, vector->x = vector->y = 0;
+        vector.reset();
+        vector.set(2, 1);
 
         //Return null rotation;
         return 0;
@@ -286,13 +287,13 @@ float RotationMatrix3D::getRotationData(Vector3D *vector) {
         //Update all coordinates :
 
         //x = (m21 - m12) * denominator;
-        vector->x = (data_array[7] - data_array[5]) * denominator;
+        vector.set(0, (data_array[7] - data_array[5]) * denominator);
 
         //y = (m02 - m20) * denominator;
-        vector->y = (data_array[2] - data_array[6]) * denominator;
+        vector.set(1, (data_array[2] - data_array[6]) * denominator);
 
         //z = (m10 - m01) * denominator;
-        vector->z = (data_array[3] - data_array[1]) * denominator;
+        vector.set(2, (data_array[3] - data_array[1]) * denominator);
 
 
     } else {
@@ -322,7 +323,7 @@ float RotationMatrix3D::getRotationData(Vector3D *vector) {
             angle = (float) M_PI;
 
             //Take the square root of all coordinates, as turnaround in both directions are equivalent;
-            vector->x = sqrtf(m00), vector->y = sqrtf(m11), vector->z = sqrtf(m22);
+            vector.set(0, sqrtf(m00)), vector.set(1, sqrtf(m11)), vector.set(2, sqrtf(m22));
 
             return angle;
 
@@ -344,15 +345,15 @@ float RotationMatrix3D::getRotationData(Vector3D *vector) {
 
         //Update x :
         temp = sqrtf(m00);
-        vector->x = (data_array[7] > data_array[5]) ? temp : -temp;
+        vector.set(0, (data_array[7] > data_array[5]) ? temp : -temp);
 
         //Update y :
         temp = sqrtf(m11);
-        vector->y = (data_array[2] - data_array[6]) ? temp : -temp;
+        vector.set(0, (data_array[2] - data_array[6]) ? temp : -temp);
 
         //Update z :
         temp = sqrtf(m22);
-        vector->z = (data_array[3] - data_array[1]) ? temp : -temp;
+        vector.set(1, (data_array[3] - data_array[1]) ? temp : -temp);
 
     }
 

@@ -26,8 +26,6 @@
 
 #include <DroneControl/MotorRegisterer.h>
 
-#include <Math/LinearSystem.h>
-
 #include <DroneControl/MultiRotors/MatrixMultiRotor/SolidMultiRotor.h>
 
 class SinglePentaCopter : public SolidMultiRotor, private MotorRegisterer {

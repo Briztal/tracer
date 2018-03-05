@@ -26,7 +26,6 @@
 
 #include <DroneControl/MotorRegisterer.h>
 
-#include <Math/LinearSystem.h>
 
 
 class TriRover : public MatrixRover, private MotorRegisterer {
@@ -50,7 +49,7 @@ private:
     void setCoordinateSystem(RoverCoordinateSystem *coordinate_system) override;
 
     //No relations to add;
-    void createRelations(LinearSystem *system) override {}
+    void createRelations(LinearSystem *system) {}
 
 
     //-------------------------------- Functions delegated to the sub-class --------------------------------

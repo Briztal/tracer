@@ -6,7 +6,7 @@
 #define TRACER_ROTATION_DATA_H
 
 
-#include "Math/3D/Vector3D.h"
+#include "DataStructures/CoordinateSystems/Vector3D.h"
 
 /*
  * This structure contains all data that characterise a rotation in space :

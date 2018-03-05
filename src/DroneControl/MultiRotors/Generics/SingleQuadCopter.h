@@ -27,8 +27,6 @@
 
 #include <DroneControl/MotorRegisterer.h>
 
-#include <Math/LinearSystem.h>
-
 
 class SingleQuadCopter : public SolidMultiRotor, private MotorRegisterer {
 

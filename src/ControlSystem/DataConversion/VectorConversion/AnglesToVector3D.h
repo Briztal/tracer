@@ -6,7 +6,7 @@
 #define TRACER_VECTORTOANGLES_H
 
 
-#include <Math/3D/Vector3D.h>
+#include <DataStructures/CoordinateSystems/Vector3D.h>
 #include "stdint.h"
 
 //TODO MAKE A FUCKING LIBRARY DUMBAS...
@@ -43,12 +43,12 @@ class AnglesToVector3D {
 
 public:
 
-    static void convert(float ax, float ay, float az, Vector3D *vector);
+    static void convert(const Triplet &angles, Vector3D &vector);
 
 
 private:
 
-    static void build_relation_data(relation_data *data, float epsilon, float angle, uint8_t in, uint8_t out);
+    static void build_relation_data(relation_data &data, float epsilon, float angle, uint8_t in, uint8_t out);
 
     static void sortRelations(relation_data **data_array);
 

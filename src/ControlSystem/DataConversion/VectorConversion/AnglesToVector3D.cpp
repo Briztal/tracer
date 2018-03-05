@@ -13,7 +13,14 @@
  * AnglesToVector3D : this function will convert the given set of angles to an unitary vector;
  */
 
-void AnglesToVector3D::convert(float ax, float ay, float az, Vector3D *output_vector) {
+void AnglesToVector3D::convert(const Triplet &angles, Vector3D &output_vector) {
+
+    //First, get values;
+    const float *const angles_p = angles.get_data();
+
+    float ax = angles_p[0];
+    float ay = angles_p[1];
+    float az = angles_p[2];
 
     //Format angles in ]-pi; pi]
     ax = formatAngle(ax);
@@ -21,7 +28,7 @@ void AnglesToVector3D::convert(float ax, float ay, float az, Vector3D *output_ve
     az = formatAngle(az);
 
     //First, build the output;
-    float output[3] = {0, 0, 0};
+    output_vector.reset();
 
     //The left part of the equation x2 + y2 + z2 = 1
     bool equation[3]{true, true, true};
@@ -38,9 +45,9 @@ void AnglesToVector3D::convert(float ax, float ay, float az, Vector3D *output_ve
     relation_data data_x{}, data_y{}, data_z{};
 
     //Build data;
-    build_relation_data(&data_x, 0, ax, 1, 2);
-    build_relation_data(&data_y, 0, ay, 2, 0);
-    build_relation_data(&data_z, 0, az, 0, 1);
+    build_relation_data(data_x, 0, ax, 1, 2);
+    build_relation_data(data_y, 0, ay, 2, 0);
+    build_relation_data(data_z, 0, az, 0, 1);
 
     //Build the data array;
     relation_data *data_array[3]{&data_x, &data_y, &data_z};
@@ -118,7 +125,7 @@ void AnglesToVector3D::convert(float ax, float ay, float az, Vector3D *output_ve
         float angle = (r0_inverted) ? r0->angle : r1->angle;
 
         //Finally, we can determine the exact value;
-        output[pivot] = (angle < 0) ? -absolute_value : absolute_value;
+        output_vector.set(pivot, (angle < 0) ? -absolute_value : absolute_value);
 
         //Nullify the coefficient in the equation;
         equation[pivot] = false;
@@ -163,7 +170,7 @@ void AnglesToVector3D::convert(float ax, float ay, float az, Vector3D *output_ve
         if (angle < 0) angle = -angle;
 
         //If the absolute angle is inferior to pi / 2, set the absolute value. If not, set its opposite;
-        output[pivot] = (angle < M_PI_2) ? absolute_value : -absolute_value;
+        output_vector.set(pivot, (angle < M_PI_2) ? absolute_value : -absolute_value);
 
         //Nullify the coefficient in the equation;
         equation[pivot] = false;
@@ -207,12 +214,7 @@ void AnglesToVector3D::convert(float ax, float ay, float az, Vector3D *output_ve
     }
 
     //Determine the last value;
-    output[pivot] = (angle < 0) ? -sqrtf(result) : sqrtf(result);
-
-    //Save the vector;
-    output_vector->x = output[0];
-    output_vector->y = output[1];
-    output_vector->z = output[2];
+    output_vector.set(pivot, (angle < 0) ? -sqrtf(result) : sqrtf(result));
 
 }
 
@@ -286,13 +288,13 @@ uint8_t AnglesToVector3D::getRelationIndexLevel2(bool *equation, relation_data *
  * build_relation_data  this function will simply copy data inside the struct;
  */
 
-void AnglesToVector3D::build_relation_data(relation_data *data, float epsilon, float angle, uint8_t in, uint8_t out) {
+void AnglesToVector3D::build_relation_data(relation_data &data, float epsilon, float angle, uint8_t in, uint8_t out) {
 
     //Simply copy all data;
-    data->angle = angle;
-    data->epsilon = epsilon;
-    data->in = in;
-    data->out = out;
+    data.angle = angle;
+    data.epsilon = epsilon;
+    data.in = in;
+    data.out = out;
 
 }
 

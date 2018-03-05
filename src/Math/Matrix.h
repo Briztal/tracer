@@ -38,13 +38,13 @@ public:
     Matrix();
 
     //The constructor : takes sizes in argument, and initialises the data array;
-    Matrix(uint8_t height, uint8_t width);
+    Matrix(uint8_t height, uint8_t width, bool initialise);
 
     //The copy constructor : takes a matrix, and duplicates it entirely;
-    explicit Matrix(const Matrix *const src);
+    Matrix(const Matrix & src, bool copy);
 
     //The copy constructor with size specs : creates a matrix with the given size and copies all possible coeffs;
-    Matrix(uint8_t height, uint8_t width, const Matrix *const src);
+    Matrix(uint8_t height, uint8_t width, const Matrix &src);
 
     virtual //The destructor : deletes the data array;
     ~Matrix();
@@ -75,11 +75,15 @@ protected:
     //The data array;
     float *const data_array;
 
+    //-------------------------- Dimensions query --------------------------
 
 public:
 
-    //Getter;
-    float *getDataArray();
+    //Height getter;
+    const uint8_t getHeight() const;
+
+    //Width getter;
+    const uint8_t getWidth() const ;
 
     //-------------------------- Coefficient-wise operations --------------------------
 
@@ -89,8 +93,11 @@ public:
     //Get a the value of a given coefficient;
     float getCoefficient(uint8_t line_index, uint8_t column_index) const;
 
+    //Getter;
+    float *getDataArray();
+
     //Set the value of a given coefficient;
-    void setCoefficient(uint8_t line_index, uint8_t column_index, float new_value);
+    void setCoefficient(uint8_t line_index, uint8_t column_index, float value);
 
 
     //Sum a whole line with the given one;
@@ -113,10 +120,10 @@ public:
 
 
     //Copy the content of src in our data array;
-    void setTo(const Matrix *const src);
+    void setTo(const Matrix & src);
 
     //Subtract the given matrix to our data array;
-    void subtract(const Matrix *const src);
+    void subtract(const Matrix & src);
 
     //Divide all coefficients by a given denominator;
     void divideBy(float denominator);
@@ -149,13 +156,13 @@ public:
 public:
 
     virtual //this <- A * B; sizes are checked;
-    void multiply(const Matrix *const A, const Matrix *const B);
+    void multiply(const Matrix & A, const Matrix & B);
 
     //this <- R + A * B; sizes are checked;
-    void multiplyAndAdd(const Matrix *const A, const Matrix *const B);
+    void multiplyAndAdd(const Matrix & A, const Matrix & B);
 
     //this <- R - A * B; sizes are checked;
-    void multiplyAndSubtract(const Matrix *const A, const Matrix *const B);
+    void multiplyAndSubtract(const Matrix & A, const Matrix & B);
 
 
     //-------------------------- Linear operation --------------------------
@@ -169,16 +176,16 @@ public:
 public:
 
     //Compute the inverse of the matrix;
-    Matrix *getInverse() const;
+    bool getInverse(Matrix &dst) const;
 
     //Compute the transposed of the matrix;
-    Matrix *getTransposed() const;
+    void setTransposed(const Matrix & src);
 
     //Compute the cofactor matrix;
-    Matrix *getCofactorMatrix() const;
+    bool getCofactorsMatrix(Matrix & dst) const;
 
     //Create a sub_matrix;
-    Matrix *subMatrix(uint8_t new_height, uint8_t new_width) const;
+    //matrix &subMatrix(uint8_t target_height, uint8_t target_width) const;
 
 
     //-------------------------- String --------------------------

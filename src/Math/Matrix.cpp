@@ -66,10 +66,16 @@ Matrix::Matrix() : height(0), width(0), data_array(nullptr) {
  * Constructor : initialises height and width, allocates data_array in the heap, and set all data to zero;
  */
 
-Matrix::Matrix(uint8_t height, uint8_t width) : height(height), width(width), data_array(new float[height * width]) {
+Matrix::Matrix(uint8_t height, uint8_t width, bool initialise) :
+        height(height), width(width), data_array(new float[height * width]) {
 
-    //Initialise the whole matrix to zero;
-    setToNull();
+    //If the content of the matrix must be initialised :
+    if (initialise) {
+
+        //Initialise the whole matrix to zero;
+        setToNull();
+
+    }
 
 }
 
@@ -78,11 +84,20 @@ Matrix::Matrix(uint8_t height, uint8_t width) : height(height), width(width), da
  * Copy constructor : duplicates entirely a matrix;
  */
 
-Matrix::Matrix(const Matrix *const src) : height(src->height), width(src->width),
-                                          data_array(new float[src->height * src->width]) {
+Matrix::Matrix(const Matrix &src, bool copy) : height(src.height), width(src.width),
+                                               data_array(new float[src.height * src.width]) {
 
-    //Copy the entire data array;
-    memcpy(data_array, src->data_array, height * width * sizeof(float));
+    //If we must copy the source matrix :
+    if (copy) {
+
+        //Copy the entire data array;
+        memcpy(data_array, src.data_array, height * width * sizeof(float));
+
+    } else {
+
+        //Otherwise, we will simply set the matrix to null;
+        setToNull();
+    }
 
 }
 
@@ -92,15 +107,15 @@ Matrix::Matrix(const Matrix *const src) : height(src->height), width(src->width)
  *  the given one;
  */
 
-Matrix::Matrix(uint8_t height, uint8_t width, const Matrix *const src) : height(height), width(width),
-                                                                         data_array(new float[height * width]) {
+Matrix::Matrix(uint8_t height, uint8_t width, const Matrix &src) : height(height), width(width),
+                                                                   data_array(new float[height * width]) {
 
     //Copy the entire data array;
     setToNull();
 
     //Determine minimal height and width;
-    uint8_t min_width = (width < src->width) ? width : src->width;
-    uint8_t min_height = (height < src->height) ? height : src->height;
+    uint8_t min_width = (width < src.width) ? width : src.width;
+    uint8_t min_height = (height < src.height) ? height : src.height;
 
     //Copy all coefficients.
 
@@ -109,13 +124,13 @@ Matrix::Matrix(uint8_t height, uint8_t width, const Matrix *const src) : height(
 
         //Cache the index;
         uint8_t this_index = width * line_index;
-        uint8_t src_index = src->width * line_index;
+        uint8_t src_index = src.width * line_index;
 
         //for each column shared between matrices :
         for (uint8_t column_index = 0; column_index < min_width; column_index++, this_index++, src_index++) {
 
             //Copy the coefficient at [line_index, column_index];
-            data_array[this_index] = src->data_array[src_index];
+            data_array[this_index] = src.data_array[src_index];
 
         }
 
@@ -123,6 +138,45 @@ Matrix::Matrix(uint8_t height, uint8_t width, const Matrix *const src) : height(
 
 }
 
+
+/*
+ * subMatrix : this function creates a new matrix, with inferior height and width than our,
+ *  and the exact same data at shared coefficients;
+ *
+ *  All data is copied.
+ */
+
+/*
+Matrix *Matrix::subMatrix(const uint8_t target_height, const uint8_t target_width) const {
+
+    //First, let's check that the required dimensions fit in our instance. If not, return an zero-size matrix;
+    if ((target_height > height) || (target_width > width))
+        return nullptr;
+
+    //First, create a new matrix in the heap;
+    Matrix *new_matrix = new Matrix(target_height, target_width);
+
+    //Then, we will copy the respective content of the matrix.
+
+    //For each line;
+    for (uint8_t line_index = 0; line_index < target_height; line_index++) {
+
+        //For each coefficient in the line;
+        for (uint8_t column_index = 0; column_index < target_width; column_index++) {
+
+            //Get the coefficient from our instance;
+            float coeff = get_coeff(line_index, column_index);
+
+            //Copy the coefficient in the new instance;
+            new_matrix->setCoefficient(line_index, column_index, coeff);
+        }
+
+    }
+
+    //Return the newly created and filled matrix;
+    return new_matrix;
+}
+*/
 
 /*
  * Destructor : deletes data_array;
@@ -192,6 +246,26 @@ float *Matrix::getDataArray() {
 }
 
 
+//-------------------------------------------------- Dimensions Query --------------------------------------------------
+
+/*
+ * getHeight : this function will simply return the matrix's height;
+ */
+
+const uint8_t Matrix::getHeight() const {
+    return height;
+}
+
+
+/*
+ * getWidth : this function will simply return the matrix's width;
+ */
+
+const uint8_t Matrix::getWidth() const {
+    return height;
+}
+
+
 //---------------------------------------------- Coefficient Manipulation ----------------------------------------------
 
 /*
@@ -215,7 +289,7 @@ float Matrix::getCoefficient(uint8_t line_index, uint8_t column_index) const {
  * setCoefficient : updates the value of the coefficient at (line_index, column_index);
  */
 
-void Matrix::setCoefficient(uint8_t line_index, uint8_t column_index, float new_value) {
+void Matrix::setCoefficient(uint8_t line_index, uint8_t column_index, float value) {
 
     //If the required value is outside the array, fail;
     if (outside_array(line_index, column_index)) {
@@ -223,7 +297,7 @@ void Matrix::setCoefficient(uint8_t line_index, uint8_t column_index, float new_
     }
 
     //Update the value of the required coefficient in our instance;
-    set_coeff(line_index, column_index, new_value, this);
+    set_coeff(line_index, column_index, value, this);
 
 }
 
@@ -374,10 +448,10 @@ void Matrix::resetLine(const uint8_t line_index) {
  * setTo : this function will copy the content of src into our instance;
  */
 
-void Matrix::setTo(const Matrix *const src) {
+void Matrix::setTo(const Matrix &src) {
 
     //If matrices have different sizes
-    if ((src->width != width) || (src->height != height)) {
+    if ((src.width != width) || (src.height != height)) {
 
         //Log;
         std_out("Error in Matrix::setTo : matrices have different sizes.");
@@ -388,7 +462,7 @@ void Matrix::setTo(const Matrix *const src) {
     }
 
     //Fast copy;
-    memcpy(data_array, src->data_array, height * width * sizeof(float));
+    memcpy(data_array, src.data_array, height * width * sizeof(float));
 
 }
 
@@ -397,10 +471,10 @@ void Matrix::setTo(const Matrix *const src) {
  * subtract : subtract coefficient by coefficient;
  */
 
-void Matrix::subtract(const Matrix *const src) {
+void Matrix::subtract(const Matrix &src) {
 
     //If both matrices dimensions are not equal :
-    if ((height != src->height) || (width != src->width)) {
+    if ((height != src.height) || (width != src.width)) {
 
         //Log:
         std_out("Error in Matrix::subtract : matrices don't have same sizes;");
@@ -411,7 +485,7 @@ void Matrix::subtract(const Matrix *const src) {
     }
 
     //Cache both arrays;
-    float *array = data_array, *s_array = src->data_array;
+    float *array = data_array, *s_array = src.data_array;
 
     //Subtract coefficient by coefficient;
     for (uint8_t coefficient_index = height * width; coefficient_index--;) {
@@ -607,7 +681,7 @@ void Matrix::divideBy(float denominator) {
             //Get the coefficient, and divideBy it by the denominator;
             float coefficient = get_coeff(row_index, column_index) / denominator;
 
-            //Save the new coefficient;
+            //Save the modified coefficient;
             set_coeff(row_index, column_index, coefficient, this)
 
         }
@@ -625,10 +699,10 @@ void Matrix::divideBy(float denominator) {
  * multiply : this function will multiply A and B  (A x B) and store the result in this;
  */
 
-void Matrix::multiply(const Matrix *const A, const Matrix *const B) {
+void Matrix::multiply(const Matrix &A, const Matrix &B) {
 
     //First, we have to check that A and B can be multiplied, ie A's width is B's height;
-    if (A->width != B->height) {
+    if (A.width != B.height) {
 
         //Log;
         std_out("Error in Matrix::multiply : A and B can't be multiplied;");
@@ -640,7 +714,7 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B) {
 
     //Then, we must check that A * B and this have the same size,
     // ie A and this have the same height, and B and this have the same width;
-    if ((A->height != this->height) || (B->width != this->width)) {
+    if ((A.height != this->height) || (B.width != this->width)) {
 
         //Log;
         std_out("Error in Matrix::multiply : A*B and this don't have the same size;");
@@ -651,7 +725,7 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B) {
     }
 
     //Initialise bounds an depth;
-    const uint8_t height = A->height, width = B->width, depth = A->width;
+    const uint8_t height = A.height, width = B.width, depth = A.width;
 
     //Initialise the this data pointer;
     float *R_ptr = this->data_array;
@@ -666,10 +740,10 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B) {
             float result = 0;
 
             //Determine the index of the first case of A's [line_index]'s line. Will be incremented of 1;
-            float *A_ptr = A->data_array + line_index * depth;
+            float *A_ptr = A.data_array + line_index * depth;
 
             //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
-            float *B_ptr = B->data_array + column_index;
+            float *B_ptr = B.data_array + column_index;
 
             //For every layer :
             for (uint8_t layer_index = depth; layer_index--; A_ptr++, B_ptr += width) {
@@ -690,10 +764,10 @@ void Matrix::multiply(const Matrix *const A, const Matrix *const B) {
 
 }
 
-void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B) {
+void Matrix::multiplyAndAdd(const Matrix &A, const Matrix &B) {
 
     //First, we have to check that A and B can be multiplied, ie A's width is B's height;
-    if (A->width != B->height) {
+    if (A.width != B.height) {
 
         //Log;
         std_out("Error in Matrix::multiply : A and B can't be multiplied;");
@@ -705,7 +779,7 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B) {
 
     //Then, we must check that A * B and this have the same size,
     // ie A and this have the same height, and B and this have the same width;
-    if ((A->height != this->height) || (B->width != this->width)) {
+    if ((A.height != this->height) || (B.width != this->width)) {
 
         //Log;
         std_out("Error in Matrix::multiply : A*B and this don't have the same size;");
@@ -716,7 +790,7 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B) {
     }
 
     //Initialise bounds an depth;
-    const uint8_t height = A->height, width = B->width, depth = A->width;
+    const uint8_t height = A.height, width = B.width, depth = A.width;
 
     //Initialise the this data pointer;
     float *R_ptr = this->data_array;
@@ -731,10 +805,10 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B) {
             float result = 0;
 
             //Determine the index of the first case of A's [line_index]'s line. Will be incremented of 1;
-            float *A_ptr = A->data_array + line_index * depth;
+            float *A_ptr = A.data_array + line_index * depth;
 
             //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
-            float *B_ptr = B->data_array + column_index;
+            float *B_ptr = B.data_array + column_index;
 
             //For every layer :
             for (uint8_t layer_index = depth; layer_index--; A_ptr++, B_ptr += width) {
@@ -755,9 +829,9 @@ void Matrix::multiplyAndAdd(const Matrix *const A, const Matrix *const B) {
 
 }
 
-void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B) {
+void Matrix::multiplyAndSubtract(const Matrix &A, const Matrix &B) {
 //First, we have to check that A and B can be multiplied, ie A's width is B's height;
-    if (A->width != B->height) {
+    if (A.width != B.height) {
 
         //Log;
         std_out("Error in Matrix::multiply : A and B can't be multiplied;");
@@ -769,7 +843,7 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B) {
 
     //Then, we must check that A * B and this have the same size,
     // ie A and this have the same height, and B and this have the same width;
-    if ((A->height != this->height) || (B->width != this->width)) {
+    if ((A.height != this->height) || (B.width != this->width)) {
 
         //Log;
         std_out("Error in Matrix::multiply : A*B and this don't have the same size;");
@@ -780,7 +854,7 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B) {
     }
 
     //Initialise bounds an depth;
-    const uint8_t height = A->height, width = B->width, depth = A->width;
+    const uint8_t height = A.height, width = B.width, depth = A.width;
 
     //Initialise the this data pointer;
     float *R_ptr = this->data_array;
@@ -795,10 +869,10 @@ void Matrix::multiplyAndSubtract(const Matrix *const A, const Matrix *const B) {
             float result = 0;
 
             //Determine the index of the first case of A's [line_index]'s line. Will be incremented of 1;
-            float *A_ptr = A->data_array + line_index * depth;
+            float *A_ptr = A.data_array + line_index * depth;
 
             //Determine the index of the [column_index]'th case of B's first line. Will be incremented of width;
-            float *B_ptr = B->data_array + column_index;
+            float *B_ptr = B.data_array + column_index;
 
             //For every layer :
             for (uint8_t layer_index = depth; layer_index--; A_ptr++, B_ptr += width) {
@@ -872,7 +946,7 @@ void Matrix::apply(const float *const inputVector, float *outputVector) const {
  *  If the matrix is not invertible, it will return a null pointer;
  */
 
-Matrix *Matrix::getInverse() const {
+bool Matrix::getInverse(Matrix &dst) const {
 
     //If the matrix is not a square matrix;
     if (height != width) {
@@ -881,11 +955,13 @@ Matrix *Matrix::getInverse() const {
         std_out("ERROR in Matrix::getInverse() : the matrix is not a square matrix;");
 
         //Fail;
-        return nullptr;
+        return false;
     }
 
     //Create the cofactor matrix;
-    Matrix *cofactorMatrix = getCofactorMatrix();
+    if (!getCofactorsMatrix(dst)) {
+        return false;
+    }
 
     //Get the determinant, by multiplying coefficient by coefficient the first line;
     float determinant = 0;
@@ -894,7 +970,7 @@ Matrix *Matrix::getInverse() const {
     for (uint8_t column_index = 0; column_index < width; column_index++) {
 
         //Multiply the two coefficients, and add the result to the determinant;
-        determinant += get_coeff(0, column_index) * cofactorMatrix->getCoefficient(0, column_index);
+        determinant += get_coeff(0, column_index) * dst.getCoefficient(0, column_index);
 
     }
 
@@ -905,7 +981,7 @@ Matrix *Matrix::getInverse() const {
         std_out("Error in Matrix::getInverse : the determinant of the matrix is null.");
 
         //Fail;
-        return nullptr;
+        return false;
 
     }
 
@@ -922,7 +998,7 @@ Matrix *Matrix::getInverse() const {
 
      */
     //Transpose the cofactor matrix;
-    cofactorMatrix->transpose();
+    dst.transpose();
 
 
     /*
@@ -931,7 +1007,7 @@ Matrix *Matrix::getInverse() const {
 
      */
     //Divide the cofactor matrix by the determinant to get the inverted matrix;
-    cofactorMatrix->divideBy(determinant);
+    dst.divideBy(determinant);
 
     /*
     //Display the cofactor matrix;
@@ -939,7 +1015,7 @@ Matrix *Matrix::getInverse() const {
      */
 
     //Return the inverted matrix;
-    return cofactorMatrix;
+    return true;
 
 }
 
@@ -948,13 +1024,10 @@ Matrix *Matrix::getInverse() const {
  * getTransposed : this function computes the transposed of the the matrix and returns it;
  */
 
-Matrix *Matrix::getTransposed() const {
-
-    //First, create the new matrix;
-    Matrix *m = new Matrix(width, height);
+void Matrix::setTransposed(const Matrix &src) {
 
     //Our data pointer;
-    const float *data_pointer = data_array;
+    const float *data_pointer = src.data_array;
 
     //Cache the width of m;
     const uint8_t m_width = height;
@@ -962,11 +1035,10 @@ Matrix *Matrix::getTransposed() const {
     //For every row : (m_width = height, more optimised like this);
     for (uint8_t row_index = 0; row_index < m_width; row_index++) {
 
-        float *output_pointer = m->data_array + row_index;
+        float *output_pointer = data_array + row_index;
 
         //For every coefficient in the line :
         for (uint8_t column_index = width; column_index--;) {
-
 
             //Set the m[column_index, row_index] to our data;
             *output_pointer = *(data_pointer++);
@@ -978,17 +1050,14 @@ Matrix *Matrix::getTransposed() const {
 
     }
 
-    //Return the transposed matrix;
-    return m;
-
 }
 
 
 /*
- * getCofactorMatrix : this function computes and returns the cofactor matrix, associated with [this] matrix;
+ * getCofactorsMatrix : this function computes and returns the cofactor matrix, associated with [this] matrix;
  */
 
-Matrix *Matrix::getCofactorMatrix() const {
+bool Matrix::getCofactorsMatrix(Matrix &dst) const {
 
     //If the matrix is not a square matrix :
     if (height != width) {
@@ -997,12 +1066,20 @@ Matrix *Matrix::getCofactorMatrix() const {
         std_out("ERROR in Matrix::getInverse() : the matrix is not a square matrix;");
 
         //Fail;
-        return nullptr;
+        return false;
 
     }
 
-    //Create a new matrix;
-    Matrix *cofactorsMatrix = new Matrix(height, width);
+    //If the two matrices don't have the same size :
+    if ((height != dst.height) && (width != dst.width)) {
+
+        //Log;
+        std_out("ERROR in Matrix::getInverse() : matrices don't have same sizes;");
+
+        //Fail;
+        return false;
+
+    }
 
     //For each line :
     for (uint8_t row_index = 0; row_index < height; row_index++) {
@@ -1011,53 +1088,15 @@ Matrix *Matrix::getCofactorMatrix() const {
         for (uint8_t column_index = 0; column_index < width; column_index++) {
 
             //Get the cofactor for this position, and save it in the cofactors matrix;
-            cofactorsMatrix->setCoefficient(row_index, column_index, getCofactor(row_index, column_index));
+            dst.setCoefficient(row_index, column_index, getCofactor(row_index, column_index));
 
         }
 
     }
 
     //Return the cofactor matrix;
-    return cofactorsMatrix;
+    return true;
 
-}
-
-
-/*
- * subMatrix : this function creates a new matrix, with inferior height and width than our,
- *  and the exact same data at shared coefficients;
- *
- *  All data is copied.
- */
-
-Matrix *Matrix::subMatrix(const uint8_t new_height, const uint8_t new_width) const {
-
-    //First, let's check that the required dimensions fit in our instance. If not, return an zero-size matrix;
-    if ((new_height > height) || (new_width > width))
-        return nullptr;
-
-    //First, create a new matrix in the heap;
-    Matrix *new_matrix = new Matrix(new_height, new_width);
-
-    //Then, we will copy the respective content of the matrix.
-
-    //For each line;
-    for (uint8_t line_index = 0; line_index < new_height; line_index++) {
-
-        //For each coefficient in the line;
-        for (uint8_t column_index = 0; column_index < new_width; column_index++) {
-
-            //Get the coefficient from our instance;
-            float coeff = get_coeff(line_index, column_index);
-
-            //Copy the coefficient in the new instance;
-            new_matrix->setCoefficient(line_index, column_index, coeff);
-        }
-
-    }
-
-    //Return the newly created and filled matrix;
-    return new_matrix;
 }
 
 

@@ -259,7 +259,7 @@ void SolidMultiRotor::addMotorsEquations(MultiRotorCoordinateSystem *coordinates
     for (uint8_t coordinate_index = 0; coordinate_index < nb_coordinates; coordinate_index++) {
 
         //The equation is simple (only one 1 coefficient in the left member), pass only the [coordinate_index]-th line;
-        system->addSimpleEquation(coordinate_index, right_member_array + (coordinate_index * nb_motors), nb_motors);
+        //TODO system->addSimpleEquation(coordinate_index, right_member_array + (coordinate_index * nb_motors), nb_motors);
 
     }
 

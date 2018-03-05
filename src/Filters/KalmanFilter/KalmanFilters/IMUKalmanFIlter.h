@@ -7,6 +7,8 @@
 
 
 #include <Filters/KalmanFilter/KalmanFilter.h>
+#include <DataStructures/CoordinateSystems/Triplet.h>
+#include "AngleOrder1KalmanFilter.h"
 
 
 class IMUKalmanFIlter {
@@ -14,46 +16,45 @@ class IMUKalmanFIlter {
 
     //------------------------------------------------- Initialisation -------------------------------------------------
 
+public:
+
     //Constructor;
-    IMUKalmanFIlter(float *speed_conversion_factord, float measure_period, Matrix **process_noises,
-                    Matrix **measure_noises);
+    IMUKalmanFIlter(float measure_period, Matrix **process_noises, Matrix **measure_noises);
 
-    //Build the prediction matrix;
-    Matrix *getPredictionMatrix(float time);
+    //Simplified constructor;
+    IMUKalmanFIlter(float measure_period, Matrix &process_noise, Matrix &measure_noise);
 
-    //Build a transformation matrix;
-    Matrix *getTransformationMatrix(float conversion_factor);
+    //Initialise data;
+    void initialise(float measure_period, Matrix **process_noises, Matrix **measure_noises);
 
     //Destructor;
     ~IMUKalmanFIlter();
 
+
     //------------------------------------------------- Setup -------------------------------------------------
 
+private:
+
     //Set initial values for gravity and gyro biais;
-    void setInitialData(float *accelerometer_averages, float *gyro_biais_averages);
+    void setInitialData(Vector3D &accelerometer_averages, Angles3D &gyro_biais_averages);
 
 
     //------------------------------------------------- Iteration -------------------------------------------------
 
+public:
+
     //Update the internal model with a new set of measures;
-    void update(Vector3D *sum_forces, float *const gyro_data);
+    void update(Vector3D &sum_forces, Triplet &gyro_data);
 
     //Get current gravity angles;
-    void getGravity(Vector3D *gravity);
+    void getGravity(Vector3D &gravity);
 
     //Get current rotation speeds;
-    void getGyroSpeeds(float *speed);
+    void getGyroSpeeds(Triplet &speed);
 
     //Get current accelerations on x, y and z;
     void getAccelerations(float *accelerations);
 
-
-    //------------------------------------------------- KalmanFilters -------------------------------------------------
-
-private:
-
-    //KalmanFilters for all axis;
-    KalmanFilter **filters;
 
 
     //------------------------------------------------- Data -------------------------------------------------
@@ -64,7 +65,17 @@ private:
     Vector3D gravity;
 
     //Angular speeds;
-    float *const angularSpeeds;
+    Triplet angularSpeeds;
+
+
+    //------------------------------------------------- KalmanFilters -------------------------------------------------
+
+private:
+
+    //Kalman filters, one for each axis;
+    AngleOrder1KalmanFilter filters[3]{AngleOrder1KalmanFilter(), AngleOrder1KalmanFilter(), AngleOrder1KalmanFilter()};
+
+
 
 };
 

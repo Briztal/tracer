@@ -31,22 +31,7 @@
  */
 
 Orientation3DToRotation::Orientation3DToRotation()
-        : targetOrientation(new RotationMatrix3D),
-          currentOrientation(new RotationMatrix3D),
-          finalTransformation(new RotationMatrix3D) {}
-
-
-/*
- * Destructor : deletes all matrices;
- */
-
-Orientation3DToRotation::~Orientation3DToRotation() {
-
-    delete targetOrientation;
-    delete currentOrientation;
-    delete finalTransformation;
-
-}
+        : targetOrientation(), currentOrientation(), finalTransformation() {}
 
 
 /*
@@ -56,15 +41,15 @@ Orientation3DToRotation::~Orientation3DToRotation() {
 void Orientation3DToRotation::reset() {
 
     //Reset the matrix to identity;
-    targetOrientation->setToIdentity();
+    targetOrientation.setToIdentity();
 
 }
 
 
-void Orientation3DToRotation::setTaget(Vector3D *v0, Vector3D *v1) {
+void Orientation3DToRotation::setTaget(Vector3D &v0, Vector3D &v1) {
 
     //Rebuild the orientation matrix;
-    targetOrientation->buildFromVectors(v0, v1);
+    targetOrientation.buildFromVectors(v0, v1);
 
 }
 
@@ -74,18 +59,18 @@ void Orientation3DToRotation::setTaget(Vector3D *v0, Vector3D *v1) {
  *  the target orientation;
  */
 
-void Orientation3DToRotation::compute(Vector3D *current_v0, Vector3D *current_v1, rotation_data_t *rotation_data) {
+void Orientation3DToRotation::compute(Vector3D &current_v0, Vector3D &current_v1, rotation_data_t *rotation_data) {
 
     //Build the current orientation matrix;
-    currentOrientation->buildFromVectors(current_v0, current_v1);
+    currentOrientation.buildFromVectors(current_v0, current_v1);
 
     //Transpose the current orientation (as currentOrientation is symmetric, its inverse is its transposed);
-    currentOrientation->transpose();
+    currentOrientation.transpose();
 
     //Now, we will determine the product (current ^ -1) * target;
-    finalTransformation->compose(currentOrientation, targetOrientation);
+    finalTransformation.compose(currentOrientation, targetOrientation);
 
     //Finally, we can now extract rotation data from the rotation product;
-    rotation_data->rotation_angle = finalTransformation->getRotationData(&rotation_data->rotation_vector);
+    rotation_data->rotation_angle = finalTransformation.getRotationData(rotation_data->rotation_vector);
 
 }

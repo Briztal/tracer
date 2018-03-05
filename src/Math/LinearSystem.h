@@ -25,6 +25,32 @@
 
 #include "Matrix.h"
 
+/*
+ * The LinearSystem class. This class intends to solve equations systems that can be represented like the following :
+ *
+ *
+ *  (S) : A * X = B * Y
+ *
+ *  with :
+ *      - X : a vector of variables, the outputs,  of size x_size;
+ *      - Y : a vector that we would know, the inputs of the system, OF SIZE y_size < x_size !!!!!
+ *      - A : an invertible square matrix of size x_size;
+ *      - B : a rectangle matrix, of size x_size * y_size;
+ *
+ *
+ *  The attentive reader will have notices that in difference to standard systems, there are less input variables than
+ *      output variables. The B matrix's role is to re-equilibrate the degree of the system, in introducing a
+ *      linear combination of Y's values, to provide B * Y, a vector of size x_size;
+ *
+ *  As the matrix A can be inverted, the solution system can be expressed like below :
+ *
+ *      (S =>) : X = Ai * B * Y
+ *
+ *      where Ai is the inverse of the matrix;
+ *
+ *  The aim of this class is to compute Ai * B, and eventually to provide an easy way to build A and B;
+ */
+
 class LinearSystem {
 
     //----------------------------------------- Initialisation -----------------------------------------
@@ -32,51 +58,10 @@ class LinearSystem {
 public:
 
     //Constructor;
-    LinearSystem(uint8_t nbInputs, uint8_t nbOutputs);
+    LinearSystem(uint8_t nb_outputs);
 
     //Destructor;
-    ~LinearSystem();
-
-
-    //----------------------------------------- Equations add -----------------------------------------
-
-    //Add a simple equation, where a single variable appears in the right member (with coefficient 1);
-    void addSimpleEquation(uint8_t left_index, float *right_member, uint8_t right_member_size);
-
-    //Add an equation, with no particular constraints on neither right of left members;
-    void addEquation(const float *left_member, const uint8_t left_member_size, const float *right_member,
-                     const uint8_t right_member_size);
-
-
-    //----------------------------------------- Fields -----------------------------------------
-
-private:
-
-    //The number of input coordinates, ie, the size of left members;
-    const uint8_t nbInputs;
-
-    //The number of output coordinates, ie, the size of right members;
-    const uint8_t nbOutputs;
-
-    /*
-     * The equation structure : contains two coefficients arrays, each related to a different set of variable;
-     */
-
-    struct equation_t {
-
-        //The left member
-        CoefficientArray *left_member = nullptr;
-
-        //The right member
-        CoefficientArray *right_member = nullptr;
-
-    };
-
-    //The current number of equations saved;
-    uint8_t nbEquations;
-
-    //The equation array;
-    equation_t *equations;
+    ~LinearSystem() = default;
 
 
     //----------------------------------------- Resolution -----------------------------------------
@@ -84,31 +69,18 @@ private:
 public:
 
     //Compute the resolution matrix;
-    Matrix *solveSystem();
+    void solve(const Matrix &A, const Matrix &B, Matrix &result);
 
-    //Extract the matrix related to the right members system;
-    const Matrix *extractMatrix() const;
 
+    //----------------------------------------- Fields -----------------------------------------
 
 private:
 
-    //Solve the left members system;
-    uint8_t solveLeftMembersSystem();
+    //The size of the output vector;
+    const uint8_t nbOutputs;
 
-    //Find an equation that has a non null coefficient, and switch it with the current position;
-    float findAndSwitch(uint8_t equation_index, const uint8_t nb_equations);
-
-
-    //Sum the last columns of the matrix;
-    void mergePseudoCoordinated(const uint8_t nb_parts, Matrix *matrix);
-
-
-    //----------------------------------------- Display -----------------------------------------
-
-public:
-
-    //Display the content of equations;
-    void display();
+    //The temporary matrix that will contain the inverse of A;
+    Matrix temp_Ai;
 
 };
 

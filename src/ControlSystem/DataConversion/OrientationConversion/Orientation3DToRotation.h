@@ -26,7 +26,7 @@
 #include "../../PID.h"
 #include "../../../Math/Matrix.h"
 
-#include "Math/3D/Vector3D.h"
+#include "DataStructures/CoordinateSystems/Vector3D.h"
 #include "Math/3D/RotationMatrix3D.h"
 #include "../../../Math/rotation_data.h"
 
@@ -42,7 +42,7 @@ public:
     Orientation3DToRotation();
 
     //Destructor;
-    ~Orientation3DToRotation();
+    ~Orientation3DToRotation() = default;
 
     //Reset all data;
     void reset();
@@ -53,10 +53,10 @@ public:
 public:
 
     //Set the target orientation;
-    void setTaget(Vector3D *v0, Vector3D *v1);
+    void setTaget(Vector3D &v0, Vector3D &v1);
 
     //Compute the rotation data for the given orientation;
-    void compute(Vector3D *current_v0, Vector3D *current_v1, rotation_data_t *rotation_data);
+    void compute(Vector3D &current_v0, Vector3D &current_v1, rotation_data_t *rotation_data);
 
 
     //----------------------------------- Fields ---------------------------------------
@@ -64,11 +64,11 @@ public:
 private:
 
     //The targetVector orientation
-    RotationMatrix3D *targetOrientation;
+    RotationMatrix3D targetOrientation;
 
     //Temp matrices;
-    RotationMatrix3D *currentOrientation;
-    RotationMatrix3D *finalTransformation;
+    RotationMatrix3D currentOrientation;
+    RotationMatrix3D finalTransformation;
 
 };
 

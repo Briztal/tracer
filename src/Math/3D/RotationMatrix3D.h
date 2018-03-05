@@ -24,7 +24,7 @@
 
 #include "Math/Matrix.h"
 
-#include "Vector3D.h"
+#include "DataStructures/CoordinateSystems/Vector3D.h"
 
 
 class RotationMatrix3D : private Matrix {
@@ -38,10 +38,10 @@ public:
     RotationMatrix3D();
 
     //Constructor;
-    RotationMatrix3D(Vector3D *v0, Vector3D *v1);
+    RotationMatrix3D(Vector3D &v0, Vector3D &v1);
 
-    //Copier;
-    explicit RotationMatrix3D(RotationMatrix3D *rotationMatrix3D);
+    //Copy constructor;
+    RotationMatrix3D(RotationMatrix3D &rotationMatrix3D);
 
     //Destructor;
     ~RotationMatrix3D() override = default;
@@ -53,7 +53,7 @@ public:
     void setToIdentity() override {Matrix::setToIdentity();};
 
     //Build the rotation matrix from vectors;
-    void buildFromVectors(Vector3D *v0, Vector3D *v1);
+    void buildFromVectors(Vector3D &v0, Vector3D &v1);
 
 
     //------------------- Matrix operations -------------------
@@ -64,7 +64,7 @@ public:
     void transpose() override {Matrix::transpose();};
 
     //Compose given rotation in this;
-    void compose(const RotationMatrix3D *const A, const RotationMatrix3D *const B);
+    void compose(const RotationMatrix3D &A, const RotationMatrix3D &B);
 
 
     //------------------- Parameters extraction -------------------
@@ -72,7 +72,7 @@ public:
 public:
 
     //Compute the rotation axis;
-    float getRotationData(Vector3D *vector);
+    float getRotationData(Vector3D &vector);
 
 
     //------------------- Standard functions -------------------

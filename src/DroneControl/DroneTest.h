@@ -31,7 +31,7 @@ public:
 
 private:
 
-    void createRelations(LinearSystem *s) override;
+    void createRelations(LinearSystem *s) ;
 
 };
 

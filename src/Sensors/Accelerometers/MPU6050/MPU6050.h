@@ -22,6 +22,9 @@
 #define TRACER_MPU6050_H
 
 
+#include <DataStructures/CoordinateSystems/Vector3D.h>
+#include <math.h>
+#include <DataStructures/CoordinateSystems/Angles3D.h>
 #include "stdint.h"
 
 
@@ -90,17 +93,10 @@ public:
 public:
 
     //Get the acceleration values;
-    void get_accelerometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z);
-
-    //Get the acceleration array;
-    void get_accelerometer_array(int16_t *array);
+    void get_accelerometer_data(Angles3D &output);
 
     //Get the gyrometer values;
-    void get_gyrometer_values(int16_t *acc_x, int16_t *acc_y, int16_t *acc_z);
-
-    //Get the gyrometer array;
-    void get_gyrometer_array(int16_t *array);
-
+    void get_gyrometer_data(Triplet &output);
 
 
     //----------------------------------- Fields -----------------------------------
@@ -108,18 +104,13 @@ public:
 private:
 
     //The accelerometer array;
-    int16_t *accelerometer_data;
-
-    //The accelerometer offsets array;
-    int16_t *accelerometer_offsets;
-
+    Angles3D accelerometer_data;
 
     //The gyrometer array;
-    int16_t *gyrometer_data;
+    Triplet gyrometer_data;
 
-    //The gyrometer offsets array;
-    int16_t *gyrometer_offsets;
-
+    //The ratio to convert gyro array to rad/s;
+    float gyrometer_ratio = ((float) 1000  * (float) M_2_PI) / ((float) 65536 * (float(180)));
 
 };
 

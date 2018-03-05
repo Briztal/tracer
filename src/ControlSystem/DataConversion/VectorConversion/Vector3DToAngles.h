@@ -9,13 +9,13 @@
 //TODO MAKE A FUCKING LIBRARY DUMBAS...
 
 
-#include <Math/3D/Vector3D.h>
+#include <DataStructures/CoordinateSystems/Vector3D.h>
 
 class Vector3DToAngles {
 
 public:
 
-    static void convert(Vector3D *vector, float *ax, float *ay, float *az);
+    static void convert(Vector3D &vector, Triplet &angles);
 
 };
 

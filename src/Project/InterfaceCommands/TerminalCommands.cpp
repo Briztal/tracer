@@ -40,6 +40,7 @@
 #include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
 #include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
 #include <Filters/KalmanFilter/KalmanFilters/IMUKalmanFIlter.h>
+#include <Math/rotation_data.h>
 
 
 task_state_t TerminalCommands::flood(char *) {
@@ -55,9 +56,9 @@ task_state_t TerminalCommands::flood(char *) {
 
 task_state_t TerminalCommands::action(char *) {
 
-    DroneTest *copter = new DroneTest();
+    //DroneTest *copter = new DroneTest();
 
-    copter->solve();
+    //copter->solve();
 
     return complete;
 
@@ -633,9 +634,6 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
     mpu->initialise_data();
 
-    int16_t accelero[3]{0}, gyro[3]{0};
-
-
     /*
     Matrix *process_noise = new Matrix(3, 3);
     Matrix *measure_noise = new Matrix(3, 3);
@@ -660,32 +658,55 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
      */
 
-    IMUKalmanFIlter *filter = new IMUKalmanFIlter()
+    uint32_t period_ms = 10;
+
+    Matrix process_noise(3, 3, false);
+    Matrix measure_noise(3, 3, false);
+    process_noise.setToIdentity();
+    measure_noise.setToIdentity();
+    process_noise.divideBy(100);
+    measure_noise.divideBy(100);
+
+    IMUKalmanFIlter filter((float)0.01, process_noise, measure_noise);
+
+    Vector3D accelero = Vector3D(0,0,-1);
+    Triplet gyro(0,0,0);
+
+    uint32_t time = millis() + period_ms;
+
+    delay(1000);
 
 
     while (true) {
 
+        /*
+
         mpu->compute_data();
 
-        mpu->get_accelerometer_array(accelero);
+        mpu->get_accelerometer_data(&accelero);
 
-        mpu->get_gyrometer_array(gyro);
+        mpu->get_gyrometer_data(gyro);
+
+        delay(10);
 
         //std_out("ax : " + String(accelero[0]) + " ay " + String(accelero[1]) + " az " + String(accelero[2]));
 
         //std_out("gx : " + String(gyro[0]) + " gy " + String(gyro[1]) + " gz " + String(gyro[2]));
 
-        Vector3D v0 = Vector3D(accelero[0], accelero[1], accelero[2]);
+                  */
 
-        float ax, ay, az;
 
-        Vector3DToAngles::convert(&v0, &ax, &ay, &az);
+        filter.update(accelero, gyro);
 
-        AnglesToVector3D::convert(ax, ay, az, &v0);
+        filter.getGravity(accelero);
 
-        std_out("Vector "+ String(v0.x, 5) + " " + String(v0.y, 5) + " " + String(v0.z, 5));
+        filter.getGyroSpeeds(gyro);
 
-        delay(500);
+        std_out("Vector " + accelero.toString() + " " + gyro.toString());
+
+        while(millis() < time);
+
+        time += period_ms;
 
     }
 
@@ -695,29 +716,74 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
 task_state_t TerminalCommands::test_kalman(char *) {
 
-    return complete;
+
+    Matrix process_noise(3, 3, false);
+    Matrix measure_noise(3, 3, false);
+
+    process_noise.setToIdentity();
+    process_noise.divideBy(100);
+
+    measure_noise.setToIdentity();
+    measure_noise.divideBy(100);
+
+    std_out(process_noise.toString());
+
+    std_out(measure_noise.toString());
+
+
+    float initial[3] {0, 0, 0};
+
+    Matrix initialP(3, 3, false);
+    initialP.setToIdentity();
+    initialP.divideBy(10);
+
+
+    Matrix prediction(3, 3, false);
+
+    prediction.setToIdentity();
+
+    prediction.setCoefficient(1, 0, 0.01);
+
+    Matrix transformation(2, 3, false);
+
+    transformation.setCoefficient(0, 0, 1);
+    transformation.setCoefficient(1, 1, 1);
+    transformation.setCoefficient(0, 2, 1);
+
+
+    KalmanFilter filter(3, 2);
+
+    filter.initialise(prediction, transformation, process_noise, measure_noise);
+
+    filter.setInitialState(initial, initialP);
+
+    float data[2]{0, 1};
+
+
+    while(true) {
+        //TODO TEST KALMAN
+    }
 
 }
 
 
 task_state_t TerminalCommands::test_rotation(char *) {
 
-    Vector3D v0 = Vector3D(-1, 0, 0);
+    Vector3D v0(-1, 0, 0);
 
     Orientation2DToRotation converter = Orientation2DToRotation();
 
-    converter.setTaget(&v0);
+    converter.setTaget(v0);
 
-    v0.x = 1;
+    v0.set(0, 1);
 
     rotation_data_t data = rotation_data_t();
 
-    converter.compute(&v0, &data);
+    converter.compute(v0, data);
 
     std_out("Angle : " + String(data.rotation_angle));
 
-    std_out(" x : " + String(data.rotation_vector.x) + " y : " + String(data.rotation_vector.y) + " z : " +
-            String(data.rotation_vector.z));
+    std_out(" x : " + data.rotation_vector.toString());
 
     return complete;
 
@@ -726,15 +792,15 @@ task_state_t TerminalCommands::test_rotation(char *) {
 
 task_state_t TerminalCommands::test_angles(char *) {
 
-    Vector3D v0 = Vector3D(0, -23, 1);
+    Vector3D v0(0, -23, 1);
 
-    float ax, ay, az;
+    Angles3D angles;
 
-    Vector3DToAngles::convert(&v0, &ax, &ay, &az);
+    Vector3DToAngles::convert(v0, angles);
 
-    AnglesToVector3D::convert(ax, ay, az, &v0);
+    AnglesToVector3D::convert(angles, v0);
 
-    std_out("Vector "+ String(v0.x, 5) + " " + String(v0.y, 5) + " " + String(v0.z, 5));
+    std_out("Vector " + v0.toString());
 
     return complete;
 

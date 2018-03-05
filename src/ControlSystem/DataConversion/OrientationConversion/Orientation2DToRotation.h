@@ -22,7 +22,7 @@
 #ifndef TRACER_ORIENTATION2DTOROTATION_H
 #define TRACER_ORIENTATION2DTOROTATION_H
 
-#include <Math/3D/Vector3D.h>
+#include <DataStructures/CoordinateSystems/Vector3D.h>
 
 #include <Math/rotation_data.h>
 
@@ -40,7 +40,7 @@ public:
     Orientation2DToRotation();
 
     //Destructor;
-    ~Orientation2DToRotation();
+    ~Orientation2DToRotation() = default;
 
 
     //----------------------------------- Computation ---------------------------------------
@@ -48,10 +48,10 @@ public:
 public:
 
     //Set the target vector;
-    void setTaget(Vector3D *target);
+    void setTaget(Vector3D &target);
 
     //Compute the rotation data for the given position;
-    void compute(Vector3D *currentVector, rotation_data_t *rotation_data);
+    void compute(Vector3D &currentVector, rotation_data_t &rotation_data);
 
 
     //----------------------------------- Fields ---------------------------------------
@@ -59,7 +59,7 @@ public:
 private:
 
     //The targetVector orientation
-    Vector3D *targetVector;
+    Vector3D targetVector;
 
 };
 

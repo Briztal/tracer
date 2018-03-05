@@ -35,7 +35,6 @@
 
 #include <Math/Matrix.h>
 
-#include <Math/LinearSystem.h>
 
 #include <DroneControl/MatrixDrone.h>
 

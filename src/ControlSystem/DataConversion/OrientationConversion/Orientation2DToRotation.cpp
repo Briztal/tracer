@@ -32,30 +32,19 @@
 /*
  * Constructor : initialises the target vector;
  */
-Orientation2DToRotation::Orientation2DToRotation() : targetVector(new Vector3D(0, 0, 0)) {}
-
-
-/*
- * Destructor : deletes the target vector;
- */
-
-Orientation2DToRotation::~Orientation2DToRotation() {
-
-    delete targetVector;
-
-}
+Orientation2DToRotation::Orientation2DToRotation() : targetVector() {}
 
 
 /*
  * setTarget : this function will copy the target vector;
  */
 
-void Orientation2DToRotation::setTaget(Vector3D *target) {
+void Orientation2DToRotation::setTaget(Vector3D &target) {
 
     //First, we must normalise the target;
 
     //If the target is null :
-    if (!target->normalise()) {
+    if (!target.normalise()) {
 
         //Log;
         std_out("Error in Orientation2DToRotation::setTaget : null vector given;");
@@ -66,9 +55,7 @@ void Orientation2DToRotation::setTaget(Vector3D *target) {
     }
 
     //Copy coordinates;
-    targetVector->x = target->x;
-    targetVector->y = target->y;
-    targetVector->z = target->z;
+    targetVector.clone(target);
 
 }
 
@@ -77,12 +64,12 @@ void Orientation2DToRotation::setTaget(Vector3D *target) {
  * compute : this function will compute the rotation data, in order to reach the target vector;
  */
 
-void Orientation2DToRotation::compute(Vector3D *currentVector, rotation_data_t *rotation_data) {
+void Orientation2DToRotation::compute(Vector3D &currentVector, rotation_data_t &rotation_data) {
 
     //First, we must normalise the orientation;
 
     //If the orientation is null :
-    if (!currentVector->normalise()) {
+    if (!currentVector.normalise()) {
 
         //Log;
         std_out("Error in Orientation2DToRotation::setTaget : null vector given;");
@@ -95,7 +82,7 @@ void Orientation2DToRotation::compute(Vector3D *currentVector, rotation_data_t *
     //If vectors are not collinear, we must determine the angle;
 
     //First, determine the cosine of the angle (dot product of vectors);
-    float cos = Vector3D::dotProduct(currentVector, targetVector);
+    float cos = currentVector.dotProduct(targetVector);
 
     std_out("cos : " + String(cos));
 
@@ -103,7 +90,7 @@ void Orientation2DToRotation::compute(Vector3D *currentVector, rotation_data_t *
     float angle = acosf(cos);
 
     //First, cache the rotation vector, to avoid two pointer accesses;
-    Vector3D *rotation_vector = &rotation_data->rotation_vector;
+    Vector3D rotation_vector(rotation_data.rotation_vector);
 
     std_out("angle : " + String(angle));
 
@@ -112,10 +99,11 @@ void Orientation2DToRotation::compute(Vector3D *currentVector, rotation_data_t *
     if (angle < ANGULAR_THRESHOLD) {
 
         //Set the angle to zero;
-        rotation_data->rotation_angle = 0;
+        rotation_data.rotation_angle = 0;
 
         //Set the default rotation vector;
-        rotation_vector->z = 1, rotation_vector->x = rotation_vector->y = 0;
+        rotation_vector.reset();
+        rotation_vector.set(2, 1);
 
         //Complete;
         return;
@@ -141,29 +129,30 @@ void Orientation2DToRotation::compute(Vector3D *currentVector, rotation_data_t *
          */
 
         //Let's set the current vector to x.
-        currentVector->x = 1, currentVector->y = currentVector->z = 0;
+        rotation_vector.reset();
+        rotation_vector.set(0, 1);
 
-        float new_dot = Vector3D::dotProduct(currentVector, targetVector);
+        float new_dot = currentVector.dotProduct(targetVector);
 
         //If x was too close to the target, y won't
         if (abs(new_dot) > SQRT_2_D_2) {
 
             std_out("switch");
             //Let's set the current vector to y;
-            currentVector->y = 1, currentVector->x = currentVector->z = 0;
-
+            rotation_vector.reset();
+            rotation_vector.set(1, 1);
         }
 
     }
 
     //Save the angle;
-    rotation_data->rotation_angle = angle;
+    rotation_data.rotation_angle = angle;
 
     //First, let's compute the vector product of the couple of vectors;
-    rotation_vector->vectorProduct(currentVector, targetVector);
+    rotation_vector.vectorProduct(currentVector, targetVector);
 
     //Then, normalise this vector;
-    rotation_vector->normalise();
+    rotation_vector.normalise();
 
 
 }

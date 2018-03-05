@@ -22,7 +22,7 @@
 #ifndef TRACER_VALUESET_H
 #define TRACER_VALUESET_H
 
-#include "ValueVector.h"
+#include "ValueContainer.h"
 
 template<typename T>
 class ValueSet : public ValueVector<T> {

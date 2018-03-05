@@ -27,8 +27,6 @@
 
 #include "RoverCoordinateSystem.h"
 
-#include <Math/LinearSystem.h>
-
 #include <DroneControl/MatrixDrone.h>
 
 
@@ -56,7 +54,7 @@ protected:
     void createMotors() override = 0;
 
     //The method to create relations;
-    void createRelations(LinearSystem *s) override = 0;
+    //TODO void createRelations(LinearSystem *s) override = 0;
 
 
     //------------------------------- Overridden methods -------------------------------

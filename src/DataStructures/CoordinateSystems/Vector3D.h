@@ -22,18 +22,37 @@
 #define TRACER_VECTOR3D_H
 
 
-class Vector3D {
+#include "stdint.h"
+#include "Triplet.h"
+
+class Vector3D : public Triplet {
 
 public:
 
-    //Constructor;
-    Vector3D(float x, float y, float z);
+    //Basic constructor;
+    Vector3D() : Triplet(){}
 
-    //Duplicator;
-    Vector3D(Vector3D *);
+    //Value constructor;
+    Vector3D(float v0, float v1, float v2) : Triplet(v0, v1, v2) {};
+
+    //Copy constructor;
+    Vector3D(const Vector3D &src) : Triplet(src) {};
 
     //Destructor;
-    ~Vector3D() = default;
+    ~Vector3D() override = default;
+
+    //Cloner :
+    void clone(const Vector3D &src);
+
+    //---------------- Coordinates operations ----------------
+
+public:
+
+    //Modify a coordinate's value;
+    void set(uint8_t index, float value) override;
+
+    //Reset the vector to (0,0,0);
+    void reset() override;
 
 
     //---------------- Internal operations ----------------
@@ -41,19 +60,19 @@ public:
 public:
 
     //Verify that the vector is null-vector;
-    bool nullVector();
+    bool nullVector() const;
 
     //Determine the square of the vector's norm;
-    float squareNorm();
+    float squareNorm()const;
 
     //Normalise the vector;
     bool normalise();
 
     //Add the given vector to our coordinates;
-    void add(Vector3D *v);
+    void add(Vector3D &v);
 
     //Subtract the given vector to our coordinates;
-    void subtract(Vector3D *v);
+    void subtract(Vector3D &v);
 
     //Multiply coordinates by a given coefficient;
     void multiply(float coefficient);
@@ -65,18 +84,18 @@ public:
     //---------------- External operations ----------------
 
     //Compute the vector product of the provided couple;
-    void vectorProduct(Vector3D *v0, Vector3D *v1);
+    void vectorProduct(Vector3D &v0, Vector3D &v1);
 
     //Compute the dot product of the provided couple;
-    static float dotProduct(Vector3D *v0, Vector3D *v1);
+    float dotProduct(Vector3D &v) const;
 
 
-    //----------------
+    //---------------- Data ----------------
 
-public:
 
-    //Vector coordinates, public;
-    float x, y, z;
+    //Normalisation bool
+    bool unitary = false;
+
 
 };
 

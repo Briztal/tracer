@@ -29,6 +29,7 @@ template <class MotorClass, class CoordinateSystem>
 class MatrixDrone {
 
 
+
     //------------------------------- Init -------------------------------
 
 protected:
@@ -57,7 +58,7 @@ protected:
     virtual void createMotors() = 0;
 
     //The method to create relations;
-    virtual void createRelations(LinearSystem *s) = 0;
+    virtual void createRelations(Matrix &A, Matrix &B) = 0;
 
     //Count the number of enabled coordinates in the coordinate system;
     virtual uint8_t getCoordinatesNumber(CoordinateSystem *coordinate_system) = 0;
@@ -302,17 +303,16 @@ void MatrixDrone<MotorClass, CoordinateSystem>::solve() {
      * System resolution;
      */
 
-    //Create the linear system that will represent our physical model;
-    LinearSystem *system = new LinearSystem(nbMotors, nb_coordinates);
+    //TODO
 
     //Now, add the motors equations to the system;
-    addMotorsEquations(&coordinate_system, system);
+    //addMotorsEquations(&coordinate_system, system);
 
     //Then, let the sub-class add its own relations;
-    createRelations(system);
+    //createRelations(system);
 
     //Now, extract the control matrix, for the threshold check;
-    const Matrix *control_matrix = system->extractMatrix();
+    const Matrix *control_matrix = new Matrix();//TODO system->extractMatrix();
 
 
     /*
@@ -349,8 +349,12 @@ void MatrixDrone<MotorClass, CoordinateSystem>::solve() {
      * System resolution;
      */
 
+    //Create the linear system that will represent our physical model;
+    LinearSystem *system = new LinearSystem(nbMotors);
+
+
     //Solve the system, and get the control matrix;
-    powerMatrix = system->solveSystem();
+    //powerMatrix = system->solve();
 
     //Delete the system;
     delete system;

@@ -31,7 +31,7 @@
 #ifndef TRACER_TASKPROGRAMMER_H
 #define TRACER_TASKPROGRAMMER_H
 
-#include <DataStructures/Vectors/PointerVector.h>
+#include <DataStructures/Containers/PointerContainer.h>
 #include "stdint.h"
 #include "ProgrammedTask.h"
 

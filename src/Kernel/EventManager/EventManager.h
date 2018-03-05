@@ -21,8 +21,8 @@
 #ifndef TRACER_EVENTMANAGER_H
 #define TRACER_EVENTMANAGER_H
 
-#include <DataStructures/Vectors/ValueSet.h>
-#include <DataStructures/Vectors/PointerVector.h>
+#include <DataStructures/Containers/ValueSet.h>
+#include <DataStructures/Containers/PointerContainer.h>
 
 #include "stdint.h"
 

@@ -6,11 +6,13 @@
 
 #include "math.h"
 
-void Vector3DToAngles::convert(Vector3D *vector, float *ax, float *ay, float *az) {
+void Vector3DToAngles::convert(Vector3D &vector, Triplet &angles) {
 
-    *ax = atan2f(vector->z, vector->y);
-    *ay = atan2f(vector->x, vector->z);
-    *az = atan2f(vector->y, vector->x);
+    const float *const v = vector.get_data();
+
+    angles.set(0, atan2f(v[2], v[1]));
+    angles.set(1, atan2f(v[0], v[2]));
+    angles.set(2, atan2f(v[1], v[0]));
 
 }
 
