@@ -446,8 +446,8 @@ void MPU6050::compute_accelerometer_data() {
 
     //Convert data to unitary vector
     accelerometer_data.set(0, (float) accelerometer_raws[0]);
-    accelerometer_data.set(0, (float) accelerometer_raws[1]);
-    accelerometer_data.set(0, (float) accelerometer_raws[2]);
+    accelerometer_data.set(1, (float) accelerometer_raws[1]);
+    accelerometer_data.set(2, (float) accelerometer_raws[2]);
 
     //Normalise the vector;
 
@@ -485,10 +485,10 @@ void MPU6050::compute_gyrometer_data() {
  * get_acceleration_values : this function returns acceleration coordinates from caches in the class;
  */
 
-void MPU6050::get_accelerometer_data(Angles3D &output) {
+void MPU6050::get_accelerometer_data(Vector3D &output) {
 
     //Simply update the three variables;
-    output.clone(output);
+    output.clone(accelerometer_data);
 
 }
 
@@ -500,6 +500,6 @@ void MPU6050::get_accelerometer_data(Angles3D &output) {
 void MPU6050::get_gyrometer_data(Triplet &output) {
 
     //Simply update the three variables;
-    output.clone(output);
+    output.clone(gyrometer_data);
 
 }

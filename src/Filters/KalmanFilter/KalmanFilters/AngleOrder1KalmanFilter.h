@@ -8,7 +8,7 @@
 
 #include <Filters/KalmanFilter/KalmanFilter.h>
 
-class AngleOrder1KalmanFilter : private KalmanFilter {
+class AngleOrder1KalmanFilter : protected KalmanFilter {
 
 public:
 
@@ -28,6 +28,16 @@ public:
 
     //Get the computed state;
     void getState(float &angle, float &angular_speed, float &gyro_biais);
+
+
+    //-------------------------- Wrappers --------------------------
+
+    //Measure wrapper;
+    void wrapMeasure(float *measure) override;
+
+    //State wrapper;
+    void wrapState(float *state) override;
+
 
 };
 

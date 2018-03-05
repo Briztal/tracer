@@ -10,12 +10,13 @@
 
 
 #include <DataStructures/CoordinateSystems/Vector3D.h>
+#include <DataStructures/CoordinateSystems/Angles3D.h>
 
 class Vector3DToAngles {
 
 public:
 
-    static void convert(Vector3D &vector, Triplet &angles);
+    static void convert(Vector3D &vector, Angles3D &angles);
 
 };
 

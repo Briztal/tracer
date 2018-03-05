@@ -6,7 +6,7 @@
 
 #include "math.h"
 
-void Vector3DToAngles::convert(Vector3D &vector, Triplet &angles) {
+void Vector3DToAngles::convert(Vector3D &vector, Angles3D &angles) {
 
     const float *const v = vector.get_data();
 

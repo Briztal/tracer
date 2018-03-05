@@ -2,6 +2,7 @@
 // Created by root on 3/4/18.
 //
 
+#include <DataStructures/CoordinateSystems/Angles3D.h>
 #include "AngleOrder1KalmanFilter.h"
 
 /*
@@ -42,9 +43,7 @@ void AngleOrder1KalmanFilter::initialise(float period, Matrix &process_noise, Ma
      *
      */
 
-
-    transformation.setCoefficient(0, 0, 1);
-    transformation.setCoefficient(1, 1, 1);
+    transformation.setToIdentity();
     transformation.setCoefficient(0, 2, 1);
 
     //Finally, let's initialise all matrices;
@@ -77,7 +76,7 @@ void AngleOrder1KalmanFilter::getState(float &angle, float &angular_speed, float
     float state[3];
 
     //Get state;
-    KalmanFilter::compute(state);
+    KalmanFilter::getState(state);
 
     //Copy state;
     angular_speed = state[0];
@@ -85,3 +84,25 @@ void AngleOrder1KalmanFilter::getState(float &angle, float &angular_speed, float
     biais = state[2];
 
 }
+
+//------------------------------------------------------ Wrappers ------------------------------------------------------
+
+
+void AngleOrder1KalmanFilter::wrapMeasure(float *measure) {
+
+    //Simply wrap the angle;
+    measure[1] = Angles3D::wrapAngle_PI(measure[1]);
+}
+
+void AngleOrder1KalmanFilter::wrapState(float *state) {
+
+    //Simply wrap the angle;
+    state[1] = Angles3D::wrapAngle_PI(state[1]);
+
+}
+
+
+
+
+
+

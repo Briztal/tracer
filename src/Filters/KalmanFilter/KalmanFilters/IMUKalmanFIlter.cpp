@@ -81,9 +81,14 @@ void IMUKalmanFIlter::initialise(float measure_period, Matrix **process_noises, 
         //Initialise the i-th filter, with
         filters[i].initialise(measure_period, *process_noises[i], *measure_noises[i]);
 
-                //TODO ENLEVER
+
+        //TODO ENLEVER
         float initial[2]{0};
-        filters[i].setInitialState(initial, *process_noises[i]);
+        Matrix initialP(3,3, false);
+        initialP.setToIdentity();
+        initialP.divideBy((10));
+
+        filters[i].setInitialState(initial, initialP);
 
     }
 
@@ -118,16 +123,12 @@ void IMUKalmanFIlter::update(Vector3D &sum_forces, Triplet &gyro_data) {
     const float *const gyro = gyro_data.get_data();
     const float *const angles_p = gravity_angles.get_data();
 
-    std_out("angles : "+String(gravity_angles.toString()));
-
     //Update all filters;
     for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {
 
         //Update the filter;
         filters[axis_index].compute(angles_p[axis_index], gyro[axis_index]);
 
-        //TODO REMOVE
-        break;
 
     }
 
@@ -140,14 +141,15 @@ void IMUKalmanFIlter::update(Vector3D &sum_forces, Triplet &gyro_data) {
     for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {
 
         float angle, speed, biais;
+
         //Get the computed state from the filter;
         filters[axis_index].getState(angle, speed, biais);
 
         //Copy the angular speed into the class's array;
-        angularSpeeds.set(axis_index, angle);
+        angularSpeeds.set(axis_index, speed);
 
         //Copy the gravity angle into the local array;
-        gravity_angles.set(axis_index, speed);
+        gravity_angles.set(axis_index, angle);
 
     }
 

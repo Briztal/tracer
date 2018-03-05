@@ -41,7 +41,7 @@ public:
     Matrix(uint8_t height, uint8_t width, bool initialise);
 
     //The copy constructor : takes a matrix, and duplicates it entirely;
-    Matrix(const Matrix & src, bool copy);
+    Matrix(const Matrix &src, bool copy);
 
     //The copy constructor with size specs : creates a matrix with the given size and copies all possible coeffs;
     Matrix(uint8_t height, uint8_t width, const Matrix &src);
@@ -83,7 +83,7 @@ public:
     const uint8_t getHeight() const;
 
     //Width getter;
-    const uint8_t getWidth() const ;
+    const uint8_t getWidth() const;
 
     //-------------------------- Coefficient-wise operations --------------------------
 
@@ -120,10 +120,10 @@ public:
 
 
     //Copy the content of src in our data array;
-    void setTo(const Matrix & src);
+    void setTo(const Matrix &src);
 
     //Subtract the given matrix to our data array;
-    void subtract(const Matrix & src);
+    void subtract(const Matrix &src);
 
     //Divide all coefficients by a given denominator;
     void divideBy(float denominator);
@@ -147,8 +147,8 @@ private:
 
 public:
 
-     //Transpose the matrix;
-     virtual void transpose();
+    //Transpose the matrix;
+    virtual void transpose();
 
 
     //-------------------------- Inter-matrix operations --------------------------
@@ -156,13 +156,13 @@ public:
 public:
 
     virtual //this <- A * B; sizes are checked;
-    void multiply(const Matrix & A, const Matrix & B);
+    void multiply(const Matrix &A, const Matrix &B);
 
     //this <- R + A * B; sizes are checked;
-    void multiplyAndAdd(const Matrix & A, const Matrix & B);
+    void multiplyAndAdd(const Matrix &A, const Matrix &B);
 
     //this <- R - A * B; sizes are checked;
-    void multiplyAndSubtract(const Matrix & A, const Matrix & B);
+    void multiplyAndSubtract(const Matrix &A, const Matrix &B);
 
 
     //-------------------------- Linear operation --------------------------
@@ -179,10 +179,10 @@ public:
     bool getInverse(Matrix &dst) const;
 
     //Compute the transposed of the matrix;
-    void setTransposed(const Matrix & src);
+    void setTransposed(const Matrix &src);
 
     //Compute the cofactor matrix;
-    bool getCofactorsMatrix(Matrix & dst) const;
+    bool getCofactorsMatrix(Matrix &dst) const;
 
     //Create a sub_matrix;
     //matrix &subMatrix(uint8_t target_height, uint8_t target_width) const;

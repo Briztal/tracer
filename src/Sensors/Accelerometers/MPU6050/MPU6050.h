@@ -93,7 +93,7 @@ public:
 public:
 
     //Get the acceleration values;
-    void get_accelerometer_data(Angles3D &output);
+    void get_accelerometer_data(Vector3D &output);
 
     //Get the gyrometer values;
     void get_gyrometer_data(Triplet &output);
@@ -104,7 +104,7 @@ public:
 private:
 
     //The accelerometer array;
-    Angles3D accelerometer_data;
+    Vector3D accelerometer_data;
 
     //The gyrometer array;
     Triplet gyrometer_data;

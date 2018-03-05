@@ -56,9 +56,11 @@ public:
 
 private:
 
-    bool stateInitialised;
-
+    //The matrices initialisation flag. Set when all matrices have been initialised;
     bool matricesInitialised;
+
+    //The state initialisation flag; set when the initial state has been initialised;
+    bool stateInitialised;
 
     //The current state;
     float *const x;
@@ -112,7 +114,7 @@ private:
 public:
 
     //Compute a new state, with a new value;
-    void compute(const float *const measure);
+    void compute(float *const measure);
 
 
 private:
@@ -121,7 +123,7 @@ private:
     void predict(float *prediction, Matrix &prediction_P);
 
     //Compute the innovation;
-    void computeInnovation(const float *const prediction, const float *const measure, float *innovation);
+    void computeInnovation(const float *prediction, const float *measure, float *innovation);
 
     //compute the Kalman Gain
     void computeKalmanGain(const Matrix &prediction_P, Matrix &kalmanGain);
@@ -129,6 +131,19 @@ private:
     //Update the state with all computed values;
     void update(const float *const prediction, const float *const innovation, const Matrix &prediction_P,
                 const Matrix &kalmanGain);
+
+
+    /*
+     * post process methods to wrap vectors in their coordinate systems;
+     */
+
+protected:
+
+    //A post process function to eventually wrap the innovation in the correct coordinate system;
+    virtual void wrapMeasure(float *measure) {};
+
+    //A post process function to eventually wrap the state in the correct coordinate system;
+    virtual void wrapState(float *innovation) {};
 
 
     //------------------------ Query ------------------------

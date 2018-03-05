@@ -27,14 +27,17 @@ public:
     //Modify an angle's value;
     void set(uint8_t index, float value) override;
 
+
+public:
+
+    //Set an angle in ]pi; pi]
+    static float wrapAngle_PI(float angle);
+
+
 private:
 
     //Set all angles in ]-pi; pi]
-    void wrapAngles();
-
-    //Set an angle in ]pi; pi]
-    float wrapAngle(float angle);
-
+    void wrapAngles_PI();
 
 
 };

@@ -1026,25 +1026,40 @@ bool Matrix::getInverse(Matrix &dst) const {
 
 void Matrix::setTransposed(const Matrix &src) {
 
+    //If matrices don't have the same format :
+    if ((src.height != width) || (src.width != height)) {
+
+        //Log;
+        std_out("Error in Matrix::setTransposed : matrices don't have symmetric dimensions");
+
+        //Initialise data for safety;
+        setToIdentity();
+
+        //Fail;
+        return;
+
+    }
+
     //Our data pointer;
-    const float *data_pointer = src.data_array;
+    float *data_pointer = data_array;
 
     //Cache the width of m;
-    const uint8_t m_width = height;
+    const uint8_t src_width = src.width;
 
-    //For every row : (m_width = height, more optimised like this);
-    for (uint8_t row_index = 0; row_index < m_width; row_index++) {
+    //For every row : (src_width = height, more optimised like this);
+    for (uint8_t row_index = 0; row_index < src_width; row_index++) {
 
-        float *output_pointer = data_array + row_index;
+        //Cache the source pointer
+        const float *src_pointer = src.data_array + row_index;
 
         //For every coefficient in the line :
         for (uint8_t column_index = width; column_index--;) {
 
             //Set the m[column_index, row_index] to our data;
-            *output_pointer = *(data_pointer++);
+            *(data_pointer++) = *(src_pointer);
 
             //Increase the output pointer of height (go one line below)
-            output_pointer += height;
+            src_pointer += src_width;
 
         }
 

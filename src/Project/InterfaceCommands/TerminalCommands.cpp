@@ -661,16 +661,26 @@ task_state_t TerminalCommands::test_mpu(char *) {
     uint32_t period_ms = 10;
 
     Matrix process_noise(3, 3, false);
-    Matrix measure_noise(3, 3, false);
+    Matrix measure_noise(2, 2, false);
     process_noise.setToIdentity();
     measure_noise.setToIdentity();
-    process_noise.divideBy(100);
-    measure_noise.divideBy(100);
 
-    IMUKalmanFIlter filter((float)0.01, process_noise, measure_noise);
+    process_noise.divideBy(2);
+    measure_noise.divideBy(2);
 
-    Vector3D accelero = Vector3D(0,0,-1);
-    Triplet gyro(0,0,0);
+    process_noise.setCoefficient(0, 0, 0.5);
+    process_noise.setCoefficient(1, 1, 0.01);
+    process_noise.setCoefficient(2, 2, 0.5);
+
+    //Gyro speed is not reliable;
+    measure_noise.setCoefficient(0, 0, 0.01);
+    //Acc measure is reliable
+    measure_noise.setCoefficient(1,1, 0.1);
+
+    IMUKalmanFIlter filter((float) 0.01, process_noise, measure_noise);
+
+    Vector3D accelero = Vector3D(0, 0, -1);
+    Triplet gyro(0, 0, 0);
 
     uint32_t time = millis() + period_ms;
 
@@ -679,11 +689,9 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
     while (true) {
 
-        /*
-
         mpu->compute_data();
 
-        mpu->get_accelerometer_data(&accelero);
+        mpu->get_accelerometer_data(accelero);
 
         mpu->get_gyrometer_data(gyro);
 
@@ -693,7 +701,6 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
         //std_out("gx : " + String(gyro[0]) + " gy " + String(gyro[1]) + " gz " + String(gyro[2]));
 
-                  */
 
 
         filter.update(accelero, gyro);
@@ -702,15 +709,18 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
         filter.getGyroSpeeds(gyro);
 
-        std_out("Vector " + accelero.toString() + " " + gyro.toString());
+        std_out("\n");
+        std_out("Acc " + accelero.toString());
+        std_out("Gyr " + gyro.toString());
 
-        while(millis() < time);
+        while (millis() < time);
 
         time += period_ms;
 
     }
 
     return complete;
+
 }
 
 
@@ -718,50 +728,74 @@ task_state_t TerminalCommands::test_kalman(char *) {
 
 
     Matrix process_noise(3, 3, false);
-    Matrix measure_noise(3, 3, false);
+    Matrix measure_noise(2, 2, false);
 
     process_noise.setToIdentity();
-    process_noise.divideBy(100);
+    process_noise.divideBy(10000);
 
     measure_noise.setToIdentity();
-    measure_noise.divideBy(100);
+    measure_noise.divideBy(1000);
 
     std_out(process_noise.toString());
 
     std_out(measure_noise.toString());
 
 
-    float initial[3] {0, 0, 0};
+    float initial[3]{0.5, 0, 0};
 
     Matrix initialP(3, 3, false);
     initialP.setToIdentity();
     initialP.divideBy(10);
 
+    AngleOrder1KalmanFilter filter;
 
-    Matrix prediction(3, 3, false);
-
-    prediction.setToIdentity();
-
-    prediction.setCoefficient(1, 0, 0.01);
-
-    Matrix transformation(2, 3, false);
-
-    transformation.setCoefficient(0, 0, 1);
-    transformation.setCoefficient(1, 1, 1);
-    transformation.setCoefficient(0, 2, 1);
-
-
-    KalmanFilter filter(3, 2);
-
-    filter.initialise(prediction, transformation, process_noise, measure_noise);
+    filter.initialise(0.01, process_noise, measure_noise);
 
     filter.setInitialState(initial, initialP);
 
-    float data[2]{0, 1};
+    uint32_t period = 10;
+
+    uint32_t time = millis() + period;
+
+    MPU6050 *mpu = new MPU6050();
+
+    mpu->initialise_hardware();
+
+    mpu->initialise_data();
+
+    Vector3D accelero;
+    Triplet gyro;
+
+    while (true) {
 
 
-    while(true) {
-        //TODO TEST KALMAN
+        mpu->compute_data();
+
+        mpu->get_accelerometer_data(accelero);
+
+        std_out("accelero : " + String(accelero.toString()));
+
+
+        mpu->get_gyrometer_data(gyro);
+
+        Angles3D angles;
+
+        //TODO PROBLEM IN CONVERSION
+        Vector3DToAngles::convert(accelero, angles);
+        std_out("Angles : " + String(angles.toString()));
+
+        filter.compute(angles.get(0), gyro.get(0));
+
+        float angle, angular_speed, biais;
+        filter.getState(angle, angular_speed, biais);
+
+        //std_out("state : "+String(angle)+" "+String(angular_speed)+" "+String(biais)+"\n");
+
+        std_out("waiting");
+        while (millis() < time);
+
+        time += period;
+
     }
 
 }
