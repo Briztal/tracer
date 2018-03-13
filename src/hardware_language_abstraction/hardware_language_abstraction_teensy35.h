@@ -46,6 +46,11 @@
 #include "Arduino.h"
 #include "EEPROM.h"
 #include "i2c_t3.h"
+#include "DataStructures/string.h"
+
+#define String SUUS
+
+
 
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
@@ -67,9 +72,6 @@
 
 //----------------------------------------------------STRING------------------------------------------------------------
 
-#define string_t String
-
-#define str(t) String(t)
 
 #define str_to_float(s) strtof(s, NULL);
 
@@ -269,8 +271,10 @@ public:\
     static inline uint16_t available() {return (uint16_t)(serial).available();}\
     static inline void write(char c) {(serial).print(c);}\
     static inline char read() {return (char)(serial).read();}\
-    static inline void send_str(string_t c) {(serial).print(c);}\
+    static inline void send_str(string &c) {(serial).print(c.data());}\
 };
+
+
 
 /*
  * We define here 4 serial adapters : the usb serial and serial 1, 2 and 3.

@@ -25,7 +25,7 @@
 #include "ValueContainer.h"
 
 template<typename T>
-class ValueSet : public ValueVector<T> {
+class ValueSet : public ValueContainer<T> {
 
 public:
 
@@ -49,7 +49,7 @@ public:
  */
 
 template<class T>
-ValueSet<T>::ValueSet(uint8_t max_size) : ValueVector<T>(max_size) {}
+ValueSet<T>::ValueSet(uint8_t max_size) : ValueContainer<T>(max_size) {}
 
 
 /*
@@ -63,7 +63,7 @@ bool ValueSet<T>::add(T new_element) {
     uint8_t index = 0;
 
     //If the element is already present :
-    if (ValueVector<T>::isElementPresent(new_element, &index)) {
+    if (ValueContainer<T>::isElementPresent(new_element, &index)) {
 
         //Fail;
         return false;
@@ -71,7 +71,7 @@ bool ValueSet<T>::add(T new_element) {
     }
 
     //If it is not present, try to add it;
-    return ValueVector<T>::add(new_element);
+    return ValueContainer<T>::add(new_element);
 
 }
 
@@ -91,7 +91,7 @@ bool ValueSet<T>::remove(T element) {
     uint8_t index = 0;
 
     //If the element is not present :
-    if (!ValueVector<T>::isElementPresent(element, &index)) {
+    if (!ValueContainer<T>::isElementPresent(element, &index)) {
 
         //Fail, nothing to remove;
         return false;
@@ -99,7 +99,7 @@ bool ValueSet<T>::remove(T element) {
     }
 
     //Remove the element by index;
-    ValueVector<T>::remove(index);
+    ValueContainer<T>::remove(index);
 
     //An element has been deleted, return true;
     return true;
@@ -117,7 +117,7 @@ template<class T>
 bool ValueSet<T>::remove(T element, uint8_t *old_index) {
 
     //If the element is not present :
-    if (!ValueVector<T>::isElementPresent(element, old_index)) {
+    if (!ValueContainer<T>::isElementPresent(element, old_index)) {
 
         //Fail, nothing to remove;
         return false;
@@ -125,7 +125,7 @@ bool ValueSet<T>::remove(T element, uint8_t *old_index) {
     }
 
     //Remove the element by index;
-    ValueVector<T>::remove(*old_index);
+    ValueContainer<T>::remove(*old_index);
 
     //An element has been deleted, return true;
     return true;

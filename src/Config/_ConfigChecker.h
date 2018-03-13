@@ -38,28 +38,28 @@ class _ConfigChecker {
 public:
 
     //Call all unit config check;
-    static bool check_config(String *message);
+    static bool check_config(string &message);
 
 
 private:
 
     //Check the actions configuration file;
-    static bool check_actions(String *message);
+    static bool check_actions(string &message);
 
     //Check the control structure;
-    static bool check_transmission(String *message);
+    static bool check_transmission(string &message);
 
     //Check the control loops config;
-    static bool check_control_loops(String *message);
+    static bool check_control_loops(string &message);
 
     //Check all enabled controllers;
-    static bool check_controllers(String *message);
+    static bool check_controllers(string &message);
 
     //Check the sensors config;
-    static bool check_sensors(String *message);
+    static bool check_sensors(string &message);
 
     //Check the stepper control module config;
-    static bool check_stepper_control(String *message);
+    static bool check_stepper_control(string &message);
 
 };
 

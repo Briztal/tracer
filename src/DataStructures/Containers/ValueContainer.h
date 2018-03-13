@@ -20,11 +20,11 @@
 
 
 /*
- * The ValueVector template class : a Vector class, storing objects by value;
+ * The ValueContainer template class : a Vector class, storing objects by value;
  *
  * Elements are stored by value, contiguously.
  *
- * For storage by pointer, please check the ValueVector Class
+ * For storage by pointer, please check the ValueContainer Class
  */
 
 #ifndef TRACER_TVECTOR_H
@@ -34,17 +34,17 @@
 
 template<typename T>
 
-class ValueVector {
+class ValueContainer {
 
     //-------------------------------------- Initialisation --------------------------------------
 
 public:
 
     //Constructor;
-    explicit ValueVector(uint8_t max_size);
+    explicit ValueContainer(uint8_t max_size);
 
     //Destructor;
-    virtual ~ValueVector();
+    virtual ~ValueContainer();
 
 
     //-------------------------------------- Builders --------------------------------------
@@ -118,7 +118,7 @@ private:
  */
 
 template<class T>
-ValueVector<T>::ValueVector(uint8_t max_size) : size(0), max_size(max_size), elements(nullptr) {}
+ValueContainer<T>::ValueContainer(uint8_t max_size) : size(0), max_size(max_size), elements(nullptr) {}
 
 
 /*
@@ -126,7 +126,7 @@ ValueVector<T>::ValueVector(uint8_t max_size) : size(0), max_size(max_size), ele
  */
 
 template<class T>
-ValueVector<T>::~ValueVector() {
+ValueContainer<T>::~ValueContainer() {
 
     clear();
 
@@ -143,7 +143,7 @@ ValueVector<T>::~ValueVector() {
  */
 
 template<class T>
-bool ValueVector<T>::add(T new_element) {
+bool ValueContainer<T>::add(T new_element) {
 
 
     //Increment the size;
@@ -174,7 +174,7 @@ bool ValueVector<T>::add(T new_element) {
  */
 
 template<class T>
-T ValueVector<T>::remove(uint8_t index) {
+T ValueContainer<T>::remove(uint8_t index) {
 
     //If the index is invalid, stop here;
     if (index >= size)
@@ -219,7 +219,7 @@ T ValueVector<T>::remove(uint8_t index) {
  */
 
 template<class T>
-void ValueVector<T>::clear() {
+void ValueContainer<T>::clear() {
 
 
     //First, realloc tasks_array to zero-size;
@@ -245,7 +245,7 @@ void ValueVector<T>::clear() {
  */
 
 template<class T>
-bool ValueVector<T>::isElementPresent(T old_task, uint8_t *index) {
+bool ValueContainer<T>::isElementPresent(T old_task, uint8_t *index) {
 
     //Search for the task in the array;
     for (uint8_t task_index = 0; task_index < size; task_index++) {
@@ -277,7 +277,7 @@ bool ValueVector<T>::isElementPresent(T old_task, uint8_t *index) {
  */
 
 template<class T>
-uint8_t ValueVector<T>::getSize() {
+uint8_t ValueContainer<T>::getSize() {
 
     //Return the size lol;
     return size;
@@ -290,7 +290,7 @@ uint8_t ValueVector<T>::getSize() {
  */
 
 template<class T>
-T ValueVector<T>::getElement(uint8_t index) {
+T ValueContainer<T>::getElement(uint8_t index) {
 
     //If the index is invalid
     if (index >= size)
@@ -307,7 +307,7 @@ T ValueVector<T>::getElement(uint8_t index) {
  */
 
 template<class T>
-T ValueVector<T>::setElement(uint8_t index, T new_element) {
+T ValueContainer<T>::setElement(uint8_t index, T new_element) {
 
     //If the index is invalid
     if (index >= size)
@@ -331,13 +331,13 @@ T ValueVector<T>::setElement(uint8_t index, T new_element) {
  */
 
 template<class T>
-bool ValueVector<T>::resize(uint8_t new_size) {
+bool ValueContainer<T>::resize(uint8_t new_size) {
 
     //If the maximum number of tasks is reached :
     if (new_size >= max_size) {
 
         //Log;
-        std_out("Error in ValueVector::resize : the requested size is superior to the maximum size;");
+        std_out("Error in ValueContainer::resize : the requested size is superior to the maximum size;");
 
         //Fail;
         return false;
@@ -351,7 +351,7 @@ bool ValueVector<T>::resize(uint8_t new_size) {
     if (!new_array && new_size) {
 
         //Log;
-        std_out("Error in ValueVector::resize : the reallocation failed;");
+        std_out("Error in ValueContainer::resize : the reallocation failed;");
 
         //Fail;
         return false;

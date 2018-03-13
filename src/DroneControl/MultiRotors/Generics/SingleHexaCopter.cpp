@@ -79,7 +79,7 @@ void SingleHexaCopter::registerMotor(uint8_t motor_index, float x, float y, floa
             (x, y, z, phi, theta, direction, traction_coeff, torque_coeff, kV, voltage, max_signal, servo_index);
 
     //Register the motor;
-    SolidMultiRotor::addMotor(motor_data);
+    //SolidMultiRotor::addMotor(motor_data);
 
     //Mark the motor as registered;
     setRegistered(motor_index);

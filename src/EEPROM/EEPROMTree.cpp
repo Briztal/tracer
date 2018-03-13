@@ -26,7 +26,7 @@
  * Constructor : this function initialises all fields;
  */
 
-EEPROMTree::EEPROMTree(string_t *name, float *const data, float default_value) : name(name), data(data),
+EEPROMTree::EEPROMTree(string *name, float *const data, float default_value) : name(name), data(data),
                                                                                  default_value(default_value) {
 
     //Initialise the children pointer to nullptr;
@@ -73,7 +73,7 @@ const uint8_t EEPROMTree::getNbChildren() {
  * getName ; this function returns the name of the tree;
  */
 
-const String *EEPROMTree::getName() {
+const string *EEPROMTree::getName() {
 
     return name;
 }
@@ -89,7 +89,7 @@ void EEPROMTree::addChild(char *child_name) {
     if (_addChild()) {
 
         //Save the new child;
-        children[nb_children - 1] = new EEPROMTree(new String(child_name), nullptr, 0);
+        children[nb_children - 1] = new EEPROMTree(new string(child_name), nullptr, 0);
 
     }
 }
@@ -119,7 +119,7 @@ void EEPROMTree::addChild(EEPROMTree *child) {
 
 bool EEPROMTree::_addChild() {
 
-    //Serial.println(*name + " adding child : "+String(nb_children));
+    //Serial.println(*name + " adding child : "+string(nb_children));
 
     //Increment the number of children;
     nb_children++;
@@ -163,7 +163,7 @@ EEPROMTree *EEPROMTree::getChild(char *child_name) {
         EEPROMTree *child = children[child_id];
 
         //If the name of the child_id and our name are equal :
-        if (compareStrings(child_name, children[child_id]->name->c_str())) {
+        if (compareStrings(child_name, children[child_id]->name->data())) {
 
             //Return the cached pointer to the child;
             return child;
@@ -317,7 +317,7 @@ void EEPROMTree::setDataPointer(float *data_pointer) {
 
 
 /*
- * compareStrings : this function compares values of the two provided strings, and returns true if they are identical;;
+ * comparestrings : this function compares values of the two provided strings, and returns true if they are identical;;
  */
 
 bool EEPROMTree::compareStrings(const char *string0, const char *string1) {
@@ -346,10 +346,11 @@ bool EEPROMTree::compareStrings(const char *string0, const char *string1) {
  * printTree : this recursive function prints the whole tree;
  */
 
-String EEPROMTree::printTree() {
+string EEPROMTree::printTree() {
+
 
     //Initialise a string containing the name;
-    String s = *name + "\n";
+    string s = *name + "\n";
 
     //Add the content of each child;
     for (uint8_t child = 0; child < nb_children; child++) {

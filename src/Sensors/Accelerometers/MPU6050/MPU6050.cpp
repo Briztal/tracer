@@ -25,7 +25,6 @@
 #include "hardware_language_abstraction.h"
 
 
-
 #define N_ERROR                1000
 
 #define MPU_PERIOD_US        2000        //us
@@ -96,7 +95,7 @@
  * Constructor : initialises data arrays;
  */
 
-MPU6050::MPU6050() : accelerometer_data(0,0,1), gyrometer_data(0,0,0) {
+MPU6050::MPU6050() : accelerometer_data(0, 0, 1), gyrometer_data(0, 0, 0) {
 
     //Initialise the hardware;
     initialise_hardware();
@@ -304,8 +303,8 @@ void MPU6050::read_int16s(uint8_t address, uint8_t nb_ints, int16_t *int_array) 
     if (bytes_received != nb_bytes) {
 
         //Log;
-        std_out("Error in MPU6050::read_bytes : expected " + String(nb_bytes) + " bytes, received " +
-                String(bytes_received));
+        std_out(string("Error in MPU6050::read_bytes : expected ") + nb_bytes + " bytes, received " +
+                (uint16_t) bytes_received);
 
         //Fail
         return;
@@ -462,7 +461,7 @@ void MPU6050::compute_accelerometer_data() {
 
 void MPU6050::compute_gyrometer_data() {
 
-    float ratio = ((float) 1000  * (float) M_2_PI) / ((float) 65536 * (float(180)));
+    float ratio = ((float) 1000 * (float) M_2_PI) / ((float) 65536 * (float(180)));
 
     int16_t gyrometer_raws[3]{0};
 
@@ -472,7 +471,7 @@ void MPU6050::compute_gyrometer_data() {
     //Convert data to unitary vector
     gyrometer_data.set(0, gyrometer_raws[0] * ratio);
     gyrometer_data.set(1, gyrometer_raws[1] * ratio);
-    gyrometer_data.set(2,  gyrometer_raws[2] * ratio);
+    gyrometer_data.set(2, gyrometer_raws[2] * ratio);
 
     std_out(gyrometer_data.toString());
 

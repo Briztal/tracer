@@ -98,12 +98,12 @@ PID::PID_constants_t PID::getConstants() {
 void PID::EEPROMRegister(char *path, const char *name) {
 
     //Create the parent
-    EEPROMTree *tree = new EEPROMTree(new String(name), nullptr, 0);
+    EEPROMTree *tree = new EEPROMTree(new string(name), nullptr, 0);
 
     //Create sons; Default values will be the current ones;
-    tree->addChild(new EEPROMTree(new String("kp"), &kp, kp));
-    tree->addChild(new EEPROMTree(new String("ki"), &ki, ki));
-    tree->addChild(new EEPROMTree(new String("kd"), &kd, kd));
+    tree->addChild(new EEPROMTree(new string("kp"), &kp, kp));
+    tree->addChild(new EEPROMTree(new string("ki"), &ki, ki));
+    tree->addChild(new EEPROMTree(new string("kd"), &kd, kd));
 
     //Register the tree in the EEPROMMap;
     EEPROMMap::add_branch(path, tree);

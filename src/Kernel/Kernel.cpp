@@ -101,10 +101,10 @@ void Kernel::start() {
 void Kernel::check_config() {
 
     //Declare the error message;
-    string_t error_message = "";
+    string error_message = "";
 
     //If the config is ok, return;
-    if (_ConfigChecker::check_config(&error_message)) {
+    if (_ConfigChecker::check_config(error_message)) {
         return;
     }
 

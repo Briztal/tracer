@@ -42,19 +42,19 @@ class TerminalTree {
 public:
 
     //Constructor
-    TerminalTree(string_t *name, uint8_t nb_children, string_t *description, task_state_t (*const f)(char *));
+    TerminalTree(string *name, uint8_t nb_children, string *description, task_state_t (*const f)(char *));
 
     //Destructor
     ~TerminalTree();
 
     //The name of the command : a single non-spaced word.
-    const String *const name;
+    const string *const name;
 
     //The number of children
     const uint8_t nb_children;
 
     //The description
-    const string_t *const description;
+    const string *const description;
 
     //The function to execute
     task_state_t (*const function)(char *);

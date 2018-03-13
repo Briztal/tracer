@@ -43,7 +43,7 @@
 
 #include <Kernel/TaskScheduler/TaskScheduler.h>
 
-#define debug(s) TaskScheduler::log(String("debug ") + s);
+#define debug(s) TaskScheduler::log(string("debug ") + s);
 
 #define std_out(s) TaskScheduler::log(s)
 

@@ -90,7 +90,7 @@ void Terminal::init_message() {
 void Terminal::parse(char *message) {
 
     //Display the revieved command
-    log("\n" + str(PROJECT_NAME) + "> " + str(message));
+    log(string("\n") + PROJECT_NAME + "> " + message);
 
 
     //Initialise the current current_node to the root;
@@ -149,7 +149,7 @@ void Terminal::parse(char *message) {
 
         }
 
-        const char *node_identifier = (*current_sub_node->name).c_str();
+        const char *node_identifier = (*current_sub_node->name).data();
 
         //If the current command_identifier matches the current_node's name
         if (!strcmp(node_identifier, command_identifier)) {
@@ -229,7 +229,7 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
     //Display the last correct node's content.
 
     //initialise_hardware an empty string
-    String s = "";
+    string s = "";
 
     //Fill it with the name and description of direct nb_children
     for (uint8_t i = 0; i < log_node->nb_children; i++) {
@@ -356,7 +356,7 @@ void Terminal::confirm_command_execution(const controller_data_t *data) {
  * log : this function encodes a string and transmits it with the output protocol;
  */
 
-void Terminal::external_log(Protocol *protocol, const string_t msg) {
+void Terminal::external_log(Protocol *protocol, const string msg) {
 
     protocol->encode_data(msg + "\n");
 
@@ -367,7 +367,7 @@ void Terminal::external_log(Protocol *protocol, const string_t msg) {
  * log : this function encodes a string and transmits it with the provided protocol;
  */
 
-void Terminal::log(const string_t msg) {
+void Terminal::log(const string msg) {
 
     output_protocol->encode_data(msg + "\n");
 
@@ -381,7 +381,7 @@ void Terminal::log(const string_t msg) {
  *  It echoes text data on the link layer
  */
 
-void Terminal::respond(const string_t msg) {
+void Terminal::respond(const string msg) {
 
     output_protocol->encode_data(msg + "\n");
 
@@ -392,7 +392,7 @@ void Terminal::respond(const string_t msg) {
 #define m Terminal
 
 //Build the command tree
-const TerminalTree *m::command_tree = new TerminalTree(new String(), 0, new String(), nullptr);
+const TerminalTree *m::command_tree = new TerminalTree(new string(), 0, new string(), nullptr);
 
 Protocol *m::output_protocol;
 

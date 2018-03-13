@@ -27,7 +27,7 @@ class DroneTest : public TriRover {
 
 public:
 
-    void createMotors() override;
+    void createMotors();
 
 private:
 

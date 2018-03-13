@@ -128,6 +128,6 @@ uint16_t SqrtFastComputer::_sqrt_fast(bool positive_incr, uint16_t incr) {
 
 
 void SqrtFastComputer::print_data() {
-    std_out("sd : " + str(primary));
-    std_out("de : " + str(square_root));
+    std_out(string("sd : ") + primary);
+    std_out(string("de : ") + square_root);
 }

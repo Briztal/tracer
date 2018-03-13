@@ -90,7 +90,7 @@ void Steppers::enable(sig_t signature) {
 void Steppers::enable() {
 
 
-#define STEPPER(i, sig, rel, ps, pd, dp,  pinPower, ...) \
+#define STEPPER(i, sig, rel, ps, pd, dp, pinPower, ...) \
     digital_write(pinPower, LOW);\
     digital_write(13, LOW);
 
@@ -110,7 +110,7 @@ void Steppers::enable() {
 void Steppers::disable() {
 
 
-#define STEPPER(i, sig, rel, ps, pd, dp,  pinPower, ...) \
+#define STEPPER(i, sig, rel, ps, pd, dp, pinPower, ...) \
     digital_write(pinPower, HIGH);\
 
 
@@ -245,7 +245,7 @@ void Steppers::fastStep(sig_t id) {
 void Steppers::send_position() {
 
 #define STEPPER(i, ...) \
-    std_out("pos : "+str(i)+" "+str(pos##i));\
+    std_out(string("pos : ")+(uint8_t)i+" "+pos##i);\
 
 
 #include <Config/stepper_control_config.h>

@@ -390,7 +390,7 @@ void TaskProgrammer::_schedule_tasks(uint32_t current_time) {
             //Cache the remaining schedulings;
             uint32_t remaining_schedulings = task->remainingSchedulings;
 
-            std_out("Remaining schedulings : "+String(remaining_schedulings));
+            std_out(string("Remaining schedulings : ") + remaining_schedulings);
 
             //Set the scheduled flag;
             scheduled = true;

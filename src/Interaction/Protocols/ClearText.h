@@ -38,7 +38,7 @@ public :
     void decode_data();
 
     //Encode data on data_link;
-    void encode_data(String data);
+    void encode_data(string data);
 
     //Get a pointer to the data;
     char *get_data();

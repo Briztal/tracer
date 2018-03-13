@@ -43,7 +43,7 @@
 #include "MultiRotorMotorData.h"
 
 
-class SolidMultiRotor : public MatrixDrone<MultiRotorMotorData, MultiRotorCoordinateSystem> {
+class SolidMultiRotor : public MatrixDrone{
 
 
     //------------------------------- Init -------------------------------

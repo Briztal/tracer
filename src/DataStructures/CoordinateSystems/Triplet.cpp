@@ -123,8 +123,8 @@ const float *const Triplet::get_data() const {
 
 }
 
-String Triplet::toString() {
+string Triplet::toString() {
 
-    return String(data[0]) +" "+String(data[1])+" "+String(data[2]);
+    return string(data[0], 2) +" "+string(data[1], 2)+" "+string(data[2], 2);
 
 }

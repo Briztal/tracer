@@ -37,7 +37,7 @@ ClearText::ClearText(uint8_t size, uint16_t (*const available_f)(void), void (*c
  * encode_data : this function encodes a string, and sends it.
  */
 
-void ClearText::encode_data(String s) {
+void ClearText::encode_data(string s) {
 
     //For every char in the string :
     for (uint8_t i = 0; i < s.length(); i++) {

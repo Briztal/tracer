@@ -84,7 +84,7 @@ public:
     //Build and schedule a task;
     static bool
     schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                  void (*log_f)(Protocol *, const string_t), Protocol *protocol);
+                  void (*log_f)(Protocol *, const string), Protocol *protocol);
 
 
 private:
@@ -138,19 +138,19 @@ private:
 public:
 
     //Echo a message on the current log pipe; inline for efficiency.
-    static void log(String message);
+    static void log(string message);
 
 
 private:
 
     //The encoding function;
-    static void (*log_function)(Protocol *, String message);
+    static void (*log_function)(Protocol *, string message);
 
     //The communication log_protocol;
     static Protocol *log_protocol;
 
     //The encoding function;
-    static void (*default_log_function)(Protocol *, String message);
+    static void (*default_log_function)(Protocol *, string message);
 
     //The communication log_protocol;
     static Protocol *default_log_protocol;

@@ -98,12 +98,12 @@ uint8_t SubMovementManager::update_current_movement(movement_data_t *movement_da
 
 
 void SubMovementManager::display_distances() {
-    for (int i = 0; i < NB_STEPPERS; i++) {
-        std_out(str(i) + " ed : " + str(end_distances[i]) + " jd : " + str(jerk_distances[i]));
+    for (uint8_t i = 0; i < NB_STEPPERS; i++) {
+        std_out(string(i) + " ed : " + end_distances[i] + " jd : " + jerk_distances[i]);
     }
 
-    for (int i = 0; i < NB_STEPPERS; i++) {
-        std_out(str(i) + " ed : " + str(end_position[i]) + " jd : " + str(jerk_position[i]));
+    for (uint8_t i = 0; i < NB_STEPPERS; i++) {
+        std_out(string(i) + " ed : " + end_position[i] + " jd : " + jerk_position[i]);
     }
 }
 

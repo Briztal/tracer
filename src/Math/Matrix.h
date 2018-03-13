@@ -193,7 +193,7 @@ public:
 public:
 
     virtual //Create a string that display the matrix;
-    String toString() const;
+    string toString() const;
 
 };
 

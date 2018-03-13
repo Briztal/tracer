@@ -106,7 +106,7 @@ bool TerminalArguments::parse_arguments(char *argument_sequence) {
 
             //Display an error message
             std_out(
-                    "The TerminalArguments hasn't been configured to accept more than " + String(TERMINAL_MAX_ARGS_NB) +
+                    string("The TerminalArguments hasn't been configured to accept more than ") + (uint8_t)TERMINAL_MAX_ARGS_NB +
                     " content. Please check your terminal_interface_config.h file.");
 
             //Fail

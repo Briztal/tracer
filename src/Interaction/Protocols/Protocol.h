@@ -57,7 +57,7 @@ public:
     virtual void decode_data() = 0;
 
     //Encode a string of char;
-    virtual void encode_data(String data) = 0;
+    virtual void encode_data(string data) = 0;
 
     //Read_data data on the data_link;
     virtual void decode_char(char data) = 0;

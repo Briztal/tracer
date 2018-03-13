@@ -70,10 +70,10 @@ private :
 public :
 
     //System alias for echo;
-    static void log(const string_t msg);
+    static void log(const string msg);
 
     //System alias for echo;
-    static void external_log(Protocol *protocol, const string_t msg);
+    static void external_log(Protocol *protocol, const string msg);
 
     //System alias for send_position;
     static void send_position(float*){}
@@ -81,7 +81,7 @@ public :
 private:
 
     //System alias for a response (doesn't add //);
-    static void respond(const String msg);
+    static void respond(const string msg);
 
 
 

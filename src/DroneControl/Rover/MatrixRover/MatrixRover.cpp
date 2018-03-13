@@ -104,7 +104,7 @@ void MatrixRover::addMotorsEquations(RoverCoordinateSystem *coordinates, LinearS
         uint8_t coordinate_index = 0;
 
         //Cache the motor data pointer;
-        RoverMotorData *data = motors[motor_index];
+        RoverMotorData *data = 0;//motors[motor_index];
 
 
 
@@ -249,7 +249,7 @@ bool MatrixRover::checkControl(const Matrix *m, RoverCoordinateSystem *coordinat
     if (coordinates->coordinate##_en) {\
         \
         /*Determine the norm of the line*/\
-        float norm = infiniteNorm(m->getLine(line_counter++), nbMotors);\
+        float norm = 0;/*infiniteNorm(m->getLine(line_counter++), nbMotors);*/\
         \
         /*If the norm is below the threshold : */\
         if (norm < threshold) {\

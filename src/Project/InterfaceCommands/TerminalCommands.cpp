@@ -93,7 +93,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         float new_value = GET_ARG_VALUE('w');
 
         //Log message
-        std_out("Writing " + String(cache_path) + " to " + String(new_value));
+        std_out(string("Writing ") + string(cache_path) + " to " + new_value);
 
         //write the variable
         EEPROMMap::write_data_by_string(cache_path, new_value);
@@ -113,7 +113,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         if (EEPROMMap::read_data_by_string(cache_path, &read_value)) {
 
             //Log message
-            std_out("Value for " + String(name) + " : " + String(read_value));
+            std_out("Value for " + string(name) + " : " + read_value);
 
         }
 
@@ -615,11 +615,11 @@ task_state_t TerminalCommands::stepper_test(char *) {
 task_state_t TerminalCommands::temp_test(char *) {
 
 
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(847), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(845), 5));
 
 
     return complete;
@@ -697,9 +697,9 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
         delay(10);
 
-        //std_out("ax : " + String(accelero[0]) + " ay " + String(accelero[1]) + " az " + String(accelero[2]));
+        //std_out("ax : " + string(accelero[0]) + " ay " + string(accelero[1]) + " az " + string(accelero[2]));
 
-        //std_out("gx : " + String(gyro[0]) + " gy " + String(gyro[1]) + " gz " + String(gyro[2]));
+        //std_out("gx : " + string(gyro[0]) + " gy " + string(gyro[1]) + " gz " + string(gyro[2]));
 
 
 
@@ -773,7 +773,7 @@ task_state_t TerminalCommands::test_kalman(char *) {
 
         mpu->get_accelerometer_data(accelero);
 
-        std_out("accelero : " + String(accelero.toString()));
+        std_out("accelero : " + string(accelero.toString()));
 
 
         mpu->get_gyrometer_data(gyro);
@@ -782,14 +782,14 @@ task_state_t TerminalCommands::test_kalman(char *) {
 
         //TODO PROBLEM IN CONVERSION
         Vector3DToAngles::convert(accelero, angles);
-        std_out("Angles : " + String(angles.toString()));
+        std_out("Angles : " + string(angles.toString()));
 
         filter.compute(angles.get(0), gyro.get(0));
 
         float angle, angular_speed, biais;
         filter.getState(angle, angular_speed, biais);
 
-        //std_out("state : "+String(angle)+" "+String(angular_speed)+" "+String(biais)+"\n");
+        //std_out("state : "+string(angle)+" "+string(angular_speed)+" "+string(biais)+"\n");
 
         std_out("waiting");
         while (millis() < time);
@@ -815,7 +815,7 @@ task_state_t TerminalCommands::test_rotation(char *) {
 
     converter.compute(v0, data);
 
-    std_out("Angle : " + String(data.rotation_angle));
+    std_out(string("Angle : ") + data.rotation_angle);
 
     std_out(" x : " + data.rotation_vector.toString());
 

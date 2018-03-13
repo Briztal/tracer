@@ -97,10 +97,10 @@ public:
     //--------------------------------------------- Vars display ---------------------------------------------
 
 
-    String display() {
+    string display() {
 
-        return "\ninput " + String(insertion_index) + " output " + String(reading_index) + " nb_objects " +
-               String(nb_objects) + " nb_spaces " + String(nb_spaces);
+        return string("\ninput ") + string(insertion_index) + " output " + string(reading_index) + " nb_objects " +
+               string(nb_objects) + " nb_spaces " + string(nb_spaces);
 
     }
 

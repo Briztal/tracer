@@ -80,7 +80,7 @@ public:
 public:
 
     //String conversion;
-    String toString() const override {return Matrix::toString();};
+    string toString() const override {return Matrix::toString();};
 
 };
 

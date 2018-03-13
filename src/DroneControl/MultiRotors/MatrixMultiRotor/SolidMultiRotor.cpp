@@ -116,7 +116,7 @@ void SolidMultiRotor::addMotorsEquations(MultiRotorCoordinateSystem *coordinates
         uint8_t coordinate_index = 0;
 
         //Cache the motor data pointer;
-        MultiRotorMotorData *data = motors[motor_index];
+        MultiRotorMotorData *data = 0;//TODOmotors[motor_index];
 
         /*
          * The R_i coefficient will be used for all computations involving this motors;
@@ -286,7 +286,7 @@ bool SolidMultiRotor::checkControl(const Matrix *m, MultiRotorCoordinateSystem *
     if (coordinates->coordinate##_en) {\
         \
         /*Determine the norm of the line*/\
-        float norm = infiniteNorm(m->getLine(line_counter++), nbMotors);\
+        float norm = 1;/*infiniteNorm(m->getLine(line_counter++), nbMotors);*/\
         \
         /*If the norm is below the threshold : */\
         if (norm < threshold) {\

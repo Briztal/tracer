@@ -59,7 +59,7 @@ protected:
 
 public:
 
-    String toString();
+    string toString();
 
 };
 

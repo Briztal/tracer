@@ -92,7 +92,7 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
         if (nb_identifiers == GCODE_MAX_ARGS_NB) {
 
             //Display an error message
-            std_out("The Terminal hasn't been configured to accept more than " + String(GCODE_MAX_ARGS_NB) +
+            std_out(string("The Terminal hasn't been configured to accept more than ") + (uint8_t)GCODE_MAX_ARGS_NB +
                      " content. Please check your terminal_interface_config.h file.");
 
             //Fail

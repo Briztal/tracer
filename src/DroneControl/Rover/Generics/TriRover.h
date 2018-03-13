@@ -38,7 +38,7 @@ public:
     TriRover();
 
     //Destructor;
-    ~TriRover() override;
+    ~TriRover();
 
 
     //-------------------------------- Inherited methods from SolidMultiRotor --------------------------------
@@ -46,7 +46,7 @@ public:
 private:
 
     //Set the common (z, pitch, roll, yaw) coordinate system;
-    void setCoordinateSystem(RoverCoordinateSystem *coordinate_system) override;
+    void setCoordinateSystem(RoverCoordinateSystem *coordinate_system);
 
     //No relations to add;
     void createRelations(LinearSystem *system) {}
@@ -57,7 +57,7 @@ private:
 protected:
 
     //The function to implement in the sub-class to register motors;
-    void createMotors() override = 0;
+    void createMotors() ;
 
     //The function to register a motor;
     void

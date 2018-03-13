@@ -31,7 +31,7 @@ class EEPROMTree {
 public:
 
     //The Constructor;
-    EEPROMTree(string_t *name, float *, float default_value);
+    EEPROMTree(string *name, float *, float default_value);
 
     //The Destructor
     ~EEPROMTree();
@@ -43,7 +43,7 @@ public:
     const uint8_t getNbChildren();
 
     //Get the name;
-    const String *getName();
+    const string *getName();
 
     //Get the pointed value;
     const float getData();
@@ -85,7 +85,7 @@ public:
     //------------------------------------------- Info -------------------------------------------
 
     //Display the tree;
-    String printTree();
+    string printTree();
 
 
     //------------------------------------------- Fields -------------------------------------------
@@ -99,7 +99,7 @@ private:
     EEPROMTree **children;
 
     //The parameter name;
-    const String *name;
+    const string *name;
 
     //The pointer to the related data;
     float *data;

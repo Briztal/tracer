@@ -181,16 +181,16 @@ void CoefficientArray::multiply(float factor) {
  * toString : create a string that displays the content of the arrat;
  */
 
-String CoefficientArray::toString() {
+string CoefficientArray::toString() {
 
-    //Initialise a String;
-    String s = "";
+    //Initialise a string;
+    string s = "";
 
     //For each coefficient :
     for (uint8_t coeff_index = 0; coeff_index < size; coeff_index++) {
 
         //Add its string value to the string, followed by a space;
-        s += String(coefficients[coeff_index]) + " ";
+        s += string(coefficients[coeff_index], 2) + " ";
 
     }
 

@@ -84,7 +84,7 @@ void Orientation2DToRotation::compute(Vector3D &currentVector, rotation_data_t &
     //First, determine the cosine of the angle (dot product of vectors);
     float cos = currentVector.dotProduct(targetVector);
 
-    std_out("cos : " + String(cos));
+    std_out(string("cos : ") + cos);
 
     //Then, save the angle and complete;
     float angle = acosf(cos);
@@ -92,7 +92,7 @@ void Orientation2DToRotation::compute(Vector3D &currentVector, rotation_data_t &
     //First, cache the rotation vector, to avoid two pointer accesses;
     Vector3D rotation_vector(rotation_data.rotation_vector);
 
-    std_out("angle : " + String(angle));
+    std_out(string("angle : ") + angle);
 
 
     //If the rotation angle is close enough to zero :

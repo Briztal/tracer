@@ -24,7 +24,7 @@
  *
  * Elements must be pointers to objects, as the class handles itself deletion of unused elements;
  *
- * For storage by value, please check the ValueVector Class
+ * For storage by value, please check the ValueContainer Class
  */
 
 #ifndef TRACER_POINTERVECTOR_H

@@ -32,7 +32,7 @@ void EEPROMMap::initialise_data() {
     delete data_tree;
 
     //Instantiate a new data tree;
-    data_tree = new EEPROMTree(new String("root"), nullptr, 0);
+    data_tree = new EEPROMTree(new string("root"), nullptr, 0);
 
     //Enable the tree modification;
     lock_flag = false;
@@ -196,7 +196,7 @@ void EEPROMMap::_hash_tree(EEPROMTree *tree, uint8_t *index_p) {
     index = *index_p;
 
     //A cache for the name;
-    static const String *name;
+    static const string *name;
     name = tree->getName();
 
     //For each char in the name :
@@ -616,7 +616,7 @@ EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in, const bool authorise
         current_sub_tree = current_tree->getChild(i);
 
         //Cache the sub tree name;
-        const char *c = (*current_sub_tree->getName()).c_str();
+        const char *c = (*current_sub_tree->getName()).data();
 
         //If the current word matches the current_tree's name
         if (!strcmp(c, word)) {
@@ -660,7 +660,7 @@ EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in, const bool authorise
 void EEPROMMap::search_log(EEPROMTree *tree) {
 
     //Log message
-    String s = "Suggestions for " + *tree->getName() + " : ";
+    string s = string("Suggestions for ") + *tree->getName() + " : ";
 
     //Cache the number of children;
     uint8_t nb_children = tree->getNbChildren();
@@ -682,7 +682,7 @@ void EEPROMMap::search_log(EEPROMTree *tree) {
 bool EEPROMMap::lock_flag = false;
 
 //The data tree;
-EEPROMTree *EEPROMMap::data_tree = new EEPROMTree(new String("root"), nullptr, 0);
+EEPROMTree *EEPROMMap::data_tree = new EEPROMTree(new string("root"), nullptr, 0);
 
 //The hash array;
 uint8_t t_EP_hash[EEPROM_HASH_SIZE];

@@ -118,7 +118,7 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
     //Initialise the current current_tree to the root;
     const GCodeTree *current_tree = command_tree;
 
-    log("COMMAND : " + String(command_id));
+    log("COMMAND : " + string(command_id));
     //The current depth
     uint8_t depth = 0;
 
@@ -313,7 +313,7 @@ void GCode::confirm_command_execution(const controller_data_t *data) {
  * log : this function encodes a string and transmits it with the output protocol;
  */
 
-void GCode::external_log(Protocol *protocol, const string_t msg) {
+void GCode::external_log(Protocol *protocol, const string msg) {
 
     protocol->encode_data("// " + msg + "\n");
 
@@ -324,7 +324,7 @@ void GCode::external_log(Protocol *protocol, const string_t msg) {
  * log : this function encodes a string and transmits it with the provided protocol;
  */
 
-void GCode::log(const string_t msg) {
+void GCode::log(const string msg) {
 
     output_protocol->encode_data("// " + msg + "\n");
 
@@ -338,7 +338,7 @@ void GCode::log(const string_t msg) {
  *  It echoes text data on the link layer
  */
 
-void GCode::respond(const string_t msg) {
+void GCode::respond(const string msg) {
 
     output_protocol->encode_data(msg + "\n");
 

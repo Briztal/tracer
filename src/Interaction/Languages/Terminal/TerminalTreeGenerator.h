@@ -32,10 +32,10 @@
 class TerminalTreeGenerator {
 
     //Function to build the summary of the tree that will be used to generate the effective tree.
-    static void build_tree_summary(String *tree_summary);
+    static void build_tree_summary(string *tree_summary);
 
     //Function to get the number of children of a node in the tree.
-    static uint8_t get_sub_nodes_nb(String *tree_summary, uint16_t command_index);
+    static uint8_t get_sub_nodes_nb(string *tree_summary, uint16_t command_index);
 
 
 public:

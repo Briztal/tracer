@@ -30,7 +30,7 @@ ProgrammedTask::ProgrammedTask(task_pointer_t task, uint32_t first_time, uint32_
         : isSchedulable(false), task(task), nextExecutionTime(first_time), period(period),
           remainingSchedulings(nb_scheduling) {
 
-    std_out("first_time : " + String(first_time));
+    std_out("first_time : " + string(first_time));
 
 }
 

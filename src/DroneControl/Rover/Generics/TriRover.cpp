@@ -72,7 +72,7 @@ void TriRover::registerMotor(uint8_t motor_index, float x, float y, float phi, f
     RoverMotorData *motor_data = new RoverMotorData(x, y, phi, theta, radius, servo_index);
 
     //Register the motor;
-    MatrixRover::addMotor(motor_data);
+    //MatrixRover::addMotor(motor_data);
 
     //Mark the motor as registered;
     setRegistered(motor_index);

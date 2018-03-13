@@ -991,7 +991,7 @@ bool Matrix::getInverse(Matrix &dst) const {
     std_out("Original matrix :\n" + toString());
 
     //Display the determinant matrix;
-    std_out("Determinant : "+String(determinant));
+    std_out("Determinant : "+string(determinant));
 
     //Display the cofactor matrix;
     std_out("Cofactors matrix :\n" + cofactorMatrix->display());
@@ -1115,16 +1115,16 @@ bool Matrix::getCofactorsMatrix(Matrix &dst) const {
 }
 
 
-//------------------------------------------------------- String  ------------------------------------------------------
+//------------------------------------------------------- string  ------------------------------------------------------
 
 
 /*
  * display : this function creates a string that contains the matrix.
  */
-String Matrix::toString() const {
+string Matrix::toString() const {
 
     //Create the return string;
-    String s = "";
+    string s = "";
 
     //For every row :
     for (uint8_t row_index = 0; row_index < height; row_index++) {
@@ -1133,7 +1133,7 @@ String Matrix::toString() const {
         for (uint8_t column_index = 0; column_index < width; column_index++) {
 
             //Append the numeric value to the string;
-            s += String(get_coeff(row_index, column_index), 3) + " ";
+            s += string(get_coeff(row_index, column_index), 3) + " ";
 
         }
 

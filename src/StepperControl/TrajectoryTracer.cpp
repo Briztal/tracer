@@ -476,8 +476,8 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
 void TrajectoryTracer::discard_movement() {
 
-    debug("Discarding  : size  : " + str(movement_data_queue.available_objects()) + " nb_spaces " +
-          String(movement_data_queue.available_spaces()));
+    debug(string("Discarding  : size  : ") + movement_data_queue.available_objects() + " nb_spaces " +
+          movement_data_queue.available_spaces());
 
     //Reset the flag;
     bool queue_flag = false;
@@ -502,8 +502,8 @@ void TrajectoryTracer::discard_movement() {
 
     std_out("\n----------------------------------\n\nDISCARD\n\n-----------------------------\n");
 
-    debug("Discarded  : size  : " + str(movement_data_queue.available_objects()) + " nb_spaces " +
-          String(movement_data_queue.available_spaces()));
+    debug(string("Discarded  : size  : ") + movement_data_queue.available_objects() + " nb_spaces " +
+          movement_data_queue.available_spaces());
 
 }
 

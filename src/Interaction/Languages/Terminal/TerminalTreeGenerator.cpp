@@ -37,16 +37,16 @@
  *  This string is used to determine the number of nb_children of a particular node.
  */
 
-void TerminalTreeGenerator::build_tree_summary(String *tree_summary) {
+void TerminalTreeGenerator::build_tree_summary(string *tree_summary) {
 
     //Set the initial go_lower
-    tree_summary->append((char) 2);
+    tree_summary += ((char) 2);
 
-#define GO_LOWER(...) tree_summary->append((char)2);
+#define GO_LOWER(...) (tree_summary+=(char)2);
 
-#define GO_UPPER(...) tree_summary->append((char)0);
+#define GO_UPPER(...) (tree_summary+=(char)0);
 
-#define CREATE_LEAF(...) tree_summary->append((char)1);
+#define CREATE_LEAF(...) (tree_summary+=(char)1);
 
 #include "Config/controller_terminal_config.h"
 
@@ -67,10 +67,10 @@ void TerminalTreeGenerator::build_tree_summary(String *tree_summary) {
 TerminalTree *TerminalTreeGenerator::generate_tree() {
 
     //Local string
-    String s;
+    string s;
 
     //The pointer to pass;
-    String *tree_summary = &s;
+    string *tree_summary = &s;
 
     //Create the tree summary;
     build_tree_summary(tree_summary);
@@ -79,10 +79,10 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
     uint16_t command_counter = 0;
 
     //Get the number of sons of root.
-    uint8_t root_sons_nb = get_sub_nodes_nb(tree_summary,command_counter++);
+    uint8_t root_sons_nb = get_sub_nodes_nb(tree_summary, command_counter++);
 
     //Create the root tree.
-    TerminalTree *root = new TerminalTree(new String("root"), root_sons_nb, new String("root"), nullptr);
+    TerminalTree *root = new TerminalTree(new string("root"), root_sons_nb, new string("root"), nullptr);
 
     //Initialise the current tree and the history.
     TerminalTree *current_tree = root;
@@ -111,7 +111,7 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
     current_index = 0;\
     tree_history[depth] = current_tree;\
     tmp_nb = get_sub_nodes_nb(tree_summary, command_counter++);\
-    current_tree = new TerminalTree(new String(#name), tmp_nb, new String(#desc), nullptr);\
+    current_tree = new TerminalTree(new string(#name), tmp_nb, new string(#desc), nullptr);\
     depth++;
 
 
@@ -142,7 +142,7 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
      */
 
 #define CREATE_LEAF(name, function, desc)\
-    current_tree->set_child(current_index++, new TerminalTree(new String(#name), 0, new String(#desc), TerminalCommands::function), &tree_flag);\
+    current_tree->set_child(current_index++, new TerminalTree(new string(#name), 0, new string(#desc), TerminalCommands::function), &tree_flag);\
     command_counter++;
 
 #include "Config/controller_terminal_config.h"
@@ -162,7 +162,7 @@ TerminalTree *TerminalTreeGenerator::generate_tree() {
  *  string.
  */
 
-uint8_t TerminalTreeGenerator::get_sub_nodes_nb(String *tree_summary, uint16_t command_index) {
+uint8_t TerminalTreeGenerator::get_sub_nodes_nb(string *tree_summary, uint16_t command_index) {
 
     uint16_t max = (uint16_t) tree_summary->length();
 

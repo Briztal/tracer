@@ -195,7 +195,7 @@ void EventManager::trigger_event(const char *event_name) {
     if (!search_event(event_name, &index)) {
 
         //Log :
-        std_out("Error in EventManager::trigger_event : no event named "+String(event_name));
+        std_out("Error in EventManager::trigger_event : no event named "+string(event_name));
 
         //Fail;
         return;

@@ -83,7 +83,7 @@ command_line_t **GCodeTreeGenerator::build_commands(uint16_t *nb_commands_p) {
 #define GCODE_COMMAND(name_, function_)\
         commands[i++] = command_line = new command_line_t();\
         command_line->function = GCodeCommands::function_;\
-        save_command_name(command_line, String(#name_).c_str());\
+        save_command_name(command_line, string(#name_).data());\
 
 //Create all commands
 #include <Config/controller_gcode_config.h>
@@ -164,7 +164,7 @@ uint16_t GCodeTreeGenerator::get_command_nb() {
 
 void GCodeTreeGenerator::print_tree(const GCodeTree *tree) {
 
-    GCode::log(String(tree->name));
+    GCode::log(string(tree->name));
 
     for (uint8_t child_id = 0; child_id < tree->nb_children; child_id++) {
 
@@ -175,7 +175,7 @@ void GCodeTreeGenerator::print_tree(const GCodeTree *tree) {
         if (b) {
             print_tree(child);
         } else {
-            std_out("Error in GCodeTreeGenerator::print_tree : the child "+String(child_id)+" is not assigned");
+            std_out("Error in GCodeTreeGenerator::print_tree : the child "+string(child_id)+" is not assigned");
         }
     }
 

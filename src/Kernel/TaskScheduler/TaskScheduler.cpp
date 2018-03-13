@@ -78,7 +78,7 @@ void TaskScheduler::initialise_data() {
 
 
     //Initialise the default log environment;
-    default_log_function = (void (*)(Protocol *,const String)) Interaction::get_default_log_function();
+    default_log_function = (void (*)(Protocol *,const string)) Interaction::get_default_log_function();
 
     //Initialise the default protocol;
     default_log_protocol = Interaction::get_default_protocol();
@@ -193,7 +193,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
  */
 
 bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                                  void (*log_function)(Protocol *, const string_t), Protocol *protocol) {
+                                  void (*log_function)(Protocol *, const string), Protocol *protocol) {
 
     //Create a task to contain the provided data;
     task_t task = task_t();
@@ -304,7 +304,7 @@ bool TaskScheduler::is_sequence_locked(uint8_t type) {
 
 bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
 
-    std_out("NB TASK SEQUENCES "+String(NB_TASK_SEQUENCES));
+    std_out("NB TASK SEQUENCES "+string(NB_TASK_SEQUENCES));
     //If the sequence is locked, fail, no more tasks of this type are schedulable;
     if (TaskScheduler::is_sequence_locked(task_type)) {
         return false;
@@ -656,7 +656,7 @@ bool TaskScheduler::execute_task(task_t *task) {
 //-------------------------------------------------------- Log ---------------------------------------------------------
 
 
-void TaskScheduler::log(String message) {
+void TaskScheduler::log(string message) {
 
     //If both log function and log log_protocol have been assigned :
     if (log_function && log_protocol) {
@@ -711,13 +711,13 @@ Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
 bool m::flood_enabled = false;
 
 //The encoding function;
-void (*m::log_function)(Protocol *, String message) = nullptr;
+void (*m::log_function)(Protocol *, string message) = nullptr;
 
 //The communication log_protocol;
 Protocol *m::log_protocol = nullptr;
 
 //The default log function
-void (*m::default_log_function)(Protocol *, String message);
+void (*m::default_log_function)(Protocol *, string message);
 
 //The default log_protocol;
 Protocol *m::default_log_protocol;

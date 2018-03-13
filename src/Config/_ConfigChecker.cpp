@@ -24,7 +24,7 @@
 #include <Config/actions_config.h>
 
 
-bool _ConfigChecker::check_config(String *message) {
+bool _ConfigChecker::check_config(string &message) {
 
     //Check actions config;
     if (!check_actions(message)) return false;
@@ -52,28 +52,29 @@ bool _ConfigChecker::check_config(String *message) {
  * check_actions : this function verifies the action configuration;
  */
 
-bool _ConfigChecker::check_actions(String *message) {
+bool _ConfigChecker::check_actions(string &message) {
 
     //First, we will count the number of continuous actions.
 
     //Reset the counter;
     uint8_t counter =
 
-    //A macro to increment the counter for each action;
+            //A macro to increment the counter for each action;
 #define CONTINUOUS(...) 1 +
 
-    //Count every continuous action;
+            //Count every continuous action;
 #include <Config/actions_config.h>
 
-    //Undef the macro for safety
-#undef CONTINUOUS
+            //Undef the macro for safety
+            #undef CONTINUOUS
 
-     + 0;
+            +0;
 
     if (counter != NB_CONTINUOUS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_SERVOS)+" PWMGPIO declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + "There should be " + (uint8_t) NB_SERVOS + " PWMGPIO declarations, but only " + counter +
+                  " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -86,7 +87,7 @@ bool _ConfigChecker::check_actions(String *message) {
     //A macro to count controls;
 #define CONTINUOUS(i, ...) \
     if (counter != i) {\
-        *message = "PWM with index "#i" should have the index "+String(counter)+". Check actions_config.h.";\
+        message = string()+ "PWM with index "#i" should have the index "+counter+". Check actions_config.h.";\
         return false;\
     }\
     counter++;
@@ -103,7 +104,8 @@ bool _ConfigChecker::check_actions(String *message) {
     if (NB_SERVOS * 2500 > SERVO_PERIOD_US) {
 
         //Return a message and fail;
-        *message = "The servo period cannot contain the number of servos you specified. Check actions_config.h. Please reduce the amount of steppers or increase the period.";
+        message = string() +
+                  "The servo period cannot contain the number of servos you specified. Check actions_config.h. Please reduce the amount of steppers or increase the period.";
         return false;
 
     }
@@ -113,22 +115,23 @@ bool _ConfigChecker::check_actions(String *message) {
     //Reset the counter;
     counter =
 
-    //A macro to increment the counter for each action;
+            //A macro to increment the counter for each action;
 #define SERVO(...) 1 +
 
-    //Count every continuous action;
+//Count every continuous action;
 #include <Config/actions_config.h>
 
-    //Undef the macro for safety
+//Undef the macro for safety
 #undef SERVO
 
-    0;
+0;
 
     //Check the number of servos;
     if (counter != NB_SERVOS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_SERVOS)+" servo motor declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + string("There should be ") + (uint8_t) NB_SERVOS + " servo motor declarations, but only " + counter +
+                  " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -141,7 +144,7 @@ bool _ConfigChecker::check_actions(String *message) {
     //A macro to count controls;
 #define SERVO(i, ...) \
     if (counter != i) {\
-        *message = "Servo with index "#i" should have the index "+String(counter)+". Check actions_config.h.";\
+        message = string()+"Servo with index "#i" should have the index "+(uint8_t)counter+". Check actions_config.h.";\
         return false;\
     }\
     counter++;
@@ -162,7 +165,7 @@ bool _ConfigChecker::check_actions(String *message) {
  * check_transmission : This function verifies the configuration of the control chains;
  */
 
-bool _ConfigChecker::check_transmission(String *message) {
+bool _ConfigChecker::check_transmission(string &message) {
 
     /*
      * First, we will check the number of controls;
@@ -176,16 +179,17 @@ bool _ConfigChecker::check_transmission(String *message) {
             //Count every control;
 #include "Config/control_config.h"
 
-    //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
+            //Undef the macro for safety;
+            #undef EXTERNAL_CONTROL
 
-    0;
+            0;
 
     //Check the number of controls
     if (counter != NB_CONTROLS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_CONTROLS)+" controllers declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + "There should be " + (uint8_t) NB_CONTROLS + " controllers declarations, but only " +
+                  counter + " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -199,7 +203,7 @@ bool _ConfigChecker::check_transmission(String *message) {
     void (*functions[NB_CONTROLS])(void);
 
     //The counter will now count how many functions are in the array.
-    counter  = 0;
+    counter = 0;
 
     void (*function)(void);
 
@@ -212,7 +216,7 @@ bool _ConfigChecker::check_transmission(String *message) {
         /*If the function pointer matched one previously added;*/\
         if (function == functions[i]) {\
             /*Log and fail;*/\
-            *message = "the transmission layer "#transmission" is used multiple times. Check control_config.h.";\
+            message = string() + "the transmission layer "#transmission" is used multiple times. Check control_config.h.";\
             return false;\
         }\
     }\
@@ -232,7 +236,7 @@ bool _ConfigChecker::check_transmission(String *message) {
 }
 
 
-bool _ConfigChecker::check_control_loops(String *message) {
+bool _ConfigChecker::check_control_loops(string &message) {
 
     /*
      * First, we will check the number of control loops;
@@ -240,14 +244,14 @@ bool _ConfigChecker::check_control_loops(String *message) {
 
     uint8_t counter =
 
-        //A macro to count controls;
+            //A macro to count controls;
 #define LOOP_FUNCTION(...) 1 +
 
-        //Count every control;
+            //Count every control;
 #include "Config/control_loops_config.h"
 
-        //Undef the macro for safety;
-#undef LOOP_FUNCTION
+            //Undef the macro for safety;
+            #undef LOOP_FUNCTION
 
             0;
 
@@ -255,7 +259,8 @@ bool _ConfigChecker::check_control_loops(String *message) {
     if (counter != NB_LOOPS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_LOOPS)+" control loops declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + "There should be " + (uint8_t) NB_LOOPS + " control loops declarations, but only " +
+                  counter + " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -268,7 +273,7 @@ bool _ConfigChecker::check_control_loops(String *message) {
     //A macro to count controls;
 #define LOOP_FUNCTION(i, ...) \
     if (counter != i) {\
-        *message = "loop with index "#i" should have the index "+String(counter)+". Check control_loops_config.h.";\
+        message = string() + string("loop with index "#i" should have the index ")+counter+". Check control_loops_config.h.";\
         return false;\
     }\
     counter++;
@@ -291,16 +296,17 @@ bool _ConfigChecker::check_control_loops(String *message) {
 //Count every control;
 #include "Config/control_loops_config.h"
 
-    //Undef the macro for safety;
+//Undef the macro for safety;
 #undef GENERATE_PID
 
-    0;
+0;
 
     //Check the number of controls
     if (counter != NB_PIDS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_PIDS)+" pid declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + string("There should be ") + (uint8_t) NB_PIDS + " pid declarations, but only " + counter +
+                  " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -313,7 +319,7 @@ bool _ConfigChecker::check_control_loops(String *message) {
     //A macro to count controls;
 #define GENERATE_PID(i, ...) \
     if (counter != i) {\
-        *message = "pid with index "#i" should have the index "+String(counter)+". Check control_loops_config.h";\
+        message = string() + string("pid with index "#i" should have the index ")+counter+". Check control_loops_config.h";\
         return false;\
     }\
     counter++;
@@ -329,20 +335,20 @@ bool _ConfigChecker::check_control_loops(String *message) {
 }
 
 
-bool _ConfigChecker::check_controllers(String *message) {
+bool _ConfigChecker::check_controllers(string &message) {
 
     /*
      * GCode check : We will check that no GCode command has its size greater than the maximum size;
      */
 
     //Cache for the name;
-    String str_name;
+    string str_name;
 
     //Check a command size;
 #define GCODE_COMMAND(name, ...)\
     str_name = #name;\
     if(str_name.length() > GCODE_MAX_DEPTH) { \
-        *message = "GCode command "#name" is longer than "+String(GCODE_MAX_DEPTH)+" chars. Check controller_gcode_config.h";\
+        message = string()+"GCode command "#name" is longer than "+ (uint8_t)GCODE_MAX_DEPTH+" chars. Check controller_gcode_config.h";\
         return false;\
     }
 
@@ -357,7 +363,7 @@ bool _ConfigChecker::check_controllers(String *message) {
 
 }
 
-bool _ConfigChecker::check_sensors(String *message) {
+bool _ConfigChecker::check_sensors(string &message) {
 
     /*
      * Then, we will check if indices are consecutives;
@@ -368,7 +374,7 @@ bool _ConfigChecker::check_sensors(String *message) {
     //A macro to count controls;
 #define THERMISTOR(i, ...) \
     if (counter != i) {\
-        *message = "thermistor with index "#i" should have the index "+String(counter)+". Check sensors_config.h.";\
+        message = string()+ "thermistor with index "#i" should have the index "+counter+". Check sensors_config.h.";\
         return false;\
     }\
     counter++;
@@ -384,7 +390,7 @@ bool _ConfigChecker::check_sensors(String *message) {
 
 }
 
-bool _ConfigChecker::check_stepper_control(String *message) {
+bool _ConfigChecker::check_stepper_control(string &message) {
 
     //First, we will count the number of stepper motors.
 
@@ -400,12 +406,13 @@ bool _ConfigChecker::check_stepper_control(String *message) {
             //Undef the macro for safety
             #undef STEPPER
 
-            + 0;
+            +0;
 
     if (counter != NB_STEPPERS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_STEPPERS)+" stepper motor declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + string("There should be ") + (uint8_t) NB_STEPPERS + " stepper motor declarations, but only " +
+                  counter + " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -418,7 +425,7 @@ bool _ConfigChecker::check_stepper_control(String *message) {
     //A macro to check an index;
 #define STEPPER(i, ...) \
     if (counter != i) {\
-        *message = "Stepper with index "#i" should have the index "+String(counter)+". Check stepper_control_config.h.";\
+        message = string()+"Stepper with index "#i" should have the index "+counter+". Check stepper_control_config.h.";\
         return false;\
     }\
     counter++;
@@ -443,12 +450,14 @@ bool _ConfigChecker::check_stepper_control(String *message) {
 //Undef the macro for safety
 #undef STEPPER_DATA
 
-+ 0;
++0;
 
     if (counter != NB_STEPPERS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_STEPPERS)+" stepper data declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message =
+                string("There should be ") + (uint8_t) NB_STEPPERS + " stepper data declarations, but only " + counter +
+                " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -461,7 +470,7 @@ bool _ConfigChecker::check_stepper_control(String *message) {
     //A macro to check an index;
 #define STEPPER_DATA(i, ...) \
     if (counter != i) {\
-        *message = "Stepper data with index "#i" should have the index "+String(counter)+". Check stepper_control_config.h.";\
+        message = string() + "Stepper data with index "#i" should have the index "+counter+". Check stepper_control_config.h.";\
         return false;\
     }\
     counter++;
@@ -487,12 +496,13 @@ bool _ConfigChecker::check_stepper_control(String *message) {
 //Undef the macro for safety
 #undef CARTESIAN_GROUP
 
-+ 0;
++0;
 
     if (counter != NB_CARTESIAN_GROUPS) {
 
         //Return a message and fail;
-        *message = "There should be "+String(NB_CARTESIAN_GROUPS)+" cartesian group declarations, but only "+String(counter)+" are provided. Check stepper_config.h.";
+        message = string() + string("There should be ") + (uint8_t) NB_CARTESIAN_GROUPS +
+                  " cartesian group declarations, but only " + counter + " are provided. Check stepper_config.h.";
         return false;
 
     }
@@ -505,21 +515,21 @@ bool _ConfigChecker::check_stepper_control(String *message) {
 
 #define CHECK_STEPPER_INDEX(n, index) \
     if ((index) >= NB_STEPPERS)  {\
-        *message = " the cartesian group "#n" refers to the stepper "#index" that doesn't exist. Check stepper_control_config.h.";\
+        message = string() + " the cartesian group "#n" refers to the stepper "#index" that doesn't exist. Check stepper_control_config.h.";\
         return false;\
     }\
 
     //A macro to check an index;
 #define CARTESIAN_GROUP(i, a, b, c, speed) \
     if (counter != (i)) {\
-        *message = " the cartesian group with index "#i" should have the index "+String(counter)+". Check stepper_control_config.h.";\
+        message = string() + " the cartesian group with index "#i" should have the index "+counter+". Check stepper_control_config.h.";\
         return false;\
     }\
     CHECK_STEPPER_INDEX(i, a)\
     CHECK_STEPPER_INDEX(i, b)\
     CHECK_STEPPER_INDEX(i, c)\
     if ((float)(speed) <= 0.) {\
-        *message = " the maximum speed of the cartesian group with index "#i" is negative or null. Check stepper_control_config.h.";\
+        message = string() + " the maximum speed of the cartesian group with index "#i" is negative or null. Check stepper_control_config.h.";\
         return false;\
     }\
     counter++;
