@@ -71,7 +71,7 @@ string::~string() {
 //---------------------------------------- Primitive types constructors ----------------------------------------
 
 #define define_constructor(type) \
-string::string(type i) : string() { *this=i;}
+string::string(type i) : string() {Serial.println(#type); *this = i; }
 
 define_constructor(uint8_t);
 define_constructor(int8_t);
@@ -82,13 +82,16 @@ define_constructor(int32_t);
 define_constructor(uint64_t);
 define_constructor(int64_t);
 
+string::string(float i) : string() { *this = i; }
+
 
 /*
  * Constructor from char : initialises to empty and calls the char init function;
  */
 
-string::string(char i) : string() {
-    *this = ((int8_t) i);
+string::string(char c) : string() {
+    Serial.println("from char");
+    *this = c;
 }
 
 
@@ -97,9 +100,85 @@ string::string(char i) : string() {
  */
 
 string::string(float f, uint8_t resolution) : string() {
-    *this = (f, resolution);
+    this->setTo(f, resolution);
 }
 
+
+/*
+ * setTo : this function sets the string as the representation of the given float,
+ *  with the given resolution, ie the given number of figures after comma.
+ */
+
+void string::setTo(float f, uint8_t resolution) {
+
+    //Before anything, let's determine the sign and take the absolute value;
+    bool negative;
+    float abs = ((negative = (f < 0))) ? -f : f;
+
+    //First, we will determine the optimal function to call to convert the integer part; bounds will depend on the sign;
+    if (negative) {
+        if (f < (float) ((uint8_t) -1 >> 1)) {
+            //1 byte integer part :
+            *this = (int8_t) f;
+        } else if (f < (float) ((uint16_t) -1 >> 1)) {
+            //1 byte integer part :
+            *this = (int16_t) f;
+        } else if (f < (float) ((uint32_t) -1 >> 1)) {
+            //1 byte integer part :
+            *this = (int32_t) f;
+        } else {
+            //1 byte integer part :
+            *this = (int64_t) f;
+        }
+    } else {
+        if (f < (float) (uint8_t) -1) {
+            //1 byte integer part :
+            *this = (uint8_t) f;
+        } else if (f < (float) (uint16_t) -1) {
+            //1 byte integer part :
+            *this = (uint16_t) f;
+        } else if (f < (float) (uint32_t) -1) {
+            //1 byte integer part :
+            *this = (uint32_t) f;
+        } else {
+            //1 byte integer part :
+            *this = (uint64_t) f;
+        }
+
+    }
+
+    //Get the fractional part;
+    float frac = abs - (float) (uint64_t) f;
+
+    //Cache the insertion index;
+    uint16_t insertion_index = size - (uint16_t) 1;
+
+    //Resize to the array to contain the decimal part (plus dot);
+    resizeTo(size + resolution + (uint16_t) 1);
+
+    //Insert the dot;
+    buffer[insertion_index++] = '.';
+
+    //For each digit under the comma :
+    for (; resolution--;) {
+
+        //Multiply the fractionnal part by 10;
+        frac *= (float)10;
+
+        Serial.println(((uint8_t) frac + (uint8_t)48));
+        //Get the digit;
+        char c = (char) ((uint8_t) frac + (uint8_t)48);
+
+        frac -= (float)(uint8_t)frac;
+        //Insert the digit;
+        buffer[insertion_index++] = c;
+
+    }
+
+    //Null terminate the string;
+    buffer[insertion_index] = 0;
+
+}
 
 /*
  * Char array constructor : initialises the data to represent exactly the given char array;
@@ -109,9 +188,11 @@ string::string(float f, uint8_t resolution) : string() {
 
 string::string(const char *src) : string() {
 
+
     //If src is empty, nothing to do;
     if (!*src)
         return;
+
 
     //First, we must determine the size of the char array;
     const char *c_src = src;
@@ -125,6 +206,8 @@ string::string(const char *src) : string() {
     }
 
     resizeTo(src_size);
+
+    memcpy(buffer, src, size * sizeof(char));
 
 }
 
@@ -150,10 +233,13 @@ string &string::operator=(string &&src) {
  * Copy assignment operator : follows the copy and swap idiom;
  */
 
-string &string::operator=(string src) {
+string &string::operator=(const string &src) {
+
+    //Clone src;
+    string ssrc = src;
 
     //Swap objects;
-    swap(*this, src);
+    swap(*this, ssrc);
 
     //Return a reference to us;
     return *this;
@@ -167,8 +253,8 @@ string &string::operator=(string src) {
 
 string &string::operator=(char i) {
 
-    //Resize to size-1;
-    resizeTo(1);
+    //Resize to size_1;
+    resizeTo(2);
 
     //Copy the char at the first position;
     *buffer = i;
@@ -203,7 +289,7 @@ string &string::operator=(const char *src) {
     resizeTo(new_size);
 
     //Copy the whole src array to our buffer;
-    memcpy(buffer, src, new_size);
+    memcpy(buffer, src, new_size * sizeof(char));
 
     //Return a pointer to this;
     return *this;
@@ -278,74 +364,10 @@ impl_int_initialiser(64, 20);
  * float assignment operator;
  */
 
-string &string::operator=(float f, uint8_t resolution) {
+string &string::operator=(float f) {
 
-    //Before anything, let's determine the sign and take the absolute value;
-    bool negative;
-    float abs = ((negative = (f < 0))) ? -f : f;
+    setTo(f, 2);
 
-    //First, we will determine the optimal function to call to convert the integer part; bounds will depend on the sign;
-    if (negative) {
-        if (f < (float) ((uint8_t) -1 >> 1)) {
-            //1 byte integer part :
-            *this = (int8_t) f;
-        } else if (f < (float) ((uint16_t) -1 >> 1)) {
-            //1 byte integer part :
-            *this = (int16_t) f;
-        } else if (f < (float) ((uint32_t) -1 >> 1)) {
-            //1 byte integer part :
-            *this = (int32_t) f;
-        } else {
-            //1 byte integer part :
-            *this = (int64_t) f;
-        }
-    } else {
-        if (f < (float) (uint8_t) -1) {
-            //1 byte integer part :
-            *this = (uint8_t) f;
-        } else if (f < (float) (uint16_t) -1) {
-            //1 byte integer part :
-            *this = (uint16_t) f;
-        } else if (f < (float) (uint32_t) -1) {
-            //1 byte integer part :
-            *this = (uint32_t) f;
-        } else {
-            //1 byte integer part :
-            *this = (uint64_t) f;
-        }
-
-    }
-
-    //Get the fractional part;
-    float frac = abs - (float) (uint64_t) f;
-
-    //Cache the insertion index;
-    uint16_t insertion_index = size - (uint16_t) 1;
-
-    //Resize to the array to contain the decimal part (plus dot);
-    resizeTo(size + resolution + (uint16_t) 1);
-
-    //Insert the dot;
-    buffer[insertion_index++] = '.';
-
-    //For each digit under the comma :
-    for (; resolution--;) {
-
-        //Multiply the fractionnal part by 10;
-        frac *= 10;
-
-        //Get the digit;
-        char c = (char) ((uint8_t) (frac) + 30);
-
-        //Insert the digit;
-        buffer[insertion_index++] = c;
-
-    }
-
-    //Null terminate the string;
-    buffer[insertion_index] = 0;
-
-    //Return a pointer to this;
     return *this;
 
 }
@@ -397,7 +419,7 @@ string &string::operator+=(const char *src) {
  * add operator, for string reference;
  */
 
-string &string::operator+=(string &src) {
+string &string::operator+=(const string &src) {
 
     //Determine the new size
     uint16_t new_size = size + src.size - (uint16_t) 1;
@@ -409,7 +431,7 @@ string &string::operator+=(string &src) {
     resizeTo(new_size);
 
     //Copy src in the created space, and copy the '\0' at the end;
-    memcpy(buffer + old_size - 1, src.buffer, src.size);
+    memcpy(buffer + old_size - 1, src.buffer, src.size * sizeof(char));
 
     //Return a reference to us;
     return *this;
@@ -446,10 +468,10 @@ void string::left_concat(const char *src) {
     resizeTo(new_size);
 
     //First, shift our string of src_size positions on the right;
-    memcpy(buffer + src_size, buffer, old_size);
+    memcpy(buffer + src_size, buffer, old_size * sizeof(char));
 
     //Then, insert src's string in the fred space;
-    memcpy(buffer, src, src_size);
+    memcpy(buffer, src, src_size * sizeof(char));
 
 }
 
@@ -481,7 +503,7 @@ void string::right_concat(const char *src) {
     resizeTo(new_size);
 
     //Copy src in the created space, and copy the '\0' at the end;
-    memcpy(buffer + old_size - (uint16_t) 1, src, src_size + 1);
+    memcpy(buffer + old_size - (uint16_t) 1, src,(src_size + 1) * sizeof(char));
 
 }
 
@@ -751,9 +773,6 @@ void string::int64_to_a(int64_t i, char *data) {
 #undef euint_to_a
 
 
-void string::float_to_a(float i, char *data) {}
-
-
 /*
  * symmetric_copy : this function turns dst to the symmetric of src;
  */
@@ -790,7 +809,7 @@ void string::symmetric_copy(const char *src, char *dst, uint8_t size) {
         data_length++;\
         \
         /*Set the current case of data to the current digit;*/\
-        *(data++) = (i % (uint8_t) 10) + 30;\
+        *(data++) = (char) ((uint8_t)(i % (uint8_t) 10) + (uint8_t)48);\
         \
     } while (i/=10);\
     /*While number is superior to zero;*/\
@@ -851,19 +870,6 @@ uint8_t string::_uint64_to_as(uint64_t i, char *data) {
 //--------------------------------------------- + operators ---------------------------------------------
 
 /*
- * Sum operator : sums a char * to the left of c;
- */
-
-string &operator+(const char c[], string &src) {
-
-    //Concatenate c to the left of src;
-    src.left_concat(c);
-
-    //Return a reference to src;
-    return src;
-}
-
-
 #define impl_operators(type)\
 string operator+(const string &s0, type i) {\
     string s(s0);\
@@ -871,7 +877,7 @@ string operator+(const string &s0, type i) {\
     return s;\
 }\
 string &operator+(string &&s0, type i) {\
-    return s0+=i;\
+    return s0+=string(i);\
 }\
 
 
@@ -890,13 +896,42 @@ impl_operators(int32_t)
 impl_operators(uint64_t)
 
 impl_operators(int64_t)
+*/
 
-string operator+(const string &s0, float i) {
+/*
+ * Sum operator : sums a char * to the left of src;
+ */
+
+string &operator+(const char *c, string &&src) {
+
+    //Concatenate c to the left of src;
+    src.left_concat(c);
+
+    //Return a reference to src;
+    return src;
+}
+
+
+string operator+(const string &s0, const string &i) {
+
     string s(s0);
-    s += string(i, 2);
+    s += i;
     return s;
 }
 
-string &operator+(string &&s0, float i) {
+string operator+(const string &s0, string &&i) {
+
+    string s(s0);
+    s += i;
+    return s;
+}
+
+string &operator+(string &&s0, const string &i) {
+
+    return s0 += i;
+}
+
+string &operator+(string &&s0, string &&i) {
+
     return s0 += i;
 }

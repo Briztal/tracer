@@ -138,7 +138,13 @@ private:
 public:
 
     //Echo a message on the current log pipe; inline for efficiency.
-    static void log(string message);
+    static void log(string &message);
+
+    //Echo a message on the current log pipe; inline for efficiency.
+    static void log(string &&message);
+
+    //Echo a message on the current log pipe; inline for efficiency.
+    static void log(const char * message);
 
 
 private:

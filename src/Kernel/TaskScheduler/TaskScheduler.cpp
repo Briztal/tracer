@@ -656,7 +656,34 @@ bool TaskScheduler::execute_task(task_t *task) {
 //-------------------------------------------------------- Log ---------------------------------------------------------
 
 
-void TaskScheduler::log(string message) {
+void TaskScheduler::log(string &message) {
+
+    //If both log function and log log_protocol have been assigned :
+    if (log_function && log_protocol) {
+
+        //Send the message with the correct log_protocol.
+        (*log_function)(log_protocol, message);
+
+    }
+
+}
+
+void TaskScheduler::log(string &&message) {
+
+    //If both log function and log log_protocol have been assigned :
+    if (log_function && log_protocol) {
+
+        //Send the message with the correct log_protocol.
+        (*log_function)(log_protocol, message);
+
+    }
+
+}
+
+void TaskScheduler::log(const char *str) {
+
+    //Create a string containing the message;
+    string message(str);
 
     //If both log function and log log_protocol have been assigned :
     if (log_function && log_protocol) {

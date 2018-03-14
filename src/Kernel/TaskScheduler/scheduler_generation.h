@@ -247,7 +247,6 @@ static task_state_t _##name(void *_unpacker_pointer_) {\
 }
 
 
-
 /*
  * Generator macro :
  *

@@ -139,7 +139,7 @@ void Kernel::check_config() {
 #endif
 
         //A macro to enable all interfaces;
-#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str("Error : "+error_message+"\n\n");
+#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str("Error : "+error_message);
 
         //Initialise every interface;
 #include "Config/control_config.h"

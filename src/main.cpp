@@ -22,7 +22,25 @@
 
 int main() {
 
-  Kernel::start();
+    /*
+
+    Serial.begin(115200);
+
+    while (true) {
+
+        string s = string(2.6545, 5);
+        Serial.print("size : ");
+        Serial.println(s.length());
+        Serial.println(s.data());
+
+        Serial.println("BITE");
+
+        delay(1000);
+    }
+
+     */
+
+    Kernel::start();
 
 
 }

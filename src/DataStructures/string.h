@@ -36,42 +36,46 @@ public:
 
     //Int constructors;
 
-    explicit string(uint8_t i);
+    string(uint8_t i);
 
-    explicit string(int8_t i);
+    string(int8_t i);
 
-    explicit string(uint16_t i);
+    string(uint16_t i);
 
-    explicit string(int16_t i);
+    string(int16_t i);
 
-    explicit string(uint32_t i);
+    string(uint32_t i);
 
-    explicit string(int32_t i);
+    string(int32_t i);
 
-    explicit string(uint64_t i);
+    string(uint64_t i);
 
-    explicit string(int64_t i);
+    string(int64_t i);
 
-    explicit string(char i);
+    string(float f);
 
     //Float constructor;
     string(float f, uint8_t resolution);
 
+    void setTo(float f, uint8_t resolution);
+
+    string(char i);
+
     //Char array constructor;
-    explicit string(const char *src);
+    string(const char *src);
 
 
     //-------------------------------------- Assignment Operators --------------------------------------
 
 
     //Copy assignment operator;
-    string &operator=(string src);
+    string &operator=(const string &src);
 
     //Move assignment constructor;
     string &operator=(string &&src) noexcept;
 
     //Char set operator;
-    string& operator=(char i);
+    string &operator=(char i);
 
     //array set operator;
     string &operator=(const char *);
@@ -80,23 +84,23 @@ public:
      * Following functions assign the string as the string representation of basic number types;
      */
 
-    string& operator=(uint8_t i);
+    string &operator=(uint8_t i);
 
-    string& operator=(int8_t i);
+    string &operator=(int8_t i);
 
-    string& operator=(uint16_t i);
+    string &operator=(uint16_t i);
 
-    string& operator=(int16_t i);
+    string &operator=(int16_t i);
 
-    string& operator=(uint32_t i);
+    string &operator=(uint32_t i);
 
-    string& operator=(int32_t i);
+    string &operator=(int32_t i);
 
-    string& operator=(uint64_t i);
+    string &operator=(uint64_t i);
 
-    string& operator=(int64_t i);
+    string &operator=(int64_t i);
 
-    string& operator=(float f, uint8_t resolution);
+    string &operator=(float f);
 
 
     //-------------------------------------- Append Operators --------------------------------------
@@ -107,12 +111,8 @@ public:
     //Copcatenation operator;
     string &operator+=(const char *src);
 
-    //Copy assignment operator;
-    string &operator+=(string &src);
-
-    //Move assignment operator;
-    string &operator+=(string &&src);
-
+    //append operator;
+    string &operator+=(const string &src);
 
     //-------------------------------------- Concatenation --------------------------------------
 
@@ -153,14 +153,16 @@ public:
 
     //-------------------------------------- Data --------------------------------------
 
+private:
+
     //The current length of the string;
     uint16_t size;
 
     //The content of the string;
     char *buffer;
 
-    //-------------------------------------- External string conversion --------------------------------------
 
+    //-------------------------------------- External string conversion --------------------------------------
 
 public:
 
@@ -183,8 +185,6 @@ public:
     static void uint64_to_a(uint64_t i, char *data);
 
     static void int64_to_a(int64_t i, char *data);
-
-    static void float_to_a(float i, char *data);
 
 
 private:
@@ -210,21 +210,25 @@ private:
  * External operators : do not modify strings (except rvalues);
  */
 
-string &operator+(const char *c, string &&src);
+//string &operator+(const char *c, string &&src);
 
-string &operator+(const string &&s0, const string &&s1);
 
-string &operator+(const string &s0, const string &&s1);
+string operator+(const string &s0, const string &i);
 
-string &operator+(const string &&s0, const string &s1);
+string operator+(const string &s0, string &&i);
 
-string &operator+(const string &&s0, const char *c);
 
-string &operator+(const string &&s0, const string &src1);
+string &operator+(string &&s0, const string &i);
 
-#define def_operators(type)\
+string &operator+(string &&s0, string &&i);
+
+
+
+/*
+
+ #define def_operators(type)\
 string operator+(const string &s0, type i);\
-string &operator+(const string &&s0, type i);
+string &operator+(string &&s0, type i);
 
 def_operators(uint8_t)
 
@@ -242,9 +246,11 @@ def_operators(uint64_t)
 
 def_operators(int64_t)
 
-def_operators(const string &)
+def_operators(const char *)
 
 def_operators(float)
+
+ */
 
 
 #endif //TRACER_TSTRING_H

@@ -65,4 +65,4 @@ if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.piolibdeps)
     )
 endif()
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} src/DataStructures/Containers/ValueSet.cpp src/DataStructures/Containers/ValueSet.h src/Kernel/EventManager/SystemEvent.cpp src/Kernel/EventManager/SystemEvent.h src/Kernel/TaskProgrammer/TaskProgrammer.cpp src/Kernel/TaskProgrammer/TaskProgrammer.h src/Kernel/TaskProgrammer/ProgrammedTask.cpp src/Kernel/TaskProgrammer/ProgrammedTask.h src/ControlSystem/ControlLayer.cpp src/ControlSystem/ControlLayer.h src/ControlSystem/ControlManager.cpp src/ControlSystem/ControlManager.h src/ControlSystem/ControlStage.cpp src/ControlSystem/ControlStage.h)
+add_executable(${PROJECT_NAME} ${SRC_LIST})
