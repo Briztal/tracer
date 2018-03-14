@@ -46,6 +46,26 @@ public:
     //Destructor;
     virtual ~ValueContainer();
 
+    //---------------------------------------- Copy Constructor ----------------------------------------
+
+    //Copy constructor;
+    ValueContainer(const ValueContainer &container);
+
+    //Move constructor;
+    ValueContainer(ValueContainer &&container) noexcept;
+
+
+    //---------------------------------------- Assignment operator ----------------------------------------
+
+    //Copy assignment operator;
+    ValueContainer &operator=(const ValueContainer &container);
+
+    //Copy assignment operator;
+    ValueContainer &operator=(ValueContainer &&container) noexcept;
+
+    //Swap function;
+    void swap(ValueContainer &a, ValueContainer &b);
+
 
     //-------------------------------------- Builders --------------------------------------
 
@@ -105,7 +125,6 @@ private:
 };
 
 
-
 #include <malloc.h>
 
 #include <Interaction/Interaction.h>
@@ -129,6 +148,113 @@ template<class T>
 ValueContainer<T>::~ValueContainer() {
 
     clear();
+
+}
+
+
+//---------------------------------------- Copy Constructor ----------------------------------------
+
+/*
+ * Copy constructor : recreates the array;
+ */
+
+template<typename T>
+ValueContainer<T>::ValueContainer(const ValueContainer &container) : ValueContainer(container.max_size) {
+
+    //Resize to the container's size;
+    resize(container.size);
+
+    //For each element :
+    for (uint8_t element_index = size; element_index--;) {
+
+        //Copy the element at the given index;
+        elements[element_index] = container.elements[element_index];
+
+    }
+
+}
+
+
+/*
+ * Move constructor : swaps data;
+ */
+
+template<typename T>
+ValueContainer<T>::ValueContainer(ValueContainer &&container) noexcept : size(container.size),
+                                                                         max_size(container.max_size),
+                                                                         elements(container.elements) {
+
+    //Reset container's data;
+    container.size = 0;
+    container.elements = nullptr;
+
+}
+
+//---------------------------------------- Assignment operator ----------------------------------------
+
+
+/*
+ * Copy assignment operator : checks the pointer and if required, copies and swaps;
+ */
+
+template<typename T>
+ValueContainer<T> &ValueContainer<T>::operator=(const ValueContainer &container) {
+
+    //If the container is us, do nothing;
+    if (&container == this) {
+        return *this;
+    }
+
+    //Create a copy;
+    ValueContainer copy = ValueContainer(container);
+
+    //Swap, to that our data is deleted at the end of copy's scope;
+    swap(*this, copy);
+
+    //Return a reference to us;
+    return *this;
+
+}
+
+
+/*
+ *
+ */
+
+template<typename T>
+ValueContainer<T> &ValueContainer<T>::operator=(ValueContainer &&container) noexcept {
+
+    //Swap, to that our data is deleted at the end of container's scope;
+    swap(*this, container);
+
+    //Return a reference to us;
+    return *this;
+
+}
+
+
+
+/*
+ * Swap : this function will swap content of the two containers;
+ */
+
+template<typename T>
+void ValueContainer<T>::swap(ValueContainer &a, ValueContainer &b) {
+
+    //Swap max sizes;
+    uint8_t ts = a.max_size;
+    a.max_size = b.max_size;
+    b.max_size = ts;
+
+    //Swap sizes;
+    ts = a.size;
+    a.size = b.size;
+    b.size = ts;
+
+    //Swap contents;
+    T *ptr = a.elements;
+    a.elements = b.elements;
+    b.elements = ptr;
 
 }
 
@@ -229,7 +355,7 @@ void ValueContainer<T>::clear() {
     if (new_ptr) {
 
         //Update the task pointer;
-        elements = (T*) new_ptr;
+        elements = (T *) new_ptr;
 
         //Update the size;
         size = 0;
@@ -362,7 +488,7 @@ bool ValueContainer<T>::resize(uint8_t new_size) {
     //If the reallocation completed :
 
     //Update the tasks array;
-    elements = (T*) new_array;
+    elements = (T *) new_array;
 
 
     //Update the size;

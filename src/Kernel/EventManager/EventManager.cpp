@@ -271,7 +271,7 @@ void EventManager::process_events() {
 
 
 //Registered events;
-PointerVector<SystemEvent> *EventManager::system_events = new PointerVector<SystemEvent>(MAX_NB_EVENTS);
+PointerContainer<SystemEvent> *EventManager::system_events = new PointerContainer<SystemEvent>(MAX_NB_EVENTS);
 
 //Triggered events;
 ValueSet<uint8_t> *EventManager::triggered_events = new ValueSet<uint8_t>(MAX_NB_EVENTS);

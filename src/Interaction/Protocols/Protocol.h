@@ -22,7 +22,8 @@
 #ifndef TRACER_PROTOCOL_H
 #define TRACER_PROTOCOL_H
 
-#include "hardware_language_abstraction.h"
+#include <DataStructures/string/tstring.h>
+
 
 class Protocol {
 
@@ -56,8 +57,8 @@ public:
     //read all available_data;
     virtual void decode_data() = 0;
 
-    //Encode a string of char;
-    virtual void encode_data(string data) = 0;
+    //Encode a tstring of char;
+    virtual void encode_data(const char *data) = 0;
 
     //Read_data data on the data_link;
     virtual void decode_char(char data) = 0;

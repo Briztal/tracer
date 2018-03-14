@@ -660,14 +660,14 @@ EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in, const bool authorise
 void EEPROMMap::search_log(EEPROMTree *tree) {
 
     //Log message
-    string s = string("Suggestions for ") + *tree->getName() + " : ";
+    tstring s = tstring("Suggestions for ") + *tree->getName() + " : ";
 
     //Cache the number of children;
     uint8_t nb_children = tree->getNbChildren();
 
     //Append the suggestion for every child tree;
     for (uint8_t i = 0; i < nb_children; i++) {
-        s += *tree->getChild(i)->getName() + ", ";
+        s += tstring(*tree->getChild(i)->getName()) + ", ";
     }
 
     std_out(s);

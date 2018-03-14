@@ -44,7 +44,7 @@ struct task_t {
      *  The log_protocol, as the message, must be provided.
      */
 
-    void (*log_function)(Protocol *, const string message) = nullptr;
+    void (*log_function)(Protocol *, const char *message) = nullptr;
 
 
     /*

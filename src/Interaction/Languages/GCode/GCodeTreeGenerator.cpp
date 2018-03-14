@@ -164,7 +164,7 @@ uint16_t GCodeTreeGenerator::get_command_nb() {
 
 void GCodeTreeGenerator::print_tree(const GCodeTree *tree) {
 
-    GCode::log(string(tree->name));
+    std_out(string(tree->name));
 
     for (uint8_t child_id = 0; child_id < tree->nb_children; child_id++) {
 

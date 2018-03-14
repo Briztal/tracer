@@ -84,7 +84,7 @@ public:
     //Build and schedule a task;
     static bool
     schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                  void (*log_f)(Protocol *, const string), Protocol *protocol);
+                  void (*log_f)(Protocol *, const char *), Protocol *protocol);
 
 
 private:
@@ -114,7 +114,7 @@ private:
     static void process_task_sequences();
 
     //Shift a task at the insertion index;
-    static uint8_t shift(boolean shift_enabled, task_t *task, uint8_t insert_index);
+    static uint8_t shift(bool shift_enabled, task_t *task, uint8_t insert_index);
 
     //Verify that a type exists
     static bool check_sequence_type(uint8_t type);
@@ -137,26 +137,26 @@ private:
 
 public:
 
-    //Echo a message on the current log pipe; inline for efficiency.
-    static void log(string &message);
+    //Echo a message on the current log pipe;
+    static void log(tstring &message);
 
-    //Echo a message on the current log pipe; inline for efficiency.
-    static void log(string &&message);
+    //Echo a message on the current log pipe;
+    static void log(tstring &&message);
 
-    //Echo a message on the current log pipe; inline for efficiency.
+    //Echo a message on the current log pipe;
     static void log(const char * message);
 
 
 private:
 
     //The encoding function;
-    static void (*log_function)(Protocol *, string message);
+    static void (*log_function)(Protocol *, const char *message);
 
     //The communication log_protocol;
     static Protocol *log_protocol;
 
     //The encoding function;
-    static void (*default_log_function)(Protocol *, string message);
+    static void (*default_log_function)(Protocol *, const char *message);
 
     //The communication log_protocol;
     static Protocol *default_log_protocol;

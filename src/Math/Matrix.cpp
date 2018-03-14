@@ -1121,10 +1121,10 @@ bool Matrix::getCofactorsMatrix(Matrix &dst) const {
 /*
  * display : this function creates a string that contains the matrix.
  */
-string Matrix::toString() const {
+tstring Matrix::toString() const {
 
     //Create the return string;
-    string s = "";
+    tstring s;
 
     //For every row :
     for (uint8_t row_index = 0; row_index < height; row_index++) {
@@ -1138,7 +1138,7 @@ string Matrix::toString() const {
         }
 
         //Add a carriage return for the next line;
-        s += "\n";
+        s += string("\n");
 
     }
 

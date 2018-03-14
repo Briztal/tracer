@@ -110,7 +110,7 @@ private:
     //----------------------------------- Fields -----------------------------------
 
     //Programmed tasks;
-    static PointerVector<ProgrammedTask> *programmed_tasks;
+    static PointerContainer<ProgrammedTask> *programmed_tasks;
 
     //Next time that a task can be scheduled;
     static uint32_t next_check_time;

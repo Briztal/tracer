@@ -27,10 +27,40 @@
 template<typename T>
 class ValueSet : public ValueContainer<T> {
 
+    //---------------------------------------------- Initialisation ----------------------------------------------
+
 public:
 
-    //Default constructor;
+    //Constructor;
     explicit ValueSet(uint8_t max_size);
+
+    //Destructor;
+    virtual ~ValueSet() = default;
+
+
+    //---------------------------------------- Copy Constructor ----------------------------------------
+
+public:
+
+    //Copy constructor;
+    ValueSet(const ValueSet &container) : ValueContainer<T>(container){};
+
+    //Move constructor;
+    ValueSet(ValueSet &&container) noexcept : ValueContainer<T>(container){};
+
+
+    //---------------------------------------- Assignment operator ----------------------------------------
+
+    //Copy assignment operator;
+    ValueSet &operator=(const ValueSet &container) {ValueContainer<T>::operator=(container);}
+
+    //Copy assignment operator;
+    ValueSet &operator=(ValueSet &&container) noexcept {ValueContainer<T>::operator=(container);};
+
+
+    //---------------------------------------------- Functions ----------------------------------------------
+
+public:
 
     //Add a task;
     bool add(T new_element) override;

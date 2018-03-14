@@ -75,7 +75,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
             f = GET_ARG_VALUE('W');
 
             //Log message
-            std_out("Writing " + String(path) + " to " + String(f));
+            std_out("Writing " + string(path) + " to " + string(f));
 
             //write_data the variable
             //EEPROMInterface::write_data_by_string(path, f);
@@ -87,7 +87,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
         if (EEPROMInterface::read_data_by_string(path, &f)) {
 
             //Log message
-            std_out("Value for " + String(path) + " : " + String(f));
+            std_out("Value for " + string(path) + " : " + string(f));
 
         }*/
 
@@ -564,11 +564,11 @@ task_state_t GCodeCommands::stepper_test(char *) {
 task_state_t GCodeCommands::temp_test(char *) {
 
 
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(847), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(846), 5));
-    std_out("t0 : " + String(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(845), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(847), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(846), 5));
+    std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(845), 5));
 
 
     return complete;

@@ -262,7 +262,7 @@ static task_state_t _##name(void *_unpacker_pointer_) {\
 
 
 /*
- * String processing macros :
+ * string processing macros :
  *
  *  Macros defined below generate the code required to
  *      - get the signature;

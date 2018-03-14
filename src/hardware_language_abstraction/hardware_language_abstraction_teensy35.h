@@ -46,9 +46,10 @@
 #include "Arduino.h"
 #include "EEPROM.h"
 #include "i2c_t3.h"
-#include "DataStructures/string.h"
+#include <DataStructures/string/string.h>
 
-#define String SUUS
+
+//#define String SUUS
 
 
 
@@ -271,7 +272,7 @@ public:\
     static inline uint16_t available() {return (uint16_t)(serial).available();}\
     static inline void write(char c) {(serial).print(c);}\
     static inline char read() {return (char)(serial).read();}\
-    static inline void send_str(string &c) {(serial).print(c.data());}\
+    static inline void send_str(const char *c) {(serial).print(c);}\
 };
 
 

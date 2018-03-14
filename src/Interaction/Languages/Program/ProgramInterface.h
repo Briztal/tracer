@@ -117,7 +117,7 @@ public :
     //Append an float
     static void add_float_out(float data);
 
-    //Append an String
+    //Append an string
     static void add_string_out(const char *data);
 
 

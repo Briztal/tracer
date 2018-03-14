@@ -93,7 +93,7 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
         float new_value = GET_ARG_VALUE('w');
 
         //Log message
-        std_out(string("Writing ") + string(cache_path) + " to " + new_value);
+        std_out(string("Writing ") + cache_path + " to " + new_value);
 
         //write the variable
         EEPROMMap::write_data_by_string(cache_path, new_value);
@@ -709,9 +709,11 @@ task_state_t TerminalCommands::test_mpu(char *) {
 
         filter.getGyroSpeeds(gyro);
 
+
         std_out("\n");
-        std_out("Acc " + accelero.toString());
+        std_out(st("Acc ") + accelero.toString());
         std_out("Gyr " + gyro.toString());
+
 
         while (millis() < time);
 
@@ -773,7 +775,7 @@ task_state_t TerminalCommands::test_kalman(char *) {
 
         mpu->get_accelerometer_data(accelero);
 
-        std_out("accelero : " + string(accelero.toString()));
+        std_out("accelero : " + accelero.toString());
 
 
         mpu->get_gyrometer_data(gyro);
@@ -782,7 +784,7 @@ task_state_t TerminalCommands::test_kalman(char *) {
 
         //TODO PROBLEM IN CONVERSION
         Vector3DToAngles::convert(accelero, angles);
-        std_out("Angles : " + string(angles.toString()));
+        std_out("Angles : " + angles.toString());
 
         filter.compute(angles.get(0), gyro.get(0));
 

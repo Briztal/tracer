@@ -28,6 +28,8 @@
 
 #include "hardware_language_abstraction.h"
 
+#include <DataStructures/string/tstring.h>
+
 class Matrix {
 
     //-------------------------- Constructors --------------------------
@@ -188,12 +190,12 @@ public:
     //matrix &subMatrix(uint8_t target_height, uint8_t target_width) const;
 
 
-    //-------------------------- String --------------------------
+    //-------------------------- string --------------------------
 
 public:
 
-    virtual //Create a string that display the matrix;
-    string toString() const;
+    //Create a string that display the matrix;
+    virtual tstring toString() const;
 
 };
 

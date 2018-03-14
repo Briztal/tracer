@@ -44,22 +44,22 @@ void K2Physics::initialise_data() {
     last_time = 0;
 
     //Reset the steppers speed;
-    memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
+    mmemset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the deceleration distances;
-    memset(deceleration_distances, 0, NB_STEPPERS * sizeof(float));
+    mmemset(deceleration_distances, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the deceleration constants;
-    memset(deceleration_constants, 0, NB_STEPPERS * sizeof(float));
+    mmemset(deceleration_constants, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the delta constants;
-    memset(delta_speed_constants, 0, NB_STEPPERS * sizeof(float));
+    mmemset(delta_speed_constants, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the speed constants;
-    memset(max_speed_constants, 0, NB_STEPPERS * sizeof(float));
+    mmemset(max_speed_constants, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the jerk offsets;
-    memset(jerk_offsets, 0, NB_STEPPERS * sizeof(float));
+    mmemset(jerk_offsets, 0, NB_STEPPERS * sizeof(float));
 
 }
 
@@ -72,8 +72,8 @@ void K2Physics::initialise_data() {
 void K2Physics::start() {
 
     //initialise_hardware speeds and step_distances to zeros.
-    memset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
-    memset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
+    mmemset(steppers_speeds, 0, NB_STEPPERS * sizeof(float));
+    mmemset(deceleration_distances, 0, NB_STEPPERS * sizeof(uint32_t));
 
     //Pre compute the regulation_speed constants
     pre_compute_speed_constants();
@@ -377,7 +377,7 @@ void K2Physics::propagate_jerk_offsets(const movement_data_t *current_movement, 
 
 void K2Physics::update_jerk_offsets(const uint32_t *const new_offsets) {
 
-    memcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
+    mmemcpy(jerk_offsets, new_offsets, sizeof(uint32_t) * NB_STEPPERS);
 
 }
 

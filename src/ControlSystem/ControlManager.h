@@ -19,15 +19,14 @@
 */
 
 
-#ifndef TRACER_LAYERMANAGER_H
-#define TRACER_LAYERMANAGER_H
+#ifndef TRACER_CONTROLMANAGER_H
+#define TRACER_CONTROLMANAGER_H
 
 #include "ControlStage.h"
 
 #include "stdint.h"
 
 #include "DataStructures/Containers/PointerContainer.h"
-#include "ControlStage.h"
 
 
 /*
@@ -36,7 +35,7 @@
  *  When you want to control your model, by targets or by trajectory, you will control a certain layer of the model.
  */
 
-class ControlManager : private PointerVector<ControlStage> {
+class ControlManager : private PointerContainer<ControlStage> {
 
 
     //------------------------------------- Initialisation -------------------------------------
@@ -95,4 +94,4 @@ public:
 };
 
 
-#endif //TRACER_LAYERMANAGER_H
+#endif //TRACER_CONTROLMANAGER_H

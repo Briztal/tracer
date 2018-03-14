@@ -3,8 +3,8 @@
 //
 
 #include <malloc.h>
+
 #include <Interaction/Interaction.h>
-#include "string.h"
 
 #define SIZE_LIMIT (uint16_t) 255
 
@@ -375,137 +375,6 @@ string &string::operator=(float f) {
 
 #undef uint_to_a
 
-//--------------------------------------------- Append Operators ---------------------------------------------
-
-/*
- * add operator, for char;
- */
-
-string &string::operator+=(char c) {
-
-    //Cache the old size;
-    uint16_t old_size = size;
-
-    //Write the char at the end of the array;
-    buffer[old_size - 1] = c;
-
-    //Resize the array;
-    resizeTo(size + (uint16_t) 1);
-
-    buffer[old_size] = 0;
-
-    //Return a reference to us;
-    return *this;
-
-}
-
-
-/*
- * add operator, for const char arrays;
- */
-
-string &string::operator+=(const char *src) {
-
-    //Concatenate on the right;
-    right_concat(src);
-
-    //Return a reference to us;
-    return *this;
-
-}
-
-
-/*
- * add operator, for string reference;
- */
-
-string &string::operator+=(const string &src) {
-
-    //Determine the new size
-    uint16_t new_size = size + src.size - (uint16_t) 1;
-
-    //Cache the old size;
-    uint16_t old_size = size;
-
-    //Now we must resize to the appropriate length;
-    resizeTo(new_size);
-
-    //Copy src in the created space, and copy the '\0' at the end;
-    memcpy(buffer + old_size - 1, src.buffer, src.size * sizeof(char));
-
-    //Return a reference to us;
-    return *this;
-
-}
-
-
-//-------------------------------------- Concatenation --------------------------------------
-
-/*
- * left_concat : this function concatenates the given char array on our right;
- */
-
-void string::left_concat(const char *src) {
-
-    //First cache the src pointer to determine the size;
-    const char *c_src = src;
-
-    //Initialise the new size as the current size;
-    uint16_t src_size = 0;
-
-    //Increment the new size while we haven't reached src's end;
-    while (*(c_src++)) {
-        src_size++;
-    }
-
-    //Update the new size
-    uint16_t new_size = size + src_size;
-
-    //Cache the old size;
-    uint16_t old_size = size;
-
-    //Now we must resize to the appropriate length;
-    resizeTo(new_size);
-
-    //First, shift our string of src_size positions on the right;
-    memcpy(buffer + src_size, buffer, old_size * sizeof(char));
-
-    //Then, insert src's string in the fred space;
-    memcpy(buffer, src, src_size * sizeof(char));
-
-}
-
-
-/*
- * right_concat : this function concatenates the given char array on our right;
- */
-
-void string::right_concat(const char *src) {
-
-    //First cache the src pointer to determine the size;
-    const char *c_src = src;
-
-    //Initialise the new size as the current size;
-    uint16_t src_size = 0;
-
-    //Increment the new size while we haven't reached src's end;
-    while (*(c_src++)) {
-        src_size++;
-    }
-
-    //Update the new size
-    uint16_t new_size = size + src_size;
-
-    //Cache the old size;
-    uint16_t old_size = size;
-
-    //Now we must resize to the appropriate length;
-    resizeTo(new_size);
-
-    //Copy src in the created space, and copy the '\0' at the end;
-    memcpy(buffer + old_size - (uint16_t) 1, src,(src_size + 1) * sizeof(char));
-
-}
 
 
 //-------------------------------------- Size modification --------------------------------------
@@ -898,40 +767,46 @@ impl_operators(uint64_t)
 impl_operators(int64_t)
 */
 
+
+//--------------------------------------------- Memory copy utils ---------------------------------------------
+
+
 /*
- * Sum operator : sums a char * to the left of src;
+ * memset : sets the content of size_t first bytes of dst to value;
  */
 
-string &operator+(const char *c, string &&src) {
+void mmemset(void *dst, uint8_t value, size_t size) {
 
-    //Concatenate c to the left of src;
-    src.left_concat(c);
+    //Convert dst to a uint8_t pointer, as arithmetic on void * is illegal;
+    uint8_t *d = (uint8_t *)dst;
 
-    //Return a reference to src;
-    return src;
+    //For each byte of data :
+    for (;size--;) {
+
+        //Set the byte to the value and increment;
+        *(d++) = value;
+
+    }
+
 }
 
 
-string operator+(const string &s0, const string &i) {
+/*
+ * memcpy : copies the content of size_t first bytes of data of src to dst;
+ */
 
-    string s(s0);
-    s += i;
-    return s;
-}
+void mmemcpy(void *dst, const void *src, size_t size) {
 
-string operator+(const string &s0, string &&i) {
+    //Convert dst and src to a uint8_t pointer, as arithmetic on void * is illegal;
+    uint8_t *d = (uint8_t *)dst;
+    uint8_t *s = (uint8_t *)src;
 
-    string s(s0);
-    s += i;
-    return s;
-}
+    //For each byte of data :
+    for (;size--;) {
 
-string &operator+(string &&s0, const string &i) {
+        //Set the byte to the value of src at this position and increment both pointers;;
+        *(d++) = *(s++);
 
-    return s0 += i;
-}
+    }
 
-string &operator+(string &&s0, string &&i) {
-
-    return s0 += i;
 }

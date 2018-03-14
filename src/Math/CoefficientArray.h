@@ -23,7 +23,8 @@
 #define TRACER_EQUATION_H
 
 #include <WString.h>
-#include <DataStructures/string.h>
+#include <DataStructures/string/string.h>
+#include <DataStructures/string/tstring.h>
 #include "stdint.h"
 
 class CoefficientArray {
@@ -79,7 +80,7 @@ public:
     void multiply(float factor);
 
     //Create a string displaying the content of the array;
-    string toString();
+    tstring toString();
 
 };
 

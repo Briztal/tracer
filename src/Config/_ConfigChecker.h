@@ -33,33 +33,35 @@
 
 #include <hardware_language_abstraction.h>
 
+#include <DataStructures/string/tstring.h>
+
 class _ConfigChecker {
 
 public:
 
     //Call all unit config check;
-    static bool check_config(string &message);
+    static bool check_config(tstring &message);
 
 
 private:
 
     //Check the actions configuration file;
-    static bool check_actions(string &message);
+    static bool check_actions(tstring &message);
 
     //Check the control structure;
-    static bool check_transmission(string &message);
+    static bool check_transmission(tstring &message);
 
     //Check the control loops config;
-    static bool check_control_loops(string &message);
+    static bool check_control_loops(tstring &message);
 
     //Check all enabled controllers;
-    static bool check_controllers(string &message);
+    static bool check_controllers(tstring &message);
 
     //Check the sensors config;
-    static bool check_sensors(string &message);
+    static bool check_sensors(tstring &message);
 
     //Check the stepper control module config;
-    static bool check_stepper_control(string &message);
+    static bool check_stepper_control(tstring &message);
 
 };
 

@@ -21,6 +21,7 @@
 #include "CoefficientArray.h"
 
 #include <math.h>
+#include <DataStructures/string/tstring.h>
 
 #include "hardware_language_abstraction.h"
 
@@ -181,10 +182,10 @@ void CoefficientArray::multiply(float factor) {
  * toString : create a string that displays the content of the arrat;
  */
 
-string CoefficientArray::toString() {
+tstring CoefficientArray::toString() {
 
     //Initialise a string;
-    string s = "";
+    tstring s = "";
 
     //For each coefficient :
     for (uint8_t coeff_index = 0; coeff_index < size; coeff_index++) {

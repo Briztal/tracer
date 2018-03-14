@@ -37,13 +37,16 @@ ClearText::ClearText(uint8_t size, uint16_t (*const available_f)(void), void (*c
  * encode_data : this function encodes a string, and sends it.
  */
 
-void ClearText::encode_data(string s) {
+void ClearText::encode_data(const char *s) {
 
-    //For every char in the string :
-    for (uint8_t i = 0; i < s.length(); i++) {
+    //Cache for the current char;
+    char c;
+
+    //While the current char is not null :
+    while((c = *(s++))) {
 
         //Echo the char;
-        (*write_data)(s.charAt(i));
+        (*write_data)(c);
 
     }
 }

@@ -101,12 +101,14 @@ void Kernel::start() {
 void Kernel::check_config() {
 
     //Declare the error message;
-    string error_message = "";
+    tstring error_message = "Error : ";
 
     //If the config is ok, return;
     if (_ConfigChecker::check_config(error_message)) {
         return;
     }
+
+    const char *m = error_message.data();
 
     //If the config is not ok :
 
@@ -139,7 +141,7 @@ void Kernel::check_config() {
 #endif
 
         //A macro to enable all interfaces;
-#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str("Error : "+error_message);
+#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str(m);
 
         //Initialise every interface;
 #include "Config/control_config.h"

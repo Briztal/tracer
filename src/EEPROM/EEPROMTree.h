@@ -25,6 +25,10 @@
 
 #include <DataStructures/Tree.h>
 
+#include <DataStructures/string/tstring.h>
+
+
+
 class EEPROMTree {
 
 
@@ -85,7 +89,7 @@ public:
     //------------------------------------------- Info -------------------------------------------
 
     //Display the tree;
-    string printTree();
+    tstring printTree();
 
 
     //------------------------------------------- Fields -------------------------------------------

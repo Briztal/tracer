@@ -55,7 +55,6 @@ void GCode::initialise_data(Protocol *protocol) {
 }
 
 
-
 /*
  * The following function displays a logo at the initialisation of the code.
  */
@@ -106,7 +105,7 @@ bool GCode::parse(char *message) {
 /*
  * parse : this function analyses the packet received, and parses the command part.
  *
- *  When it has found the GCodeCommand identified by this string, it saves the rest of the packet (the content part)
+ *  When it has found the GCodeCommand identified by this tstring, it saves the rest of the packet (the content part)
  *      in the argument storage, and then, schedules the execution of this function.
  *
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
@@ -118,7 +117,6 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
     //Initialise the current current_tree to the root;
     const GCodeTree *current_tree = command_tree;
 
-    log("COMMAND : " + string(command_id));
     //The current depth
     uint8_t depth = 0;
 
@@ -191,7 +189,8 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
                          *  with data as content, the log function, and the output protocol;
                          */
 
-                        TaskScheduler::schedule_task(255, execute_command, (void *) data, external_log, output_protocol);
+                        TaskScheduler::schedule_task(255, execute_command, (void *) data, external_log,
+                                                     output_protocol);
 
                         //Complete
                         return;
@@ -219,8 +218,6 @@ void GCode::schedule_command(const char *command_id, const char *arguments) {
     //If the command_char didn't match any know child tree, send a warning and complete;
     log("Warning : Command not supported");
     respond("ok");
-    
-    
 
 }
 
@@ -310,26 +307,28 @@ void GCode::confirm_command_execution(const controller_data_t *data) {
 
 
 /*
- * log : this function encodes a string and transmits it with the output protocol;
+ * log : this function encodes a tstring and transmits it with the output protocol;
  */
 
-void GCode::external_log(Protocol *protocol, const string msg) {
+void GCode::external_log(Protocol *protocol, const char *msg) {
 
-    protocol->encode_data("// " + msg + "\n");
+    protocol->encode_data(msg);
 
 }
 
 
 /*
- * log : this function encodes a string and transmits it with the provided protocol;
+ * log : this function encodes a tstring and transmits it with the provided protocol;
  */
 
-void GCode::log(const string msg) {
+void GCode::log(const char *msg) {
 
-    output_protocol->encode_data("// " + msg + "\n");
+    //TODO output_protocol->encode_data("// " + msg + "\n");
+    output_protocol->encode_data("//");
+    output_protocol->encode_data(msg);
+    output_protocol->encode_data("\n");
 
 }
-
 
 
 /*
@@ -338,9 +337,10 @@ void GCode::log(const string msg) {
  *  It echoes text data on the link layer
  */
 
-void GCode::respond(const string msg) {
+void GCode::respond(const char *msg) {
 
-    output_protocol->encode_data(msg + "\n");
+    output_protocol->encode_data(msg);
+    output_protocol->encode_data("\n");
 
 }
 

@@ -21,7 +21,7 @@
 #ifndef TRACER_QUEUE_H
 #define TRACER_QUEUE_H
 
-#include "hardware_language_abstraction.h"
+#include <DataStructures/string/tstring.h>
 
 template<typename T>
 class Queue {
@@ -97,10 +97,10 @@ public:
     //--------------------------------------------- Vars display ---------------------------------------------
 
 
-    string display() {
+    tstring display() {
 
-        return string("\ninput ") + string(insertion_index) + " output " + string(reading_index) + " nb_objects " +
-               string(nb_objects) + " nb_spaces " + string(nb_spaces);
+        return tstring("\ninput ") + insertion_index + " output " + reading_index + " nb_objects " +
+               nb_objects + " nb_spaces " + nb_spaces;
 
     }
 

@@ -239,7 +239,7 @@ const float EEPROMTree::getData() {
 }
 
 /*
- * getDatapointer : this function returns the data pointer's value;
+ * getDataPointer : this function returns the data pointer's value;
  */
 
 float *EEPROMTree::getDataPointer() {
@@ -346,11 +346,11 @@ bool EEPROMTree::compareStrings(const char *string0, const char *string1) {
  * printTree : this recursive function prints the whole tree;
  */
 
-string EEPROMTree::printTree() {
+tstring EEPROMTree::printTree() {
 
 
     //Initialise a string containing the name;
-    string s = *name + "\n";
+    tstring s = *name + "\n";
 
     //Add the content of each child;
     for (uint8_t child = 0; child < nb_children; child++) {

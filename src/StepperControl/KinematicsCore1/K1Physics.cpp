@@ -578,10 +578,10 @@ void K1Physics::compute_jerk_offsets(float speed, k1_movement_data *previous_mov
 
 bool K1Physics::regulate_speed() {
 
-    //CI::echo("jerk : "+String(watch_for_jerk_point)+" - en : "+String(speed_regulation_enabled)+" - inc : "+String(speed_increasing_flag)+" - sub : "+String(sub_movement_time)+" - reg : "+String(regulation_sub_movement_time));
-    //CI::echo("jerk : "+String(watch_for_jerk_point) +" - jd : "+String(offset_heuristic_jerk_distance)+" of : "+String(jerk_distance_offset));
+    //CI::echo("jerk : "+string(watch_for_jerk_point)+" - en : "+string(speed_regulation_enabled)+" - inc : "+string(speed_increasing_flag)+" - sub : "+string(sub_movement_time)+" - reg : "+string(regulation_sub_movement_time));
+    //CI::echo("jerk : "+string(watch_for_jerk_point) +" - jd : "+string(offset_heuristic_jerk_distance)+" of : "+string(jerk_distance_offset));
 
-    //CI::echo("acc : "+String(acceleration_speed_distance)+" - dec : "+String(deceleration_speed_distance));
+    //CI::echo("acc : "+string(acceleration_speed_distance)+" - dec : "+string(deceleration_speed_distance));
 
     if (heuristic_end_distance < deceleration_speed_distance) {
         //If the machine must decelerate_of, due to the proximity of the end point :

@@ -75,13 +75,13 @@ private:
 public :
 
     //System alias for echo;
-    static void log(const string msg);
+    static void log(const char *msg);
 
     //System alias for echo;
-    static void external_log(Protocol *protocol, const string msg);
+    static void external_log(Protocol *protocol, const char *msg);
 
     //System alias for a response (doesn't add //);
-    static void respond(const string msg);
+    static void respond(const char *msg);
 
     //System alias for send_position;
     static void send_position(float*){}

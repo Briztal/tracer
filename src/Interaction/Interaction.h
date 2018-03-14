@@ -18,8 +18,8 @@
 
 */
 
-#ifndef TRACER_INTERFACES_H
-#define TRACER_INTERFACES_H
+#ifndef TRACER_INTERACTION_H
+#define TRACER_INTERACTION_H
 
 
 /*
@@ -43,7 +43,7 @@
 
 #include <Kernel/TaskScheduler/TaskScheduler.h>
 
-#define debug(s) TaskScheduler::log(string("debug ") + s);
+#define debug(s) TaskScheduler::log(st("debug ") + (s));
 
 #define std_out(s) TaskScheduler::log(s)
 
@@ -101,4 +101,4 @@ public:
 //A piece of macro that will help the automatic
 
 
-#endif //TRACER_INTERFACES_H
+#endif //TRACER_INTERACTION_H

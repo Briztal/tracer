@@ -81,7 +81,7 @@ public:
 private:
 
     //Registered events;
-    static PointerVector<SystemEvent> *system_events;
+    static PointerContainer<SystemEvent> *system_events;
 
     //Triggered events;
     static ValueSet<uint8_t> *triggered_events;

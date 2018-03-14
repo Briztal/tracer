@@ -2,10 +2,13 @@
 // Created by root on 3/10/18.
 //
 
-#ifndef TRACER_TSTRING_H
-#define TRACER_TSTRING_H
+#ifndef TRACER_BASICSTRING_H
+#define TRACER_BASICSTRING_H
 
 #include "stdint.h"
+
+//A macro to ease the redaction of string;
+#define st(i) string(i)
 
 class string {
 
@@ -29,12 +32,14 @@ public:
 
     //-------------------------------------- Primitive types constructors --------------------------------------
 
+public:
+
     /*
      * The following constructors are trivial constructor, that set the string empty
      *  and call the appropriate setTo function;
      */
 
-    //Int constructors;
+    //Numbers constructors;
 
     string(uint8_t i);
 
@@ -52,12 +57,17 @@ public:
 
     string(int64_t i);
 
+
+    //Float constructors;
+
     string(float f);
 
-    //Float constructor;
     string(float f, uint8_t resolution);
 
     void setTo(float f, uint8_t resolution);
+
+
+    //Char constructors;
 
     string(char i);
 
@@ -67,6 +77,7 @@ public:
 
     //-------------------------------------- Assignment Operators --------------------------------------
 
+public:
 
     //Copy assignment operator;
     string &operator=(const string &src);
@@ -103,29 +114,9 @@ public:
     string &operator=(float f);
 
 
-    //-------------------------------------- Append Operators --------------------------------------
-
-    //char append operator;
-    string &operator+=(char);
-
-    //Copcatenation operator;
-    string &operator+=(const char *src);
-
-    //append operator;
-    string &operator+=(const string &src);
-
-    //-------------------------------------- Concatenation --------------------------------------
-
-    //Concatenate a char array to the right;
-    void right_concat(const char *src);
-
-    //Concatenate a char array to the left;
-    void left_concat(const char *src);
-
-
     //-------------------------------------- Size modification --------------------------------------
 
-private:
+protected:
 
     //Resize the string;
     bool resizeTo(uint16_t new_size);
@@ -147,13 +138,15 @@ public:
 
     //-------------------------------------- Data swap --------------------------------------
 
+public:
+
     //Copy and swap idiom;
     static void swap(string &t0, string &t1);
 
 
     //-------------------------------------- Data --------------------------------------
 
-private:
+protected:
 
     //The current length of the string;
     uint16_t size;
@@ -206,51 +199,9 @@ private:
 };
 
 
-/*
- * External operators : do not modify strings (except rvalues);
- */
+void mmemset(void *dst, uint8_t value, size_t size);
 
-//string &operator+(const char *c, string &&src);
+void mmemcpy(void *dst, const void *src, size_t size);
 
 
-string operator+(const string &s0, const string &i);
-
-string operator+(const string &s0, string &&i);
-
-
-string &operator+(string &&s0, const string &i);
-
-string &operator+(string &&s0, string &&i);
-
-
-
-/*
-
- #define def_operators(type)\
-string operator+(const string &s0, type i);\
-string &operator+(string &&s0, type i);
-
-def_operators(uint8_t)
-
-def_operators(int8_t)
-
-def_operators(uint16_t)
-
-def_operators(int16_t)
-
-def_operators(uint32_t)
-
-def_operators(int32_t)
-
-def_operators(uint64_t)
-
-def_operators(int64_t)
-
-def_operators(const char *)
-
-def_operators(float)
-
- */
-
-
-#endif //TRACER_TSTRING_H
+#endif //TRACER_BASICSTRING_H

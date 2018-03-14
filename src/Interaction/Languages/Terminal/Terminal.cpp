@@ -80,7 +80,7 @@ void Terminal::init_message() {
 /*
  * parse : this function analyses the packet received, and parses the command part.
  *
- *  When it has found the TerminalCommand identified by this string, it saves the rest of the packet (the content part)
+ *  When it has found the TerminalCommand identified by this tstring, it saves the rest of the packet (the content part)
  *      in the argument_t storage, and then, schedules the execution of this function.
  *
  *  This command will be executed, by the intermediary of the execute_command function, defined below.
@@ -90,7 +90,7 @@ void Terminal::init_message() {
 void Terminal::parse(char *message) {
 
     //Display the revieved command
-    log(string("\n") + PROJECT_NAME + "> " + message);
+    std_out(tstring("\n") + PROJECT_NAME + "> " + message);
 
 
     //Initialise the current current_node to the root;
@@ -116,10 +116,10 @@ void Terminal::parse(char *message) {
     //get the first node identifier, in the command_identifier buffer
     message += StringUtils::count_until_char(message, ' ');
 
-    //Nullify and update only if the string is not finished.
+    //Nullify and update only if the tstring is not finished.
     if (message) {
 
-        //Null terminate the word, to make a string of it.
+        //Null terminate the word, to make a tstring of it.
         *message = '\0';
 
         //Go to the next char
@@ -228,8 +228,8 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
 
     //Display the last correct node's content.
 
-    //initialise_hardware an empty string
-    string s = "";
+    //initialise_hardware an empty tstring
+    tstring s;
 
     //Fill it with the name and description of direct nb_children
     for (uint8_t i = 0; i < log_node->nb_children; i++) {
@@ -243,20 +243,20 @@ void Terminal::log_parsing_error(const TerminalTree *const log_node) {
         //If the query succeeded;
         if (tree_flag) {
 
-            //Complete the string
+            //Complete the tstring
             s += *t->name + "\t\t : " + *t->description + "\n";
 
 
         } else {
             //If the query fails :
 
-            s += "error \n";
+            s += string("error \n");
 
         }
     }
 
     //Display
-    log(s);
+    std_out(s);
 
 }
 
@@ -353,23 +353,26 @@ void Terminal::confirm_command_execution(const controller_data_t *data) {
 
 
 /*
- * log : this function encodes a string and transmits it with the output protocol;
+ * log : this function encodes a tstring and transmits it with the output protocol;
  */
 
-void Terminal::external_log(Protocol *protocol, const string msg) {
+void Terminal::external_log(Protocol *protocol, const char * msg) {
 
-    protocol->encode_data(msg + "\n");
+    output_protocol->encode_data(msg);
+    output_protocol->encode_data("\n");
+
 
 }
 
 
 /*
- * log : this function encodes a string and transmits it with the provided protocol;
+ * log : this function encodes a tstring and transmits it with the provided protocol;
  */
 
-void Terminal::log(const string msg) {
+void Terminal::log(const char *msg) {
 
-    output_protocol->encode_data(msg + "\n");
+    output_protocol->encode_data(msg);
+    output_protocol->encode_data("\n");
 
 }
 
@@ -381,9 +384,11 @@ void Terminal::log(const string msg) {
  *  It echoes text data on the link layer
  */
 
-void Terminal::respond(const string msg) {
+void Terminal::respond(const char * msg) {
 
-    output_protocol->encode_data(msg + "\n");
+    output_protocol->encode_data(msg);
+    output_protocol->encode_data("\n");
+
 
 }
 //---------------------------------Static declarations / definitions------------------------------

@@ -19,7 +19,10 @@
 */
 
 
+#include <Interaction/Interaction.h>
 #include "TaskProgrammer.h"
+
+#include "hardware_language_abstraction.h"
 
 //----------------------------------- Initialisation -----------------------------------
 
@@ -500,7 +503,7 @@ void TaskProgrammer::get_next_check_time() {
 
 
 //Programmed tasks;
-PointerVector<ProgrammedTask> *TaskProgrammer::programmed_tasks = new PointerVector<ProgrammedTask>(
+PointerContainer<ProgrammedTask> *TaskProgrammer::programmed_tasks = new PointerContainer<ProgrammedTask>(
         MAX_PROGRAMMED_TASKS);
 
 

@@ -38,6 +38,8 @@
 
 #include <DataStructures/Queue.h>
 
+#include "hardware_language_abstraction.h"
+
 #include <Kernel/TaskScheduler/task_state_t.h>
 
 #include "_core_include.h"

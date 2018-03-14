@@ -79,8 +79,8 @@ public:
 
 public:
 
-    //String conversion;
-    string toString() const override {return Matrix::toString();};
+    //string conversion;
+    tstring toString() const override {return Matrix::toString();};
 
 };
 

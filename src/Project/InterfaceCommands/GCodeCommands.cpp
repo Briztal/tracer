@@ -75,7 +75,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
             f = GET_ARG_VALUE('W');
 
             //Log message
-            std_out(string("Writing ") + string(path) + " to " + f);
+            std_out(string("Writing ") + path + " to " + f);
 
             //write_data the variable
             //EEPROMInterface::write_data_by_string(path, f);

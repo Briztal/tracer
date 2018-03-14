@@ -78,13 +78,17 @@ void KalmanFilter::initialise(const Matrix &prediction_matrix, const Matrix &tra
 
     matricesInitialised = true;
 
-
-    std_out("A\n"+A.toString());
+    /*
+    tstring t;
+    A.toString(t);
+    std_out("A\n"+t);
     std_out("H\n"+H.toString());
     std_out("A\n"+At.toString());
     std_out("H\n"+Ht.toString());
     std_out("Q\n"+Q.toString());
     std_out("R\n"+R.toString());
+
+     */
 
 
 
@@ -177,8 +181,8 @@ void KalmanFilter::compute(float *const measure) {
     //Eventually, call the wrapper on the predicted state;
     wrapState(prediction);
 
-    //std_out("prediction : " + String(prediction[0]) + " " + String(prediction[1]) + " " + String(prediction[2]));
-    //std_out("measure : " + String(measure[0]) + " " + String(measure[1]));
+    //std_out("prediction : " + string(prediction[0]) + " " + string(prediction[1]) + " " + string(prediction[2]));
+    //std_out("measure : " + string(measure[0]) + " " + string(measure[1]));
 
     /*
      * Step 1 : Measure.
@@ -195,7 +199,7 @@ void KalmanFilter::compute(float *const measure) {
     //Eventually, call the wrapper on the predicted state;
     wrapMeasure(innovation);
 
-    //std_out("innovation : " + String(innovation[0]) + " " + String(innovation[1]));
+    //std_out("innovation : " + string(innovation[0]) + " " + string(innovation[1]));
 
 
     /*
@@ -220,7 +224,7 @@ void KalmanFilter::compute(float *const measure) {
     //Eventually call the wrapper on the new state;
     wrapState(x);
 
-    //std_out("state : " + String(x[0]) + " " + String(x[1]) + " " + String(x[2]));
+    //std_out("state : " + string(x[0]) + " " + string(x[1]) + " " + string(x[2]));
 
 }
 
