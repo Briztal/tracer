@@ -23,10 +23,12 @@
 #define TRACER_GCODETREEGENERATOR_H
 
 #include <Config/control_config.h>
+#include <Kernel/TaskScheduler/task_state_t.h>
+#include <cstdint>
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include "GCodeTree.h"
+
 #include "Config/controller_gcode_config.h"
 
 typedef struct command_line_t {
@@ -48,13 +50,10 @@ class GCodeTreeGenerator {
 
 public:
 
-    static GCodeTree *generate_tree();
+    static GCodeTree generate_tree();
 
     static void print_tree(const GCodeTree *tree);
 
-private:
-
-//TODO COMMENT
 
     //------------------------------------- Command array -------------------------------------
 

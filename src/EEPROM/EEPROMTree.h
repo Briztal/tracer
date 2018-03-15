@@ -23,8 +23,6 @@
 
 #include <hardware_language_abstraction.h>
 
-#include <DataStructures/Tree.h>
-
 #include <DataStructures/string/tstring.h>
 
 

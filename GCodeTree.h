@@ -36,7 +36,9 @@
 #include <stdint.h>
 #include <Kernel/TaskScheduler/task_state_t.h>
 
-class GCodeTree {
+typedef task_state_t (*const gcode_function)(char *);
+
+class GCodeTree : public Tree<char, gcode_function {
 
 
 public:
@@ -62,24 +64,6 @@ public:
     //Get a pointer to a child. Fails if the child is not assigned.
     const GCodeTree *get_child (uint8_t id, bool *success) const;
 
-private:
-
-    /*
-     * As verifying that a sub_tree is allocated before accessing it, we will store our nb_children in structs.
-     */
-
-    struct gcode_child_container_t {
-
-        //The allocation flag;
-        bool allocated = false;
-
-        //The tree;
-        GCodeTree *tree = nullptr;
-
-    };
-
-    //The array of structs containing nb_children.
-    gcode_child_container_t *children;
 
 };
 

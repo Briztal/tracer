@@ -27,65 +27,74 @@
 
 #include <Interaction/Languages/_language_data.h>
 #include <Interaction/Protocols/Protocol.h>
-#include "GCodeTree.h"
+#include <Interaction/Languages/Language.h>
+#include "gcode_tree.h"
 
-class GCode {
 
+class GCode : Language {
+
+    //-------------------------------------- Initialisation ----------------------------------
 
 public :
 
+    //Default constructor;
+    GCode();
+
+    //Destructor;
+    ~GCode();
+
     //Send the initialisation message
-    static void init_message();
-
-    //Data initialisation function;
-    static void initialise_data(Protocol *protocol);
+    void init_message() final;
 
 
-    //--------------------------------------Command Parsing----------------------------------
-
+    //--------------------------------------Command Parsing---------------------------------
 
 public:
 
     //Parse the GCode Command.
-    static bool parse(char *message);
+    bool parse(char *message) final;
 
 
 private :
 
     //Analyse the GCode Command index, and schedule the associated command.
-    static void schedule_command(const char *command_id, const char *arguments);
+    void schedule_command(const char *command_id, const char *arguments);
 
     //Execute a parsed command;
-    static task_state_t execute_command(void *data_pointer);
+    task_state_t execute_command(void *data_pointer);
 
     //Finalise the execution of a command;
-    static void confirm_command_execution(const controller_data_t *data);
+    void confirm_command_execution(const controller_data_t *data);
 
-    //The GCode Command tree;
-    static GCodeTree *command_tree;
+
+    //------------------------------------ Tree Generation -----------------------------
+
+    //Generate the gcode Tree, left to sub classes;
+    virtual void generateTree();
 
 
     //------------------------------------ Output -----------------------------
 
 public :
-    //System alias for echo;
-    static void log(const char *msg);
 
     //System alias for echo;
-    static void external_log(Protocol *protocol, const char *msg);
+    void log(const char *msg);
 
-    //System alias for send_position;
-    static void send_position(float *) {}
+    //System alias for echo;
+    //void external_log(Protocol *protocol, const char *msg);
+
 
 private:
 
     //System alias for a response (doesn't add //);
-    static void respond(const char *msg);
+    void respond(const char *msg);
 
 
 private:
 
-    static Protocol *output_protocol;
+    //The GCode Command tree;
+    GCodetree commandTree;
+
 
 };
 

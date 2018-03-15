@@ -24,33 +24,23 @@
 
 #include "GCode.h"
 #include <Kernel/TaskScheduler/TaskScheduler.h>
-#include "GCodeTreeGenerator.h"
 #include "GCodeArguments.h"
 #include <DataStructures/StringUtils.h>
 
 
 //----------------------------------------------------Initialisation----------------------------------------------------
 
-
 /*
- * initialise_data : this function resets initialises all data of the class
+ * Default constructor : this function resets initialises all data of the class
  */
 
-void GCode::initialise_data(Protocol *protocol) {
-
-    //Initialise the output log_protocol;
-    output_protocol = protocol;
+GCode::GCode() : commandTree() {
 
     //Arguments initialisation;
     GCodeArguments::clear();
 
-    //Tree initialisation.
-
-    //delete the current tree;
-    delete (command_tree);
-
     //Create a new command tree;
-    command_tree = GCodeTreeGenerator::generate_tree();
+    generateTree();
 
 }
 
@@ -115,7 +105,7 @@ bool GCode::parse(char *message) {
 void GCode::schedule_command(const char *command_id, const char *arguments) {
 
     //Initialise the current current_tree to the root;
-    const GCodeTree *current_tree = command_tree;
+    const GCodeTree *current_tree = commandTree;
 
     //The current depth
     uint8_t depth = 0;
@@ -299,65 +289,11 @@ void GCode::confirm_command_execution(const controller_data_t *data) {
 
     }
 
-
 }
 
-
-//----------------------------------------------------System aliases----------------------------------------------------
-
-
-/*
- * log : this function encodes a tstring and transmits it with the output protocol;
- */
-
-void GCode::external_log(Protocol *protocol, const char *msg) {
-
-    protocol->encode_data(msg);
-
-}
-
-
-/*
- * log : this function encodes a tstring and transmits it with the provided protocol;
- */
-
-void GCode::log(const char *msg) {
-
-    //TODO output_protocol->encode_data("// " + msg + "\n");
-    output_protocol->encode_data("//");
-    output_protocol->encode_data(msg);
-    output_protocol->encode_data("\n");
-
-}
-
-
-/*
- * respond : this function is an alias for the system log command.
- *
- *  It echoes text data on the link layer
- */
-
-void GCode::respond(const char *msg) {
-
-    output_protocol->encode_data(msg);
-    output_protocol->encode_data("\n");
-
-}
 
 //-------------------------------------------Static declarations / definitions------------------------------------------
 
-#define m GCode
-
-
-//Create an empty temporary tree;
-GCodeTree *m::command_tree = new GCodeTree(' ', 0, nullptr);
-
-//The log_protocol used to transmit all communication interfaces;
-Protocol *m::output_protocol;
-
-#undef m
-
-#endif
 
 /*
 

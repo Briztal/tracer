@@ -72,7 +72,7 @@ public:
     //Add a new element to the list;
     bool add(T *new_element);
 
-    bool set(uint8_t index, T* new_element);
+    bool set(uint8_t index, T *new_element);
 
     //Remove a element from the list if it is present;
     T *remove(uint8_t index);
@@ -104,6 +104,14 @@ public:
 
     //Set a particular element;
     T *setElement(uint8_t index, T *new_element);
+
+
+    //-------------------------------------- Sort --------------------------------------
+
+public:
+
+    //Get the number of elements in the list;
+    void sort();
 
 
     //-------------------------------------- Resizing --------------------------------------
@@ -321,7 +329,6 @@ bool PointerContainer<T>::set(uint8_t index, T *new_element) {
 }
 
 
-
 /*
  * remove : this function will search if the provided element exists in the array, and if so, it will
  *  remove it.
@@ -414,7 +421,7 @@ bool PointerContainer<T>::rightConcatenation(PointerContainer<T> &&src) {
     uint8_t src_size = src.size;
 
     //First, determine the final size;
-    uint16_t final_size = (uint16_t)size + (uint16_t)src.getSize();
+    uint16_t final_size = (uint16_t) size + (uint16_t) src.getSize();
 
     //If the concatenation can't be done : fail;
     if (final_size > (uint16_t) getMaxSize()) {
@@ -459,7 +466,7 @@ bool PointerContainer<T>::leftConcatenation(PointerContainer<T> &&src) {
     uint8_t src_size = src.size;
 
     //First, determine the final size;
-    uint16_t final_size = (uint16_t)size + (uint16_t)src.getSize();
+    uint16_t final_size = (uint16_t) size + (uint16_t) src.getSize();
 
     //If the concatenation can't be done : fail;
     if (final_size > (uint16_t) getMaxSize()) {
@@ -532,7 +539,6 @@ uint8_t PointerContainer<T>::getMaxSize() {
 }
 
 
-
 /*
  * get_task : this function returns the task at the given index, if it is valid;
  */
@@ -571,6 +577,51 @@ T *PointerContainer<T>::setElement(uint8_t index, T *new_element) {
     return old_element;
 
 }
+
+
+//-------------------------------------- Sort --------------------------------------
+
+/*
+ * sort : this function will sort the container, using a simple descending  bubble sort,
+ *  based on the < operator of the class T;
+ */
+
+template<typename T>
+void PointerContainer<T>::sort() {
+
+    //First, let's cache the size;
+    uint8_t size = this->size;
+
+    //If no elements are to sort, do nothing;
+    if (!size) return;
+
+    //For all elements except the first :
+    for (uint8_t sort_index = size; --size;) {
+
+        T **up_swap = elements + sort_index;
+        T **down_swap = up_swap - 1;
+
+        //For all elements before the sort index :
+        for (uint8_t swap_count = sort_index - (uint8_t) 1;swap_count--;up_swap--, down_swap--) {
+
+            //If the object at up index is higher than the one at down index :
+            if ((*up_swap)->operator<(**down_swap)) {
+
+                //Swap pointers;
+                T* ptr = *up_swap;
+                *up_swap = *down_swap;
+                *down_swap = ptr;
+
+            }
+
+        }
+
+    }
+
+}
+
+
+//-------------------------------------- Resizing --------------------------------------
 
 
 /*
