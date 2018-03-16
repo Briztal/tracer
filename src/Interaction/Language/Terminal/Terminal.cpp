@@ -36,9 +36,9 @@
  * initialise_hardware : this function initialises the serial, and sets up the command processing environment.
  */
 
-void Terminal::initialise_data(Protocol *protocol) {
+void Terminal::initialise_data(Delimiter *protocol) {
 
-    //Initialise the protocol;
+    //Initialise the delimiter;
     output_protocol = protocol;
 
     //Arguments initialisation;
@@ -353,26 +353,26 @@ void Terminal::confirm_command_execution(const controller_data_t *data) {
 
 
 /*
- * log : this function encodes a tstring and transmits it with the output protocol;
+ * log : this function encodes a tstring and transmits it with the output delimiter;
  */
 
-void Terminal::external_log(Protocol *protocol, const char * msg) {
+void Terminal::external_log(Delimiter *protocol, const char * msg) {
 
-    output_protocol->encode_data(msg);
-    output_protocol->encode_data("\n");
+    output_protocol->process(msg);
+    output_protocol->process("\n");
 
 
 }
 
 
 /*
- * log : this function encodes a tstring and transmits it with the provided protocol;
+ * log : this function encodes a tstring and transmits it with the provided delimiter;
  */
 
 void Terminal::log(const char *msg) {
 
-    output_protocol->encode_data(msg);
-    output_protocol->encode_data("\n");
+    output_protocol->process(msg);
+    output_protocol->process("\n");
 
 }
 
@@ -386,8 +386,8 @@ void Terminal::log(const char *msg) {
 
 void Terminal::respond(const char * msg) {
 
-    output_protocol->encode_data(msg);
-    output_protocol->encode_data("\n");
+    output_protocol->process(msg);
+    output_protocol->process("\n");
 
 
 }
@@ -399,7 +399,7 @@ void Terminal::respond(const char * msg) {
 //Build the command tree
 const TerminalTree *m::command_tree = new TerminalTree(new string(), 0, new string(), nullptr);
 
-Protocol *m::output_protocol;
+Delimiter *m::output_protocol;
 
 #undef m
 

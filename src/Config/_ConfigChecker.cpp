@@ -340,7 +340,7 @@ bool _ConfigChecker::check_control_loops(tstring &message) {
 bool _ConfigChecker::check_controllers(tstring &message) {
 
     /*
-     * GCode check : We will check that no GCode command has its size greater than the maximum size;
+     * ByteTreeLanguage check : We will check that no ByteTreeLanguage command has its size greater than the maximum size;
      */
 
     //Cache for the name;

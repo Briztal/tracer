@@ -22,20 +22,20 @@
 #ifndef TRACER_VALUESET_H
 #define TRACER_VALUESET_H
 
-#include "ValueContainer.h"
+#include "DynamicBuffer.h"
 
 template<typename T>
-class ValueSet : public ValueContainer<T> {
+class DynamicSet : public DynamicBuffer<T> {
 
     //---------------------------------------------- Initialisation ----------------------------------------------
 
 public:
 
     //Constructor;
-    explicit ValueSet(uint8_t max_size);
+    explicit DynamicSet(uint8_t max_size);
 
     //Destructor;
-    virtual ~ValueSet() = default;
+    virtual ~DynamicSet() = default;
 
 
     //---------------------------------------- Copy Constructor ----------------------------------------
@@ -43,19 +43,19 @@ public:
 public:
 
     //Copy constructor;
-    ValueSet(const ValueSet &container) : ValueContainer<T>(container){};
+    DynamicSet(const DynamicSet &container) : DynamicBuffer<T>(container){};
 
     //Move constructor;
-    ValueSet(ValueSet &&container) noexcept : ValueContainer<T>(container){};
+    DynamicSet(DynamicSet &&container) noexcept : DynamicBuffer<T>(container){};
 
 
     //---------------------------------------- Assignment operator ----------------------------------------
 
     //Copy assignment operator;
-    ValueSet &operator=(const ValueSet &container) {ValueContainer<T>::operator=(container);}
+    DynamicSet &operator=(const DynamicSet &container) {DynamicBuffer<T>::operator=(container);}
 
     //Copy assignment operator;
-    ValueSet &operator=(ValueSet &&container) noexcept {ValueContainer<T>::operator=(container);};
+    DynamicSet &operator=(DynamicSet &&container) noexcept {DynamicBuffer<T>::operator=(container);};
 
 
     //---------------------------------------------- Functions ----------------------------------------------
@@ -79,7 +79,7 @@ public:
  */
 
 template<class T>
-ValueSet<T>::ValueSet(uint8_t max_size) : ValueContainer<T>(max_size) {}
+DynamicSet<T>::DynamicSet(uint8_t max_size) : DynamicBuffer<T>(max_size) {}
 
 
 /*
@@ -87,13 +87,13 @@ ValueSet<T>::ValueSet(uint8_t max_size) : ValueContainer<T>(max_size) {}
  */
 
 template<class T>
-bool ValueSet<T>::add(T new_element) {
+bool DynamicSet<T>::add(T new_element) {
 
     //The index to pass to isElementPresent. Unused;
     uint8_t index = 0;
 
     //If the element is already present :
-    if (ValueContainer<T>::isElementPresent(new_element, &index)) {
+    if (DynamicBuffer<T>::isElementPresent(new_element, &index)) {
 
         //Fail;
         return false;
@@ -101,7 +101,7 @@ bool ValueSet<T>::add(T new_element) {
     }
 
     //If it is not present, try to add it;
-    return ValueContainer<T>::add(new_element);
+    return DynamicBuffer<T>::add(new_element);
 
 }
 
@@ -115,13 +115,13 @@ bool ValueSet<T>::add(T new_element) {
 
 
 template<class T>
-bool ValueSet<T>::remove(T element) {
+bool DynamicSet<T>::remove(T element) {
 
     //The eventual index to remove;
     uint8_t index = 0;
 
     //If the element is not present :
-    if (!ValueContainer<T>::isElementPresent(element, &index)) {
+    if (!DynamicBuffer<T>::isElementPresent(element, &index)) {
 
         //Fail, nothing to remove;
         return false;
@@ -129,7 +129,7 @@ bool ValueSet<T>::remove(T element) {
     }
 
     //Remove the element by index;
-    ValueContainer<T>::remove(index);
+    DynamicBuffer<T>::remove(index);
 
     //An element has been deleted, return true;
     return true;
@@ -144,10 +144,10 @@ bool ValueSet<T>::remove(T element) {
  */
 
 template<class T>
-bool ValueSet<T>::remove(T element, uint8_t *old_index) {
+bool DynamicSet<T>::remove(T element, uint8_t *old_index) {
 
     //If the element is not present :
-    if (!ValueContainer<T>::isElementPresent(element, old_index)) {
+    if (!DynamicBuffer<T>::isElementPresent(element, old_index)) {
 
         //Fail, nothing to remove;
         return false;
@@ -155,7 +155,7 @@ bool ValueSet<T>::remove(T element, uint8_t *old_index) {
     }
 
     //Remove the element by index;
-    ValueContainer<T>::remove(*old_index);
+    DynamicBuffer<T>::remove(*old_index);
 
     //An element has been deleted, return true;
     return true;

@@ -46,7 +46,7 @@
  * In order to receive orders from th outside, a Controller must receive its data from a Protocol, that reads and decode
  *  data over transmission layers;
  *
- * Protocols are objects, created by the Kernel;
+ * Delimiter are objects, created by the Kernel;
  *
  *  Transmission layers are static data defined in hardware_language_abstraction.
  *
@@ -56,7 +56,7 @@
  *  CONTROL(controller, log_protocol, protocol_buffer_size, transmission_layer), where :
  *
  *      - controller is the name of a Controller class;
- *      - log_protocol is the name of a Protocol class (Interaction/Protocols);
+ *      - log_protocol is the name of a Protocol class (Interaction/Delimiter);
  *      - protocol_buffer_size is the size of the Protocol class's input buffer;
  *      - transmission layer is the name of a transmission layer (hardware_language_abstraction_xxxx.h)
  *

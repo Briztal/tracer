@@ -50,7 +50,7 @@ const uint8_t NB_ENDSTOPS =
 
 void Endstops::initialise_hardware() {
 
-    //Create a macro that will read the state of an endstop
+    //Create a macro that will readall the state of an endstop
 #define ENDSTOP(i, pin, enable_value) pin_mode_input(pin);
 
     //Read all endstops;
@@ -74,7 +74,7 @@ void Endstops::initialise_data() {
 }
 
 
-//---------------------------------------------------- Direct read ----------------------------------------------------
+//---------------------------------------------------- Direct readall ----------------------------------------------------
 
 
 /*
@@ -83,10 +83,10 @@ void Endstops::initialise_data() {
 
 bool Endstops::read_endstop_state(uint8_t index) {
 
-    //Create a macro that will read an endstop
+    //Create a macro that will readall an endstop
 #define ENDSTOP(i, pin, enable_value)\
     case i:\
-        /*Return true only if we read the enabled state, and save it;*/\
+        /*Return true only if we readall the enabled state, and save it;*/\
         return (states[i] = (digital_read((i)) == (enable_value)));
 
     //Try all possibilities for [index]. This is not efficient, reason why get_endstop_state and read_endstops exist.
@@ -106,13 +106,13 @@ bool Endstops::read_endstop_state(uint8_t index) {
 
 }
 
-//---------------------------------------------------- Undirect read ----------------------------------------------------
+//---------------------------------------------------- Undirect readall ----------------------------------------------------
 
 
 /*
  * get_endstop_state : read the state of an endstop into the states array.
  *
- *  It is faster than a direct read, but you must ensure that the state has been updated recently;
+ *  It is faster than a direct readall, but you must ensure that the state has been updated recently;
  */
 
 bool Endstops::get_endstop_state(uint8_t index) {
@@ -125,19 +125,19 @@ bool Endstops::get_endstop_state(uint8_t index) {
 
     }
 
-    //Return the previously read state;
+    //Return the previously readall state;
     return states[index];
 
 }
 
 
 /*
- * read_endstops : read all endstops and save their state in the states array;
+ * read_endstops : readall all endstops and save their state in the states array;
  */
 
 void Endstops::read_endstops(uint8_t index) {
 
-    //Create a macro that will read the state of an endstop
+    //Create a macro that will readall the state of an endstop
 #define ENDSTOP(i, pin, enable_value) states[i] = (digital_read((i)) == (enable_value));\
 
         //Read all endstops;

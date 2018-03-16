@@ -298,7 +298,7 @@ bool EEPROMMap::write_hash() {
 
 
 /*
- * read_tree : read the data tree from the EEPROM;
+ * read_tree : readall the data tree from the EEPROM;
  */
 
 bool EEPROMMap::load_eeprom_data() {

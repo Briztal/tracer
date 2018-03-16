@@ -6,11 +6,11 @@
 #define TRACER_TSTRINGCLASS_H
 
 
-#include <DataStructures/Containers/PointerContainer.h>
+#include <DataStructures/Containers/DynamicPointerBuffer.h>
 #include <DataStructures/string/string.h>
 
 
-class tstring : private PointerContainer<string> {
+class tstring : private DynamicPointerBuffer<string> {
 
     //------------------------------------------- Constructors -------------------------------------------
 

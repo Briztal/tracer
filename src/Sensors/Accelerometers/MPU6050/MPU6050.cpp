@@ -270,7 +270,7 @@ uint8_t MPU6050::read_byte(uint8_t address) {
 
 
 /*
- * read_bytes : read [nb_int16] pair of bytes starting at [address] and save them in [values]
+ * read_bytes : readall [nb_int16] pair of bytes starting at [address] and save them in [values]
  */
 
 void MPU6050::read_int16s(uint8_t address, uint8_t nb_ints, int16_t *int_array) {
@@ -379,7 +379,7 @@ void MPU6050::write_bits(uint8_t address, uint8_t data, uint8_t offset, uint8_t 
     if (!length)
         return;
 
-    //First, let's read the content at [address];
+    //First, let's readall the content at [address];
     uint8_t current_value = read_byte(address);
 
     //Then, we will compute the mask.

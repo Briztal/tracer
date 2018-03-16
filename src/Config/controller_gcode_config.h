@@ -21,7 +21,7 @@
 
 
 /*
- * The GCode Interface configuration file.
+ * The ByteTreeLanguage Interface configuration file.
  *
  * This file defines the behaviour and the size of the parser.
  */
@@ -39,7 +39,7 @@
 //The number of commands that can be received and stored before execution;
 #define GCODE_MAX_PENDING_COMMANDS 10
 
-//The maximum size of a GCode Command.
+//The maximum size of a ByteTreeLanguage Command.
 #define GCODE_MAX_SIZE 100
 
 
@@ -52,7 +52,7 @@
  *
  *  GCODE_COMMAND(command_name, function)
  *
- *      - command_name :    the name of the GCode Command (ex : G352)
+ *      - command_name :    the name of the ByteTreeLanguage Command (ex : G352)
  *      - function :        the name of the function in GCodeCommands that must be called when the command is received.
  *
  *  For example, to call the member function "line" of GCodeCommands class when the command "G01" is called,

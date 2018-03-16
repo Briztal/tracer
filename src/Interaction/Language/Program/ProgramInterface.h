@@ -41,7 +41,7 @@
 //TODO POTENTIAL LOSS OF PACKETS : The data size transmitted is not the real size, but the size with BEGIN_BYTES doubled
 
 /*
- * The Program class is in charge of receiving data from the outside, and to decode them, according to
+ * The Program class is in charge of receiving data from the outside, and to process them, according to
  *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config_files file).
  *
  * When it received a command, it enqueues it in Kernel's external_tasks queue.

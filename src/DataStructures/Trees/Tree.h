@@ -5,7 +5,7 @@
 #ifndef TRACER_TREE_H
 #define TRACER_TREE_H
 
-#include "DataStructures/Containers/PointerContainer.h"
+#include "DataStructures/Containers/DynamicPointerBuffer.h"
 
 template<class L, class N>
 class Tree {
@@ -49,15 +49,26 @@ public:
     Tree<L, N> &operator=(Tree<L, N> &&src) noexcept;
 
 
+    //--------------------------------------- Getters ---------------------------------------
+
+    //Label getter;
+    const L getLabel() const;
+
+    //Node getter;
+    const N getNode() const;
+
     //--------------------------------------- children alteration ---------------------------------------
 
 public:
 
     //Child getter;
-    Tree<L, N> *getChild(uint8_t index);
+    Tree<L, N> *getChild(uint8_t index) const;
 
     //Child adder;
     void addChild(Tree<L, N> *child);
+
+    //Children number getter;
+    uint8_t getChildrenNb() const;
 
     //--------------------------------------- Sort ---------------------------------------
 
@@ -75,7 +86,7 @@ private:
     N node;
 
     //The array of children;
-    PointerContainer<Tree<L, N>> children;
+    DynamicPointerBuffer<Tree<L, N>> children;
 
 
 };

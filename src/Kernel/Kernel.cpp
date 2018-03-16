@@ -263,7 +263,7 @@ void Kernel::run() {
          */
 
         //Add as much tasks as possible in the pool from external controllers;
-        Interaction::read_external_controllers();
+        Interaction::read_communication_pipes();
 
         //Execute all scheduled tasks;
         TaskScheduler::iterate();

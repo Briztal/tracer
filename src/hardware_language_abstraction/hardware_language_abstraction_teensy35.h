@@ -48,6 +48,7 @@
 #include "i2c_t3.h"
 #include <DataStructures/string/string.h>
 
+#include <DataStructures/string/string.h>
 
 //#define String SUUS
 

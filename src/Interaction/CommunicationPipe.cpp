@@ -11,15 +11,15 @@
  * Constructor : takes two rvalues and moves them in the class;
  */
 
-CommunicationPipe::CommunicationPipe(Language &&language, Protocol &&protocol) :
-        language((Language&&)language), protocol((Protocol&&)protocol) {}
+CommunicationPipe::CommunicationPipe(HardwareSerial &serial, Delimiter &&protocol, Language &&language) :
+        language((Language&&)language), delimiter((Delimiter&&)protocol) {}
 
 
 /*
  * Destructor : no dynamic data to delete;
  */
 
-CommunicationPipe::~CommunicationPipe() {}
+CommunicationPipe::~CommunicationPipe() = default;
 
 
 //--------------------------------------- Processing ---------------------------------------
@@ -28,19 +28,45 @@ CommunicationPipe::~CommunicationPipe() {}
  * send : receives a message from inside the code, and sends it through the pipe;
  */
 
-void CommunicationPipe::send(tstring &&message) {
+void CommunicationPipe::send(tstring &message) {
 
     //First, we must use the language instance to encode the message;
-    language.encode((tstring&)message);
+    language.encode(message);
 
     //Then, we have to add one layer of encoding, using the encoder;
-    protocol.encode_data(message);
+    delimiter.encode(message);
 
-    //Finally, we can extract the data and send it.
-    //TODO
+    //Then, we can extract the data;
+    const char *data = message.data();
+
+    //Finally, we can send the extracted data;
+    serial.print(data);
 
 }
 
-void CommunicationPipe::read() {
+
+/*
+ * read : this function will readall the hardware interface until no char is available anymore;
+ */
+
+void CommunicationPipe::readall() {
+
+    //While some data is available :
+    while(serial.available()) {
+
+        //Read the data and pass it to the decoder;
+        delimiter.decode((char)serial.read());
+
+        //If the decoder has successfully decoded a message :
+        if (delimiter.messageDecoded()) {
+
+            //Parse the decoded message;
+            language.parse(delimiter.getData());
+
+        }
+
+    }
+
+
 
 }

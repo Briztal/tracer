@@ -21,8 +21,8 @@
 #ifndef TRACER_EVENTMANAGER_H
 #define TRACER_EVENTMANAGER_H
 
-#include <DataStructures/Containers/ValueSet.h>
-#include <DataStructures/Containers/PointerContainer.h>
+#include <DataStructures/Containers/DynamicSet.h>
+#include <DataStructures/Containers/DynamicPointerBuffer.h>
 
 #include "stdint.h"
 
@@ -81,10 +81,10 @@ public:
 private:
 
     //Registered events;
-    static PointerContainer<SystemEvent> *system_events;
+    static DynamicPointerBuffer<SystemEvent> *system_events;
 
     //Triggered events;
-    static ValueSet<uint8_t> *triggered_events;
+    static DynamicSet<uint8_t> *triggered_events;
 
 };
 

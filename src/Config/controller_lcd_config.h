@@ -19,12 +19,12 @@
 */
 
 /*
- * The GCode Interface configuration file.
+ * The ByteTreeLanguage Interface configuration file.
  *
  * This file defines the behaviour of the parser. You can personalise the following parameters :
  *      - The commands (G101, M1 commands for example).
  *      - The Parameters you can pass (X, Y, Z, A, B, etc...)
- *      - The function a special command triggers (ex : in Reprap GCode, G1 triggers a linear enqueue_movement function)
+ *      - The function a special command triggers (ex : in Reprap ByteTreeLanguage, G1 triggers a linear enqueue_movement function)
  *
  * Command are created with a simple tree. For example, to include next commands :
  *      G0, G1, M1, M2, G10, M225 and G5D0
@@ -48,14 +48,14 @@
  *
  * This structure is a little bit hard to initially approach, but it has two major advantages :
  *      - It allows to define all types of commands (1F5EF for example).
- *      - The code generated with it is REALLY more optimised than a typical GCode parser like.
+ *      - The code generated with it is REALLY more optimised than a typical ByteTreeLanguage parser like.
  *          For example, in Marlin, there are two switch (M and G) over all commands indices.
  *          These code practices are extremely inefficient.
  *          Here, at every node, a switch is made over the direct children.
  *
  * To define the command tree, you have access to the three following commands :
  *      COMMAND(k1_position_indice, fname)           : defines a leaf node, that triggers a method in MachineController::fname
- *      GO_LOWER_COMMAND(k1_position_indice, fname)  : defines a non leaf node that triggers MachineController::fname if it terminates a GCode (ex : G1 upper), and go to its level
+ *      GO_LOWER_COMMAND(k1_position_indice, fname)  : defines a non leaf node that triggers MachineController::fname if it terminates a ByteTreeLanguage (ex : G1 upper), and go to its level
  *      GO_LOWER(k1_position_indice)                 : defines a non leaf node, that does not trigger any function, and goes to its level
  *      GO_UPPER()                  : returns to the parent node level
  *
@@ -119,7 +119,7 @@ GO_UPPER()
 #undef F;
 
 /*
-    GCode Parameters :
+    ByteTreeLanguage Parameters :
     place here all parameters you need in your commands, with this parameter scheme :
     GCODE_PARAMETER_STATEMENT(indice, 'matching letter', matching letter)
 

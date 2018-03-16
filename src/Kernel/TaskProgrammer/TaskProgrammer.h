@@ -31,7 +31,7 @@
 #ifndef TRACER_TASKPROGRAMMER_H
 #define TRACER_TASKPROGRAMMER_H
 
-#include <DataStructures/Containers/PointerContainer.h>
+#include <DataStructures/Containers/DynamicPointerBuffer.h>
 #include "stdint.h"
 #include "ProgrammedTask.h"
 
@@ -110,7 +110,7 @@ private:
     //----------------------------------- Fields -----------------------------------
 
     //Programmed tasks;
-    static PointerContainer<ProgrammedTask> *programmed_tasks;
+    static DynamicPointerBuffer<ProgrammedTask> *programmed_tasks;
 
     //Next time that a task can be scheduled;
     static uint32_t next_check_time;

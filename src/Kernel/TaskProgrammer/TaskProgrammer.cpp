@@ -503,7 +503,7 @@ void TaskProgrammer::get_next_check_time() {
 
 
 //Programmed tasks;
-PointerContainer<ProgrammedTask> *TaskProgrammer::programmed_tasks = new PointerContainer<ProgrammedTask>(
+DynamicPointerBuffer<ProgrammedTask> *TaskProgrammer::programmed_tasks = new DynamicPointerBuffer<ProgrammedTask>(
         MAX_PROGRAMMED_TASKS);
 
 

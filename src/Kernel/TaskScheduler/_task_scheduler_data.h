@@ -2,7 +2,7 @@
 #define TRACER_TASK_SCHEDULER_DATA_H
 
 
-#include <Interaction/Protocols/Protocol.h>
+#include "task_function_t.h"
 #include "task_state_t.h"
 
 struct task_t {
@@ -21,7 +21,7 @@ struct task_t {
      * The function to parse, at runtime.
      */
 
-    task_state_t (*task)(void *) = nullptr;
+    task_function_t task = nullptr;
 
 
     /*
@@ -44,14 +44,14 @@ struct task_t {
      *  The log_protocol, as the message, must be provided.
      */
 
-    void (*log_function)(Protocol *, const char *message) = nullptr;
+    //void (*log_function)(Delimiter *, const char *message) = nullptr;
 
 
     /*
      * The log_protocol used to communicate.
      */
 
-    Protocol *log_protocol = nullptr;
+    //Delimiter *log_protocol = nullptr;
 
 
 };

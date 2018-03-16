@@ -43,10 +43,10 @@
 /*
  * The next lines focus on Interaction configuration. Interaction are static classes, meant only to interpret data.
  *
- * In order to receive orders from th outside, a Controller must receive its data from a Protocol, that reads and decode
+ * In order to receive orders from th outside, a Controller must receive its data from a Delimiter, that reads and process
  *  data over transmission layers;
  *
- * Protocols are objects, created by the Kernel;
+ * Delimiter are objects, created by the Kernel;
  *
  *  Transmission layers are static data defined in hardware_language_abstraction.
  *
@@ -56,18 +56,18 @@
  *  EXTERNAL_CONTROL(language, log_protocol, protocol_buffer_size, transmission_layer), where :
  *
  *      - language is the name of a Language class;
- *      - log_protocol is the name of a Protocol class (Interaction/Protocols);
- *      - protocol_buffer_size is the size of the Protocol class's input buffer;
+ *      - log_protocol is the name of a Delimiter class (Interaction/Delimiter);
+ *      - protocol_buffer_size is the size of the Delimiter class's input buffer;
  *      - transmission layer is the name of a transmission layer (hardware_language_abstraction_xxxx.h)
  *
  */
 
-#define NB_CONTROLS 1
+#define NB_PIPES 1
 
-#ifdef EXTERNAL_CONTROL
+#ifdef COMMUNICATION_PIPE
 
-EXTERNAL_CONTROL(Terminal, ClearText, 100, usb_serial)
+COMMUNICATION_PIPE(Terminal, LineDelimiter, 100, usb_serial)
 
 #endif
 
-#define STD_OUT_PROTOCOL 0
+#define STD_OUT_PIPE 0

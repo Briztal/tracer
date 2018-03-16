@@ -32,16 +32,16 @@ class StringUtils {
 public :
 
     //Get the number of times that 'verif_char' is consecutively present, at the beginning of the char sequence.
-    static uint8_t lstrip(char *in_buffer, const char verif_char);
+    static uint8_t lstrip(const char *in_buffer, const char verif_char);
 
     //Get the length of a string;
-    static uint8_t length(char *in_buffer);
+    static uint8_t length(const char *in_buffer);
 
     //Count thenumber of chars before the limit_char, or the end of the string;
-    static uint8_t count_until_char(char *in_buffer, const char limit_char);
+    static uint8_t count_until_char(const char *in_buffer, char limit_char);
 
     //Get the number of words in the string;
-    static uint8_t get_nb_words(char *in_buffer);
+    static uint8_t get_nb_words(const char *in_buffer);
 
     //Compare the two strings, and return true if they are the same;
     static bool strcmp(const char *string0, const char *string1);

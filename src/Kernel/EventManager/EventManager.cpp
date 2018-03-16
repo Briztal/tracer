@@ -271,7 +271,7 @@ void EventManager::process_events() {
 
 
 //Registered events;
-PointerContainer<SystemEvent> *EventManager::system_events = new PointerContainer<SystemEvent>(MAX_NB_EVENTS);
+DynamicPointerBuffer<SystemEvent> *EventManager::system_events = new DynamicPointerBuffer<SystemEvent>(MAX_NB_EVENTS);
 
 //Triggered events;
-ValueSet<uint8_t> *EventManager::triggered_events = new ValueSet<uint8_t>(MAX_NB_EVENTS);
+DynamicSet<uint8_t> *EventManager::triggered_events = new DynamicSet<uint8_t>(MAX_NB_EVENTS);

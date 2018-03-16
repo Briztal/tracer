@@ -72,7 +72,7 @@ Tree<L, N>::Tree(const Tree<L, N> &src) : label(src.label), node(src.node), chil
 
 template<class L, class N>
 Tree<L, N>::Tree(Tree<L, N> &&src): label((L &&) src.label), node((N &&) src.node),
-                                    children((PointerContainer<Tree<L, N>> &&) src.children) {}
+                                    children((DynamicPointerBuffer<Tree<L, N>> &&) src.children) {}
 
 
 //--------------------------------------- Assignment operators ---------------------------------------
@@ -103,8 +103,29 @@ Tree<L, N> &Tree<L, N>::operator=(Tree<L, N> &&src) {
     //Call the move assignment operator on node and children array;
     label = (L &&) src.label;
     node = (N &&) src.node;
-    children = (PointerContainer<Tree<L, N>> &&) src.children;
+    children = (DynamicPointerBuffer<Tree<L, N>> &&) src.children;
 
+}
+
+//--------------------------------------- Getters ---------------------------------------
+
+/*
+ * getLabel : returns a copy of the tree's label;
+ */
+
+template<class L, class N>
+const L Tree<L, N>::getLabel() const {
+    return label;
+}
+
+
+/*
+ * getNode : returns a copy of the tree's node;
+ */
+
+template<class L, class N>
+const N Tree<L, N>::getNode() const {
+    return node;
 }
 
 
@@ -127,11 +148,21 @@ void Tree<L, N>::addChild(Tree<L, N> *child) {
  *  it returns nullptr;
  */
 template<class L, class N>
-Tree<L, N> *Tree<L, N>::getChild(uint8_t index) {
+Tree<L, N> *Tree<L, N>::getChild(uint8_t index) const {
 
     //Return a pointer to the child;
     return children.getElement(index);
 
+}
+
+
+/*
+ * getChildrenNb : returns the number of children of the tree;
+ */
+
+template<class L, class N>
+uint8_t Tree<L, N>::getChildrenNb() const {
+    return children.getSize();
 }
 
 

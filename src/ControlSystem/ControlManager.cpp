@@ -25,7 +25,7 @@
  * Constructor : calls the parent constructor;
  */
 
-ControlManager::ControlManager(uint8_t size) : PointerContainer(size), locked(false) {
+ControlManager::ControlManager(uint8_t size) : DynamicPointerBuffer(size), locked(false) {
 
 }
 

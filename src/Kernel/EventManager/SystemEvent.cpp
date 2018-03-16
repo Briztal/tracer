@@ -23,7 +23,7 @@
 //-------------------------------- Initialisation --------------------------------
 
 
-SystemEvent::SystemEvent(const char *name, uint8_t max_tasks) : tasks(new ValueSet<task_pointer_t>(max_tasks)) {
+SystemEvent::SystemEvent(const char *name, uint8_t max_tasks) : tasks(new DynamicSet<task_pointer_t>(max_tasks)) {
 
     //First, let's set the name;
     for (uint8_t i = 0; i<10; i++) {

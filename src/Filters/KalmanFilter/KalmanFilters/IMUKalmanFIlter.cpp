@@ -135,7 +135,7 @@ void IMUKalmanFIlter::update(Vector3D &sum_forces, Triplet &gyro_data) {
 
 
 
-    //Now we will read data from filters;
+    //Now we will readall data from filters;
 
     //For each axis :
     for (uint8_t axis_index = 0; axis_index < 3; axis_index++) {

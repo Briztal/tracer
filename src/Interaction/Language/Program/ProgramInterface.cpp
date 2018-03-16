@@ -495,7 +495,7 @@ void PI::reset_input_data() {
  *
  *  This interface connects with a program that must adapt its behaviour to the command structure.
  *
- *  We use a basic protocol (commands listed below) to make him acknowledge the command structure.
+ *  We use a basic delimiter (commands listed below) to make him acknowledge the command structure.
  *
  */
 

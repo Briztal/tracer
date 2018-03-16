@@ -19,9 +19,26 @@
 */
 
 #include "stdint.h"
+
 #include "Interaction.h"
-#include <Kernel/TaskScheduler/TaskScheduler.h>
+
 #include <Interaction/Protocols/ClearText.h>
+
+
+namespace Interaction {
+
+    //---------------------------------------- private fields ----------------------------------------
+
+    //The communication pipes array;
+    CommunicationPipe pipes[NB_PIPES];
+
+
+    //---------------------------------------- private methods ----------------------------------------
+
+    //Initialise controllers
+    static void initialise_communication_pipes();
+
+}
 
 
 /*
@@ -31,13 +48,13 @@
 void Interaction::initialise_hardware() {
 
     //A macro that will solve the interface for a giver control pipeline;
-#define EXTERNAL_CONTROL(controller, protocol, buffer, transmission) transmission::begin();
+#define COMMUNICATION_PIPE(controller, protocol, buffer, transmission) transmission::begin();
 
     //Expand the initialise_hardware;
 #include <Config/control_config.h>
 
     //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
+#undef COMMUNICATION_PIPE
 
     delay_ms(200);
 
@@ -45,202 +62,51 @@ void Interaction::initialise_hardware() {
 
 
 /*
- * initialisation_message : this function triggers the init_message for all enabled controllers;
- */
-
-void Interaction::initialisation_message() {
-
-    //A macro that will solve the interface for a giver control pipeline;
-#define EXTERNAL_CONTROL(controller, protocol, buffer, transmission)\
-    controller::init_message();
-
-    //Expand the message;
-#include <Config/control_config.h>
-
-    //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
-
-}
-
-
-/*
- * initialise_hardware : this function initialises data for all enabled controllers.
- *
- *  It creates a new Protocol, and gives it to the controller, that will solve its data accordingly;
+ * initialise_hardware : this function initialises all communication pipes
  */
 
 void Interaction::initialise_data() {
 
-    initialise_external_controllers();
-
-    //TODO initialise_internal_protocols();
+    //Initialise all communication pipes;
+    initialise_communication_pipes();
 
 }
 
 
 /*
- * initialise_external_controllers : this function initialises data for external controllers;
+ * initialise_communication_pipes : this function initialises data for external controllers;
  */
 
-void Interaction::initialise_external_controllers() {
+void Interaction::initialise_communication_pipes() {
 
-    //Cache for the log_protocol;
-    Protocol *p;
-
-    //The log_protocol index;
+    //The pipe index, incremented during the add;
     uint8_t i = 0;
 
-
     //A macro that will solve the i-th log_protocol, memorise it, and give it to the controller;
-#define EXTERNAL_CONTROL(controller, protocol, buffer, transmission)\
-    /*Eventually delete the pointer*/\
-    if ((p = protocols[i]) != nullptr) { delete p;};\
-    /*Create a new protocol;*/\
-    protocols[i++] = p = new protocol((uint8_t)(buffer), transmission::available, transmission::write, transmission::read);\
-    /*Initialise the new protocol;*/\
-    controller::initialise_data(p);
+#define COMMUNICATION_PIPE(language, delimiter, buffer, transmission)\
+    pipes[i++] = new CommunicationPipe(transmission, delimiter(buffer), language());
 
     //Expand the initialise_hardware;
 #include <Config/control_config.h>
 
     //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
+#undef COMMUNICATION_PIPE
 
-}
-
-
-Protocol *Interaction::get_default_protocol() {
-
-#include <Config/control_config.h>
-
-#ifdef STD_OUT_PROTOCOL
-
-    uint8_t i = 0;
-
-#define EXTERNAL_CONTROL(...) i++;
-
-#include <Config/control_config.h>
-
-#undef EXTERNAL_CONTROL
-
-    if (STD_OUT_PROTOCOL < i)
-        return protocols[STD_OUT_PROTOCOL];
-
-#endif
-
-    return nullptr;
-
-}
-
-
-void *Interaction::get_default_log_function() {
-
-#include <Config/control_config.h>
-
-#ifdef STD_OUT_PROTOCOL
-
-    uint8_t i = STD_OUT_PROTOCOL;
-
-#define EXTERNAL_CONTROL(language, log_protocol, protocol_buffer_size, transmission_layer)\
-    if (!(i--)) return (void *) language::external_log;
-
-#include <Config/control_config.h>
-
-#undef EXTERNAL_CONTROL
-
-#endif
-
-    return nullptr;
 }
 
 
 /*
- * read_external_controllers : this function will read_data all interfaces, in order to schedule new tasks.
- *
- *  In order to process all interfaces, with the same priority, the two following rules are applied :
- *
- *      - The function interrogates one interface at the time;
- *
- *      - When being interrogated, an interface schedules at most one task;
- *          This prevents from interrogating the first interface, and fulling the queue, and not being able to
- *          interrogate other interfaces.
- *
- *      - Interaction are interrogated in order, and all with the same priority.
- *          It means that if interface 0 is interrogated, the next interface to be interrogated will
- *          necessarily be interface 1.
+ * read_communication_pipes : this function read all communication pipes;
  */
 
-void Interaction::read_external_controllers() {
+void Interaction::read_communication_pipes() {
 
-    //The number of interfaces to skip;
-    static uint8_t skip_counter = 0;
+    //For each communication pipe :
+    for (uint8_t pipe_index = 0; pipe_index < NB_PIPES; pipe_index++) {
 
-    //The number of interfaces to skip at the next iteration;
-    uint8_t next_skip_counter = 0;
+        //Read all data in the pipe;
+        pipes[pipe_index].readall();
 
-    //A flag, showing if the interrogation must continue (is true if almost one interface can be read_data again);
-    bool keep_on;
-
-
-    /*
-     * As the algorithm for querying each interface is exactly the same (but with different values),
-     *  we will use a function-like macro.
-     */
-
-#define QUERY_INTERFACE(controller, protocol) \
-                if (!skip_counter) {\
-                    /*Special case of the interface identifier*/\
-                    if (!TaskScheduler::available_spaces(255)) {\
-                        skip_counter = next_skip_counter;\
-                        return;\
-                    }\
-                    /*Read all data or a packet in the protocol*/\
-                    (protocol)->decode_data();\
-                    /*Re-iterate the loop if data is still available;*/\
-                    if((protocol)->parsing_ready()) {\
-                        controller::parse((protocol)->get_data());\
-                        keep_on = true;\
-                    }\
-                /*Do not break, as we must interrogate other interfaces.*/\
-                } else skip_counter--;/*If this interface has been skipped, decr the skip_counter.*/\
-                /*Another interface to skip if the next one cannot be interrogated*/\
-                next_skip_counter++;
-
-    do {
-
-        //Reset the flag. Will be set if one interface has more data available.
-        keep_on = false;
-
-        //No interfaces to skip;
-        next_skip_counter = 0;
-
-        //Protocol index;
-        uint8_t i = 0;
-
-        Protocol *p;
-
-        //Process or switch every controller;
-#define EXTERNAL_CONTROL(controller, protocol, ...) \
-        p = protocols[i++];\
-        QUERY_INTERFACE(controller, p);
-
-        //Expand the processing;
-#include <Config/control_config.h>
-
-        //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
-
-    } while (keep_on);
+    }
 
 }
-
-
-void Interaction::read_internal_controllers() {
-
-
-}
-
-
-Protocol *t_prot_cont[NB_CONTROLS];
-Protocol **const Interaction::protocols = t_prot_cont;
-

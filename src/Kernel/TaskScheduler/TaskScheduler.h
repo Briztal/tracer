@@ -84,7 +84,7 @@ public:
     //Build and schedule a task;
     static bool
     schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                  void (*log_f)(Protocol *, const char *), Protocol *protocol);
+                  void (*log_f)(Delimiter *, const char *), Delimiter *protocol);
 
 
 private:
@@ -150,16 +150,16 @@ public:
 private:
 
     //The encoding function;
-    static void (*log_function)(Protocol *, const char *message);
+    static void (*log_function)(Delimiter *, const char *message);
 
     //The communication log_protocol;
-    static Protocol *log_protocol;
+    static Delimiter *log_protocol;
 
     //The encoding function;
-    static void (*default_log_function)(Protocol *, const char *message);
+    static void (*default_log_function)(Delimiter *, const char *message);
 
     //The communication log_protocol;
-    static Protocol *default_log_protocol;
+    static Delimiter *default_log_protocol;
 
 
 };

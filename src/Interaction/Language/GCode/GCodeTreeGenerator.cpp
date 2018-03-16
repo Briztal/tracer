@@ -140,7 +140,7 @@ void GCodeTreeGenerator::free_commands(command_line_t **commands, const uint16_t
 
 
 /*
- * get_command_nb : this function returns the number of GCode commands required by the config file.
+ * get_command_nb : this function returns the number of ByteTreeLanguage commands required by the config file.
  */
 
 uint16_t GCodeTreeGenerator::get_command_nb() {
@@ -157,7 +157,7 @@ uint16_t GCodeTreeGenerator::get_command_nb() {
     //Un-define the macro for safety
 #undef GCODE_COMMAND
 
-    //Return the number of GCode commands;
+    //Return the number of ByteTreeLanguage commands;
     return i;
 
 }

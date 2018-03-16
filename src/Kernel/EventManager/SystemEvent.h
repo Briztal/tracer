@@ -22,7 +22,7 @@
 #define TRACER_EVENT_H
 
 
-#include <DataStructures/Containers/ValueSet.h>
+#include <DataStructures/Containers/DynamicSet.h>
 
 
 /*
@@ -85,7 +85,7 @@ private:
     char name[11]{0};
 
     //The event's tasks;
-    ValueSet<task_pointer_t> *tasks;
+    DynamicSet<task_pointer_t> *tasks;
 
     //The index of the next task to schedule;
     uint8_t task_to_schedule;

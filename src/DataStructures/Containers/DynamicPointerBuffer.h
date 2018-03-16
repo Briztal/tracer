@@ -20,11 +20,11 @@
 
 
 /*
- * The PointerContainer template class : a Vector class, storing pointers to objects;
+ * The DynamicPointerBuffer template class : a Vector class, storing pointers to objects;
  *
  * Elements must be pointers to objects, as the class handles itself deletion of unused elements;
  *
- * For storage by value, please check the ValueContainer Class
+ * For storage by value, please check the DynamicBuffer Class
  */
 
 #ifndef TRACER_POINTERCONTAINER_H
@@ -33,37 +33,37 @@
 #include "stdint.h"
 
 template<typename T>
-class PointerContainer {
+class DynamicPointerBuffer {
 
     //-------------------------------------- Constructor - Destructor --------------------------------------
 
 public:
 
     //Constructor;
-    explicit PointerContainer(uint8_t max_size);
+    explicit DynamicPointerBuffer(uint8_t max_size);
 
     //Destructor;
-    virtual ~PointerContainer();
+    virtual ~DynamicPointerBuffer();
 
     //---------------------------------------- Copy Constructor ----------------------------------------
 
     //Copy constructor;
-    PointerContainer(const PointerContainer<T> &container);
+    DynamicPointerBuffer(const DynamicPointerBuffer<T> &container);
 
     //Move constructor;
-    PointerContainer(PointerContainer<T> &&container) noexcept;
+    DynamicPointerBuffer(DynamicPointerBuffer<T> &&container) noexcept;
 
 
     //---------------------------------------- Assignment operator ----------------------------------------
 
     //Copy assignment operator;
-    PointerContainer &operator=(const PointerContainer<T> &container);
+    DynamicPointerBuffer &operator=(const DynamicPointerBuffer<T> &container);
 
     //Copy assignment operator;
-    PointerContainer &operator=(PointerContainer<T> &&container) noexcept;
+    DynamicPointerBuffer &operator=(DynamicPointerBuffer<T> &&container) noexcept;
 
     //Swap function;
-    void swap(PointerContainer &a, PointerContainer<T> &b);
+    void swap(DynamicPointerBuffer &a, DynamicPointerBuffer<T> &b);
 
     //-------------------------------------- Builders --------------------------------------
 
@@ -84,23 +84,23 @@ public:
     //-------------------------------------- Concatenation --------------------------------------
 
     //Concatenate an lvalue array on the right;
-    bool rightConcatenation(PointerContainer<T> &&src);
+    bool rightConcatenation(DynamicPointerBuffer<T> &&src);
 
     //Concatenate an lvalue array on the left;
-    bool leftConcatenation(PointerContainer<T> &&src);
+    bool leftConcatenation(DynamicPointerBuffer<T> &&src);
 
     //-------------------------------------- Getters --------------------------------------
 
 public:
 
     //Get the number of elements in the list;
-    uint8_t getSize();
+    uint8_t getSize() const;
 
     //Get the number of elements in the list;
-    uint8_t getMaxSize();
+    uint8_t getMaxSize() const;
 
     //Get a particular element;
-    T *getElement(uint8_t index);
+    T *getElement(uint8_t index) const;
 
     //Set a particular element;
     T *setElement(uint8_t index, T *new_element);
@@ -149,7 +149,7 @@ private:
  */
 
 template<class T>
-PointerContainer<T>::PointerContainer(uint8_t max_size) : size(0), maxSize(max_size), elements(nullptr) {}
+DynamicPointerBuffer<T>::DynamicPointerBuffer(uint8_t max_size) : size(0), maxSize(max_size), elements(nullptr) {}
 
 
 /*
@@ -157,7 +157,7 @@ PointerContainer<T>::PointerContainer(uint8_t max_size) : size(0), maxSize(max_s
  */
 
 template<class T>
-PointerContainer<T>::~PointerContainer() {
+DynamicPointerBuffer<T>::~DynamicPointerBuffer() {
 
     clear();
 
@@ -171,7 +171,7 @@ PointerContainer<T>::~PointerContainer() {
  */
 
 template<typename T>
-PointerContainer<T>::PointerContainer(const PointerContainer &container) : PointerContainer(container.maxSize) {
+DynamicPointerBuffer<T>::DynamicPointerBuffer(const DynamicPointerBuffer &container) : DynamicPointerBuffer(container.maxSize) {
 
     //First, we will update sizes;
     resizeTo(container.size);
@@ -192,7 +192,7 @@ PointerContainer<T>::PointerContainer(const PointerContainer &container) : Point
  */
 
 template<typename T>
-PointerContainer<T>::PointerContainer(PointerContainer &&container) : size(container.size),
+DynamicPointerBuffer<T>::DynamicPointerBuffer(DynamicPointerBuffer &&container) : size(container.size),
                                                                       maxSize(container.maxSize),
                                                                       elements(container.elements) {
 
@@ -209,7 +209,7 @@ PointerContainer<T>::PointerContainer(PointerContainer &&container) : size(conta
  */
 
 template<typename T>
-PointerContainer<T> &PointerContainer<T>::operator=(const PointerContainer<T> &container) {
+DynamicPointerBuffer<T> &DynamicPointerBuffer<T>::operator=(const DynamicPointerBuffer<T> &container) {
 
     //If the container is us, do nothing;
     if (&container == this) {
@@ -217,7 +217,7 @@ PointerContainer<T> &PointerContainer<T>::operator=(const PointerContainer<T> &c
     }
 
     //Create a copy;
-    PointerContainer copy = PointerContainer(container);
+    DynamicPointerBuffer copy = DynamicPointerBuffer(container);
 
     //Swap, to that our data is deleted at the end of copy's scope;
     swap(*this, copy);
@@ -233,7 +233,7 @@ PointerContainer<T> &PointerContainer<T>::operator=(const PointerContainer<T> &c
  */
 
 template<typename T>
-PointerContainer<T> &PointerContainer<T>::operator=(PointerContainer<T> &&container) noexcept {
+DynamicPointerBuffer<T> &DynamicPointerBuffer<T>::operator=(DynamicPointerBuffer<T> &&container) noexcept {
 
     //Swap, to that our data is deleted at the end of container's scope;
     swap(*this, container);
@@ -249,7 +249,7 @@ PointerContainer<T> &PointerContainer<T>::operator=(PointerContainer<T> &&contai
  */
 
 template<typename T>
-void PointerContainer<T>::swap(PointerContainer<T> &a, PointerContainer<T> &b) {
+void DynamicPointerBuffer<T>::swap(DynamicPointerBuffer<T> &a, DynamicPointerBuffer<T> &b) {
 
     //Swap max sizes;
     uint8_t ts = a.maxSize;
@@ -278,7 +278,7 @@ void PointerContainer<T>::swap(PointerContainer<T> &a, PointerContainer<T> &b) {
  */
 
 template<class T>
-bool PointerContainer<T>::add(T *new_element) {
+bool DynamicPointerBuffer<T>::add(T *new_element) {
 
 
     //Increment the size;
@@ -306,7 +306,7 @@ bool PointerContainer<T>::add(T *new_element) {
  */
 
 template<class T>
-bool PointerContainer<T>::set(uint8_t index, T *new_element) {
+bool DynamicPointerBuffer<T>::set(uint8_t index, T *new_element) {
 
 
     //Increment the size;
@@ -337,7 +337,7 @@ bool PointerContainer<T>::set(uint8_t index, T *new_element) {
  */
 
 template<class T>
-T *PointerContainer<T>::remove(uint8_t index) {
+T *DynamicPointerBuffer<T>::remove(uint8_t index) {
 
     //If the index is invalid, stop here;
     if (index >= size)
@@ -382,7 +382,7 @@ T *PointerContainer<T>::remove(uint8_t index) {
  */
 
 template<class T>
-void PointerContainer<T>::clear() {
+void DynamicPointerBuffer<T>::clear() {
 
     //First, delete each element;
     for (uint8_t element_index = 0; element_index < size; element_index++) {
@@ -414,7 +414,7 @@ void PointerContainer<T>::clear() {
  */
 
 template<typename T>
-bool PointerContainer<T>::rightConcatenation(PointerContainer<T> &&src) {
+bool DynamicPointerBuffer<T>::rightConcatenation(DynamicPointerBuffer<T> &&src) {
 
     //Cache current sizes;
     uint8_t size = this->size;
@@ -459,7 +459,7 @@ bool PointerContainer<T>::rightConcatenation(PointerContainer<T> &&src) {
  */
 
 template<typename T>
-bool PointerContainer<T>::leftConcatenation(PointerContainer<T> &&src) {
+bool DynamicPointerBuffer<T>::leftConcatenation(DynamicPointerBuffer<T> &&src) {
 
     //Cache current sizes;
     uint8_t size = this->size;
@@ -518,7 +518,7 @@ bool PointerContainer<T>::leftConcatenation(PointerContainer<T> &&src) {
  */
 
 template<class T>
-uint8_t PointerContainer<T>::getSize() {
+uint8_t DynamicPointerBuffer<T>::getSize() const {
 
     //Return the size lol;
     return size;
@@ -531,7 +531,7 @@ uint8_t PointerContainer<T>::getSize() {
  */
 
 template<class T>
-uint8_t PointerContainer<T>::getMaxSize() {
+uint8_t DynamicPointerBuffer<T>::getMaxSize() const {
 
     //Return the size lol;
     return maxSize;
@@ -544,7 +544,7 @@ uint8_t PointerContainer<T>::getMaxSize() {
  */
 
 template<class T>
-T *PointerContainer<T>::getElement(uint8_t index) {
+T *DynamicPointerBuffer<T>::getElement(uint8_t index) const {
 
     //If the index is invalid
     if (index >= size)
@@ -561,7 +561,7 @@ T *PointerContainer<T>::getElement(uint8_t index) {
  */
 
 template<class T>
-T *PointerContainer<T>::setElement(uint8_t index, T *new_element) {
+T *DynamicPointerBuffer<T>::setElement(uint8_t index, T *new_element) {
 
     //If the index is invalid
     if (index >= size)
@@ -587,7 +587,7 @@ T *PointerContainer<T>::setElement(uint8_t index, T *new_element) {
  */
 
 template<typename T>
-void PointerContainer<T>::sort() {
+void DynamicPointerBuffer<T>::sort() {
 
     //First, let's cache the size;
     uint8_t size = this->size;
@@ -631,13 +631,13 @@ void PointerContainer<T>::sort() {
  */
 
 template<class T>
-bool PointerContainer<T>::resizeTo(uint8_t new_size) {
+bool DynamicPointerBuffer<T>::resizeTo(uint8_t new_size) {
 
     //If the maximum number of tasks is reached :
     if (new_size >= maxSize) {
 
         //Log;
-        //std_out("Error in PointerContainer::resize : the requested size is superior to the maximum size;");
+        //std_out("Error in DynamicPointerBuffer::resize : the requested size is superior to the maximum size;");
 
         //Fail;
         return false;
@@ -661,7 +661,7 @@ bool PointerContainer<T>::resizeTo(uint8_t new_size) {
     if (!new_array && new_size) {
 
         //Log;
-        //std_out("Error in PointerContainer::resize : the reallocation failed;");
+        //std_out("Error in DynamicPointerBuffer::resize : the reallocation failed;");
 
         //Fail;
         return false;

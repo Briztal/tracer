@@ -6,6 +6,9 @@
 #define TRACER_LANGUAGE_H
 
 
+#include <DataStructures/string/tstring.h>
+#include <Kernel/TaskScheduler/task_state_t.h>
+
 /*
  * This class is a virtual representation of a Language.
  *
@@ -20,19 +23,21 @@
 class Language {
 
 
-public:
-
-    //Data initialisation function;
-    virtual void initialise_data() = 0;
-
-    //Send the initialisation message
-    virtual void init_message() = 0;
-
-    //Parse the message and eventually execute the associated command;
-    virtual bool parse(char *message) = 0;
+    //-------------------------------------- Tree generation (for final class)  --------------------------------------
 
     //Generate the tree used to parse the message;
     virtual void generateTree() = 0;
+
+
+    //-------------------------------------- Encoding / decoding --------------------------------------
+
+
+    //Parse the message and eventually execute the associated command;
+    virtual bool decode(const char *message) = 0;
+
+    //Encode a rvalue string;
+    virtual void encode(tstring &s, uint8_t type) = 0;
+
 
 
 };

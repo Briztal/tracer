@@ -42,63 +42,30 @@
 #endif
 
 #include <Kernel/TaskScheduler/TaskScheduler.h>
+#include "CommunicationPipe.h"
 
 #define debug(s) TaskScheduler::log(st("debug ") + (s));
 
 #define std_out(s) TaskScheduler::log(s)
 
 
-class Interaction {
+namespace Interaction {
 
     //------------------------------------------------- Initialisation -------------------------------------------------
-
-public:
 
     //Initialise all interfaces hardware (data_link);
     static void initialise_hardware();
 
-    //Send the initialisation message on all interfaces
-    static void initialisation_message();
-
     //Initialise all interfaces data (fields and processing environment);
     static void initialise_data();
-
-private:
-
-    //Initialise controllers
-    static void initialise_external_controllers();
 
 
     //------------------------------------------------- Controls -------------------------------------------------
 
-public:
-
-    //Read internal controllers
-    static void read_internal_controllers();
-
-    //Read external controllers;
-    static void read_external_controllers();
-
-
-private:
-
-    //The log_protocol array;
-    static Protocol **const protocols;
-
-
-    //------------------------------------------------- Default log -------------------------------------------------
-
-
-public:
-
-    static Protocol *get_default_protocol();
-
-    static void *get_default_log_function();
+    //Read all communication pipes;
+    static void read_communication_pipes();
 
 };
-
-
-//A piece of macro that will help the automatic
 
 
 #endif //TRACER_INTERACTION_H

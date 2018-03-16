@@ -219,5 +219,5 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 //The maximum number of pre-processable sub_movements.
 #define SUB_MOVEMENT_DATA_QUEUE_SIZE 40
 
-//The maximum number of curve points in a GCode Command (used in Bezier curves for ex)
+//The maximum number of curve points in a ByteTreeLanguage Command (used in Bezier curves for ex)
 #define MAX_CURVE_POINTS 5

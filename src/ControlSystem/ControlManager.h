@@ -26,7 +26,7 @@
 
 #include "stdint.h"
 
-#include "DataStructures/Containers/PointerContainer.h"
+#include "DataStructures/Containers/DynamicPointerBuffer.h"
 
 
 /*
@@ -35,7 +35,7 @@
  *  When you want to control your model, by targets or by trajectory, you will control a certain layer of the model.
  */
 
-class ControlManager : private PointerContainer<ControlStage> {
+class ControlManager : private DynamicPointerBuffer<ControlStage> {
 
 
     //------------------------------------- Initialisation -------------------------------------

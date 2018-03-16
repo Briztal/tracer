@@ -27,7 +27,7 @@
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include <Interaction/Languages/_language_data.h>
-#include <Interaction/Protocols/Protocol.h>
+#include <Interaction/Protocols/Delimiter.h>
 #include "TerminalTree.h"
 
 class Terminal {
@@ -41,7 +41,7 @@ public :
     static void init_message();
 
     //The data initialisation function;
-    static void initialise_data(Protocol *protocol);
+    static void initialise_data(Delimiter *protocol);
 
 
     //--------------------------------------Command Parsing----------------------------------
@@ -78,7 +78,7 @@ public :
     static void log(const char *msg);
 
     //System alias for echo;
-    static void external_log(Protocol *protocol, const char *msg);
+    static void external_log(Delimiter *protocol, const char *msg);
 
     //System alias for a response (doesn't add //);
     static void respond(const char *msg);
@@ -89,7 +89,7 @@ public :
 
 private:
 
-    static Protocol *output_protocol;
+    static Delimiter *output_protocol;
 
 
 };

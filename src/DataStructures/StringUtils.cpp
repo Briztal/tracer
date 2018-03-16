@@ -18,13 +18,14 @@
 
 */
 
+#include <HardwareSerial.h>
 #include "StringUtils.h"
 
 /*
  * length : this function determines the length of the string (without the \0 comprised);
  */
 
-uint8_t StringUtils::length(char *in_buffer) {
+uint8_t StringUtils::length(const char *in_buffer) {
 
     uint8_t char_count = 0;
 
@@ -51,7 +52,7 @@ uint8_t StringUtils::length(char *in_buffer) {
  *
  */
 
-uint8_t StringUtils::count_until_char(char *in_buffer, const char limit_char) {
+uint8_t StringUtils::count_until_char(const char *in_buffer, const char limit_char) {
 
     uint8_t char_count = 0;
     //Initialise a cache for the current char
@@ -80,7 +81,7 @@ uint8_t StringUtils::count_until_char(char *in_buffer, const char limit_char) {
  *
  */
 
-uint8_t StringUtils::lstrip(char *in_buffer, const char verif_char) {
+uint8_t StringUtils::lstrip(const char *in_buffer, const char verif_char) {
 
     //initialise_hardware a counter
     uint8_t counter = 0;
@@ -109,7 +110,7 @@ uint8_t StringUtils::lstrip(char *in_buffer, const char verif_char) {
  *
  */
 
-uint8_t StringUtils::get_nb_words(char *in_buffer) {
+uint8_t StringUtils::get_nb_words(const char *in_buffer) {
 
     //Initialise a word counter.
     uint8_t nb_words = 0;

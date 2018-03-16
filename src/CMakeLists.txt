@@ -128,8 +128,8 @@ add_library(hardware
 #-----------------------------------------------INTERFACES--------------------------------------------------------------
 
 set(CIP "Interaction")
-set(CLP "Interaction/Languages")
-set(CPP "Interaction/Protocols")
+set(CLP "Interaction/Language")
+set(CPP "Interaction/Delimiter")
 include_directories(${CCP}/)
 
 
@@ -168,7 +168,7 @@ add_library(interaction
         )
 
 
-set(CPP "Interaction/Protocols")
+set(CPP "Interaction/Delimiter")
 
 include_directories(${CPP}/)
 

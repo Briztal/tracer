@@ -11,14 +11,14 @@
  * Constructor : initialises the container, to contain at most 10 strings;
  */
 
-tstring::tstring() : PointerContainer(255), string_generated(false), size(1), final_data(nullptr) {}
+tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), size(1), final_data(nullptr) {}
 
 
 /*
  * Constructor : initialises the container, to contain at most 10 strings;
  */
 
-tstring::tstring(uint8_t max_strings) : PointerContainer(max_strings), string_generated(false), size(1),
+tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), string_generated(false), size(1),
                                         final_data(nullptr) {}
 
 
@@ -55,7 +55,7 @@ tstring::tstring(const string &&s) : tstring() {
 
 
 /*
- * Destructor : all strings will be deleted automatically by the PointerContainer's destructor;
+ * Destructor : all strings will be deleted automatically by the DynamicPointerBuffer's destructor;
  */
 
 tstring::~tstring() {
@@ -72,7 +72,7 @@ tstring::~tstring() {
 void tstring::clear() {
 
     //Clear the content;
-    PointerContainer::clear();
+    DynamicPointerBuffer::clear();
 
     //Delete the data;
     deleteData();
@@ -87,7 +87,7 @@ void tstring::clear() {
  * Copy constructor : this function will duplicate the tstring;
  */
 
-tstring::tstring(const tstring &src) : PointerContainer(src), string_generated(src.string_generated), size(src.size),
+tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generated(src.string_generated), size(src.size),
                                        final_data(src.final_data) {}
 
 
@@ -95,7 +95,7 @@ tstring::tstring(const tstring &src) : PointerContainer(src), string_generated(s
  * Move constructor : this function will move dynamic data to us;
  */
 
-tstring::tstring(tstring &&src) : PointerContainer((tstring &&) src), string_generated(src.string_generated),
+tstring::tstring(tstring &&src) : DynamicPointerBuffer((tstring &&) src), string_generated(src.string_generated),
                                   size(src.size), final_data(src.final_data) {
 
     //Reset src's data;
@@ -139,7 +139,7 @@ tstring &tstring::operator=(const tstring &src) {
 tstring &tstring::operator=(tstring &&src) {
 
     //Move the parent container;
-    PointerContainer::operator=((tstring &&) src);
+    DynamicPointerBuffer::operator=((tstring &&) src);
 
     //Swap, to that our data is deleted at the end of container's scope;
     swap(*this, src);
@@ -196,7 +196,7 @@ tstring &tstring::operator+=(const string &src) {
     size += src.length();
 
     //Add the string to the container;
-    PointerContainer::add(s);
+    DynamicPointerBuffer::add(s);
     
     //Return a reference to us;
     return *this;
@@ -217,7 +217,7 @@ tstring &tstring::operator+=(string &&src) {
     string *s = new string(src);
 
     //Add the moved string to the container;
-    PointerContainer::add(s);
+    DynamicPointerBuffer::add(s);
     
     //Return a reference to us;
     return *this;
@@ -251,7 +251,7 @@ void tstring::rightConcatenation(tstring &&src) {
     src.deleteData();
 
     //Concatenate data; if it succeeds :
-    if (PointerContainer::rightConcatenation((tstring &&) src)) {
+    if (DynamicPointerBuffer::rightConcatenation((tstring &&) src)) {
 
         //Update our size;
         size += src.size - (uint16_t) 1;
@@ -273,7 +273,7 @@ void tstring::leftConcatenation(tstring &&src) {
     src.deleteData();
 
     //Concatenate data; if it succeeds :
-    if (PointerContainer::leftConcatenation((tstring &&) src)) {
+    if (DynamicPointerBuffer::leftConcatenation((tstring &&) src)) {
 
         //Update our size;
         size += src.size - (uint16_t) 1;

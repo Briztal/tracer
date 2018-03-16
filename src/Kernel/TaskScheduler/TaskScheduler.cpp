@@ -78,9 +78,9 @@ void TaskScheduler::initialise_data() {
 
 
     //Initialise the default log environment;
-    default_log_function = (void (*)(Protocol *,const char *)) Interaction::get_default_log_function();
+    default_log_function = (void (*)(Delimiter *,const char *)) Interaction::get_default_log_function();
 
-    //Initialise the default protocol;
+    //Initialise the default delimiter;
     default_log_protocol = Interaction::get_default_protocol();
 
     //Reset the log environment;
@@ -193,7 +193,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
  */
 
 bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                                  void (*log_function)(Protocol *, const char *), Protocol *protocol) {
+                                  void (*log_function)(Delimiter *, const char *), Delimiter *protocol) {
 
     //Create a task to contain the provided data;
     task_t task = task_t();
@@ -213,7 +213,7 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
         //Set the log function;
         task.log_function = log_function;
 
-        //Set the log protocol;
+        //Set the log delimiter;
         task.log_protocol = protocol;
 
     } else {
@@ -221,7 +221,7 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
         //Set the log function;
         task.log_function = default_log_function;
 
-        //Set the log protocol;
+        //Set the log delimiter;
         task.log_protocol = default_log_protocol;
 
     }
@@ -616,7 +616,7 @@ bool TaskScheduler::execute_task(task_t *task) {
         if (task->log_function)
             log_function = task->log_function;
 
-        //Save the protocol if it is not null;
+        //Save the delimiter if it is not null;
         if (task->log_protocol)
             log_protocol = task->log_protocol;
 
@@ -743,15 +743,15 @@ Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
 bool m::flood_enabled = false;
 
 //The encoding function;
-void (*m::log_function)(Protocol *, const char * message) = nullptr;
+void (*m::log_function)(Delimiter *, const char * message) = nullptr;
 
 //The communication log_protocol;
-Protocol *m::log_protocol = nullptr;
+Delimiter *m::log_protocol = nullptr;
 
 //The default log function
-void (*m::default_log_function)(Protocol *, const char * message);
+void (*m::default_log_function)(Delimiter *, const char * message);
 
 //The default log_protocol;
-Protocol *m::default_log_protocol;
+Delimiter *m::default_log_protocol;
 
 

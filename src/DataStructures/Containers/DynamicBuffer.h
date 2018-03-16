@@ -20,11 +20,11 @@
 
 
 /*
- * The ValueContainer template class : a Vector class, storing objects by value;
+ * The DynamicBuffer template class : a Vector class, storing objects by value;
  *
  * Elements are stored by value, contiguously.
  *
- * For storage by pointer, please check the ValueContainer Class
+ * For storage by pointer, please check the DynamicBuffer Class
  */
 
 #ifndef TRACER_TVECTOR_H
@@ -34,37 +34,37 @@
 
 template<typename T>
 
-class ValueContainer {
+class DynamicBuffer {
 
     //-------------------------------------- Initialisation --------------------------------------
 
 public:
 
     //Constructor;
-    explicit ValueContainer(uint8_t max_size);
+    explicit DynamicBuffer(uint8_t max_size);
 
     //Destructor;
-    virtual ~ValueContainer();
+    virtual ~DynamicBuffer();
 
     //---------------------------------------- Copy Constructor ----------------------------------------
 
     //Copy constructor;
-    ValueContainer(const ValueContainer &container);
+    DynamicBuffer(const DynamicBuffer &container);
 
     //Move constructor;
-    ValueContainer(ValueContainer &&container) noexcept;
+    DynamicBuffer(DynamicBuffer &&container) noexcept;
 
 
     //---------------------------------------- Assignment operator ----------------------------------------
 
     //Copy assignment operator;
-    ValueContainer &operator=(const ValueContainer &container);
+    DynamicBuffer &operator=(const DynamicBuffer &container);
 
     //Copy assignment operator;
-    ValueContainer &operator=(ValueContainer &&container) noexcept;
+    DynamicBuffer &operator=(DynamicBuffer &&container) noexcept;
 
     //Swap function;
-    void swap(ValueContainer &a, ValueContainer &b);
+    void swap(DynamicBuffer &a, DynamicBuffer &b);
 
 
     //-------------------------------------- Builders --------------------------------------
@@ -137,7 +137,7 @@ private:
  */
 
 template<class T>
-ValueContainer<T>::ValueContainer(uint8_t max_size) : size(0), max_size(max_size), elements(nullptr) {}
+DynamicBuffer<T>::DynamicBuffer(uint8_t max_size) : size(0), max_size(max_size), elements(nullptr) {}
 
 
 /*
@@ -145,7 +145,7 @@ ValueContainer<T>::ValueContainer(uint8_t max_size) : size(0), max_size(max_size
  */
 
 template<class T>
-ValueContainer<T>::~ValueContainer() {
+DynamicBuffer<T>::~DynamicBuffer() {
 
     clear();
 
@@ -159,7 +159,7 @@ ValueContainer<T>::~ValueContainer() {
  */
 
 template<typename T>
-ValueContainer<T>::ValueContainer(const ValueContainer &container) : ValueContainer(container.max_size) {
+DynamicBuffer<T>::DynamicBuffer(const DynamicBuffer &container) : DynamicBuffer(container.max_size) {
 
     //Resize to the container's size;
     resize(container.size);
@@ -180,7 +180,7 @@ ValueContainer<T>::ValueContainer(const ValueContainer &container) : ValueContai
  */
 
 template<typename T>
-ValueContainer<T>::ValueContainer(ValueContainer &&container) noexcept : size(container.size),
+DynamicBuffer<T>::DynamicBuffer(DynamicBuffer &&container) noexcept : size(container.size),
                                                                          max_size(container.max_size),
                                                                          elements(container.elements) {
 
@@ -198,7 +198,7 @@ ValueContainer<T>::ValueContainer(ValueContainer &&container) noexcept : size(co
  */
 
 template<typename T>
-ValueContainer<T> &ValueContainer<T>::operator=(const ValueContainer &container) {
+DynamicBuffer<T> &DynamicBuffer<T>::operator=(const DynamicBuffer &container) {
 
     //If the container is us, do nothing;
     if (&container == this) {
@@ -206,7 +206,7 @@ ValueContainer<T> &ValueContainer<T>::operator=(const ValueContainer &container)
     }
 
     //Create a copy;
-    ValueContainer copy = ValueContainer(container);
+    DynamicBuffer copy = DynamicBuffer(container);
 
     //Swap, to that our data is deleted at the end of copy's scope;
     swap(*this, copy);
@@ -222,7 +222,7 @@ ValueContainer<T> &ValueContainer<T>::operator=(const ValueContainer &container)
  */
 
 template<typename T>
-ValueContainer<T> &ValueContainer<T>::operator=(ValueContainer &&container) noexcept {
+DynamicBuffer<T> &DynamicBuffer<T>::operator=(DynamicBuffer &&container) noexcept {
 
     //Swap, to that our data is deleted at the end of container's scope;
     swap(*this, container);
@@ -239,7 +239,7 @@ ValueContainer<T> &ValueContainer<T>::operator=(ValueContainer &&container) noex
  */
 
 template<typename T>
-void ValueContainer<T>::swap(ValueContainer &a, ValueContainer &b) {
+void DynamicBuffer<T>::swap(DynamicBuffer &a, DynamicBuffer &b) {
 
     //Swap max sizes;
     uint8_t ts = a.max_size;
@@ -269,7 +269,7 @@ void ValueContainer<T>::swap(ValueContainer &a, ValueContainer &b) {
  */
 
 template<class T>
-bool ValueContainer<T>::add(T new_element) {
+bool DynamicBuffer<T>::add(T new_element) {
 
 
     //Increment the size;
@@ -300,7 +300,7 @@ bool ValueContainer<T>::add(T new_element) {
  */
 
 template<class T>
-T ValueContainer<T>::remove(uint8_t index) {
+T DynamicBuffer<T>::remove(uint8_t index) {
 
     //If the index is invalid, stop here;
     if (index >= size)
@@ -345,7 +345,7 @@ T ValueContainer<T>::remove(uint8_t index) {
  */
 
 template<class T>
-void ValueContainer<T>::clear() {
+void DynamicBuffer<T>::clear() {
 
 
     //First, realloc tasks_array to zero-size;
@@ -371,7 +371,7 @@ void ValueContainer<T>::clear() {
  */
 
 template<class T>
-bool ValueContainer<T>::isElementPresent(T old_task, uint8_t *index) {
+bool DynamicBuffer<T>::isElementPresent(T old_task, uint8_t *index) {
 
     //Search for the task in the array;
     for (uint8_t task_index = 0; task_index < size; task_index++) {
@@ -403,7 +403,7 @@ bool ValueContainer<T>::isElementPresent(T old_task, uint8_t *index) {
  */
 
 template<class T>
-uint8_t ValueContainer<T>::getSize() {
+uint8_t DynamicBuffer<T>::getSize() {
 
     //Return the size lol;
     return size;
@@ -416,7 +416,7 @@ uint8_t ValueContainer<T>::getSize() {
  */
 
 template<class T>
-T ValueContainer<T>::getElement(uint8_t index) {
+T DynamicBuffer<T>::getElement(uint8_t index) {
 
     //If the index is invalid
     if (index >= size)
@@ -433,7 +433,7 @@ T ValueContainer<T>::getElement(uint8_t index) {
  */
 
 template<class T>
-T ValueContainer<T>::setElement(uint8_t index, T new_element) {
+T DynamicBuffer<T>::setElement(uint8_t index, T new_element) {
 
     //If the index is invalid
     if (index >= size)
@@ -457,13 +457,13 @@ T ValueContainer<T>::setElement(uint8_t index, T new_element) {
  */
 
 template<class T>
-bool ValueContainer<T>::resize(uint8_t new_size) {
+bool DynamicBuffer<T>::resize(uint8_t new_size) {
 
     //If the maximum number of tasks is reached :
     if (new_size >= max_size) {
 
         //Log;
-        std_out("Error in ValueContainer::resize : the requested size is superior to the maximum size;");
+        std_out("Error in DynamicBuffer::resize : the requested size is superior to the maximum size;");
 
         //Fail;
         return false;
@@ -477,7 +477,7 @@ bool ValueContainer<T>::resize(uint8_t new_size) {
     if (!new_array && new_size) {
 
         //Log;
-        std_out("Error in ValueContainer::resize : the reallocation failed;");
+        std_out("Error in DynamicBuffer::resize : the reallocation failed;");
 
         //Fail;
         return false;
