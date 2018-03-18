@@ -72,6 +72,7 @@ public:
     //Add a new element to the list;
     bool add(T *new_element);
 
+    //Set an element in the list,
     bool set(uint8_t index, T *new_element);
 
     //Remove a element from the list if it is present;

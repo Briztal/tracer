@@ -1,24 +1,101 @@
-/*
-  Tree.h - Part of TRACER
+//
+// Created by root on 3/14/18.
+//
 
-  Copyright (c) 2017 Raphaël Outhier
+#ifndef TRACER_TREE_H
+#define TRACER_TREE_H
 
-  TRACER is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+#include "DataStructures/Containers/DynamicPointerBuffer.h"
 
-  TRACER is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+template<class L, class N>
+class Tree {
 
-  You should have received a copy of the GNU General Public License
-  aint32_t with TRACER. If not, see <http://www.gnu.org/licenses/>.
+    //--------------------------------------- Initialisation ---------------------------------------
 
-*/
+public:
 
-#include "Tree.h"
+    //Default constructor;
+    Tree(uint8_t max_children_nb);
+
+    //Class lvalue constructor;
+    explicit Tree(const L &label, const N &node, uint8_t max_children_nb);
+
+    //Class rvalue constructor;
+    explicit Tree(L &&label, N &&node, uint8_t max_children_nd);
+
+    //Destructor;
+    ~Tree();
+
+
+    //--------------------------------------- Copy constructors ---------------------------------------
+
+public:
+
+    //Copy constructor;
+    Tree(const Tree<L, N> &src);
+
+    //Move constructor;
+    Tree(Tree<L, N> &&src) noexcept;
+
+
+    //--------------------------------------- Assignment operators ---------------------------------------
+
+public:
+
+    //Copy assignment operator;;
+    Tree<L, N> &operator=(const Tree<L, N> &src);
+
+    //Move assignment operator;;
+    Tree<L, N> &operator=(Tree<L, N> &&src) noexcept;
+
+
+    //--------------------------------------- Getters / setters ---------------------------------------
+
+    //Label getter;
+    const L getLabel() const;
+
+    //Node getter;
+    const N getNode() const;
+
+    //Node setter;
+    void setNode(N new_node);
+
+    //--------------------------------------- children alteration ---------------------------------------
+
+public:
+
+    //Child getter;
+    Tree<L, N> *getChild(uint8_t index) const;
+
+    //Child getter;
+    Tree<L, N> *getChild(L &label) const;
+
+    //Child adder;
+    void addChild(Tree<L, N> *child);
+
+    //Children number getter;
+    uint8_t getChildrenNb() const;
+
+    //--------------------------------------- Sort ---------------------------------------
+
+    //Sort the tree;
+    void sort();
+
+    //--------------------------------------- Data ---------------------------------------
+
+private:
+
+    //The label will be a reference to the template label;
+    L label;
+
+    //The node will be a reference to the template node;
+    N node;
+
+    //The array of children;
+    DynamicPointerBuffer<Tree<L, N>> children;
+
+
+};
 
 
 //--------------------------------------- Initialisation ---------------------------------------
@@ -29,7 +106,7 @@
  */
 
 template<class L, class N>
-Tree<L, N>::Tree() : label(L()), node(N()), children() {}
+Tree<L, N>::Tree(uint8_t max_children_nb) : label(L()), node(N()), children(max_children_nb) {}
 
 
 /*
@@ -37,7 +114,7 @@ Tree<L, N>::Tree() : label(L()), node(N()), children() {}
  */
 
 template<class L, class N>
-Tree<L, N>::Tree(const L &label, const N &node) : label(label), node(node), children() {}
+Tree<L, N>::Tree(const L &label, const N &node, uint8_t max_children_nb) : label(label), node(node), children(max_children_nb) {}
 
 
 /*
@@ -45,7 +122,7 @@ Tree<L, N>::Tree(const L &label, const N &node) : label(label), node(node), chil
  */
 
 template<class L, class N>
-Tree<L, N>::Tree(L &&label, N &&node) : label((L &&) label), node((N &&) node), children() {}
+Tree<L, N>::Tree(L &&label, N &&node, uint8_t max_children_nb) : label((L &&) label), node((N &&) node), children(max_children_nb) {}
 
 
 /*
@@ -129,6 +206,16 @@ const N Tree<L, N>::getNode() const {
 }
 
 
+/*
+ * setNode : updates the node with the new one;
+ */
+
+template<class L, class N>
+void Tree<L, N>::setNode(N new_node) {
+    node = new_node;
+}
+
+
 //--------------------------------------- children alteration ---------------------------------------
 
 /*
@@ -150,9 +237,38 @@ void Tree<L, N>::addChild(Tree<L, N> *child) {
 template<class L, class N>
 Tree<L, N> *Tree<L, N>::getChild(uint8_t index) const {
 
+    //If the index is invalid, fail;
+    if (index >= children.getSize())
+        return nullptr;
+
     //Return a pointer to the child;
     return children.getElement(index);
 
+}
+
+
+/*
+ * getChild : this function returns a pointer to the child with . If the required child doesn't exist,
+ *  it returns nullptr;
+ */
+
+template<class L, class N>
+Tree<L, N> *Tree<L, N>::getChild(L &label) const {
+
+    //Search all children :
+    for (uint8_t child_index = children.getSize(); child_index--;) {
+
+        //Cache the child's pointer;
+        Tree<L, N> *child = children.getElement(child_index);
+
+        //If labels match, return the child's pointer;
+        if (child->label == label)
+            return child;
+
+    }
+
+    //If no child with the label was found, return an null pointer;;
+    return nullptr;
 }
 
 
@@ -183,3 +299,6 @@ void Tree<L, N>::sort() {
     }
 
 }
+
+
+#endif //TRACER_TREE_H

@@ -23,7 +23,7 @@
 #define TRACER_LINEDELIMITER_H
 
 #include "stdint.h"
-#include "Interaction/Delimiters/Delimiter.h"
+#include "Interaction/Delimiter/Delimiter.h"
 
 
 /*

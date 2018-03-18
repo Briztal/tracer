@@ -74,6 +74,9 @@ public:
     //Char array constructor;
     string(const char *src);
 
+    //Char with size constructor;
+    string(const char *src, uint16_t size);
+
 
     //-------------------------------------- Assignment Operators --------------------------------------
 
@@ -198,6 +201,28 @@ private:
 
 };
 
+
+//-------------------------------------- Comparison Operators --------------------------------------
+
+bool operator<(const string &left_s, const string &right_s);
+
+bool operator>(const string &left_s, const string &right_s);
+
+bool operator<=(const string &left_s, const string &right_s);
+
+bool operator>=(const string &left_s, const string &right_s);
+
+
+//-------------------------------------- Equality Operators --------------------------------------
+
+bool operator==(const string &left_s, const string &right_s);
+
+bool operator!=(const string &left_s, const string &right_s);
+
+
+//-------------------------------------- Memory Access Utilities; --------------------------------------
+
+#include "malloc.h"
 
 void mmemset(void *dst, uint8_t value, size_t size);
 

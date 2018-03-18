@@ -6,8 +6,8 @@
 #define TRACER_COMMUNICATIONPIPIE_H
 
 
-#include <Interaction/Languages/Language.h>
-#include <Interaction/Protocols/Delimiter.h>
+#include <Interaction/Language/Language.h>
+#include <Interaction/Delimiter/Delimiter.h>
 #include <HardwareSerial.h>
 
 
@@ -18,7 +18,7 @@ class CommunicationPipe {
 public:
 
     //Constructor : must take two rvalues in arguments;
-    CommunicationPipe(HardwareSerial &serial, Delimiter &&delimiter, Language &&language);
+    CommunicationPipe(HardwareSerial &serial, Delimiter *delimiter, Language *language);
 
     //Destructor;
     ~CommunicationPipe();
@@ -29,7 +29,7 @@ public:
 public:
 
     //Send a rvalue message over the pipe;
-    void send(tstring &message);
+    void send(tstring &message, uint8_t type);
 
     //Read a message comming in the communication interface;
     void readall();
@@ -43,10 +43,10 @@ private:
     HardwareSerial serial;
 
     //The delimiter that will be used to transmit data;
-    Delimiter delimiter;
+    Delimiter *delimiter;
 
     //The language that will be used to interpret commands;
-    Language language;
+    Language *language;
 
 
 };

@@ -8,7 +8,7 @@
 #include "stdint.h"
 
 template<typename T>
-class Buffer<T> {
+class Buffer {
 
     //---------------------------------- Initialisation ----------------------------------
 

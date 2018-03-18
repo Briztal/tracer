@@ -60,7 +60,6 @@ public:
 };
 
 
-#include <Interaction/Languages/Terminal/TerminalArguments.h>
 
 //TODO COMMENT AND COMMENT GCODEINTERFACECOMMANDS
 #define PARSE_ARGUMENTS(arguments) {if (!TerminalArguments::parse_arguments(arguments)) return invalid_arguments;}

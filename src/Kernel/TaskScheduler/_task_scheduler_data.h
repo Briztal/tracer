@@ -4,6 +4,8 @@
 
 #include "task_function_t.h"
 #include "task_state_t.h"
+#include <Interaction/CommunicationPipe.h>
+
 
 struct task_t {
 
@@ -18,7 +20,7 @@ struct task_t {
 
 
     /*
-     * The function to parse, at runtime.
+     * The function to execute, at runtime.
      */
 
     task_function_t task = nullptr;
@@ -30,29 +32,18 @@ struct task_t {
      *      arguments
      *
      * This structure MUST BE DECLARED IN THE HEAP, as it will be freed automatically, to avoid memory leak.
-     *
      */
 
     void *dynamic_args = nullptr;
 
 
     /*
-     * The communication method :
-     *  If communication is required (logs), this function will take care of the encoding, and transmit
-     *      the encoded string, using a particular log_protocol.
+     * The communication pipe :
      *
-     *  The log_protocol, as the message, must be provided.
+     *  If log is required (logs), this pipe will handle it;
      */
 
-    //void (*log_function)(Delimiter *, const char *message) = nullptr;
-
-
-    /*
-     * The log_protocol used to communicate.
-     */
-
-    //Delimiter *log_protocol = nullptr;
-
+    CommunicationPipe *log_pipe;
 
 };
 

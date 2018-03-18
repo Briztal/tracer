@@ -22,7 +22,9 @@
 
 #include "Interaction.h"
 
-#include <Interaction/Protocols/ClearText.h>
+#include "hardware_language_abstraction.h"
+
+#include <Interaction/Delimiter/LineDelimiter.h>
 
 
 namespace Interaction {
@@ -30,7 +32,7 @@ namespace Interaction {
     //---------------------------------------- private fields ----------------------------------------
 
     //The communication pipes array;
-    CommunicationPipe pipes[NB_PIPES];
+    CommunicationPipe *pipes[NB_PIPES]{nullptr};
 
 
     //---------------------------------------- private methods ----------------------------------------
@@ -84,7 +86,7 @@ void Interaction::initialise_communication_pipes() {
 
     //A macro that will solve the i-th log_protocol, memorise it, and give it to the controller;
 #define COMMUNICATION_PIPE(language, delimiter, buffer, transmission)\
-    pipes[i++] = new CommunicationPipe(transmission, delimiter(buffer), language());
+    delete pipes[i];pipes[i++] = new CommunicationPipe(transmission, delimiter(buffer), language());
 
     //Expand the initialise_hardware;
 #include <Config/control_config.h>
@@ -105,7 +107,7 @@ void Interaction::read_communication_pipes() {
     for (uint8_t pipe_index = 0; pipe_index < NB_PIPES; pipe_index++) {
 
         //Read all data in the pipe;
-        pipes[pipe_index].readall();
+        pipes[pipe_index]->readall();
 
     }
 

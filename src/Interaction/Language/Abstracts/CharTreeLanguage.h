@@ -19,27 +19,26 @@
 */
 
 #include <Config/control_config.h>
+#include <DataStructures/Containers/Tree.h>
 
-#ifdef ENABLE_GCODE_INTERFACE
+#ifndef TRACER_BYTETREELANGUAGE_H
+#define TRACER_BYTETREELANGUAGE_H
 
-#ifndef GCODEINTERFACE
-#define GCODEINTERFACE
+#include <Interaction/Language/Language.h>
 
-#include <Interaction/Language/ArgumentLanguage.h>
-#include "gcode_tree.h"
+typedef Tree<char, language_function> CharTree;
 
-
-class ByteTreeLanguage : ArgumentLanguage {
+class CharTreeLanguage : public Language {
 
     //-------------------------------------- Initialisation ----------------------------------
 
 public :
 
     //Default constructor;
-    ByteTreeLanguage();
+    CharTreeLanguage(uint8_t max_children_nb);
 
     //Destructor;
-    ~ByteTreeLanguage() = default;
+    ~CharTreeLanguage() = default;
 
 
     //--------------------------------------Decoding ---------------------------------
@@ -53,39 +52,29 @@ public:
 private :
 
     //Analyse the command index, and schedule the associated command.
-    void analyse(const char *command_id, const char *arguments);
+    bool analyseCommand(const char *command_id, const char *arguments);
 
     //Finalise the execution of a command;
     //void confirm_command_execution(const controller_data_t *data);
 
 
-    //--------------------------------------Encoding ---------------------------------
+    //------------------------------------ Tree Creation -----------------------------
 
 public:
 
-    //Parse the ByteTreeLanguage Command.
-    void encode(tstring &, uint8_t type) final;
+    //Add a null terminated command to the tree;
+     void addCommand(const char *command_name, language_function);
 
 
-//private:
-
-    //Finalise the execution of a command;
-    //void confirm_command_execution(const controller_data_t *data);
-
-
-    //------------------------------------ Tree Generation -----------------------------
-
-    //Generate the gcode Tree, left to sub classes;
-    virtual void generateTree();
-
-
-private:
+protected:
 
     //The ByteTreeLanguage Command tree;
-    GCodeTree commandTree;
+    CharTree commandTree;
+
+    //The maximum number of children in our tree;
+    uint8_t max_children_nb;
 
 
 };
 
-#endif //CODE_GCodeExecuter_H
-#endif
+#endif //TRACER_BYTETREELANGUAGE_H

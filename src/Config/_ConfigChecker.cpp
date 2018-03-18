@@ -176,21 +176,21 @@ bool _ConfigChecker::check_transmission(tstring &message) {
     uint8_t counter =
 
             //A macro to count controls;
-#define EXTERNAL_CONTROL(c, p, s, transmission) 1 +
+#define COMMUNICATION_PIPE(c, p, s, transmission) 1 +
 
             //Count every control;
 #include "Config/control_config.h"
 
             //Undef the macro for safety;
-            #undef EXTERNAL_CONTROL
+            #undef COMMUNICATION_PIPE
 
             0;
 
     //Check the number of controls
-    if (counter != NB_CONTROLS) {
+    if (counter != NB_PIPES) {
 
         //Return a message and fail;
-        message = tstring() + "There should be " + (uint8_t) NB_CONTROLS + " controllers declarations, but only " +
+        message = tstring() + "There should be " + (uint8_t) NB_PIPES + " controllers declarations, but only " +
                   counter + " are provided. Check stepper_config.h.";
         return false;
 
@@ -202,7 +202,7 @@ bool _ConfigChecker::check_transmission(tstring &message) {
      */
 
     //Declare an array of functions;
-    void (*functions[NB_CONTROLS])(void);
+    void (*functions[NB_PIPES])(void);
 
     //The counter will now count how many functions are in the array.
     counter = 0;

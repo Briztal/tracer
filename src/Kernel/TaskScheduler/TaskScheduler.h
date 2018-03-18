@@ -25,6 +25,7 @@
 #include <Config/kernel_config.h>
 
 #include <DataStructures/Queue.h>
+#include <Interaction/CommunicationPipe.h>
 
 #include "_task_scheduler_data.h"
 
@@ -82,9 +83,7 @@ public:
     static bool schedule_task(task_t *task);
 
     //Build and schedule a task;
-    static bool
-    schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                  void (*log_f)(Delimiter *, const char *), Delimiter *protocol);
+    static bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
 
 
 private:
@@ -93,6 +92,7 @@ private:
     static bool execute_task(task_t *task);
 
 public:
+
     //Temp var for tests//TODO REMOVE
     static bool flood_enabled;
 
@@ -143,24 +143,22 @@ public:
     //Echo a message on the current log pipe;
     static void log(tstring &&message);
 
-    //Echo a message on the current log pipe;
-    static void log(const char * message);
 
+    //------------------------------------------ Communication pipe set -----------------------------------------
+
+    //Set the communication pipe to a given one;
+    static void setCommunicationPipe(CommunicationPipe &pipe);
+
+    //Set the defualt communication pipe;
+    static void setDefaultCommunicationPipe();
 
 private:
 
-    //The encoding function;
-    static void (*log_function)(Delimiter *, const char *message);
+    //The communication log_protocol;
+    static CommunicationPipe *log_pipe;
 
     //The communication log_protocol;
-    static Delimiter *log_protocol;
-
-    //The encoding function;
-    static void (*default_log_function)(Delimiter *, const char *message);
-
-    //The communication log_protocol;
-    static Delimiter *default_log_protocol;
-
+    static CommunicationPipe *default_log_pipe;
 
 };
 

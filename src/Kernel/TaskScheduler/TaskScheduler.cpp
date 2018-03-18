@@ -76,16 +76,11 @@ void TaskScheduler::initialise_data() {
     //Reset the flood flag; //TODO REMOVE;
     flood_enabled = false;
 
-
-    //Initialise the default log environment;
-    default_log_function = (void (*)(Delimiter *,const char *)) Interaction::get_default_log_function();
-
     //Initialise the default delimiter;
-    default_log_protocol = Interaction::get_default_protocol();
+    default_log_pipe = Interaction::get_default_pipe();
 
     //Reset the log environment;
-    log_function = default_log_function;
-    log_protocol = default_log_protocol;
+    log_pipe = default_log_pipe;
 
 }
 
@@ -114,7 +109,7 @@ bool TaskScheduler::check_sequence_type(uint8_t type) {
  *  I REPEAT, {\Color(red) \textit{\textbf{WARNING : }}}
  *      (If you got that one, you use latex, and you're a good person ! Thanks for reading my comments by the way ;-) )
  *
- *  If the task cannot be scheduled, (no space available, or bad sequence type), args are freed automatically.
+ *  If the task cannot be scheduled, (no space available, or bad sequence type), arguments_p are freed automatically.
  */
 
 bool TaskScheduler::schedule_task(task_t *task) {
@@ -173,7 +168,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
 
     }
 
-    //If the scheduling failed, automatically free args, to avoid memory leak;
+    //If the scheduling failed, automatically free arguments_p, to avoid memory leak;
     free(task->dynamic_args);
 
 
@@ -192,8 +187,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
  *      - type : the type of the task.
  */
 
-bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args,
-                                  void (*log_function)(Delimiter *, const char *), Delimiter *protocol) {
+bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
 
     //Create a task to contain the provided data;
     task_t task = task_t();
@@ -207,22 +201,16 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
     //Set the type;
     task.type = type;
 
+    //If a valid log pipe was provided:
+    if (log_pipe) {
 
-    if (log_function && log_protocol) {
-
-        //Set the log function;
-        task.log_function = log_function;
-
-        //Set the log delimiter;
-        task.log_protocol = protocol;
+        //Set the task's log pipe to the provided one;
+        task.log_pipe = log_pipe;
 
     } else {
 
-        //Set the log function;
-        task.log_function = default_log_function;
-
-        //Set the log delimiter;
-        task.log_protocol = default_log_protocol;
+        //Set the task's log pipe to the default one;
+        task.log_pipe = default_log_pipe;
 
     }
 
@@ -304,7 +292,7 @@ bool TaskScheduler::is_sequence_locked(uint8_t type) {
 
 bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
 
-    std_out(string("NB TASK SEQUENCES ")+(uint8_t)NB_TASK_SEQUENCES);
+    std_out(string("NB TASK SEQUENCES ") + (uint8_t) NB_TASK_SEQUENCES);
 
     //If the sequence is locked, fail, no more tasks of this type are schedulable;
     if (TaskScheduler::is_sequence_locked(task_type)) {
@@ -540,7 +528,7 @@ void TaskScheduler::process_task_sequences() {
 
                         //Log
                         std_out("ERROR in Kernel::process_task_sequences : "
-                                         "the reading element is not allocated.");
+                                        "the reading element is not allocated.");
 
                         //Emergency stop
                         Kernel::emergency_stop();
@@ -570,7 +558,7 @@ void TaskScheduler::process_task_sequences() {
 
                             //Log
                             std_out("ERROR in Kernel::process_task_sequences : "
-                                             "the discarded element was not allocated.");
+                                            "the discarded element was not allocated.");
 
                             //Emergency stop
                             Kernel::emergency_stop();
@@ -612,16 +600,12 @@ bool TaskScheduler::execute_task(task_t *task) {
     //Execute if the task is not null.
     if (task->task != nullptr) {
 
-        //Save the log function if it is not null;
-        if (task->log_function)
-            log_function = task->log_function;
-
-        //Save the delimiter if it is not null;
-        if (task->log_protocol)
-            log_protocol = task->log_protocol;
+        //Update the log pipe, with the task's one of with the default one if not provided;
+        log_pipe = (task->log_pipe) ? task->log_pipe : default_log_pipe;
 
         //call the function of the task by pointer, and provide the content of the task.
-        state = (*(task->task))(task->dynamic_args);
+        state = (*(task_function_t) (task->task))(task->dynamic_args);
+
 
     }
 
@@ -633,7 +617,7 @@ bool TaskScheduler::execute_task(task_t *task) {
          *
          *      warning: deleting 'void*' is undefined [-Wdelete-incomplete]
          *
-         * As dynamic args are dynamically allocated, this operation is secure.
+         * As dynamic arguments_p are dynamically allocated, this operation is secure.
          */
 
 #pragma GCC diagnostic ignored "-Wdelete-incomplete"
@@ -659,14 +643,11 @@ bool TaskScheduler::execute_task(task_t *task) {
 
 void TaskScheduler::log(tstring &message) {
 
-    //If both log function and log log_protocol have been assigned :
-    if (log_function && log_protocol) {
+    //If the log pipe is not null;
+    if (log_pipe) {
 
-        //Generate the final message pointer;
-        const char *ptr = message.data();
-
-        //Send the message with the correct log_protocol.
-        (*log_function)(log_protocol, ptr);
+        //Send the message through the log_pipe;
+        log_pipe->send(message, 0);
 
     }
 
@@ -674,29 +655,40 @@ void TaskScheduler::log(tstring &message) {
 
 void TaskScheduler::log(tstring &&message) {
 
-    //If both log function and log log_protocol have been assigned :
-    if (log_function && log_protocol) {
 
-        //Generate the final message pointer;
-        const char *ptr = message.data();
+    //If the log pipe is not null;
+    if (log_pipe) {
 
-        //Send the message with the correct log_protocol.
-        (*log_function)(log_protocol, ptr);
+        //Send the message through the log_pipe;
+        log_pipe->send(message, 0);
 
     }
 
 }
 
-void TaskScheduler::log(const char *message) {
 
-    //If both log function and log log_protocol have been assigned :
-    if (log_function && log_protocol) {
+//------------------------------------------ Communication pipe set -----------------------------------------
+
+/*
+ * setCommunicationPipe : sets the provided communication pipe as the log pipe;
+ */
+
+void TaskScheduler::setCommunicationPipe(CommunicationPipe &pipe) {
+
+    //Set the log pipe;
+    log_pipe = &pipe;
+
+}
 
 
-        //Send the message with the correct log_protocol.
-        (*log_function)(log_protocol, message);
+/*
+ * setCommunicationPipe : sets the default log pipe as the log pipe;
+ */
 
-    }
+void TaskScheduler::setDefaultCommunicationPipe() {
+
+    //Set the log pipe;
+    log_pipe = default_log_pipe;
 
 }
 
@@ -741,17 +733,4 @@ Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
 Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
 
 bool m::flood_enabled = false;
-
-//The encoding function;
-void (*m::log_function)(Delimiter *, const char * message) = nullptr;
-
-//The communication log_protocol;
-Delimiter *m::log_protocol = nullptr;
-
-//The default log function
-void (*m::default_log_function)(Delimiter *, const char * message);
-
-//The default log_protocol;
-Delimiter *m::default_log_protocol;
-
 

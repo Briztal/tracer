@@ -20,17 +20,14 @@
  *  The language comprises the two last layers of the interaction stack;
  */
 
+//The type of a command schedulable by a language;
+typedef task_state_t (*language_function)();
+
 class Language {
-
-
-    //-------------------------------------- Tree generation (for final class)  --------------------------------------
-
-    //Generate the tree used to parse the message;
-    virtual void generateTree() = 0;
-
 
     //-------------------------------------- Encoding / decoding --------------------------------------
 
+public:
 
     //Parse the message and eventually execute the associated command;
     virtual bool decode(const char *message) = 0;
@@ -39,6 +36,23 @@ class Language {
     virtual void encode(tstring &s, uint8_t type) = 0;
 
 
+    //---------------------------------- Argument parsing  ----------------------------------
+
+public:
+
+    //Parse the arguments string;
+    virtual bool parseArguments(const char *data) = 0;
+
+
+    //---------------------------------- Generic functions for command scheduling  ----------------------------------
+
+protected:
+
+    //Schedule the command related to a decoded message;
+    static void schedule_command(Language *instance, language_function function, const char *arguments);
+
+    //Execute the previously scheduled command;
+    static task_state_t execute_command(void *);
 
 };
 

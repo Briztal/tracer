@@ -66,7 +66,7 @@
 
 #ifdef COMMUNICATION_PIPE
 
-COMMUNICATION_PIPE(Terminal, LineDelimiter, 100, usb_serial)
+COMMUNICATION_PIPE(Serial, LineDelimiter, 100, usb_serial)
 
 #endif
 

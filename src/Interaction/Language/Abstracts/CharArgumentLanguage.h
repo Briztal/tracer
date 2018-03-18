@@ -22,39 +22,28 @@
 #define TRACER_GCODEARGUMENTS_H
 
 
-#include <Config/control_config.h>
+#include <DataStructures/string/string.h>
 
-#ifdef ENABLE_GCODE_INTERFACE
+#include <DataStructures/Containers/DynamicPointerBuffer.h>
 
-#include <Interaction/Languages/ArgumentsContainer.h>
-#include <Interaction/Languages/_language_data.h>
+#include <Interaction/Language/Language.h>
 
-class GCodeArguments {
+#include "stdint.h"
 
-    //--------------------------------------Arguments Storage--------------------------------------
+
+
+class CharArgumentLanguage : public virtual Language {
+
+
+    //-------------------------------------- Initialisation --------------------------------------
 
 public:
 
-    //Clear the argument storage;
-    static void clear();
+    //Default constructor;
+    CharArgumentLanguage(uint8_t max_arguments_nb);
 
-    //Return the number of available spaces in the storage;
-    static inline uint8_t available_spaces() {return arguments_storage.available_spaces();}
-
-    //Inserts and saves an argument, and returns its index in the container;
-    static inline bool insert_argument(const char *args, uint8_t *index_p) {return arguments_storage.insert_argument(args, index_p);}
-
-    //Returns a pointer to an argument's first case, and gives the size;
-    static inline char* get_argument(uint8_t index) {return arguments_storage.get_argument(index);}
-
-    //Removes an argument;
-    static inline void remove_argument(uint8_t index) {arguments_storage.remove_argument(index);}
-
-
-private:
-
-    //The content container;
-    static ArgumentsContainer arguments_storage;
+    //Default destructor;
+    ~CharArgumentLanguage() = default;
 
 
     //--------------------------------------Arguments parsing--------------------------------------
@@ -62,7 +51,7 @@ private:
 public:
 
     /*
-     * A Gcode Inteface command can accept an undefined number of content, in an argument sequence.
+     * A char argument command can accept an undefined number of arguments, in an argument sequence.
      *
      *  An argument sequence is a sequence of word, where the first letter is the identifier, and
      *      the rest of the word is an eventual value, example
@@ -75,36 +64,50 @@ public:
      */
 
     //Parse the provided content, and save the data in the local buffer;
-    static bool parse_arguments(char *args_current_position);
+    bool parseArguments(const char *args_current_position) final;
+
+    //CLear the parsing content;
+    void clear();
 
     //Get the pointer to the required argument;
-    static char *get_argument(char id);
+    const char * get_argument(char id);
 
     //Get a previously parsed argument_t if it exists;
-    static float get_argument_value(char id);
+    float get_argument_value(char id);
 
     //Verify that all content (defined by their content) have been provided (content is null terminated);
-    static bool verify_all_identifiers_presence(const char *identifiers);
+    bool verify_all_identifiers_presence(const char *identifiers);
 
     //Verify that at least one argument_t (defined by their content) have been provided (content is null terminated);
-    static bool verify_one_identifiers_presence(const char *identifiers);
+    bool verify_one_identifiers_presence(const char *identifiers);
 
     //verify that an argument_t identifier has be provided;
-    static bool verify_identifier_presence(char id);
+    bool verify_identifier_presence(char id);
 
 
 private:
 
-    //Number of content in a sequence;
-    static uint8_t nb_identifiers;
+    /*
+     * To contain argument data, we will define a class that will contain a char identifier and an string;
+     */
 
-    //Identifiers in a parsed argument_t sequence;
-    static argument_t *const arguments;
+    class ArgumentData {
+
+    public:
+
+        //The argument identifier;
+        char identifier;
+
+        //The argument data, a string containing the argument value;
+        string data;
+
+    };
+
+    //The parsed arguments buffer;
+    DynamicPointerBuffer<ArgumentData> arguments;
 
 
 };
 
 
 #endif //TRACER_GCODEARGUMENTS_H
-
-#endif

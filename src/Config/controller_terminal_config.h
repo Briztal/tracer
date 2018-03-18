@@ -54,10 +54,10 @@
  *  This language is a tree, where every node is labeled by a word, and has a certain number of children.
  *
  *      For example, a simple language, supporting the three following commands :
- *          move home       (+args) -> call home_function
- *          move line of    (+args) -> call line_to_function
- *          move line to    (+args) -> call line_of_function
- *          halt            (+args) -> call halt_function
+ *          move home       (+arguments_p) -> call home_function
+ *          move line of    (+arguments_p) -> call line_to_function
+ *          move line to    (+arguments_p) -> call line_of_function
+ *          halt            (+arguments_p) -> call halt_function
  *
  *      Will have its command tree like below :
  *

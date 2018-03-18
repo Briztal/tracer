@@ -4,6 +4,7 @@
 
 #include "CommunicationPipe.h"
 
+#include "Kernel/TaskScheduler/TaskScheduler.h"
 
 //--------------------------------------- Initialisation ---------------------------------------
 
@@ -11,15 +12,18 @@
  * Constructor : takes two rvalues and moves them in the class;
  */
 
-CommunicationPipe::CommunicationPipe(HardwareSerial &serial, Delimiter &&protocol, Language &&language) :
-        language((Language&&)language), delimiter((Delimiter&&)protocol) {}
+CommunicationPipe::CommunicationPipe(HardwareSerial &serial, Delimiter *protocol, Language *language) :
+        language(language), delimiter(protocol) {}
 
 
 /*
- * Destructor : no dynamic data to delete;
+ * Destructor : delete the language and the delimiter;
  */
 
-CommunicationPipe::~CommunicationPipe() = default;
+CommunicationPipe::~CommunicationPipe() {
+    delete language;
+    delete delimiter;
+}
 
 
 //--------------------------------------- Processing ---------------------------------------
@@ -28,13 +32,13 @@ CommunicationPipe::~CommunicationPipe() = default;
  * send : receives a message from inside the code, and sends it through the pipe;
  */
 
-void CommunicationPipe::send(tstring &message) {
+void CommunicationPipe::send(tstring &message, uint8_t type) {
 
     //First, we must use the language instance to encode the message;
-    language.encode(message);
+    language->encode(message, type);
 
     //Then, we have to add one layer of encoding, using the encoder;
-    delimiter.encode(message);
+    delimiter->encode(message);
 
     //Then, we can extract the data;
     const char *data = message.data();
@@ -51,21 +55,28 @@ void CommunicationPipe::send(tstring &message) {
 
 void CommunicationPipe::readall() {
 
+    //Set us as the communcation pipe;
+    TaskScheduler::setCommunicationPipe(*this);
+
     //While some data is available :
     while(serial.available()) {
 
         //Read the data and pass it to the decoder;
-        delimiter.decode((char)serial.read());
+        delimiter->process((char)serial.read());
 
         //If the decoder has successfully decoded a message :
-        if (delimiter.messageDecoded()) {
+        if (delimiter->isMessageDecoded()) {
 
             //Parse the decoded message;
-            language.parse(delimiter.getData());
+            language->decode(delimiter->getData());
 
         }
 
     }
+
+    //Reset the default communication pipe;
+    TaskScheduler::setDefaultCommunicationPipe();
+
 
 
 

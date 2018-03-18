@@ -71,7 +71,7 @@ string::~string() {
 //---------------------------------------- Primitive types constructors ----------------------------------------
 
 #define define_constructor(type) \
-string::string(type i) : string() {Serial.println(#type); *this = i; }
+string::string(type i) : string() {*this = i; }
 
 define_constructor(uint8_t);
 define_constructor(int8_t);
@@ -90,7 +90,6 @@ string::string(float i) : string() { *this = i; }
  */
 
 string::string(char c) : string() {
-    Serial.println("from char");
     *this = c;
 }
 
@@ -165,7 +164,6 @@ void string::setTo(float f, uint8_t resolution) {
         //Multiply the fractionnal part by 10;
         frac *= (float)10;
 
-        Serial.println(((uint8_t) frac + (uint8_t)48));
         //Get the digit;
         char c = (char) ((uint8_t) frac + (uint8_t)48);
 
@@ -207,6 +205,23 @@ string::string(const char *src) : string() {
 
     resizeTo(src_size);
 
+    memcpy(buffer, src, size * sizeof(char));
+
+}
+
+
+/*
+ * Constructor with char array and size;
+ *
+ * Initialises the string as empty, resizes to the required length and copies the content;
+ */
+
+string::string(const char *src, uint16_t size) : string() {
+
+    //The, resize to the required size, plus 1 to insert the null termination;
+    resizeTo(size+(uint16_t)1);
+
+    //Then, copy the given portion of the string;
     memcpy(buffer, src, size * sizeof(char));
 
 }
@@ -767,6 +782,86 @@ impl_operators(uint64_t)
 impl_operators(int64_t)
 */
 
+
+//-------------------------------------- Comparison Operators --------------------------------------
+
+/*
+ * Comparison operator : uses the lexicographic order;
+ */
+
+bool operator<(const string &left_s, const string &right_s) {
+
+    //Cache both buffers;
+    const char *left_array = left_s.data();
+    const char *right_array = right_s.data();
+
+    //Compare all chars;
+    for (uint16_t i = left_s.length()+(uint16_t)1; i--;) {
+
+        //Cache the left array's current char and incr;
+        char l = *(left_array++);
+        char r = *(right_array++);
+
+        //If l is terminated, return true;
+        if (l) return true;
+
+        //If l and r are equal (not null), reiterate on next chars;
+        if (l == r) continue;
+
+        //As one string is lower than another, a boolean evaluation does the job;
+        return (l < r);
+
+    }
+
+    //End case, never happens as strings are null terminated;
+    return false;
+
+}
+
+
+/*
+ * Equality operator;
+ */
+
+bool operator==(const string &left_s, const string &right_s) {
+
+    //Cache both buffers;
+    const char *left_array = left_s.data();
+    const char *right_array = right_s.data();
+
+    //Compare all chars;
+    for (uint16_t i = left_s.length()+(uint16_t)1; i--;) {
+
+        //Cache the left array's current char and incr;
+        char l = *(left_array++);
+
+        //If chars are different : string are different;
+        if (l != *(right_array++))
+            return false;
+
+        //If chars are equal, and both woth zero ('\0'), strings are equal;
+        if (!l)
+            return true;
+
+    }
+
+    //End case, never happens as strings are null terminated;
+    return false;
+}
+
+
+inline bool operator>(const string &left_s, const string &right_s) { return right_s < left_s; }
+
+inline bool operator<=(const string &left_s, const string &right_s) { return !(left_s > right_s); }
+
+inline bool operator>=(const string &left_s, const string &right_s) { return !(left_s < right_s); }
+
+
+//-------------------------------------- Equality Operators --------------------------------------
+
+inline bool operator==(const string &left_s, const string &right_s);
+
+inline bool operator!=(const string &left_s, const string &right_s) { return !(left_s == right_s); }
 
 //--------------------------------------------- Memory copy utils ---------------------------------------------
 

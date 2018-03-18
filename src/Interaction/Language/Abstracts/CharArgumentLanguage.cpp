@@ -22,61 +22,48 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include "GCodeArguments.h"
+#include "CharArgumentLanguage.h"
 
 #include <Config/controller_gcode_config.h>
 #include <DataStructures/StringUtils.h>
 #include "Interaction/Interaction.h"
 
+//-------------------------------------- Initialisation --------------------------------------
+
 /*
- * clear : this function resets the argument parsing environment;
+ * Constructor : initialises the arguments array;
  */
-
-void GCodeArguments::clear() {
-
-    //Clear the argument container;
-    arguments_storage.clear();
-
-    //Argument parsing initialisation;
-    nb_identifiers = 0;
+CharArgumentLanguage::CharArgumentLanguage(uint8_t max_arguments_nb) : arguments(max_arguments_nb) {
 
 }
-
 
 
 //--------------------------------------Arguments Processing--------------------------------------
 
 /*
- * parse_arguments : this function parses an argument sequence, whose format is like below :
+ * parseArguments : this function parses an argument sequence, whose format is like below :
  *
  *  -i0 arg0 -i1 arg1 ... -in argn
  *
  *  After the parsing, content can be get with the get_argument methods.
- *
- *  Remarks :
- *      - argi can be empty.
- *      - The function DOES NOT COPY ARGS. All it does is saving the indices (char),
- *          and their eventual args's positions (char *). The argument sequence must NEVER be changed,
- *          or args values will be corrupted.
  */
 
-bool GCodeArguments::parse_arguments(char *args_current_position) {
+bool CharArgumentLanguage::parseArguments(const char *argument_sequence) {
 
-    //First, reset the argument parsing structure :
+    //First, clear the argument parsing structure :
+    arguments.clear();
 
-    //reset the content counter
-    nb_identifiers = 0;
-
+    //Parse all arguments;
     do {
 
         //First, remove unnecessary nb_spaces;
-        uint8_t dec = StringUtils::lstrip(args_current_position, ' ');
+        uint8_t dec = StringUtils::lstrip(argument_sequence, ' ');
 
-        args_current_position += dec;
+        argument_sequence += dec;
         //The current position is now on an argument identifier, or the argument sequence's end.
 
         //Get the argument identifier.
-        char argument_identifier = *args_current_position;
+        char argument_identifier = *argument_sequence;
 
         //If we reached the end of the argument string :
         if (!argument_identifier) {
@@ -85,32 +72,18 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
             return true;
 
         }
-
-        //Now we are sure to be parsing a new argument.
-
-        //If the argument container is already full;
-        if (nb_identifiers == GCODE_MAX_ARGS_NB) {
-
-            //Display an error message
-            std_out(string("The Terminal hasn't been configured to accept more than ") + (uint8_t)GCODE_MAX_ARGS_NB +
-                     " content. Please check your terminal_interface_config.h file.");
-
-            //Fail
-            return false;
-
-        }
-
         //We are now sure not to be at the string's end position.
         //The eventual value is just after the current position.
 
         //Increment the current position (legit, as the string is not finished) and cache the new value.
-        char *arg = ++args_current_position;
+        const char *arg = ++argument_sequence;
 
         //Make a local flag, that will determine if the parsing keeps on after the current argument.
         bool finished;
 
+        uint16_t argument_size;
 
-        //If the string end here (no value provided, and string end);
+        //If the string ends here (no value provided, and string end);
         if (!*arg) {
 
             //The argument is already at '\0' position, no modification is required.
@@ -118,34 +91,44 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
             //Plan the stop of the loop
             finished = true;
 
-            //Enqueue an empty argument
-            goto insert_arg;
+
+        } else {
+
+            //Cache the argument length;
+            argument_size = StringUtils::count_until_char(argument_sequence, ' ');
+
+            //Go to the word's end;
+            argument_sequence += argument_size;
+
+            //If the word's end is '\0' (string terminated), plan the loop stop.
+            finished = (!*argument_sequence);
+
+            //Shift the current position
+            argument_sequence++;
 
         }
 
-        //Go to the word's end (if we are already, we will simply not prepare_movement the position.
-        args_current_position += StringUtils::count_until_char(args_current_position, ' ');
-
-        //If the word's end is '\0' (string terminated), plan the loop stop.
-        finished = (!*args_current_position);
-
-        //Nullify the word's end (reason why we cached the bool.
-        *args_current_position = '\0';
-
-        //Shift the current position
-        args_current_position++;
 
         //---------------------------------- Argument saving ----------------------------------
 
         insert_arg:
 
         //Save the relation between the identifier and the argument location.
-        argument_t *argument = arguments + nb_identifiers;
-        argument->identifier = argument_identifier;
-        argument->arg = arg;
+        ArgumentData *argumentData = new ArgumentData();
+        argumentData->identifier = argument_identifier;
+        argumentData->data = string(arg, argument_size);
 
-        //Increase the number of parsed content
-        nb_identifiers++;
+        //Add the argument to the buffer;
+        //If the argument container is already full;
+        if (arguments.add(argumentData)) {
+
+            //Display an error message
+            std_out(string("Error in CharArgumentLanguage::parseArguments : too many arguments. Check your config file;"));
+
+            //Fail
+            return false;
+
+        }
 
         //If we have reached the end of the sequence
         if (finished) {
@@ -163,19 +146,33 @@ bool GCodeArguments::parse_arguments(char *args_current_position) {
 
 
 /*
+ * clear : this function resets the argument parsing environment;
+ */
+
+void CharArgumentLanguage::clear() {
+
+    //Clear the argument container;
+    arguments.clear();
+
+}
+
+
+/*
  * get_argument_value : this function presupposes that the argument referenced
  *  by the identifier id is a numeric value, and returns that value.
  */
 
-float GCodeArguments::get_argument_value(char id) {
+float CharArgumentLanguage::get_argument_value(char id) {
 
     //Get the argument pointer.
-    char *ptr = get_argument(id);
+    const char *ptr = get_argument(id);
 
     //return the float equivalent.
     if (ptr != nullptr) {
 
-        return str_to_float(ptr);
+        std_out("TODO  String to float");
+        //TODO STRING TO FLOAT
+        return 0;// str_to_float(ptr);
 
     } else return 0;
 
@@ -187,24 +184,25 @@ float GCodeArguments::get_argument_value(char id) {
  *  by the identifier id.
  */
 
-char *GCodeArguments::get_argument(char id) {
+const char *CharArgumentLanguage::get_argument(char id) {
 
     //For every identifier
-    for (uint8_t i = 0; i < nb_identifiers; i++) {
+    for (uint8_t argument_index = arguments.getSize(); argument_index --;) {
 
         //Cache for the link
-        argument_t *link = arguments + i;
+        ArgumentData *link = arguments.getElement(argument_index);
 
         //If the links'identifier matches the provided one
         if (link->identifier == id) {
 
             //Get the location of the argument (from the link), and convert the argument into a float.
-            return link->arg;
+            return link->data.data();
 
         }
 
     }
 
+    //If no valid identifier was found : fail;
     return nullptr;
 
 }
@@ -218,7 +216,7 @@ char *GCodeArguments::get_argument(char id) {
  *      ex "arp" triggers the checking for content a, r and p.
  */
 
-bool GCodeArguments::verify_all_identifiers_presence(const char *identifiers) {
+bool CharArgumentLanguage::verify_all_identifiers_presence(const char *identifiers) {
 
     //Cache for the current char
     char c = *(identifiers++);
@@ -253,7 +251,7 @@ bool GCodeArguments::verify_all_identifiers_presence(const char *identifiers) {
  *      ex "arp" triggers the checking for content a, r and p.
  */
 
-bool GCodeArguments::verify_one_identifiers_presence(const char *identifiers) {
+bool CharArgumentLanguage::verify_one_identifiers_presence(const char *identifiers) {
 
     //Cache for the current char
     char c = *(identifiers++);
@@ -285,16 +283,13 @@ bool GCodeArguments::verify_one_identifiers_presence(const char *identifiers) {
  *  during the previous parsing.
  */
 
-bool GCodeArguments::verify_identifier_presence(char id) {
+bool CharArgumentLanguage::verify_identifier_presence(char id) {
 
     //Check every parsed identifier
-    for (uint8_t i = 0; i < nb_identifiers; i++) {
-
-        //Cache for the link
-        argument_t *link = arguments + i;
+    for (uint8_t argument_index = arguments.getSize(); argument_index--; argument_index++) {
 
         //If the links'identifier matches the provided one, return true
-        if (link->identifier == id) return true;
+        if (arguments.getElement(argument_index)->identifier == id) return true;
 
     }
 
@@ -303,19 +298,5 @@ bool GCodeArguments::verify_identifier_presence(char id) {
 
 }
 
-
-
-//Arguments container
-
-ArgumentsContainer GCodeArguments::arguments_storage = ArgumentsContainer(GCODE_MAX_ARGS_NB * (GCODE_MAX_WORD_SIZE + 4) + 1,
-                                                             GCODE_MAX_PENDING_COMMANDS);
-
-
-//Identifiers in a parsed argument_t sequence
-argument_t t_gcode_arguments[GCODE_MAX_ARGS_NB];
-argument_t *const GCodeArguments::arguments = t_gcode_arguments;
-
-//Number of content in a sequence
-uint8_t GCodeArguments::nb_identifiers = 0;
 
 #endif

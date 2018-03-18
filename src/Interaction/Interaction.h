@@ -29,19 +29,8 @@
 
 #include <Config/control_config.h>
 
-#ifdef ENABLE_TERMINAL_INTERFACE
-#include <Interaction/Languages/Terminal/Terminal.h>
-#endif
-
-#ifdef ENABLE_GCODE_INTERFACE
-#include <Interaction/Languages/GCode/GCode.h>
-#endif
-
-#ifdef ENABLE_PROGRAM_INTERFACE
-#include <Communication/ProgramInterface/ProgramInterface.h>
-#endif
-
 #include <Kernel/TaskScheduler/TaskScheduler.h>
+
 #include "CommunicationPipe.h"
 
 #define debug(s) TaskScheduler::log(st("debug ") + (s));
@@ -54,16 +43,16 @@ namespace Interaction {
     //------------------------------------------------- Initialisation -------------------------------------------------
 
     //Initialise all interfaces hardware (data_link);
-    static void initialise_hardware();
+    void initialise_hardware();
 
     //Initialise all interfaces data (fields and processing environment);
-    static void initialise_data();
+    void initialise_data();
 
 
     //------------------------------------------------- Controls -------------------------------------------------
 
     //Read all communication pipes;
-    static void read_communication_pipes();
+    void read_communication_pipes();
 
 };
 
