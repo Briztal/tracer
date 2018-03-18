@@ -5,6 +5,7 @@
 #include "CommunicationPipe.h"
 
 #include "Kernel/TaskScheduler/TaskScheduler.h"
+#include "Interaction.h"
 
 //--------------------------------------- Initialisation ---------------------------------------
 
@@ -12,7 +13,7 @@
  * Constructor : takes two rvalues and moves them in the class;
  */
 
-CommunicationPipe::CommunicationPipe(HardwareSerial &serial, Delimiter *protocol, Language *language) :
+CommunicationPipe::CommunicationPipe(usb_serial_class &serial, Delimiter *protocol, Language *language) :
         language(language), delimiter(protocol) {}
 
 
@@ -25,6 +26,20 @@ CommunicationPipe::~CommunicationPipe() {
     delete delimiter;
 }
 
+//--------------------------------------- Initialisation ---------------------------------------
+
+/*
+ * hardware init : initialises the serial;
+ */
+void CommunicationPipe::initialise_hardware() {
+
+    delay(2000);
+    TaskScheduler::setCommunicationPipe(*this);
+    serial.begin(115200);
+    std_out("INITIALISED");
+
+
+}
 
 //--------------------------------------- Processing ---------------------------------------
 
@@ -33,6 +48,7 @@ CommunicationPipe::~CommunicationPipe() {
  */
 
 void CommunicationPipe::send(tstring &message, uint8_t type) {
+
 
     //First, we must use the language instance to encode the message;
     language->encode(message, type);
@@ -64,11 +80,15 @@ void CommunicationPipe::readall() {
         //Read the data and pass it to the decoder;
         delimiter->process((char)serial.read());
 
+
         //If the decoder has successfully decoded a message :
         if (delimiter->isMessageDecoded()) {
 
             //Parse the decoded message;
             language->decode(delimiter->getData());
+
+            //Reset the delimiter buffer;
+            delimiter->clear();
 
         }
 

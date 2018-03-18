@@ -26,7 +26,7 @@
 #include <Interaction/Language/Abstracts/StringTreeLanguage.h>
 #include <Interaction/Language/Abstracts/CharArgumentLanguage.h>
 
-class TerminalLanguage  : public virtual StringTreeLanguage, public virtual CharArgumentLanguage  {
+class TerminalLanguage  : public StringTreeLanguage, public CharArgumentLanguage  {
 
     //--------------------------------------- Initialisation ---------------------------------------
 

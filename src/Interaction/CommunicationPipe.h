@@ -10,18 +10,27 @@
 #include <Interaction/Delimiter/Delimiter.h>
 #include <HardwareSerial.h>
 
+#include "hardware_language_abstraction.h"
+
+
 
 class CommunicationPipe {
 
-    //--------------------------------------- Initialisation ---------------------------------------
+    //--------------------------------------- Instantiation ---------------------------------------
 
 public:
 
     //Constructor : must take two rvalues in arguments;
-    CommunicationPipe(HardwareSerial &serial, Delimiter *delimiter, Language *language);
+    CommunicationPipe(usb_serial_class &serial, Delimiter *delimiter, Language *language);
 
     //Destructor;
     ~CommunicationPipe();
+
+
+    //--------------------------------------- Initialisation ---------------------------------------
+
+    //Initialise the hardware serial;
+    void initialise_hardware();
 
 
     //--------------------------------------- Processing ---------------------------------------
@@ -40,7 +49,7 @@ public:
 private:
 
     //The serial that will be used to receive data;
-    HardwareSerial serial;
+    usb_serial_class serial;
 
     //The delimiter that will be used to transmit data;
     Delimiter *delimiter;

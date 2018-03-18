@@ -1,5 +1,5 @@
 /*
-  TerminalTreeGenerator.h - Part of TRACER
+  GCodeInterfaceCommands.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,34 +18,15 @@
 
 */
 
-
-#ifndef TRACER_TERMINALTREEGENERATOR_H
-#define TRACER_TERMINALTREEGENERATOR_H
-
-
 #include <Config/control_config.h>
 
-#ifdef ENABLE_TERMINAL_INTERFACE
-
-#include "TerminalTree.h"
-
-class TerminalTreeGenerator {
-
-    //Function to build the summary of the tree that will be used to generate the effective tree.
-    static void build_tree_summary(string *tree_summary);
-
-    //Function to get the number of children of a node in the tree.
-    static uint8_t get_sub_nodes_nb(string *tree_summary, uint16_t command_index);
+namespace GCodePipe {
 
 
-public:
+    //Initialise the pipe and register it to the kernel;
+    void kernel_registration();
 
-    //Function to generate the tree used to parse commands
-    static TerminalTree *generate_tree();
+    //Initialise the pipe's data;
+    void initialise_data();
 
 };
-
-
-#endif //TRACER_TERMINALTREEGENERATOR_H
-
-#endif

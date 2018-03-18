@@ -31,14 +31,21 @@ namespace Interaction {
 
     //---------------------------------------- private fields ----------------------------------------
 
-    //The communication pipes array;
-    CommunicationPipe *pipes[NB_PIPES]{nullptr};
+    //The communication pipes array. Will contain at most 10 pipes;
+    DynamicPointerBuffer<CommunicationPipe> pipes(10);
 
 
-    //---------------------------------------- private methods ----------------------------------------
+}
 
-    //Initialise controllers
-    static void initialise_communication_pipes();
+
+/*
+ * add_communication_pipe : adds the given communication pipe to the array;
+ */
+
+void Interaction::add_communication_pipe(CommunicationPipe *pipe) {
+
+    //Add the pipe to the array;
+    pipes.add(pipe);
 
 }
 
@@ -49,53 +56,48 @@ namespace Interaction {
 
 void Interaction::initialise_hardware() {
 
-    //A macro that will solve the interface for a giver control pipeline;
-#define COMMUNICATION_PIPE(controller, protocol, buffer, transmission) transmission::begin();
+    //For each pipe :
+    for (uint8_t pipe_index = pipes.getSize(); pipe_index--;) {
 
-    //Expand the initialise_hardware;
-#include <Config/control_config.h>
+        //Initialise the hardware of the pipe;
+        pipes.getElement(pipe_index)->initialise_hardware();
 
-    //Undef the macro for safety;
-#undef COMMUNICATION_PIPE
+    }
 
+    //Delay to avoid freeze after init //TODO REMOVE;
     delay_ms(200);
 
 }
 
 
 /*
- * initialise_hardware : this function initialises all communication pipes
+ * initialise_data : this function initialises all communication pipes
  */
 
 void Interaction::initialise_data() {
 
-    //Initialise all communication pipes;
-    initialise_communication_pipes();
-
 }
 
+
+//------------------------------------------------- default pipe -------------------------------------------------
 
 /*
- * initialise_communication_pipes : this function initialises data for external controllers;
+ * get_default_pipe : returns the first pipe of the array;
  */
 
-void Interaction::initialise_communication_pipes() {
+CommunicationPipe * Interaction::get_default_pipe() {
 
-    //The pipe index, incremented during the add;
-    uint8_t i = 0;
+    //If no pipes have been added, return nullptr;
+    if (!pipes.getSize()) {
+        return nullptr;
+    }
 
-    //A macro that will solve the i-th log_protocol, memorise it, and give it to the controller;
-#define COMMUNICATION_PIPE(language, delimiter, buffer, transmission)\
-    delete pipes[i];pipes[i++] = new CommunicationPipe(transmission, delimiter(buffer), language());
-
-    //Expand the initialise_hardware;
-#include <Config/control_config.h>
-
-    //Undef the macro for safety;
-#undef COMMUNICATION_PIPE
+    //Return the first element of the pipe array;
+    return pipes.getElement(0);
 
 }
 
+//------------------------------------------------- Controls -------------------------------------------------
 
 /*
  * read_communication_pipes : this function read all communication pipes;
@@ -103,11 +105,12 @@ void Interaction::initialise_communication_pipes() {
 
 void Interaction::read_communication_pipes() {
 
+
     //For each communication pipe :
     for (uint8_t pipe_index = 0; pipe_index < NB_PIPES; pipe_index++) {
 
         //Read all data in the pipe;
-        pipes[pipe_index]->readall();
+        pipes.getElement(pipe_index)->readall();
 
     }
 

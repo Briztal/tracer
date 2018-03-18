@@ -42,12 +42,19 @@ namespace Interaction {
 
     //------------------------------------------------- Initialisation -------------------------------------------------
 
+    //Add a communication pipe;
+    void add_communication_pipe(CommunicationPipe *pipe);
+
     //Initialise all interfaces hardware (data_link);
     void initialise_hardware();
 
     //Initialise all interfaces data (fields and processing environment);
     void initialise_data();
 
+    //------------------------------------------------- default pipe -------------------------------------------------
+
+    //Get the default communication pipe (the first of the array;
+    CommunicationPipe * get_default_pipe();
 
     //------------------------------------------------- Controls -------------------------------------------------
 

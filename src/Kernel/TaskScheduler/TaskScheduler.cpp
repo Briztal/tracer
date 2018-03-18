@@ -655,7 +655,6 @@ void TaskScheduler::log(tstring &message) {
 
 void TaskScheduler::log(tstring &&message) {
 
-
     //If the log pipe is not null;
     if (log_pipe) {
 
@@ -734,3 +733,5 @@ Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
 
 bool m::flood_enabled = false;
 
+CommunicationPipe *m::log_pipe = nullptr;
+CommunicationPipe *m::default_log_pipe = nullptr;

@@ -18,45 +18,24 @@
 
 */
 
-#include <config.h>
-#ifdef ENABLE_LCD_INTERFACE
+#include <Config/control_config.h>
 
 
 #ifndef TRACER_TREEINTERFACECOMMANDS_H
 #define TRACER_TREEINTERFACECOMMANDS_H
 
 
-#include <stdint.h>
-
-class LCDInterfaceCommands {
-
-#define TI_STD_ARGS char *dptr, uint8_t size
 
 
-    //-----------------------------------------------Custom functions---------------------------------------------------
+namespace TerminalPipe {
 
-public:
+    //Initialise the pipe and register it to the kernel;
+    void kernel_registration();
 
-#define GO_UPPER(...)
+    //Initialise the pipe's data;
+    void initialise_data();
 
-#define GO_LOWER(...)
-
-#define CREATE_LEAF(i, name, ...)\
-    static bool name(char * dptr, uint8_t size);
-
-#define CREATE_CALLABLE_LEAF(i, name, ...)\
-    CREATE_LEAF(i, name)
-
-#include "lcd_interface_config.h"
-
-#undef GO_UPPER
-#undef GO_LOWER
-#undef CREATE_LEAF
-#undef CREATE_CALLABLE_LEAF
-
-#endif
-
-};
+}
 
 
-#endif //ENABLE_LCD_INTERFACE
+#endif //TRACER_TREEINTERFACECOMMANDS_H

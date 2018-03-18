@@ -48,14 +48,14 @@
  *
  *  It contains all commands that will be supported by the parser.
  *
- *  To add a command, triggering a function in GCodeCommands, use the following command :
+ *  To add a command, triggering a function in GCodePipe, use the following command :
  *
  *  GCODE_COMMAND(command_name, function)
  *
  *      - command_name :    the name of the ByteTreeLanguage Command (ex : G352)
- *      - function :        the name of the function in GCodeCommands that must be called when the command is received.
+ *      - function :        the name of the function in GCodePipe that must be called when the command is received.
  *
- *  For example, to call the member function "line" of GCodeCommands class when the command "G01" is called,
+ *  For example, to call the member function "line" of GCodePipe class when the command "G01" is called,
  *      you will write :
  *
  *      GCODE_COMMAND(line, G01)

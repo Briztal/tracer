@@ -30,6 +30,7 @@
 
 #include <Config/stepper_control_config.h>
 
+#include "hardware_language_abstraction.h"
 //-------------------------------------------------------Initialisation--------------------------------------------------
 
 /*

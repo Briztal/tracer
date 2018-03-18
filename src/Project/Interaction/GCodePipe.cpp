@@ -25,14 +25,112 @@
 
 #include <Interaction/Interaction.h>
 
-#include "GCodeCommands.h"
+#include "GCodePipe.h"
 
 #include <Project/MachineController.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
+#include <Interaction/Language/Languages/GCodeLanguage.h>
+#include <Kernel/Kernel.h>
+#include <Interaction/Delimiter/LineDelimiter.h>
+
+#include "hardware_language_abstraction.h"
+
+namespace GCodePipe {
 
 
-task_state_t GCodeCommands::action(char *) {
+    task_state_t home();
+    task_state_t line();
+
+    task_state_t enable_steppers();
+    task_state_t set_position();
+    task_state_t set_extrusion();
+    task_state_t set_cooling();
+    task_state_t set_hotend();
+    task_state_t set_hotbed();
+    
+    task_state_t get_temps();
+    task_state_t get_regulations();
+    
+    task_state_t stepper_test();
+    task_state_t temp_test();
+    task_state_t action();
+
+    task_state_t eeprom();
+    //The language we will use;
+    GCodeLanguage * language;
+
+};
+
+
+/*
+ * This function creates a communication pipe and registers it in the kernel;
+ */
+
+void GCodePipe::kernel_registration() {
+
+    //Instantiate our language;
+    language = new GCodeLanguage(15, 10);
+
+    //Instantiate our pipe;
+    CommunicationPipe *pipe = new CommunicationPipe(Serial, new LineDelimiter(100), language);
+
+    //Register the pipe to the kernel;
+    Kernel::register_communication_pipe(pipe);
+
+}
+
+/*
+ * This function creates the language's tree;
+ */
+
+void GCodePipe::initialise_data() {
+    
+    language->clear();
+    
+    
+    //Movement
+    language->addCommand("G00", home);
+    language->addCommand("G01", line);
+
+    //Setup
+    language->addCommand("G10", enable_steppers);
+    language->addCommand("G11", set_position);
+    language->addCommand("G12", set_extrusion);
+    language->addCommand("G13", set_cooling);
+    language->addCommand("G14", set_hotend);
+    language->addCommand("G15", set_hotbed);
+
+    //Get
+    language->addCommand("G20", get_temps);
+    language->addCommand("G21", get_regulations);
+
+    //test
+    language->addCommand("G30", stepper_test);
+    language->addCommand("G31", temp_test);
+    language->addCommand("G32", action);
+
+    //EEPROM
+    language->addCommand("G4", eeprom);
+            
+}
+
+
+
+#define PARSE_ARGUMENTS(arguments) {if (!language->parse_arguments(arguments)) return invalid_arguments;}
+
+#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!language->verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!language->verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define CHECK_ARGUMENT(identifier) (language->verify_identifier_presence(identifier))
+
+#define GET_ARG(identifier) language->get_argument(identifier)
+
+#define GET_ARG_VALUE(identifier) language->get_argument_value(identifier)
+
+
+task_state_t GCodePipe::action() {
 
     std_out("DUMB COMMAND");
 
@@ -43,10 +141,7 @@ task_state_t GCodeCommands::action(char *) {
 
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
-task_state_t GCodeCommands::eeprom(char *arguments) {
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
+task_state_t GCodePipe::eeprom() {
 
     //verify that function and p content are provided.
     REQUIRE_ONE_ARGUMENTS("PRD");
@@ -64,7 +159,7 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
     //If a path was provided : read_data or write_data
     if (CHECK_ARGUMENT('P')) {
 
-        char *path = GET_ARG('P');
+        const char *path = GET_ARG('P');
 
         float f;
 
@@ -140,13 +235,10 @@ task_state_t GCodeCommands::eeprom(char *arguments) {
  *
  */
 
-task_state_t GCodeCommands::home(char *arguments) {
+task_state_t GCodePipe::home() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse content
-    PARSE_ARGUMENTS(arguments);
 
     //Declare the structure;
     MachineController::home_state_t state;
@@ -180,13 +272,10 @@ task_state_t GCodeCommands::home(char *arguments) {
  *      - r : (optionnal) all provided coordinates are relative.
  */
 
-task_state_t GCodeCommands::line(char *arguments) {
+task_state_t GCodePipe::line() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("XYZE");
@@ -234,14 +323,11 @@ task_state_t GCodeCommands::line(char *arguments) {
  *
  */
 
-task_state_t GCodeCommands::enable_steppers(char *arguments) {
+task_state_t GCodePipe::enable_steppers() {
 
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //Fail if the enabling argument_t is omitted
     REQUIRE_ALL_ARGUMENTS("E")
@@ -263,13 +349,10 @@ task_state_t GCodeCommands::enable_steppers(char *arguments) {
  *
  */
 
-task_state_t GCodeCommands::set_position(char *arguments) {
+task_state_t GCodePipe::set_position() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("xyze");
@@ -311,13 +394,10 @@ task_state_t GCodeCommands::set_position(char *arguments) {
  *  Almost one must be provided.
  *
  */
-task_state_t GCodeCommands::set_extrusion(char *arguments) {
+task_state_t GCodePipe::set_extrusion() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //At least w (working carriage) and s (speed) must be provided
     REQUIRE_ONE_ARGUMENTS("CS");
@@ -379,13 +459,10 @@ task_state_t GCodeCommands::set_extrusion(char *arguments) {
  *
  */
 
-task_state_t GCodeCommands::set_cooling(char *arguments) {
+task_state_t GCodePipe::set_cooling() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments)
 
     //Fail if none of power of enable are provided
     REQUIRE_ONE_ARGUMENTS("EP");
@@ -431,13 +508,10 @@ task_state_t GCodeCommands::set_cooling(char *arguments) {
  *      -e or -t must be provided.
  */
 
-task_state_t GCodeCommands::set_hotend(char *arguments) {
+task_state_t GCodePipe::set_hotend() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments)
 
     //Fail if a hotend was not specified
     REQUIRE_ALL_ARGUMENTS("H")
@@ -487,13 +561,10 @@ task_state_t GCodeCommands::set_hotend(char *arguments) {
  *      -e or -t must be provided.
  */
 
-task_state_t GCodeCommands::set_hotbed(char *arguments) {
+task_state_t GCodePipe::set_hotbed() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments)
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
     REQUIRE_ONE_ARGUMENTS("TE");
@@ -533,14 +604,14 @@ task_state_t GCodeCommands::set_hotbed(char *arguments) {
 
 
 
-task_state_t GCodeCommands::get_regulations(char *) {
+task_state_t GCodePipe::get_regulations() {
 
     return complete;
 
 }
 
 
-task_state_t GCodeCommands::get_temps(char *) {
+task_state_t GCodePipe::get_temps() {
 
     return complete;
 
@@ -551,7 +622,7 @@ task_state_t GCodeCommands::get_temps(char *) {
 //---------------------------------------------------------Tests--------------------------------------------------------
 
 
-task_state_t GCodeCommands::stepper_test(char *) {
+task_state_t GCodePipe::stepper_test() {
 
     std_out("EXIT");
 
@@ -561,7 +632,7 @@ task_state_t GCodeCommands::stepper_test(char *) {
 }
 
 
-task_state_t GCodeCommands::temp_test(char *) {
+task_state_t GCodePipe::temp_test() {
 
 
     std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(845), 5));

@@ -116,6 +116,7 @@ public:
 
     string &operator=(float f);
 
+    bool operator==(const string &s) const ;
 
     //-------------------------------------- Size modification --------------------------------------
 

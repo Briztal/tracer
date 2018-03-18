@@ -36,6 +36,68 @@
 #include <Kernel/TaskProgrammer/TaskProgrammer.h>
 #include "Kernel.h"
 
+
+namespace Kernel {
+    
+    //The start flag, set only once, at the entry point. Prevents start to be called a second time.
+    bool started = false;
+
+
+    //------------------------------------------- Config checking -------------------------------------------
+    
+    /*
+     * check_config : this function is called once, by the start function.
+     *
+     *  It will call _ConfigChecker, and if it fails, make the led blink and display the error message
+     *      on all data links.
+     */
+
+    void check_config();
+
+
+    //------------------------------------------- Initialisation -------------------------------------------
+
+
+    /*
+     * initialise_hardware : this function is called once, by start only. It is the hardware initialisation function.
+     *
+     *  As its name suggests, it will solve the hardware for all interfaces.
+     */
+
+    void initialise_hardware();
+
+
+    /*
+     * initialise_hardware : this function is called after the restoration point. It resets every module's processing
+     *
+     *  environment.
+     */
+
+    void initialise_data();
+
+
+
+    //------------------------------------------- Main Loop -------------------------------------------
+    
+    
+    /*
+     * run : this function is the main loop of the project.
+     *
+     *  It calls a Scheduler iteration , and eventually executes user defined routines.
+     */
+
+    void run();
+    
+    
+    //------------------------------------------- Emergency Stop -------------------------------------------
+
+    /*
+     * The jump buffer pointing to the code'entry point;
+     */
+
+    jmp_buf restoration_point;
+
+}
 //------------------------------------------- Entry Point -------------------------------------------
 
 
@@ -47,15 +109,20 @@
 
 void Kernel::start() {
 
+
+
     //This function can be called only once. If it has already been called, fail.
     if (started)
         return;
 
-    //Set the flag o prevent multiple excutions;
+    //Set the flag o prevent multiple executions;
     started = true;
 
     //Check all configuration files;
     check_config();
+
+    //Setup the kernel;
+    Project::initialise_kernel();
 
     //Initialise the hardware;
     initialise_hardware();
@@ -63,7 +130,7 @@ void Kernel::start() {
     //Setup the restoration jump buffer;
     int jump_state = setjmp(restoration_point);
 
-    //If the restoration point was already used, probabily due to an uncaught exception :
+    //If the restoration point was already used, probably due to an uncaught exception :
     if (jump_state) {
 
         delay(500);
@@ -82,12 +149,22 @@ void Kernel::start() {
     //Initialise the environment;
     initialise_data();
 
-    //Logo and initialise_hardware message
-    Interaction::initialisation_message();
-
     //Call the main loop;
     run();
 
+
+}
+
+//------------------------------------------- Interaction -------------------------------------------
+
+/*
+ * register_communication_pipe : adds the communication pipe to the Interaction data;
+ */
+
+void Kernel::register_communication_pipe(CommunicationPipe *pipe) {
+
+    //Add the communication pipe to the interaction data;
+    Interaction::add_communication_pipe(pipe);
 
 }
 
@@ -140,6 +217,7 @@ void Kernel::check_config() {
         digital_write(LED_PIN, !digital_read(LED_PIN));
 #endif
 
+        //TODO CORRECT SEND
         //A macro to enable all interfaces;
 #define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str(m);
 
@@ -305,12 +383,3 @@ void Kernel::emergency_stop() {
     longjmp(restoration_point, 1);
 
 }
-
-
-//--------------------------------- Static declarations - definitions ---------------------------------
-
-//The start flag, initialised to false;
-bool Kernel::started = false;
-
-//The restoration jump buffer;
-jmp_buf Kernel::restoration_point;

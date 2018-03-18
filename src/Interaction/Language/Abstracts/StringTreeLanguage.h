@@ -13,7 +13,7 @@
 typedef Tree<string, language_function> StringTree;
 
 
-class StringTreeLanguage : Language {
+class StringTreeLanguage : virtual public Language {
 
 
     //-------------------------------------- Initialisation ----------------------------------

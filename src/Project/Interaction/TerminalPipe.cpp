@@ -23,11 +23,13 @@
 
 #include "EEPROM/EEPROMMap.h"
 
+#include "hardware_language_abstraction.h"
+
 #ifdef ENABLE_TERMINAL_INTERFACE
 
 #include "Interaction/Interaction.h"
 
-#include "TerminalCommands.h"
+#include "TerminalPipe.h"
 #include <Project/MachineController.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
@@ -41,9 +43,112 @@
 #include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
 #include <Filters/KalmanFilter/KalmanFilters/IMUKalmanFIlter.h>
 #include <Math/rotation_data.h>
+#include <Interaction/Language/Languages/TerminalLanguage.h>
+#include <Interaction/Delimiter/LineDelimiter.h>
+#include <Kernel/Kernel.h>
+
+namespace  TerminalPipe {
+    
+    //-----------------------------------------------Custom functions---------------------------------------------------
+
+    task_state_t eeprom();
+    
+    task_state_t home();
+    task_state_t line();
+    
+    task_state_t enable_steppers();
+    task_state_t set_position();
+    task_state_t set_extrusion();
+    task_state_t set_cooling();
+    task_state_t set_hotend();
+    task_state_t set_hotbed();
+
+    task_state_t get_temps();
+    task_state_t get_regulations();
+
+    task_state_t test_steppers();
+    task_state_t test_temp();
+    task_state_t test_mpu();
+    task_state_t test_kalman();
+    task_state_t test_rotation();
+    task_state_t test_angles();
+    task_state_t test_flood();
+    task_state_t test_action();
+
+    //The language we will use;
+    TerminalLanguage * language;
+
+};
 
 
-task_state_t TerminalCommands::flood(char *) {
+/*
+ * This function creates a communication pipe and registers it in the kernel;
+ */
+
+void TerminalPipe::kernel_registration() {
+
+    //Instantiate our language;
+    language = new TerminalLanguage(15, 8, 10);
+
+    //Instantiate our pipe;
+    CommunicationPipe *pipe = new CommunicationPipe(Serial, new LineDelimiter(100), language);
+
+    //Register the pipe to the kernel;
+    Kernel::register_communication_pipe(pipe);
+
+}
+
+
+/*
+ * This function creates the language's tree;
+ */
+
+void TerminalPipe::initialise_data() {
+
+    language->clear();
+
+    language->addCommand("eeprom", eeprom);
+
+    language->addCommand("move home", home);
+    language->addCommand("move line", line);
+
+    language->addCommand("set power", enable_steppers);
+    language->addCommand("set position", set_position);
+    language->addCommand("set suus", set_extrusion);
+    language->addCommand("set hotend", set_hotend);
+    language->addCommand("set hotbed", set_hotbed);
+
+    language->addCommand("get temp", get_temps);
+    language->addCommand("get regul", get_regulations);
+
+    language->addCommand("test steppers", test_steppers);
+    language->addCommand("test temp", test_temp);
+    language->addCommand("test mpu", test_mpu);
+    language->addCommand("test kalman", test_kalman);
+    language->addCommand("test rotation", test_kalman);
+    language->addCommand("test angles", test_angles);
+    language->addCommand("test flood", test_flood);
+    language->addCommand("test action", test_action);
+
+}
+
+
+//TODO COMMENT AND COMMENT GCODEINTERFACECOMMANDS
+#define PARSE_ARGUMENTS(arguments) {if (!language->parse_arguments(arguments)) return invalid_arguments;}
+
+#define REQUIRE_ALL_ARGUMENTS(arg_string) {if (!language->verify_all_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define REQUIRE_ONE_ARGUMENTS(arg_string) {if (!language->verify_one_identifiers_presence(arg_string)) return invalid_arguments;}
+
+#define CHECK_ARGUMENT(identifier) (language->verify_identifier_presence(identifier))
+
+#define GET_ARG(identifier) language->get_argument(identifier)
+
+#define GET_ARG_VALUE(identifier) language->get_argument_value(identifier)
+
+
+
+task_state_t TerminalPipe::test_flood() {
 
     TaskScheduler::flood_enabled = true;
 
@@ -54,7 +159,7 @@ task_state_t TerminalCommands::flood(char *) {
 }
 
 
-task_state_t TerminalCommands::action(char *) {
+task_state_t TerminalPipe::test_action() {
 
     //DroneTest *copter = new DroneTest();
 
@@ -66,16 +171,13 @@ task_state_t TerminalCommands::action(char *) {
 
 //--------------------------------------------------------EEPROM--------------------------------------------------------
 
-task_state_t TerminalCommands::eeprom(char *arguments) {
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
+task_state_t TerminalPipe::eeprom() {
 
     //verify that function and p content are provided.
     REQUIRE_ONE_ARGUMENTS("n");
 
     //get the cache_path;
-    char *name = GET_ARG('n');
+    const char *name = GET_ARG('n');
 
     //Cache the cache_path, in case of multiple uses;
     uint8_t size = StringUtils::length(name) + (uint8_t) 1;
@@ -196,13 +298,10 @@ task_state_t TerminalCommands::eeprom(char *arguments) {
  *  -s : homes the machine using endstops.
  */
 
-task_state_t TerminalCommands::home(char *arguments) {
+task_state_t TerminalPipe::home() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse content
-    PARSE_ARGUMENTS(arguments);
 
     //Declare the structure;
     MachineController::home_state_t state;
@@ -236,7 +335,7 @@ task_state_t TerminalCommands::home(char *arguments) {
  *      - r : (optionnal) all provided coordinates are relative.
  */
 
-task_state_t TerminalCommands::line(char *arguments) {
+task_state_t TerminalPipe::line() {
 
     std_out("SUUS");
 
@@ -244,10 +343,6 @@ task_state_t TerminalCommands::line(char *arguments) {
     FAIL_IF_CANT_SCHEDULE(1);
 
     std_out("SUUS2");
-
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("xyze");
@@ -294,13 +389,10 @@ task_state_t TerminalCommands::line(char *arguments) {
  *  It takes only one argument_t, -e followed by 0 (disable) or [not zero] enabled
  */
 
-task_state_t TerminalCommands::enable_steppers(char *arguments) {
+task_state_t TerminalPipe::enable_steppers() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //Fail if the enabling argument_t is omitted
     REQUIRE_ALL_ARGUMENTS("e")
@@ -320,13 +412,10 @@ task_state_t TerminalCommands::enable_steppers(char *arguments) {
  *  It takes almost one of the coordinates x, y, z and e.
  */
 
-task_state_t TerminalCommands::set_position(char *arguments) {
+task_state_t TerminalPipe::set_position() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("xyze");
@@ -367,13 +456,10 @@ task_state_t TerminalCommands::set_position(char *arguments) {
  *
  *  Almost one must be provided.
  */
-task_state_t TerminalCommands::set_extrusion(char *arguments) {
+task_state_t TerminalPipe::set_extrusion() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments);
 
     //At least w (working carriage) and s (speed) must be provided
     REQUIRE_ONE_ARGUMENTS("cs");
@@ -434,13 +520,10 @@ task_state_t TerminalCommands::set_extrusion(char *arguments) {
  *      -p : modifies the cooling power (truncated between 0 and 100).
  */
 
-task_state_t TerminalCommands::set_cooling(char *arguments) {
+task_state_t TerminalPipe::set_cooling() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments)
 
     //Fail if none of power of enable are provided
     REQUIRE_ONE_ARGUMENTS("ep");
@@ -485,13 +568,10 @@ task_state_t TerminalCommands::set_cooling(char *arguments) {
  *      -e or -t must be provided.
  */
 
-task_state_t TerminalCommands::set_hotend(char *arguments) {
+task_state_t TerminalPipe::set_hotend() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments)
 
     //Fail if a hotend was not specified
     REQUIRE_ALL_ARGUMENTS("h")
@@ -541,13 +621,10 @@ task_state_t TerminalCommands::set_hotend(char *arguments) {
  *      -e or -t must be provided.
  */
 
-task_state_t TerminalCommands::set_hotbed(char *arguments) {
+task_state_t TerminalPipe::set_hotbed() {
 
     //This command must schedule one type-0 task.
     FAIL_IF_CANT_SCHEDULE(1);
-
-    //Parse Arguments
-    PARSE_ARGUMENTS(arguments)
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
     REQUIRE_ONE_ARGUMENTS("te");
@@ -586,14 +663,14 @@ task_state_t TerminalCommands::set_hotbed(char *arguments) {
 
 //---------------------------------------------------------Gets---------------------------------------------------------
 
-task_state_t TerminalCommands::get_regulations(char *) {
+task_state_t TerminalPipe::get_regulations() {
 
     return complete;
 
 }
 
 
-task_state_t TerminalCommands::get_temps(char *) {
+task_state_t TerminalPipe::get_temps() {
 
     return complete;
 
@@ -603,7 +680,7 @@ task_state_t TerminalCommands::get_temps(char *) {
 //---------------------------------------------------------Tests--------------------------------------------------------
 
 
-task_state_t TerminalCommands::stepper_test(char *) {
+task_state_t TerminalPipe::test_steppers() {
 
     std_out("EXIT");
 
@@ -612,7 +689,7 @@ task_state_t TerminalCommands::stepper_test(char *) {
 }
 
 
-task_state_t TerminalCommands::temp_test(char *) {
+task_state_t TerminalPipe::test_temp() {
 
 
     std_out("t0 : " + string(Thermistors::get_temperature_hotend_0(845), 5));
@@ -626,7 +703,7 @@ task_state_t TerminalCommands::temp_test(char *) {
 }
 
 
-task_state_t TerminalCommands::test_mpu(char *) {
+task_state_t TerminalPipe::test_mpu() {
 
     MPU6050 *mpu = new MPU6050();
 
@@ -726,7 +803,7 @@ task_state_t TerminalCommands::test_mpu(char *) {
 }
 
 
-task_state_t TerminalCommands::test_kalman(char *) {
+task_state_t TerminalPipe::test_kalman() {
 
 
     Matrix process_noise(3, 3, false);
@@ -803,7 +880,7 @@ task_state_t TerminalCommands::test_kalman(char *) {
 }
 
 
-task_state_t TerminalCommands::test_rotation(char *) {
+task_state_t TerminalPipe::test_rotation() {
 
     Vector3D v0(-1, 0, 0);
 
@@ -826,7 +903,7 @@ task_state_t TerminalCommands::test_rotation(char *) {
 }
 
 
-task_state_t TerminalCommands::test_angles(char *) {
+task_state_t TerminalPipe::test_angles() {
 
     Vector3D v0(0, -23, 1);
 

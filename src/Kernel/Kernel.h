@@ -23,14 +23,14 @@
 
 #include <sanity_check.h>
 
+#include <Interaction/CommunicationPipe.h>
+
 #include "setjmp.h"
 
-class Kernel {
+namespace Kernel {
 
 
     //------------------------------------------- Entry Point -------------------------------------------
-
-public:
 
     /*
      * start : this function is called once, by main only. It is the project's entry point.
@@ -38,67 +38,19 @@ public:
      *  It will call initialise_hardware, and then call iterate indefinitely.
      */
 
-    static void start();
-
-private:
-
-    //The start flag, set only once, at the entry point. Prevents start to be called a second time.
-    static bool started;
+    void start();
 
 
-    //------------------------------------------- Config checking -------------------------------------------
-
-private:
+    //------------------------------------------- Interaction -------------------------------------------
 
     /*
-     * check_config : this function is called once, by the start function.
-     *
-     *  It will call _ConfigChecker, and if it fails, make the led blink and display the error message
-     *      on all data links.
+     * register_communication_pipe : registers the given communication pipe to the interaction pocedure;
      */
 
-    static void check_config();
+    void register_communication_pipe(CommunicationPipe *pipe);
 
-
-    //------------------------------------------- Initialisation -------------------------------------------
-
-private:
-
-    /*
-     * initialise_hardware : this function is called once, by start only. It is the hardware initialisation function.
-     *
-     *  As its name suggests, it will solve the hardware for all interfaces.
-     */
-
-    static void initialise_hardware();
-
-
-    /*
-     * initialise_hardware : this function is called after the restoration point. It resets every module's processing
-     *
-     *  environment.
-     */
-
-    static void initialise_data();
-
-
-
-    //------------------------------------------- Main Loop -------------------------------------------
-
-private:
-
-    /*
-     * run : this function is the main loop of the project.
-     *
-     *  It calls a Scheduler iteration , and eventually executes user defined routines.
-     */
-
-    static void run();
-
-
+    
     //------------------------------------------- Emergency Stop -------------------------------------------
-
-public:
 
     /*
      * emergency_stop : this function stops the code, and long-jumps to the entry point.
@@ -106,9 +58,7 @@ public:
      *  Any unhandled exception in the code calls this function, to avoid any unplanned behaviour.
      */
 
-    static void emergency_stop();
-
-    static jmp_buf restoration_point;
+    void emergency_stop();
 
 };
 

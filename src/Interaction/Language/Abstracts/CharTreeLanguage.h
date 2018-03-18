@@ -28,7 +28,7 @@
 
 typedef Tree<char, language_function> CharTree;
 
-class CharTreeLanguage : public Language {
+class CharTreeLanguage : public virtual Language {
 
     //-------------------------------------- Initialisation ----------------------------------
 

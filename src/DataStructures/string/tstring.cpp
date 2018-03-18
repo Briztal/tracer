@@ -2,6 +2,7 @@
 // Created by root on 3/14/18.
 //
 
+#include "hardware_language_abstraction.h"
 #include "tstring.h"
 
 
@@ -11,14 +12,14 @@
  * Constructor : initialises the container, to contain at most 10 strings;
  */
 
-tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), size(1), final_data(nullptr) {}
+tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), final_data(nullptr) {}
 
 
 /*
  * Constructor : initialises the container, to contain at most 10 strings;
  */
 
-tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), string_generated(false), size(1),
+tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), string_generated(false),
                                         final_data(nullptr) {}
 
 
@@ -27,6 +28,8 @@ tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), strin
  */
 
 tstring::tstring(const char *buffer) : tstring() {
+
+    string *s = new string(buffer);
 
     add(new string(buffer));
 
@@ -87,7 +90,7 @@ void tstring::clear() {
  * Copy constructor : this function will duplicate the tstring;
  */
 
-tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generated(src.string_generated), size(src.size),
+tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generated(src.string_generated),
                                        final_data(src.final_data) {}
 
 
@@ -96,12 +99,11 @@ tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generat
  */
 
 tstring::tstring(tstring &&src) : DynamicPointerBuffer((tstring &&) src), string_generated(src.string_generated),
-                                  size(src.size), final_data(src.final_data) {
+                                  final_data(src.final_data) {
 
     //Reset src's data;
     src.final_data = nullptr;
     src.string_generated = false;
-    src.size = 0;
 
 }
 
@@ -160,11 +162,6 @@ void tstring::swap(tstring &a, tstring &b) {
     a.string_generated = b.string_generated;
     b.string_generated = tb;
 
-    //Swap sizes;
-    uint16_t ts = a.size;
-    a.size = b.size;
-    b.size = ts;
-
     //Swap contents;
     char *ptr = a.final_data;
     a.final_data = b.final_data;
@@ -186,14 +183,8 @@ tstring &tstring::operator+=(const string &src) {
     //First, if data has been generated, delete it;
     deleteData();
 
-    //Increment the size of the string's length;
-    size += src.length();
-
     //Create a heap-copy of the string;
     string *s = new string(src);
-
-    //Increment the size of the string's length;
-    size += src.length();
 
     //Add the string to the container;
     DynamicPointerBuffer::add(s);
@@ -214,7 +205,7 @@ tstring &tstring::operator+=(string &&src) {
     deleteData();
 
     //Move constructor;
-    string *s = new string(src);
+    string *s = new string((string&&)src);
 
     //Add the moved string to the container;
     DynamicPointerBuffer::add(s);
@@ -251,13 +242,7 @@ void tstring::rightConcatenation(tstring &&src) {
     src.deleteData();
 
     //Concatenate data; if it succeeds :
-    if (DynamicPointerBuffer::rightConcatenation((tstring &&) src)) {
-
-        //Update our size;
-        size += src.size - (uint16_t) 1;
-
-    }
-
+    DynamicPointerBuffer::rightConcatenation((tstring &&) src);
 
 }
 
@@ -273,12 +258,7 @@ void tstring::leftConcatenation(tstring &&src) {
     src.deleteData();
 
     //Concatenate data; if it succeeds :
-    if (DynamicPointerBuffer::leftConcatenation((tstring &&) src)) {
-
-        //Update our size;
-        size += src.size - (uint16_t) 1;
-
-    }
+    if (DynamicPointerBuffer::leftConcatenation((tstring &&) src));
 
 }
 
@@ -303,6 +283,28 @@ const char *tstring::data() {
 
     //Return the generated data;
     return final_data;
+}
+
+
+/*
+ * length : computes the length;
+ */
+
+uint16_t tstring::length() {
+
+    //Initialise the string length;
+    uint16_t length = 0;
+
+    //For each string registered :
+    for (uint8_t string_index = getSize(); string_index--; ) {
+
+        //Increase the length of the size;
+        length += getElement(string_index)->length();
+
+    }
+
+    return length;
+
 }
 
 
@@ -334,25 +336,28 @@ void tstring::deleteData() {
 void tstring::generateData() {
 
     //Cache the size;
-    const uint16_t size = this->size;
+    const uint16_t length = this->length();
 
     //Create an array that will contain the final string;
-    final_data = new char[size];
+    final_data = new char[length + 1];
 
     //Cache the data pointer;
     char *dptr = final_data;
 
+    //Cache the number of strings for loop efficiency;
+    const uint8_t nb_strings = getSize();
+
     //For each string :
-    for (uint8_t element_index = 0; element_index < size; element_index++) {
+    for (uint8_t string_index = 0; string_index < nb_strings; string_index++) {
 
         //Cache the data pointer of the string;
-        const char *string_pointer = getElement(element_index)->data();
+        const char *string_pointer = getElement(string_index)->data();
 
         //The current char;
         char c;
 
         //While the current char is not '\0' :
-        while ((c = *string_pointer)) {
+        while ((c = *(string_pointer++))) {
 
             //Copy the current char at the current case and increment the data pointer;
             *(dptr++) = c;

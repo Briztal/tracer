@@ -9,7 +9,7 @@
 #include <Interaction/Language/Abstracts/CharTreeLanguage.h>
 #include <Interaction/Language/Abstracts/CharArgumentLanguage.h>
 
-class GCodeLanguage : public virtual CharTreeLanguage, public virtual CharArgumentLanguage {
+class GCodeLanguage : public CharTreeLanguage, public CharArgumentLanguage {
 
     //--------------------------------------- Initialisation ---------------------------------------
 

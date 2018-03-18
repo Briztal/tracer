@@ -73,7 +73,7 @@
  *  To do this, you can use the 3 following commands :
  *
  *      - CREATE_LEAF(command, name)    : Create a leaf labelled "command", triggering the member function "name"
- *                              of the class TerminalCommands
+ *                              of the class TerminalPipe
  *      - GO_LOWER(command) :   following lines will define children of an new node labeled "command";
  *      - GO_UPPER() :          opposite of the previous command, terminate the section of the node defined by
  *                                  the last GO_LOWER

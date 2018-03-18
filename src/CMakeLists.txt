@@ -49,7 +49,7 @@ add_library(project_config
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
 
 
-set(PIP "Project/InterfaceCommands")
+set(PIP "Project/Interaction")
 
 include_directories(${PIP}/)
 

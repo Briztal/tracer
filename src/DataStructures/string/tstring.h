@@ -86,9 +86,6 @@ private:
     //A flag, set if the final string is generated;
     bool string_generated;
 
-    //The final size of the string (null termination comprised);
-    uint16_t size;
-
     //The final pointer to the string;
     char *final_data;
 
@@ -100,6 +97,7 @@ public:
     //Get the data pointer;
     const char *data();
 
+    uint16_t length();
 
     //------------------------------------------- string Data -------------------------------------------
 

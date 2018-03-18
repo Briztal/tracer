@@ -22,25 +22,18 @@
 #define TRACER_PROJECT_H
 
 
-#include "MachineController.h"
-#include "TemperatureController.h"
 
-class Project {
+namespace Project {
+
+    //--------------------------- Kernel Initialisation ---------------------------
+
+    void initialise_kernel();
+
 
     //--------------------------- Data Initialisation ---------------------------
 
-public:
-
     //Initialise the class in a safe state;
-    static inline void initialise_data() {
-
-        //Initialise the machine controller;
-        MachineController::initialise_data();
-
-        //Initialise the temperature controller;
-        TemperatureController::initialise_data();
-
-    }
+    void initialise_data();
 
 
 };

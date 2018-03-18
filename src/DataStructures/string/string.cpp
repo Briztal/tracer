@@ -224,6 +224,9 @@ string::string(const char *src, uint16_t size) : string() {
     //Then, copy the given portion of the string;
     memcpy(buffer, src, size * sizeof(char));
 
+    //Null terminate;
+    buffer[size] = 0;
+
 }
 
 
@@ -390,6 +393,34 @@ string &string::operator=(float f) {
 
 #undef uint_to_a
 
+bool string::operator==(const string &s) const {
+
+    Serial.println("OPERATOR CALLED");
+
+    //Cache both buffers;
+    const char *left_array = this->data();
+    const char *right_array = s.data();
+
+    //Compare all chars;
+    for (uint16_t i = s.length()+(uint16_t)1; i--;) {
+
+        //Cache the left array's current char and incr;
+        char l = *(left_array++);
+
+        //If chars are different : string are different;
+        if (l != *(right_array++))
+            return false;
+
+        //If chars are equal, and both woth zero ('\0'), strings are equal;
+        if (!l)
+            return true;
+
+    }
+
+    //End case, never happens as strings are null terminated;
+    return false;
+
+}
 
 
 //-------------------------------------- Size modification --------------------------------------
@@ -823,45 +854,20 @@ bool operator<(const string &left_s, const string &right_s) {
  * Equality operator;
  */
 
-bool operator==(const string &left_s, const string &right_s) {
+bool operator==(const string &left_s, const string &right_s) { return left_s.operator==(right_s); }
 
-    //Cache both buffers;
-    const char *left_array = left_s.data();
-    const char *right_array = right_s.data();
+bool operator>(const string &left_s, const string &right_s) { return right_s < left_s; }
 
-    //Compare all chars;
-    for (uint16_t i = left_s.length()+(uint16_t)1; i--;) {
+bool operator<=(const string &left_s, const string &right_s) { return !(left_s > right_s); }
 
-        //Cache the left array's current char and incr;
-        char l = *(left_array++);
-
-        //If chars are different : string are different;
-        if (l != *(right_array++))
-            return false;
-
-        //If chars are equal, and both woth zero ('\0'), strings are equal;
-        if (!l)
-            return true;
-
-    }
-
-    //End case, never happens as strings are null terminated;
-    return false;
-}
-
-
-inline bool operator>(const string &left_s, const string &right_s) { return right_s < left_s; }
-
-inline bool operator<=(const string &left_s, const string &right_s) { return !(left_s > right_s); }
-
-inline bool operator>=(const string &left_s, const string &right_s) { return !(left_s < right_s); }
+bool operator>=(const string &left_s, const string &right_s) { return !(left_s < right_s); }
 
 
 //-------------------------------------- Equality Operators --------------------------------------
 
-inline bool operator==(const string &left_s, const string &right_s);
+bool operator==(const string &left_s, const string &right_s);
 
-inline bool operator!=(const string &left_s, const string &right_s) { return !(left_s == right_s); }
+bool operator!=(const string &left_s, const string &right_s) { return !(left_s.operator==(right_s)); }
 
 //--------------------------------------------- Memory copy utils ---------------------------------------------
 
