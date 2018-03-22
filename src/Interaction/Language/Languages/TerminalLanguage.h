@@ -41,7 +41,7 @@ public:
 public:
 
     //Encode a string;
-    void encode(tstring &s, uint8_t type) final;
+    void encode(tstring &s, uint8_t type) override ;
 
 
 

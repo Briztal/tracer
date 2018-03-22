@@ -12,7 +12,9 @@
  * Constructor : initialises the container, to contain at most 10 strings;
  */
 
-tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), final_data(nullptr) {}
+tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), final_data(new char[0]) {
+    Serial.println("CONSTRUCTOR "+String((long)this));
+}
 
 
 /*
@@ -20,7 +22,10 @@ tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), final_d
  */
 
 tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), string_generated(false),
-                                        final_data(nullptr) {}
+                                        final_data(new char[0]) {
+    Serial.println("CONSTRUCTOR "+String((long)this));
+
+}
 
 
 /*
@@ -28,8 +33,6 @@ tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), strin
  */
 
 tstring::tstring(const char *buffer) : tstring() {
-
-    string *s = new string(buffer);
 
     add(new string(buffer));
 
@@ -63,6 +66,8 @@ tstring::tstring(const string &&s) : tstring() {
 
 tstring::~tstring() {
 
+    Serial.println("DESTRUCTOR "+String((long)this)+" "+String((long)final_data));
+
     delete[] final_data;
 
 }
@@ -91,7 +96,10 @@ void tstring::clear() {
  */
 
 tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generated(src.string_generated),
-                                       final_data(src.final_data) {}
+                                       final_data(src.final_data) {
+    Serial.println("COPY CONSTRUCTOR "+String((long)this)+ " "+String((long)&src));
+
+}
 
 
 /*
@@ -100,6 +108,8 @@ tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generat
 
 tstring::tstring(tstring &&src) : DynamicPointerBuffer((tstring &&) src), string_generated(src.string_generated),
                                   final_data(src.final_data) {
+    Serial.println("MOVE CONSTRUCTOR "+String((long)this)+ " "+String((long)&src));
+
 
     //Reset src's data;
     src.final_data = nullptr;
@@ -207,9 +217,16 @@ tstring &tstring::operator+=(string &&src) {
     //Move constructor;
     string *s = new string((string&&)src);
 
+    Serial.println("data : "+String(s->data()));
+
+    Serial.println("size : "+String(getSize()));
     //Add the moved string to the container;
-    DynamicPointerBuffer::add(s);
-    
+    bool b = DynamicPointerBuffer::add(s);
+
+    Serial.println("success : "+String(b));
+    Serial.println("size : "+String(getSize()));
+
+
     //Return a reference to us;
     return *this;
 
@@ -335,6 +352,7 @@ void tstring::deleteData() {
 
 void tstring::generateData() {
 
+
     //Cache the size;
     const uint16_t length = this->length();
 
@@ -369,6 +387,8 @@ void tstring::generateData() {
     //Null terminate the string;
     *dptr = 0;
 
+    //Mark the string as generated;
+    string_generated = true;
 }
 
 

@@ -20,6 +20,7 @@
 */
 
 #include <stdint.h>
+#include "Arduino.h"
 
 #include "TerminalLanguage.h"
 
@@ -33,7 +34,5 @@ TerminalLanguage::TerminalLanguage(uint8_t max_children_nb, uint8_t max_word_siz
 
 
 void TerminalLanguage::encode(tstring &s, uint8_t type) {
-
-
 
 }

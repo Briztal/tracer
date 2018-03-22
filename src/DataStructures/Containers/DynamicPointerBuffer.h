@@ -78,8 +78,8 @@ public:
     //Remove a element from the list if it is present;
     T *remove(uint8_t index);
 
-    virtual //Remove all element;
-    void clear();
+    //Remove all element;
+    virtual void clear();
 
 
     //-------------------------------------- Concatenation --------------------------------------
@@ -278,15 +278,19 @@ void DynamicPointerBuffer<T>::swap(DynamicPointerBuffer<T> &a, DynamicPointerBuf
  * This function starts to realloc the task array, and if it succeeds, saves the new task;
  */
 
+
+#include "Arduino.h"
+
 template<class T>
 bool DynamicPointerBuffer<T>::add(T *new_element) {
-
 
     //Increment the size;
     uint8_t old_size = size;
 
     //If the resizing completed
     if (resizeTo(old_size + (uint8_t) 1)) {
+
+        Serial.println("NEW SIZE : "+String(size));
 
         //Save the last task;
         elements[old_size] = new_element;
@@ -385,8 +389,12 @@ T *DynamicPointerBuffer<T>::remove(uint8_t index) {
 template<class T>
 void DynamicPointerBuffer<T>::clear() {
 
+    Serial.println("delete size : "+String(size));
+
     //First, delete each element;
     for (uint8_t element_index = 0; element_index < size; element_index++) {
+
+        Serial.println("TO DELETE : "+String((long)elements[element_index]));
 
         //Delete the element;
         delete elements[element_index];
@@ -656,7 +664,7 @@ bool DynamicPointerBuffer<T>::resizeTo(uint8_t new_size) {
     }
 
     //Then, reallocate the task array, to contain one more element;
-    void *new_array = realloc(elements, new_size);
+    void *new_array = realloc(elements, new_size * sizeof(T));
 
     //If the reallocation failed :
     if (!new_array && new_size) {

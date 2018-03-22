@@ -105,9 +105,11 @@ void TerminalPipe::kernel_registration() {
 
 void TerminalPipe::initialise_data() {
 
+
     language->clear();
 
     language->addCommand("eeprom", eeprom);
+    return;
 
     language->addCommand("move home", home);
     language->addCommand("move line", line);

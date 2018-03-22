@@ -14,7 +14,7 @@
  */
 
 CommunicationPipe::CommunicationPipe(usb_serial_class &serial, Delimiter *protocol, Language *language) :
-        language(language), delimiter(protocol) {}
+       serial(serial), delimiter(protocol),  language(language) {}
 
 
 /*
@@ -36,6 +36,9 @@ void CommunicationPipe::initialise_hardware() {
     delay(2000);
     TaskScheduler::setCommunicationPipe(*this);
     serial.begin(115200);
+
+    serial.println("SERIAL ECHO");
+
     std_out("INITIALISED");
 
 
@@ -49,7 +52,6 @@ void CommunicationPipe::initialise_hardware() {
 
 void CommunicationPipe::send(tstring &message, uint8_t type) {
 
-
     //First, we must use the language instance to encode the message;
     language->encode(message, type);
 
@@ -60,7 +62,7 @@ void CommunicationPipe::send(tstring &message, uint8_t type) {
     const char *data = message.data();
 
     //Finally, we can send the extracted data;
-    serial.print(data);
+    Serial.print(data);
 
 }
 

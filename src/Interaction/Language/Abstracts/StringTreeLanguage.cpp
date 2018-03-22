@@ -116,12 +116,12 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
     //While the first letter of the next word is not the string termination :
     while (*(command_name += StringUtils::lstrip(command_name, ' '))) {
 
-        std_out("BITE");
-
-        //TODO FAIT PLANTER. POURQUOI ????
-
         //Cache the word's size;
         uint8_t word_size = StringUtils::count_until_char(command_name, ' ');
+
+        std_out("UHJO");
+
+        return;
 
         Serial.println("size : "+String(word_size));
 

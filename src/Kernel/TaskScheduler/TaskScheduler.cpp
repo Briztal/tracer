@@ -643,6 +643,8 @@ bool TaskScheduler::execute_task(task_t *task) {
 
 void TaskScheduler::log(tstring &message) {
 
+    Serial.println("lvalue");
+
     //If the log pipe is not null;
     if (log_pipe) {
 
@@ -650,11 +652,16 @@ void TaskScheduler::log(tstring &message) {
         log_pipe->send(message, 0);
 
     }
+
+    Serial.println("AH");
+
 
 }
 
 void TaskScheduler::log(tstring &&message) {
 
+    Serial.println("rvalue");
+
     //If the log pipe is not null;
     if (log_pipe) {
 
@@ -662,6 +669,8 @@ void TaskScheduler::log(tstring &&message) {
         log_pipe->send(message, 0);
 
     }
+
+    Serial.println("AH");
 
 }
 

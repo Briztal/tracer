@@ -80,9 +80,6 @@ bool CharTreeLanguage::analyseCommand(const char *command_id, const char *argume
     //Initialise the current current_tree to the root;
     const CharTree *current_tree = &commandTree;
 
-    //A cache for the child of the current node we are focused on.
-    const CharTree *current_child;
-
     //The current char in the command_char;
     char current_char;
 
@@ -98,7 +95,7 @@ bool CharTreeLanguage::analyseCommand(const char *command_id, const char *argume
         }
 
         //Update the current node and the current nb_children array.
-        current_tree = current_child;
+        current_tree = child;
 
         //if the new node is a leaf, schedule its command;
         if (!current_tree->getChildrenNb()) {
@@ -112,6 +109,9 @@ bool CharTreeLanguage::analyseCommand(const char *command_id, const char *argume
 
         //If the new node is not single, let's check its children, during the next iteration;
     }
+
+    //If command didn't lead to a leaf, fail;
+    return false;
 
 }
 

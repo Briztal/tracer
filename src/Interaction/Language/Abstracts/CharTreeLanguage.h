@@ -68,11 +68,12 @@ public:
 
 protected:
 
+    //The maximum number of children in our tree;
+    uint8_t max_children_nb;
+
     //The ByteTreeLanguage Command tree;
     CharTree commandTree;
 
-    //The maximum number of children in our tree;
-    uint8_t max_children_nb;
 
 
 };

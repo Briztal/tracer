@@ -81,7 +81,7 @@ bool CharArgumentLanguage::parseArguments(const char *argument_sequence) {
         //Make a local flag, that will determine if the parsing keeps on after the current argument.
         bool finished;
 
-        uint16_t argument_size;
+        uint16_t argument_size = 0;
 
         //If the string ends here (no value provided, and string end);
         if (!*arg) {
@@ -110,8 +110,6 @@ bool CharArgumentLanguage::parseArguments(const char *argument_sequence) {
 
 
         //---------------------------------- Argument saving ----------------------------------
-
-        insert_arg:
 
         //Save the relation between the identifier and the argument location.
         ArgumentData *argumentData = new ArgumentData();

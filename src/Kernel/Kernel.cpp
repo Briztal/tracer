@@ -308,6 +308,8 @@ void Kernel::initialise_data() {
 
 #endif
 
+    Serial.println("data Init");
+
     //Finally, solve the project;
     Project::initialise_data();
 

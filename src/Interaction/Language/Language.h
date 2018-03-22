@@ -25,6 +25,10 @@ typedef task_state_t (*language_function)();
 
 class Language {
 
+public:
+
+    virtual ~Language() = default;
+
     //-------------------------------------- Encoding / decoding --------------------------------------
 
 public:

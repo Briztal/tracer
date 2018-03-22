@@ -4,8 +4,9 @@
 
 #include <malloc.h>
 
-#include <Interaction/Interaction.h>
+#include "string.h"
 
+#include "Arduino.h"
 #define SIZE_LIMIT (uint16_t) 255
 
 
@@ -16,6 +17,8 @@
  * Default constructor : initialises the string to an empty string (null buffer and zero size;
  */
 string::string() : size(1), buffer(nullptr) {
+
+    Serial.println("STR CTOR "+String((long)this));
 
     //Set to zero size string;
     resizeTo(1);
@@ -31,6 +34,7 @@ string::string() : size(1), buffer(nullptr) {
  */
 
 string::string(const string &src) : string() {
+    Serial.println("COPY");
 
     //Resize to the given size;
     if (!resizeTo(src.size)) {
@@ -49,6 +53,8 @@ string::string(const string &src) : string() {
 
 string::string(string &&src) noexcept : size(src.size), buffer(src.buffer) {
 
+    Serial.println("STR MOV CTOR "+String((long)this));
+
     //Reset fields in the src string;
     src.size = 0;
     src.buffer = nullptr;
@@ -61,6 +67,8 @@ string::string(string &&src) noexcept : size(src.size), buffer(src.buffer) {
  */
 
 string::~string() {
+
+    Serial.println("STR DTOR "+String((long)this)+" "+String(size)+" "+String(buffer));
 
     //Free the content of the string;
     free(buffer);
@@ -450,18 +458,21 @@ bool string::resizeTo(uint16_t new_size) {
     }
 
     //Reallocate the buffer;
-    void *new_array = realloc(buffer, new_size);
+    void *new_array = realloc(buffer, new_size * sizeof(char));
 
     //If the reallocation failed :
     if (!new_array) {
 
         //Log;
-        std_out(string("Error in string::resizeTo : the reallocation failed;"));
+        Serial.println("ERROR : REALLOCATION FAILED !");
 
         //Fail;
         return false;
 
     }
+
+    Serial.println("REALLOCATION OK !"+String(new_size));
+
 
     //If the reallocation succeeded :
 
