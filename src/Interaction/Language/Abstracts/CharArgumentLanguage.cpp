@@ -25,7 +25,6 @@
 #include "CharArgumentLanguage.h"
 
 #include <Config/controller_gcode_config.h>
-#include <DataStructures/StringUtils.h>
 #include "Interaction/Interaction.h"
 
 //-------------------------------------- Initialisation --------------------------------------
@@ -57,7 +56,7 @@ bool CharArgumentLanguage::parseArguments(const char *argument_sequence) {
     do {
 
         //First, remove unnecessary nb_spaces;
-        uint8_t dec = StringUtils::lstrip(argument_sequence, ' ');
+        uint8_t dec = cstring::lstrip(argument_sequence, ' ');
 
         argument_sequence += dec;
         //The current position is now on an argument identifier, or the argument sequence's end.
@@ -95,7 +94,7 @@ bool CharArgumentLanguage::parseArguments(const char *argument_sequence) {
         } else {
 
             //Cache the argument length;
-            argument_size = StringUtils::count_until_char(argument_sequence, ' ');
+            argument_size = cstring::count_until_char(argument_sequence, ' ');
 
             //Go to the word's end;
             argument_sequence += argument_size;

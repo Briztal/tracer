@@ -19,8 +19,6 @@
 */
 
 #include <malloc.h>
-#include <DataStructures/StringUtils.h>
-
 #include "EventManager.h"
 
 
@@ -164,7 +162,7 @@ bool EventManager::search_event(const char *name, uint8_t *found_index) {
     for (uint8_t event_index = 0; event_index < nb_events; event_index++) {
 
         //If the event name matches the searched name :
-        if (StringUtils::strcmp(name, system_events->getElement(event_index)->getName())) {
+        if (cstring::strcmp(name, system_events->getElement(event_index)->getName())) {
 
             //Save the found index;
             *found_index = event_index;

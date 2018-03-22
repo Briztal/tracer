@@ -33,7 +33,6 @@
 #include <Project/MachineController.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
-#include <DataStructures/StringUtils.h>
 #include <DroneControl/MultiRotors/Generics/SingleQuadCopter.h>
 #include <DroneControl/DroneTest.h>
 #include <Sensors/Accelerometers/MPU6050/MPU6050.h>
@@ -182,7 +181,7 @@ task_state_t TerminalPipe::eeprom() {
     const char *name = GET_ARG('n');
 
     //Cache the cache_path, in case of multiple uses;
-    uint8_t size = StringUtils::length(name) + (uint8_t) 1;
+    uint8_t size = cstring::length(name) + (uint8_t) 1;
 
     //Declare the name cache;
     char cache_path[size];

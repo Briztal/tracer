@@ -1,11 +1,7 @@
 
 //TODO EEPROM
 
-//TODO COMMUNICATION STRUCTURE
-
-//TODO FORBID SPACES IN GCODE
-
-//TODO Merge StringUtils and string;
+//TODO REBUILD QUEUE
 
 //TODO UNDEF MACROS IN scheduler_generation.h
 

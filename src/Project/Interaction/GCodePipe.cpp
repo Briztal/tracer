@@ -87,8 +87,7 @@ void GCodePipe::kernel_registration() {
 void GCodePipe::initialise_data() {
     
     language->clear();
-    
-    
+
     //Movement
     language->addCommand("G00", home);
     language->addCommand("G01", line);

@@ -595,8 +595,6 @@ void DynamicPointerBuffer<T>::sort() {
     //First, let's cache the size;
     uint8_t size = this->size;
 
-    Serial.println("size : "+String(size));
-
     //If no elements are to sort, do nothing;
     if (!size) return;
 
@@ -612,7 +610,7 @@ void DynamicPointerBuffer<T>::sort() {
 
             //If the object at up index is higher than the one at down index :
             if ((*up_swap)->operator<(**down_swap)) {
-                Serial.println("Reverse");
+
                 //Swap pointers;
                 T* ptr = *up_swap;
                 *up_swap = *down_swap;

@@ -158,48 +158,6 @@ protected:
     //The content of the string;
     char *buffer;
 
-
-    //-------------------------------------- External string conversion --------------------------------------
-
-public:
-
-    /*
-     * Following functions set the given array as the string representation of basic number types;
-     */
-
-    static void uint8_to_a(uint8_t i, char *data);
-
-    static void int8_to_a(int8_t i, char *data);
-
-    static void uint16_to_a(uint16_t i, char *data);
-
-    static void int16_to_a(int16_t i, char *data);
-
-    static void uint32_to_a(uint32_t i, char *data);
-
-    static void int32_to_a(int32_t i, char *data);
-
-    static void uint64_to_a(uint64_t i, char *data);
-
-    static void int64_to_a(int64_t i, char *data);
-
-
-private:
-
-    static uint8_t _uint8_to_as(uint8_t i, char *data);
-
-    static uint8_t _uint16_to_as(uint16_t i, char *data);
-
-    static uint8_t _uint32_to_as(uint32_t i, char *data);
-
-    static uint8_t _uint64_to_as(uint64_t i, char *data);
-
-
-private:
-
-    //Copy the given array to the dst array in the symetric order;
-    static void symmetric_copy(const char *src, char *dst, uint8_t size);
-
 };
 
 
@@ -225,9 +183,69 @@ bool operator!=(const string &left_s, const string &right_s);
 
 #include "malloc.h"
 
+//Set a block of bytes at a given value;
 void mmemset(void *dst, uint8_t value, size_t size);
 
+//Copy a block of bytes in another;
 void mmemcpy(void *dst, const void *src, size_t size);
 
+//Copy the given array to the dst array in the symetric order;
+void mmemcpy_reverse(void *dst, const void *src, size_t size);
+
+
+//-------------------------------------- C style strings functions  ----------------------------------
+
+namespace cstring {
+
+    //-------------------------------------- various conversions ----------------------------------
+
+    //Get the number of times that 'verif_char' is consecutively present, at the beginning of the char sequence.
+    uint8_t lstrip(const char *in_buffer, const char verif_char);
+
+    //Get the length of a string;
+    uint8_t length(const char *in_buffer);
+
+    //Count thenumber of chars before the limit_char, or the end of the string;
+    uint8_t count_until_char(const char *in_buffer, char limit_char);
+
+    //Get the number of words in the string;
+    uint8_t count_words(const char *in_buffer);
+
+    //Compare the two strings, and return true if they are the same;
+    bool strcmp(const char *string0, const char *string1);
+
+
+    //-------------------------------------- To string conversion --------------------------------------
+
+    /*
+     * Following functions set the given array as the string representation of basic number types;
+     */
+
+    void uint8_to_a(uint8_t i, char *data);
+
+    void int8_to_a(int8_t i, char *data);
+
+    void uint16_to_a(uint16_t i, char *data);
+
+    void int16_to_a(int16_t i, char *data);
+
+    void uint32_to_a(uint32_t i, char *data);
+
+    void int32_to_a(int32_t i, char *data);
+
+    void uint64_to_a(uint64_t i, char *data);
+
+    void int64_to_a(int64_t i, char *data);
+
+
+    uint8_t _uint8_to_as(uint8_t i, char *data);
+
+    uint8_t _uint16_to_as(uint16_t i, char *data);
+
+    uint8_t _uint32_to_as(uint32_t i, char *data);
+
+    uint8_t _uint64_to_as(uint64_t i, char *data);
+
+}
 
 #endif //TRACER_BASICSTRING_H

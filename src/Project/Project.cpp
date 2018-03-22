@@ -3,6 +3,7 @@
 //
 
 #include <Project/Interaction/TerminalPipe.h>
+#include <Project/Interaction/GCodePipe.h>
 #include "Project.h"
 
 #include "MachineController.h"

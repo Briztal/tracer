@@ -18,7 +18,6 @@
 
 */
 
-#include <DataStructures/StringUtils.h>
 #include <Interaction/Interaction.h>
 #include <Config/eeprom_config.h>
 #include "EEPROMMap.h"
@@ -93,14 +92,14 @@ EEPROMTree *EEPROMMap::createIfAbsent(char *id_string) {
     parse_word:
 
     //Remove extra spaces at the beginning of the string;
-    id_string += StringUtils::lstrip(id_string, ' ');
+    id_string += cstring::lstrip(id_string, ' ');
 
     //Cache the beginning of the word;
     char *word_ptr = id_string;
 
 
     //Get the size of the next word;
-    uint8_t word_size = StringUtils::count_until_char(id_string, ' ');
+    uint8_t word_size = cstring::count_until_char(id_string, ' ');
 
     //If the word is empty, stop;
     if (!word_size)
@@ -586,13 +585,13 @@ EEPROMTree *EEPROMMap::search_tree_by_string(char *data_in, const bool authorise
     node_check:
 
     //remove extra spaces
-    data_in += StringUtils::lstrip(data_in, ' ');
+    data_in += cstring::lstrip(data_in, ' ');
 
     //Get the word address;
     word = data_in;
 
     //Go to the next word;
-    uint8_t word_size= StringUtils::count_until_char(data_in, ' ');
+    uint8_t word_size= cstring::count_until_char(data_in, ' ');
 
     //If non leafs are authorised, and string identifier is finished, return the current tree;
     if (authorise_non_leafs && !word_size)

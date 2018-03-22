@@ -276,12 +276,9 @@ public:
 
             insertion_object->allocated = true;
 
-
         }
 
     }
-
-
 
     /*
      * read_previous_input_ptr : this method returns a pointer to the previous input case

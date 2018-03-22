@@ -20,7 +20,6 @@
 
 #include "CharTreeLanguage.h"
 #include "CharArgumentLanguage.h"
-#include <DataStructures/StringUtils.h>
 #include <Interaction/Interaction.h>
 
 
@@ -46,13 +45,13 @@ CharTreeLanguage::CharTreeLanguage(uint8_t max_children_nb) :
 bool CharTreeLanguage::decode(const char *message) {
 
     //Remove extra spaces;
-    message += StringUtils::lstrip(message, ' ');
+    message += cstring::lstrip(message, ' ');
 
     //Save the pointer to the first char of the command id.
     const char *command_id = message;
 
     //Get the command id length;
-    uint8_t command_id_length = StringUtils::count_until_char(message, ' ');
+    uint8_t command_id_length = cstring::count_until_char(message, ' ');
 
     //Abort if the first word was a space.
     if (!command_id_length)

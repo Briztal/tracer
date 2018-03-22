@@ -3,7 +3,6 @@
 //
 
 #include <Interaction/Interaction.h>
-#include <DataStructures/StringUtils.h>
 #include "StringTreeLanguage.h"
 
 /*
@@ -49,10 +48,10 @@ bool StringTreeLanguage::decode(const char *message) {
     //--------------------------Tree Iteration--------------------------
 
     //While the first letter of the next word is not the string termination :
-    while (*(message += StringUtils::lstrip(message, ' '))) {
+    while (*(message += cstring::lstrip(message, ' '))) {
 
         //Cache the word's size;
-        uint8_t word_size = StringUtils::count_until_char(message, ' ');
+        uint8_t word_size = cstring::count_until_char(message, ' ');
 
         //Create a string that will contain the word;
         string message_word(message, word_size);
@@ -61,7 +60,7 @@ bool StringTreeLanguage::decode(const char *message) {
         message += word_size;
 
         //Go to the next letter if not null
-        message += StringUtils::lstrip(message, ' ');
+        message += cstring::lstrip(message, ' ');
 
         //Get the child with the given label;
         StringTree *child_tree = current_tree->getChild(message_word);
@@ -113,10 +112,10 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
     //--------------------------Tree Iteration--------------------------
 
     //While the first letter of the next word is not the string termination :
-    while (*(command_name += StringUtils::lstrip(command_name, ' '))) {
+    while (*(command_name += cstring::lstrip(command_name, ' '))) {
 
         //Cache the word's size;
-        uint8_t word_size = StringUtils::count_until_char(command_name, ' ');
+        uint8_t word_size = cstring::count_until_char(command_name, ' ');
 
         //Create a string that will contain the word;
         string message_word(command_name, word_size);
@@ -125,7 +124,7 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
         command_name += word_size;
 
         //Go to the next letter if not null
-        command_name += StringUtils::lstrip(command_name, ' ');
+        command_name += cstring::lstrip(command_name, ' ');
 
         //Get the child with the given label;
         StringTree *child_tree = current_tree->getChild(message_word);
