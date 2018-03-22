@@ -96,8 +96,7 @@ void LineDelimiter::process(char read_char) {
 void LineDelimiter::encode(tstring &data) {
 
     //Add the termination;
-    //data+=string("\n\r");
-    data+=string("chibre");
+    data+=string("\n\r");
 
 
 }

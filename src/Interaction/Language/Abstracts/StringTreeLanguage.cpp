@@ -14,17 +14,23 @@ StringTreeLanguage::StringTreeLanguage(uint8_t max_string_length, uint8_t max_ch
         commandTree("root", nullptr, max_children_nb), max_children_nb(max_children_nb) {}
 
 
+
+/*
+ * print_tree : prints the name and all direct children of the given tree;
+ */
+
 void print_tree(const StringTree *tree) {
 
     std_out(tree->getLabel() + " " + tree->getChildrenNb());
 
     const uint8_t size = tree->getChildrenNb();
 
-    for (uint8_t child_pointer = size; child_pointer--;) {
+    for (uint8_t child_pointer = 0; child_pointer < size; child_pointer++) {
 
         std_out("child : " + tree->getChild(child_pointer)->getLabel());
 
     }
+
 }
 
 /*
@@ -34,16 +40,11 @@ void print_tree(const StringTree *tree) {
 
 bool StringTreeLanguage::decode(const char *message) {
 
-    Serial.println("DECODING");
-
     //Display the received command
     std_out(tstring("\nTRACER > ") + message);
 
     //Initialise the current current_tree to the root;
     const StringTree *current_tree = &commandTree;
-
-    print_tree(current_tree);
-
 
     //--------------------------Tree Iteration--------------------------
 
@@ -88,28 +89,26 @@ bool StringTreeLanguage::decode(const char *message) {
 
     }
 
-    //If no child was found, or if commad part was too short to point a leaf :
+    //If no child was found, or if command part was too short to point a leaf :
 
     //Log the curent tree's content;
-    //TODO log_parsing_error(current_tree);
+    print_tree(current_tree);
 
     //Fail
     return false;
 
 }
 
+
+/*
+ * AddCommand : adds a command named by a phrase in the tree;
+ */
+
 void StringTreeLanguage::addCommand(const char *command_name, language_function command_function) {
-
-    TaskScheduler::setDefaultCommunicationPipe();
-
-    delay(1000);
 
     //Initialise the current current_tree to the root;
     StringTree *current_tree = &commandTree;
 
-    //print_tree(current_tree);
-
-    Serial.println(command_name);
 
     //--------------------------Tree Iteration--------------------------
 
@@ -119,26 +118,14 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
         //Cache the word's size;
         uint8_t word_size = StringUtils::count_until_char(command_name, ' ');
 
-        std_out("UHJO");
-
-        return;
-
-        Serial.println("size : "+String(word_size));
-
         //Create a string that will contain the word;
         string message_word(command_name, word_size);
-
-        Serial.println(message_word.data());
 
         //Go to the end of the word (space or null termination);
         command_name += word_size;
 
-        Serial.println("INCR");
-
         //Go to the next letter if not null
         command_name += StringUtils::lstrip(command_name, ' ');
-
-        Serial.println("Searching");
 
         //Get the child with the given label;
         StringTree *child_tree = current_tree->getChild(message_word);
@@ -146,15 +133,12 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
         //If the current node didn't contain the required command :
         if (child_tree == nullptr) {
 
-            Serial.println("NULLPTR");
-
             //Create the child;
             child_tree = new StringTree(message_word, (language_function) nullptr, max_children_nb);
 
             //Add it to the current tree;
             current_tree->addChild(child_tree);
 
-            Serial.println("CREATED");
         }
 
         //Update the current tree;
@@ -175,3 +159,15 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
 
 
 }
+
+//------------------------------------ Tree Sort -----------------------------
+
+
+/*
+ * sort : sorts the tree in the alphanumerical order;
+ */
+
+void StringTreeLanguage::sort() {
+    commandTree.sort();
+}
+

@@ -62,10 +62,6 @@ uint8_t StringUtils::count_until_char(const char *in_buffer, const char limit_ch
     //While the current char is not null, or the limit char
     while (c && (c != limit_char)) {
 
-        std_out("SUUS");
-
-        return 0;
-
         //Update the current char
         c = *(in_buffer++);
 

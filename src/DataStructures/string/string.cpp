@@ -18,8 +18,6 @@
  */
 string::string() : size(1), buffer(nullptr) {
 
-    Serial.println("STR CTOR "+String((long)this));
-
     //Set to zero size string;
     resizeTo(1);
 
@@ -34,7 +32,6 @@ string::string() : size(1), buffer(nullptr) {
  */
 
 string::string(const string &src) : string() {
-    Serial.println("COPY");
 
     //Resize to the given size;
     if (!resizeTo(src.size)) {
@@ -53,8 +50,6 @@ string::string(const string &src) : string() {
 
 string::string(string &&src) noexcept : size(src.size), buffer(src.buffer) {
 
-    Serial.println("STR MOV CTOR "+String((long)this));
-
     //Reset fields in the src string;
     src.size = 0;
     src.buffer = nullptr;
@@ -67,8 +62,6 @@ string::string(string &&src) noexcept : size(src.size), buffer(src.buffer) {
  */
 
 string::~string() {
-
-    Serial.println("STR DTOR "+String((long)this)+" "+String(size)+" "+String(buffer));
 
     //Free the content of the string;
     free(buffer);
@@ -403,8 +396,6 @@ string &string::operator=(float f) {
 
 bool string::operator==(const string &s) const {
 
-    Serial.println("OPERATOR CALLED");
-
     //Cache both buffers;
     const char *left_array = this->data();
     const char *right_array = s.data();
@@ -470,9 +461,6 @@ bool string::resizeTo(uint16_t new_size) {
         return false;
 
     }
-
-    Serial.println("REALLOCATION OK !"+String(new_size));
-
 
     //If the reallocation succeeded :
 
@@ -833,6 +821,10 @@ impl_operators(int64_t)
 
 bool operator<(const string &left_s, const string &right_s) {
 
+    Serial.println("OPERATOR < : ");
+    Serial.println(left_s.data());
+    Serial.println(right_s.data());
+
     //Cache both buffers;
     const char *left_array = left_s.data();
     const char *right_array = right_s.data();
@@ -845,7 +837,7 @@ bool operator<(const string &left_s, const string &right_s) {
         char r = *(right_array++);
 
         //If l is terminated, return true;
-        if (l) return true;
+        if (!l) return true;
 
         //If l and r are equal (not null), reiterate on next chars;
         if (l == r) continue;

@@ -5,6 +5,7 @@
 #ifndef TRACER_TREE_H
 #define TRACER_TREE_H
 
+#include <Interaction/Interaction.h>
 #include "DataStructures/Containers/DynamicPointerBuffer.h"
 
 template<class L, class N>
@@ -80,6 +81,8 @@ public:
 
     //Sort the tree;
     void sort();
+
+    bool operator<(Tree<L,N>);
 
     //--------------------------------------- Data ---------------------------------------
 
@@ -299,6 +302,12 @@ void Tree<L, N>::sort() {
     }
 
 }
+
+
+template<class L, class N>
+bool Tree<L, N>::operator<(Tree<L,N> tree) {
+    return this->label < tree.label;
+};
 
 
 #endif //TRACER_TREE_H

@@ -33,9 +33,9 @@
 
 #include "CommunicationPipe.h"
 
-#define debug(s) TaskScheduler::log(st("debug ") + (s));
+#define debug(s) Interaction::log(st("debug ") + (s));
 
-#define std_out(s) TaskScheduler::log(s)
+#define std_out(s) Interaction::log(s)
 
 
 namespace Interaction {
@@ -60,6 +60,24 @@ namespace Interaction {
 
     //Read all communication pipes;
     void read_communication_pipes();
+
+
+    //------------------------------------------ Log -----------------------------------------
+
+    //Echo a message on the current log pipe;
+    void log(tstring &message);
+
+    //Echo a message on the current log pipe;
+    void log(tstring &&message);
+
+
+    //------------------------------------------ Communication pipe set -----------------------------------------
+
+    //Get a reference to the current communication pipe;
+    CommunicationPipe* getCommunicationPipe();
+
+    //Set the communication pipe to a given one;
+    void setCommunicationPipe(CommunicationPipe &pipe);
 
 };
 

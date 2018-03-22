@@ -13,7 +13,6 @@
  */
 
 tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), final_data(new char[0]) {
-    Serial.println("CONSTRUCTOR "+String((long)this));
 }
 
 
@@ -23,7 +22,6 @@ tstring::tstring() : DynamicPointerBuffer(255), string_generated(false), final_d
 
 tstring::tstring(uint8_t max_strings) : DynamicPointerBuffer(max_strings), string_generated(false),
                                         final_data(new char[0]) {
-    Serial.println("CONSTRUCTOR "+String((long)this));
 
 }
 
@@ -66,8 +64,6 @@ tstring::tstring(const string &&s) : tstring() {
 
 tstring::~tstring() {
 
-    Serial.println("DESTRUCTOR "+String((long)this)+" "+String((long)final_data));
-
     delete[] final_data;
 
 }
@@ -96,10 +92,7 @@ void tstring::clear() {
  */
 
 tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generated(src.string_generated),
-                                       final_data(src.final_data) {
-    Serial.println("COPY CONSTRUCTOR "+String((long)this)+ " "+String((long)&src));
-
-}
+                                       final_data(src.final_data) {}
 
 
 /*
@@ -108,8 +101,6 @@ tstring::tstring(const tstring &src) : DynamicPointerBuffer(src), string_generat
 
 tstring::tstring(tstring &&src) : DynamicPointerBuffer((tstring &&) src), string_generated(src.string_generated),
                                   final_data(src.final_data) {
-    Serial.println("MOVE CONSTRUCTOR "+String((long)this)+ " "+String((long)&src));
-
 
     //Reset src's data;
     src.final_data = nullptr;
@@ -217,15 +208,8 @@ tstring &tstring::operator+=(string &&src) {
     //Move constructor;
     string *s = new string((string&&)src);
 
-    Serial.println("data : "+String(s->data()));
-
-    Serial.println("size : "+String(getSize()));
     //Add the moved string to the container;
-    bool b = DynamicPointerBuffer::add(s);
-
-    Serial.println("success : "+String(b));
-    Serial.println("size : "+String(getSize()));
-
+    DynamicPointerBuffer::add(s);
 
     //Return a reference to us;
     return *this;

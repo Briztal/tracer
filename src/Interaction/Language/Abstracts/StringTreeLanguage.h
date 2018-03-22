@@ -44,6 +44,15 @@ public:
     void addCommand(const char *command_name, language_function);
 
 
+    //------------------------------------ Tree Sort -----------------------------
+
+public:
+
+    //Add a null terminated command to the tree;
+    void sort();
+
+
+
 protected:
 
     //The ByteTreeLanguage Command tree;

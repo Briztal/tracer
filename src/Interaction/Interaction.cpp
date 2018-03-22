@@ -35,6 +35,11 @@ namespace Interaction {
     DynamicPointerBuffer<CommunicationPipe> pipes(10);
 
 
+    //------------------------------------------ Log -----------------------------------------
+
+    //The communication log_protocol;
+    static CommunicationPipe *log_pipe;
+
 }
 
 
@@ -59,10 +64,18 @@ void Interaction::initialise_hardware() {
     //For each pipe :
     for (uint8_t pipe_index = pipes.getSize(); pipe_index--;) {
 
+        //Cache the pipe;
+        CommunicationPipe *pipe = pipes.getElement(pipe_index);
+
+        //Set it as the current log pipe (so that it can use std_out);
+        setCommunicationPipe(*pipe);
+
         //Initialise the hardware of the pipe;
         pipes.getElement(pipe_index)->initialise_hardware();
 
     }
+
+    //At the end, the current communication pipe is the first one. It will be the default one;
 
     //Delay to avoid freeze after init //TODO REMOVE;
     delay_ms(200);
@@ -107,11 +120,74 @@ void Interaction::read_communication_pipes() {
 
 
     //For each communication pipe :
-    for (uint8_t pipe_index = 0; pipe_index < NB_PIPES; pipe_index++) {
+    for (uint8_t pipe_index = NB_PIPES; pipe_index --; ) {
+
+        //Cache the pipe;
+        CommunicationPipe *pipe = pipes.getElement(pipe_index);
+
+        //Set it as the current log pipe (so that it can use std_out);
+        setCommunicationPipe(*pipe);
 
         //Read all data in the pipe;
-        pipes.getElement(pipe_index)->readall();
+        pipe->readall();
 
     }
+
+    //At the end, the current communication pipe is the first one. It will be the default one;
+
+}
+
+
+
+//-------------------------------------------------------- Log ---------------------------------------------------------
+
+
+void Interaction::log(tstring &message) {
+
+    //If the log pipe is not null;
+    if (log_pipe) {
+
+        //Send the message through the log_pipe;
+        log_pipe->send(message, 0);
+
+    }
+
+}
+
+void Interaction::log(tstring &&message) {
+
+    //If the log pipe is not null;
+    if (log_pipe) {
+
+        //Send the message through the log_pipe;
+        log_pipe->send(message, 0);
+
+    }
+}
+
+
+//------------------------------------------ Communication pipe set -----------------------------------------
+
+
+/*
+ * getCommunicationPipe : returns the current communication pipe;
+ */
+
+CommunicationPipe* Interaction::getCommunicationPipe() {
+
+    //Return the current communication pipe;
+    return log_pipe;
+
+}
+
+
+/*
+ * setCommunicationPipe : sets the provided communication pipe as the log pipe;
+ */
+
+void Interaction::setCommunicationPipe(CommunicationPipe &pipe) {
+
+    //Set the log pipe;
+    log_pipe = &pipe;
 
 }

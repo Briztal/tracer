@@ -132,34 +132,6 @@ private:
     //Task sequences;
     static Queue<task_t> **const task_sequences;
 
-
-    //------------------------------------------ Log -----------------------------------------
-
-public:
-
-    //Echo a message on the current log pipe;
-    static void log(tstring &message);
-
-    //Echo a message on the current log pipe;
-    static void log(tstring &&message);
-
-
-    //------------------------------------------ Communication pipe set -----------------------------------------
-
-    //Set the communication pipe to a given one;
-    static void setCommunicationPipe(CommunicationPipe &pipe);
-
-    //Set the defualt communication pipe;
-    static void setDefaultCommunicationPipe();
-
-private:
-
-    //The communication log_protocol;
-    static CommunicationPipe *log_pipe;
-
-    //The communication log_protocol;
-    static CommunicationPipe *default_log_pipe;
-
 };
 
 

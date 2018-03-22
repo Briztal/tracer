@@ -290,8 +290,6 @@ bool DynamicPointerBuffer<T>::add(T *new_element) {
     //If the resizing completed
     if (resizeTo(old_size + (uint8_t) 1)) {
 
-        Serial.println("NEW SIZE : "+String(size));
-
         //Save the last task;
         elements[old_size] = new_element;
 
@@ -389,12 +387,8 @@ T *DynamicPointerBuffer<T>::remove(uint8_t index) {
 template<class T>
 void DynamicPointerBuffer<T>::clear() {
 
-    Serial.println("delete size : "+String(size));
-
     //First, delete each element;
     for (uint8_t element_index = 0; element_index < size; element_index++) {
-
-        Serial.println("TO DELETE : "+String((long)elements[element_index]));
 
         //Delete the element;
         delete elements[element_index];
@@ -601,21 +595,24 @@ void DynamicPointerBuffer<T>::sort() {
     //First, let's cache the size;
     uint8_t size = this->size;
 
+    Serial.println("size : "+String(size));
+
     //If no elements are to sort, do nothing;
     if (!size) return;
 
     //For all elements except the first :
-    for (uint8_t sort_index = size; --size;) {
+    for (uint8_t sort_index = size; --sort_index;) {
 
-        T **up_swap = elements + sort_index;
-        T **down_swap = up_swap - 1;
+        T **down_swap = elements;
+        T **up_swap = elements + 1;
+
 
         //For all elements before the sort index :
-        for (uint8_t swap_count = sort_index - (uint8_t) 1;swap_count--;up_swap--, down_swap--) {
+        for (uint8_t swap_count = sort_index; swap_count--;up_swap++, down_swap++) {
 
             //If the object at up index is higher than the one at down index :
             if ((*up_swap)->operator<(**down_swap)) {
-
+                Serial.println("Reverse");
                 //Swap pointers;
                 T* ptr = *up_swap;
                 *up_swap = *down_swap;

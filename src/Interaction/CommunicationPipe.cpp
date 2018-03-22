@@ -34,7 +34,7 @@ CommunicationPipe::~CommunicationPipe() {
 void CommunicationPipe::initialise_hardware() {
 
     delay(2000);
-    TaskScheduler::setCommunicationPipe(*this);
+
     serial.begin(115200);
 
     serial.println("SERIAL ECHO");
@@ -73,9 +73,6 @@ void CommunicationPipe::send(tstring &message, uint8_t type) {
 
 void CommunicationPipe::readall() {
 
-    //Set us as the communcation pipe;
-    TaskScheduler::setCommunicationPipe(*this);
-
     //While some data is available :
     while(serial.available()) {
 
@@ -95,11 +92,5 @@ void CommunicationPipe::readall() {
         }
 
     }
-
-    //Reset the default communication pipe;
-    TaskScheduler::setDefaultCommunicationPipe();
-
-
-
 
 }

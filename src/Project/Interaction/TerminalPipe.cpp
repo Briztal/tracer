@@ -109,7 +109,6 @@ void TerminalPipe::initialise_data() {
     language->clear();
 
     language->addCommand("eeprom", eeprom);
-    return;
 
     language->addCommand("move home", home);
     language->addCommand("move line", line);
@@ -132,6 +131,7 @@ void TerminalPipe::initialise_data() {
     language->addCommand("test flood", test_flood);
     language->addCommand("test action", test_action);
 
+    language->sort();
 }
 
 

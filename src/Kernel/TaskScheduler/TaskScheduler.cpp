@@ -76,12 +76,6 @@ void TaskScheduler::initialise_data() {
     //Reset the flood flag; //TODO REMOVE;
     flood_enabled = false;
 
-    //Initialise the default delimiter;
-    default_log_pipe = Interaction::get_default_pipe();
-
-    //Reset the log environment;
-    log_pipe = default_log_pipe;
-
 }
 
 
@@ -201,21 +195,12 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
     //Set the type;
     task.type = type;
 
-    //If a valid log pipe was provided:
-    if (log_pipe) {
-
-        //Set the task's log pipe to the provided one;
-        task.log_pipe = log_pipe;
-
-    } else {
-
-        //Set the task's log pipe to the default one;
-        task.log_pipe = default_log_pipe;
-
-    }
+    //Get the communication pipe that the task will use;
+    task.log_pipe = Interaction::getCommunicationPipe();
 
     //Call the scheduling function and return whether the task was successfully scheduled;
     return schedule_task(&task);
+
 }
 
 
@@ -600,12 +585,11 @@ bool TaskScheduler::execute_task(task_t *task) {
     //Execute if the task is not null.
     if (task->task != nullptr) {
 
-        //Update the log pipe, with the task's one of with the default one if not provided;
-        log_pipe = (task->log_pipe) ? task->log_pipe : default_log_pipe;
+        //Set the task's log pipe;
+        Interaction::setCommunicationPipe(*task->log_pipe);
 
         //call the function of the task by pointer, and provide the content of the task.
         state = (*(task_function_t) (task->task))(task->dynamic_args);
-
 
     }
 
@@ -634,69 +618,6 @@ bool TaskScheduler::execute_task(task_t *task) {
 
     //Fail if the task must be reprogrammed.
     return false;
-
-}
-
-
-//-------------------------------------------------------- Log ---------------------------------------------------------
-
-
-void TaskScheduler::log(tstring &message) {
-
-    Serial.println("lvalue");
-
-    //If the log pipe is not null;
-    if (log_pipe) {
-
-        //Send the message through the log_pipe;
-        log_pipe->send(message, 0);
-
-    }
-
-    Serial.println("AH");
-
-
-}
-
-void TaskScheduler::log(tstring &&message) {
-
-    Serial.println("rvalue");
-
-    //If the log pipe is not null;
-    if (log_pipe) {
-
-        //Send the message through the log_pipe;
-        log_pipe->send(message, 0);
-
-    }
-
-    Serial.println("AH");
-
-}
-
-
-//------------------------------------------ Communication pipe set -----------------------------------------
-
-/*
- * setCommunicationPipe : sets the provided communication pipe as the log pipe;
- */
-
-void TaskScheduler::setCommunicationPipe(CommunicationPipe &pipe) {
-
-    //Set the log pipe;
-    log_pipe = &pipe;
-
-}
-
-
-/*
- * setCommunicationPipe : sets the default log pipe as the log pipe;
- */
-
-void TaskScheduler::setDefaultCommunicationPipe() {
-
-    //Set the log pipe;
-    log_pipe = default_log_pipe;
 
 }
 
@@ -741,6 +662,3 @@ Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
 Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
 
 bool m::flood_enabled = false;
-
-CommunicationPipe *m::log_pipe = nullptr;
-CommunicationPipe *m::default_log_pipe = nullptr;
