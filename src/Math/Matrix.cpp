@@ -19,7 +19,7 @@
 */
 
 #include <string.h>
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include "Matrix.h"
 

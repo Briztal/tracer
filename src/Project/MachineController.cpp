@@ -20,7 +20,7 @@
 
 #include "MachineController.h"
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include <StepperControl/StepperController.h>
 #include <StepperControl/Steppers.h>

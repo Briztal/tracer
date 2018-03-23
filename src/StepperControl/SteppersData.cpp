@@ -18,9 +18,8 @@
 
 */
 
-#include <EEPROM/EEPROMTree.h>
-#include <EEPROM/EEPROMMap.h>
-#include <Interaction/Interaction.h>
+#include <Kernel/EEPROM/EEPROMMap.h>
+#include <Kernel/Interaction/Interaction.h>
 #include "SteppersData.h"
 
 
@@ -46,7 +45,7 @@ void SteppersData::initialise_data() {
 void SteppersData::EEPROM_registration() {
 
     //Cache the current tree;
-    EEPROMTree *parent_tree = new EEPROMTree(new string("steppers"), nullptr, 0);
+    EEPROMTree *parent_tree = new EEPROMTree(string("steppers"), EEPROMData(), 0);
 
     //cache for the stepper data;
     stepper_data_t *stepper_data;
@@ -57,16 +56,16 @@ void SteppersData::EEPROM_registration() {
     //Register one stepper data;
 #define STEPPER_DATA(i, m_steps_per_unit, m_speed, m_acceleration, m_jerk)\
     /*Create the tree for the current stepper.*/\
-    stepper_tree  = new EEPROMTree(new string(#i), nullptr, 0);\
+    stepper_tree  = new EEPROMTree(string(#i), EEPROMData(), 4);\
     /*Add the stepper tree to the parent tree;.*/\
     parent_tree->addChild(stepper_tree);\
     /*Cache the stepper data pointer.*/\
     stepper_data = steppers_data + (i);\
     /*Add sub_trees for steps per unit, speed, acceleration and jerk.*/\
-    stepper_tree->addChild(new EEPROMTree(new string("steps"), &stepper_data->steps_per_unit, m_steps_per_unit));\
-    stepper_tree->addChild(new EEPROMTree(new string("speed"), &stepper_data->maximum_speed, m_speed));\
-    stepper_tree->addChild(new EEPROMTree(new string("acceleration"), &stepper_data->acceleration, m_acceleration));\
-    stepper_tree->addChild(new EEPROMTree(new string("jerk"), &stepper_data->jerk, m_jerk));\
+    stepper_tree->addChild(new EEPROMTree(string("steps"), EEPROMData(&stepper_data->steps_per_unit, m_steps_per_unit), 0));\
+    stepper_tree->addChild(new EEPROMTree(string("speed"), EEPROMData(&stepper_data->maximum_speed, m_speed), 0));\
+    stepper_tree->addChild(new EEPROMTree(string("acceleration"), EEPROMData(&stepper_data->acceleration, m_acceleration), 0));\
+    stepper_tree->addChild(new EEPROMTree(string("jerk"), EEPROMData(&stepper_data->jerk, m_jerk), 0));\
 
 
     //Add all steppers trees;

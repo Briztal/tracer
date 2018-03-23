@@ -20,7 +20,7 @@
 
 #include "MPU6050.h"
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include "hardware_language_abstraction.h"
 

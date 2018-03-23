@@ -19,7 +19,8 @@
 */
 
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
+
 #include "KalmanFilter.h"
 
 

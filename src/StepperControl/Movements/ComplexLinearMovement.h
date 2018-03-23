@@ -25,8 +25,8 @@
 #include <config.h>
 #ifdef ENABLE_STEPPER_CONTROL
 
-#include <DataStructures/Queue.h>
-#include <Kernel/TaskScheduler/task_state_t.h>
+#include <DataStructures/Containers/Queue.h>
+#include <Kernel/Scheduler/TaskScheduler/task_state_t.h>
 #include "StepperControl/_kinematics_data.h"
 
 class ComplexLinearMovement {

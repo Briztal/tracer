@@ -20,7 +20,7 @@
 
 #include "PWMGPIO.h"
 #include <hardware_language_abstraction.h>
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 //------------------------------------------- Init -------------------------------------------
 

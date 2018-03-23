@@ -19,9 +19,6 @@
 */
 
 
-#include <cmath>
-#include <EEPROM/EEPROMTree.h>
-#include <EEPROM/EEPROMMap.h>
 
 #include "Orientation3DToRotation.h"
 

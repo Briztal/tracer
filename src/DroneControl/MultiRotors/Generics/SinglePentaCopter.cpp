@@ -20,7 +20,7 @@
 
 #include "SinglePentaCopter.h"
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 /*
  * Constructor : calls the SolidMultiRotor constructor, ans solves the control model;

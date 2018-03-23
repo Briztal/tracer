@@ -327,7 +327,7 @@ string &string::operator=(const char *src) {
     resizeTo(data_length + 1);\
     \
     /*Copy digits of i in data;*/\
-    mmemcpy_reverse(t, buffer, data_length);\
+    mmemcpy_reverse(buffer, t, data_length);\
     \
     /*Return a pointer to this;*/\
     return *this;
@@ -351,7 +351,7 @@ string &string::operator=(const char *src) {
     if (negative) *buffer = '-';\
     \
     /*Copy digits of i in data;*/\
-    mmemcpy_reverse(t, buffer + 1, data_length);\
+    mmemcpy_reverse(buffer + 1, t, data_length);\
     \
     /*Return a pointer to this;*/\
     return *this;
@@ -830,7 +830,7 @@ bool cstring::strcmp(const char *string0, const char *string1) {
     _uint##size##_to_as(i, t);\
     \
     /*Copy digits of i in data;*/\
-    mmemcpy_reverse(t, data, size);\
+    mmemcpy_reverse(data, t, size);\
 
 
 

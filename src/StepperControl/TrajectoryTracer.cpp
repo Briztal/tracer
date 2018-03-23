@@ -26,7 +26,7 @@
 #include "IncrementComputer.h"
 #include "SubMovementManager.h"
 #include "MovementCoordinator.h"
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 #include <StepperControl/StepperController.h>
 #include <Actuators/PWMGPIO.h>
 #include <StepperControl/Steppers.h>

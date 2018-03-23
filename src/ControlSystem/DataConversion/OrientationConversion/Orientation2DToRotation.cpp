@@ -19,7 +19,7 @@
 
 */
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include <Math/rotation_data.h>
 

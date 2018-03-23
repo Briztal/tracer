@@ -23,7 +23,7 @@
 
 #include <sanity_check.h>
 
-#include <Interaction/CommunicationPipe.h>
+#include <Kernel/Interaction/CommunicationPipe.h>
 
 #include "setjmp.h"
 

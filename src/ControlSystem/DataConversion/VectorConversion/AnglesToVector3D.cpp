@@ -4,9 +4,6 @@
 
 #include "AnglesToVector3D.h"
 
-#include <math.h>
-#include <Interaction/Interaction.h>
-
 #define ANGULAR_THRESHOLD 0.001
 
 /*

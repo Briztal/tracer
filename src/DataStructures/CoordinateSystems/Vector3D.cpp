@@ -21,7 +21,7 @@
 
 #include "Vector3D.h"
 #include <math.h>
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 
 

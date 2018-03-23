@@ -18,7 +18,6 @@
 
 */
 
-#include <Interaction/Interaction.h>
 #include "MatrixRover.h"
 
 

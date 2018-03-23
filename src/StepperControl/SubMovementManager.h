@@ -31,7 +31,7 @@
 #ifndef TRACER_SUBMOVEMENTMANAGER_H
 #define TRACER_SUBMOVEMENTMANAGER_H
 
-#include <DataStructures/Queue.h>
+#include <DataStructures/Containers/Queue.h>
 
 #include "_core_include.h"
 

@@ -28,7 +28,7 @@
 #ifndef TRACER_REAL_TIME_PROCESS_H
 #define TRACER_REAL_TIME_PROCESS_H
 
-#include <DataStructures/Queue.h>
+#include <DataStructures/Containers/Queue.h>
 
 #include <StepperControl/_core_include.h>
 

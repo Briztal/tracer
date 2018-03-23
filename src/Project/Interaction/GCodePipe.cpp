@@ -23,16 +23,16 @@
 
 #ifdef ENABLE_GCODE_INTERFACE
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include "GCodePipe.h"
 
 #include <Project/MachineController.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
-#include <Interaction/Language/Languages/GCodeLanguage.h>
+#include <Kernel/Interaction/Language/Languages/GCodeLanguage.h>
 #include <Kernel/Kernel.h>
-#include <Interaction/Delimiter/LineDelimiter.h>
+#include <Kernel/Interaction/Delimiter/LineDelimiter.h>
 
 #include "hardware_language_abstraction.h"
 

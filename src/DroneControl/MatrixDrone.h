@@ -22,7 +22,7 @@
 #define TRACER_MATRIXDRONE_H
 
 #include <Math/LinearSystem.h>
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 /*
  * MatrixDrone : this class is an abstract base for variable geometry drones models, with the condition that

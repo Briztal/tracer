@@ -20,7 +20,7 @@
 
 #include "SingleHexaCopter.h"
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 
 /*

@@ -19,3 +19,5 @@
 */
 
 #define EEPROM_HASH_SIZE 20
+
+#define MAX_EEPROM_CHILDREN_NB 10

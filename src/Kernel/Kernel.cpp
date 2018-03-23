@@ -22,18 +22,18 @@
 #include <StepperControl/Steppers.h>
 #include <ControlSystem/ControlLoops.h>
 
-#include <Kernel/TaskScheduler/TaskScheduler.h>
-#include <Kernel/EventManager/EventManager.h>
+#include <Kernel/Scheduler/TaskScheduler/TaskScheduler.h>
+#include <Kernel/Scheduler/EventManager/EventManager.h>
 
 #include <StepperControl/TrajectoryTracer.h>
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 #include <Sensors/Sensors.h>
 #include <Actuators/Actuators.h>
 #include <StepperControl/StepperController.h>
 #include <Config/_ConfigChecker.h>
-#include <EEPROM/EEPROMMap.h>
+#include <Kernel/EEPROM/EEPROMMap.h>
 #include <Project/Project.h>
-#include <Kernel/TaskProgrammer/TaskProgrammer.h>
+#include <Kernel/Scheduler/TaskProgrammer/TaskProgrammer.h>
 #include "Kernel.h"
 
 

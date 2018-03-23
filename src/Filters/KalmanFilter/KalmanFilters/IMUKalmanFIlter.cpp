@@ -2,10 +2,8 @@
 // Created by root on 2/24/18.
 //
 
-#include <Interaction/Interaction.h>
 #include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
 #include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
-#include <DataStructures/CoordinateSystems/Angles3D.h>
 #include "IMUKalmanFIlter.h"
 
 

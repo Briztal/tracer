@@ -27,7 +27,7 @@
 
 #include <Kernel/Kernel.h>
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include <StepperControl/StepperController.h>
 

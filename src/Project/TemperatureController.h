@@ -31,7 +31,7 @@
 #define TRACER_CLOSEDLOOPS_H
 
 
-#include <Kernel/TaskScheduler/TaskScheduler.h>
+#include <Kernel/Scheduler/TaskScheduler/TaskScheduler.h>
 #include <ControlSystem/PID.h>
 
 class TemperatureController {

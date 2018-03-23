@@ -18,7 +18,8 @@
 
 */
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
+
 #include "RotationMatrix3D.h"
 
 //The angular limit : below, the rotation will be considered as null;

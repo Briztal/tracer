@@ -18,33 +18,28 @@
 
 */
 
+#include "TerminalPipe.h"
 
 #include <Config/control_config.h>
+#include <Kernel/Interaction/Delimiter/LineDelimiter.h>
+#include <Kernel/Interaction/Language/Languages/TerminalLanguage.h>
+#include <Kernel/Kernel.h>
+#include <Project/MachineController.h>
+#include <Project/TemperatureController.h>
+#include <Sensors/Thermistors/Thermistors.h>
+#include <Sensors/Accelerometers/MPU6050/MPU6050.h>
+#include <Math/Matrix.h>
+#include <Filters/KalmanFilter/KalmanFilters/IMUKalmanFIlter.h>
+#include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
+#include <ControlSystem/DataConversion/OrientationConversion/Orientation2DToRotation.h>
+#include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
 
-#include "EEPROM/EEPROMMap.h"
+#include "Kernel/EEPROM/EEPROMMap.h"
 
 #include "hardware_language_abstraction.h"
 
 #ifdef ENABLE_TERMINAL_INTERFACE
 
-#include "Interaction/Interaction.h"
-
-#include "TerminalPipe.h"
-#include <Project/MachineController.h>
-#include <Project/TemperatureController.h>
-#include <Sensors/Thermistors/Thermistors.h>
-#include <DroneControl/MultiRotors/Generics/SingleQuadCopter.h>
-#include <DroneControl/DroneTest.h>
-#include <Sensors/Accelerometers/MPU6050/MPU6050.h>
-#include <Math/3D/RotationMatrix3D.h>
-#include <ControlSystem/DataConversion/OrientationConversion/Orientation2DToRotation.h>
-#include <ControlSystem/DataConversion/VectorConversion/Vector3DToAngles.h>
-#include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
-#include <Filters/KalmanFilter/KalmanFilters/IMUKalmanFIlter.h>
-#include <Math/rotation_data.h>
-#include <Interaction/Language/Languages/TerminalLanguage.h>
-#include <Interaction/Delimiter/LineDelimiter.h>
-#include <Kernel/Kernel.h>
 
 namespace  TerminalPipe {
     
@@ -174,8 +169,10 @@ task_state_t TerminalPipe::test_action() {
 
 task_state_t TerminalPipe::eeprom() {
 
+
     //verify that function and p content are provided.
     REQUIRE_ONE_ARGUMENTS("n");
+
 
     //get the cache_path;
     const char *name = GET_ARG('n');

@@ -26,7 +26,7 @@
 
 #include "Steppers.h"
 
-#include <Interaction/Interaction.h>
+#include <Kernel/Interaction/Interaction.h>
 
 #include <Config/stepper_control_config.h>
 
