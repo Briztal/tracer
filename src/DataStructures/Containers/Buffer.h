@@ -46,6 +46,7 @@ public:
 
     //The size of the buffer;
     const uint8_t max_size;
+
     //The first case of the buffer;
     T *const buffer;
 

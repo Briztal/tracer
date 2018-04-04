@@ -33,7 +33,6 @@
 #include "stdint.h"
 
 template<typename T>
-
 class DynamicBuffer {
 
     //-------------------------------------- Initialisation --------------------------------------

@@ -35,112 +35,46 @@
 
 //The file scheduler_safe_use.txt contains documentation and help about the scheduler. I Hope it will help you.
 
-class TaskScheduler {
+namespace TaskScheduler {
 
     //-------------------------------------------- Parsing - execution cycle -------------------------------------------
-
-public:
 
     //Initialise the scheduler in a safe state;
-    static void initialise_data();
+    void initialise_data();
 
 
-    //-------------------------------------------- Parsing - execution cycle -------------------------------------------
+    //-------------------------------------------- Flood -------------------------------------------
 
-public:
-
-    //Trigger a complete parsing - execution cycle;
-    static void iterate();
+    //Flood the task array;
+    void flood();
 
 
     //-------------------------------------------------- State getters -------------------------------------------------
 
-public:
-
     //Returns the number of type-[type] tasks that can be scheduled;
-    static const uint8_t available_spaces(uint8_t type);
+    const uint8_t available_spaces();
 
-    //Lock the specified sequence;
-    static void lock_sequence(uint8_t type);
-
-    //get the state of a sequence;
-    static bool is_sequence_locked(uint8_t type);
-
-    //Verify that nb_tasks can be schedule;
-    static bool verify_schedulability(uint8_t task_type, uint8_t nb_tasks);
-
-
-private:
-
-    //First tasks flags;
-    static bool *const sequences_locked;
+    //Verify that nb_tasks can be scheduled;
+    bool verify_schedulability(uint8_t nb_tasks);
 
 
     //------------------------------------------- Task scheduling - execution ------------------------------------------
 
-public:
-
     //Schedule a task;
-    static bool schedule_task(task_t *task);
+    bool schedule_task(task_t *task);
 
     //Build and schedule a task;
-    static bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
-
-
-private:
-
-    //Process a particular task;
-    static bool execute_task(task_t *task);
-
-public:
-
-    //Temp var for tests//TODO REMOVE
-    static bool flood_enabled;
+    bool schedule_task(task_state_t (*f)(void *), void *args);
 
 
     //------------------------------------------ Pool and Sequences processing -----------------------------------------
 
-public:
-
     //Clear the task pool and all task sequences;
-    static void clear();
+    void clear();
 
 
-private:
-
-    //Execute every possible task of the task pool;
-    static void process_task_pool();
-
-    //Execute every possible task on tasks sequences;
-    static void process_task_sequences();
-
-    //Shift a task at the insertion index;
-    static uint8_t shift(bool shift_enabled, task_t *task, uint8_t insert_index);
-
-    //Verify that a type exists
-    static bool check_sequence_type(uint8_t type);
-
-
-    //The primary task pool;
-    static task_t *const task_pool;
-
-    //The number of tasks stored in the task pool;
-    static uint8_t pool_task_nb;
-
-    //The number of tasks stored in the task pool;
-    static uint8_t pool_task_spaces;
-
-    //Task sequences;
-    static Queue<task_t> **const task_sequences;
 
 };
-
-
-/*
- * LOCK_SEQUENCE : This macro shall be used in your tasks to lock a given task_sequence.
- */
-
-#define LOCK_SEQUENCE(type) {TaskScheduler::lock_sequence(type);}
 
 
 #endif //PROJECT_SYSTEM_H

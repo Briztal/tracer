@@ -10,16 +10,6 @@
 struct task_t {
 
     /*
-     * The type of the task :
-     *  - 255 for a task to execute as soon as possible
-     *  - other values for task to parse in order.
-     *      WARNING : The order only applies for task belonging to the same group!
-     */
-
-    uint8_t type = 255;
-
-
-    /*
      * The function to execute, at runtime.
      */
 

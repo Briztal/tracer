@@ -35,7 +35,7 @@
 //TASK_SEQUENCE(id, size)
 #ifdef TASK_SEQUENCE
 
-TASK_SEQUENCE(0, 20)
+TASK_SEQUENCE(20)
 
 #endif
 

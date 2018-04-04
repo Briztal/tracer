@@ -30,27 +30,38 @@ PONEY
 
 #include <StepperControl/TrajectoryTracer.h>//TODO REMOVE
 
-
-
-//-------------------------------------------- Const variable init --------------------------------------------
-
-/*
- * The number of task sequences is a constant, directly determinable by counting the number of times TASK_SEQUENCES
- *  is written in the configuration file.
- *
- *  Instead of asking the user to provide it, what could lead to errors, we will use a compiler constant
- *      determined directly using macro;
- *
- */
-#define TASK_SEQUENCE(...) 1 +
-
-const uint8_t NB_TASK_SEQUENCES =
-
 #include "Config/kernel_config.h"
 
-        0;
 
-#undef TASK_SEQUENCE
+namespace TaskScheduler {
+
+    //------------------------------------------- Task scheduling - execution ------------------------------------------
+
+    //Process a particular task;
+    bool execute_task(task_t *task);
+
+
+    //------------------------------------------ Pool and Sequences processing -----------------------------------------
+
+    //Execute every possible task of the task pool;
+    void process_task_pool();
+
+    //Shift a task at the insertion index;
+    uint8_t shift(bool shift_enabled, task_t *task, uint8_t insert_index);
+
+    //The primary task pool;
+    task_t task_pool[TASK_POOL_SIZE];
+
+    //The number of tasks stored in the task pool;
+    uint8_t pool_task_nb = 0;
+
+    //The number of tasks stored in the task pool;
+    uint8_t pool_task_spaces = TASK_POOL_SIZE;
+
+    //Temp var for tests//TODO REMOVE
+    bool flood_enabled;
+
+}
 
 
 //------------------------------------------------- Init ---------------------------------------------------
@@ -65,31 +76,10 @@ void TaskScheduler::initialise_data() {
     pool_task_nb = 0;
     pool_task_spaces = TASK_POOL_SIZE;
 
-    //Reset sequences lock counters;
-    memset(sequences_locked, 0, NB_TASK_SEQUENCES * sizeof(bool));
-
-    //Clear tasks sequences;
-    for (uint8_t sequence = 0; sequence < NB_TASK_SEQUENCES; sequence++) {
-        task_sequences[sequence]->clear();
-    }
-
     //Reset the flood flag; //TODO REMOVE;
     flood_enabled = false;
 
 }
-
-
-//--------------------------------------------------Type Verification---------------------------------------------------
-
-bool TaskScheduler::check_sequence_type(uint8_t type) {
-
-    if (type == 255) {
-        return true;
-    } else {
-        return (type < NB_TASK_SEQUENCES);
-    }
-}
-
 
 //---------------------------------------------------Task Management----------------------------------------------------
 
@@ -108,9 +98,7 @@ bool TaskScheduler::check_sequence_type(uint8_t type) {
 
 bool TaskScheduler::schedule_task(task_t *task) {
 
-    uint8_t type = task->type;
-
-    if ((type == 255) && (pool_task_spaces)) {
+    if (pool_task_spaces) {
 
         //copy the task;
         task_pool[pool_task_nb] = *task;
@@ -126,45 +114,10 @@ bool TaskScheduler::schedule_task(task_t *task) {
 
     }
 
-
-    //If the task's type corresponds to an existing sequence:
-    if ((type < NB_TASK_SEQUENCES) && (task_sequences[type]->available_spaces())) {
-
-        //First, cache the address of the current task sequence;
-        Queue<task_t> *queue = task_sequences[type];
-
-        //Initialise a flag;
-        bool queue_flag = false;
-
-        //Copy the task in the sequence;
-        queue->insert_object(task, &queue_flag);
-
-
-        //Copy the task in the sequence;
-        *task_sequences[type]->get_insertion_address(&queue_flag) = *task;
-
-        //Integriy check
-        if (!queue_flag) {
-
-            //Log
-            std_out("ERROR in Kernel::schedule_task : failed to copy the task in the queue.");
-
-            //Emergency stop
-            Kernel::emergency_stop();
-
-        } else {
-
-            //Succeed;
-            return true;
-
-        }
-
-
-    }
-
     //If the scheduling failed, automatically free arguments_p, to avoid memory leak;
     free(task->dynamic_args);
 
+    //TODO PROPER CONTAINERS
 
     //Fail;
     return false;
@@ -178,10 +131,9 @@ bool TaskScheduler::schedule_task(task_t *task) {
  *      - function : the function to parse;
  *      - dynamic_args : a void *, addressing the first byte of the content. Those may be dynamic or static.
  *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
- *      - type : the type of the task.
  */
 
-bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
+bool TaskScheduler::schedule_task(task_state_t (*f)(void *), void *args) {
 
     //Create a task to contain the provided data;
     task_t task = task_t();
@@ -191,9 +143,6 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
 
     //Set the argument_t pointer;
     task.dynamic_args = args;
-
-    //Set the type;
-    task.type = type;
 
     //Get the communication pipe that the task will use;
     task.log_pipe = Interaction::getCommunicationPipe();
@@ -208,107 +157,36 @@ bool TaskScheduler::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
  * nb_spaces : this function returns the number of nb_spaces available in the task pool.
  */
 
-const uint8_t TaskScheduler::available_spaces(uint8_t type) {
+const uint8_t TaskScheduler::available_spaces() {
 
-    if (type == 255) {
-
-        //If the type corresponds to the task pool : return the number of nb_spaces of the pool;
-        return pool_task_spaces;
-
-    } else {
-
-        //If the type is not allocated, return zero;
-        if (!check_sequence_type(type))
-            return 0;
-
-        //If the type corresponds to a sequence, return the number of nb_spaces in the concerned sequence;
-        return task_sequences[type]->available_spaces();
-
-    }
-}
-
-
-/*
- * lock_sequence : this function locks a specified sequence.
- */
-
-void TaskScheduler::lock_sequence(uint8_t type) {
-
-    //If the type is not allocated, do nothing;
-    if (!check_sequence_type(type))
-        return;
-
-    if (type != 255) {
-
-        //Set the lock of the concerned sequence;
-        sequences_locked[type] = true;
-
-    }
+    //return the number of nb_spaces of the pool;
+    return pool_task_spaces;
 
 }
 
 
 /*
- * is_sequence_locked : this function returns true if the specified sequence is locked, and false if not.
- */
-
-bool TaskScheduler::is_sequence_locked(uint8_t type) {
-
-    //If the type is not allocated, the queue is locked by default.
-    if (!check_sequence_type(type))
-        return true;
-
-    if (type == 255) {
-
-        return false;
-    }
-
-    return !sequences_locked[type];
-}
-
-
-/*
- * verify_schedulability : this function verifies than nb_tasks of type task_type can be scheduled.
+ * verify_schedulability : this function verifies than nb_tasks can be scheduled.
  *
  *  To do this, it verifies :
  *      - that the task sequence (or task pool for a 255-type task) is unlocked
  *      - that the concerned task container can effectively contain the required number of tasks.
  */
 
-bool TaskScheduler::verify_schedulability(uint8_t task_type, uint8_t nb_tasks) {
+bool TaskScheduler::verify_schedulability(uint8_t nb_tasks) {
 
-    std_out(string("NB TASK SEQUENCES ") + (uint8_t) NB_TASK_SEQUENCES);
 
-    //If the sequence is locked, fail, no more tasks of this type are schedulable;
-    if (TaskScheduler::is_sequence_locked(task_type)) {
-        return false;
-    } else {
+    //If the sequence (or the task pool, depending on the type) contains less than nb_tasks nb_spaces, fail;
+    return pool_task_spaces >= nb_tasks;
 
-        //If the sequence (or the task pool, depending on the type) contains less than nb_tasks nb_spaces, fail;
-        if (TaskScheduler::available_spaces(task_type) < nb_tasks) {
-            return false;
-        }
-    }
 
     //Succeed!
-    return true;
 
 }
 
 
-//---------------------------------------------------Task Execution----------------------------------------------------
+//---------------------------------------------------Task Flood----------------------------------------------------
 
-
-/*
- * iterate : this function executes all available tasks in the pool, while maintaining the order for non-non-sequential tasks;
- *
- *  It starts by reading interfaces, and filling the task pool with incoming tasks;
- *
- *  Then it executes every task it can (while maintaining the sequential constraints in non-non-sequential tasks) in the
- *      task pool;
- *
- *  Finally, it executes every task it can in task sequences.
- */
 
 uint8_t temp_xxx = 0;
 
@@ -316,14 +194,7 @@ uint8_t temp_yyy = 0;
 
 uint8_t temp_zzz = 0;
 
-void TaskScheduler::iterate() {
-
-    //Process non-sequential tasks in priority
-    process_task_pool();
-
-    //Process tasks sequences after
-    process_task_sequences();
-
+void TaskScheduler::flood() {
 
     //TODO REMOVE
     if (flood_enabled) {
@@ -368,6 +239,9 @@ void TaskScheduler::iterate() {
 
 }
 
+//---------------------------------------------------Task Execution----------------------------------------------------
+
+
 
 /*
  * clear : this function deletes all programmed tasks.
@@ -386,18 +260,6 @@ void TaskScheduler::clear() {
     //The number of tasks stored in the task pool;
     pool_task_spaces = TASK_POOL_SIZE;
 
-
-    //Clear all tasks sequences.
-
-    //For each task sequence :
-    for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
-
-        //Clear the sequence;
-        task_sequences[i]->clear();
-
-    }
-
-
 }
 
 /*
@@ -408,11 +270,6 @@ void TaskScheduler::clear() {
  */
 
 void TaskScheduler::process_task_pool() {
-
-    //Reset the first-task flags
-    for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
-        sequences_locked[i] = true;
-    }
 
     //Initialise an insertion index;
     uint8_t insert_index = 0;
@@ -468,111 +325,6 @@ uint8_t TaskScheduler::shift(boolean shift_enabled, task_t *task, uint8_t insert
 
 }
 
-
-/*
- * process_task_sequences : this function processes task sequences.
- *
- *  It executes one task for each sequence, until no tasks are executable anymore.
- */
-
-void TaskScheduler::process_task_sequences() {
-
-    //Declare an array of bool, that will enable the processing of the task queue they are indexed with.
-    bool process[NB_TASK_SEQUENCES];
-
-    //Fill array with true.
-    for (uint8_t i = 0; i < NB_TASK_SEQUENCES; i++) {
-        process[i] = true;
-    }
-
-    bool keep_processing = true;
-
-    while (keep_processing) {
-
-        keep_processing = false;
-
-        for (uint8_t sequence_id = 0; sequence_id < NB_TASK_SEQUENCES; sequence_id++) {
-
-            //Cache the task sequence;
-            Queue<task_t> *sequence = task_sequences[sequence_id];
-
-            //If the sequence can be processed :
-            if (process[sequence_id]) {
-
-                //If the sequence still has tasks to process
-                if (sequence->available_objects()) {
-
-                    //Declare a flag
-                    bool queue_flag = false;
-
-                    //Get the task to execute
-                    task_t *task = sequence->get_reading_address(&queue_flag);
-
-                    //Integrity check
-                    if (!queue_flag) {
-
-                        //Log
-                        std_out("ERROR in Kernel::process_task_sequences : "
-                                        "the reading element is not allocated.");
-
-                        //Emergency stop
-                        Kernel::emergency_stop();
-
-                        return;
-
-                    }
-
-                    //If the executed task must be reprogrammed
-                    if (!execute_task(task)) {
-
-                        //Disable this sequence's processing
-                        process[sequence_id] = false;
-
-
-                    } else {
-                        //If the task was processed :
-
-                        //Reset the flag
-                        queue_flag = false;
-
-                        //Go to the other task
-                        sequence->discard(&queue_flag);
-
-                        //Integrity check
-                        if (!queue_flag) {
-
-                            //Log
-                            std_out("ERROR in Kernel::process_task_sequences : "
-                                            "the discarded element was not allocated.");
-
-                            //Emergency stop
-                            Kernel::emergency_stop();
-
-                            return;
-
-                        }
-
-                        //Enable the next processing
-                        keep_processing = true;
-
-                    }
-
-                } else {
-
-                    //Disable this sequence's processing
-                    process[sequence_id] = false;
-
-                }
-
-            }
-
-        }
-
-    }
-
-}
-
-
 /*
  * execute_task : this function processes a task, and returns the result (it's a simple alias, for comprehensibility.)
  */
@@ -620,45 +372,3 @@ bool TaskScheduler::execute_task(task_t *task) {
     return false;
 
 }
-
-//----------------------------------------- Tasks queues creation ------------------------------------------
-
-/*
- * instantiate_task_queues : this function will instantiate task queues in the provided array.
- */
-Queue<task_t> **instantiate_task_queues(Queue<task_t> **ptr) {
-
-//task sequences definition
-#define TASK_SEQUENCE(i, size) ptr[i] = new Queue<task_t>(size);
-
-#include <Config/kernel_config.h>
-
-#undef TASK_SEQUENCE
-
-    return ptr;
-}
-
-
-//-----------------------------------------Static declarations and definitions------------------------------------------
-
-#define m TaskScheduler
-
-//task pool definition
-task_t t_tskpl[TASK_POOL_SIZE];
-task_t *const m::task_pool = t_tskpl;
-
-//The number of tasks stored in the task pool
-uint8_t m::pool_task_nb = 0;
-
-//The number of tasks stored in the task pool
-uint8_t m::pool_task_spaces = TASK_POOL_SIZE;
-
-//Sequences lock counters definition
-bool t_ftflg[NB_TASK_SEQUENCES]{false};
-bool *const m::sequences_locked = t_ftflg;
-
-//task sequences declaration
-Queue<task_t> *t_tsks[NB_TASK_SEQUENCES];
-Queue<task_t> **const m::task_sequences = instantiate_task_queues(t_tsks);
-
-bool m::flood_enabled = false;
