@@ -18,6 +18,7 @@
 
 */
 
+#include <Kernel/Scheduler/NewKernel/ThreadManager.h>
 #include "Kernel/Kernel.h"
 #include "core_cm4.h"
 #include "setjmp.h"
@@ -68,24 +69,37 @@
  *      - Determination of the thread's PSP;
  */
 
-void *stack0 = malloc(200);
-
-void *stack1 = malloc(200);
 
 
-typedef struct {
-    uint32_t pc;
-};
+void end_function() {
+    Serial.println("END FUNCTION REACHED");
+}
 
 
+void task_0(void *) {
 
-/*
- * preempt : this function will switch the context
- */
-void preempt() {
+    Serial.println("Task_1");
+    delay(1000);
+
+    task_data_t td;
+    td.function = task_0;
+    td.termination = end_function;
+    ThreadManager::addTask(td);
 
 }
 
+
+void task_1(void *) {
+
+    Serial.println("Task_1");
+    delay(1000);
+
+    task_data_t td;
+    td.function = task_1;
+    td.termination = end_function;
+    ThreadManager::addTask(td);
+
+}
 
 
 
@@ -93,70 +107,31 @@ int main() {
 
     Serial.begin(115200);
 
-    Serial.println("STACK0 : "+String((long)stack0));
+    //Initialise all threads;
+    ThreadManager::initialise_threads();
 
-    Serial.println("STACK1 : "+String((long)stack1));
+    task_data_t td0;
+    td0.function = task_0;
+    td0.termination = end_function;
+
+    //Add some tasks;
+    ThreadManager::addTask(td0);
 
 
-    while(true) {
+    task_data_t td1;
+    td1.function = task_1;
+    td1.termination = end_function;
 
-    }
+    //Add some tasks;
+    ThreadManager::addTask(td1);
+
+    //Run threads;
+    ThreadManager::start();
+
+    //Never reached;
+    while (true);
 
     //Kernel::start();
 
 }
-
-
-bool task_1_selected;
-
-void task_0() {
-
-}
-
-void f1() {
-
-    task_1_selected = true;
-
-    while(true) {
-
-        uint8_t i = 2;
-
-        while(i--) {
-
-            Serial.println("F_1_TICK");
-            delay(1000);
-
-        }
-
-        preempt();
-
-
-    }
-
-}
-
-void task_2() {
-
-
-    task_1_selected = false;
-
-    while(true) {
-
-        uint8_t i = 2;
-
-        while(i--) {
-
-            Serial.println("F_2_TICK");
-            delay(1000);
-
-        }
-
-        preempt();
-
-
-    }
-
-}
-
-
 

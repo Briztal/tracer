@@ -226,7 +226,7 @@ SERVO(2, servo3, 4, 0, 1)
  *  for example, and to control them in groups.
  *
  *  To configure you layer of abstraction, you may require some persistent parameters, that will be saved in the
- *      EEPROM.
+ *      Storage.
  *
  *  To create a persistent variable, you may use the following command :
  *
@@ -399,10 +399,10 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 #endif
 
-//###############################################EEPROM SETTINGS########################################################
+//###############################################Storage SETTINGS########################################################
 
 
-/* EEPROM custom data definition : for each variable you need to save in EEPROM, write_data one of the following lines
+/* Storage custom data definition : for each variable you need to save in Storage, write_data one of the following lines
  *
  * EEPROM_BOOL(name, default_value)
  * EEPROM_INT8(name, default_value)
@@ -411,7 +411,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
  * EEPROM_FLOAT(name, default_value)
  *
  * Each one of these functions will create a variable of the specified type with the name provided
- *  in the EPROMStorage class, that will be saved in EEPROM, and take the default value provided
+ *  in the EPROMStorage class, that will be saved in Storage, and take the default value provided
  */
 
 

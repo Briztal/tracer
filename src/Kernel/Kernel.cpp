@@ -313,7 +313,7 @@ void Kernel::initialise_data() {
     //Finally, solve the project;
     Project::initialise_data();
 
-    //Lock the EEPROMMap tree, and solve data across the code if a relevant profile is found in the EEPROM;
+    //Lock the EEPROMMap tree, and solve data across the code if a relevant profile is found in the Storage;
     EEPROMMap::lock_tree();
 
 

@@ -49,7 +49,7 @@ public:
 
 };
 
-//Now, we can define the EEPROM Tree type;
+//Now, we can define the Storage Tree type;
 typedef Tree<string, EEPROMData> EEPROMTree;
 
 
@@ -73,12 +73,12 @@ namespace EEPROMMap {
     void lock_tree();
     
 
-    //------------------------------------------- EEPROM Interaction ---------------------------------------------------
+    //------------------------------------------- Storage Interaction ---------------------------------------------------
     
-    //Save the data tree in the EEPROM;
+    //Save the data tree in the Storage;
     void save_eeprom_data();
 
-    //Read the data tree from the EEPROM;
+    //Read the data tree from the Storage;
     bool load_eeprom_data();
 
 

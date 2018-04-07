@@ -165,7 +165,7 @@ task_state_t TerminalPipe::test_action() {
 
 }
 
-//--------------------------------------------------------EEPROM--------------------------------------------------------
+//--------------------------------------------------------Storage--------------------------------------------------------
 
 task_state_t TerminalPipe::eeprom() {
 
@@ -239,7 +239,7 @@ task_state_t TerminalPipe::eeprom() {
     if (CHECK_ARGUMENT('r')) {
         //If the default profile must be reset
 
-        std_out("Reseting the EEPROM default profile.");
+        std_out("Reseting the Storage default profile.");
 
         //Cache the name;
         strncpy(cache_path, name, size);
@@ -249,13 +249,13 @@ task_state_t TerminalPipe::eeprom() {
 
     }
 
-    //Save the EEPROM if required;
+    //Save the Storage if required;
     if (CHECK_ARGUMENT('s')) {
 
         //Save;
         EEPROMMap::save_eeprom_data();
 
-        std_out("Data saved in the EEPROM;");
+        std_out("Data saved in the Storage;");
     }
 
     //Succeed

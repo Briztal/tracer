@@ -28,7 +28,7 @@
 
 
 /*
- * initialise_data : this function initialises data in a safe state, and registers PID in the EEPROM;
+ * initialise_data : this function initialises data in a safe state, and registers PID in the Storage;
  */
 
 void RegulationController::initialise_data() {

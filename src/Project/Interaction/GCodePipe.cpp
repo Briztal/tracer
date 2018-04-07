@@ -109,7 +109,7 @@ void GCodePipe::initialise_data() {
     language->addCommand("G31", temp_test);
     language->addCommand("G32", action);
 
-    //EEPROM
+    //Storage
     language->addCommand("G4", eeprom);
             
 }
@@ -138,7 +138,7 @@ task_state_t GCodePipe::action() {
 }
 
 
-//--------------------------------------------------------EEPROM--------------------------------------------------------
+//--------------------------------------------------------Storage--------------------------------------------------------
 
 task_state_t GCodePipe::eeprom() {
 
@@ -148,7 +148,7 @@ task_state_t GCodePipe::eeprom() {
     //If the default profile must be reset
     if (CHECK_ARGUMENT('R')) {
 
-        std_out("Reseting the EEPROM default profile.");
+        std_out("Reseting the Storage default profile.");
 
         //Reset
         //EEPROMStorage::set_default_profile();

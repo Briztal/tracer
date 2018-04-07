@@ -5,6 +5,8 @@
 
 #include "ThreadManager.h"
 
+#include "core_arm_cortex_m4f.h"
+
 #include <Kernel/Interaction/Interaction.h>
 
 
@@ -12,7 +14,7 @@
 
 const uint8_t NB_THREADS = (uint8_t) 0
 
-#define THREAD(i, ...) (+ (uint8_t 1)
+#define THREAD(i, ...) + ((uint8_t) 1)
 
 #include "threads_config.h"
 
@@ -33,21 +35,6 @@ const uint8_t NB_THREADS = (uint8_t) 0
  *      - a function to execute at the end;
  *
  */
-
-typedef struct {
-
-    //The task's function;
-    void (*function)(void *args);
-
-    //The function's arguments;
-    void *args;
-
-    //The termination function to execute after the task's function;
-    void (*termination)();
-
-} task_data_t;
-
-
 
 //The set of execution states;
 enum thread_state {
@@ -82,20 +69,11 @@ typedef struct {
 } thread_data_t;
 
 
-//TODO KERNEL SPECIFIC;
-//The stack pointer type;
-typedef uint32_t *stack_ptr_t;
-
-
-
 /*
  * Private variables and function for ThreadManager Library;
  */
 
 namespace ThreadManager {
-
-    //Threads initializer;
-    bool initialise_threads();
 
     //Thread initializer;
     bool initialise_thread(uint8_t i, uint32_t size, void (*function)(void));
@@ -103,22 +81,40 @@ namespace ThreadManager {
     //Threads main functions;
     void run(thread_data_t thread_data);
 
+    //Threads termination functions;
+    void termination_loop();
+
     //Threads contexts;
     thread_data_t threads_data[NB_THREADS];
 
     //The current task;
-    uint8_t current_task;
+    uint8_t current_thread = 0;
 
 
 #define THREAD(i, ...) void thread_function_##i() { run(threads_data[i]);}
 
-#include "threads_config.h"
+   #include "threads_config.h"
 
 #undef THREAD
 
 }
 
 
+void ThreadManager::addTask(task_data_t task) {
+
+    for (uint8_t i = 0; i < NB_THREADS; i++) {
+
+        if (threads_data[i].current_state == TERMINATED) {
+
+            threads_data[i].current_state = PENDING;
+
+            *threads_data[i].task = task;
+
+        }
+
+    }
+
+}
 
 /*
  * initialise_threads : this function will initialise all threads;
@@ -143,6 +139,11 @@ bool ThreadManager::initialise_threads() {
 
 }
 
+
+/*
+ * initialise_thread : this function initialises a single thread;
+ */
+
 bool ThreadManager::initialise_thread(uint8_t thread_id, uint32_t stack_size, void (*function)(void)) {
 
     //First, free the eventually allocated memory;
@@ -163,28 +164,42 @@ bool ThreadManager::initialise_thread(uint8_t thread_id, uint32_t stack_size, vo
     }
 
     //As stack is decreasing, we must set the stack pointer as the array's end;
-    stack_ptr_t sp = threads_data[thread_id].stack_pointer = (stack_ptr_t) stack_end + stack_size - 1;
+    stack_ptr_t sp = (stack_ptr_t) stack_end + stack_size - 1;
 
     //Set the thread's stack pointer to the allocated memory zone;
-    kernel_set_thread_stack_pointer(sp);
+    core_set_thread_stack_pointer(sp);
 
-    //Stack the current context. This way, at runtime, context unstack won't dequeue to unallocated space;
-    kernel_stack_thread_context();
+    //Initialise the stack;
+    core_init_stack(function, termination_loop);
 
-    //Get the address of the function;
-    void *function_pointer = (void*)function;
+    //Get the new stack pointer;
+    core_get_thread_stack_pointer(sp);
 
-    //TODO SET THE PROGRAM COUNTER OF THE PREVIOUS CONTEXT;
-    kernel_set_stacked_pc(function_pointer);
+    //Save the new stack pointer;
+    threads_data[thread_id].stack_pointer = sp;
 
 }
+
+
+/*
+ * trigger_context_switch : enables the context switching at next thread exit;
+ */
 
 inline void trigger_context_switch() {
 
-    NVIC_SET_PENDING(-2);
+    //Call the core function;
+    core_trigger_context_switch();
 
 }
 
+
+/*
+ * run : this function is the base function of a thread;
+ *
+ *  It verifies that it can execute a task, then executes it if so.
+ *
+ *  Finally, it executes its termination function, and re-iterate;
+ */
 
 void ThreadManager::run(thread_data_t thread_data) {
 
@@ -206,10 +221,10 @@ void ThreadManager::run(thread_data_t thread_data) {
             //Terminate the task;
             task_p->termination();
 
-            //Mark the task finished;
-            thread_data.current_state = TERMINATED;
-
         }
+
+        //Mark the thread inactive;
+        thread_data.current_state = TERMINATED;
 
         //Require a context switch, as the task is finished;
         trigger_context_switch();
@@ -220,24 +235,90 @@ void ThreadManager::run(thread_data_t thread_data) {
 
 
 /*
+ * termination_loop : does nothing but to wait;
+ */
+
+void ThreadManager::termination_loop() {
+    while (true);
+}
+
+
+/*
+ * start : requires the user mode, and starts the execution of the first thread;
+ */
+
+void ThreadManager::start() {
+
+    //Update the current thread;
+    current_thread = 0;
+
+    //Set the current stack pointer;
+    core_set_thread_stack_pointer(threads_data[0].stack_pointer);
+
+    //Require the user mode;
+    core_set_user_mode();
+
+    //Execute the first task;
+    thread_function_0();
+
+}
+
+
+/*
+ * set_current_task_sp : update the current task's stack pointer;
+ */
+
+void ThreadManager::set_current_task_sp(stack_ptr_t new_stack_pointer) {
+
+    //Simply copy the new stack pointer in the appropriate thread data;
+    threads_data[current_thread].stack_pointer = new_stack_pointer;
+
+}
+
+
+/*
+ * schedule : selects a new thread to run, and return its stack pointer;
+ */
+
+stack_ptr_t ThreadManager::schedule() {
+
+
+    //Basic round robin.
+    if (!current_thread)
+        current_thread = NB_THREADS;
+
+    current_thread--;
+
+    return threads_data[current_thread].stack_pointer;
+
+}
+
+
+/*
  * The context switcher;
  */
 
 void PendSV_Handler() {
 
-    //Save the current thread's stack pointer;
-    ThreadManager::set_current_task_sp(kernel_get_thread_stack_pointer());
-
     //Stack the context in the current process stack;
-    kernel_stack_thread_context();
+    core_stack_thread_context();
+
+    //Create a temp variable to contain the thread stack pointer;
+    stack_ptr_t thread_stack_pointer = 0;
+
+    //Get the stack pointer;
+    core_get_thread_stack_pointer(thread_stack_pointer)
+
+    //Save the current thread's stack pointer;
+    ThreadManager::set_current_task_sp(thread_stack_pointer);
 
     //Get the next working thread's stack pointer;
-    uint32_t stack_pointer = ThreadManager::switch_task();
+    stack_ptr_t stack_pointer = ThreadManager::schedule();
 
     //Set the appropriate context;
-    kernel_set_thread_stack_pointer(stack_pointer);
+    core_set_thread_stack_pointer(stack_pointer);
 
     //Unstack the context from the previous process stack
-    kernel_unstack_thread_context();
+    core_unstack_thread_context();
 
 }

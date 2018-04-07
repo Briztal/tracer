@@ -37,7 +37,7 @@ namespace EEPROMMap {
     EEPROMTree *data_tree = new EEPROMTree(string("root"), EEPROMData(), 0);;
 
 
-    //------------------------------------------- EEPROM Interaction ---------------------------------------------------
+    //------------------------------------------- Storage Interaction ---------------------------------------------------
 
     //Hash the data tree in the hash array;
     void hash_tree();
@@ -45,16 +45,16 @@ namespace EEPROMMap {
     //Hash a tree (recursive)
     void _hash_tree(EEPROMTree *tree, uint8_t *index_p);
 
-    //Verify that the hash in the hash array matches the one in the EEPROM;
+    //Verify that the hash in the hash array matches the one in the Storage;
     bool compare_hash();
 
-    //Write the hash in the EEPROM;
+    //Write the hash in the Storage;
     bool write_hash();
 
-    //Load a tree's data from the EEPROM;
+    //Load a tree's data from the Storage;
     bool _load_eeprom_data(EEPROMTree *tree, uint8_t *eeprom_index_p);
 
-    //Save a tree's data in the EEPROM;
+    //Save a tree's data in the Storage;
     void _save_eeprom_data(EEPROMTree *tree, uint8_t *eeprom_index_p);
 
 
@@ -220,7 +220,7 @@ void EEPROMMap::lock_tree() {
     //If the loading failed, save the current tree;
     if (!b) {
 
-        Serial.println("FAILED TO LOAD A RELEVANT PROFILE IN THE EEPROM. ");
+        Serial.println("FAILED TO LOAD A RELEVANT PROFILE IN THE Storage. ");
 
         save_eeprom_data();
     }
@@ -229,7 +229,7 @@ void EEPROMMap::lock_tree() {
 
 
 
-//------------------------------------------- EEPROM Interaction ---------------------------------------------------
+//------------------------------------------- Storage Interaction ---------------------------------------------------
 
 
 /*
@@ -326,7 +326,7 @@ void EEPROMMap::_hash_tree(EEPROMTree *tree, uint8_t *index_p) {
 
 
 /*
- * compare_hash : this function compares the hash present in the EEPROM, and the current hash;
+ * compare_hash : this function compares the hash present in the Storage, and the current hash;
  */
 
 bool EEPROMMap::compare_hash() {
@@ -334,7 +334,7 @@ bool EEPROMMap::compare_hash() {
     //For each byte of the hash
     for (uint8_t i = 0; i < EEPROM_HASH_SIZE; i++) {
 
-        //If the byte is different than the one in the EEPROM :
+        //If the byte is different than the one in the Storage :
         if (hash_array[i] != (uint8_t) EEPROM_read(i)) {
 
             //Fail
@@ -351,7 +351,7 @@ bool EEPROMMap::compare_hash() {
 
 
 /*
- * write_hash : this function compares the hash present in the EEPROM, and the current hash;
+ * write_hash : this function compares the hash present in the Storage, and the current hash;
  */
 
 bool EEPROMMap::write_hash() {
@@ -371,7 +371,7 @@ bool EEPROMMap::write_hash() {
 
 
 /*
- * read_tree : readall the data tree from the EEPROM;
+ * read_tree : readall the data tree from the Storage;
  */
 
 bool EEPROMMap::load_eeprom_data() {
@@ -387,7 +387,7 @@ bool EEPROMMap::load_eeprom_data() {
         return false;
     }
 
-    //If the hash in the EEPROM doesn't match the current one :
+    //If the hash in the Storage doesn't match the current one :
     if (!compare_hash()) {
 
         //Fail;
@@ -395,10 +395,10 @@ bool EEPROMMap::load_eeprom_data() {
 
     }
 
-    //Initialise the EEPROM Index;
+    //Initialise the Storage Index;
     uint8_t eeprom_index = EEPROM_HASH_SIZE;
 
-    //Save the data tree in the EEPROM;
+    //Save the data tree in the Storage;
     return _load_eeprom_data(data_tree, &eeprom_index);
 
 }
@@ -468,7 +468,7 @@ bool EEPROMMap::_load_eeprom_data(EEPROMTree *tree, uint8_t *eeprom_index_p) {
 
 
 /*
- * write_tree : save the data tree in the EEPROM;
+ * write_tree : save the data tree in the Storage;
  */
 
 void EEPROMMap::save_eeprom_data() {
@@ -484,10 +484,10 @@ void EEPROMMap::save_eeprom_data() {
         return;
     }
 
-    //If the hash in the EEPROM doesn't match the current one :
+    //If the hash in the Storage doesn't match the current one :
     if (!compare_hash()) {
 
-        //Write the hash in the EEPROM;
+        //Write the hash in the Storage;
         write_hash();
 
     }
@@ -495,7 +495,7 @@ void EEPROMMap::save_eeprom_data() {
     //Initialise the eeprom index to the end of the hash;
     uint8_t eeprom_index = EEPROM_HASH_SIZE;
 
-    //Save all the data in the EEPROM;
+    //Save all the data in the Storage;
     _save_eeprom_data(data_tree, &eeprom_index);
 
 }
@@ -621,7 +621,7 @@ void EEPROMMap::reset(const char *id_string) {
 
 void EEPROMMap::reset_tree(EEPROMTree *tree) {
 
-    //Cache the EEPROM Data pointer;
+    //Cache the Storage Data pointer;
     EEPROMData *data = tree->getNode();
 
     //Reset the variable;

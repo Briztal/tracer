@@ -406,7 +406,7 @@ private:
 
 public:
 
-    //This function does not store its data. It is stored in the EEPROM.
+    //This function does not store its data. It is stored in the Storage.
 
     //Set and get hotbed temperatures
     static task_state_t set_coord_interface_state(coord_interface_state_t);

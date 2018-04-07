@@ -31,7 +31,7 @@
 
 
 /*
- * initialise_data : this function initialises data in a safe state, and registers PID in the EEPROM;
+ * initialise_data : this function initialises data in a safe state, and registers PID in the Storage;
  */
 
 void TemperatureController::initialise_data() {
@@ -52,7 +52,7 @@ void TemperatureController::initialise_data() {
     //Cache the path;
     char path[10];
 
-    //EEPROM init;
+    //Storage init;
 
     memset(path, 0, 10 * sizeof(char)), strncpy(path, "pid", 10);
     pid_hotends[0].EEPROMRegister(path, "hotend_0");

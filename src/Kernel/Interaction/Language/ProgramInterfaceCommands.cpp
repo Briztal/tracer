@@ -27,11 +27,11 @@
 #include "ProgramInterfaceCommands.h"
 #include <StepperControl/MachineInterface.h>
 #include <Actions/ContinuousActions.h>
-#include <EEPROM/EEPROMStorage.h>
+#include <Storage/EEPROMStorage.h>
 #include <interface.h>
 #include <StepperControl/Machine.h>
-#include <EEPROM/_eeprom_storage_data.h>
-#include <EEPROM/EEPROMInterface.h>
+#include <Storage/_eeprom_storage_data.h>
+#include <Storage/EEPROMInterface.h>
 
 
 //#define EEPROM_SUBCANAL 1
@@ -287,7 +287,7 @@ task_state_t ProgramInterfaceCommands::EEPROM_system_canal(char *data, uint8_t s
             return complete;
 
         case 1 : //Read case
-            f = 0;//EEPROM::read_integer(data, size);
+            f = 0;//Storage::read_integer(data, size);
             TI::prepare_EEPROM_packet();
             TI::add_char_out(1);
             TI::add_float_out(f);
