@@ -215,14 +215,14 @@ void EventManager::trigger_event(const char *event_name) {
 void EventManager::process_events() {
 
     //While spaces are available in the scheduler and events are triggered :
-    while(TaskScheduler::available_spaces(255) && triggered_events->getSize()) {
+    while(TaskScheduler::available_spaces() && triggered_events->getSize()) {
 
         //For every triggered event index (vector is modified during iteration, so size not const) :
         for (uint8_t triggered_event_index = 0;
              triggered_event_index < triggered_events->getSize(); triggered_event_index++) {
 
             //If no more spaces are available in the scheduler, complete;
-            if (!TaskScheduler::available_spaces(255))
+            if (!TaskScheduler::available_spaces())
                 return;
 
             //Get the system event;

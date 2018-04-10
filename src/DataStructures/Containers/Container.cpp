@@ -2,6 +2,11 @@
 // Created by root on 3/25/18.
 //
 
+
+
+#ifndef TRACER_CONTAINER_CPP
+#define TRACER_CONTAINER_CPP
+
 #include <DataStructures/string/string.h>
 #include "Container.h"
 
@@ -68,11 +73,11 @@ Container<T>::~Container() {
  */
 
 template<typename T>
-void Container<T>::operator=(Container<T> &src) {
+Container<T> &Container<T>::operator=(const Container<T> &src) {
 
     //If we try to assign ourselves, nothing to do;
     if (&src == this)
-        return;
+        return *this;
 
     //Resize to the given array's size;
     if (resize(src.size)) {
@@ -82,6 +87,9 @@ void Container<T>::operator=(Container<T> &src) {
 
     }
 
+    //Return a pointer to us;
+    return *this;
+
 }
 
 /*
@@ -89,13 +97,30 @@ void Container<T>::operator=(Container<T> &src) {
  */
 
 template<typename T>
-void Container<T>::operator=(Container<T> &&src) noexcept {
+Container<T> &Container<T>::operator=(Container<T> &&src) noexcept {
 
     //Move the size and the data pointer;
     size = src.size;
     src.size = 0;
     data = src.data;
     src.data = 0;
+
+    //Return a pointer to us;
+    return *this;
+
+
+}
+
+
+//--------------------------- Getters ---------------------------
+
+/*
+ * getSize : returns the size of the container;
+ */
+template<typename T>
+uint8_t Container<T>::getSize() {
+
+    return size;
 
 }
 
@@ -115,7 +140,7 @@ bool Container<T>::add(uint8_t index, T element) {
         return false;
 
     //If the resizing completed :
-    if (resize(index + (uint8_t) 1)) {
+    if (resize(size + (uint8_t) 1)) {
 
         //Cache the shift index;
         T *shift_ptr = data + size - (uint8_t)2;
@@ -157,6 +182,7 @@ void Container<T>::add(T element) {
 
 }
 
+
 /*
  * set : sets the
  */
@@ -182,16 +208,89 @@ T Container<T>::set(uint8_t index, T element) {
 
 
 /*
- * Remove : this function will //TODO COMMENT SHIFT AND REDACT;
+ * Remove : this function will copy the element at the given index, shift all next elements of one index
+ *  in order to remove it, and return it;
  */
+
 template<typename T>
-T Container<T>::remove(uint8_t index) {
+void Container<T>::remove(uint8_t index) {
 
+    //If the index is invalid, fail;
+    if (index >= size) {
+        return;
+    }
 
+    //Copy the element;
+    T element = data[index];
+
+    //Declare shift pointers;
+    T *shift_to = data + index, *shift_from = shift_to + 1;
+
+    //For every element from the next to the last;
+    for(uint8_t shift_ctr = size - index - (uint8_t) 1; shift_ctr--;) {
+
+        //Shift the element;
+        *(shift_to++) = *(shift_from++);
+
+    }
+
+    //Resize the array;
+    resize(size - (uint8_t)1);
+
+    //Return the removed value;
+    return;
 
 }
+
+
+/*
+ * clear : empties the array;
+ */
 
 template<typename T>
 void Container<T>::clear() {
 
+    //Free the entire array;
+    free(data);
+
+    //Reset data;
+    data = nullptr;
+
+    //Reset the size;
+    size = 0;
+
 }
+
+
+//--------------------------- Resize ---------------------------
+
+
+/*
+ * Resize : this function will try to reallocate the array to the required size;
+ */
+
+template<typename T>
+bool Container<T>::resize(uint8_t new_size) {
+
+    //Try to reallocate the array;
+    void *ptr = realloc(data, new_size * sizeof(T));
+
+    //If the reallocation failed, fail;
+    if (ptr != nullptr) {
+        return false;
+    }
+
+    //If the reallocation succeeded :
+
+    //Update the size;
+    size = new_size;
+
+    //Update the array;
+    data = (T*) ptr;
+
+    //Complete;
+    return true;
+
+}
+
+#endif //TRACER_CONTAINER_CPP

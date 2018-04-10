@@ -40,6 +40,7 @@ namespace TaskSequencer {
     //First tasks flags;
     bool insertion_disabled[NB_TASK_SEQUENCES]{false};
 
+    bool schedule_task(task_t *task);
 }
 
 
@@ -62,7 +63,7 @@ void TaskSequencer::initialise_data() {
 
 #define TASK_SEQUENCE(size) task_sequences[sequences_id++] = new Queue<task_t>(size);
 
-#include "Config/kernel_config.h"
+//TODO #include "Config/kernel_config.h"
 
 #undef TASK_SEQUENCE
 
@@ -96,6 +97,7 @@ void TaskSequencer::process() {
         //Cache the task sequence;
         Queue<task_t> *sequence = task_sequences[sequence_id];
 
+        /* TODO
         //If the sequence can be processed :
         if (process[sequence_id]) {
 
@@ -121,6 +123,7 @@ void TaskSequencer::process() {
                     return;
 
                 }
+
 
                 //If the executed task must be reprogrammed
                 if (!execute_task(task)) {
@@ -164,7 +167,8 @@ void TaskSequencer::process() {
 
             }
 
-        }
+        }*/
+
 
     }
 
@@ -184,8 +188,9 @@ void TaskSequencer::process() {
  *  If the task cannot be scheduled, (no space available, or bad sequence type), arguments_p are freed automatically.
  */
 
-bool TaskScheduler::schedule_task(task_t *task) {
+bool TaskSequencer::schedule_task(task_t *task) {
 
+    /*
     if ((type == 255) && (pool_task_spaces)) {
 
         //copy the task;
@@ -244,6 +249,8 @@ bool TaskScheduler::schedule_task(task_t *task) {
 
     //Fail;
     return false;
+
+     */
 }
 
 
@@ -259,6 +266,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
 
 bool TaskSequencer::schedule_task(uint8_t type, task_state_t (*f)(void *), void *args) {
 
+    /*
     //Create a task to contain the provided data;
     task_t task = task_t();
 
@@ -276,6 +284,7 @@ bool TaskSequencer::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
 
     //Call the scheduling function and return whether the task was successfully scheduled;
     return schedule_task(&task);
+     */
 
 }
 
@@ -284,6 +293,7 @@ bool TaskSequencer::schedule_task(uint8_t type, task_state_t (*f)(void *), void 
  * nb_spaces : this function returns the number of nb_spaces available in the task pool.
  */
 
+/*
 const uint8_t TaskSequencer::available_spaces(uint8_t type) {
 
     if (type == 255) {
@@ -303,3 +313,4 @@ const uint8_t TaskSequencer::available_spaces(uint8_t type) {
     }
 }
 
+ */

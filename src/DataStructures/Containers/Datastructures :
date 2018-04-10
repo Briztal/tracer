@@ -1,19 +1,15 @@
 
 All structures have dynamic capabilities;
 
-Layer 0 : Resizeable Container;
-    - Resizable array of consecutive values of a particular typename;
-    - MUSTN'T BE USED TO CONTAIN objects; Objects are stored by pointer, or in an array of fixed size;
-    - DOESN'T take instantiation or deletion in charge;
-
-
-Layer 1 : type Container : resizeable container of primitive types;
+Layer 0 : Resizeable Container : resizeable container of primitive types;
 
     - Can add / set / remove elements by index
     - Can access elements anywhere;
+    - No size limitation;
+    - reallocation management;
 
 
-Layer 2 : Object Container : resizeable container of object pointers ;
+Layer 1 : Object Container : resizeable container of object pointers ;
 
     - Container of object pointers;
     - Takes creation and deletion in charge;

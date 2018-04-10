@@ -379,10 +379,10 @@ void TaskProgrammer::_schedule_tasks(uint32_t current_time) {
         //The task is not null;
 
         //If the task is schedulable and if a space is available in the scheduler;
-        if ((task->isSchedulable) && (TaskScheduler::available_spaces(255))) {
+        if ((task->isSchedulable) && (TaskScheduler::available_spaces())) {
 
             //Schedule the task;
-            TaskScheduler::schedule_task(255, task->task, nullptr);
+            TaskScheduler::schedule_task(task->task, nullptr);
 
             //Determine the new execution time;
             task->nextExecutionTime = current_time + task->period;

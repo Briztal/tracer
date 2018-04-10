@@ -5,22 +5,12 @@
 #ifndef TRACER_THREADMANAGER_H
 #define TRACER_THREADMANAGER_H
 
-#include "Arduino.h"
 
 #include "core_arm_cortex_m4f.h"
 
-typedef struct {
+#include "TaskData.h"
 
-    //The task's function;
-    void (*function)(void *args);
 
-    //The function's arguments;
-    void *args;
-
-    //The termination function to execute after the task's function;
-    void (*termination)();
-
-} task_data_t;
 
 /*
  * The thread manager manages threads.
@@ -33,21 +23,22 @@ typedef struct {
 
 namespace ThreadManager {
 
-    //Threads initializer;
-    bool initialise_threads();
-
-    //TODO TASK MANAGER SPECIFIC
+    //TODO SCHEDULER SPECIFIC
     //Task add;
-    void addTask(task_data_t task);
+    void addTask(TaskData &task);
+
+    //Select a new task and return its stack pointer;
+    stack_ptr_t schedule();
+
+
+    //Thread creator;
+    bool createThread(uint32_t stack_size);
 
     //Start threads execution;
     void start();
 
     //Set the current task's stack pointer;
     void set_current_task_sp(stack_ptr_t new_stack_pointer);
-
-    //Select a new task and return its stack pointer;
-    stack_ptr_t schedule();
 
 };
 

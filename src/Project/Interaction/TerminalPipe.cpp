@@ -34,7 +34,7 @@
 #include <ControlSystem/DataConversion/OrientationConversion/Orientation2DToRotation.h>
 #include <ControlSystem/DataConversion/VectorConversion/AnglesToVector3D.h>
 
-#include "Kernel/EEPROM/EEPROMMap.h"
+#include "Kernel/Storage/EEPROMMap.h"
 
 #include "hardware_language_abstraction.h"
 
@@ -146,7 +146,7 @@ void TerminalPipe::initialise_data() {
 
 task_state_t TerminalPipe::test_flood() {
 
-    TaskScheduler::flood_enabled = true;
+    //TODO TaskScheduler::flood_enabled = true;
 
     std_out("EXIT");
 
@@ -280,9 +280,9 @@ task_state_t TerminalPipe::eeprom() {
 #define FAIL_IF_CANT_SCHEDULE(nb)\
     {\
         /*If the task is not executable :*/\
-        if (!TaskScheduler::verify_schedulability(0, nb)) {\
+        if (!TaskScheduler::verify_schedulability(nb)) {\
             /*Lock the sequence 0*/\
-            LOCK_SEQUENCE(0)\
+            /*TDOO LOCK_SEQUENCE(0)\*/\
             /*Schedule a re-execution*/\
             return reprogram;\
         }\

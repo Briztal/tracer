@@ -24,7 +24,7 @@ public:
     //Move constructor;
     Container(Container<T> &&src) noexcept ;
 
-    //Destructor;
+    virtual //Destructor;
     ~Container();
 
 
@@ -33,11 +33,19 @@ public:
 public:
 
     //Copy assignment operator;
-    void operator=(Container<T> &src);
+    Container<T>& operator=(const Container<T> &src);
 
     //Move assignment operator;
-    void operator=(Container<T> &&src);
+    Container<T>& operator=(Container<T> &&src) noexcept;
 
+
+
+    //--------------------------- Getters ---------------------------
+
+public:
+
+    //Get the size of the container;
+    uint8_t getSize();
 
     //--------------------------- Operations ---------------------------
 
@@ -50,27 +58,27 @@ public:
     void add(T element);
 
     //Update an element of the array;
-    void set(uint8_t index, T element);
+    T set(uint8_t index, T element);
 
     //Remove an element of the array;
-    void remove(uint8_t index);
+    virtual void remove(uint8_t index);
 
     //Clear the content of the array;
-    void clear();
+    virtual void clear();
 
 
     //--------------------------- Resize ---------------------------
 
 
-private:
+protected:
 
     //Resize to the given size;
-    bool resize(uint8_t new_size);
+    virtual bool resize(uint8_t new_size);
 
 
     //--------------------------- Data ---------------------------
 
-private:
+protected :
 
     //The array of data;
     T* data;

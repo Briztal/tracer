@@ -50,10 +50,6 @@
 
 #include <DataStructures/string/string.h>
 
-//#define String SUUS
-
-
-
 //------------------------------------------------HARDWARE_FLAGS--------------------------------------------------------
 
 
@@ -175,6 +171,7 @@ static inline static void delay_ms(uint16_t time_ms){
 #define set_int_period_2(period) SET_INTERRUPT_PERIOD(period, 2)
 #define set_int_period_3(period) SET_INTERRUPT_PERIOD(period, 3)
 
+//Define the reload converters for all 4 timers;
 //Define the reload converters for all 4 timers;
 #define period_to_reload_0(period) UNIT_TO_TICS(period, 0)
 #define period_to_reload_1(period) UNIT_TO_TICS(period, 1)

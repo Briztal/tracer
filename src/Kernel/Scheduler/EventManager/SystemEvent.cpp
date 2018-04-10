@@ -152,7 +152,7 @@ bool SystemEvent::scheduleNextTask() {
     }
 
     //If the task scheduler has no more spaces left :
-    if (!TaskScheduler::available_spaces(255)) {
+    if (!TaskScheduler::available_spaces()) {
 
         //Log;
         std_out("Error in SystemEvent::scheduleNextTask : function called with no space left in the TaskScheduler;");
@@ -163,7 +163,7 @@ bool SystemEvent::scheduleNextTask() {
     }
 
     //Schedule a task of type 255, executing our function;
-    TaskScheduler::schedule_task(255, tasks->getElement(task_to_schedule), nullptr);
+    TaskScheduler::schedule_task(tasks->getElement(task_to_schedule), nullptr);
 
     //Increment the task to execute;
     task_to_schedule++;

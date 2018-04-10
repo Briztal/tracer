@@ -18,7 +18,7 @@
 
 */
 
-#include <Kernel/EEPROM/EEPROMMap.h>
+#include <Kernel/Storage/EEPROMMap.h>
 #include "PID.h"
 
 /*

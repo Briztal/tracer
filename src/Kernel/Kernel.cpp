@@ -31,7 +31,7 @@
 #include <Actuators/Actuators.h>
 #include <StepperControl/StepperController.h>
 #include <Config/_ConfigChecker.h>
-#include <Kernel/EEPROM/EEPROMMap.h>
+#include <Kernel/Storage/EEPROMMap.h>
 #include <Project/Project.h>
 #include <Kernel/Scheduler/TaskProgrammer/TaskProgrammer.h>
 #include "Kernel.h"
@@ -346,7 +346,7 @@ void Kernel::run() {
         Interaction::read_communication_pipes();
 
         //Execute all scheduled tasks;
-        TaskScheduler::iterate();
+        //TaskScheduler::iterate();
 
         //Process events;
         EventManager::process_events();

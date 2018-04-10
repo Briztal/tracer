@@ -217,9 +217,9 @@ task_state_t GCodePipe::eeprom() {
 #define FAIL_IF_CANT_SCHEDULE(nb)\
     {\
         /*If the task is not executable :*/\
-        if (!TaskScheduler::verify_schedulability(0, nb)) {\
+        if (!TaskScheduler::verify_schedulability(nb)) {\
             /*Lock the sequence 0*/\
-            LOCK_SEQUENCE(0)\
+            /*LOCK_SEQUENCE(0)\*/\
             /*Schedule a re-execution*/\
             return reprogram;\
         }\

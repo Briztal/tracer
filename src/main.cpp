@@ -18,10 +18,15 @@
 
 */
 
-#include <Kernel/Scheduler/NewKernel/ThreadManager.h>
+/*
 #include "Kernel/Kernel.h"
-#include "core_cm4.h"
 #include "setjmp.h"
+
+ */
+
+#include "Arduino.h"
+
+#include <Kernel/Scheduler/NewKernel/ThreadManager.h>
 
 
 /*
@@ -78,13 +83,17 @@ void end_function() {
 
 void task_0(void *) {
 
-    Serial.println("Task_1");
+    Serial.println("Task_0");
     delay(1000);
 
-    task_data_t td;
+    TaskData td;
     td.function = task_0;
     td.termination = end_function;
+    Serial.println("Adding");
+
     ThreadManager::addTask(td);
+    Serial.println("Added");
+
 
 }
 
@@ -94,10 +103,11 @@ void task_1(void *) {
     Serial.println("Task_1");
     delay(1000);
 
-    task_data_t td;
+    TaskData td;
     td.function = task_1;
     td.termination = end_function;
     ThreadManager::addTask(td);
+    Serial.println("Added");
 
 }
 
@@ -107,10 +117,15 @@ int main() {
 
     Serial.begin(115200);
 
+    delay(2000);
+    Serial.println("SUUUUUS");
+
     //Initialise all threads;
     ThreadManager::initialise_threads();
 
-    task_data_t td0;
+    Serial.println("Initialised");
+
+    TaskData td0;
     td0.function = task_0;
     td0.termination = end_function;
 
@@ -118,12 +133,17 @@ int main() {
     ThreadManager::addTask(td0);
 
 
-    task_data_t td1;
+    Serial.println("Added");
+
+
+    TaskData td1;
     td1.function = task_1;
     td1.termination = end_function;
 
     //Add some tasks;
     ThreadManager::addTask(td1);
+
+    Serial.println("Ready");
 
     //Run threads;
     ThreadManager::start();

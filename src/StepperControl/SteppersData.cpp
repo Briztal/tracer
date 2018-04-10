@@ -18,7 +18,7 @@
 
 */
 
-#include <Kernel/EEPROM/EEPROMMap.h>
+#include <Kernel/Storage/EEPROMMap.h>
 #include <Kernel/Interaction/Interaction.h>
 #include "SteppersData.h"
 

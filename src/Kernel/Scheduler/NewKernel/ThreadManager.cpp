@@ -3,11 +3,13 @@
 //
 
 
+#include <DataStructures/Containers/ObjectContainer.h>
 #include "ThreadManager.h"
 
-#include "core_arm_cortex_m4f.h"
+#include "Arduino.h"
 
-#include <Kernel/Interaction/Interaction.h>
+#include "core_arm_cortex_m4f.h"
+#include "ThreadData.h"
 
 
 //First, let's determine the number of threads;
@@ -23,50 +25,7 @@ const uint8_t NB_THREADS = (uint8_t) 0
 #undef THREAD
 
 
-/*
- * The task data structure;
- *
- *  A task will contain :
- *
- *      - a function to execute;
- *
- *      - a pointer to arguments (that will be casted by the function at execution time);
- *
- *      - a function to execute at the end;
- *
- */
 
-//The set of execution states;
-enum thread_state {
-
-    //Execution required;
-            PENDING,
-
-    //Execution in progress;
-            ACTIVE,
-
-    //Execution done;
-            TERMINATED
-
-};
-
-
-/*
- * The thread data structure. Contains the current task in execution and the current state of execution;
- */
-
-typedef struct {
-
-    //The current task in execution;
-    task_data_t *task = nullptr;
-
-    //The current execution state;
-    thread_state current_state = TERMINATED;
-
-    //The maximum value of the thread's stack;
-    uint32_t *stack_pointer;
-
-} thread_data_t;
 
 
 /*
@@ -75,66 +34,51 @@ typedef struct {
 
 namespace ThreadManager {
 
-    //Thread initializer;
-    bool initialise_thread(uint8_t i, uint32_t size, void (*function)(void));
+    //Start a thread on the fly;
+    void threadStart();
 
     //Threads main functions;
-    void run(thread_data_t thread_data);
+    void run(uint8_t);
 
     //Threads termination functions;
     void termination_loop();
 
     //Threads contexts;
-    thread_data_t threads_data[NB_THREADS];
+    static ObjectContainer<ThreadData> threads;
 
     //The current task;
-    uint8_t current_thread = 0;
+    static volatile uint8_t current_thread = 0;
 
-
-#define THREAD(i, ...) void thread_function_##i() { run(threads_data[i]);}
-
-   #include "threads_config.h"
-
-#undef THREAD
-
+    void resetThread(ThreadData &thread_data, uint8_t thread_id);
 }
 
 
-void ThreadManager::addTask(task_data_t task) {
+void ThreadManager::addTask(TaskData &task) {
 
-    for (uint8_t i = 0; i < NB_THREADS; i++) {
+    Serial.println("ADDTASK ");
+
+    const uint8_t nb_threads = threads.getSize();
+
+    for (uint8_t i = 0; i < nb_threads; i++) {
 
         if (threads_data[i].current_state == TERMINATED) {
 
-            threads_data[i].current_state = PENDING;
+            threads_data[i].current_state = (volatile thread_state)PENDING;
 
-            *threads_data[i].task = task;
+            threads_data[i].task = new TaskData(task);
+
+            //Serial.println("PTR : "+String((uint32_t) threads_data[i].task));
+
+            //Serial.println(String((long)task.function)+" "+String((long)&threads_data[i].task->function));
+
+            Serial.println("SAVED IN THREAD "+String(i));
+
+            return;
 
         }
 
+
     }
-
-}
-
-/*
- * initialise_threads : this function will initialise all threads;
- */
-
-bool ThreadManager::initialise_threads() {
-
-
-    //Initialise all threads and return true if all happened correctly;
-    return true
-
-        //Add every initialisation;
-#define THREAD(i, size) && initialise_thread(i, size, thread_function_##i)
-
-#include "threads_config.h"
-
-        //End the expression;
-;
-
-#undef THREAD
 
 
 }
@@ -144,39 +88,49 @@ bool ThreadManager::initialise_threads() {
  * initialise_thread : this function initialises a single thread;
  */
 
-bool ThreadManager::initialise_thread(uint8_t thread_id, uint32_t stack_size, void (*function)(void)) {
+bool ThreadManager::createThread(uint32_t stack_size) {
 
-    //First, free the eventually allocated memory;
-    free(threads_data[thread_id].stack_pointer);
+    //First, create a heap copy of the thread data and add it to the threads array;
+    if (threads.add(ThreadData()));//TODO ADD THREAD
 
-    //Then, allocate a new stack of the required size;
-    void *stack_end = malloc(stack_size);
+    //Then, allocate a memory zone of the required size;
+    void *ptr = malloc(stack_size * sizeof(stack_element_t));
 
-    //If the allocation failed :
-    if (stack_end == nullptr) {
-
-        //Log;
-        std_out("Error in ThreadManager::initialise_threads : the stack allocation failed;");
-
-        //Fail;
-        return false;
-
+    //If the reallocation failed :
+    if (ptr == nullptr) {
+        Serial.println("Error during thread initialisation");
     }
 
-    //As stack is decreasing, we must set the stack pointer as the array's end;
-    stack_ptr_t sp = (stack_ptr_t) stack_end + stack_size - 1;
+    //If the malloc completed :
+
+    //Initialise the thread's data;
+
+    //Complete;
+    return true;
+
+}
+
+
+/*
+ * resetThread : resets the thread to its initial stack pointer, and initialises the context to its beginning;
+ */
+
+void ThreadManager::resetThread(ThreadData &thread_data, uint8_t thread_id) {
+
+    //Declare a stack pointer;
+    stack_ptr_t sp = thread_data.stack_begin;
 
     //Set the thread's stack pointer to the allocated memory zone;
     core_set_thread_stack_pointer(sp);
 
     //Initialise the stack;
-    core_init_stack(function, termination_loop);
+    core_init_stack(threadStart, termination_loop, thread_id);
 
     //Get the new stack pointer;
     core_get_thread_stack_pointer(sp);
 
     //Save the new stack pointer;
-    threads_data[thread_id].stack_pointer = sp;
+    thread_data.stack_pointer = sp;
 
 }
 
@@ -194,6 +148,28 @@ inline void trigger_context_switch() {
 
 
 /*
+ * threadStart : this function is called when a thread is started on the fly, without proper function call, due to
+ *  a context switch;
+ *
+ *  As the thread ID has been saved in the register at the thread initialisation, the first step is to get it back;
+ *
+ *  Then, we can call properly the run function;
+ */
+
+void ThreadManager::threadStart() {
+
+    //Declare the thread identifier;
+    volatile stack_element_t thread_id = 0;
+
+    //Define the thread identifier;
+    core_get_thread_id(thread_id);
+
+    //Run the thread;
+    run((uint8_t)thread_id);
+
+}
+
+/*
  * run : this function is the base function of a thread;
  *
  *  It verifies that it can execute a task, then executes it if so.
@@ -201,19 +177,21 @@ inline void trigger_context_switch() {
  *  Finally, it executes its termination function, and re-iterate;
  */
 
-void ThreadManager::run(thread_data_t thread_data) {
+void ThreadManager::run(volatile uint8_t thread_id) {
 
     //Infinite loop;
     while (true) {
 
+        Serial.println("Thread "+String((uint32_t)thread_id) +" "+ String(threads_data[thread_id].current_state == PENDING));
+
         //If the task must be executed :
-        if (thread_data.current_state == PENDING) {
+        if (threads_data[thread_id].current_state == PENDING) {
 
             //Mark the thread Active;
-            thread_data.current_state = ACTIVE;
+            threads_data[thread_id].current_state = (volatile thread_state)ACTIVE;
 
             //Cache the task;
-            task_data_t *task_p = thread_data.task;
+            volatile TaskData *task_p = threads_data[thread_id].task;
 
             //Execute the task;
             task_p->function(task_p->args);
@@ -224,10 +202,16 @@ void ThreadManager::run(thread_data_t thread_data) {
         }
 
         //Mark the thread inactive;
-        thread_data.current_state = TERMINATED;
+        threads_data[thread_id].current_state = (volatile thread_state)TERMINATED;
+
+        Serial.println("TRIGGERIG d");
+
+        delay(500);
 
         //Require a context switch, as the task is finished;
         trigger_context_switch();
+
+        Serial.println("TRIGGERED");
 
     }
 
@@ -243,6 +227,49 @@ void ThreadManager::termination_loop() {
 }
 
 
+
+/*
+ * The context switcher;
+ */
+
+
+void pendSV_Handler() {
+
+    Serial.println("PENDSV");
+
+    //Stack the context in the current process stack;
+    core_stack_thread_context();
+
+    uint32_t sp = 0;
+    core_get_stack_pointer(sp);
+
+    Serial.println("SP : "+String(sp));
+
+    //Create a temp variable to contain the thread stack pointer;
+    stack_ptr_t thread_stack_pointer = 0;
+
+    //Get the stack pointer;
+    core_get_thread_stack_pointer(thread_stack_pointer)
+
+    Serial.println("PSP : "+String((uint32_t)thread_stack_pointer));
+
+    //Save the current thread's stack pointer;
+    ThreadManager::set_current_task_sp(thread_stack_pointer);
+
+    //Get the next working thread's stack pointer;
+    stack_ptr_t stack_pointer = ThreadManager::schedule();
+
+    Serial.println("nPSP : "+String((uint32_t)stack_pointer));
+
+    //Set the appropriate context;
+    core_set_thread_stack_pointer(stack_pointer);
+
+    //Unstack the context from the previous process stack
+    core_unstack_thread_context();
+
+}
+
+
 /*
  * start : requires the user mode, and starts the execution of the first thread;
  */
@@ -252,14 +279,19 @@ void ThreadManager::start() {
     //Update the current thread;
     current_thread = 0;
 
+    //TODO PROPER CORE INIT;
+    _VectorsRam[14] = &pendSV_Handler;
+    NVIC_SET_PRIORITY(-2, 240);
+
     //Set the current stack pointer;
-    core_set_thread_stack_pointer(threads_data[0].stack_pointer);
+    core_set_thread_stack_pointer(threads_data[0].stack_pointer + 8);
 
     //Require the user mode;
-    core_set_user_mode();
+    core_set_thread_mode();
 
     //Execute the first task;
-    thread_function_0();
+    run(0);
+
 
 }
 
@@ -276,49 +308,22 @@ void ThreadManager::set_current_task_sp(stack_ptr_t new_stack_pointer) {
 }
 
 
+
 /*
  * schedule : selects a new thread to run, and return its stack pointer;
  */
 
 stack_ptr_t ThreadManager::schedule() {
 
+    current_thread++;
 
     //Basic round robin.
-    if (!current_thread)
-        current_thread = NB_THREADS;
+    if (current_thread == NB_THREADS)
+        current_thread = 0;
 
-    current_thread--;
+    Serial.println("Current Thread : "+String(current_thread));
 
-    return threads_data[current_thread].stack_pointer;
-
-}
-
-
-/*
- * The context switcher;
- */
-
-void PendSV_Handler() {
-
-    //Stack the context in the current process stack;
-    core_stack_thread_context();
-
-    //Create a temp variable to contain the thread stack pointer;
-    stack_ptr_t thread_stack_pointer = 0;
-
-    //Get the stack pointer;
-    core_get_thread_stack_pointer(thread_stack_pointer)
-
-    //Save the current thread's stack pointer;
-    ThreadManager::set_current_task_sp(thread_stack_pointer);
-
-    //Get the next working thread's stack pointer;
-    stack_ptr_t stack_pointer = ThreadManager::schedule();
-
-    //Set the appropriate context;
-    core_set_thread_stack_pointer(stack_pointer);
-
-    //Unstack the context from the previous process stack
-    core_unstack_thread_context();
+    return (stack_ptr_t) (threads_data[current_thread].stack_pointer);
 
 }
+

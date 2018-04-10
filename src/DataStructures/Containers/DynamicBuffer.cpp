@@ -370,7 +370,7 @@ bool DynamicBuffer<T>::resize(uint8_t new_size) {
     }
 
     //Then, reallocate the task array, to contain the required amount of elements;
-    void *new_array = realloc(elements, new_size);
+    void *new_array = realloc(elements, new_size * sizeof(T));
 
     //If the reallocation failed :
     if (!new_array && new_size) {
