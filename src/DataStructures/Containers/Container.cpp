@@ -8,6 +8,7 @@
 #define TRACER_CONTAINER_CPP
 
 #include <DataStructures/string/string.h>
+#include <Arduino.h>
 #include "Container.h"
 
 
@@ -124,6 +125,23 @@ uint8_t Container<T>::getSize() {
 
 }
 
+/*
+ * getPointer : get a pointer to the required element;
+ */
+template<typename T>
+T *Container<T>::getPointer(uint8_t element_index) {
+
+    //If the index is valid, return a pointer to the first element;
+    if (element_index >= size) {
+        return data;
+    }
+
+    //If the index is correct, complete;
+    return data + element_index;
+
+}
+
+
 //--------------------------- Operations ---------------------------
 
 /*
@@ -157,7 +175,7 @@ bool Container<T>::add(uint8_t index, T element) {
         }
 
         //Save the element;
-        element[index] = element;
+        data[index] = element;
 
         //Complete;
         return true;
@@ -178,7 +196,7 @@ template<typename T>
 void Container<T>::add(T element) {
 
     //Add the element at the end of the array;
-    add(size - (uint8_t)1, element);
+    add(size, element);
 
 }
 
@@ -219,9 +237,6 @@ void Container<T>::remove(uint8_t index) {
     if (index >= size) {
         return;
     }
-
-    //Copy the element;
-    T element = data[index];
 
     //Declare shift pointers;
     T *shift_to = data + index, *shift_from = shift_to + 1;
@@ -276,7 +291,7 @@ bool Container<T>::resize(uint8_t new_size) {
     void *ptr = realloc(data, new_size * sizeof(T));
 
     //If the reallocation failed, fail;
-    if (ptr != nullptr) {
+    if (ptr == nullptr) {
         return false;
     }
 
@@ -292,5 +307,6 @@ bool Container<T>::resize(uint8_t new_size) {
     return true;
 
 }
+
 
 #endif //TRACER_CONTAINER_CPP

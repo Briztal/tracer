@@ -121,7 +121,11 @@ int main() {
     Serial.println("SUUUUUS");
 
     //Initialise all threads;
-    ThreadManager::initialise_threads();
+    ThreadManager::createThread(1000);
+    ThreadManager::createThread(1000);
+    ThreadManager::createThread(1000);
+    ThreadManager::createThread(1000);
+    ThreadManager::createThread(1000);
 
     Serial.println("Initialised");
 

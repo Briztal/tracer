@@ -26,41 +26,22 @@ enum thread_state {
 };
 
 
-class ThreadData {
-
-public:
-
-    //Constructor;
-    ThreadData() :
-            task(nullptr),
-            current_state(TERMINATED),
-            stack_pointer(nullptr),
-            stack_begin(nullptr),
-            stack_end(nullptr) {};
-
-    //Copy constructor : disabled;
-    ThreadData(uint32_t stack_size);
-
-    //Move constructor : disabled;
-    ThreadData(ThreadData &&src) noexcept : ThreadData(){};
-
-
-public:
+struct ThreadData {
 
     //The current task in execution;
-    TaskData *task;
+    TaskData *task = nullptr;
+
+    //The current stack pointer;
+    stack_ptr_t stack_pointer = nullptr;
+
+    //The beginning of the stack;
+    stack_ptr_t stack_begin = nullptr;
+
+    //The end of the stack;
+    stack_ptr_t stack_end = nullptr;
 
     //The current execution state;
     thread_state current_state = TERMINATED;
-
-    //The current stack pointer;
-    stack_ptr_t stack_pointer;
-
-    //The beginning of the stack;
-    stack_ptr_t stack_begin;
-
-    //The end of the stack;
-    stack_ptr_t stack_end;
 
 };
 

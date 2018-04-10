@@ -31,6 +31,8 @@ namespace ThreadManager {
     stack_ptr_t schedule();
 
 
+    //---------------------------- Public functions ----------------------------
+
     //Thread creator;
     bool createThread(uint32_t stack_size);
 

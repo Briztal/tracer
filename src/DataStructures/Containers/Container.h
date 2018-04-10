@@ -47,6 +47,10 @@ public:
     //Get the size of the container;
     uint8_t getSize();
 
+    //Get a pointer to an element;
+    T* getPointer(uint8_t element_index);
+
+
     //--------------------------- Operations ---------------------------
 
 public:
@@ -89,5 +93,6 @@ protected :
 
 };
 
+#include "Container.cpp"
 
 #endif //TRACER_CONTAINER_H
