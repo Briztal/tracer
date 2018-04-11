@@ -121,7 +121,7 @@ public:
     const float *getLine(const uint8_t line_index) const;
 
 
-    //Copy the content of src in our data array;
+    //Copy the data of src in our data array;
     void setTo(const Matrix &src);
 
     //Subtract the given matrix to our data array;

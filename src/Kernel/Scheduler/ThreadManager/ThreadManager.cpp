@@ -7,9 +7,7 @@
 
 #include "ThreadManager.h"
 
-#include "Arduino.h"
-
-#include "core_arm_cortex_m4f.h"
+#include "Kernel/Scheduler/core_arm_cortex_m4f.h"
 
 #include "ThreadData.h"
 

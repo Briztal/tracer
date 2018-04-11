@@ -292,7 +292,7 @@ void Kernel::initialise_data() {
     EventManager::initialise_data();
 
     //Initialise the task programmer;
-    TaskProgrammer::initialise_data();
+    TaskProgrammer::reset();
 
     //Initialise actions;
     Actuators::initialise_data();

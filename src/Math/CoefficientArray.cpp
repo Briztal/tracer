@@ -89,7 +89,7 @@ void CoefficientArray::setCoefficient(uint8_t index, float new_value) {
 
 
 /*
- * setCoefficients : copy the content of [coefficients] into our array;
+ * setCoefficients : copy the data of [coefficients] into our array;
  */
 
 void CoefficientArray::setCoefficients(const float *coefficients, uint8_t size) {
@@ -179,7 +179,7 @@ void CoefficientArray::multiply(float factor) {
 
 
 /*
- * toString : create a string that displays the content of the arrat;
+ * toString : create a string that displays the data of the arrat;
  */
 
 tstring CoefficientArray::toString() {

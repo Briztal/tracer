@@ -69,7 +69,7 @@ Matrix::Matrix() : height(0), width(0), data_array(nullptr) {
 Matrix::Matrix(uint8_t height, uint8_t width, bool initialise) :
         height(height), width(width), data_array(new float[height * width]) {
 
-    //If the content of the matrix must be initialised :
+    //If the data of the matrix must be initialised :
     if (initialise) {
 
         //Initialise the whole matrix to zero;
@@ -156,7 +156,7 @@ Matrix *Matrix::subMatrix(const uint8_t target_height, const uint8_t target_widt
     //First, create a new matrix in the heap;
     Matrix *new_matrix = new Matrix(target_height, target_width);
 
-    //Then, we will copy the respective content of the matrix.
+    //Then, we will copy the respective data of the matrix.
 
     //For each line;
     for (uint8_t line_index = 0; line_index < target_height; line_index++) {
@@ -445,7 +445,7 @@ void Matrix::resetLine(const uint8_t line_index) {
 
 
 /*
- * setTo : this function will copy the content of src into our instance;
+ * setTo : this function will copy the data of src into our instance;
  */
 
 void Matrix::setTo(const Matrix &src) {

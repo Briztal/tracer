@@ -6,9 +6,9 @@
 #define TRACER_THREADMANAGER_H
 
 
-#include "core_arm_cortex_m4f.h"
+#include "Kernel/Scheduler/core_arm_cortex_m4f.h"
 
-#include "TaskData.h"
+#include "Kernel/Scheduler/TaskData.h"
 
 
 

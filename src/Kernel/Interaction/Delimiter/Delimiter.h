@@ -23,7 +23,7 @@
 #define TRACER_PROTOCOL_H
 
 #include <DataStructures/string/tstring.h>
-#include <DataStructures/Containers/Buffer.h>
+#include <DataStructures/Containers/Array.h>
 
 
 class Delimiter {
@@ -72,7 +72,7 @@ public:
 protected :
 
     //The buffer that will contain the received data;
-    Buffer<char> receptionBuffer;
+    Array<char> receptionBuffer;
 
     //The parsing flag. Set when received data can be parsed;
     bool messageDecoded = false;

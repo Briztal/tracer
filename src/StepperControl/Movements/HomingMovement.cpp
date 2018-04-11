@@ -75,7 +75,7 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
     //Update the number of axis to reset, with the cardinal of the signature;
     nb_axis = cardinal(reset);
 
-    //Copy the entire content of the endstops indices array;
+    //Copy the entire data of the endstops indices array;
     memcpy(endstops_indices, endstops, nb_axis * sizeof(uint8_t));
 
     //Initialise the step period;

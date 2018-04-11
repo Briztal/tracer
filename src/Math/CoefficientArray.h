@@ -79,7 +79,7 @@ public:
     //Multiply all coefficients by the given factor
     void multiply(float factor);
 
-    //Create a string displaying the content of the array;
+    //Create a string displaying the data of the array;
     tstring toString();
 
 };

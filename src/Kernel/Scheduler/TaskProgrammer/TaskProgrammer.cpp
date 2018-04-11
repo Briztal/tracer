@@ -20,62 +20,57 @@
 
 
 #include <Kernel/Interaction/Interaction.h>
+#include <Kernel/Scheduler/Systick.h>
+#include <DataStructures/Containers/ObjectContainer.h>
 
 #include "TaskProgrammer.h"
 
 
+namespace TaskProgrammer {
+
+    //----------------------------------- Builders -----------------------------------
+
+    //Program a task;
+    void _program_task(task_function_t task, uint32_t offset, uint32_t period, uint32_t nb_schedulings);
+
+
+    //----------------------------------- Execution -----------------------------------
+
+    //Enable all tasks that can be scheduled;
+    void check_executability();
+
+
+    //----------------------------------- Timeline reset -----------------------------------
+
+    //Update all tasks durations according to the new timeline;
+    void reset_timeline(uint32_t diff);
+
+
+    //----------------------------------- Fields -----------------------------------
+
+    //Programmed tasks;
+    ObjectContainer<ProgrammedTask> programmedTasks(MAX_PROGRAMMED_TASKS);
+
+    //Next time that we must check for a schedulable task; At init, a check must be made;
+    uint32_t next_check_time = 0;
+
+}
+
+
 //----------------------------------- Initialisation -----------------------------------
 
-/*
- * intialise_hardware : this function will initialise properly the seconds counting environment;
- */
-
-void TaskProgrammer::intialise_hardware() {
-
-    //Clean the hardware;
-    clean_taskprog_interrupt();
-
-    //Reset the seconds counter;
-    seconds = 0;
-
-    //Setup the timer interruption to occur at 1 hertz and to call count_seconds;
-    setup_taskprog_interrupt(count_seconds, 1);
-
-}
-
 
 /*
- * initialise_data : this function will set all data in a safe state;
+ * reset : this function will set all data in a safe state;
  */
 
-void TaskProgrammer::initialise_data() {
-
-    //Reset the seconds counter;
-    seconds = 0;
+void TaskProgrammer::reset() {
 
     //Reset all programmed tasks;
-    programmed_tasks->clear();
-
-    //Program a check at runtime;
-    next_check_time = 0;
-
-    //Program a scheduling at runtime;
-    schedulable_tasks = true;
+    programmedTasks.clear();
 
 }
 
-
-//----------------------------------- Seconds counting -----------------------------------
-
-/*
- * count_seconds : this function increments the number of seconds ellapsed since last reset;
- */
-
-void TaskProgrammer::count_seconds() {
-
-    seconds++;
-
-}
 
 //----------------------------------- Builders -----------------------------------
 
@@ -83,7 +78,7 @@ void TaskProgrammer::count_seconds() {
  * Program a one shot task in [offset] seconds;
  */
 
-void TaskProgrammer::program_punctual_task(task_pointer_t task, uint32_t offset) {
+void TaskProgrammer::program_punctual_task(task_function_t task, uint32_t offset) {
 
     //Program the single shot task;
     _program_task(task, offset, offset, 1);
@@ -94,7 +89,7 @@ void TaskProgrammer::program_punctual_task(task_pointer_t task, uint32_t offset)
  * program_repetitive_task : this function programs a repetitive task;
  */
 
-void TaskProgrammer::program_repetitive_task(task_pointer_t task, uint32_t offset, uint32_t period,
+void TaskProgrammer::program_repetitive_task(task_function_t task, uint32_t offset, uint32_t period,
                                              uint32_t nb_schedulings) {
 
     //If the number of schedulings is zero :
@@ -118,7 +113,7 @@ void TaskProgrammer::program_repetitive_task(task_pointer_t task, uint32_t offse
  * program_repetitive_task : programs a repetitive task with an offset equal to its period;
  */
 
-void TaskProgrammer::program_repetitive_task(task_pointer_t task, uint32_t period, uint32_t nb_schedulings) {
+void TaskProgrammer::program_repetitive_task(task_function_t task, uint32_t period, uint32_t nb_schedulings) {
 
     //Program the task;
     program_repetitive_task(task, period, period, nb_schedulings);
@@ -130,7 +125,7 @@ void TaskProgrammer::program_repetitive_task(task_pointer_t task, uint32_t perio
  * program_infinite_task : programs an infinite task;
  */
 
-void TaskProgrammer::program_infinite_task(task_pointer_t task, uint32_t offset, uint32_t period) {
+void TaskProgrammer::program_infinite_task(task_function_t task, uint32_t offset, uint32_t period) {
 
     //Program the task;
     _program_task(task, offset, period, 0);
@@ -142,7 +137,7 @@ void TaskProgrammer::program_infinite_task(task_pointer_t task, uint32_t offset,
  * program_infinite_task : programs an infinite task that has its offset equal to its period;
  */
 
-void TaskProgrammer::program_infinite_task(task_pointer_t task, uint32_t period) {
+void TaskProgrammer::program_infinite_task(task_function_t task, uint32_t period) {
 
     //Program the task;
     program_infinite_task(task, period, period);
@@ -154,7 +149,7 @@ void TaskProgrammer::program_infinite_task(task_pointer_t task, uint32_t period)
  * _program_task : programs a task with the given set of parameters;
  */
 
-void TaskProgrammer::_program_task(task_pointer_t task, uint32_t offset, uint32_t period, uint32_t nb_schedulings) {
+void TaskProgrammer::_program_task(task_function_t task, uint32_t offset, uint32_t period, uint32_t nb_schedulings) {
 
     //If the task is null :
     if (task == nullptr) {
@@ -178,45 +173,41 @@ void TaskProgrammer::_program_task(task_pointer_t task, uint32_t offset, uint32_
 
     }
 
-    //The task is clear;
+    //Create and add the task to the programmed tasks;
+    programmedTasks.add(ProgrammedTask(task, offset, period, nb_schedulings));
 
-    uint32_t first_time = seconds + offset;
+    //Get the pointer to the task in the container :
+    ProgrammedTask *programmedTask = programmedTasks.get(programmedTasks.getSize() - (uint8_t) 1);
 
-    //Create the task;
-    ProgrammedTask *programmedTask = new ProgrammedTask(task, first_time, period, nb_schedulings);
-
-    //Add the task to the programmed tasks;
-    programmed_tasks->add(programmedTask);
+    //Cache the next execution time of the new task;
+    const uint32_t next = programmedTask->nextExecutionTime;
 
     //Eventually modify the check time;
-    if (first_time < next_check_time) next_check_time = first_time;
+    if (next < next_check_time) next_check_time = next;
 
 }
 
 
 /*
- * un_program_task : remove any programmed taks that matches the given function;
+ * deprogram_task : remove any programmed task that matches the given function;
  */
 
-void TaskProgrammer::un_program_task(task_pointer_t function) {
-
-    //A flag, set if a task has been effectively removed;
-    bool removed = false;
+void TaskProgrammer::deprogram_task(task_function_t function) {
 
     //For each task :
-    for (uint8_t task_index = 0; task_index < programmed_tasks->getSize(); task_index++) {
+    for (uint8_t task_index = 0; task_index < programmedTasks.getSize(); task_index++) {
 
         //Cache the task;
-        ProgrammedTask *task = programmed_tasks->getElement(task_index);
+        ProgrammedTask *task = programmedTasks.get(task_index);
 
         //If the task is null :
         if (task == nullptr) {
 
             //Log;
-            std_out("Error in TaskProgrammer::check_schedulability : a task pointer points to null;");
+            std_out("Error in TaskProgrammer::check_executability : a task pointer points to null;");
 
             //Remove the task;
-            programmed_tasks->remove(task_index);
+            programmedTasks.remove(task_index);
 
             //Decrement the task, in order to re-iterate on the next element;
             task_index--;
@@ -229,24 +220,18 @@ void TaskProgrammer::un_program_task(task_pointer_t function) {
         //The task is not null;
 
         //If we found a match :
-        if (task->task == function) {
+        if (task->function == function) {
 
             //Remove the task;
-            programmed_tasks->remove(task_index);
+            programmedTasks.remove(task_index);
 
             //Decrement the task, in order to re-iterate on the next element;
             task_index--;
 
-            //Set the removed flag;
-            removed = true;
 
         }
 
     }
-
-
-    //If a task was removed, update the next check time;
-    if (removed) get_next_check_time();
 
 }
 
@@ -254,220 +239,37 @@ void TaskProgrammer::un_program_task(task_pointer_t function) {
 //----------------------------------- Execution -----------------------------------
 
 /*
- * process_tasks : this function will mark all schedulable tasks, and try to schedule all schedulable tasks;
+ * check_executability : this function will compare each task's scheduling time to the current time, and mark
+ *
+ *  them as executable if the current time is greater;
  */
 
-void TaskProgrammer::process_tasks() {
+void TaskProgrammer::check_executability() {
 
     //Cache the current time;
-    uint32_t current_time = seconds;
+    uint32_t current_time = Systick::milliseconds();
 
-    //If tasks are to schedule now, and couldn't be scheduled at check time :
-    if (schedulable_tasks) {
-
-        //Schedule as many schedulable tasks as possible;
-        _schedule_tasks(current_time);
-
-    }
-
-    //If we didn't reach the next check time yet :
-    if (current_time < next_check_time) {
-
-        //Reprogram;
+    //If the next check time is not passed, nothing to do;
+    if (current_time < next_check_time)
         return;
-
-    }
-
-    check_schedulability(current_time);
-
-    //If tasks have just been marked schedulable :
-    if (schedulable_tasks) {
-
-        //Schedule as many schedulable tasks as possible;
-        _schedule_tasks(current_time);
-
-    }
-
-}
-
-
-/*
- * check_schedulability : this function will compare each task's scheduling time to the current time, and mark
- *
- *  them as schedulable if the current time is greater;
- */
-
-void TaskProgrammer::check_schedulability(uint32_t current_time) {
-
-    //For each task :
-    for (uint8_t task_index = 0; task_index < programmed_tasks->getSize(); task_index++) {
-
-        //Cache the task;
-        ProgrammedTask *task = programmed_tasks->getElement(task_index);
-
-        //If the task is null :
-        if (task == nullptr) {
-
-            //Log;
-            std_out("Error in TaskProgrammer::check_schedulability : a task pointer points to null;");
-
-            //Remove the task;
-            programmed_tasks->remove(task_index);
-
-            //Decrement the task, in order to re-iterate on the next element;
-            task_index--;
-
-            //Re-iterate
-            continue;
-
-        }
-
-        //The task is not null;
-
-        //If the task can already be scheduled, no work needed;
-        if (task->isSchedulable)
-            continue;
-
-        //If the current time is superior to the task's scheduling time :
-        if (current_time > task->nextExecutionTime) {
-
-            //Mask the task as schedulable;
-            task->isSchedulable = true;
-
-        }
-
-    }
-}
-
-
-/*
- * _schedule_tasks : this function will :
- *
- *  - attempt to execute all schedulable tasks;
- *
- *  - determine the next execution time;
- */
-
-void TaskProgrammer::_schedule_tasks(uint32_t current_time) {
-
-    //A flag, set if a task has been scheduled;
-    bool scheduled = false;
-
-    //For each task :
-    for (uint8_t task_index = 0; task_index < programmed_tasks->getSize(); task_index++) {
-
-        //Cache the task;
-        ProgrammedTask *task = programmed_tasks->getElement(task_index);
-
-        //If the task is null :
-        if (task == nullptr) {
-
-            //Log;
-            std_out("Error in TaskProgrammer::check_schedulability : a task pointer points to null;");
-
-            //Remove the task;
-            programmed_tasks->remove(task_index);
-
-            //Decrement the task, in order to re-iterate on the next element;
-            task_index--;
-
-            //Re-iterate
-            continue;
-
-        }
-
-        //The task is not null;
-
-        //If the task is schedulable and if a space is available in the scheduler;
-        if ((task->isSchedulable) && (TaskScheduler::available_spaces())) {
-
-            //Schedule the task;
-            TaskScheduler::schedule_task(task->task, nullptr);
-
-            //Determine the new execution time;
-            task->nextExecutionTime = current_time + task->period;
-
-            //Mark the task as scheduled;
-            task->isSchedulable = false;
-
-            //Cache the remaining schedulings;
-            uint32_t remaining_schedulings = task->remainingSchedulings;
-
-            std_out(string("Remaining schedulings : ") + remaining_schedulings);
-
-            //Set the scheduled flag;
-            scheduled = true;
-
-            //If the task is not infinite :
-            if (remaining_schedulings) {
-
-                //Decrement the number of schedulings;
-                remaining_schedulings--;
-
-                //If all schedulings have been done :
-                if (!remaining_schedulings) {
-
-                    //Remove the task;
-                    programmed_tasks->remove(task_index);
-
-                    //Decrement the task, in order to re-iterate on the next element;
-                    task_index--;
-
-                    //Re-iterate
-                    continue;
-
-                }
-
-                //If not, update the remaining number of schedulings;
-                task->remainingSchedulings = remaining_schedulings;
-
-            }
-
-        }
-
-    }
-
-
-    //If tasks have been scheduled :
-    if (scheduled) {
-
-        //Update the next check time;
-        get_next_check_time();
-
-    }
-
-}
-
-void TaskProgrammer::get_next_check_time() {
-
-
-    //if no tasks are programmed :
-    if (!programmed_tasks->getSize()) {
-
-        //Disable the checking;
-        next_check_time = 0;
-
-        //Return;
-
-    }
 
     //Declare the next time;
     uint32_t next_time = 0;
 
     //For each task :
-    for (uint8_t task_index = 0; task_index < programmed_tasks->getSize(); task_index++) {
+    for (uint8_t task_index = programmedTasks.getSize(); task_index --;) {
 
         //Cache the task;
-        ProgrammedTask *task = programmed_tasks->getElement(task_index);
+        ProgrammedTask *task = programmedTasks.get(task_index);
 
         //If the task is null :
         if (task == nullptr) {
 
             //Log;
-            std_out("Error in TaskProgrammer::check_schedulability : a task pointer points to null;");
+            std_out("Error in TaskProgrammer::check_executability : a task pointer points to null;");
 
             //Remove the task;
-            programmed_tasks->remove(task_index);
+            programmedTasks.remove(task_index);
 
             //Decrement the task, in order to re-iterate on the next element;
             task_index--;
@@ -477,10 +279,20 @@ void TaskProgrammer::get_next_check_time() {
 
         }
 
-        //The task is not null;
 
         //Cache the local scheduling time;
         uint32_t task_time = task->nextExecutionTime;
+
+        //If the current time is superior to the task's scheduling time :
+        if (current_time > task_time) {
+
+            //Mask the task as executable;
+            task->executionFlag = true;
+
+            //update the task's period;
+            task->nextExecutionTime = (task_time += task->period);
+
+        }
 
         //If the next time is null or greater than the task's scheduling time :
         if ((!next_time) || (task_time < next_time)) {
@@ -497,21 +309,52 @@ void TaskProgrammer::get_next_check_time() {
 
 }
 
+//----------------------------------- Timeline reset -----------------------------------
 
+/*
+ * reset_timeline : update all tasks execution time according to the new timeline;
+ */
 
-//----------------------------------------- Static declarations - definitions ------------------------------------------
+void TaskProgrammer::reset_timeline(uint32_t diff) {
 
+    //For each task :
+    for (uint8_t task_index = programmedTasks.getSize(); task_index --;) {
 
-//Programmed tasks;
-DynamicPointerBuffer<ProgrammedTask> *TaskProgrammer::programmed_tasks = new DynamicPointerBuffer<ProgrammedTask>(
-        MAX_PROGRAMMED_TASKS);
+        //Cache the task;
+        ProgrammedTask *task = programmedTasks.get(task_index);
 
+        //If the task is null :
+        if (task == nullptr) {
 
-//Next time that a task can be scheduled;
-uint32_t TaskProgrammer::next_check_time = 0;
+            //Log;
+            std_out("Error in TaskProgrammer::check_executability : a task pointer points to null;");
 
-//A flag, set if some tasks can currently be executed;
-bool TaskProgrammer::schedulable_tasks = true;
+            //Remove the task;
+            programmedTasks.remove(task_index);
 
-//The seconds counter;
-volatile uint32_t TaskProgrammer::seconds = 0;
+            //Decrement the task, in order to re-iterate on the next element;
+            task_index--;
+
+            //Re-iterate
+            continue;
+
+        }
+
+        if (task->nextExecutionTime < diff) {
+
+            //Minor the execution time;
+            task->nextExecutionTime = 0;
+
+        } else {
+
+            //Subtract the difference;
+            task->nextExecutionTime -= diff;
+
+        }
+
+    }
+
+    //Plan an executability check;
+    next_check_time = 0;
+
+}

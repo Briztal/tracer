@@ -51,7 +51,7 @@ void KinematicsCore1::initialise_data() {
     memset(current_hl_position, 0, NB_STEPPERS * sizeof(float));
 
     //Initialise the physics manager;
-    K1Physics::initialise_data();
+    K1Physics::reset();
 
 }
 

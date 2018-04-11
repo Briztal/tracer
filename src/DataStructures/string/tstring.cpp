@@ -75,7 +75,7 @@ tstring::~tstring() {
 
 void tstring::clear() {
 
-    //Clear the content;
+    //Clear the data;
     DynamicPointerBuffer::clear();
 
     //Delete the data;
@@ -153,7 +153,7 @@ tstring &tstring::operator=(tstring &&src) {
 
 
 /*
- * Swap : this function will swap content of the two containers;
+ * Swap : this function will swap data of the two containers;
  */
 
 void tstring::swap(tstring &a, tstring &b) {
@@ -176,7 +176,7 @@ void tstring::swap(tstring &a, tstring &b) {
 
 
 /*
- * Concatenation : this operator takes an lvalue, whose content must be copied and added to the vector;
+ * Concatenation : this operator takes an lvalue, whose data must be copied and added to the vector;
  */
 
 tstring &tstring::operator+=(const string &src) {
@@ -197,7 +197,7 @@ tstring &tstring::operator+=(const string &src) {
 
 
 /*
- * Concatenation : this operator takes an rvalue, whose content can be swapped to a string added to the vector;
+ * Concatenation : this operator takes an rvalue, whose data can be swapped to a string added to the vector;
  */
 
 tstring &tstring::operator+=(string &&src) {

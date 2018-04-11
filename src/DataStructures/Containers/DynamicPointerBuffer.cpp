@@ -128,7 +128,7 @@ DynamicPointerBuffer<T> &DynamicPointerBuffer<T>::operator=(DynamicPointerBuffer
 
 
 /*
- * Swap : this function will swap content of the two containers;
+ * Swap : this function will swap data of the two containers;
  */
 
 template<typename T>
@@ -325,7 +325,7 @@ bool DynamicPointerBuffer<T>::rightConcatenation(DynamicPointerBuffer<T> &&src) 
 
     }
 
-    //Nullify src's content;
+    //Nullify src's data;
     src.elements = nullptr;
     src.size = 0;
 
@@ -382,7 +382,7 @@ bool DynamicPointerBuffer<T>::leftConcatenation(DynamicPointerBuffer<T> &&src) {
 
     }
 
-    //Nullify src's content;
+    //Nullify src's data;
     src.elements = nullptr;
     src.size = 0;
 

@@ -93,7 +93,7 @@ namespace EEPROMMap {
     //Reset a particular child;
     void reset(const char *id_string);
 
-    //Print the content of a particular child;
+    //Print the data of a particular child;
     void print_tree(const char *id_string);
     
 

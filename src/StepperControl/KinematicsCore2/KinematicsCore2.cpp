@@ -34,7 +34,7 @@
 //------------------------------------------- Initialisation --------------------------------------------
 
 /*
- * initialise_data : this function intialises the module and its physics manager to a safe state;
+ * reset : this function intialises the module and its physics manager to a safe state;
  */
 
 void KinematicsCore2::initialise_data() {

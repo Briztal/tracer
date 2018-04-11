@@ -24,7 +24,7 @@
 
 
 /*
- * initialise_data : this function resets data, and registers it in the EEPROMMap;
+ * reset : this function resets data, and registers it in the EEPROMMap;
  */
 void SteppersData::initialise_data() {
 

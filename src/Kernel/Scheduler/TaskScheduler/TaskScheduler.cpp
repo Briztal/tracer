@@ -67,7 +67,7 @@ namespace TaskScheduler {
 //------------------------------------------------- Init ---------------------------------------------------
 
 /*
- * initialise_data : this function initialises the scheduler in a safe state;
+ * reset : this function initialises the scheduler in a safe state;
  */
 
 void TaskScheduler::initialise_data() {
@@ -127,9 +127,9 @@ bool TaskScheduler::schedule_task(task_t *task) {
 /*
  * schedule_task : this function creates a task and adds it to the task pool.
  *
- *  It takes in content all parameters required to build a task, namely :
+ *  It takes in data all parameters required to build a task, namely :
  *      - function : the function to parse;
- *      - dynamic_args : a void *, addressing the first byte of the content. Those may be dynamic or static.
+ *      - dynamic_args : a void *, addressing the first byte of the data. Those may be dynamic or static.
  *      - auto_free : set if dynamic_args must be freed automatically by the scheduler (if they are on the heap, for example).
  */
 
@@ -340,7 +340,7 @@ bool TaskScheduler::execute_task(task_t *task) {
         //Set the task's log pipe;
         Interaction::setCommunicationPipe(*task->log_pipe);
 
-        //call the function of the task by pointer, and provide the content of the task.
+        //call the function of the task by pointer, and provide the data of the task.
         state = (*(task_function_t) (task->task))(task->dynamic_args);
 
     }

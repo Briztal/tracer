@@ -17,7 +17,7 @@ public :
     //Actuators Init
     static void initialise_hardware();
 
-    //Data initialise_data : no static fields or output to reset;
+    //Data reset : no static fields or output to reset;
     static void initialise_data() {}
 
 

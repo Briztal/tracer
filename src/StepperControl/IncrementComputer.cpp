@@ -83,7 +83,7 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
 
 
 /*
- * extract_increment : this function takes in content :
+ * extract_increment : this function takes in data :
  *      - get_position : a trajectory function
  *      - point : a float, of the dimension of get_function's input.
  *      - increment : a distance from point, of the same dimension than point

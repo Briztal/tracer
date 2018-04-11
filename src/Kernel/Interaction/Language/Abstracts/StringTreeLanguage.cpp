@@ -89,7 +89,7 @@ bool StringTreeLanguage::decode(const char *message) {
 
     //If no child was found, or if command part was too short to point a leaf :
 
-    //Log the curent tree's content;
+    //Log the curent tree's data;
     print_tree(current_tree);
 
     //Fail

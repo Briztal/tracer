@@ -32,7 +32,7 @@
 //------------------------------------------- Initialisation --------------------------------------------
 
 /*
- * initialise_data : this function initialises the module in a safe state;
+ * reset : this function initialises the module in a safe state;
  */
 
 void K2Physics::initialise_data() {

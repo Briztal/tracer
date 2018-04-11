@@ -142,7 +142,7 @@ task_state_t GCodePipe::action() {
 
 task_state_t GCodePipe::eeprom() {
 
-    //verify that function and p content are provided.
+    //verify that function and p data are provided.
     REQUIRE_ONE_ARGUMENTS("PRD");
 
     //If the default profile must be reset
@@ -265,7 +265,7 @@ task_state_t GCodePipe::home() {
 
 /*
  * line : this function draws a line to the provided position.
- *  It takes the following content  :
+ *  It takes the following data  :
  *
  *      -{x, y, z, e} : coordinates of the current carriage. Almost one is required.
  *      - r : (optionnal) all provided coordinates are relative.
@@ -386,7 +386,7 @@ task_state_t GCodePipe::set_position() {
 /*
  * set_extrusion : this function modifies extrusion parameters.
  *
- *  It takes the folloging content :
+ *  It takes the folloging data :
  *      - c : changes the working carriage;
  *      - s : changes the speed for the carriages designed by c (or for the working carriage if c is not provided).
  *
@@ -452,7 +452,7 @@ task_state_t GCodePipe::set_extrusion() {
 /*
  * set_cooling : this function modifies the cooling state.
  *
- *  It takes the following content :
+ *  It takes the following data :
  *      -e : 0 means disable the cooling, other values will enable it.
  *      -p : modifies the cooling power (truncated between 0 and 100).
  *
@@ -499,7 +499,7 @@ task_state_t GCodePipe::set_cooling() {
 /*
  * set_hotend : this function sets the state of a particular hotend.
  *
- *  It takes the following content :
+ *  It takes the following data :
  *      -h : the hotend to modify, mandatory.
  *      -e : 0 means disable the power on the hotend, other values will enable it.
  *      -t : sets the targetVector temperature of the hotend.
@@ -553,7 +553,7 @@ task_state_t GCodePipe::set_hotend() {
 /*
  * set_hotbed : this function sets the hotbed's state
  *
- *  It takes the following content :
+ *  It takes the following data :
  *      -e : 0 means disable the power on the hotbed, other values will enable it.
  *      -t : sets the targetVector temperature of the hotbed.
  *

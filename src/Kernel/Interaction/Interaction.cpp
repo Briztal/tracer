@@ -80,7 +80,7 @@ void Interaction::initialise_hardware() {
 
 
 /*
- * initialise_data : this function initialises all communication pipes
+ * reset : this function initialises all communication pipes
  */
 
 void Interaction::initialise_data() {

@@ -32,13 +32,13 @@
  *  Normally, to schedule a this function, you would need :
  *      - A structure to contain data (var_0, 1 and 2), from the moment you schedule the function
  *          to the moment it is effectively executed;
- *      - A scheduler, taking the same content than your function, that would put those into
+ *      - A scheduler, taking the same data than your function, that would put those into
  *          an instance of the struct, and schedule the unpacker (below);
- *      - An unpacker, that would unpack content, and parse the desired function, with extracted dynamic_args.
+ *      - An unpacker, that would unpack data, and parse the desired function, with extracted dynamic_args.
  *
  *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
  *
- *  The only thing you have to do is to call the macro GENERATE_SCHEDULERn with the content like below :
+ *  The only thing you have to do is to call the macro GENERATE_SCHEDULERn with the data like below :
  *
  *      GENERATE_SCHEDULER(function_name, task_type, type_0, variable_0, ..., type_[nb_args], variable_[nb_args])
  *
@@ -80,7 +80,7 @@
 
 
 
- struct declaration : this text will declare the content of the structure, according to provided types and variables.
+ struct declaration : this text will declare the data of the structure, according to provided types and variables.
 
     we need to convert (type_0, var_0, ..., type_n, var_n) to :
 

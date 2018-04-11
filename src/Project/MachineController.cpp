@@ -61,7 +61,7 @@
 
 
 /*
- * initialise_data : this function initialises data in a safe state;
+ * reset : this function initialises data in a safe state;
  */
 
 void MachineController::initialise_data() {
@@ -558,7 +558,7 @@ task_state_t MachineController::set_working_extruder(uint8_t carriage) {
             return complete;
     }
 
-    //If valid content :
+    //If valid data :
     extrusion_state.working_carriage = carriage;
 
     //Succeed.

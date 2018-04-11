@@ -23,10 +23,7 @@
 
 #include <Kernel/Scheduler/TaskScheduler/task_state_t.h>
 
-#include <cstdint>
-
-
-typedef task_state_t (*task_pointer_t)(void *);
+#include <stdint.h>
 
 class ProgrammedTask {
 
@@ -35,7 +32,7 @@ class ProgrammedTask {
 public:
 
     //Constructor;
-    ProgrammedTask(task_pointer_t task, uint32_t offset, uint32_t period, uint32_t nb_scheduling);
+    ProgrammedTask(task_function_t function, uint32_t offset, uint32_t period, uint32_t nb_executions);
 
     //Destructor;
     ~ProgrammedTask() = default;
@@ -45,20 +42,20 @@ public:
 
 public:
 
-    //A flag, set if the task must be executed;
-    bool isSchedulable;
-
-    //The task itself;
-    task_pointer_t task;
-
     //The time at which the next execution is supposed to happen;
     uint32_t nextExecutionTime;
+
+    //The remaining number of times the function must be executed;
+    uint32_t remainingExecutions;
+
+    //The task itself;
+    task_function_t function;
 
     //The period of the task;
     uint32_t period;
 
-    //The remaining number of time the function must be scheduled;
-    uint32_t remainingSchedulings;
+    //A flag, set if the task must be executed;
+    bool executionFlag;
 
 };
 

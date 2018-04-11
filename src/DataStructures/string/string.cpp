@@ -63,7 +63,7 @@ string::string(string &&src) noexcept : size(src.size), buffer(src.buffer) {
 
 string::~string() {
 
-    //Free the content of the string;
+    //Free the data of the string;
     free(buffer);
 
 }
@@ -182,7 +182,7 @@ void string::setTo(float f, uint8_t resolution) {
 /*
  * Char array constructor : initialises the data to represent exactly the given char array;
  *
- * It first initialises the string to empty, and then updates its content;
+ * It first initialises the string to empty, and then updates its data;
  */
 
 string::string(const char *src) : string() {
@@ -214,7 +214,7 @@ string::string(const char *src) : string() {
 /*
  * Constructor with char array and size;
  *
- * Initialises the string as empty, resizes to the required length and copies the content;
+ * Initialises the string as empty, resizes to the required length and copies the data;
  */
 
 string::string(const char *src, uint16_t size) : string() {
@@ -577,7 +577,7 @@ bool operator!=(const string &left_s, const string &right_s) { return !(left_s.o
 
 
 /*
- * memset : sets the content of size_t first bytes of dst to value;
+ * memset : sets the data of size_t first bytes of dst to value;
  */
 
 void mmemset(void *dst, uint8_t value, size_t size) {
@@ -597,7 +597,7 @@ void mmemset(void *dst, uint8_t value, size_t size) {
 
 
 /*
- * memcpy : copies the content of size_t first bytes of data of src to dst;
+ * memcpy : copies the data of size_t first bytes of data of src to dst;
  */
 
 void mmemcpy(void *dst, const void *src, size_t size) {

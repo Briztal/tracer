@@ -37,7 +37,7 @@
 
 
 /*
- * initialise_data : this function initialises the class to a safe state;
+ * reset : this function initialises the class to a safe state;
  */
 
 void TrajectoryTracer::initialise_data() {
@@ -109,7 +109,7 @@ bool TrajectoryTracer::enqueue_authorised() {
 /*
  * queue_locked : this function is used by another process, to verify if the movement queue is not locked.
  * 
- * The queue lock is a punctual interrupt-controlled action, that is independent of the queue's content. The queue can 
+ * The queue lock is a punctual interrupt-controlled action, that is independent of the queue's data. The queue can
  *  be empty, but locked. This is used to prevent the enqueue of a moment for a short period of time.
  *  
  *      For now, it it only used when all movement have been entirely processed, and only sub_movements present

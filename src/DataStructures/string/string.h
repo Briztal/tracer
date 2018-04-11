@@ -155,7 +155,7 @@ protected:
     //The current length of the string;
     uint16_t size;
 
-    //The content of the string;
+    //The data of the string;
     char *buffer;
 
 };

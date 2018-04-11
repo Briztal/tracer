@@ -528,7 +528,7 @@ void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_p
 /*
  * update_end_jerk_distances : this function updates step_distances to end point and jerk point.
  *
- *  It takes in content the absolute step_distances on each stepper of the next sub_movement, and their negative signature.
+ *  It takes in data the absolute step_distances on each stepper of the next sub_movement, and their negative signature.
  *
  *      Reminder : the i_th bit of direction_signature is 1 if the distance on the i_th stepper is negative.
  *

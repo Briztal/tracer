@@ -116,7 +116,7 @@ void PI::prepare_EEPROM_packet() {
 //--------------------------------------------------Packet Emission-----------------------------------------------------
 
 /*
- * prepare_data_out : the function to initialise_data a the next outgoing packet.
+ * prepare_data_out : the function to reset a the next outgoing packet.
  *
  * It sets the command id bytes, and initialises the data_out size.
  */

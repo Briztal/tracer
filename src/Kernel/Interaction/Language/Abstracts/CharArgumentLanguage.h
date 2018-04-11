@@ -63,10 +63,10 @@ public:
      *
      */
 
-    //Parse the provided content, and save the data in the local buffer;
+    //Parse the provided data, and save the data in the local buffer;
     bool parseArguments(const char *args_current_position) final;
 
-    //CLear the parsing content;
+    //CLear the parsing data;
     void clear();
 
     //Get the pointer to the required argument;
@@ -75,10 +75,10 @@ public:
     //Get a previously parsed argument_t if it exists;
     float get_argument_value(char id);
 
-    //Verify that all content (defined by their content) have been provided (content is null terminated);
+    //Verify that all data (defined by their data) have been provided (data is null terminated);
     bool verify_all_identifiers_presence(const char *identifiers);
 
-    //Verify that at least one argument_t (defined by their content) have been provided (content is null terminated);
+    //Verify that at least one argument_t (defined by their data) have been provided (data is null terminated);
     bool verify_one_identifiers_presence(const char *identifiers);
 
     //verify that an argument_t identifier has be provided;

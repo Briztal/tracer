@@ -15,7 +15,7 @@
  */
 
 template<class T>
-ObjectContainer<T>::ObjectContainer() : Container<T*>() {
+ObjectContainer<T>::ObjectContainer(uint8_t max_size) : Container<T*>(max_size) {
 
 }
 
@@ -119,6 +119,24 @@ uint8_t ObjectContainer<T>::getSize() {
     return Container<T*>::getSize();
 
 }
+
+
+/*
+ * get : get a pointer to an element;
+ */
+
+template<class T>
+T *ObjectContainer<T>::get(uint8_t element_index) {
+
+    //If the index is invalid, fail;
+    if (element_index >= Container<T>::size)
+        return nullptr;
+
+    //Return the pointer to the required element;
+    return data[element_index];
+
+}
+
 
 
 //--------------------------- Operations ---------------------------

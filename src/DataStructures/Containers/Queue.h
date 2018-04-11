@@ -26,7 +26,6 @@
 template<typename T>
 class Queue {
 
-
     /*
      * A macro to safely decrement an index :
      *  - if the index is zero, it takes the maximal value;
@@ -48,11 +47,11 @@ private:
  */
     struct queue_object_t {
 
-        //A flag, to notify whether the object has been allocated.
-        bool allocated = false;
-
         //The effective object we want to store.
         T object;
+
+        //A flag, to notify whether the object has been allocated.
+        bool allocated = false;
 
     };
 
@@ -82,14 +81,14 @@ private:
 
 public:
     /*
-     * Constructor : initialises all content
+     * Constructor : initialises all data
      */
     explicit Queue(uint8_t size) :
             size(size), max_index((const uint8_t) (size - 1)), content(new queue_object_t[size]), nb_spaces(size) {}
 
 
     /*
-     * Destructor : deletes the content array;
+     * Destructor : deletes the data array;
      */
     ~Queue() {
         delete[] content;
@@ -205,7 +204,6 @@ public:
 
     T *get_insertion_address(bool *success) {
 
-
         //First, cache the address of the queue object at the reading index;
         queue_object_t *insertion_object = content + insertion_index;
 
@@ -288,9 +286,9 @@ public:
     /*
     T *read_previous_input_ptr() {
         if (insertion_index != max_index) {
-            return content + insertion_index + 1;
+            return data + insertion_index + 1;
         } else {
-            return content;
+            return data;
         }
     }
 

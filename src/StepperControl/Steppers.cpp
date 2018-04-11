@@ -49,7 +49,7 @@ void Steppers::initialise_hardware() {
 }
 
 /*
- * initialise_data : this function resets
+ * reset : this function resets
  */
 
 void Steppers::initialise_data() {

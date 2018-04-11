@@ -44,7 +44,7 @@ CharArgumentLanguage::CharArgumentLanguage(uint8_t max_arguments_nb) : arguments
  *
  *  -i0 arg0 -i1 arg1 ... -in argn
  *
- *  After the parsing, content can be get with the get_argument methods.
+ *  After the parsing, data can be get with the get_argument methods.
  */
 
 bool CharArgumentLanguage::parseArguments(const char *argument_sequence) {
@@ -188,11 +188,11 @@ const char *CharArgumentLanguage::get_argument(char id) {
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ALL content contained
- *  in the content string have been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ALL data contained
+ *  in the data string have been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are content to check .
- *      ex "arp" triggers the checking for content a, r and p.
+ *  the identifier string is a string, where all letters are data to check .
+ *      ex "arp" triggers the checking for data a, r and p.
  */
 
 bool CharArgumentLanguage::verify_all_identifiers_presence(const char *identifiers) {
@@ -216,18 +216,18 @@ bool CharArgumentLanguage::verify_all_identifiers_presence(const char *identifie
 
     }
 
-    //All content are present, succeed.
+    //All data are present, succeed.
     return true;
 
 }
 
 
 /*
- * verify_all_identifiers_presence : this function return true only if ONE content contained
- *  in the content string has been extracted during the previous parsing.
+ * verify_all_identifiers_presence : this function return true only if ONE data contained
+ *  in the data string has been extracted during the previous parsing.
  *
- *  the identifier string is a string, where all letters are content to check .
- *      ex "arp" triggers the checking for content a, r and p.
+ *  the identifier string is a string, where all letters are data to check .
+ *      ex "arp" triggers the checking for data a, r and p.
  */
 
 bool CharArgumentLanguage::verify_one_identifiers_presence(const char *identifiers) {

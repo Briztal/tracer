@@ -63,7 +63,7 @@ void Endstops::initialise_hardware() {
 
 
 /*
- * initialise_data : this function resets the states array;
+ * reset : this function resets the states array;
  */
 
 void Endstops::initialise_data() {

@@ -134,7 +134,7 @@ DynamicBuffer<T> &DynamicBuffer<T>::operator=(DynamicBuffer &&container) noexcep
 
 
 /*
- * Swap : this function will swap content of the two containers;
+ * Swap : this function will swap data of the two containers;
  */
 
 template<typename T>

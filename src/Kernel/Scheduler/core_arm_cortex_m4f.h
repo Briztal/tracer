@@ -5,6 +5,8 @@
 
 #include "stdint.h"
 
+#include "kinetis.h"
+
 
 //The stack element type;
 typedef uint32_t stack_element_t;
@@ -31,7 +33,7 @@ typedef stack_element_t *stack_ptr_t;
  */
 /*
  * core_set_thread_stack_pointer : creates a temporary variable to contain the casted stack pointer,
- *  and injects assembly inline to move the content of the temp into psp;
+ *  and injects assembly inline to move the data of the temp into psp;
  */
 
 #define core_set_thread_stack_pointer(sp) {\
@@ -41,7 +43,7 @@ typedef stack_element_t *stack_ptr_t;
 
 
 /*
- * core_get_thread_stack_pointer : injects assembly code in order to move the content of psp into the
+ * core_get_thread_stack_pointer : injects assembly code in order to move the data of psp into the
  *  provided variable -> sp must be an existing variable name;
  */
 

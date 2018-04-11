@@ -6,8 +6,8 @@
 #define TRACER_THREADDATA_H
 
 
-#include "TaskData.h"
-#include "core_arm_cortex_m4f.h"
+#include "Kernel/Scheduler/TaskData.h"
+#include "Kernel/Scheduler/core_arm_cortex_m4f.h"
 
 #include <stdint.h>
 

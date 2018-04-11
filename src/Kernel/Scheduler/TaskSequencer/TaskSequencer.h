@@ -6,33 +6,40 @@
 #define TRACER_TASKSEQUENCER_H
 
 
-#include <Kernel/Scheduler/TaskScheduler/task_function_t.h>
+
 #include <DataStructures/Containers/Queue.h>
+#include <Kernel/Scheduler/TaskData.h>
 
 namespace TaskSequencer {
 
+    //Reset the sequencer;
+    void reset();
 
-    //Initialise the scheduler in a safe state;
-    void initialise_data();
+    //Get the number of task that can be inserted in a particular sequence;
+    uint8_t availableSpaces(uint8_t type);
 
-    //Verify that a type exists
-    bool check_sequence_type(uint8_t type);
-
-    //Execute every possible task on tasks sequences;
-    void process();
+    //Verify that tasks are available in the required sequences;
+    bool availableTasks(uint8_t type);
 
     //Build and schedule a task;
-    bool schedule_task(uint8_t type, task_state_t (*f)(void *), void *args);
+    bool schedule_task(uint8_t type, uint8_t task_index);
+
+    //Remove the current task of the given sequence;
+    void unlockSequence(uint8_t sequence_id);
+
+    //Determine the number of tasks in the task pool;
+    uint8_t poolTasksNb();
+
+    //Get a task from the task pool;
+    uint8_t getPoolTask();
+
+    //Determine if the required sequence can be processed;
+    bool poolProcessable(uint8_t type);
+
+    //Get the first task of the given sequence;
+    uint8_t getSequencerTask(uint8_t sequence_id);
 
 };
-
-
-
-/*
- * LOCK_SEQUENCE : This macro shall be used in your tasks to lock a given task_sequence.
- */
-
-#define LOCK_SEQUENCE(type) {TaskScheduler::lock_sequence(type);}
 
 
 #endif //TRACER_TASKSEQUENCER_H

@@ -16,7 +16,7 @@ class Container {
 public:
 
     //Default constructor;
-    Container();
+    Container(uint8_t max_size);
 
     //Copy constructor;
     Container(const Container<T> &src);
@@ -44,12 +44,14 @@ public:
 
 public:
 
-    //Get the size of the container;
-    uint8_t getSize();
+     //Get the size of the container;
+     virtual uint8_t getSize();
 
     //Get a pointer to an element;
     T* getPointer(uint8_t element_index);
 
+    //Get the copy of an element;
+    T getElement(uint8_t element_index);
 
     //--------------------------- Operations ---------------------------
 
@@ -67,7 +69,7 @@ public:
     //Remove an element of the array;
     virtual void remove(uint8_t index);
 
-    //Clear the content of the array;
+    //Clear the data of the array;
     virtual void clear();
 
 
@@ -89,6 +91,9 @@ protected :
 
     //The size of the array;
     uint8_t size;
+
+    //The size of the array;
+    const uint8_t maxSize;
 
 
 };

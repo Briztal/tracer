@@ -15,7 +15,7 @@ class ObjectContainer : private Container<T*> {
 public:
 
     //Default constructor;
-    ObjectContainer();
+    explicit ObjectContainer(uint8_t max_size);
 
     //Copy constructor;
     ObjectContainer(const ObjectContainer<T> &src);
@@ -45,6 +45,10 @@ public:
     //Get the size of the container;
     uint8_t getSize();
 
+    //Get a pointer to an element;
+    T* get(uint8_t element_index);
+
+
     //--------------------------- Setters ---------------------------
 
 public:
@@ -70,7 +74,7 @@ public:
     //Remove an element of the array;
     void remove(uint8_t index);
 
-    //Clear the content of the array;
+    //Clear the data of the array;
     void clear();
 
 

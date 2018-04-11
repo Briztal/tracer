@@ -379,7 +379,7 @@ void MPU6050::write_bits(uint8_t address, uint8_t data, uint8_t offset, uint8_t 
     if (!length)
         return;
 
-    //First, let's readall the content at [address];
+    //First, let's readall the data at [address];
     uint8_t current_value = read_byte(address);
 
     //Then, we will compute the mask.

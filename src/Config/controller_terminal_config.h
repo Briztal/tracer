@@ -29,13 +29,13 @@
 //Put the name of your project here
 #define PROJECT_NAME "TRACER"
 
-//The maximal size of a command (id + content)
+//The maximal size of a command (id + data)
 #define TERMINAL_MAX_SIZE 100
 
 //The maximal size of an argument
 #define TERMINAL_MAX_WORD_SIZE 20
 
-//The maximal number of content
+//The maximal number of data
 #define TERMINAL_MAX_ARGS_NB 6
 
 //The maximum depth of the tree. //TODO DETERMINE THE MAXIMUM DEPTH WITH AN ALGORITHM

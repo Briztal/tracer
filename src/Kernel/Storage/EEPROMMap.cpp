@@ -631,7 +631,7 @@ void EEPROMMap::reset_tree(EEPROMTree *tree) {
 
 
 /*
- * print_tree this function will print the entire content of the data tree;
+ * print_tree this function will print the entire data of the data tree;
  */
 
 void EEPROMMap::print_tree(const char *id_string) {
@@ -643,7 +643,7 @@ void EEPROMMap::print_tree(const char *id_string) {
     if (tree) {
 
         //TODO RECURSIVE PRINT
-        //Display the content of the tree;
+        //Display the data of the tree;
         //std_out(tree->printTree());
 
     }

@@ -23,7 +23,7 @@
 
 
 /*
- * initialise_data : initialise the event array;
+ * reset : initialise the event array;
  */
 
 void EventManager::initialise_data() {

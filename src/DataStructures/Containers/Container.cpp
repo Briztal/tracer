@@ -19,7 +19,7 @@
  */
 
 template<typename T>
-Container<T>::Container() : data(nullptr), size(0) {}
+Container<T>::Container(uint8_t max_size) : data(nullptr), size(0), maxSize(max_size) {}
 
 
 /*
@@ -27,12 +27,12 @@ Container<T>::Container() : data(nullptr), size(0) {}
  */
 
 template<typename T>
-Container<T>::Container(const Container<T> &src) : Container() {
+Container<T>::Container(const Container<T> &src) : data(nullptr), size(0), maxSize(src.maxSize) {
 
     //Resize to the given array's size;
     if (resize(src.size)) {
 
-        //If the resizing succeeded, copy the content;
+        //If the resizing succeeded, copy the data;
         mmemcpy(data, src.data, sizeof(T) * size);
 
     }
@@ -45,7 +45,7 @@ Container<T>::Container(const Container<T> &src) : Container() {
  */
 
 template<typename T>
-Container<T>::Container(Container<T> &&src) : data(src.data), size(src.size) {
+Container<T>::Container(Container<T> &&src) : data(src.data), size(src.size), maxSize(src.maxSize) {
 
     //Reset the source's data;
     src.data = nullptr;
@@ -55,7 +55,7 @@ Container<T>::Container(Container<T> &&src) : data(src.data), size(src.size) {
 
 
 /*
- * Destructor : free the content of the array;
+ * Destructor : free the data of the array;
  */
 
 template<typename T>
@@ -83,7 +83,7 @@ Container<T> &Container<T>::operator=(const Container<T> &src) {
     //Resize to the given array's size;
     if (resize(src.size)) {
 
-        //If the resizing succeeded, copy the content;
+        //If the resizing succeeded, copy the data;
         mmemcpy(data, src.data, sizeof(T) * size);
 
     }
@@ -125,6 +125,7 @@ uint8_t Container<T>::getSize() {
 
 }
 
+
 /*
  * getPointer : get a pointer to the required element;
  */
@@ -141,6 +142,22 @@ T *Container<T>::getPointer(uint8_t element_index) {
 
 }
 
+/*
+ * getElement : get the copy of an element;
+ */
+
+template<typename T>
+T Container<T>::getElement(uint8_t element_index) {
+
+    //If the index is valid, return a pointer to the first element;
+    if (element_index >= size) {
+        return *data;
+    }
+
+    //If the index is correct, complete;
+    return data[element_index];
+
+}
 
 //--------------------------- Operations ---------------------------
 
@@ -286,6 +303,10 @@ void Container<T>::clear() {
 
 template<typename T>
 bool Container<T>::resize(uint8_t new_size) {
+
+    //If the container can't be greater, fail;
+    if (new_size >= maxSize)
+        return false;
 
     //Try to reallocate the array;
     void *ptr = realloc(data, new_size * sizeof(T));

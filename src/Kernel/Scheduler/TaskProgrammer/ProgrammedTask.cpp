@@ -1,5 +1,5 @@
 /*
-  ProgrammedTask.cpp - Part of TRACER
+  ProgrammedTask.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,20 +18,13 @@
 
 */
 
-#include <Kernel/Interaction/Interaction.h>
-
+#include <Kernel/Scheduler/Systick.h>
 #include "ProgrammedTask.h"
 
-#include "Kernel/Kernel.h"
-
 /*
- * Constructor : initialises all fields;
+ * Constructor;
  */
-ProgrammedTask::ProgrammedTask(task_pointer_t task, uint32_t first_time, uint32_t period, uint32_t nb_scheduling)
-        : isSchedulable(false), task(task), nextExecutionTime(first_time), period(period),
-          remainingSchedulings(nb_scheduling) {
 
-    std_out("first_time : " + string(first_time));
-
-}
-
+ProgrammedTask::ProgrammedTask(task_function_t function, uint32_t offset, uint32_t period, uint32_t nb_executions)
+        : nextExecutionTime(offset + Systick::milliseconds()), remainingExecutions(nb_executions),
+          function(function), period(period), executionFlag(false) {}
