@@ -5,6 +5,7 @@
 #include <Kernel/Interaction/Interaction.h>
 #include <Kernel/Kernel.h>
 #include <DataStructures/Containers/CircularBuffer.h>
+#include <Kernel/Scheduler/TaskStorage.h>
 #include "TaskSequencer.h"
 
 
@@ -76,24 +77,27 @@ void TaskSequencer::reset() {
 
 
 /*
- * schedule_task : this function adds the task, if it is possible, in :
- *  - the task pool if its type is 255;
- *  - a task sequence if its type corresponds to a task sequence.
- *
- *  WARNING :
- *
- *  I REPEAT, {\Color(red) \textit{\textbf{WARNING : }}}
- *      (If you got that one, you use latex, and you're a good person ! Thanks for reading my comments by the way ;-) )
- *
- *  If the task cannot be scheduled, (no space available, or bad sequence type), arguments_p are freed automatically.
+ * TODO
  */
 
-bool TaskSequencer::schedule_task(uint8_t sequence_id, uint8_t task_index) {
+bool TaskSequencer::schedule_task(uint8_t sequence_id, TaskData &task) {
+
+    //If no space is available, nothing to do;
+    if (!TaskStorage::availableSpaces()){
+        return false;//TODO KERNEL PANIC, SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+    }
 
     //If the task is to execute asap, and the task pool can contain tasks :
-    if ((sequence_id == 255) && (taskPool.available_spaces())) {
+    if (sequence_id == 255) {
 
-        //copy the task;
+        //If the task pool doesn't have any space left, fail;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+        if (!taskPool.available_spaces())
+            return false;
+
+        //Save the task in the TaskStorage and cache its index;
+        uint8_t task_index = TaskStorage::addTask(task);
+
+        //Copy the task;
         taskPool.insert_object(task_index);
 
         //Succeed;
@@ -109,7 +113,10 @@ bool TaskSequencer::schedule_task(uint8_t sequence_id, uint8_t task_index) {
 
         //If the sequence is full, fail;
         if (!sequence->available_spaces())
-            return false;
+            return false;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+
+        //Save the task in the TaskStorage and cache its index;
+        uint8_t task_index = TaskStorage::addTask(task);
 
         //Copy the task in the sequence;
         sequence->insert_object(task_index);
@@ -119,6 +126,7 @@ bool TaskSequencer::schedule_task(uint8_t sequence_id, uint8_t task_index) {
 
     }
 
+    //TODO KERNEL PANIC. INVALID SEQUENCE ID, THE TASK WILL BE LOST;
     //Fail;
     return false;
 
@@ -126,10 +134,16 @@ bool TaskSequencer::schedule_task(uint8_t sequence_id, uint8_t task_index) {
 
 
 /*
- * nb_spaces : this function returns the number of nb_spaces available in the task pool.
+ * nb_spaces : this function returns the number of spaces available in the task pool.
  */
 
 uint8_t TaskSequencer::availableSpaces(uint8_t type) {
+
+    //If no space is available, nothing to do;
+    if (!TaskStorage::availableSpaces()){
+        return 0;
+    }
+
 
     if (type == 255) {
 
@@ -147,6 +161,7 @@ uint8_t TaskSequencer::availableSpaces(uint8_t type) {
         return sequences[type]->available_spaces();
 
     }
+
 }
 
 

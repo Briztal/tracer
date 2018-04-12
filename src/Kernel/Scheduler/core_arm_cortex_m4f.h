@@ -122,7 +122,7 @@ typedef stack_element_t *stack_ptr_t;
     __asm__ __volatile__("mov %0, r12": "=r" (thread_id):)
 
 /*
- * core_trigger_context_switch : sets the pendSV exception pending flag;
+ * core_trigger_context_switch : sets the pendSV exception isPending flag;
  */
 
 #define core_trigger_context_switch()\

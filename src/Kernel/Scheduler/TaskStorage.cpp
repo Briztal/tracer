@@ -13,6 +13,7 @@
 
 namespace TaskStorage {
 
+
     //---------------------- Fields ----------------------
 
     //The task container;
@@ -42,7 +43,6 @@ uint8_t TaskStorage::availableSpaces() {
 
 uint8_t TaskStorage::addTask(TaskData &task) {
 
-
     //Add the task to the container;
     return taskContainer.add(task);
 
@@ -65,7 +65,8 @@ void TaskStorage::removeTask(uint8_t task_id) {
     if (task->task_origin == SEQUENCE) {
 
         //Notify the sequencer that one of its tasks is finished;
-        TaskSequencer::validateTask(task->task_sub_type);
+        TaskSequencer::unlockSequence(task->task_sub_type);
+
     }
 
     //Remove the task of the container;

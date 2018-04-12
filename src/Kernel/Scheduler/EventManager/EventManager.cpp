@@ -18,21 +18,38 @@
 
 */
 
-#include <malloc.h>
+#include <Kernel/Scheduler/TaskStorage.h>
 #include "EventManager.h"
 
+namespace EventManager {
+
+    //------------------------------------- Name search -------------------------------------
+
+    //Get the index of an event by its name;
+    bool search_event(const char *event, uint8_t *found_index);
+
+
+    //------------------------------------- Fields -------------------------------------
+
+    //Registered events;
+    DynamicPointerBuffer<SystemEvent> systemEvents(MAX_NB_EVENTS);
+
+    //Triggered events
+    DynamicSet<uint8_t> pendingEvents(MAX_NB_EVENTS);
+
+}
 
 /*
  * reset : initialise the event array;
  */
 
-void EventManager::initialise_data() {
+void EventManager::reset() {
 
     //Delete all events;
-    system_events->clear();
+    systemEvents.clear();
 
-    //Delete all triggered events;
-    triggered_events->clear();
+    //Delete all isPending events;
+    pendingEvents.clear();
 
 }
 
@@ -40,10 +57,10 @@ void EventManager::initialise_data() {
 //------------------------------------- Builders -------------------------------------
 
 /*
- * add_event : adds an event to the supported events;
+ * addEvent : adds an event to the supported events;
  */
 
-void EventManager::add_event(const char *name) {
+void EventManager::addEvent(const char *name) {
 
     //First, we must check that the event is not already registered;
 
@@ -54,7 +71,7 @@ void EventManager::add_event(const char *name) {
     if (search_event(name, &unused)) {
 
         //Log;
-        std_out("Error in EventManager::add_event : an event is already has this name;");
+        std_out("Error in EventManager::addEvent : an event is already has this name;");
 
         //Fail;
         return;
@@ -65,82 +82,36 @@ void EventManager::add_event(const char *name) {
     SystemEvent *new_event = new SystemEvent(name, MAX_TASKS_PER_EVENT);
 
     //Then, add the event to the system event;
-    system_events->add(new_event);
+    systemEvents.add(new_event);
 
 }
 
 
 /*
- * register_to_event : search for an event matching the given name, and eventually add the given function to its 
+ * registerToEvent : search for an event matching the given name, and eventually add the given function to its
  * 
  *  registered tasks;
  */
 
-void EventManager::register_to_event(const char *name, task_state_t (*function)(void *)) {
+void EventManager::registerToEvent(const char *name, TaskData &task) {
 
     //Declare a search index;
     uint8_t index = 0;
 
     //If the given name doesn't match any event :
     if (!search_event(name, &index)) {
-        
+
         //Log;
-        std_out("Error in EventManager::register_to_event : no events matches the given name");
-        
+        std_out("Error in EventManager::registerToEvent : no events matches the given name");
+
         //Fail;
         return;
-        
+
     }
-    
+
     //Register the provided function to the event's tasks;
-    system_events->getElement(index)->addTask(function);
+    systemEvents.getElement(index)->addTask(task);
 
-}
-
-
-/*
- * un_register_to_event : this function will un-register the given function to the event matching the given name;
- */
-
-void EventManager::un_register_to_event(const char *name, task_pointer_t function) {
-
-    //Declare a search index;
-    uint8_t index = 0;
-
-    //If the given name doesn't match any event :
-    if (!search_event(name, &index)) {
-
-        //Log;
-        std_out("Error in EventManager::un_register_to_event : no events matches the given name");
-
-        //Fail;
-        return;
-
-    }
-
-    //Un-register the provided function to the event's tasks;
-    system_events->getElement(index)->removeTask(function);
-    
-}
-
-
-/*
- * un_register_to_all : this function will un-register the given function to all events;
- */
-
-void EventManager::un_register_to_all(task_pointer_t function) {
-
-    //Cache the number of events;
-    const uint8_t nb_events = system_events->getSize();
-    
-    //For each event : 
-    for (uint8_t event_index = 0; event_index < nb_events; event_index++) {
-
-        //Un-register the provided function to the event's tasks;
-        system_events->getElement(event_index)->removeTask(function);
-        
-    }
-    
 }
 
 
@@ -156,13 +127,13 @@ void EventManager::un_register_to_all(task_pointer_t function) {
 bool EventManager::search_event(const char *name, uint8_t *found_index) {
 
     //First, cache the current number of events;
-    const uint8_t nb_events = system_events->getSize();
+    const uint8_t nb_events = systemEvents.getSize();
 
     //For every system event :
     for (uint8_t event_index = 0; event_index < nb_events; event_index++) {
 
         //If the event name matches the searched name :
-        if (cstring::strcmp(name, system_events->getElement(event_index)->getName())) {
+        if (cstring::strcmp(name, systemEvents.getElement(event_index)->getName())) {
 
             //Save the found index;
             *found_index = event_index;
@@ -182,9 +153,10 @@ bool EventManager::search_event(const char *name, uint8_t *found_index) {
 //-------------------------------------------------- Event management --------------------------------------------------
 
 /*
- * trigger_event : this function will
+ * triggerEvent : this function will
  */
-void EventManager::trigger_event(const char *event_name) {
+
+void EventManager::triggerEvent(const char *event_name) {
 
     //Declare the search index;
     uint8_t index = 0;
@@ -193,83 +165,63 @@ void EventManager::trigger_event(const char *event_name) {
     if (!search_event(event_name, &index)) {
 
         //Log :
-        std_out("Error in EventManager::trigger_event : no event named "+string(event_name));
+        std_out("Error in EventManager::triggerEvent : no event named " + string(event_name));
 
         //Fail;
         return;
 
     }
 
-    //Add the event index to the set of triggered events;
-    triggered_events->add(index);
+}
+
+
+/*
+ * taskAvailable : this function returns true if a task can be executed;
+ */
+
+bool EventManager::taskAvailable() {
+
+    //A task is available if an event is pending and the storage is not full;
+    return ((bool) pendingEvents.getSize()) && (TaskStorage::availableSpaces());
 
 }
 
 
 /*
- * process_events : attempt to schedule all tasks registered to all events;
- *
- * One task is scheduled at time for every event, to avoid execution of only one event that could re-trigger himself;
+ * getTask : return the id pf the next task of the first pending event;
  */
 
-void EventManager::process_events() {
+uint8_t EventManager::getTask() {
 
-    //While spaces are available in the scheduler and events are triggered :
-    while(TaskScheduler::available_spaces() && triggered_events->getSize()) {
+    if (!taskAvailable()) //TODO KERNEL PANIC;
+        return 0;
 
-        //For every triggered event index (vector is modified during iteration, so size not const) :
-        for (uint8_t triggered_event_index = 0;
-             triggered_event_index < triggered_events->getSize(); triggered_event_index++) {
+    //Get the first element of the array;
+    uint8_t pendingEvent = pendingEvents.getElement(0);
 
-            //If no more spaces are available in the scheduler, complete;
-            if (!TaskScheduler::available_spaces())
-                return;
+    //Cache the event, to check for nullity;
+    SystemEvent *event = systemEvents.getElement(pendingEvent);
 
-            //Get the system event;
-            uint8_t event_index = triggered_events->getElement(triggered_event_index);
+    //If the event is nullptr, fail;
+    if (event == nullptr) {
 
-            //Cache the event, to check for nullity;
-            SystemEvent *event = system_events->getElement(event_index);
+        return 0;//TODO KERNEL PANIC
 
-            //If the event is nullptr :
-            if (event == nullptr) {
-
-                //Log;
-                std_out("Error in EventManager::process_events : an event index points to nullptr event;");
-
-                //Remove the index;
-                triggered_events->remove(event_index);
-
-                //Decrease the counter, to re-iterate on the same one.
-                triggered_event_index--;
-
-            }
-
-            //Execute the task;
-            bool event_processed = event->scheduleNextTask();
-
-            //If all event's tasks have been processed :
-            if (event_processed) {
-
-                //Remove the index;
-                triggered_events->remove(event_index);
-
-                //Decrease the counter, to re-iterate on the same one.
-                triggered_event_index--;
-
-            }
-
-        }
     }
+
+    //Execute the task;
+    uint8_t task_index = event->getTask();
+
+    //If all event's tasks have been processed :
+    if (!event->isPending()) {
+
+        //Remove the event of the pending list;
+        pendingEvents.remove(0);
+
+    }
+
+    //Return the index of the task to execute;
+    return task_index;
 
 }
 
-
-//------------------------------------------ Static declaration - Definition -------------------------------------------
-
-
-//Registered events;
-DynamicPointerBuffer<SystemEvent> *EventManager::system_events = new DynamicPointerBuffer<SystemEvent>(MAX_NB_EVENTS);
-
-//Triggered events;
-DynamicSet<uint8_t> *EventManager::triggered_events = new DynamicSet<uint8_t>(MAX_NB_EVENTS);

@@ -289,7 +289,7 @@ void Kernel::initialise_data() {
     TaskScheduler::initialise_data();
 
     //Initalise the event manager;
-    EventManager::initialise_data();
+    EventManager::reset();
 
     //Initialise the task programmer;
     TaskProgrammer::reset();

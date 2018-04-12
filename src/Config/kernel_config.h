@@ -29,7 +29,7 @@
 
 /*
  * The following block defines the number of task sequences, their ID, their name and their size
- *  (the maximal number of pending task they can contain).
+ *  (the maximal number of isPending task they can contain).
  */
 
 //TASK_SEQUENCE(id, size)

@@ -39,7 +39,7 @@
  * initialise_data : this function intialises the module and its physics manager to a safe state;
  */
 
-void KinematicsCore1::initialise_data() {
+void KinematicsCore1::reset() {
 
     //Reset the high level position;
     memset(current_hl_position, 0, NB_STEPPERS * sizeof(float));

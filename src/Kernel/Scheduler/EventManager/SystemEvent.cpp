@@ -18,12 +18,18 @@
 
 */
 
+#include <Kernel/Scheduler/TaskStorage.h>
 #include "SystemEvent.h"
+
 
 //-------------------------------- Initialisation --------------------------------
 
+/*
+ * Constructor : initialises the tasks array;
+ */
 
-SystemEvent::SystemEvent(const char *name, uint8_t max_tasks) : tasks(new DynamicSet<task_pointer_t>(max_tasks)) {
+SystemEvent::SystemEvent(const char *name, uint8_t max_tasks) :
+        eventPending(false), nextTask(0), tasks(new Container<TaskData>(max_tasks)) {
 
     //First, let's set the name;
     for (uint8_t i = 0; i<10; i++) {
@@ -61,42 +67,12 @@ SystemEvent::~SystemEvent() {
  * addTask : add a task to the tasks set;
  */
 
-void SystemEvent::addTask(task_pointer_t task) {
+void SystemEvent::addTask(TaskData task) {
 
     //Simply add the task to the set;
     tasks->add(task);
 
     //Nothing to do about task_to_schedule, as the new task is inserted at the end of the vector;
-
-}
-
-
-/*
- * removeTask : this function removes the given task from the tasks set;
- */
-
-void SystemEvent::removeTask(task_pointer_t t) {
-
-    //We must know the index of an eventual deletion;
-    uint8_t index = 0;
-
-    //Simply remove the task from the tasks set; If no element is found :
-    if (!tasks->remove(t, &index)) {
-
-        //Return, no modification to make;
-        return;
-
-    }
-
-    /*
-     * If an element has been deleted (at index [index]) :
-     *
-     *  The task_to_schedule index must be moved only if the removed index was strictly before task_to_schedule;
-     */
-
-    //If the removed index is below task_to_schedule, decrease it of one;
-    if (index < task_to_schedule)
-        task_to_schedule--;
 
 }
 
@@ -111,13 +87,12 @@ void SystemEvent::removeAllTasks() {
     tasks->clear();
 
     //No more task to schedule;
-    task_to_schedule = 0;
+    nextTask = 0;
 
 }
 
 
 //-------------------------------- Name getter --------------------------------
-
 
 /*
  * getName : returns the name of the event;
@@ -127,59 +102,74 @@ const char *SystemEvent::getName() {
 
     //Return the name of the event;
     return name;
+
 }
+
 
 //-------------------------------- Task Scheduler --------------------------------
 
+/*
+ * setPending : sets the event isPending;
+ */
+
+void SystemEvent::setPending() {
+
+    //Cache the number of tasks in the event;
+    const uint8_t nbTasks = tasks->getSize();
+
+    //If the event doesn't contain any tasks, nothing to do;
+    if (!nbTasks)
+        return;
+
+    //Mark the event pending;
+    eventPending = true;
+
+    //Update the index to the last task;
+    nextTask = nbTasks - (uint8_t) 1;
+
+}
+
 
 /*
- * scheduleNextTask : schedule the next task on the list;
+ * taskAvailable : returns true if a task can be created;
+ */
+
+bool SystemEvent::isPending() {
+
+    //A task can be created if the event is isPending and the task storage is not full;
+    return eventPending;
+
+}
+
+
+/*
+ * getTask : schedule the next task on the list;
  *
  *  It will return true only if all tasks have been executed;
  */
 
-bool SystemEvent::scheduleNextTask() {
+uint8_t SystemEvent::getTask() {
 
-    //If the next task to schedule is outside the task array (can happen if empty task list) :
-    if (task_to_schedule >= tasks->getSize()) {
+    if (!eventPending)
+        return 0;//TODO Kernel Panic
 
-        //Reset the scheduling environment;
-        task_to_schedule = 0;
+    //Create the new task and get its index:
+    uint8_t index = TaskStorage::addTask(*tasks->getPointer(nextTask));
 
-        //Succeed;
-        return true;
+    //If we just scheduled the last task :
+    if (!nextTask) {
 
-    }
+        //Mark the event not isPending;
+        eventPending = false;
 
-    //If the task scheduler has no more spaces left :
-    if (!TaskScheduler::available_spaces()) {
+    } else {
 
-        //Log;
-        std_out("Error in SystemEvent::scheduleNextTask : function called with no space left in the TaskScheduler;");
-
-        //Fail, still tasks to execute;
-        return false;
+        //If there are more tasks to execute, decrease the task index;
+        nextTask--;
 
     }
 
-    //Schedule a task of type 255, executing our function;
-    TaskScheduler::schedule_task(tasks->getElement(task_to_schedule), nullptr);
-
-    //Increment the task to execute;
-    task_to_schedule++;
-
-    //If the next task to schedule is outside the task array :
-    if (task_to_schedule == tasks->getSize()) {
-
-        //Reset the scheduling environment;
-        task_to_schedule = 0;
-
-        //Succeed, as all tasks have been scheduled;
-        return true;
-
-    }
-
-    //If the next task to execute is in the tasks array, other tasks are to execute.
-    return false;
+    //Return the task's index;
+    return index;
 
 }

@@ -22,7 +22,8 @@
 #define TRACER_EVENT_H
 
 
-#include <DataStructures/Containers/DynamicSet.h>
+#include <DataStructures/Containers/ObjectContainer.h>
+#include <Kernel/Scheduler/TaskData.h>
 
 
 /*
@@ -30,8 +31,6 @@
  *  - a name (array of chars);
  *  - a set of tasks;
  */
-
-typedef task_state_t (*task_pointer_t)(void *);
 
 
 class SystemEvent {
@@ -53,13 +52,11 @@ public:
 public:
 
     //Register a task to the event;
-    void addTask(task_pointer_t);
-
-    //Un-register a task to the event;
-    void removeTask(task_pointer_t t);
+    void addTask(TaskData);
 
     //Un-register all tasks;
     void removeAllTasks();
+
 
     //-------------------------------- Name getter --------------------------------
 
@@ -73,23 +70,31 @@ public:
 
 public:
 
-    //Schedule the next task on the list;
-    bool scheduleNextTask();
+    //Is the event isPending (un-executed tasks remain);
+    bool isPending();
+
+    //Set the event isPending;
+    void setPending();
+
+    //Get the next task on the list;
+    uint8_t getTask();
 
 
     //-------------------------------- Fields --------------------------------
 
 private:
 
+    //Is the event isPending
+    bool eventPending;
+
+    //The index of the next task to schedule, in case of a isPending event;
+    uint8_t nextTask;
+
     //The event's name;
     char name[11]{0};
 
     //The event's tasks;
-    DynamicSet<task_pointer_t> *tasks;
-
-    //The index of the next task to schedule;
-    uint8_t task_to_schedule;
-
+    Container<TaskData> *tasks;
 
 };
 

@@ -29,62 +29,40 @@
 #include "SystemEvent.h"
 
 
-class EventManager {
+namespace EventManager {
 
     //------------------------------------- Initialisation -------------------------------------
 
-public:
-
     //Initialise data in a safe state;
-    static void initialise_data();
+    void reset();
 
 
     //------------------------------------- Builders -------------------------------------
 
-public:
-
     //Add an event;
-    static void add_event(const char *name);
+    void addEvent(const char *name);
 
     //Register a function to a particular event;
-    static void register_to_event(const char *name, task_state_t (*function)(void *));
-
-    //Un-register a function to a particular event;
-    static void un_register_to_event(const char *name, task_state_t (*function)(void *));
-
-    //Un-register a function to all events;
-    static void un_register_to_all(task_pointer_t);
-
-
-    //------------------------------------- Name search -------------------------------------
-
-
-private:
-
-    //Get the index of an event by its name;
-    static bool search_event(const char *event, uint8_t *found_index);
+    void registerToEvent(const char *name, TaskData &data);
 
 
     //------------------------------------- Event management -------------------------------------
 
-public:
-
     //Trigger a particular event;
-    static void trigger_event(const char *event_name);
+    void triggerEvent(const char *event_name);
 
     //Process all triggered events;
-    static void process_events();
+    void process_events();
 
 
-    //------------------------------------- Fields -------------------------------------
+    //------------------------------------- Task Execution -------------------------------------
 
-private:
+    //Can a task be executed ?
+    bool taskAvailable();
 
-    //Registered events;
-    static DynamicPointerBuffer<SystemEvent> *system_events;
+    //Get the next task to be executed;
+    uint8_t getTask();
 
-    //Triggered events;
-    static DynamicSet<uint8_t> *triggered_events;
 
 };
 
