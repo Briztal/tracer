@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 template<typename T>
-class CircularBuffer<T> {
+class CircularBuffer {
 
 private:
 

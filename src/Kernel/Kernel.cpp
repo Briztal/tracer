@@ -249,7 +249,7 @@ void Kernel::initialise_hardware() {
     hl_init();
 
     //Initialise the tasl programmer;
-    TaskProgrammer::intialise_hardware();
+    //TaskProgrammer::intialise_hardware();
 
     //Initialise all enabled interfaces
     Interaction::initialise_hardware();

@@ -2,7 +2,10 @@
 // Created by root on 4/10/18.
 //
 
+#include "Arduino.h"
+
 #include "Systick.h"
+
 #include "core_arm_cortex_m4f.h"
 
 //---------------------- System tick ----------------------
@@ -10,10 +13,10 @@
 namespace Systick {
 
     //The milliseconds reference;
-    uint32_t millis = 0;
+    uint32_t st_millis = 0;
 
     //The current task's duration;
-    uint16_t task_duration = 0;
+    uint16_t task_duration = 1;
 
 }
 
@@ -33,7 +36,13 @@ namespace Systick {
 void Systick::systick() {
 
     //Increment the ms counter;
-    millis++;
+    st_millis++;
+
+    if (st_millis == 1000) {
+
+        Serial.println("SYSTICK SECOND");
+
+    }
 
     //If the current task can pe preempted :
     if (task_duration) {
@@ -77,18 +86,18 @@ void Systick::setTaskDuration(uint16_t ms) {
  */
 
 uint32_t Systick::milliseconds() {
-    return millis;
+    return st_millis;
 }
 
 
 /*
- * msResetRequired : this function will return true if the millis reference has to be reset;
+ * msResetRequired : this function will return true if the st_millis reference has to be reset;
  */
 
 bool Systick::msResetRequired() {
 
     //If the milliseconds counter has reached the half of its maximal value, it's time to reset;
-    return (millis > (uint32_t) -1 >> 1);
+    return (st_millis > (uint32_t) -1 >> 1);
 
 }
 
@@ -98,7 +107,7 @@ bool Systick::msResetRequired() {
  */
 void Systick::msReset() {
 
-    //Reset the millis counter;
-    millis = 0;
+    //Reset the st_millis counter;
+    st_millis = 0;
 
 }

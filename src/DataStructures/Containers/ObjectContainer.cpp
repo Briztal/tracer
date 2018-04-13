@@ -133,7 +133,7 @@ T *ObjectContainer<T>::get(uint8_t element_index) {
         return nullptr;
 
     //Return the pointer to the required element;
-    return data[element_index];
+    return Container<T>::data[element_index];
 
 }
 

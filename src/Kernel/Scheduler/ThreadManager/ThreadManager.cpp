@@ -4,6 +4,7 @@
 
 
 #include <DataStructures/Containers/ObjectContainer.h>
+#include <Kernel/Scheduler/Systick.h>
 
 #include "ThreadManager.h"
 
@@ -215,9 +216,16 @@ void ThreadManager::start() {
     for (uint8_t i = 0; i < threads.getSize(); i++) {
         Serial.println("sp : "+String((long)threads.getPointer(i)->stack_pointer));
     }
+
     //TODO PROPER CORE INIT;
     _VectorsRam[14] = &pendSV_Handler;
     NVIC_SET_PRIORITY(-2, 240);
+
+    //Set the systick task's duration to reschedule on next tick;
+    Systick::setTaskDuration(1);
+
+    //Start the systick timer, and set the systick function;
+    core_start_systick_timer(1, &Systick::systick);
 
     //Set the current stack pointer;//TODO OFFSET CORE SPECIFIC
     core_set_thread_stack_pointer(threads.getPointer(0)->stack_pointer + 8);
@@ -227,7 +235,6 @@ void ThreadManager::start() {
 
     //Execute the first task;
     run(threads.getPointer(0));
-
 
 }
 

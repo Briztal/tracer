@@ -2,7 +2,6 @@
 #define TRACER_TASK_SCHEDULER_DATA_H
 
 
-#include "task_function_t.h"
 #include "task_state_t.h"
 #include <Kernel/Interaction/CommunicationPipe.h>
 

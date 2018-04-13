@@ -153,6 +153,7 @@ typedef stack_element_t *stack_ptr_t;
 /*
  * core_set_thread_mode : set the processor to use the psp, and stay privileged in thread mode;
  */
+
 //TODO UNPRIVILEGE
 #define core_set_thread_mode()\
     __asm__ __volatile__(\
@@ -166,3 +167,50 @@ typedef stack_element_t *stack_ptr_t;
     __asm__ __volatile__(\
         "mov %0, sp" : "=r" (sp)\
     )
+
+
+/*
+ * ------------------------------------- Systick -------------------------------------
+ */
+
+/*
+ * core_start_systick_timer :
+ *  - sets the system timer reload value;
+ *  - sets the function to execute at undf;
+ *  - resets the undf flag;
+ *  - enables the timer;
+ *
+ *  the reload value is determined by :
+ *
+ *
+ *      timer_period_seconds = 1 / F_CPU seconds;
+ *      systick_period_seconds = systick_period_ms / 1000;
+ *
+ *      nb_ticks = systick_period / timer_period = F_CPU * systick_period_ms / 1000
+ *
+ *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
+ */
+
+#define core_start_systick_timer(systick_period_us, systick_function)\
+    _VectorsRam[15] = systick_function;\
+    SYST_RVR = (systick_period_us) * ((float) F_CPU / (float) 1000);\
+    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;\
+    SYST_CSR |= SYST_CSR_ENABLE;\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
