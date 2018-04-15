@@ -40,7 +40,7 @@ namespace TaskSequencer {
     CircularBuffer<uint8_t> *sequences[NB_TASK_SEQUENCES]{nullptr};
 
     //Task Sequences lock;
-    bool sequencesUnlocked[NB_TASK_SEQUENCES]{false};
+    bool sequencesUnlocked[NB_TASK_SEQUENCES]{true};
 }
 
 
@@ -62,8 +62,8 @@ void TaskSequencer::reset() {
     uint8_t sequence_id = 0;
 
 #define TASK_SEQUENCE(size) \
-        sequences[sequences_id] = new CircularBuffer<task_t>(size);\
-        sequencesLocks[sequence_id++] = false;
+        sequences[sequence_id] = new CircularBuffer<uint8_t>(size);\
+        sequencesUnlocked[sequence_id++] = true;
 
 #include "Config/kernel_config.h"
 

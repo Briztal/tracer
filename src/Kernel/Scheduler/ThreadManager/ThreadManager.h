@@ -36,6 +36,9 @@ namespace ThreadManager {
     //Thread creator;
     bool createThread(uint32_t stack_size);
 
+    //Set the task of a thread;
+    void setTask(uint8_t thread_index, uint8_t task_index);
+
     //Start threads execution;
     void start();
 

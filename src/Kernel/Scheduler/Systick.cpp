@@ -13,10 +13,10 @@
 namespace Systick {
 
     //The milliseconds reference;
-    uint32_t st_millis = 0;
+    volatile uint32_t st_millis = 0;
 
-    //The current task's duration;
-    uint16_t task_duration = 1;
+    //The current task's duration. At init, preemption disabled;
+    volatile uint16_t task_duration = 0;
 
 }
 
@@ -35,20 +35,18 @@ namespace Systick {
 
 void Systick::systick() {
 
+    if (!(st_millis%1000)) {
+        //Serial.println("SUUS "+String(st_millis));
+    }
+
     //Increment the ms counter;
     st_millis++;
-
-    if (st_millis == 1000) {
-
-        Serial.println("SYSTICK SECOND");
-
-    }
 
     //If the current task can pe preempted :
     if (task_duration) {
 
         //If it must be preempted :
-        if (--task_duration) {
+        if (!--task_duration) {
 
             //Trigger the preemption;
             core_trigger_context_switch();
@@ -87,6 +85,26 @@ void Systick::setTaskDuration(uint16_t ms) {
 
 uint32_t Systick::milliseconds() {
     return st_millis;
+}
+
+
+
+/*
+ * Wait till time has reached the given limit;
+ */
+
+void Systick::delay(uint32_t delta_t) {
+
+    //Determine the limit;
+    uint32_t limit = st_millis + delta_t;
+
+    //Serial.println("DELAYING");
+
+    //Sleep till the limit;
+    while((volatile uint32_t) Systick::st_millis < limit) {
+        //Serial.println(String((volatile uint32_t) Systick::st_millis) + " "+String(limit));
+    };
+
 }
 
 

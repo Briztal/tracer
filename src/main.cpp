@@ -26,7 +26,10 @@
 
 #include "Arduino.h"
 
-#include <Kernel/Scheduler/NewKernel/ThreadManager.h>
+#include <Kernel/Scheduler/ThreadManager/ThreadManager.h>
+#include <Kernel/Scheduler/TaskStorage.h>
+#include <Kernel/Scheduler/Systick.h>
+#include <usb_dev.h>
 
 
 /*
@@ -81,43 +84,66 @@ void end_function() {
 }
 
 
-void task_0(void *) {
+task_state_t task_0(void *) {
 
-    Serial.println("Task_0");
-    delay(1000);
+    delay(500);
 
-    TaskData td;
-    td.function = task_0;
-    td.termination = end_function;
-    Serial.println("Adding");
-
-    ThreadManager::addTask(td);
-    Serial.println("Added");
+    while (true) {
+        //Serial.println("Task_0");
+        digitalWrite(13, !digitalRead(13));
+        Systick::delay(1000);
+    }
 
 
 }
 
+task_state_t task_1(void *) {
 
-void task_1(void *) {
-
-    Serial.println("Task_1");
-    delay(1000);
-
-    TaskData td;
-    td.function = task_1;
-    td.termination = end_function;
-    ThreadManager::addTask(td);
-    Serial.println("Added");
+    while (true) {
+        Serial.println("Task_1");
+        Systick::delay(3000);
+    }
 
 }
 
+task_state_t task_2(void *) {
+
+    while (true) {
+        Serial.println("Task_2");
+        Systick::delay(5000);
+    }
+
+}
+
+
+task_state_t task_3(void *) {
+
+    Systick::delay(1000);
+
+    while (true) {
+        Serial.println("Task_3");
+        Systick::delay(14000);
+    }
+
+
+    return complete;
+
+}
 
 
 int main() {
 
+    delay(1000);
+
+    pinMode(13, OUTPUT);
+
+    digitalWrite(13, HIGH);
+
     Serial.begin(115200);
 
-    delay(2000);
+    Serial.println("INITIALISED");
+
+
     Serial.println("SUUUUUS");
 
     //Initialise all threads;
@@ -127,14 +153,17 @@ int main() {
     ThreadManager::createThread(1000);
     ThreadManager::createThread(1000);
 
+
     Serial.println("Initialised");
 
     TaskData td0;
     td0.function = task_0;
     td0.termination = end_function;
 
+    TaskStorage::addTask(td0);
+
     //Add some tasks;
-    ThreadManager::addTask(td0);
+    ThreadManager::setTask(0, TaskStorage::addTask(td0));
 
 
     Serial.println("Added");
@@ -145,7 +174,29 @@ int main() {
     td1.termination = end_function;
 
     //Add some tasks;
-    ThreadManager::addTask(td1);
+    //ThreadManager::setTask(1, TaskStorage::addTask(td1));
+
+
+    Serial.println("Added");
+
+
+    TaskData td2;
+    td1.function = task_2;
+    td1.termination = end_function;
+
+    //Add some tasks;
+    //ThreadManager::setTask(2, TaskStorage::addTask(td2));
+
+
+    Serial.println("Added");
+
+
+    TaskData td3;
+    td1.function = task_3;
+    td1.termination = end_function;
+
+    //Add some tasks;
+    //ThreadManager::setTask(3, TaskStorage::addTask(td3));
 
     Serial.println("Ready");
 

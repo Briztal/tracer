@@ -129,11 +129,11 @@ template<class T>
 T *ObjectContainer<T>::get(uint8_t element_index) {
 
     //If the index is invalid, fail;
-    if (element_index >= Container<T>::size)
+    if (element_index >= Container<T*>::size)
         return nullptr;
 
     //Return the pointer to the required element;
-    return Container<T>::data[element_index];
+    return Container<T*>::data[element_index];
 
 }
 
@@ -227,8 +227,11 @@ void ObjectContainer<T>::set(uint8_t index, T &&element) {
 template<class T>
 void ObjectContainer<T>::remove(uint8_t index) {
 
-    //Remove the pointer at the given index and delete the object it references;
-    delete Container<T*>::remove(index);
+    //Delete the object at the given index;
+    delete Container<T*>::getElement(index);
+
+    //Remove the pointer;
+    Container<T*>::remove(index);
 
 }
 

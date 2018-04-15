@@ -118,4 +118,6 @@ private:
 };
 
 
+#include "CircularBuffer.cpp"
+
 #endif //TRACER_CircularBuffer_H

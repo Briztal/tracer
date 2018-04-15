@@ -169,6 +169,41 @@ typedef stack_element_t *stack_ptr_t;
     )
 
 
+
+/*
+ * ------------------------------------- Stack bound -------------------------------------
+ */
+
+/*
+ * core_get_stack_begin : determines the stacks beginning case from the allocated pointer and the size;
+ *
+ *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
+ */
+
+#define core_get_stack_begin(allocated_pointer, size) ((allocated_pointer) + (size))
+
+
+/*
+ * core_get_stack_begin : determines the stacks end case from the allocated pointer and the size;
+ *
+ *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
+ */
+
+#define core_get_stack_end(allocated_pointer, size) (allocated_pointer)
+
+/*
+ * ------------------------------------- Context switch -------------------------------------
+ */
+
+/*
+ * core_set_context_switcher : sets the function to be called when a context switch is required;
+ */
+
+#define core_set_context_switcher(context_switcher)\
+    _VectorsRam[14] = context_switcher;\
+    NVIC_SET_PRIORITY(-2, 240);
+
+
 /*
  * ------------------------------------- Systick -------------------------------------
  */
@@ -193,7 +228,9 @@ typedef stack_element_t *stack_ptr_t;
 
 #define core_start_systick_timer(systick_period_us, systick_function)\
     _VectorsRam[15] = systick_function;\
+    NVIC_SET_PRIORITY(-1, 0);\
     SYST_RVR = (systick_period_us) * ((float) F_CPU / (float) 1000);\
+    Serial.println("PERIOD : "+String( (systick_period_us) * ((float) F_CPU / (float) 1000)));\
     SCB_ICSR &= ~SCB_ICSR_PENDSTSET;\
     SYST_CSR |= SYST_CSR_ENABLE;\
 

@@ -17,7 +17,7 @@ namespace TaskStorage {
     //---------------------- Fields ----------------------
 
     //The task container;
-    UnorderedArray taskContainer;
+    UnorderedArray<TaskData> taskContainer(255);//TODO CONFIGURABLE
 
 };
 
@@ -59,10 +59,10 @@ void TaskStorage::removeTask(uint8_t task_id) {
     TaskData *task = taskContainer.get(task_id);
 
     //Delete the task's content;
-    delete(task->args);
+    free(task->args);
 
     //If the task comes from a sequence :
-    if (task->task_origin == SEQUENCE) {
+    if (task->task_origin == SEQUENCE_TASK) {
 
         //Notify the sequencer that one of its tasks is finished;
         TaskSequencer::unlockSequence(task->task_sub_type);

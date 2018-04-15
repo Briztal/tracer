@@ -5,54 +5,13 @@
 
 #include <DataStructures/Containers/ObjectContainer.h>
 #include <Kernel/Scheduler/Systick.h>
+#include <Kernel/Scheduler/TaskStorage.h>
 
 #include "ThreadManager.h"
 
 #include "Kernel/Scheduler/core_arm_cortex_m4f.h"
 
 #include "ThreadData.h"
-
-
-
-
-void pendSV_Handler() {
-
-    Serial.println("PENDSV");
-
-    //Stack the context in the current process stack;
-    core_stack_thread_context();
-
-    uint32_t sp = 0;
-    core_get_stack_pointer(sp);
-
-    Serial.println("SP : "+String(sp));
-
-    //Create a temp variable to contain the thread stack pointer;
-    stack_ptr_t thread_stack_pointer = 0;
-
-    //Get the stack pointer;
-    core_get_thread_stack_pointer(thread_stack_pointer)
-
-    Serial.println("PSP : "+String((uint32_t)thread_stack_pointer));
-
-    //Save the current thread's stack pointer;
-    ThreadManager::set_current_task_sp(thread_stack_pointer);
-
-    //Get the next working thread's stack pointer;
-    stack_ptr_t stack_pointer = ThreadManager::schedule();
-
-    Serial.println("nPSP : "+String((uint32_t)stack_pointer));
-
-    //Set the appropriate context;
-    core_set_thread_stack_pointer(stack_pointer);
-
-    //Unstack the context from the previous process stack
-    core_unstack_thread_context();
-
-}
-
-
-
 
 /*
  * Private variables and function for ThreadManager Library;
@@ -75,57 +34,20 @@ namespace ThreadManager {
     //Threads termination functions;
     void termination_loop();
 
+    //The Thread context switcher;
+    void contextSwitcher();
 
     //---------------------------- Fields ----------------------------
 
     //Threads contexts;
-    Container<ThreadData> threads;
+    Container<ThreadData> threads(10);//TODO CONFIGURABLE
 
     //The current task;
-    static volatile uint8_t current_thread = 0;
+    volatile uint8_t current_thread = 0;
 
 }
 
 
-/*
- * AddTask : TODO SCHEDULER SPECIFIC
- */
-
-void ThreadManager::addTask(TaskData &task) {
-
-    Serial.println("ADDTASK ");
-
-    const uint8_t nb_threads = threads.getSize();
-
-    for (uint8_t i = 0; i < nb_threads; i++) {
-
-        //Cache the current threads's data pointer;
-        ThreadData *thread_ptr = threads.getPointer(i);
-
-        if (thread_ptr->current_state == TERMINATED) {
-
-            thread_ptr->current_state = (volatile thread_state)PENDING;
-
-            thread_ptr->task = new TaskData(task);
-
-            //Serial.println("PTR : "+String((uint32_t) threads_data[i].task));
-
-            //Serial.println(String((long)task.function)+" "+String((long)&threads_data[i].task->function));
-
-            Serial.println("SAVED IN THREAD "+String(i));
-
-            return;
-
-        }
-
-    }
-
-}
-
-
-/*
- * The context switcher; //TODO SCHEDULER SPECIFIC
- */
 
 /*
  * schedule : selects a new thread to run, and return its stack pointer;
@@ -139,20 +61,11 @@ stack_ptr_t ThreadManager::schedule() {
     if (current_thread == threads.getSize())
         current_thread = 0;
 
-    Serial.println("Current Thread : "+String(current_thread));
+    Systick::setTaskDuration(1);
+
+    //Serial.println("Current Thread : " + String(current_thread));
 
     return (stack_ptr_t) (threads.getPointer(current_thread)->stack_pointer);
-
-}
-
-/*
- * trigger_context_switch : enables the context switching at next thread exit; //TODO SCHEDULER SPCEIFIC
- */
-
-inline void trigger_context_switch() {
-
-    //Call the core function;
-    core_trigger_context_switch();
 
 }
 
@@ -186,11 +99,16 @@ bool ThreadManager::createThread(const uint32_t stack_size) {
 
     //If the malloc completed :
 
-    Serial.println((long)thread_data);
+    Serial.println((long) thread_data);
 
     //Initialise the thread's stack data;
-    stack_ptr_t sp = thread_data->stack_end = (stack_ptr_t) ptr;
-    thread_data->stack_begin = thread_data->stack_pointer = sp + stack_size;
+    stack_ptr_t sp = (stack_ptr_t) ptr;
+
+    //Set the stack's begin;
+    thread_data->stack_begin = core_get_stack_begin(sp, stack_size);
+
+    //Set the stack's end;
+    thread_data->stack_end = core_get_stack_end(sp, stack_size);
 
     Serial.println("THREAD ID" + String(thread_id));
     //Reset the thread in its initialisation state;
@@ -202,6 +120,32 @@ bool ThreadManager::createThread(const uint32_t stack_size) {
 }
 
 
+/*
+ * setTask : this function is called by the scheduler to set the task of the given thread;
+ */
+
+void ThreadManager::setTask(uint8_t thread_index, uint8_t task_index) {
+
+    //If the thread doesn't exist, fail;
+    if (thread_index >= threads.getSize())
+        return;//TODO KERNEL PANIC
+
+    //Cache the current threads's data pointer;
+    ThreadData *thread_ptr = threads.getPointer(thread_index);
+
+    //If the thread is still in execution, fail;
+    if (thread_ptr->current_state != TERMINATED)
+        return;//TODO KERNEL PANIC;
+
+    //Update the state;
+    thread_ptr->current_state = (volatile thread_state) PENDING;
+
+    //Update the thread's task;
+    thread_ptr->task_index = task_index;
+
+    Serial.println("Thread " + String(thread_index) + " updated");
+
+}
 
 
 /*
@@ -213,22 +157,23 @@ void ThreadManager::start() {
     //Update the current thread;
     current_thread = 0;
 
-    for (uint8_t i = 0; i < threads.getSize(); i++) {
-        Serial.println("sp : "+String((long)threads.getPointer(i)->stack_pointer));
-    }
 
-    //TODO PROPER CORE INIT;
-    _VectorsRam[14] = &pendSV_Handler;
-    NVIC_SET_PRIORITY(-2, 240);
+    //TODO IN KERNEL INIT
+    //Set the context switcher;
+    core_set_context_switcher(&contextSwitcher);
 
-    //Set the systick task's duration to reschedule on next tick;
-    Systick::setTaskDuration(1);
-
+    //TODO IN KERNEL INIT
     //Start the systick timer, and set the systick function;
     core_start_systick_timer(1, &Systick::systick);
 
-    //Set the current stack pointer;//TODO OFFSET CORE SPECIFIC
-    core_set_thread_stack_pointer(threads.getPointer(0)->stack_pointer + 8);
+    Serial.println("Systick Started, ");
+    delay(2000);
+
+    //Enable the preemtion in one millisecond;
+    Systick::setTaskDuration(1);
+
+    //Set the current stack pointer to the first thread's stack begin;;
+    core_set_thread_stack_pointer(threads.getPointer(0)->stack_begin);
 
     //Require the user mode;
     core_set_thread_mode();
@@ -313,36 +258,42 @@ void ThreadManager::run(ThreadData *volatile data) {
     //Infinite loop;
     while (true) {
 
-        Serial.println("Thread "+String((uint32_t)data) +" "+ String(data->current_state == PENDING));
+        //Serial.println("Thread "+String((uint32_t)data) +" "+ String(data->current_state == PENDING));
 
         //If the task must be executed :
-        if ((volatile thread_state )data->current_state == PENDING) {
+        if ((volatile thread_state) data->current_state == PENDING) {
 
             //Mark the thread Active;
-            data->current_state = (volatile thread_state)ACTIVE;
+            data->current_state = (volatile thread_state) ACTIVE;
 
-            //Cache the task;
-            volatile TaskData *task_p = data->task;
+            //Cache the task index;
+            volatile uint8_t task_index = data->task_index;
+
+            //Cache the task data;
+            volatile TaskData *volatile taskData = TaskStorage::getTask(task_index);
 
             //Execute the task;
-            task_p->function(task_p->args);
+            taskData->function(taskData->args);
 
             //Terminate the task;
-            task_p->termination();
+            taskData->termination();
+
+            //Remove the task;
+            TaskStorage::removeTask(task_index);
+
+            //Require a context switch, as the task is finished;
+            core_trigger_context_switch();
 
         }
 
         //Mark the thread inactive;
-        data->current_state = (volatile thread_state)TERMINATED;
+        data->current_state = (volatile thread_state) TERMINATED;
 
-        Serial.println("TRIGGERIG d");
+        //Serial.println("TRIGGERIG d");
 
-        delay(500);
+        //Systick::delay(500);
 
-        //Require a context switch, as the task is finished;
-        trigger_context_switch();
-
-        Serial.println("TRIGGERED");
+        //Serial.println("TRIGGERED");
 
     }
 
@@ -355,6 +306,49 @@ void ThreadManager::run(ThreadData *volatile data) {
 
 void ThreadManager::termination_loop() {
     while (true);
+}
+
+
+
+
+/*
+ * The context switcher :
+ *
+ *  - saves the current contex;
+ *  - calls the scheduler;
+ *  - loads the new task's context;
+ */
+
+void ThreadManager::contextSwitcher() {
+
+    //Stack the context in the current process stack;
+    core_stack_thread_context();
+
+    stack_ptr_t sp = nullptr;
+    core_get_stack_pointer(sp);
+
+    //Create a temp variable to contain the thread stack pointer;
+    stack_ptr_t thread_stack_pointer = nullptr;
+
+    //Get the stack pointer;
+    core_get_thread_stack_pointer(thread_stack_pointer)
+
+    //Serial.println("PSP : "+String((uint32_t)thread_stack_pointer));
+
+    //Save the current thread's stack pointer;
+    ThreadManager::set_current_task_sp(thread_stack_pointer);
+
+    //Get the next working thread's stack pointer;
+    stack_ptr_t stack_pointer = ThreadManager::schedule();
+
+    //Serial.println("nPSP : "+String((uint32_t)stack_pointer));
+
+    //Set the appropriate context;
+    core_set_thread_stack_pointer(stack_pointer);
+
+    //Unstack the context from the previous process stack
+    core_unstack_thread_context();
+
 }
 
 

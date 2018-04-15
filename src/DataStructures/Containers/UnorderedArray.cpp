@@ -2,8 +2,12 @@
 // Created by root on 4/11/18.
 //
 
-#include <DataStructures/string/string.h>
+#ifndef TRACER_UNORDEREDARRAY_CPP
+#define TRACER_UNORDEREDARRAY_CPP
+
 #include "UnorderedArray.h"
+
+#include <DataStructures/string/string.h>
 
 
 //--------------- Initialisation ---------------
@@ -76,7 +80,7 @@ uint8_t UnorderedArray<T>::add(T &element) {
         if (!arrayElement->allocation_flag) {
 
             //Copy the value in the element;
-            *arrayElement->element = element;
+            arrayElement->element = element;
 
             //Mark the element as allocated;
             arrayElement->allocation_flag = true;
@@ -183,3 +187,5 @@ uint8_t UnorderedArray<T>::getNbSpaces() const {
     return nbSpaces;
 
 }
+
+#endif //TRACER_UNORDEREDARRAY_CPP

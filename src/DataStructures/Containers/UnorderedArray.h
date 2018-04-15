@@ -89,5 +89,7 @@ private:
 
 };
 
+#include "UnorderedArray.cpp"
+
 
 #endif //TRACER_UNORDEREDARRAY_H

@@ -28,9 +28,6 @@ enum thread_state {
 
 struct ThreadData {
 
-    //The current task in execution;
-    TaskData *task = nullptr;
-
     //The current stack pointer;
     stack_ptr_t stack_pointer = nullptr;
 
@@ -42,6 +39,9 @@ struct ThreadData {
 
     //The current execution state;
     thread_state current_state = TERMINATED;
+
+    //The current task in execution;
+    uint8_t task_index = 0;
 
 };
 

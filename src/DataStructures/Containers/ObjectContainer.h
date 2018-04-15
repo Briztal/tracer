@@ -8,7 +8,7 @@
 #include "Container.h"
 
 template <class T>
-class ObjectContainer : private Container<T*> {
+class ObjectContainer : protected Container<T*> {
 
     //--------------------------- Construction ---------------------------
 
@@ -88,6 +88,8 @@ private:
 
 
 };
+
+#include "ObjectContainer.cpp"
 
 
 #endif //TRACER_OBJECTCONTAINE_H
