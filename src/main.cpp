@@ -78,7 +78,6 @@
  */
 
 
-
 void end_function() {
     Serial.println("END FUNCTION REACHED");
 }
@@ -87,6 +86,8 @@ void end_function() {
 task_state_t task_0(void *) {
 
     delay(500);
+
+    Serial1.begin(115200);
 
     while (true) {
         //Serial.println("Task_0");

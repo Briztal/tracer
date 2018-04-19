@@ -9,7 +9,7 @@
 
 #include "ThreadManager.h"
 
-#include "Kernel/Scheduler/core_arm_cortex_m4f.h"
+#include "Kernel/Arch/CortexM4F/core_arm_cortex_m4f.h"
 
 #include "ThreadData.h"
 
