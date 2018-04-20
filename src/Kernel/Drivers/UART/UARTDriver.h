@@ -20,12 +20,17 @@
  *  It handles a simple UART that comprises hardware FIFOs for in/out buffering (FIFOs can be of size 1);
  */
 
-#include <DataStructures/Containers/CircularBuffer.h>
-
+//Int types;
 #include "stdint.h"
 
-class UARTDriver {
+//UART Peripheral configuration structures;
+#include "UARTSpecs.h"
 
+//Buffers to contain temporary data;
+#include <DataStructures/Containers/CircularBuffer.h>
+
+
+class UARTDriver {
 
     //-------------------------------- Driver Initialisation -----------------------------------
 
@@ -36,6 +41,9 @@ public:
 
     //Driver initialisation;
     void initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size);
+
+    //Driver reset : resets the UART in the default state;
+    void reset();
 
     //The destructor;
     ~UARTDriver();
@@ -58,64 +66,9 @@ private:
     void operator=(UARTDriver &&) noexcept {};
 
 
-    //-------------------------------- Configuration data types -----------------------------------
+    //-------------------------------- Configuration functions -----------------------------------
 
 public:
-
-    //Number of possible data bits;
-    enum parity_bit_t {
-        EVEN_PARITY,
-        ODD_PARITY
-    };
-
-    
-    /*
-     * Packet configuration structure;
-     */
-
-    struct uart_packet_config {
-
-        //The Number of data bits;
-        uint8_t nb_data_bits = 8;
-
-        //Is the parity bit present ?
-        bool parity_bit_enabled = false;
-
-        //The type of the parity bit;
-        parity_bit_t parity_type = EVEN_PARITY;
-
-        //The number of parity bits;
-        uint8_t nb_stop_bits = 1;
-
-    };
-
-    struct uart_modem_config {
-
-        //RTS enabled;
-        bool rts_enabled = false;
-
-        //CTS check before detection enabled;
-        bool cts_enabled = false;
-
-    };
-
-    //The type of the transmission;
-    enum transmission_type_t {
-
-        HALF_DUPLEX,
-        FULL_DUPLEX
-    };
-
-    //The transmission config
-    struct uart_transmission_config {
-
-        //The transmission state;
-        transmission_type_t transmission_type = FULL_DUPLEX;
-
-    };
-
-
-    //-------------------------------- Configuration functions -----------------------------------
 
     //Configure the packet format;
     inline void configure_packet_format(uart_packet_config &);
@@ -126,20 +79,27 @@ public:
     //Configure the transmission;
     inline void configure_transmission(uart_transmission_config &);
 
+    //Start or stop UART components;
+    inline void configure_state(uart_state_config &);
+
 
     //-------------------------------- Transmission functions -----------------------------------
+
+public:
 
     //Send an uint16_t through the UART when possible;
     void send(uint16_t data);
 
     //Send a break through the serial;
-    void send_break();
+    void transmit_break();
 
     //Transmit as many uint16_t as possible to the UART peripheral;
     void transmit();
 
 
     //-------------------------------- Reception functions -----------------------------------
+
+public:
 
     //Read an uint16_t received through the serial. If no data was received, returns 0;
     uint16_t read();
@@ -152,6 +112,8 @@ public:
 
 
     //-------------------------------- Fields -----------------------------------
+
+private:
 
     //The UART we monitor;
     arch::UART *uart;

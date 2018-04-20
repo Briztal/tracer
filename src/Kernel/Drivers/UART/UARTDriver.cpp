@@ -30,6 +30,34 @@ void UARTDriver::initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size) {
     //Initialise the transmission buffer;
     transmissionBuffer = new CircularBuffer((uint8_t)tx_buffer_size);
 
+    //Reset the UART in the default state;
+    reset();
+
+}
+
+
+/*
+ * reset : resets the UART in the default state;
+ */
+
+void UARTDriver::reset() {
+
+    //Reset the default packet structure;
+    uart_packet_config packet_config;
+    configure_packet_format(packet_config);
+
+    //Reset the default modem config;;
+    uart_modem_config modem_config;
+    configure_modem(modem_config);
+
+    //Reset the default transmission configuration;
+    uart_transmission_config transmission_config;
+    configure_transmission(transmission_config);
+
+    //Reset the default state;
+    uart_state_config state_config;
+    configure_state(state_config);
+
 }
 
 
@@ -48,11 +76,13 @@ UARTDriver::~UARTDriver() {
 
 //-------------------------------- UART Configuration -----------------------------------
 
+
 /*
  * configure_packet_format : delegates to the UART;
  */
 
-void UARTDriver::configure_packet_format(UARTDriver::uart_packet_config &config) {
+void UARTDriver::configure_packet_format(uart_packet_config &config) {
+
     uart->configure_packet_format(config);
 }
 
@@ -61,7 +91,8 @@ void UARTDriver::configure_packet_format(UARTDriver::uart_packet_config &config)
  * configure_modem : delegates to the UART;
  */
 
-void UARTDriver::configure_modem(UARTDriver::uart_modem_config &config) {
+void UARTDriver::configure_modem(uart_modem_config &config) {
+
     uart->configure_modem(config);
 
 }
@@ -71,8 +102,20 @@ void UARTDriver::configure_modem(UARTDriver::uart_modem_config &config) {
  * configure_transmission : delegates to the UART;
  */
 
-void UARTDriver::configure_transmission(UARTDriver::uart_transmission_config &) {
+void UARTDriver::configure_transmission(uart_transmission_config &config) {
+
     uart->configure_transmission(config);
+
+}
+
+
+/*
+ * configure_state : delegates to the UART;
+ */
+
+void UARTDriver::configure_state(uart_state_config &config) {
+
+    uart->configure_state(config);
 
 }
 
@@ -130,15 +173,15 @@ void UARTDriver::transmit() {
 
 
 /*
- * send_break : sends a break (special data) through the UART.
+ * transmit_break : sends a break (special data) through the UART.
  *
  * The break happens immediately.
  */
 
-void UARTDriver::send_break() {
+void UARTDriver::transmit_break() {
 
     //Delegate the break to the uart
-    uart->send_break();
+    uart->transmit_break();
 
 }
 
@@ -192,8 +235,11 @@ void UARTDriver::receive() {
     //While data can be received by the UART peripheral :
     while(uart->reception_available()) {
 
+        //Cache the data received;
+        uint16_t data = uart->receive();
+
         //Receive a uint16_t from the UART and insert in in the reception buffer;
-        receptionBuffer->insert_object(uart->receive());
+        receptionBuffer->insert_object(data);
 
     }
 
