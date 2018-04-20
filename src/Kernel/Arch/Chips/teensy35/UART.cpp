@@ -4,6 +4,13 @@
 
 #include "UART.h"
 
+/*
+ * Constructor : initialises the data pointer and the frequency;w
+ */
+
+teensy35::UART::UART(teensy35::UART::UART_DATA *data, uint32_t uart_frequency)
+        : data(data), clockFrequency(uart_frequency) {}
+
 //-------------------------- Configuration methods --------------------------
 
 /*
@@ -18,15 +25,57 @@ void teensy35::UART::configure_modem(uart_modem_config &) {
 
 }
 
-void teensy35::UART::configure_transmission(uart_transmission_config &) {
+void teensy35::UART::configure_transmission(uart_transmission_config &config) {
+
+    //First, cache the data pointer to avoid permanent implicit double pointer access;
+    UART_DATA *ptr = data;
 
     //TODO FULL / HALF DUPLEX
+
 
     /*
      * BaudRate Configuration :
      *
-     * The Baudrate is adjusted by two parameters, SBR and 
+     * The Baudrate is adjusted by two parameters, SBR (Coarse adjust) and BRFD (Fine adjust),
+     *  that verify :
+     *
+     *      Kb = 2 * UART_CLOCK / BaudRate
+     *
+     *      SBR (uint13_t) = Kb / 32 (integer division);
+     *      BRFA (uint5_t) = Kb % 32;
      */
+
+    //First, determine Kb;
+    uint32_t Kb = ((uint32_t) ((uint32_t) (clockFrequency << 1)) / config.baudrate);
+
+    //Then, determine SBR. A division by 32 is a shift by 5;
+    uint16_t SBR = (uint16_t) (Kb >> 5);
+
+    //Finally, determine SBR. A modulo by 32 is a AND by 32;
+    uint8_t BRFA = (uint8_t) Kb & (uint8_t)32;
+
+    /*
+     * Now we can update SBR, located in the two Baudrate registers;
+     */
+
+    //Copy the first 8 bits of SBR in BDL;
+    data->BDL = (uint8_t) SBR;
+
+    //Reset the first 5 bits of BDH with an AND with 11100000 (224);
+    data->BDH &= (uint8_t)224;
+
+    //Copy the 5 MSB of SBR in the 5 LSB of BDH;
+    data->BDH |= (uint8_t) (SBR >> 8);
+
+    /*
+    * Now we can update BRFA, located in the 5 first bits of C4;
+    */
+
+    //Reset BFRA with an AND with 11100000 (224);
+    data->C4 &= (uint8_t)224;
+
+    //Copy the new BRFA;
+    data->C4 |= BRFA;
 
 }
 
