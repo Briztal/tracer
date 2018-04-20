@@ -39,8 +39,6 @@ struct uart_packet_config {
     //The type of the parity bit;
     parity_bit_t parity_type = EVEN_PARITY;
 
-    //The number of parity bits;
-    uint8_t nb_stop_bits = 1;
 
 };
 

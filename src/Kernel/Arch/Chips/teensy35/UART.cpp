@@ -43,10 +43,88 @@ teensy35::UART::UART(teensy35::UART::UART_DATA *data, uint32_t uart_frequency)
 //-------------------------- Configuration methods --------------------------
 
 /*
- * Packet format configuration : TODO;
+ * Packet format configuration : sets :
+ *  - The number of data bits;
+ *  - The parity bit (enables of disables);
+ *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void teensy35::UART::configure_packet_format(uart_packet_config &) {
+void teensy35::UART::configure_packet_format(uart_packet_config &config) {
+
+    //TODO MSB FIRST
+    //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
+
+    //To avoid implicit double pointer access, we will cache data;
+    UART_DATA *ptr = data;
+
+    /*
+     * Number of bits; This peripheral only supports 8 or 9 data bits;
+     *
+     * The number of bits is defined by bit 4 of C1;
+     */
+
+    //Check the number of bits :
+    switch(config.nb_data_bits) {
+
+        case 8:
+            //8 data bits, bit 4 cleared;
+            CLEAR_BIT(ptr->C1, 4, 8);
+            break;
+
+        case 9:
+            //9 data bits, bit 4 set;
+            CLEAR_BIT(ptr->C1, 4, 8);
+            break;
+
+        default:
+            //Other number, not suported, driver panic;
+            //TODO DRIVER PANIC;
+            break;
+
+    }
+
+    /*
+     * Parity enable and type : Parity (enable and type) is defined by (resp) bits 1 and 0 of C1;
+     */
+
+    //By default, disable the 10-th bit by clearing bit 5 of C4. Will be re-enabled if necessary;
+    CLEAR_BIT(ptr->C4, 5, 8);
+
+    //If the parity bit must be enabled :
+    if (config.parity_bit_enabled) {
+
+        //Bit 1 of C1 is set;
+        SET_BIT(ptr->C1, 1, 8);
+
+        //We must set the parity type too;
+
+        //If the parity is of type EVEN (default) :
+        if (config.parity_type == EVEN_PARITY) {
+
+            //Bit 0 of C1 is cleared;
+            CLEAR_BIT(ptr->C1, 1, 8);
+
+        } else {
+
+            //If the parity is odd, bit 0 of C1 is set;
+            SET_BIT(ptr->C1, 1, 8);
+
+        }
+
+        //Finally, if the parity is enabled and there are 9 data bits, the 10-th bit must be declared;
+        if (config.nb_data_bits == 9) {
+
+            //Set M10, bit 5 of C4;
+            SET_BIT(ptr->C4, 5, 8);
+
+        }
+
+    } else {
+
+        //Parity bit disabled, bit 1 of C1 is cleared;
+        CLEAR_BIT(ptr->C1, 1, 8);
+
+    }
 
 }
 
@@ -112,6 +190,8 @@ void teensy35::UART::configure_transmission(uart_transmission_config &config) {
         //To achieve a full-duplex configuration, the MSB of C1 must be cleared;
         CLEAR_BIT(ptr->C1, 7, 8);
 
+        //TODO IF HALF DUPLEX, TXDIR MUST BE MANAGED CORRECTLY;
+
     } else {
 
         //To achieve a half duplex configuration, we must set bits 5 and 7 of C1 : OR with 10100000 (160)
@@ -154,6 +234,7 @@ void teensy35::UART::configure_transmission(uart_transmission_config &config) {
     //Copy the 5 MSB of SBR in the 5 LSB of BDH;
     SET(ptr->BDH, (SBR >> 8), 8);
 
+
     /*
     * Now we can update BRFA, located in the 5 first bits of C4;
     */
@@ -184,6 +265,7 @@ void teensy35::UART::configure_state(uart_state_config &config) {
         SET_BIT(data->C2, 2, 8);
 
     } else {
+        w
         //If rx must be disabled, clear bit 2 of C2;
         CLEAR_BIT(data->C2, 2, 8);
 
