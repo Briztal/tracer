@@ -30,7 +30,23 @@ void teensy35::UART::configure_transmission(uart_transmission_config &config) {
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     UART_DATA *ptr = data;
 
-    //TODO FULL / HALF DUPLEX
+
+    /*
+     * First, we will configure the transmission type : Full or Half duplex;
+     */
+
+    if (config.transmission_type == FULL_DUPLEX) {
+
+        //To achieve a full-duplex configuration, the MSB of C1 must be reset : AND with the compl of 10000000 (128);
+        ptr->C1 &= ~128;
+
+    } else {
+
+        //To achieve a half duplex configuration, we must set bits 5 and 7 of C1 : OR with 10100000 (160)
+        ptr->C1 |= 160;
+
+    }
+
 
 
     /*
