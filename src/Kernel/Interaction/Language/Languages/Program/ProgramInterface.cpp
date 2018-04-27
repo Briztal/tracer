@@ -418,7 +418,7 @@ void PI::accept_data() {
             } else {
                 //Not a double beginning byte -> beginning symbol
 
-                //Flush data, and prepare to receive the command?
+                //Flush data, and prepare to receive_all the command?
                 reset_input_data();
 
                 //If the command size is lesser than the maximal value, validate the receiving state

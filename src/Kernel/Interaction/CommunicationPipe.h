@@ -48,10 +48,10 @@ public:
 
 private:
 
-    //The serial that will be used to receive data;
+    //The serial that will be used to receive_all data;
     usb_serial_class serial;
 
-    //The delimiter that will be used to transmit data;
+    //The delimiter that will be used to transmit_all data;
     Delimiter *delimiter;
 
     //The language that will be used to interpret commands;

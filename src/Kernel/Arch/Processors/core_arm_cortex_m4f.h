@@ -7,7 +7,6 @@
 
 #include "kinetis.h"
 
-
 //The stack element type;
 typedef uint32_t stack_element_t;
 
@@ -235,9 +234,57 @@ typedef stack_element_t *stack_ptr_t;
     SYST_CSR |= SYST_CSR_ENABLE;\
 
 
+/*
+ * ------------------------------------- Interrupts -------------------------------------
+ */
+
+/*
+ * core_enable_interrupt : enables the specified interrupt;
+ */
+
+#define core_enable_interrupt(interrupt_index)\
+    NVIC_ENABLE_IRQ(interrupt_index);
 
 
 
+/*
+ * core_disable_interrupt : disables the specified interrupt;
+ */
+
+#define core_disable_interrupt(interrupt_index)\
+    NVIC_DISABLE_IRQ(interrupt_index);
+
+
+/*
+ * core_set_interrupt_pending : marks the interrupt as pending. Will be executed asap;
+ */
+
+#define core_set_interrupt_pending(interrupt_index)\
+    NVIC_SET_PENDING(interrupt_index);
+
+
+/*
+ * core_clear_interrupt_pending : marks the interrupt as not pending;
+ */
+
+#define core_clear_interrupt_pending(interrupt_index)\
+    NVIC_CLEAR_PENDING(interrupt_index);
+
+
+/*
+ * core_set_interrupt_priority : sets the priority of the required interrupt to the povided;
+ */
+
+#define core_set_interrupt_priority(interrupt_index, priority)\
+    NVIC_SET_PRIORITY(interrupt_index, priority);
+
+
+/*
+ * core_set_interrupt_handler : sets the handler of the required interrupt;
+ */
+
+#define core_set_interrupt_handler(interrupt_index, handler)\
+    _VectorsRam[16 + (interrupt_index)] = handler;
 
 
 

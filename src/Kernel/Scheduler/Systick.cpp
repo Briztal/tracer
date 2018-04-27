@@ -8,7 +8,7 @@
 
 #include "usb_dev.h"
 
-#include "Kernel/Arch/CortexM4F/core_arm_cortex_m4f.h"
+#include "Kernel/Arch/Processors/core_arm_cortex_m4f.h"
 
 //---------------------- System tick ----------------------
 

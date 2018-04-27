@@ -6,7 +6,7 @@
 #ifndef TRACER_UARTDRIVER_CPP
 #define TRACER_UARTDRIVER_CPP
 
-#include "UARTDriver.h"
+#include "UARTBase.h"
 
 //-------------------------------- Driver Initialisation -----------------------------------
 
@@ -14,21 +14,22 @@
  * Constructor : initialises the uart and the two buffers;
  */
 
-UARTDriver::UARTDriver(arch::UART *uart) : uart(uart), receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
+UARTBase::UARTBase() : receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
 
 
 /*
  * Driver initialisation : initialises reception and transmission buffers with the provided sizes;
  */
 
-void UARTDriver::initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size) {
+void UARTBase::initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size) {
 
     //TODO CHANGE SIZES;
+
     //Initialise the reception buffer;
-    receptionBuffer = new CircularBuffer((uint8_t)rx_buffer_size);
+    receptionBuffer = new CircularBuffer<uint16_t>((uint8_t)rx_buffer_size);
 
     //Initialise the transmission buffer;
-    transmissionBuffer = new CircularBuffer((uint8_t)tx_buffer_size);
+    transmissionBuffer = new CircularBuffer<uint16_t>((uint8_t)tx_buffer_size);
 
     //Reset the UART in the default state;
     reset();
@@ -40,7 +41,7 @@ void UARTDriver::initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size) {
  * reset : resets the UART in the default state;
  */
 
-void UARTDriver::reset() {
+void UARTBase::reset() {
 
     //Reset the default packet structure;
     uart_packet_config packet_config;
@@ -65,57 +66,11 @@ void UARTDriver::reset() {
  * Destructor : Deletes the couple of buffers;
  */
 
-UARTDriver::~UARTDriver() {
+UARTBase::~UARTBase() {
 
     //Delete both buffers and complete;
     delete receptionBuffer;
     delete transmissionBuffer;
-
-}
-
-
-//-------------------------------- UART Configuration -----------------------------------
-
-
-/*
- * configure_packet_format : delegates to the UART;
- */
-
-void UARTDriver::configure_packet_format(uart_packet_config &config) {
-
-    uart->configure_packet_format(config);
-}
-
-
-/*
- * configure_modem : delegates to the UART;
- */
-
-void UARTDriver::configure_modem(uart_modem_config &config) {
-
-    uart->configure_modem(config);
-
-}
-
-
-/*
- * configure_transmission : delegates to the UART;
- */
-
-void UARTDriver::configure_transmission(uart_transmission_config &config) {
-
-    uart->configure_transmission(config);
-
-}
-
-
-/*
- * configure_state : delegates to the UART;
- */
-
-void UARTDriver::configure_state(uart_state_config &config) {
-
-    uart->configure_state(config);
 
 }
 
@@ -126,17 +81,17 @@ void UARTDriver::configure_state(uart_state_config &config) {
  * send : this function enqueues the provided uint16_t in the transmission
  */
 
-void UARTDriver::send(uint16_t data) {
+void UARTBase::send(uint16_t data) {
 
     //If the transmission buffer is full, we need to wait until the UART can send data;
     if (!transmissionBuffer->available_spaces()) {
 
         //Wait till the transmission is complete;
-        while (!uart->transmission_available());
+        while (!this->transmission_available());
         //TODO SLEEP FOR 1 MS;
 
-        //Now that transmission is available, transmit as many data as possible;
-        transmit();
+        //Now that transmission is available, transmit_all as many data as possible;
+        transmit_all();
 
     }
 
@@ -148,40 +103,11 @@ void UARTDriver::send(uint16_t data) {
 
     }
 
+    //Enable the transmission interrupt as a new element is available in the transmission buffer
+    enable_transmission_interrupt();
+
     //Transmit as many uint16_t as possible;
-    transmit();
-
-
-}
-
-
-/*
- * transmit : this function transmits as many uint16_t as possible from the transmission buffer through the serial;
- */
-
-void UARTDriver::transmit() {
-
-    //While data can be transmitted :
-    while(uart->transmission_available()) {
-
-        //Get a uint16_t and transmit it;
-        uart->transmit(transmissionBuffer->get_and_discard_output());
-
-    }
-
-}
-
-
-/*
- * transmit_break : sends a break (special data) through the UART.
- *
- * The break happens immediately.
- */
-
-void UARTDriver::transmit_break() {
-
-    //Delegate the break to the uart
-    uart->transmit_break();
+    transmit_all();
 
 }
 
@@ -192,16 +118,19 @@ void UARTDriver::transmit_break() {
  * read : return a uint16_t received through the serial, if there is one available. Returns 0 if not;
  */
 
-uint16_t UARTDriver::read() {
+uint16_t UARTBase::read() {
 
     //Receive as many data as possible from the UART peripheral;
-    receive();
+    receive_all();
 
     //If at least uint16_t has been received :
     if (receptionBuffer->available_elements()) {
 
         //Return the less recent uint16_t received;
         return receptionBuffer->get_and_discard_output();
+
+        //Enable the reception interrupt, as a new space is available in the reception buffer;
+        enable_reception_interrupt();
 
     }
 
@@ -215,34 +144,15 @@ uint16_t UARTDriver::read() {
  * available : returns the number of uint16_t that can be read;
  */
 
-uint16_t UARTDriver::available() {
+uint16_t UARTBase::available() {
 
     //Receive as many data as possible from the UART peripheral;
-    receive();
+    receive_all();
 
     //Return the number of received uint16_t;
     return receptionBuffer->available_elements();
 
 }
 
-
-/*
- * receive : receive as many uint16_t as possible from the UART;
- */
-
-void UARTDriver::receive() {
-
-    //While data can be received by the UART peripheral :
-    while(uart->reception_available()) {
-
-        //Cache the data received;
-        uint16_t data = uart->receive();
-
-        //Receive a uint16_t from the UART and insert in in the reception buffer;
-        receptionBuffer->insert_object(data);
-
-    }
-
-}
 
 #endif

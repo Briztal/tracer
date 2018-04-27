@@ -236,7 +236,7 @@ task_state_t MachineController::line(movement_state_t movement_state) {
         return return_state;
     }
 
-    /* As we must transmit the new destination coordinates, we will set all coordinates in movement_state, and pass it
+    /* As we must transmit_all the new destination coordinates, we will set all coordinates in movement_state, and pass it
      *  to movement functions.
      */
 

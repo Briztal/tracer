@@ -132,6 +132,7 @@ task_state_t task_3(void *) {
 }
 
 
+
 int main() {
 
     delay(1000);
@@ -141,6 +142,11 @@ int main() {
     digitalWrite(13, HIGH);
 
     Serial.begin(115200);
+
+    Serial.println("SUUS");
+
+
+    while(true);
 
     Serial.println("INITIALISED");
 

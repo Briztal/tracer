@@ -241,7 +241,7 @@ public:
      * -------------------------------------------------------------------------------------------------
      *
      * State modifiers : functions below are in charge of modifying the machine's state, according to
-     *  state structures they receive in arguments.
+     *  state structures they receive_all in arguments.
      *
      * -------------------------------------------------------------------------------------------------
      * -------------------------------------------------------------------------------------------------

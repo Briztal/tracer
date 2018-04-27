@@ -173,7 +173,7 @@ void MatrixRover::addMotorsEquations(RoverCoordinateSystem *coordinates, LinearS
 
 
     /*
-     * Now that we have filled the equation array, we will transmit these equations to the linear system;
+     * Now that we have filled the equation array, we will transmit_all these equations to the linear system;
      */
 
     //For every equation :

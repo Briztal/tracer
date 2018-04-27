@@ -176,7 +176,7 @@ private:
 
     static ArgumentsContainer arguments_storage;
 
-    //Reset incomming data, to receive new packets properly
+    //Reset incomming data, to receive_all new packets properly
     static void reset_input_data();
 
     //Incomming message processing
