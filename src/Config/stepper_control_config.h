@@ -202,7 +202,7 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 #define sig_t uint32_t
 
-//The delay type
+//The sleep type
 #define delay_t uint32_t
 
 

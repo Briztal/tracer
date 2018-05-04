@@ -28,7 +28,7 @@ string::string() : size(1), buffer(nullptr) {
 
 
 /*
- * Copy constructor : this function will initialise to the given size, and copy all data;
+ * Copy constructor : this function will start to the given size, and copy all data;
  */
 
 string::string(const string &src) : string() {
@@ -45,7 +45,7 @@ string::string(const string &src) : string() {
 
 
 /*
- * Move constructor : this function will initialise to the given size and siphon all data;
+ * Move constructor : this function will start to the given size and siphon all data;
  */
 
 string::string(string &&src) noexcept : size(src.size), buffer(src.buffer) {

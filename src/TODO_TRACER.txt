@@ -7,6 +7,8 @@
 
 //TODO LICENSE
 
+//TODO SEMAPHORES + protect enable and disable interrupts by a semaphore;
+
 //TODO SEPARATE SEQUENTIAL TASK SCHEDULER
 
 //TODO SIZES ON uint16_t in DATASTRUCTURES + CHANGE SIZES IN DRIVERS

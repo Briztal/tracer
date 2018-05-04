@@ -68,7 +68,7 @@ IMUKalmanFIlter::IMUKalmanFIlter(float measure_period, Matrix &process_noise, Ma
 
 
 /*
- * initialise : this function will initialise all data;
+ * initialise : this function will start all data;
  */
 
 void IMUKalmanFIlter::initialise(float measure_period, Matrix **process_noises, Matrix **measure_noises) {

@@ -2,6 +2,7 @@
 // Created by root on 4/10/18.
 //
 
+#include <Kernel/Scheduler/ThreadManager/process.h>
 #include "Arduino.h"
 
 #include "Systick.h"
@@ -53,7 +54,7 @@ void Systick::systick() {
             //Trigger the preemption;
             core_trigger_context_switch();
 
-            //Task duration becomes 0, won't be preempted anymore;
+            //Task duration becomes 0, preemption won't be called anymore;
 
         }
 
@@ -95,17 +96,15 @@ uint32_t Systick::milliseconds() {
  * Wait till time has reached the given limit;
  */
 
-void Systick::delay(uint32_t delta_t) {
+void Systick::sleep(uint32_t delta_t) {
 
     //Determine the limit;
-    uint32_t limit = st_millis + delta_t;
-
-    //Serial.println("DELAYING");
+    volatile uint32_t limit = st_millis + delta_t;
 
     //Sleep till the limit;
     while((volatile uint32_t) Systick::st_millis < limit) {
-        //Serial.println(String((volatile uint32_t) Systick::st_millis) + " "+String(limit));
     };
+
 
 }
 

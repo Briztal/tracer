@@ -6,16 +6,18 @@
 #define TRACER_SCHEDULER_H
 
 
-namespace Scheduler {
+class Scheduler {
+
+public:
 
     //Initialise the Scheduling environment;
-    void initialise();
+    virtual void initialise() = 0;
 
     //Add a task in the scheduler;
-    void addTask();
+    virtual void addTask() = 0;
 
     //Select the thread to be executed;
-    void selectThread();
+    virtual void selectThread() = 0;
 
 };
 

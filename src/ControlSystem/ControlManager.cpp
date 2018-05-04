@@ -119,7 +119,7 @@ bool ControlManager::validate() {
 
 
 /*
- * initialise : this function initialises each stage at its given mode;
+ * start : this function initialises each stage at its given mode;
  */
 
 void ControlManager::initialise() {

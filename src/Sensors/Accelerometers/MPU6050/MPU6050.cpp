@@ -116,7 +116,7 @@ MPU6050::~MPU6050() {
 
 
 /*
- * initialise_hardware : this function will initialise the connection and the chip;
+ * initialise_hardware : this function will start the connection and the chip;
  */
 
 void MPU6050::initialise_hardware() {
@@ -188,19 +188,19 @@ void MPU6050::reset_mpu() {
 
     //Enable the chip;
     write_byte(MPU_POWER, 0x80);
-    delay(100);
+    //TODO sleep(100);
 
     //Wake the chip up;
     write_bits(MPU_POWER, 0, MPU_POWER_SLEEP_BIT, 1);    //Wake up !(it's asleep by default when reset)
-    delay(100);
+    //TODO sleep(100);
 
     //Select the gyro clock;
     write_bits(MPU_POWER, MPU_CLOCK_GYRO, MPU_CLKSEL_BIT, MPU_CLKSEL_LENGTH);    //Clock selection
-    delay(100);
+    //TODO sleep(100);
 
     //Select the gyro range : +-1000deg/s;
     write_bits(MPU_GYRO_CALIB, MPU_GYRO_CALIB_FS, MPU_GYRO_CALIB_BIT, MPU_GYRO_CALIB_LEN);    //Gyro range +-1000deg/s
-    delay(100);
+    //TODO sleep(100);
 
     //Select the Accelerometer range : +-8g;
     write_bits(MPU_ACCEL_CALIB, MPU_ACCEL_CALIB_AFS, MPU_ACCEL_CALIB_BIT, MPU_ACCEL_CALIB_LEN); //Accel range +-8g

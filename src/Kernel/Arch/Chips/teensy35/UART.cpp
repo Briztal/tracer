@@ -120,7 +120,7 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
     SET(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
 
     //Set the status interrupt priority;
-    //TODO DRIVER STATUS PRIORITY
+    core_set_interrupt_priority(status_interrupt_index, DRIVER_STARUS_INTERRUPT_PRIORITY);
 
     //Eventually de-activate a pending status interrupt;
     core_clear_interrupt_pending(status_interrupt_index);
@@ -148,7 +148,7 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
     SET(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
 
     //Set the error interrupt priority;
-    //TODO DRIVER error PRIORITY
+    core_set_interrupt_priority(error_interrupt_index, DRIVER_ERROR_INTERRUPT_PRIORITY);
 
     //Eventually de-activate a pending status interrupt;
     core_clear_interrupt_pending(error_interrupt_index);
@@ -165,13 +165,27 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
 //-------------------------- Configuration methods --------------------------
 
 /*
+ * configure_packet_format : this function configures the UART. Config is divided into several private functions
+ *  that are all called;
+ */
+
+void teensy35::UART::init(uart_config &config) {
+
+    configure_packet_format(config);
+    configure_state(config);
+    configure_modem(config);
+    configure_transmission_layer(config);
+
+}
+
+/*
  * Packet format configuration : sets :
  *  - The number of data bits;
  *  - The parity bit (enables of disables);
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void teensy35::UART::configure_packet_format(uart_packet_config &config) {
+void teensy35::UART::configure_packet_format(uart_config &config) {
 
     //TODO MSB FIRST
     //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
@@ -255,7 +269,7 @@ void teensy35::UART::configure_packet_format(uart_packet_config &config) {
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void teensy35::UART::configure_modem(uart_modem_config &config) {
+void teensy35::UART::configure_modem(uart_config &config) {
 
     UARTRegisters *const registers = data->registers;
     /*
@@ -291,14 +305,14 @@ void teensy35::UART::configure_modem(uart_modem_config &config) {
 
 
 /*
- * configure_transmission : this function will setup the transmission configuration according to the required :
+ * configure_transmission_layer : this function will setup the transmission configuration according to the required :
  *
  *  - Mode (full or half duplex);
  *  - BaudRate;
  *
  */
 
-void teensy35::UART::configure_transmission(uart_transmission_config &config) {
+void teensy35::UART::configure_transmission_layer(uart_config &config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     UARTRegisters *registers = data->registers;
@@ -379,7 +393,7 @@ void teensy35::UART::configure_transmission(uart_transmission_config &config) {
  * configure_state : enables or disables the receiver or the transmitter;
  */
 
-void teensy35::UART::configure_state(uart_state_config &config) {
+void teensy35::UART::configure_state(uart_config &config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     UARTRegisters *registers = data->registers;
@@ -420,6 +434,7 @@ void teensy35::UART::configure_state(uart_state_config &config) {
     }
 
 }
+
 
 //-------------------------------- Interrupts enable functions -----------------------------------
 
@@ -504,13 +519,9 @@ void teensy35::UART::transmit_all() {
         //If the current element is the last one that can be transferred, read S1 to clear the interrupt;
         if (!hw_buffer_spaces) {
 
-//As the reading of S1 enables the resetting of RXI flag, it must not be optimised;
-#pragma optimize( "", off )
-
+            //TODO VOLATILE CHECK
             //Read S1;
-            uint8_t S1 = registers->S1;
-
-#pragma optimize( "", on )
+            registers->S1;
 
         }
 
@@ -605,17 +616,14 @@ void teensy35::UART::receive_all() {
         //If this cycle is the last one, read S1 to clear the interrupt;
         if (!reception_available) {
 
-//As the reading of S1 enables the resetting of RXI flag, it must not be optimised;
-#pragma optimize( "", off )
-
+            //TODO VOLATILE CHECK
             //Read S1;
-            uint8_t S1 = registers->S1;
+            registers->S1;
 
-#pragma optimize( "", on )
 
         }
 
-        //First, initialise the return value;
+        //First, start the return value;
         uint16_t ret_value = 0;
 
         //If the transmission mode is set to almost 9 bits and R8 is set :
@@ -689,6 +697,12 @@ void teensy35::UART::interrupt() {
 
 }
 
+/*
+ * error : this function is called on an interrupt basis each time an error is detected by the hardware.
+ *
+ *  It supports different errors, that are described in the code below.
+ */
+
 void teensy35::UART::error() {
 
     /*
@@ -709,14 +723,9 @@ void teensy35::UART::error() {
 
         //In case of framing - parity - noise error, we read and discard;
 
-        //Deactivate optimisations for safety
-#pragma optimize( "", off )
-
+        //TODO VOLATILE CHECK
         //Read D, to discard and clear flags;
-        uint8_t d = registers->D;
-
-        //Reactivate optimisations for efficiency
-#pragma optimize( "", on )
+        registers->D;
 
     }
 
@@ -728,14 +737,9 @@ void teensy35::UART::error() {
 
         //First, read D to clear the flag;
 
-        //Deactivate optimisations for safety
-#pragma optimize( "", off )
-
+        //TODO VOLATILE CHECK
         //Read D, to discard and clear flags;
-        uint8_t d = registers->D;
-
-        //Reactivate optimisations for efficiency
-#pragma optimize( "", on )
+        registers->D;
 
         //Turn off rx;
         CLEAR(registers->C2, UART_C2_RE, 8);
@@ -776,12 +780,12 @@ void teensy35::UART::error() {
  * The instantiation of an UART requires a bit of work, that is the same for all UARTs. A Macro will simplify our work;
  */
 
-#define INSTANTIATE_UART_DRIVERS(i, address, frequency)\
+#define INSTANTIATE_UART_DRIVERS(i, address, frequency, rxsize, txsize, status_index, error_index)\
     teensy35::UARTRegisters *reg##i = ((teensy35::UARTRegisters *) (address));\
     teensy35::UARTData UARTData##i{reg##i, (frequency)};\
-    void interrupt_link_##i() {UART##i.interrupt();}\
-    teensy35::UART UART##i(&UARTData##i, interrupt_link_##i);
-
+    void status_link_##i() {UART##i->interrupt();}\
+    void error_link_##i() {UART##i->error();}\
+    teensy35::UART *UART##i = new teensy35::UART(&UARTData##i, rxsize, txsize, status_index, error_index, status_link_##i, error_link_##i);
 
 
 /*
@@ -789,11 +793,10 @@ void teensy35::UART::error() {
  */
 
 /*
-INSTANTIATE_UART_DRIVERS(0, 0x4006A000, F_CPU);
-INSTANTIATE_UART_DRIVERS(1, 0x4006B000, F_CPU);
-INSTANTIATE_UART_DRIVERS(2, 0x4006C000, F_BUS);
-INSTANTIATE_UART_DRIVERS(3, 0x4006D000, F_BUS);
-INSTANTIATE_UART_DRIVERS(4, 0x400EA000, F_BUS);
-INSTANTIATE_UART_DRIVERS(5, 0x400EB000, F_BUS);
-
+INSTANTIATE_UART_DRIVERS(0, 0x4006A000, F_CPU, teensy35::size_8, teensy35::size_8, IRQ_UART0_STATUS, IRQ_UART0_ERROR);
+INSTANTIATE_UART_DRIVERS(1, 0x4006B000, F_CPU, teensy35::size_1, teensy35::size_1, IRQ_UART1_STATUS, IRQ_UART1_ERROR);
+INSTANTIATE_UART_DRIVERS(2, 0x4006C000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART2_STATUS, IRQ_UART2_ERROR);
+INSTANTIATE_UART_DRIVERS(3, 0x4006D000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART3_STATUS, IRQ_UART3_ERROR);
+INSTANTIATE_UART_DRIVERS(4, 0x400EA000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART4_STATUS, IRQ_UART4_ERROR);
+INSTANTIATE_UART_DRIVERS(5, 0x400EB000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART5_STATUS, IRQ_UART5_ERROR);
 */

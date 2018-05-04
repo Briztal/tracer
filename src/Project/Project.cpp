@@ -2,13 +2,25 @@
 // Created by root on 3/18/18.
 //
 
+#include "Kernel/Project.h"
+
 #include <Project/Interaction/TerminalPipe.h>
 #include <Project/Interaction/GCodePipe.h>
-#include "Project.h"
 
 #include "MachineController.h"
 
 #include "TemperatureController.h"
+
+
+/*
+ * instantiate_scheduler : creates an instance of the adequate scheduler;
+ */
+
+Scheduler * Project::instantiate_scheduler() {
+
+
+
+}
 
 
 /*

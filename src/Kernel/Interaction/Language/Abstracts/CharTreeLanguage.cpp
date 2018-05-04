@@ -121,7 +121,7 @@ void CharTreeLanguage::addCommand(const char *command_name, language_function co
 
     //In this function, we will have to search in the tree, for the given command name;
 
-    //First, initialise the current tree;
+    //First, start the current tree;
     CharTree *current_tree = &commandTree;
 
     char current_char;

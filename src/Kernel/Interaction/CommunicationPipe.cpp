@@ -33,8 +33,6 @@ CommunicationPipe::~CommunicationPipe() {
  */
 void CommunicationPipe::initialise_hardware() {
 
-    delay(2000);
-
     serial.begin(115200);
 
     serial.println("SERIAL ECHO");

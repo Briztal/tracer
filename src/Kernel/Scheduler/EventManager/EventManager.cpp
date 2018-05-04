@@ -40,7 +40,7 @@ namespace EventManager {
 }
 
 /*
- * reset : initialise the event array;
+ * reset : start the event array;
  */
 
 void EventManager::reset() {

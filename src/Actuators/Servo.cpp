@@ -229,7 +229,7 @@ void Servo::stop(uint8_t id) {
     //Nullify the reload value for this servo;
     reloads[id] = 0;
 
-    //Update the complementary delay, as one reload value has been modified;
+    //Update the complementary sleep, as one reload value has been modified;
     update_complement();
 
 }

@@ -19,141 +19,49 @@
 */
 
 #include <Sensors/Thermistors/Thermistors.h>
-#include <StepperControl/Steppers.h>
 #include <ControlSystem/ControlLoops.h>
 
 #include <Kernel/Scheduler/TaskScheduler/TaskScheduler.h>
 #include <Kernel/Scheduler/EventManager/EventManager.h>
 
-#include <StepperControl/TrajectoryTracer.h>
-#include <Kernel/Interaction/Interaction.h>
-#include <Sensors/Sensors.h>
-#include <Actuators/Actuators.h>
-#include <StepperControl/StepperController.h>
-#include <Config/_ConfigChecker.h>
-#include <Kernel/Storage/EEPROMMap.h>
-#include <Project/Project.h>
-#include <Kernel/Scheduler/TaskProgrammer/TaskProgrammer.h>
+#include <Kernel/Scheduler/ThreadManager/process.h>
+
 #include "Kernel.h"
 
+#include "Kernel/Arch/arch.h"
 
 namespace Kernel {
     
     //The start flag, set only once, at the entry point. Prevents start to be called a second time.
     bool started = false;
 
-
-    //------------------------------------------- Config checking -------------------------------------------
-    
-    /*
-     * check_config : this function is called once, by the start function.
-     *
-     *  It will call _ConfigChecker, and if it fails, make the led blink and display the error message
-     *      on all data links.
-     */
-
-    void check_config();
-
-
-    //------------------------------------------- Initialisation -------------------------------------------
-
-
-    /*
-     * initialise_hardware : this function is called once, by start only. It is the hardware initialisation function.
-     *
-     *  As its name suggests, it will solve the hardware for all interfaces.
-     */
-
-    void initialise_hardware();
-
-
-    /*
-     * initialise_hardware : this function is called after the restoration point. It resets every module's processing
-     *
-     *  environment.
-     */
-
-    void initialise_data();
-
-
-
-    //------------------------------------------- Main Loop -------------------------------------------
-    
-    
-    /*
-     * run : this function is the main loop of the project.
-     *
-     *  It calls a Scheduler iteration , and eventually executes user defined routines.
-     */
-
-    void run();
-    
-    
-    //------------------------------------------- Emergency Stop -------------------------------------------
-
-    /*
-     * The jump buffer pointing to the code'entry point;
-     */
-
-    jmp_buf restoration_point;
-
 }
+
+
 //------------------------------------------- Entry Point -------------------------------------------
 
-
 /*
- * start : this function is called once, by main only. It is the project's entry point.
- *
- *  It will call initialise_hardware, and then call iterate indefinitely.
+ * start : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
 void Kernel::start() {
-
-
 
     //This function can be called only once. If it has already been called, fail.
     if (started)
         return;
 
-    //Set the flag o prevent multiple executions;
+    //Set the flag to prevent multiple executions;
     started = true;
 
-    //Check all configuration files;
-    check_config();
+    //TODO IN CORE_INIT FUNCTION, CALLED BEFORE KERNEL INIT
+    //Initialise the hardware and the framework
+    hl_init();
 
-    //Setup the kernel;
-    Project::initialise_kernel();
-
-    //Initialise the hardware;
-    initialise_hardware();
-
-    //Setup the restoration jump buffer;
-    int jump_state = setjmp(restoration_point);
-
-    //If the restoration point was already used, probably due to an uncaught exception :
-    if (jump_state) {
-
-        delay(500);
-
-        //Log
-        std_out("\nAn error has occurred in the code, and it was restored to its initialisation.\n"
-                         "You should find an error message in the logs behind. \n"
-                         "I hope it will help you to find what has gone wrong ! ");
-
-    }
-
-
-    //Wait for the eventual retransmission;
-    delay(500);
-
-    //Initialise the environment;
-    initialise_data();
-
-    //Call the main loop;
-    run();
-
+    //Start the thread manager;
+    ThreadManager::start();
 
 }
+
 
 //------------------------------------------- Interaction -------------------------------------------
 
@@ -168,12 +76,16 @@ void Kernel::register_communication_pipe(CommunicationPipe *pipe) {
 
 }
 
+
 //------------------------------------------- Config checking -------------------------------------------
 
 /*
  * check_config : this function will call _ConfigChecker, and blink the led and display the error message
  *  if it fails;
  */
+
+/*
+ * TODO REBUILD
 
 void Kernel::check_config() {
 
@@ -231,7 +143,10 @@ void Kernel::check_config() {
         delay_ms(1000);
 
     }
+
 }
+
+  */
 
 
 //------------------------------------------- Initialisation -------------------------------------------
@@ -243,22 +158,13 @@ void Kernel::check_config() {
  *  As its name suggests, it will initialise_hardware every module of the code.
  */
 
+/*
+ * TODO REBUILD
 void Kernel::initialise_hardware() {
 
-    //Initialise the hardware and the framework
-    hl_init();
-
-    //Initialise the tasl programmer;
-    //TaskProgrammer::intialise_hardware();
 
     //Initialise all enabled interfaces
     Interaction::initialise_hardware();
-
-    //Initialise actions;
-    Actuators::initialise_hardware();
-
-    //Initialise Sensors
-    Sensors::initialise_hardware();
 
     //Initialise the SteppersController module only if it is enabled
 #ifdef ENABLE_STEPPER_CONTROL
@@ -269,6 +175,7 @@ void Kernel::initialise_hardware() {
 
 
 }
+ */
 
 
 /*
@@ -276,6 +183,9 @@ void Kernel::initialise_hardware() {
  *
  *  As its name suggests, it will initialise_hardware every module of the code.
  */
+
+/*
+ * TODO REBUILD
 
 void Kernel::initialise_data() {
 
@@ -294,12 +204,6 @@ void Kernel::initialise_data() {
     //Initialise the task programmer;
     TaskProgrammer::reset();
 
-    //Initialise actions;
-    Actuators::initialise_data();
-
-    //Initialise Sensors
-    Sensors::initialise_data();
-
 
     //Initialise the SteppersController module only if it is enabled
 #ifdef ENABLE_STEPPER_CONTROL
@@ -307,8 +211,6 @@ void Kernel::initialise_data() {
     StepperController::initialise_data();
 
 #endif
-
-    Serial.println("data Init");
 
     //Finally, solve the project;
     Project::initialise_data();
@@ -318,70 +220,5 @@ void Kernel::initialise_data() {
 
 
 }
+  */
 
-
-//------------------------------------------- Main Loop -------------------------------------------
-
-
-/*
- * run : this function is the main loop of the project.
- *
- *  It calls a Scheduler iteration , and eventually executes user defined routines.
- */
-
-void Kernel::run() {
-
-    while (true) {
-
-        //TODO User Routines
-
-        /*
-         * Trigger an iteration of the task scheduler :
-         *  - read_data all available interfaces until Kernel is full or interface buffers are empties;
-         *  - execute all possible tasks in the task pool;
-         *  - execute all possible tasks in all sequences;
-         */
-
-        //Add as much tasks as possible in the pool from external controllers;
-        Interaction::read_communication_pipes();
-
-        //Execute all scheduled tasks;
-        //TaskScheduler::iterate();
-
-        //Process events;
-        EventManager::process_events();
-
-        //Process programmed tasks;
-        TaskProgrammer::process_tasks();
-
-    }
-
-}
-
-
-
-//------------------------------------------- Emergency Stop -------------------------------------------
-
-
-/*
- * emergency_stop : this function stops the code, and long-jumps to the entry point.
- *
- *  Any unhandled exception in the code calls this function, to avoid any unplanned behaviour.
- */
-
-void Kernel::emergency_stop() {
-
-    //Cleat the taskScheduler;
-    TaskScheduler::clear();
-
-    //Trigger the TrajectoryTracer's emergency stop function only if the stepper control module is enabled.
-#ifdef ENABLE_STEPPER_CONTROL
-
-    TrajectoryTracer::emergency_stop();
-
-#endif
-
-    //Restore TRACER to the initialisation point.
-    longjmp(restoration_point, 1);
-
-}

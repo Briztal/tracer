@@ -7,11 +7,11 @@
 #ifndef TRACER_TEENSY35_UART_H
 #define TRACER_TEENSY35_UART_H
 
-#include <Kernel/Drivers/UART/UARTBase.h>
+#include <Kernel/Drivers/UART/UARTDriver.h>
+
 #include "kinetis.h"
 
 namespace teensy35 {
-
 
     enum fifo_size_t {
         size_1 = 0,
@@ -89,7 +89,7 @@ namespace teensy35 {
     /*
      * Then, we define the UART data structure, that will contain a memory map, and a set of hardware constants;
      */
-    typedef struct UARTData {
+    struct UARTData {
 
         //The registers struct;
         UARTRegisters *const registers;
@@ -104,7 +104,7 @@ namespace teensy35 {
 
 
     /*
-     * Finally, we can define our UARTBase, that will inherit of the UARTBase class, and implements peripheral
+     * Finally, we can define our UARTDriver, that will inherit of the UARTDriver class, and implements peripheral
      *  for hardware UARTS;
      *
      *  The teensy35's UART integrates a hardware buffer for both rx and tx canals, whose sizes depend on the module;
@@ -137,7 +137,7 @@ namespace teensy35 {
      *
      */
 
-    class UART : UARTBase {
+    class UART : UARTDriver {
 
         /*
          * -------------------------- Object Methods --------------------------
@@ -148,7 +148,9 @@ namespace teensy35 {
     public:
 
         //Enabled Constructor;
-        UART(UARTData *data, fifo_size_t rx_size, fifo_size_t tx_size, uint8_t status_interrupt_index, uint8_t error_interrupt_index, void (*status_interrupt_link)(), void (*error_interrupt_link)());
+        UART(UARTData *data, fifo_size_t rx_size, fifo_size_t tx_size,
+             uint8_t status_interrupt_index, uint8_t error_interrupt_index,
+             void (*status_interrupt_link)(), void (*error_interrupt_link)());
 
 
 //TODO EVENTUALLY MERGE UARTDATA AND UARTDRIVER TO ECONOMISE A POINTER ACCESS
@@ -175,17 +177,26 @@ namespace teensy35 {
 
     public:
 
-        //Configure the UART packet format;
-        void configure_packet_format(uart_packet_config &) final;
+        //Initialise the uart;
+        void init(uart_config &) final;
 
-        //Configure the UART modem;
-        void configure_modem(uart_modem_config &) final;
+        //De-initialise the uart;
+        void exit() final;
 
-        //Configure the UART transmission;
-        void configure_transmission(uart_transmission_config &) final;
 
-        //Configure the UART state ;
-        void configure_state(uart_state_config &) final;
+    private:
+
+        //Configure the packet format;
+        void configure_packet_format(uart_config &);
+
+        //Configure the state;
+        void configure_state(uart_config &);
+
+        //Configure the state;
+        void configure_modem(uart_config &);
+
+        //Configure the transmission layer;
+        void configure_transmission_layer(uart_config &);
 
 
         //-------------------------------- Interrupts enable functions -----------------------------------
@@ -253,12 +264,28 @@ namespace teensy35 {
  * The teensy35 comprises 6 UARTS;
  */
 
-extern teensy35::UART UART0;
-extern teensy35::UART UART1;
-extern teensy35::UART UART2;
-extern teensy35::UART UART3;
-extern teensy35::UART UART4;
-extern teensy35::UART UART5;
+#ifndef DISABLE_UART0
+extern teensy35::UART *UART0Driver;
+#endif
 
+#ifndef DISABLE_UART1
+extern teensy35::UART *UART1Driver;
+#endif
+
+#ifndef DISABLE_UART2
+extern teensy35::UART *UART2Driver;
+#endif
+
+#ifndef DISABLE_UART3
+extern teensy35::UART *UART3Driver;
+#endif
+
+#ifndef DISABLE_UART4
+extern teensy35::UART *UART4Driver;
+#endif
+
+#ifndef DISABLE_UART5
+extern teensy35::UART *UART5Driver;
+#endif
 
 #endif //TRACER_TEENSY35_UART_H

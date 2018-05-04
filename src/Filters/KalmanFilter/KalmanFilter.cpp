@@ -52,7 +52,7 @@ KalmanFilter::KalmanFilter(uint8_t stateSize, uint8_t measureSize)
 
 
 /*
- * initialise : this function initialises all matrices;
+ * start : this function initialises all matrices;
  */
 
 void KalmanFilter::initialise(const Matrix &prediction_matrix, const Matrix &transformation_matrix,
@@ -61,7 +61,7 @@ void KalmanFilter::initialise(const Matrix &prediction_matrix, const Matrix &tra
     if (matricesInitialised) {
 
         //Log;
-        std_out("Error in KalmanFilter::initialise : attempted to initialise twice;");
+        std_out("Error in KalmanFilter::initialise : attempted to start twice;");
 
         //Abort;
         return;
@@ -111,7 +111,7 @@ void KalmanFilter::setInitialState(const float *initial_state, const Matrix &ini
     if (stateInitialised) {
 
         //Log;
-        std_out("Error in KalmanFilter::setInitialState : attempted to initialise twice;");
+        std_out("Error in KalmanFilter::setInitialState : attempted to start twice;");
 
         //Abort;
         return;

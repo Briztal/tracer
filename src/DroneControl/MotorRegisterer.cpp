@@ -22,7 +22,7 @@
 
 
 /*
- * Constructor : initialise the flags array;
+ * Constructor : start the flags array;
  */
 
 MotorRegisterer::MotorRegisterer(uint8_t nb_motors) :

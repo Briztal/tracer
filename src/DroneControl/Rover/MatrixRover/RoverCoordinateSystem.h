@@ -26,7 +26,7 @@ class RoverCoordinateSystem {
 
 public:
 
-    //Create a default constructor, that will initialise all to false
+    //Create a default constructor, that will start all to false
     RoverCoordinateSystem() = default;
 
     //Enable the x control;

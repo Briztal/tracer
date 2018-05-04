@@ -49,16 +49,6 @@ namespace Kernel {
 
     void register_communication_pipe(CommunicationPipe *pipe);
 
-    
-    //------------------------------------------- Emergency Stop -------------------------------------------
-
-    /*
-     * emergency_stop : this function stops the code, and long-jumps to the entry point.
-     *
-     *  Any unhandled exception in the code calls this function, to avoid any unplanned behaviour.
-     */
-
-    void emergency_stop();
 
 };
 

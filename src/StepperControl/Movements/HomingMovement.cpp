@@ -51,7 +51,7 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
     /*
      * Delays update :
      *
-     * The delay for a stepper simply corresponds to its max jerk;
+     * The sleep for a stepper simply corresponds to its max jerk;
      */
 
     //For each stepper :
@@ -60,7 +60,7 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
         //Cache the appropriate stepper data;
         stepper_data_t *data = SteppersData::steppers_data + axis;
 
-        //Set the delay for the i-th stepper
+        //Set the sleep for the i-th stepper
         delays[axis] = (uint32_t) (1000000 / (data->jerk * data->steps_per_unit));
     }
 
@@ -126,7 +126,7 @@ uint8_t HomingMovement::cardinal(sig_t signature) {
 
 
 /*
- * phase_1 : this function steps_per_unit all remaining axis, and eventually updates the signature and delay.
+ * phase_1 : this function steps_per_unit all remaining axis, and eventually updates the signature and sleep.
  *
  *  Then, it re-sechedules itself;
  */
@@ -148,7 +148,7 @@ void HomingMovement::phase_1() {
         //Update the signature;
         movement_signature = read_endstops();
 
-        //update the delay;
+        //update the sleep;
         step_period_us = get_movement_delay(movement_signature, delays);
 
         //Update the interrupt period;
@@ -182,12 +182,12 @@ void HomingMovement::phase_1() {
 
 /*
  * get_movement_delay : this function will compute the delay for the movement corresponding to the provided
- *      signature, with the provided delay array;
+ *      signature, with the provided sleep array;
  */
 
 float HomingMovement::get_movement_delay(sig_t signature, const float *const delays) {
 
-    //Initialise the final delay to zero.
+    //Initialise the final sleep to zero.
     float delay = 0;
 
     //For each axis :
@@ -196,10 +196,10 @@ float HomingMovement::get_movement_delay(sig_t signature, const float *const del
         //If the stepper must move :
         if (signature & (uint32_t) 1) {
 
-            //Cache the delay for the current axis;
+            //Cache the sleep for the current axis;
             float new_delay = delays[axis];
 
-            //The final delay is the maximum of the max delay and the current axis delay;
+            //The final delay is the maximum of the max delay and the current axis sleep;
             delay = max(delay, new_delay);
 
             break;
@@ -210,7 +210,7 @@ float HomingMovement::get_movement_delay(sig_t signature, const float *const del
 
     }
 
-    //Return the maximum delay;
+    //Return the maximum sleep;
     return delay;
 }
 

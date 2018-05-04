@@ -2,6 +2,8 @@
 // Created by root on 4/6/18.
 //
 
+#ifndef CORE_ARM_CORTEXM4F
+#define CORE_ARM_CORTEXM4F
 
 #include "stdint.h"
 
@@ -35,10 +37,9 @@ typedef stack_element_t *stack_ptr_t;
  *  and injects assembly inline to move the data of the temp into psp;
  */
 
-#define core_set_thread_stack_pointer(sp) {\
-        uint32_t __temp_var_core_set_thread_stack_pointer__ = (uint32_t) (sp);\
-        __asm__ __volatile__ ("msr psp, %0" :: "r" (__temp_var_core_set_thread_stack_pointer__));\
-    }
+static inline void core_set_thread_stack_pointer(const stack_ptr_t sp) {
+    __asm__ __volatile__ ("msr psp, %0"::"r" (sp));\
+}
 
 
 /*
@@ -46,9 +47,11 @@ typedef stack_element_t *stack_ptr_t;
  *  provided variable -> sp must be an existing variable name;
  */
 
-#define core_get_thread_stack_pointer(sp) {\
-        __asm__ __volatile__ ("mrs %0, psp" : "=r" ((uint32_t)sp):);\
-    }
+static inline stack_ptr_t core_get_thread_stack_pointer() {
+    stack_ptr_t ptr = nullptr;
+    __asm__ __volatile__ ("mrs %0, psp" : "=r" ((uint32_t) ptr):);
+    return ptr;
+}
 
 
 /*
@@ -62,13 +65,14 @@ typedef stack_element_t *stack_ptr_t;
  *      allow the processor to unstack properly even if core_unstack_context is called;
  */
 
-#define core_stack_thread_context()\
+static inline void core_stack_thread_context() {
+    uint32_t scratch;
     __asm__ __volatile__ (\
-        "mrs r0, psp \n\t"\
-        "stmdb r0!, {r4 - r11}\n\t"\
-        "vstmdb r0!, {s16 - s31}"\
-    )
-
+        "mrs %0, psp \n\t"\
+        "stmdb %0!, {r4 - r11}\n\t"\
+        "vstmdb %0!, {s16 - s31}" : "=r" (scratch)\
+    );
+}
 
 
 /*
@@ -81,12 +85,14 @@ typedef stack_element_t *stack_ptr_t;
  *  As core_stack_thread_context didn't alter PSP, this function doesn't either;
  */
 
-#define core_unstack_thread_context()\
+static inline void core_unstack_thread_context() {
+    uint32_t scratch;
     __asm__ __volatile__ (\
-        "mrs r0, psp \n\t"\
-        "ldmdb r0!, {r4 - r11} \n\t"\
-        "vldmdb r0!, {s16 - s31}"\
-    )
+        "mrs %0, psp \n\t"\
+        "ldmdb %0!, {r4 - r11} \n\t"\
+        "vldmdb %0!, {s16 - s31} " : "=r" (scratch)\
+    );
+}
 
 
 /*
@@ -100,25 +106,29 @@ typedef stack_element_t *stack_ptr_t;
  *  Finally, it leaves space for empty stack frame and saves the stack pointer;
  */
 
-#define core_init_stack(function, end_loop, thread_index) {\
-        uint32_t *__core_init_stack_sp__ = 0;\
-        core_get_thread_stack_pointer(__core_init_stack_sp__);\
-        *(__core_init_stack_sp__ - 1) = 0x01000000;\
-        *(__core_init_stack_sp__ - 2) = (uint32_t) (function);\
-        *(__core_init_stack_sp__ - 3) = (uint32_t) (end_loop);\
-        *(__core_init_stack_sp__ - 4) = (uint32_t) (thread_index);\
-        __core_init_stack_sp__ -= 8;\
-        core_set_thread_stack_pointer(__core_init_stack_sp__);\
+static inline void core_init_stack(void (*function)(), void (*end_loop)(), stack_element_t process_pointer) {
+        uint32_t *__core_init_stack_sp__ = core_get_thread_stack_pointer();
+        *(__core_init_stack_sp__ - 1) = 0x01000000;
+        *(__core_init_stack_sp__ - 2) = (uint32_t) (function);
+        *(__core_init_stack_sp__ - 3) = (uint32_t) (end_loop);
+        *(__core_init_stack_sp__ - 4) = (uint32_t) (process_pointer);
+        __core_init_stack_sp__ -= 8;
+        core_set_thread_stack_pointer(__core_init_stack_sp__);
     }
 
 
 /*
- * core_get_thread_id : this function will set thread_id to the value sored in r12, where was stored the thread
+ * core_get_process : this function will set thread_id to the value sored in r12, where was stored the thread
  *  index in the core_init_stack macro;
  */
 
-#define core_get_thread_id(thread_id)\
-    __asm__ __volatile__("mov %0, r12": "=r" (thread_id):)
+static inline stack_element_t core_get_process() {
+    stack_element_t thread_index = 0;
+    __asm__ __volatile__("mov %0, r12": "=r" (thread_index):);
+    return thread_index;
+
+}
+
 
 /*
  * core_trigger_context_switch : sets the pendSV exception isPending flag;
@@ -126,15 +136,15 @@ typedef stack_element_t *stack_ptr_t;
 
 #define core_trigger_context_switch()\
     SCB_ICSR |= SCB_ICSR_PENDSVSET
-    /*__asm__ __volatile__(\
-        "mrs r0, icsr \n\t"\
-        "mov r1, #1 \n\t"\
-        "and r0, r0, r1, lsl #28 \n\t"\
-        "msr icsr, r0 \n\t"\
-    );*/
 
-#define context_switch_state()\
-    SCB_ICSR &
+
+/*
+ * core_trigger_context_switch : sets the pendSV exception isPending flag;
+ */
+
+#define core_untriggerr_context_switch()\
+    SCB_ICSR |= SCB_ICSR_PENDSVCLR
+
 
 /*
  * core_enable_interrupts : injects inline assembly code to disable all interrupts. Fault handling is still enabled;
@@ -280,6 +290,19 @@ typedef stack_element_t *stack_ptr_t;
 
 
 /*
+ * Priority levels : these are the standard interrupt priorities for drivers;
+ *
+ * Cortex-M4: 0,16,32,48,64,80,96,112,128,144,160,176,192,208,224,240
+ */
+
+//The standard priority for status interrupt;
+#define DRIVER_STARUS_INTERRUPT_PRIORITY 32
+
+//The standard priority for error interrupt;
+#define DRIVER_ERROR_INTERRUPT_PRIORITY 16
+
+
+/*
  * core_set_interrupt_handler : sets the handler of the required interrupt;
  */
 
@@ -287,11 +310,18 @@ typedef stack_element_t *stack_ptr_t;
     _VectorsRam[16 + (interrupt_index)] = handler;
 
 
+/*
+ * core_in_thread_mode : this function return true if the current code runs in thread mode;
+ *
+ *  If we are in an interrupt, the 8 first bits of the System Control Block will contain the exception number.
+ *
+ *  If they are 0, we are in thread mode;
+ */
+
+#define core_in_thread_mode() (bool)(!(uint8_t ) SCB_ICSR)
 
 
-
-
-
+#endif
 
 
 

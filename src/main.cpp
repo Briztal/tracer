@@ -24,13 +24,6 @@
 
  */
 
-#include "Arduino.h"
-
-#include <Kernel/Scheduler/ThreadManager/ThreadManager.h>
-#include <Kernel/Scheduler/TaskStorage.h>
-#include <Kernel/Scheduler/Systick.h>
-#include <usb_dev.h>
-
 
 /*
  *  Initialisation :
@@ -77,22 +70,38 @@
  *      - Determination of the thread's PSP;
  */
 
+#include <Kernel/Arch/Chips/teensy35/USBuart.h>
+#include <Kernel/Scheduler/ThreadManager/process.h>
+#include <Kernel/Scheduler/TaskStorage.h>
+#include <Kernel/Scheduler/Systick.h>
+#include "Arduino.h"
 
 void end_function() {
-    Serial.println("END FUNCTION REACHED");
+    USBuart::write("END FUNCTION REACHED");
 }
 
+Semaphore S(1);
+
+//digitalWrite(13, !digitalRead(13));
 
 task_state_t task_0(void *) {
 
-    delay(500);
-
-    Serial1.begin(115200);
-
     while (true) {
-        //Serial.println("Task_0");
-        digitalWrite(13, !digitalRead(13));
-        Systick::delay(1000);
+
+        USBuart::write("Task_0 REQUEST");
+
+        S.P();
+
+        for (uint8_t i = 10; i--;) {
+
+            USBuart::write("Task_0");
+
+            Systick::sleep(1);
+        }
+
+        S.V();
+
+        Systick::sleep(10);
     }
 
 
@@ -101,8 +110,23 @@ task_state_t task_0(void *) {
 task_state_t task_1(void *) {
 
     while (true) {
-        Serial.println("Task_1");
-        Systick::delay(3000);
+
+        USBuart::write("Task_1 REQUEST");
+
+        S.P();
+
+        for (uint8_t i = 10; i--;) {
+
+            USBuart::write("Task_1");
+
+
+        }
+
+        S.V();
+
+        Systick::sleep(1);
+
+
     }
 
 }
@@ -110,8 +134,19 @@ task_state_t task_1(void *) {
 task_state_t task_2(void *) {
 
     while (true) {
-        Serial.println("Task_2");
-        Systick::delay(5000);
+
+        USBuart::write("Task_2 REQUEST");
+
+        S.P();
+
+        for (uint8_t i = 2; i--;) {
+            USBuart::write("Task_2");
+
+        }
+
+        S.V();
+
+        Systick::sleep(2);
     }
 
 }
@@ -119,11 +154,11 @@ task_state_t task_2(void *) {
 
 task_state_t task_3(void *) {
 
-    Systick::delay(1000);
+    Systick::sleep(1000);
 
     while (true) {
-        Serial.println("Task_3");
-        Systick::delay(14000);
+        USBuart::write("Task_3");
+        Systick::sleep(14000);
     }
 
 
@@ -132,26 +167,15 @@ task_state_t task_3(void *) {
 }
 
 
-
 int main() {
-
-    delay(1000);
 
     pinMode(13, OUTPUT);
 
     digitalWrite(13, HIGH);
 
-    Serial.begin(115200);
+    delay(2000);
 
-    Serial.println("SUUS");
-
-
-    while(true);
-
-    Serial.println("INITIALISED");
-
-
-    Serial.println("SUUUUUS");
+    USBuart::init(115200);
 
     //Initialise all threads;
     ThreadManager::createThread(1000);
@@ -160,8 +184,6 @@ int main() {
     ThreadManager::createThread(1000);
     ThreadManager::createThread(1000);
 
-
-    Serial.println("Initialised");
 
     TaskData td0;
     td0.function = task_0;
@@ -173,39 +195,29 @@ int main() {
     ThreadManager::setTask(0, TaskStorage::addTask(td0));
 
 
-    Serial.println("Added");
-
-
     TaskData td1;
     td1.function = task_1;
     td1.termination = end_function;
 
     //Add some tasks;
-    //ThreadManager::setTask(1, TaskStorage::addTask(td1));
-
-
-    Serial.println("Added");
+    ThreadManager::setTask(1, TaskStorage::addTask(td1));
 
 
     TaskData td2;
-    td1.function = task_2;
-    td1.termination = end_function;
+    td2.function = task_2;
+    td2.termination = end_function;
 
     //Add some tasks;
-    //ThreadManager::setTask(2, TaskStorage::addTask(td2));
-
-
-    Serial.println("Added");
+    ThreadManager::setTask(2, TaskStorage::addTask(td2));
 
 
     TaskData td3;
-    td1.function = task_3;
-    td1.termination = end_function;
+    td3.function = task_3;
+    td3.termination = end_function;
 
     //Add some tasks;
     //ThreadManager::setTask(3, TaskStorage::addTask(td3));
 
-    Serial.println("Ready");
 
     //Run threads;
     ThreadManager::start();
@@ -216,4 +228,6 @@ int main() {
     //Kernel::start();
 
 }
+
+
 

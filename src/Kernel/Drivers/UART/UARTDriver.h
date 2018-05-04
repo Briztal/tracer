@@ -8,9 +8,6 @@
 //Include the architecture library
 #include "Kernel/Arch/arch.h"
 
-//If the UART is supported :
-#ifdef UART_SUPPORTED
-
 /*
  * The base driver for UART.
  *
@@ -22,6 +19,7 @@
 
 //Buffers to contain temporary data;
 #include <DataStructures/Containers/CircularBuffer.h>
+#include <Kernel/Drivers/Driver.h>
 
 
 /*
@@ -43,39 +41,6 @@ enum parity_bit_t {
 
 
 /*
- * Packet configuration structure;
- */
-
-struct uart_packet_config {
-
-    //The Number of data bits;
-    uint8_t nb_data_bits = 8;
-
-    //Is the parity bit present ?
-    bool parity_bit_enabled = false;
-
-    //The type of the parity bit;
-    parity_bit_t parity_type = EVEN_PARITY;
-
-
-};
-
-
-/*
- * The UART modem configuration structure;
- */
-
-struct uart_modem_config {
-
-    //RTS enabled;
-    bool rts_enabled = false;
-
-    //CTS check before detection enabled;
-    bool cts_enabled = false;
-
-};
-
-/*
  * The type of the transmission;
  */
 
@@ -91,7 +56,28 @@ enum transmission_type_t {
  * The transmission configuration structure;
  */
 
-struct uart_transmission_config {
+struct uart_config {
+
+    //The size of the reception software buffer;
+    uint16_t sw_rx_buffer_size = 64;
+
+    //The size of the reception software buffer;
+    uint16_t sw_tx_buffer_size = 64;
+
+    //The Number of data bits;
+    uint8_t nb_data_bits = 8;
+
+    //Is the parity bit present ?
+    bool parity_bit_enabled = false;
+
+    //The type of the parity bit;
+    parity_bit_t parity_type = EVEN_PARITY;
+
+    //RTS enabled;
+    bool rts_enabled = false;
+
+    //CTS check before detection enabled;
+    bool cts_enabled = false;
 
     //The transmission state;
     transmission_type_t transmission_type = FULL_DUPLEX;
@@ -99,40 +85,32 @@ struct uart_transmission_config {
     //The Baudrate;
     uint32_t baudrate = 9600;
 
-};
-
-/*
- * The transmission configuration structure;
- */
-
-struct uart_state_config {
-
     //Is Tx enabled ?
-    bool tx_enabled = false;
+    bool tx_enabled = true;
 
     //Is Rx enabled ?
-    bool rx_enabled = false;
+    bool rx_enabled = true;
 
 };
 
 
-class UARTBase {
+class UARTDriver {
 
     //-------------------------------- Driver Initialisation -----------------------------------
 
 public:
 
-    //The constructor. Takes the UART instance in argument;
-    explicit UARTBase();
+    //The constructor;
+    UARTDriver();
 
-    //Driver initialisation;
-    void initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size);
+    //Driver start;
+    virtual void init(uart_config &);
 
-    //Driver reset : resets the UART in the default state;
-    void reset();
+    //Driver stop;
+    virtual void exit();
 
     //The destructor;
-    virtual ~UARTBase();
+    virtual ~UARTDriver();
 
 
     //-------------------------------- Disabled constructors and operators -----------------------------------
@@ -140,16 +118,16 @@ public:
 private:
 
     //Disabled copy constructor;
-    UARTBase(const UARTBase &) : receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
+    UARTDriver(const UARTDriver &) : receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
 
     //Disabled move constructor;
-    UARTBase(UARTBase &&) noexcept : receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
+    UARTDriver(UARTDriver &&) noexcept : receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
 
     //Disabled copy assignment operator;
-    void operator=(const UARTBase &) {};
+    void operator=(const UARTDriver &) {};
 
     //Disabled move assignment operator;
-    void operator=(UARTBase &&) noexcept {};
+    void operator=(UARTDriver &&) noexcept {};
 
 
     //-------------------------------- Buffer access functions -----------------------------------
@@ -170,6 +148,9 @@ public:
 
 protected:
 
+    //Is the driver started ?
+    bool started;
+
     //TODO THESE BUFFER TAKE SPACE IN MEMORY DUE TO ALLOCATION FLAG. MAKE A LIGHTWEIGHT CONTAINER;
     //The reception buffer;
     CircularBuffer<uint16_t> *receptionBuffer;
@@ -182,26 +163,18 @@ protected:
      * -------------------------------- Virtual Methods -----------------------------------
      */
 
+
     //-------------------------- Configuration methods --------------------------
 
 public:
 
     //Configure the UART packet format;
-    virtual void configure_packet_format(uart_packet_config &) = 0;
-
-    //Configure the UART modem;
-    virtual void configure_modem(uart_modem_config &) = 0;
-
-    //Configure the UART transmission;
-    virtual void configure_transmission(uart_transmission_config &) = 0;
-
-    //Configure the UART state ;
-    virtual void configure_state(uart_state_config &) = 0;
+    virtual void start(uart_config &) = 0;
 
 
     //-------------------------------- Interrupts enable functions -----------------------------------
 
-public:
+protected :
 
     //Enable the reception interrupt
     virtual void enable_reception_interrupt() = 0;
@@ -212,7 +185,7 @@ public:
 
     //-------------------------- Transmission methods --------------------------
 
-public:
+protected:
 
     //How many uint16_t-s can we receive_all from the UART ?
     virtual uint8_t transmission_available() = 0;
@@ -226,7 +199,7 @@ public:
 
     //-------------------------- Reception methods --------------------------
 
-public:
+protected:
 
     //Receive as many data as possible from the UART Peripheral;
     virtual void receive_all() = 0;

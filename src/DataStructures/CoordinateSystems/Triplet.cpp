@@ -15,7 +15,7 @@ Triplet::Triplet() {}
 
 
 /*
- * Value constructor : will initialise data with given values;
+ * Value constructor : will start data with given values;
  */
 
 Triplet::Triplet(float v0, float v1, float v2) {

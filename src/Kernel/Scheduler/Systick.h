@@ -35,7 +35,7 @@ namespace Systick {
     uint32_t milliseconds();
 
     //Wait till time has reached the given limit;
-    void delay(uint32_t delta_t);
+    void sleep(uint32_t delta_t);
 
     //The milliseconds reset : returns true if millis must be reset to 0 all across the code, to avoid an overflow;
     bool msResetRequired();

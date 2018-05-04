@@ -63,7 +63,7 @@ private:
 
 private:
 
-    //Function to compute the delay for a movement involving specified steppers;
+    //Function to compute the sleep for a movement involving specified steppers;
     static float get_movement_delay(uint32_t signature, const float *const delays);
 
     //Get a new movement signature;

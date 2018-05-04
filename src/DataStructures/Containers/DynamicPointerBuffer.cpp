@@ -509,7 +509,7 @@ void DynamicPointerBuffer<T>::sort() {
 /*
  * resize : this function will attempt to resize the array to the provided size;
  *
- * It will automatically delete removed elements, and initialise added elements to nullptr;
+ * It will automatically delete removed elements, and start added elements to nullptr;
  */
 
 template<class T>
@@ -557,7 +557,7 @@ bool DynamicPointerBuffer<T>::resizeTo(uint8_t new_size) {
     elements = (T **) new_array;
 
 
-    //Finally, we must initialise pointers comprised in [|size, new_size|[ to nullptr;
+    //Finally, we must start pointers comprised in [|size, new_size|[ to nullptr;
 
     //For every element :
     for (uint8_t element_index = size; element_index < new_size; element_index++) {

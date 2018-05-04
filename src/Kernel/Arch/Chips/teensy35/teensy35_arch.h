@@ -1,3 +1,7 @@
+
+#ifndef TRACER_ARCH_TEENSY35_H
+#define TRACER_ARCH_TEENSY35_H
+
 #define arch teensy35
 
 
@@ -96,9 +100,60 @@ enum IRQ_NUMBER_t {
 };
 
 */
+
+
 /*
  * --------------------------------------- Supported peripherals ---------------------------------------
  */
 
-//The teensy's hardware comprises UARTs
-#define UART_SUPPORTED
+//Before defining the peripheral ids, let's include the arch config, that will enable support for hardware drivers;
+#include "Project/arch_config.h"
+
+enum peripheral_id_t {
+
+#ifdef SUPPORT_UART0
+    UART0,
+#endif
+
+#ifdef SUPPORT_UART0
+    UART1,
+#endif
+
+#ifdef SUPPORT_UART0
+    UART2,
+#endif
+
+#ifdef SUPPORT_UART0
+    UART3,
+#endif
+
+#ifdef SUPPORT_UART0
+    UART4,
+#endif
+
+#ifdef SUPPORT_UART0
+    UART5,
+#endif
+
+#ifdef SUPPORT_LPUART
+    LPUART,
+#endif
+
+    //Force a last element
+    last,
+
+    //Get the zize of the last element;
+    size = last
+
+};
+
+
+namespace teensy35 {
+
+    //Initialise the resource manager with all declared peripherals;
+    void initialise_peripheral_manager();
+
+}
+
+
+#endif

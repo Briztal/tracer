@@ -759,7 +759,7 @@ task_state_t TerminalPipe::test_mpu() {
 
     uint32_t time = millis() + period_ms;
 
-    delay(1000);
+    //TODOsleep(1000);
 
 
     while (true) {
@@ -770,7 +770,7 @@ task_state_t TerminalPipe::test_mpu() {
 
         mpu->get_gyrometer_data(gyro);
 
-        delay(10);
+        //TODO sleep(10);
 
         //std_out("ax : " + string(accelero[0]) + " ay " + string(accelero[1]) + " az " + string(accelero[2]));
 

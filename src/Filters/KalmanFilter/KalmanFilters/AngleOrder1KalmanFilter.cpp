@@ -13,7 +13,7 @@ AngleOrder1KalmanFilter::AngleOrder1KalmanFilter() : KalmanFilter(3, 2) {}
 
 
 /*
- * This function will initialise matrices of the kalman filter;
+ * This function will start matrices of the kalman filter;
  */
 
 void AngleOrder1KalmanFilter::initialise(float period, Matrix &process_noise, Matrix &measure_noise) {
@@ -46,7 +46,7 @@ void AngleOrder1KalmanFilter::initialise(float period, Matrix &process_noise, Ma
     transformation.setToIdentity();
     transformation.setCoefficient(0, 2, 1);
 
-    //Finally, let's initialise all matrices;
+    //Finally, let's start all matrices;
     KalmanFilter::initialise(prediction, transformation, process_noise, measure_noise);
 
 }

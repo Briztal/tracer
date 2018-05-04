@@ -252,7 +252,7 @@ void Container<T>::remove(uint8_t index) {
 
     //If the index is invalid, fail;
     if (index >= size) {
-        return;
+        return;//TODO EXCEPTION;
     }
 
     //Declare shift pointers;
@@ -312,7 +312,7 @@ bool Container<T>::resize(uint8_t new_size) {
     void *ptr = realloc(data, new_size * sizeof(T));
 
     //If the reallocation failed, fail;
-    if (ptr == nullptr) {
+    if ((ptr == nullptr) && new_size) {
         return false;
     }
 

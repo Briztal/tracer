@@ -6,7 +6,8 @@
 #ifndef TRACER_UARTDRIVER_CPP
 #define TRACER_UARTDRIVER_CPP
 
-#include "UARTBase.h"
+#include <Kernel/Arch/Processors/core_arm_cortex_m4f.h>
+#include "UARTDriver.h"
 
 //-------------------------------- Driver Initialisation -----------------------------------
 
@@ -14,50 +15,46 @@
  * Constructor : initialises the uart and the two buffers;
  */
 
-UARTBase::UARTBase() : receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
+UARTDriver::UARTDriver() : started(false), receptionBuffer(nullptr), transmissionBuffer(nullptr) {}
 
 
 /*
  * Driver initialisation : initialises reception and transmission buffers with the provided sizes;
  */
 
-void UARTBase::initialise(uint16_t rx_buffer_size, uint16_t tx_buffer_size) {
+void UARTDriver::init(uart_config &config) {
 
+    //First, disable interrupts;
+    core_disable_interrupts();
     //TODO CHANGE SIZES;
 
     //Initialise the reception buffer;
-    receptionBuffer = new CircularBuffer<uint16_t>((uint8_t)rx_buffer_size);
+    receptionBuffer = new CircularBuffer<uint16_t>((uint8_t)config.sw_rx_buffer_size);
 
     //Initialise the transmission buffer;
-    transmissionBuffer = new CircularBuffer<uint16_t>((uint8_t)tx_buffer_size);
+    transmissionBuffer = new CircularBuffer<uint16_t>((uint8_t)config.sw_tx_buffer_size);
 
-    //Reset the UART in the default state;
-    reset();
+    //Mark the driver started;
+    started = false;
+
+    //Finally, re-enable interrupts;
+    core_enable_interrupts();
 
 }
 
 
 /*
- * reset : resets the UART in the default state;
+ * stop : deletes buffers and marks the driver as not started;
  */
 
-void UARTBase::reset() {
+void UARTDriver::exit() {
 
-    //Reset the default packet structure;
-    uart_packet_config packet_config;
-    configure_packet_format(packet_config);
+    //Delete both buffers and complete;
+    delete receptionBuffer;
+    delete transmissionBuffer;
 
-    //Reset the default modem config;;
-    uart_modem_config modem_config;
-    configure_modem(modem_config);
-
-    //Reset the default transmission configuration;
-    uart_transmission_config transmission_config;
-    configure_transmission(transmission_config);
-
-    //Reset the default state;
-    uart_state_config state_config;
-    configure_state(state_config);
+    //Mark the driver stopped;
+    started = false;
 
 }
 
@@ -66,7 +63,7 @@ void UARTBase::reset() {
  * Destructor : Deletes the couple of buffers;
  */
 
-UARTBase::~UARTBase() {
+UARTDriver::~UARTDriver() {
 
     //Delete both buffers and complete;
     delete receptionBuffer;
@@ -78,10 +75,16 @@ UARTBase::~UARTBase() {
 //-------------------------------- Transmission functions -----------------------------------
 
 /*
- * send : this function enqueues the provided uint16_t in the transmission
+ * send : this function enqueues the provided uint16_t in the transmission;
  */
 
-void UARTBase::send(uint16_t data) {
+void UARTDriver::send(uint16_t data) {
+
+    //TODO SEMAPHORE !!!!!!
+
+    //If the driver is not started, Driver panic;
+    if (!started)
+        return;//TODO DRIVER PANIC;
 
     //If the transmission buffer is full, we need to wait until the UART can send data;
     if (!transmissionBuffer->available_spaces()) {
@@ -90,6 +93,7 @@ void UARTBase::send(uint16_t data) {
         while (!this->transmission_available());
         //TODO SLEEP FOR 1 MS;
 
+        //Disable the preemption
         //Now that transmission is available, transmit_all as many data as possible;
         transmit_all();
 
@@ -118,7 +122,14 @@ void UARTBase::send(uint16_t data) {
  * read : return a uint16_t received through the serial, if there is one available. Returns 0 if not;
  */
 
-uint16_t UARTBase::read() {
+uint16_t UARTDriver::read() {
+
+    //De-activate all interrupts;
+    core_disable_interrupts();
+
+    //If the driver is not started, Driver panic;
+    if (!started)
+        return 0;//TODO DRIVER PANIC;
 
     //Receive as many data as possible from the UART peripheral;
     receive_all();
@@ -126,12 +137,14 @@ uint16_t UARTBase::read() {
     //If at least uint16_t has been received :
     if (receptionBuffer->available_elements()) {
 
-        //Return the less recent uint16_t received;
-        return receptionBuffer->get_and_discard_output();
+        //Cache the less recent uint16_t received;
+        uint16_t i =  receptionBuffer->get_and_discard_output();
 
         //Enable the reception interrupt, as a new space is available in the reception buffer;
         enable_reception_interrupt();
 
+        //Return the popped element;
+        return i;
     }
 
     //If no data was received, return 0;
@@ -144,7 +157,11 @@ uint16_t UARTBase::read() {
  * available : returns the number of uint16_t that can be read;
  */
 
-uint16_t UARTBase::available() {
+uint16_t UARTDriver::available() {
+
+    //If the driver is not started, Driver panic;
+    if (!started)
+        return 0;//TODO DRIVER PANIC;
 
     //Receive as many data as possible from the UART peripheral;
     receive_all();
