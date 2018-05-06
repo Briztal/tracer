@@ -41,7 +41,7 @@
 //TODO POTENTIAL LOSS OF PACKETS : The data size transmitted is not the real size, but the size with BEGIN_BYTES doubled
 
 /*
- * The Program class is in charge of receiving data from the outside, and to process them, according to
+ * The Program class is in charge of receiving data from the outside, and to process_t them, according to
  *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config_files file).
  *
  * When it received a command, it enqueues it in Kernel's external_tasks queue.
@@ -180,7 +180,7 @@ private:
     static void reset_input_data();
 
     //Incomming message processing
-    static void process(char *command, uint8_t size);
+    static void process_t(char *command, uint8_t size);
 
 
     //Command aliases

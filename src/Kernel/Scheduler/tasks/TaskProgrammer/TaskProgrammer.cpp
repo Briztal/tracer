@@ -20,7 +20,7 @@
 
 
 #include <Kernel/Interaction/Interaction.h>
-#include <Kernel/Scheduler/Systick.h>
+#include <Kernel/Scheduler/systick.h>
 #include <DataStructures/Containers/ObjectContainer.h>
 
 #include "TaskProgrammer.h"

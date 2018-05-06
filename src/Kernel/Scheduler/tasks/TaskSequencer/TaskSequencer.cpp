@@ -5,7 +5,7 @@
 #include <Kernel/Interaction/Interaction.h>
 #include <Kernel/Kernel.h>
 #include <DataStructures/Containers/CircularBuffer.h>
-#include <Kernel/Scheduler/TaskStorage.h>
+#include <Kernel/Scheduler/tasks.h>
 #include "TaskSequencer.h"
 
 

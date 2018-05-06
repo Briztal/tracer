@@ -43,7 +43,7 @@
 /*
  * The next lines focus on Interaction configuration. Interaction are static classes, meant only to interpret data.
  *
- * In order to receive orders from th outside, a Controller must receive_all its data from a Delimiter, that reads and process
+ * In order to receive orders from th outside, a Controller must receive_all its data from a Delimiter, that reads and process_t
  *  data over transmission layers;
  *
  * Delimiter are objects, created by the Kernel;

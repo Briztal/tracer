@@ -22,7 +22,7 @@
 #include "MovementCoordinator.h"
 
 /*
- * reserve : this function is called by another process to reserve the usage of the routine;
+ * reserve : this function is called by another process_t to reserve the usage of the routine;
  */
 
 bool MovementCoordinator::reserve() {

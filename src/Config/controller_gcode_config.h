@@ -62,7 +62,7 @@
  *
  *
  *  You can declare your commands in any order you desire, the only usage of this section is to build tree,
- *      process that will involve sorting commands by name;
+ *      process_t that will involve sorting commands by name;
  */
 
 #ifdef GCODE_COMMAND

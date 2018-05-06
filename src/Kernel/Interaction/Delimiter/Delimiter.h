@@ -43,7 +43,7 @@ public:
 
 public:
 
-    //process a char;
+    //process_t a char;
     virtual void process(char data) = 0;
 
 

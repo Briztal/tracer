@@ -54,7 +54,7 @@
 //Timer 2 will count on seconds, at 1Hz;
 #define TIMER_2_FREQUENCY TIMER_TASK_PROGRAMMER_FREQUENCY
 
-//Timer 3 will count on milliseconds, at 1KHz
+//Timer 3 will count on systick_milliseconds, at 1KHz
 #define TIMER_3_FREQUENCY TIMER_LOOP_FREQUENCY
 
 

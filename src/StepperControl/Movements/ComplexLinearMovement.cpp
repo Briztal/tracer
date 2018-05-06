@@ -47,7 +47,7 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
 
     bool queue_flag = false;
 
-    //extract the array case address (more efficient than by-object-process)
+    //extract the array case address (more efficient than by-object-process_t)
     k2_linear_data *d = linear_data_queue.get_insertion_address(&queue_flag);
 
     //If the insertion failed
@@ -99,12 +99,12 @@ task_state_t ComplexLinearMovement::plan_movement(const float *const destination
     while (TrajectoryTracer::queue_locked());
 
 
-    //The state of the process must be saved, as in determines if the task must be reprogrammed
+    //The state of the process_t must be saved, as in determines if the task must be reprogrammed
     task_state_t enqueue_state = TrajectoryTracer::enqueue_movement(0, max_distance, initialise_movement,
                                                                     finalise_movement, get_position,
                                                                     get_real_time_position);
 
-    //If the process has completed,
+    //If the process_t has completed,
     if (enqueue_state == complete) {
 
         //Reset the flag;

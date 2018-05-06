@@ -9,15 +9,17 @@
 #include <DataStructures/Containers/Container.h>
 #include "stdint.h"
 
+
+
 /*
- * The Semaphore class.
+ * The Semaphore library.
  *
- *  It is used by the kernel to synchronise threads.
+ *  It is used by the kernel to synchronise processes.
  *
  *  ----------------------- WARNING -----------------------
  *
- *  Semaphores synchronise threads. If they are not called from a thread (in the ThreadManager's meaning), the
- *  The semaphore call will have no effect, as semaphores lock and unlock threads.
+ *  Semaphores synchronise processes. If they are not called from a process_t (in the ThreadManager's meaning), the
+ *  The semaphore call will have no effect, as semaphores lock and unlock processes.
  *
  *  Semaphore can't (lol) lock interrupts;
  *
@@ -29,58 +31,30 @@
  *  You must take that in consideration when writing your ISRs. Use it carefully;
  */
 
-class Semaphore {
 
-    //------------------------------------------ Object Oriented Methods ------------------------------------------
+typedef struct {
 
-public:
-
-    //Constructor;
-    explicit Semaphore(uint16_t initial_counter);
-
-    //Destructor :
-    ~Semaphore();
-
-    //---------- Disabled methods : These objects mustn't be copied, moved or assigned ----------
-
-private:
-
-    //Copy constructor;
-    Semaphore(const Semaphore &) : allocation_counter(0), locked_threads(0) {};
-
-    //Move constructor;
-    Semaphore(Semaphore &&) noexcept : allocation_counter(0), locked_threads(0) {};
-
-    //Copy constructor;
-    Semaphore &operator=(const Semaphore &) {return *this;};
-
-    //Move constructor;
-    Semaphore &operator=(Semaphore &&) noexcept {return *this;};
-
-
-    //------------------------------------------ Semaphore Methods ------------------------------------------
-
-public:
-
-    //The P function : requires the execution;
-    void P();
-
-    //The V function : lets an execution happen;
-    void V();
-
-
-    //------------------------------------------ Fields ------------------------------------------
-
-private:
-
-    //The allocation counter : if superior, allocation is allowed. If not, initiator thread is put to sleep;
     uint16_t allocation_counter;
 
-    //The Thread vector : memorises threads indices that are put to sleep;
-    Container<uint8_t> locked_threads;
+} semaphore;
 
 
-};
+//The P function : requires the execution;
+void sem_wait(semaphore *semaphore);
+
+//The V function : lets an execution happen;
+void sem_post(semaphore semaphore);
+
+
+//------------------------------------------ Fields ------------------------------------------
+
+//The allocation counter : if superior, allocation is allowed. If not, initiator thread is put to sleep;
+uint16_t allocation_counter;
+
+//The Thread vector : memorises threads indices that are put to sleep;
+Container<uint8_t> locked_threads;
+
+
 
 
 #endif //TRACER_SEMAPHORE_H

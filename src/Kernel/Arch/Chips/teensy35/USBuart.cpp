@@ -2,7 +2,7 @@
 // Created by root on 4/29/18.
 //
 
-#include <Kernel/Scheduler/Systick.h>
+#include <Kernel/Scheduler/systick.h>
 #include "USBuart.h"
 
 namespace USBuart {

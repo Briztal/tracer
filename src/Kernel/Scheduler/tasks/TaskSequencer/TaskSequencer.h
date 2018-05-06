@@ -7,7 +7,7 @@
 
 
 #include <DataStructures/Containers/Queue.h>
-#include <Kernel/Scheduler/TaskData.h>
+#include <Kernel/Scheduler/tasks/task.h>
 
 
 namespace TaskSequencer {

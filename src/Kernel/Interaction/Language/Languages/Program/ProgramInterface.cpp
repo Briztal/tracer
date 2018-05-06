@@ -304,7 +304,7 @@ void PI::send_packet() {
 
 }
 
-void PI::process(char *command, uint8_t size) {
+void PI::process_t(char *command, uint8_t size) {
 
     char b = *command;
 
@@ -460,8 +460,8 @@ void PI::accept_data() {
 
                 //If the last char has been processed
 
-                //process the input data
-                process(data_in_0, in_data_size);
+                //process_t the input data
+                process_t(data_in_0, in_data_size);
 
                 //Reset the input data
                 reset_input_data();

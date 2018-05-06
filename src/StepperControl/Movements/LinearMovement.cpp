@@ -190,7 +190,7 @@ void LinearMovement::micro_move(uint32_t *dists) {//TODO FOX PASSER EN ELEMENTAR
 
 void LinearMovement::enqueue_movement(uint32_t *dists) {
 
-    //Position process preparation : set slopes and shift_nb
+    //Position process_t preparation : set slopes and shift_nb
     set_position_data(dists);
 
     //motion data setting
@@ -206,7 +206,7 @@ void LinearMovement::enqueue_movement(uint32_t *dists) {
 }
 
 /*
- * The position processing initialise_hardware function : it sets parameters required to process position :
+ * The position processing initialise_hardware function : it sets parameters required to process_t position :
  *  - slopes
  *  - shift_nb
  */

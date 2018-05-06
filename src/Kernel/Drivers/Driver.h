@@ -54,7 +54,7 @@ private:
     //Is the driver attributable ?
     bool attributable();
 
-    //Attribute the driver to a process;
+    //Attribute the driver to a process_t;
     void attribute();
 
     //Restituate the driver to the ressource manager;

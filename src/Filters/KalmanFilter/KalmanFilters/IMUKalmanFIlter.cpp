@@ -49,16 +49,16 @@ IMUKalmanFIlter::IMUKalmanFIlter(float measure_period, Matrix **process_noises,
 
 
 /*
- * Simplified constructor : same conversion factor, process noise and measure noise for all axis;;
+ * Simplified constructor : same conversion factor, process_t noise and measure noise for all axis;;
  */
 
 IMUKalmanFIlter::IMUKalmanFIlter(float measure_period, Matrix &process_noise, Matrix &measure_noise)
         : gravity(0,0,0), angularSpeeds(0,0,0) {
 
-    //Create a temp array containing tree times the process noise pointer;
+    //Create a temp array containing tree times the process_t noise pointer;
     Matrix *process_noises[3]{&process_noise, &process_noise, &process_noise};
 
-    //Create a temp array containing tree times the process measure pointer;
+    //Create a temp array containing tree times the process_t measure pointer;
     Matrix *measure_noises[3]{&measure_noise, &measure_noise, &measure_noise};
 
     //Initialise all data;

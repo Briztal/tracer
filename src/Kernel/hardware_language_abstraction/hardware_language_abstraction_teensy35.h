@@ -123,7 +123,7 @@
 
 //Uncomment this line to provide step_period_us support across LowLevel
 
-/* The function to call to wait for a specified number of milliseconds
+/* The function to call to wait for a specified number of systick_milliseconds
  *  void delay_ms(uint16_t time_ms);
  *//*
 static inline static void delay_ms(uint16_t time_ms){

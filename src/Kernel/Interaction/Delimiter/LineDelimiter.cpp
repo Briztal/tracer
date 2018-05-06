@@ -37,7 +37,7 @@ LineDelimiter::LineDelimiter(uint8_t size) : Delimiter(size) {}
 
 void LineDelimiter::process(char read_char) {
 
-    //Don't process any data if no space is available in the argument_t sequence container :
+    //Don't process_t any data if no space is available in the argument_t sequence container :
     if (messageDecoded) {
 
         //Fail;
@@ -95,7 +95,7 @@ void LineDelimiter::process(char read_char) {
 
 void LineDelimiter::encode(tstring &data) {
 
-    //Add the termination;
+    //Add the cleanup;
     data+=string("\n\r");
 
 

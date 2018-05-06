@@ -18,7 +18,7 @@
 
 */
 
-#include <Kernel/Scheduler/Systick.h>
+#include <Kernel/Scheduler/systick.h>
 #include "ProgrammedTask.h"
 
 /*

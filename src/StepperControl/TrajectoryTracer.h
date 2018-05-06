@@ -71,10 +71,10 @@ private :
 
 public:
 
-    //The function to verify that the enqueueing is authorised. returns true if the process isn't unauthorised;
+    //The function to verify that the enqueueing is authorised. returns true if the process_t isn't unauthorised;
     static bool enqueue_authorised();
 
-    //The function to verify that the queue is locked. returns true if the process isn't unauthorised;
+    //The function to verify that the queue is locked. returns true if the process_t isn't unauthorised;
     static bool queue_locked();
 
 

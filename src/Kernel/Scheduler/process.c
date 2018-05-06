@@ -8,10 +8,13 @@
 #include "stdbool.h"
 
 #include <DataStructures/Containers/ObjectContainer.h>
-#include <Kernel/Scheduler/TaskStorage.h>
-#include <Kernel/Scheduler/Schedulers/Scheduler.h>
+
+#include <Kernel/Scheduler/tasks.h>
+
+#include <Kernel/Scheduler/scheduler.h>
 
 #include "process.h"
+#include "systick.h"
 
 
 //---------------------------- Private functions ----------------------------
@@ -22,36 +25,13 @@ void process_init();
 
 
 //Threads main functions;
-void process_function(volatile process *volatile process);
+void process_function(volatile process_t *volatile process);
 
-//Threads termination functions : infinite loop;
+//Threads cleanup functions : infinite loop;
 void process_exit() { while (1); }
 
-//The process context switcher;
+//The process_t context switcher;
 void process_preempt();
-
-
-//---------------------------- Scheduler instance ----------------------------
-
-//The instance of the scheduler, initialised at start time;
-Scheduler *scheduler;
-
-
-//---------------------------- Fields ----------------------------
-
-//The current task;
-volatile uint8_t current_thread = 0;
-
-//Must the context switching be triggered ?
-bool context_switch_triggered = false;
-
-//The context switch semaphore. Context is effectively triggered when it is 0;
-uint16_t context_switch_semaphore = 0;
-
-//The thread mode flag;
-bool threadMode = false;
-
-
 
 
 //---------------------------- Process initialisation ----------------------------
@@ -62,7 +42,7 @@ bool threadMode = false;
  *  Finally, it sets the thread's state as Terminated;
  */
 
-void process_create_context(process *process, uint32_t stack_size) {
+void process_create_context(process_t *process, uint32_t stack_size) {
 
     //Then, allocate a memory zone of the required size;
     void *ptr = malloc(stack_size * sizeof(stack_element_t));
@@ -81,18 +61,18 @@ void process_create_context(process *process, uint32_t stack_size) {
     //Set the stack's end;
     process->stack_end = core_get_stack_end(sp, stack_size);
 
-    //Reset the process context;
+    //Reset the process_t context;
     process_reset_context(process);
 
 }
 
 
 /*
- * process_reset_context : resets the process to its initial stack pointer,
+ * process_reset_context : resets the process_t to its initial stack pointer,
  * and initialises the context to its beginning;
  */
 
-void process_reset_context(process * process) {
+void process_reset_context(process_t *process) {
 
     //Declare a stack pointer;
     stack_ptr_t sp = process->stack_begin;
@@ -106,7 +86,7 @@ void process_reset_context(process * process) {
     //Save the new stack pointer;
     process->stack_pointer = core_get_thread_stack_pointer();
 
-    //As the process is just reset, he potentially have no function to execute. It is so terminated by default;
+    //As the process_t is just reset, he potentially have no function to execute. It is so terminated by default;
     process->state = TERMINATED;
 
 }
@@ -115,12 +95,12 @@ void process_reset_context(process * process) {
 //---------------------------- State alteration ----------------------------
 
 /*
- * process_lock : locks the required process;
+ * process_lock : locks the required process_t;
  */
 
-void process_lock(process *process) {
+void process_lock(process_t *process) {
 
-    //Lock the process if it is active;
+    //Lock the process_t if it is active;
     if (process->state == ACTIVE)
         process->state = STOPPED;
 
@@ -128,12 +108,12 @@ void process_lock(process *process) {
 
 
 /*
- * process_unlock : unlocks the required process;
+ * process_unlock : unlocks the required process_t;
  */
 
-void process_unlock(process *process) {
+void process_unlock(process_t *process) {
 
-    //Unlock the process if it is stopped;
+    //Unlock the process_t if it is stopped;
     if (process->state == STOPPED)
         process->state = ACTIVE;
 
@@ -141,12 +121,12 @@ void process_unlock(process *process) {
 
 
 /*
- * process_init : this function is called when a process is started on the fly, without proper function call, due to
+ * process_init : this function is called when a process_t is started on the fly, without proper function call, due to
  *  a context switch;
  *
  * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
  *
- *  As the process pointer has been saved in the register at the thread initialisation, the first step is to get it back;
+ *  As the process_t pointer has been saved in the register at the thread initialisation, the first step is to get it back;
  *
  *  Then, we can call properly the run function;
  */
@@ -154,25 +134,25 @@ void process_unlock(process *process) {
 void process_init() {
 
     //Get the thread index and run the associated thread;
-    process_function((volatile process *volatile) core_get_process());
+    process_function((volatile process_t *volatile) core_get_process());
 
 }
 
 
 /*
- * process_function : this function is the routine executed by a process;
+ * process_function : this function is the routine executed by a process_t;
  */
 
-void process_function(volatile process *volatile process) {
+void process_function(volatile process_t *volatile process) {
 
-    //The process must be pending, otherwise, there has been an error in the scheduler.
+    //The process_t must be pending, otherwise, there has been an error in the scheduler.
     if ((volatile process_state) process->state != PENDING) {
 
         //Kernel panic;
         //TODO KERNEL PANIC;
 
     }
-    //Mark the process active;
+    //Mark the process_t active;
     process->state = (volatile process_state) ACTIVE;
 
     //Execute the function, passing args;
@@ -181,7 +161,7 @@ void process_function(volatile process *volatile process) {
     //Execute the exit function;
     (*(process->exit_function))();
 
-    //Mark the process inactive; Scheduler will be notified at context switch;
+    //Mark the process_t inactive; Scheduler will be notified at context switch;
     process->state = (volatile process_state) TERMINATED;
 
     //Infinite loop;
@@ -203,52 +183,43 @@ void process_function(volatile process *volatile process) {
 /*
  * process_start_execution :
  *
- *  It then requires the user mode, and starts the execution of the first process;
+ *  It then requires the user mode, and starts the execution of the first process_t;
  */
 
 void process_start_execution() {
 
-    //First, get the scheduler;
-    Scheduler * project_scheduler = Project::instantiate_scheduler();
-
-    //Initialise our copy of the scheduler pointer;
-    ThreadManager::scheduler = project_scheduler;
-
     //First, we must initialise the scheduler, that will configure threads before the actual start;
-    project_scheduler->initialise();
+    scheduler_initialise();
 
-    //Update the current thread;
-    current_thread = 0;
+    //Get the first process to execute;
+    process_t *first_process = scheduler_select_process();
 
     //TODO IN KERNEL INIT
     //Set the context switcher;
-    core_set_context_switcher(&threads_context_switcher);
+    core_set_context_switcher(&process_preempt);
 
     //TODO IN KERNEL INIT
     //Start the systick timer, and set the systick function;
-    core_start_systick_timer(1, &Systick::systick);
+    core_start_systick_timer(1, &systick_tick);
 
-    Serial.println("Systick Started, ");
-    //TODO sleep(2000);
-
-    //Enable the preemtion in one millisecond;
-    Systick::setTaskDuration(1);
+    //Enable the preemption in one millisecond;
+    systick_set_process_duration(1);
 
     //Set the current stack pointer to the first thread's stack begin;;
-    core_set_thread_stack_pointer(threads.getPointer(current_thread)->stack_begin);
+    core_set_thread_stack_pointer(first_process->stack_begin);
 
     //Require the user mode;
     core_set_thread_mode();
 
     //Execute the first task;
-    run(threads.getPointer(current_thread));
+    process_function(first_process);
 
 }
 
 
 //---------------------------- Context switch ----------------------------
 
-process *current_process;
+process_t *current_process;
 
 
 /*
@@ -261,21 +232,21 @@ process *current_process;
 
 void process_preempt() {
 
-    //Stack the context in the current process stack;
+    //Stack the context in the current process_t stack;
     core_stack_thread_context();
 
-    //Save the current process's stack pointer, while the process hasn't been deleted;
+    //Save the current process_t's stack pointer, while the process_t hasn't been deleted;
     current_process->stack_pointer = core_get_thread_stack_pointer();
 
-    //Get a new process to execute, and pass the old one for eventual relocation;
-    current_process = scheduler->schedule(current_process),
+    //Get a new process_t to execute, and pass the old one for eventual relocation;
+    current_process = scheduler_schedule(current_process),
 
             //Set the appropriate context;
             core_set_thread_stack_pointer(current_process->stack_pointer);
 
     //------------- FROM HERE, ALL DATA IS IN THE NEW TASK'S STACK -------------
 
-    //Unstack the context from the previous process stack
+    //Unstack the context from the previous process_t stack
     core_unstack_thread_context();
 
 }

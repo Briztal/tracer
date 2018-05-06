@@ -8,7 +8,7 @@ The Kalman filter is a recursive estimator, that will at first predict a state, 
 
     We will also use three constant matrices :
         - H : the translation matrix, used to compute the measure from the state;
-        - Q : The covariance matrix of the process noise;
+        - Q : The covariance matrix of the process_t noise;
         - R : The covariance matrix of the measure noise;
 
 
@@ -23,10 +23,10 @@ Step 0 : the prediction.
     The covariance matrix is updated, as the random variable of the state is known to follow the following rule :
         VX+ = A * VX + Pn (Random variable)
             with VX is the random variable of the state, Pn is a centered gaussian random variable,
-            representing the process noise;
+            representing the process_t noise;
 
         P+ = A * P * At + Q (matrix)
-            with At the transposed of A, Q the covariance matrix of the process noise;
+            with At the transposed of A, Q the covariance matrix of the process_t noise;
 
 
 

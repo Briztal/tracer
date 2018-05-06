@@ -33,7 +33,7 @@
  *  - Initialisation of threads's stacks;
  *
  *
- *  Preemption, by PenSV call, in normal task mode (lower priority, in process context);
+ *  Preemption, by PenSV call, in normal task mode (lower priority, in process_t context);
  *
  *      ASM :
  *      - (AUTOMATIC) Stacking of hardware context; //TODO VERIFY WHICH CONTEXT IS STACKED
@@ -71,14 +71,15 @@
  */
 
 #include <Kernel/Arch/Chips/teensy35/USBuart.h>
-#include <Kernel/Scheduler/ThreadManager/process.h>
-#include <Kernel/Scheduler/TaskStorage.h>
-#include <Kernel/Scheduler/Systick.h>
+#include <Kernel/Scheduler/process.h>
+#include <Kernel/Scheduler/tasks.h>
+#include <Kernel/Scheduler/systick.h>
 #include "Arduino.h"
 
 void end_function() {
     USBuart::write("END FUNCTION REACHED");
 }
+
 
 Semaphore S(1);
 
@@ -96,12 +97,12 @@ task_state_t task_0(void *) {
 
             USBuart::write("Task_0");
 
-            Systick::sleep(1);
+            systick_sleep(1);
         }
 
         S.V();
 
-        Systick::sleep(10);
+        systick_sleep(10);
     }
 
 
@@ -124,7 +125,7 @@ task_state_t task_1(void *) {
 
         S.V();
 
-        Systick::sleep(1);
+        systick_sleep(1);
 
 
     }
@@ -146,7 +147,7 @@ task_state_t task_2(void *) {
 
         S.V();
 
-        Systick::sleep(2);
+        systick_sleep(2);
     }
 
 }
@@ -154,19 +155,17 @@ task_state_t task_2(void *) {
 
 task_state_t task_3(void *) {
 
-    Systick::sleep(1000);
+    systick_sleep(1000);
 
     while (true) {
         USBuart::write("Task_3");
-        Systick::sleep(14000);
+        systick_sleep(14000);
     }
 
 
     return complete;
 
 }
-
-
 int main() {
 
     pinMode(13, OUTPUT);

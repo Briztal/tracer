@@ -136,7 +136,7 @@ task_state_t StepperController::linear_movement(float *destination) {
 //----------------------------------------------current_steppers_positions-----------------------------------------------
 
 /*
- * get_current_position : this function provides the current position to any external process.
+ * get_current_position : this function provides the current position to any external process_t.
  *
  */
 
@@ -231,7 +231,7 @@ float StepperController::get_speed(uint8_t speed_group) {
 
 
 /*
- * get_speed_group : this function provides the regulation_speed group to any external process.
+ * get_speed_group : this function provides the regulation_speed group to any external process_t.
  */
 
 uint8_t StepperController::get_speed_group() {

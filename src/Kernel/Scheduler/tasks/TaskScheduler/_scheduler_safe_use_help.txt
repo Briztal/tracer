@@ -64,7 +64,7 @@ Task pool :
 
         | 1  2  3  4  5  6  _  _  _  _  _  _  |
 
-        In the example below, the scheduler tries to process tasks 1, 2, and 3, but those are currently un-executable (
+        In the example below, the scheduler tries to process_t tasks 1, 2, and 3, but those are currently un-executable (
             they may require some currently unavailable space in the movement sequence, for example).
             The scheduler then executes the task 4, with success.
 
@@ -89,12 +89,12 @@ Task Sequence :
 
 III - Execution algorithm
 
-For executing its tasks, the scheduler process like the following :
+For executing its tasks, the scheduler process_t like the following :
     - if tasks can be added, parse data on interfaces -> tasks are added to the task pool.
     - Process all possible tasks in the task pool -> tasks may be added to
     - For each task sequence :
         1 pop the first task;
-        2 if the task can be processed, process it. If not, go to the next sequence;
+        2 if the task can be processed, process_t it. If not, go to the next sequence;
         3 if the sequence is not empty, go to step 1.
 
 
@@ -139,7 +139,7 @@ The task pool contains 7 type-255 tasks and no space :
 
 ROUND 0 :
 
-    First, the scheduler will process the task pool :
+    First, the scheduler will process_t the task pool :
     - tasks 0 and 1 are executed. 
     - task 2 must add a type-1 task, but no nb_spaces are left in the sequence 1.
         -> queues 0 and 1 are locked, and task 2 doesn't complete.

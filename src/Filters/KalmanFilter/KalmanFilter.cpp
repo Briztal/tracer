@@ -246,7 +246,7 @@ void KalmanFilter::predict(float *prediction, Matrix &prediction_P) {
      * P+ = A * P * At + Q (matrix)
      */
 
-    //Initialise the prediction covatiance matrix to the process noise;
+    //Initialise the prediction covatiance matrix to the process_t noise;
     prediction_P.setTo(Q);
 
     //Cache the temp matrix;

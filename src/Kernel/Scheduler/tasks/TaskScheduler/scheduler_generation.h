@@ -36,7 +36,7 @@
  *          an instance of the struct, and schedule the unpacker (below);
  *      - An unpacker, that would unpack data, and parse the desired function, with extracted dynamic_args.
  *
- *  As this can be a very heavy and repetitive process, macros present in this file do the implementation job for you.
+ *  As this can be a very heavy and repetitive process_t, macros present in this file do the implementation job for you.
  *
  *  The only thing you have to do is to call the macro GENERATE_SCHEDULERn with the data like below :
  *
@@ -116,7 +116,7 @@
  *      (N will be in [|0; MAX_NB_ARGS|])
  *
  *  These macros are a simulation of a N degree recursion of a provided macro MACRO.
- *      As macros will process data based on couples (type, variable), it accepts another macro, CAT,
+ *      As macros will process_t data based on couples (type, variable), it accepts another macro, CAT,
  *      that will be used to extract data from couples (type, variable).
  *
  */
@@ -146,7 +146,7 @@
  *  - SEMICOLON_I : concatenate the i couples of (type_i, value_i) to CAT(type_0, value_0); ...; CAT(type_I, value_I);
  *  - COMMA_I : concatenate the i couples of (type_i, value_i) to CAT(type_0, value_0), ..., CAT(type_I, value_I)
  *
- * CAT is a macro provided in arguments, meant to process (type_n, variable_n) to a particular text.
+ * CAT is a macro provided in arguments, meant to process_t (type_n, variable_n) to a particular text.
  *
  */
 

@@ -56,7 +56,7 @@ static inline stack_ptr_t core_get_thread_stack_pointer() {
 
 /*
  * core_stack_thread_context : injects assembly code in order to stack registers that are not
- *  stacked automatically in the process stack;
+ *  stacked automatically in the process_t stack;
  *
  *  It moves psp into r0, and then stacks r4-r7, general purposes registers, and finally
  *      stacks s16- s31, floating point unit registers;
@@ -77,7 +77,7 @@ static inline void core_stack_thread_context() {
 
 /*
  * core_stack_thread_context : injects assembly code in order to stack registers that are not
- *  stacked automatically in the process stack;
+ *  stacked automatically in the process_t stack;
  *
  *  It moves psp into r0, and then unstacks r4-r7, general purposes registers, and finally
  *      unstacks s16- s31, floating point unit registers;
@@ -99,7 +99,7 @@ static inline void core_unstack_thread_context() {
  * core_init_stack : this function initialises the unstacking environment, so that the given function will
  *  be executed at context switch time;
  *
- *  It starts by caching the process stack pointer, and stacks the thread functions pointers, and the PSR.
+ *  It starts by caching the process_t stack pointer, and stacks the thread functions pointers, and the PSR.
  *
  *  Then, it saves the thread index in R12 (next word);
  *
@@ -239,7 +239,6 @@ static inline stack_element_t core_get_process() {
     _VectorsRam[15] = systick_function;\
     NVIC_SET_PRIORITY(-1, 0);\
     SYST_RVR = (systick_period_us) * ((float) F_CPU / (float) 1000);\
-    Serial.println("PERIOD : "+String( (systick_period_us) * ((float) F_CPU / (float) 1000)));\
     SCB_ICSR &= ~SCB_ICSR_PENDSTSET;\
     SYST_CSR |= SYST_CSR_ENABLE;\
 

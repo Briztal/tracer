@@ -524,7 +524,7 @@ task_state_t MachineController::set_carriages_state(carriages_state_t new_state)
 /*
  * set_working_extruder : sets the working extruder.
  *
- *  As the process requires to check the mode and the extruder id, this separate function exists.
+ *  As the process_t requires to check the mode and the extruder id, this separate function exists.
  */
 
 task_state_t MachineController::set_working_extruder(uint8_t carriage) {

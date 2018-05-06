@@ -196,7 +196,7 @@ string::string(const char *src) : string() {
     //First, we must determine the size of the char array;
     const char *c_src = src;
 
-    //The size of src (null termination comprised;
+    //The size of src (null cleanup comprised;
     uint8_t src_size = 1;
 
     //Increment the size wile the current char is not null;
@@ -219,7 +219,7 @@ string::string(const char *src) : string() {
 
 string::string(const char *src, uint16_t size) : string() {
 
-    //The, resize to the required size, plus 1 to insert the null termination;
+    //The, resize to the required size, plus 1 to insert the null cleanup;
     resizeTo(size+(uint16_t)1);
 
     //Then, copy the given portion of the string;
@@ -402,7 +402,7 @@ string &string::operator=(float f) {
  *
  *  This function cannot set the size to zero, as a string always contains almost a null char;
  *
- *  For efficiency purposes, no modification is made on data in the reallocated array (null termination, etc...).
+ *  For efficiency purposes, no modification is made on data in the reallocated array (null cleanup, etc...).
  *      Each calling function has to implements its modifications;
  */
 
@@ -789,7 +789,7 @@ bool cstring::strcmp(const char *string0, const char *string1) {
 
         //Now, we are shure that both chars are the same;
 
-        //If the current char is a null termination :
+        //If the current char is a null cleanup :
         if (!c) {
 
             //End of string found for both strings : both strings are the same;

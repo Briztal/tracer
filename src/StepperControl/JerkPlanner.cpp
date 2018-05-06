@@ -43,7 +43,7 @@
  *  ----------------------------------------- IMPORTANT -----------------------------------------
  *
  *      This step couldn't be called at the same time than the jerk computation, as both function use
- *          pre-process trajectory functions, during the jerk ratios computation, and there functions are static.
+ *          pre-process_t trajectory functions, during the jerk ratios computation, and there functions are static.
  *          Those use static data, that is not available during the planning of a movement.
  *
  *          If both movements were lines, and we tried to execute this function at the same time than compute_jerk,

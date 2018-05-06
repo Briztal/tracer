@@ -46,7 +46,7 @@ bool StringTreeLanguage::decode(const char *message) {
 
     //--------------------------Tree Iteration--------------------------
 
-    //While the first letter of the next word is not the string termination :
+    //While the first letter of the next word is not the string cleanup :
     while (*(message += cstring::lstrip(message, ' '))) {
 
         //Cache the word's size;
@@ -55,7 +55,7 @@ bool StringTreeLanguage::decode(const char *message) {
         //Create a string that will contain the word;
         string message_word(message, word_size);
 
-        //Go to the end of the word (space or null termination);
+        //Go to the end of the word (space or null cleanup);
         message += word_size;
 
         //Go to the next letter if not null
@@ -110,7 +110,7 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
 
     //--------------------------Tree Iteration--------------------------
 
-    //While the first letter of the next word is not the string termination :
+    //While the first letter of the next word is not the string cleanup :
     while (*(command_name += cstring::lstrip(command_name, ' '))) {
 
         //Cache the word's size;
@@ -119,7 +119,7 @@ void StringTreeLanguage::addCommand(const char *command_name, language_function 
         //Create a string that will contain the word;
         string message_word(command_name, word_size);
 
-        //Go to the end of the word (space or null termination);
+        //Go to the end of the word (space or null cleanup);
         command_name += word_size;
 
         //Go to the next letter if not null

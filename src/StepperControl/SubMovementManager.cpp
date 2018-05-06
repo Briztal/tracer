@@ -204,7 +204,7 @@ void SubMovementManager::push_new_sub_movement() {
     //Initialise a queue flag;
     queue_flag = false;
 
-    //Now that validity checks are made, process the sub_movement data
+    //Now that validity checks are made, process_t the sub_movement data
     sub_movement_queue.insert(&queue_flag);
 
     queue_flag = false;

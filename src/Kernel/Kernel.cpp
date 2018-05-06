@@ -22,9 +22,9 @@
 #include <ControlSystem/ControlLoops.h>
 
 #include <Kernel/Scheduler/TaskScheduler/TaskScheduler.h>
-#include <Kernel/Scheduler/EventManager/EventManager.h>
+#include <Kernel/Scheduler/tasks/events.h>
 
-#include <Kernel/Scheduler/ThreadManager/process.h>
+#include <Kernel/Scheduler/process.h>
 
 #include "Kernel.h"
 

@@ -81,7 +81,7 @@ private:
     Matrix H;
     Matrix Ht;
 
-    //The covariance matrix of the process noise;
+    //The covariance matrix of the process_t noise;
     Matrix Q;
 
     //The covariance matrix of the measure noise;
@@ -134,15 +134,15 @@ private:
 
 
     /*
-     * post process methods to wrap vectors in their coordinate systems;
+     * post process_t methods to wrap vectors in their coordinate systems;
      */
 
 protected:
 
-    //A post process function to eventually wrap the innovation in the correct coordinate system;
+    //A post process_t function to eventually wrap the innovation in the correct coordinate system;
     virtual void wrapMeasure(float *measure) {};
 
-    //A post process function to eventually wrap the state in the correct coordinate system;
+    //A post process_t function to eventually wrap the state in the correct coordinate system;
     virtual void wrapState(float *innovation) {};
 
 

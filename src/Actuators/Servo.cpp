@@ -96,7 +96,7 @@ void Servo::write(uint8_t id, float value) {
         return;
     }
 
-    //As the process for every servo is the same, we will use a macro.
+    //As the process_t for every servo is the same, we will use a macro.
 #define SERVO(i, name, pin, min, max, pmin, pmax)\
     case i:\
         /*Force the value to be inside the bounds;*/\
@@ -114,7 +114,7 @@ void Servo::write(uint8_t id, float value) {
         //Undef the macro for safety;
 #undef SERVO
 
-        //Final case, no process.
+        //Final case, no process_t.
         default:
             break;
 

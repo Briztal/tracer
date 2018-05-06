@@ -2,30 +2,21 @@
 // Created by root on 4/10/18.
 //
 
-#include <Kernel/Scheduler/ThreadManager/process.h>
-#include "Arduino.h"
+#include <Kernel/Scheduler/process.h>
 
-#include "Systick.h"
-
-#include "usb_dev.h"
-
-#include "Kernel/Arch/Processors/core_arm_cortex_m4f.h"
+#include "systick.h"
 
 //---------------------- System tick ----------------------
 
-namespace Systick {
 
-    //The milliseconds reference;
-    volatile uint32_t st_millis = 0;
+//The systick_milliseconds reference;
+volatile uint32_t systick_millis = 0;
 
-    //The current task's duration. At init, preemption disabled;
-    volatile uint16_t task_duration = 0;
-
-}
+//The current task's duration. At init, preemption disabled;
+volatile uint16_t task_duration = 0;
 
 
 //---------------------- System tick ----------------------
-
 
 /*
  * systick : the system tick function;
@@ -36,14 +27,15 @@ namespace Systick {
  *      - triggers it if so;
  */
 
-void Systick::systick() {
 
-    if (!(st_millis%1000)) {
+void systick_tick() {
+
+    if (!(systick_millis % 1000)) {
         //Serial.println("SUUS "+String(st_millis));
     }
 
     //Increment the ms counter;
-    st_millis++;
+    systick_millis++;
 
     //If the current task can pe preempted :
     if (task_duration) {
@@ -69,10 +61,10 @@ void Systick::systick() {
 /*
  * setTaskDuration : sets the current task's duration :
  *  - 0 : infinite;
- *  - x (!= 0) : duration of x milliseconds;
+ *  - x (!= 0) : duration of x systick_milliseconds;
  */
 
-void Systick::setTaskDuration(uint16_t ms) {
+void setTaskDuration(uint16_t ms) {
 
     //Update the task's duration;
     task_duration = ms;
@@ -83,26 +75,25 @@ void Systick::setTaskDuration(uint16_t ms) {
 //---------------------- Time reference ----------------------
 
 /*
- * milliseconds : returns a copy of the milliseconds reference;
+ * milliseconds : returns a copy of the systick_milliseconds reference;
  */
 
-uint32_t Systick::milliseconds() {
-    return st_millis;
+uint32_t systick_milliseconds() {
+    return systick_millis;
 }
-
 
 
 /*
  * Wait till time has reached the given limit;
  */
 
-void Systick::sleep(uint32_t delta_t) {
+void sleep(uint32_t delta_t) {
 
     //Determine the limit;
-    volatile uint32_t limit = st_millis + delta_t;
+    volatile uint32_t limit = systick_millis + delta_t;
 
     //Sleep till the limit;
-    while((volatile uint32_t) Systick::st_millis < limit) {
+    while ((volatile uint32_t) systick_millis < limit) {
     };
 
 
@@ -113,10 +104,10 @@ void Systick::sleep(uint32_t delta_t) {
  * msResetRequired : this function will return true if the st_millis reference has to be reset;
  */
 
-bool Systick::msResetRequired() {
+bool msResetRequired() {
 
-    //If the milliseconds counter has reached the half of its maximal value, it's time to reset;
-    return (st_millis > (uint32_t) -1 >> 1);
+    //If the systick_milliseconds counter has reached the half of its maximal value, it's time to reset;
+    return (systick_millis > (uint32_t) -1 >> 1);
 
 }
 
@@ -124,9 +115,9 @@ bool Systick::msResetRequired() {
 /*
  * msReset : resets the time reference to 0;
  */
-void Systick::msReset() {
+void msReset() {
 
     //Reset the st_millis counter;
-    st_millis = 0;
+    systick_millis = 0;
 
 }

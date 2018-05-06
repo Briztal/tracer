@@ -8,7 +8,7 @@
 
 #include "Kernel/Arch/Processors/core_arm_cortex_m4f.h"
 
-#include "Kernel/Scheduler/TaskData.h"
+#include "Kernel/Scheduler/tasks/task.h"
 
 
 //The set of execution states;
@@ -30,7 +30,7 @@ typedef enum {
 
 
 /*
- * The process structure;
+ * The process_t structure;
  */
 
 typedef struct {
@@ -64,29 +64,29 @@ typedef struct {
 
 
     /*
-     * process state;
+     * process_t state;
      */
 
     process_state state;
 
-} process;
+} process_t;
 
 
-//Allocate a stack for a process;
-void process_create_context(process *process_p, uint32_t stack_size);
+//Allocate a stack for a process_t;
+void process_create_context(process_t *process_p, uint32_t stack_size);
 
-//Reset a process's context;
-void process_reset_context(process *process);
+//Reset a process_t's context;
+void process_reset_context(process_t *process);
 
 
-//Set the working process's stack pointer;
+//Set the working process_t's stack pointer;
 void process_save_sp(stack_ptr_t new_stack_pointer);
 
 //Lock a thread (semaphore call);
-void process_lock(process *process);
+void process_lock(process_t *process);
 
 //Unlock a thread (semaphore call);
-void process_unlock(process *process);
+void process_unlock(process_t *process);
 
 
 #endif //TRACER_THREADMANAGER_H

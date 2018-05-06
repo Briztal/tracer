@@ -3,7 +3,7 @@
 //
 
 #include <Kernel/Arch/Processors/core_arm_cortex_m4f.h>
-#include <Kernel/Scheduler/ThreadManager/process.h>
+#include <Kernel/Scheduler/process.h>
 #include <Kernel/Arch/Chips/teensy35/USBuart.h>
 
 #include "Semaphore.h"

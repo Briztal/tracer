@@ -248,7 +248,7 @@ public:
 
 
     /*
-     * process : this method updates the input index. The input case must have been filled before.
+     * process_t : this method updates the input index. The input case must have been filled before.
      *
      */
 

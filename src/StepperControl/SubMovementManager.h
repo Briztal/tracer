@@ -114,19 +114,19 @@ public :
      *      for a new position to be effectively pushed.
      */
 
-    //function to determine and process a candidate position.
+    //function to determine and process_t a candidate position.
     static void push_new_sub_movement();
 
     //function to determine a candidate position.
     static void compute_new_sub_movement(sub_movement_data_t *sub_movement_data);
 
-    //function to process (if the step_distances bounds are respected) the previously computed position in the queue.
+    //function to process_t (if the step_distances bounds are respected) the previously computed position in the queue.
     static bool confirm_sub_movement(sub_movement_data_t *sub_movement_data);
 
     //function to update the increment and to verify the distance bounds validity
     static bool distance_bounds_error(float max_distance);
 
-    //function to process the maximum number of positions in the queue.
+    //function to process_t the maximum number of positions in the queue.
     static void fill_sub_movement_queue();
 
     //function to pop the next position in the queue.

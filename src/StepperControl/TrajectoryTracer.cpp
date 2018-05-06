@@ -107,7 +107,7 @@ bool TrajectoryTracer::enqueue_authorised() {
 
 
 /*
- * queue_locked : this function is used by another process, to verify if the movement queue is not locked.
+ * queue_locked : this function is used by another process_t, to verify if the movement queue is not locked.
  * 
  * The queue lock is a punctual interrupt-controlled action, that is independent of the queue's data. The queue can
  *  be empty, but locked. This is used to prevent the enqueue of a moment for a short period of time.
@@ -732,7 +732,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Discard the current sub_movement in the sub-movements queue;
     SubMovementManager::discard_sub_movement();
 
-    //If no more pre-process is required :
+    //If no more pre-process_t is required :
     if (SubMovementManager::is_movement_processed()) {
 
         //Go to the end
@@ -749,7 +749,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Process a first movement for the one we made;
     SubMovementManager::push_new_sub_movement();
 
-    //If no more pre-process is required;
+    //If no more pre-process_t is required;
     if (SubMovementManager::is_movement_processed()) {
         goto exit;
     }
@@ -953,7 +953,7 @@ void TrajectoryTracer::finish_sub_movement() {
                 //Mark the final sub_movement;
                 final_sub_movement_started = true;
 
-                //re-interrupt on this function, as no more process is required;
+                //re-interrupt on this function, as no more process_t is required;
                 MovementCoordinator::enable_interrupt();
 
                 //Complete;

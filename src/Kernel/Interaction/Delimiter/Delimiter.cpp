@@ -38,7 +38,7 @@ Delimiter::Delimiter(uint8_t size) : receptionBuffer(size) {}
 
 bool Delimiter::isMessageDecoded() {
 
-    //Return the message decoding flag, updated by the process method;
+    //Return the message decoding flag, updated by the process_t method;
     return messageDecoded;
 
 }

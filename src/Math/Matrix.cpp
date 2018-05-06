@@ -29,7 +29,7 @@
  *
  * As the matrix is represented by a 1D array, some operations will be required to manipulate coefficients;
  *
- * Macros defined below ease this process;
+ * Macros defined below ease this process_t;
  */
 
 
