@@ -6,49 +6,49 @@
 #include <Kernel/Kernel.h>
 #include <DataStructures/Containers/CircularBuffer.h>
 #include <Kernel/Scheduler/tasks.h>
-#include "TaskSequencer.h"
+#include <DataStructures/Containers/circular_buffer.h>
+#include "sequences.h"
 
 
 //-------------------------------------------- Const variable init --------------------------------------------
-
 /*
- * The number of task sequences is a constant, directly determinable by counting the number of times TASK_SEQUENCES
- *  is written in the configuration file.
- *
- *  Instead of asking the user to provide it, what could lead to errors, we will use a compiler constant
- *      determined directly using macro;
- *
+ * The sequence type;
  */
 
-#define TASK_SEQUENCE(...) 1 +
+typedef enum {
+    LOCKED,
 
-const uint8_t NB_TASK_SEQUENCES =
-
-#include "Config/kernel_config.h"
-
-        0;
-
-#undef TASK_SEQUENCE
+    UNLOCKED
+} sequence_state_t;
 
 
-namespace TaskSequencer {
+/*
+ * The sequence struct;
+ */
 
-    //Task Pool;
-    CircularBuffer<uint8_t> taskPool(TASK_POOL_SIZE);
+typedef struct {
 
-    //Task sequences;
-    CircularBuffer<uint8_t> *sequences[NB_TASK_SEQUENCES]{nullptr};
+    //The sequence's state;
+    sequence_state_t state;
 
-    //Task Sequences lock;
-    bool sequencesUnlocked[NB_TASK_SEQUENCES]{true};
-}
+    //The tasks buffer;
+    cbuffer_t tasks;
+
+} sequence_t;
+
+
+//Task Pool;
+cbuffer_t pool = EMPTY_CBUFFER(task_t *);
+
+//Task sequences;
+container_t sequences = EMPTY_CONTAINER(sequence_t *);
 
 
 /*
  * reset : initialises the sequencer in a safe state;
  */
 
-void TaskSequencer::reset() {
+void init() {//TODO INITIALISE POOL AND SEQUENCES PROPERLY
 
     //First, delete all sequences;
     for (uint8_t sequences_id = NB_TASK_SEQUENCES; sequences_id--;) {
@@ -80,55 +80,71 @@ void TaskSequencer::reset() {
  * TODO
  */
 
-bool TaskSequencer::schedule_task(uint8_t sequence_id, TaskData &task) {
+bool TaskSequencer::schedule_task(uint8_t sequence_id, TaskData
 
-    //If no space is available, nothing to do;
-    if (!TaskStorage::availableSpaces()){
-        return false;//TODO KERNEL PANIC, SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
-    }
+&task) {
 
-    //If the task is to execute asap, and the task pool can contain tasks :
-    if (sequence_id == 255) {
+//If no space is available, nothing to do;
+if (!
 
-        //If the task pool doesn't have any space left, fail;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
-        if (!taskPool.available_spaces())
-            return false;
+TaskStorage::availableSpaces()
 
-        //Save the task in the TaskStorage and cache its index;
-        uint8_t task_index = TaskStorage::addTask(task);
+){
+return false;//TODO KERNEL PANIC, SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+}
 
-        //Copy the task;
-        taskPool.insert_object(task_index);
+//If the task is to execute asap, and the task pool can contain tasks :
+if (sequence_id == 255) {
 
-        //Succeed;
-        return true;
+//If the task pool doesn't have any space left, fail;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+if (!taskPool.
 
-    }
+available_spaces()
 
-    //If the task's type corresponds to an existing sequence:
-    if (sequence_id < NB_TASK_SEQUENCES) {
+)
+return false;
 
-        //First, cache the required task sequence;
-        CircularBuffer<uint8_t> *sequence = sequences[sequence_id];
+//Save the task in the TaskStorage and cache its index;
+uint8_t task_index = TaskStorage::addTask(task);
 
-        //If the sequence is full, fail;
-        if (!sequence->available_spaces())
-            return false;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+//Copy the task;
+taskPool.
+insert_object(task_index);
 
-        //Save the task in the TaskStorage and cache its index;
-        uint8_t task_index = TaskStorage::addTask(task);
+//Succeed;
+return true;
 
-        //Copy the task in the sequence;
-        sequence->insert_object(task_index);
+}
 
-        //Succeed;
-        return true;
+//If the task's type corresponds to an existing sequence:
+if (sequence_id < NB_TASK_SEQUENCES) {
 
-    }
+//First, cache the required task sequence;
+CircularBuffer <uint8_t> *sequence = sequences[sequence_id];
 
-    //TODO KERNEL PANIC. INVALID SEQUENCE ID, THE TASK WILL BE LOST;
-    //Fail;
-    return false;
+//If the sequence is full, fail;
+if (!sequence->
+
+available_spaces()
+
+)
+return false;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+
+//Save the task in the TaskStorage and cache its index;
+uint8_t task_index = TaskStorage::addTask(task);
+
+//Copy the task in the sequence;
+sequence->
+insert_object(task_index);
+
+//Succeed;
+return true;
+
+}
+
+//TODO KERNEL PANIC. INVALID SEQUENCE ID, THE TASK WILL BE LOST;
+//Fail;
+return false;
 
 }
 
@@ -140,7 +156,7 @@ bool TaskSequencer::schedule_task(uint8_t sequence_id, TaskData &task) {
 uint8_t TaskSequencer::availableSpaces(uint8_t type) {
 
     //If no space is available, nothing to do;
-    if (!TaskStorage::availableSpaces()){
+    if (!TaskStorage::availableSpaces()) {
         return 0;
     }
 

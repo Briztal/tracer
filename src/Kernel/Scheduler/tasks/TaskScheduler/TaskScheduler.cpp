@@ -84,7 +84,7 @@ void TaskScheduler::initialise_data() {
 //---------------------------------------------------Task Management----------------------------------------------------
 
 /*
- * schedule_task : this function adds the task, if it is possible, in :
+ * sequences_add_task : this function adds the task, if it is possible, in :
  *  - the task pool if its type is 255;
  *  - a task sequence if its type corresponds to a task sequence.
  *
@@ -125,7 +125,7 @@ bool TaskScheduler::schedule_task(task_t *task) {
 
 
 /*
- * schedule_task : this function creates a task and adds it to the task pool.
+ * sequences_add_task : this function creates a task and adds it to the task pool.
  *
  *  It takes in data all parameters required to build a task, namely :
  *      - function : the function to parse;

@@ -207,6 +207,7 @@ event_t *event_search(const char *name) {
 
 }
 
+
 //---------------------------------------- Event trigger and execution ----------------------------------------
 
 /*

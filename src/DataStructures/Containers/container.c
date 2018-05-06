@@ -6,9 +6,6 @@
 
 #include "container.h"
 
-//Resize the container;
-void container_resize(container_t *container, container_index_t new_size);
-
 
 /*
  * container_create : takes a pointer to a declared container and initialise it;
@@ -110,6 +107,35 @@ void *container_get_element(container_t *container, container_index_t index) {
 
     //Determine the adequate pointer to return;
     return container->elements + (uint32_t) (index * (container_index_t) container->element_size);
+
+}
+
+
+/*
+ * container_set_element : sets the element at the given index;
+ */
+
+void container_set_element(container_t *container, container_index_t index, void *element) {
+
+    //If the index is invalid :
+    if (index >= container->nb_elements) {
+
+        //Kernel panic;TODO KERNEL PANIC
+        return;
+
+    }
+
+    //Cache the src and dst pointer;
+    uint8_t *dst_ptr = container->elements + (uint32_t) (index * (container_index_t) container->element_size);
+    uint8_t *src_ptr = element;
+
+    //For each byte to copy;
+    for (uint8_t byte_count = container->element_size; byte_count--;) {
+
+        //Copy the src byte at the dst address;
+        *(dst_ptr++) = *(src_ptr++);
+
+    }
 
 }
 

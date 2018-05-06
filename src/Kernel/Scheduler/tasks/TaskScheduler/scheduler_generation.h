@@ -226,7 +226,7 @@ static task_state_t name##_scheduled_##type signature { \
     struct_fill\
     \
     /*Schedule a task, that will parse the required function, passing the previously created data.*/\
-    /*TODO TaskScheduler::schedule_task(type, _##name, (void *) _unpacker_data_);\*/\
+    /*TODO TaskScheduler::sequences_add_task(type, _##name, (void *) _unpacker_data_);\*/\
     \
     /*Complete*/\
     return complete;\
