@@ -27,30 +27,19 @@
 
 #include "setjmp.h"
 
-namespace Kernel {
 
 
-    //------------------------------------------- Entry Point -------------------------------------------
+//------------------------------------------- Entry Point -------------------------------------------
 
-    /*
-     * start : this function is called once, by main only. It is the project's entry point.
-     *
-     *  It will call initialise_hardware, and then call iterate indefinitely.
-     */
+/*
+ * start : this function is called once, by main only. It is the project's entry point.
+ *
+ *  It will call initialise_hardware, and then call iterate indefinitely.
+ */
 
-    void start();
-
-
-    //------------------------------------------- Interaction -------------------------------------------
-
-    /*
-     * register_communication_pipe : registers the given communication pipe to the interaction pocedure;
-     */
-
-    void register_communication_pipe(CommunicationPipe *pipe);
+void kernel_start();
 
 
-};
 
 
 #endif //TRACER_KERNEL_H

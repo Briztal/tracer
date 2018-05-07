@@ -18,25 +18,16 @@
 
 */
 
-#include <Sensors/Thermistors/Thermistors.h>
-#include <ControlSystem/ControlLoops.h>
+#include "kernel.h"
 
-#include <Kernel/Scheduler/TaskScheduler/TaskScheduler.h>
-#include <Kernel/Scheduler/tasks/events.h>
+#include <stdbool.h>
 
-#include <Kernel/Scheduler/process.h>
+#include <Kernel/scheduler/process.h>
 
-#include "Kernel.h"
 
-#include "Kernel/Arch/arch.h"
 
-namespace Kernel {
-    
-    //The start flag, set only once, at the entry point. Prevents start to be called a second time.
-    bool started = false;
-
-}
-
+//The start flag, set only once, at the entry point. Prevents start to be called a second time.
+bool started = false;
 
 //------------------------------------------- Entry Point -------------------------------------------
 
@@ -44,7 +35,7 @@ namespace Kernel {
  * start : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
-void Kernel::start() {
+void kernel_start() {
 
     //This function can be called only once. If it has already been called, fail.
     if (started)
@@ -53,28 +44,15 @@ void Kernel::start() {
     //Set the flag to prevent multiple executions;
     started = true;
 
-    //TODO IN CORE_INIT FUNCTION, CALLED BEFORE KERNEL INIT
+    //TODO IN CORE_INIT FUNCTION, CALLED BEFORE KERNEL start
     //Initialise the hardware and the framework
     hl_init();
 
     //Start the thread manager;
-    ThreadManager::start();
+    process_start_execution();
 
 }
 
-
-//------------------------------------------- Interaction -------------------------------------------
-
-/*
- * register_communication_pipe : adds the communication pipe to the Interaction data;
- */
-
-void Kernel::register_communication_pipe(CommunicationPipe *pipe) {
-
-    //Add the communication pipe to the interaction data;
-    Interaction::add_communication_pipe(pipe);
-
-}
 
 
 //------------------------------------------- Config checking -------------------------------------------

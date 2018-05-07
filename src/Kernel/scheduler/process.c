@@ -3,18 +3,15 @@
 //
 
 
+#include <malloc.h>
 #include "stdint.h"
 
 #include "stdbool.h"
 
-#include <DataStructures/Containers/ObjectContainer.h>
-
-#include <Kernel/Scheduler/tasks.h>
-
-#include <Kernel/Scheduler/scheduler.h>
 
 #include "process.h"
 #include "systick.h"
+#include "scheduler.h"
 
 
 //---------------------------- Private functions ----------------------------
@@ -48,7 +45,7 @@ void process_create_context(process_t *process, uint32_t stack_size) {
     void *ptr = malloc(stack_size * sizeof(stack_element_t));
 
     //If the reallocation failed :
-    if (ptr == nullptr) {
+    if (ptr == 0) {
         return;//TODO EXCEPTION;
     }
 

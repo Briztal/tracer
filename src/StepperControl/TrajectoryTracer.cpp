@@ -33,7 +33,7 @@
 #include <StepperControl/KinematicsCore1/KinematicsCore1.h>
 #include <StepperControl/KinematicsCore2/KinematicsCore2.h>
 #include <StepperControl/JerkPlanner.h>
-#include <Kernel/Kernel.h>
+#include <Kernel/kernel.h>
 
 
 /*

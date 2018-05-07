@@ -72,8 +72,8 @@ include_directories(.)
 
 add_library(tracer_config
 
-        Kernel/Kernel.h
-        Kernel/Kernel.cpp
+        Kernel/kernel.h
+        Kernel/kernel.c
 
         config.h
         parameters_indices.h

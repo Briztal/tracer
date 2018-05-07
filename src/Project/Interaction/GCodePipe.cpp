@@ -31,7 +31,7 @@
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>
 #include <Kernel/Interaction/Language/Languages/GCodeLanguage.h>
-#include <Kernel/Kernel.h>
+#include <Kernel/kernel.h>
 #include <Kernel/Interaction/Delimiter/LineDelimiter.h>
 
 #include "hardware_language_abstraction.h"

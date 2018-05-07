@@ -23,7 +23,7 @@
 #include <Config/control_config.h>
 #include <Kernel/Interaction/Delimiter/LineDelimiter.h>
 #include <Kernel/Interaction/Language/Languages/TerminalLanguage.h>
-#include <Kernel/Kernel.h>
+#include <Kernel/kernel.h>
 #include <Project/MachineController.h>
 #include <Project/TemperatureController.h>
 #include <Sensors/Thermistors/Thermistors.h>

@@ -152,6 +152,16 @@ void events_add(const char *name) {
 
 void events_register(const char *name, task_t *task) {
 
+    //If a null pointer was provided :
+    if (task == 0) {
+
+        //TODO ERROR NULL PTR;
+
+        //Ignore;
+        return;
+
+    }
+
     //Search for an event matching the given name;
     event_t *matching_event = event_search(name);
 

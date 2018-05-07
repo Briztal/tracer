@@ -78,6 +78,8 @@ void process_create_context(process_t *process_p, uint32_t stack_size);
 //Reset a process_t's context;
 void process_reset_context(process_t *process);
 
+//Start the execution of processes;
+void process_start_execution();
 
 //Set the working process_t's stack pointer;
 void process_save_sp(stack_ptr_t new_stack_pointer);

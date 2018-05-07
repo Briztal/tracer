@@ -3,7 +3,7 @@
 //
 
 #include <Kernel/Interaction/Interaction.h>
-#include <Kernel/Kernel.h>
+#include <Kernel/kernel.h>
 #include <DataStructures/Containers/CircularBuffer.h>
 #include <Kernel/Scheduler/tasks.h>
 #include <DataStructures/Containers/circular_buffer.h>
@@ -94,10 +94,21 @@ sequence_t *sequences_query_sequence(uint8_t sequence_id) {
 
 
 /*
- * TODO
+ * sequences_add_task : determines the required sequence, and appends the task to it, if there is one space.
  */
 
 bool sequences_add_task(uint8_t sequence_id, task_t *task) {
+
+
+    //If a null pointer was provided :
+    if (task == 0) {
+
+        //TODO ERROR NULL PTR;
+
+        //Ignore;
+        return false;
+
+    }
 
     //Query the appropriate sequence;
     sequence_t *sequence = sequences_query_sequence(sequence_id);
@@ -194,6 +205,7 @@ task_t *sequences_get_task(uint8_t sequence_id) {
 /*
  * sequence_unlock : this function unlocks the given sequence;
  */
+
 void sequence_unlock(uint8_t sequence_id) {
 
     //If the type is not allocated, return zero;
