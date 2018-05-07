@@ -15,17 +15,20 @@
 
 //--------------------- Initialisation ---------------------
 
-//Reset all sequences;
-void sequences_reset();
+//Set the pool size;
+void sequences_init(container_index_t pool_size);
+
+//Add a sequence of the given size;
+void sequences_add_sequence(container_index_t sequence_size);
 
 
 //--------------------- Tasks containers management ---------------------
 
 //Get the number of task that can be inserted in a particular sequence;
-uint8_t sequences_available_spaces(uint8_t type);
+container_index_t sequences_available_spaces(uint8_t sequence_id);
 
 //Verify that tasks are available in the required sequences;
-bool sequences_available_tasks(uint8_t type);
+bool sequences_available_task(uint8_t type);
 
 //Build and schedule a task;
 bool sequences_add_task(uint8_t sequence_id, task_t *task);
@@ -33,22 +36,13 @@ bool sequences_add_task(uint8_t sequence_id, task_t *task);
 
 //--------------------- Tasks execution --------------------
 
+//
+
 //Remove the current task of the given sequence;
-void unlockSequence(uint8_t sequence_id);
-
-
-//Determine the number of tasks in the task pool;
-uint8_t poolTasksNb();
-
-//Get a task from the task pool;
-uint8_t getPoolTask();
-
-
-//Determine if the required sequence can be processed;
-bool poolProcessable(uint8_t type);
+void sequences_unlock_sequence(uint8_t sequence_id);
 
 //Get the first task of the given sequence;
-uint8_t getSequencerTask(uint8_t sequence_id);
+task_t *sequences_get_task(uint8_t sequence_id);
 
 
 #endif //TRACER_TASKSEQUENCER_H

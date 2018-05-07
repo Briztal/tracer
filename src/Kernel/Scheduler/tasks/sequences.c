@@ -7,6 +7,7 @@
 #include <DataStructures/Containers/CircularBuffer.h>
 #include <Kernel/Scheduler/tasks.h>
 #include <DataStructures/Containers/circular_buffer.h>
+#include <DataStructures/Containers/container.h>
 #include "sequences.h"
 
 
@@ -37,157 +38,104 @@ typedef struct {
 } sequence_t;
 
 
-//Task Pool;
-cbuffer_t pool = EMPTY_CBUFFER(task_t *);
-
 //Task sequences;
 container_t sequences = EMPTY_CONTAINER(sequence_t *);
 
 
 /*
- * reset : initialises the sequencer in a safe state;
+ * sequences_add_sequence : adds a sequence to the container;
  */
 
-void init() {//TODO INITIALISE POOL AND SEQUENCES PROPERLY
+void sequences_add_sequence(container_index_t sequence_size) {
 
-    //First, delete all sequences;
-    for (uint8_t sequences_id = NB_TASK_SEQUENCES; sequences_id--;) {
+    //First, we must create a sequence in the heap;
 
-        //Delete the previous sequence;
-        delete sequences[sequences_id];
+    //Allocate data;
+    void *ptr = malloc(sizeof(sequence_t));
+
+    //If the allocation failed :
+    if (!ptr) {
+
+        //fail; TODO ERROR;
+        return;
 
     }
 
-    //Then, recreate them;
-    uint8_t sequence_id = 0;
+    //If the allocation succeeded, let's cache a casted copy for readability. Compiler optimised;
+    sequence_t *sequence = (sequence_t *) ptr;
 
-#define TASK_SEQUENCE(size) \
-        sequences[sequence_id] = new CircularBuffer<uint8_t>(size);\
-        sequencesUnlocked[sequence_id++] = true;
+    //Initialise the sequence;
+    *sequence = {
+            .tasks = EMPTY_CBUFFER(task_t *),
+            .state = UNLOCKED,
+    };
 
-#include "Config/kernel_config.h"
+    //Resize the task buffer;
+    cbuffer_resize(&sequence->tasks, sequence_size);
 
-#undef TASK_SEQUENCE
+    //Add the sequence to the sequences container;
+    container_append_element(&sequences, &sequence);
 
 }
 
 
-//--------------------------------------------------Type Verification---------------------------------------------------
 
+//------------------------------------------------- Sequence query --------------------------------------------------
+
+sequence_t *sequences_query_sequence(uint8_t sequence_id) {
+
+    //If the index is invalid, the container library will generate an error;
+    return *(sequence_t **) container_get_element(&sequences, sequence_id);
+
+}
+
+
+//-------------------------------------------------Type Verification ---------------------------------------------------
 
 
 /*
  * TODO
  */
 
-bool TaskSequencer::schedule_task(uint8_t sequence_id, TaskData
+bool sequences_add_task(uint8_t sequence_id, task_t *task) {
 
-&task) {
+    //Query the appropriate sequence;
+    sequence_t *sequence = sequences_query_sequence(sequence_id);
 
-//If no space is available, nothing to do;
-if (!
+    //If the sequence is full, fail;
+    if (!sequence->tasks.nb_spaces)
+        return false;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
 
-TaskStorage::availableSpaces()
+    //Copy the pointer in the cbuffer and validate it;
+    cbuffer_insert(&sequence->tasks, &task);
 
-){
-return false;//TODO KERNEL PANIC, SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
-}
+    //Succeed;
+    return true;
 
-//If the task is to execute asap, and the task pool can contain tasks :
-if (sequence_id == 255) {
 
-//If the task pool doesn't have any space left, fail;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
-if (!taskPool.
-
-available_spaces()
-
-)
-return false;
-
-//Save the task in the TaskStorage and cache its index;
-uint8_t task_index = TaskStorage::addTask(task);
-
-//Copy the task;
-taskPool.
-insert_object(task_index);
-
-//Succeed;
-return true;
-
-}
-
-//If the task's type corresponds to an existing sequence:
-if (sequence_id < NB_TASK_SEQUENCES) {
-
-//First, cache the required task sequence;
-CircularBuffer <uint8_t> *sequence = sequences[sequence_id];
-
-//If the sequence is full, fail;
-if (!sequence->
-
-available_spaces()
-
-)
-return false;//TODO KERNEL PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
-
-//Save the task in the TaskStorage and cache its index;
-uint8_t task_index = TaskStorage::addTask(task);
-
-//Copy the task in the sequence;
-sequence->
-insert_object(task_index);
-
-//Succeed;
-return true;
-
-}
-
-//TODO KERNEL PANIC. INVALID SEQUENCE ID, THE TASK WILL BE LOST;
-//Fail;
-return false;
+    //TODO KERNEL PANIC. INVALID SEQUENCE ID, THE TASK WILL BE LOST;
+    //Fail;
+    return false;
 
 }
 
 
 /*
- * nb_spaces : this function returns the number of spaces available in the task pool.
+ * nb_spaces : this function returns the number of spaces available in the required sequence;
  */
 
-uint8_t TaskSequencer::availableSpaces(uint8_t type) {
+container_index_t sequences_available_spaces(uint8_t sequence_id) {
 
-    //If no space is available, nothing to do;
-    if (!TaskStorage::availableSpaces()) {
-        return 0;
-    }
+    //If the index is invalid, return zero for safety;
+    if (sequence_id >= sequences.nb_elements)
+        return 0;//TODO ERROR ?
 
+    //Cache the required task sequence;
+    sequence_t *sequence = sequences_query_sequence(sequence_id);
 
-    if (type == 255) {
+    //If the sequence is full, fail;
+    return (sequence->tasks.nb_spaces);
 
-        //If the type corresponds to the task pool : return the number of nb_spaces of the pool;
-        return taskPool.available_spaces();
-
-    } else {
-        //If the type corresponds to a sequence :
-
-        //If the type is not allocated, return zero;
-        if (type >= NB_TASK_SEQUENCES)
-            return 0;
-
-        //return the number of nb_spaces in the concerned sequence;
-        return sequences[type]->available_spaces();
-
-    }
-
-}
-
-
-/*
- * availableTasks : returns true if tasks are available in the required sequence (255 for task pool);
- */
-
-uint8_t TaskSequencer::poolTasksNb() {
-
-    return taskPool.available_elements();
 }
 
 
@@ -195,17 +143,18 @@ uint8_t TaskSequencer::poolTasksNb() {
  * sequenceProcessable : returns true if tasks are available in the required sequence (255 for task pool);
  */
 
-bool TaskSequencer::poolProcessable(uint8_t type) {
+bool sequences_available_task(uint8_t sequence_id) {
 
-    //If the type is valid :
-    if (type < NB_TASK_SEQUENCES) {
+    //If the type is not allocated, return zero;
+    if (sequence_id >= sequences.nb_elements)
+        return 0;//TODO ERROR ?
 
-        //Return true if the sequence is unlocked and contains tasks;
-        return sequencesUnlocked[type] && sequences[type]->available_elements();
-    }
+    //Cache the required task sequence;
+    sequence_t *sequence = *(sequence_t **) container_get_element(&sequences, sequence_id);
 
-    //if not, return false for safety;
-    return false;
+    //A task is available if the sequence is unlocked and not empty;
+    return (sequence->state == UNLOCKED) && (sequence->tasks.container.nb_elements - sequence->tasks.nb_spaces);
+
 }
 
 
@@ -213,48 +162,50 @@ bool TaskSequencer::poolProcessable(uint8_t type) {
  * getPoolTask : returns a task identifier from the task pool;
  */
 
-uint8_t TaskSequencer::getPoolTask() {
-    return taskPool.get_and_discard_output();
-}
+task_t *sequences_get_task(uint8_t sequence_id) {
 
-
-/*
- * getPoolTask : returns a task identifier from the task pool;
- */
-
-uint8_t TaskSequencer::getSequencerTask(uint8_t sequence_id) {
-
-    //If the sequence_id is incorrect :
-    if (sequence_id >= NB_TASK_SEQUENCES)
-        return 0;//TODO USAGE FAULT;
+    //Get the required sequence. An invalid index will generate an error;
+    sequence_t *sequence = sequences_query_sequence(sequence_id);
 
     //If the sequence is locked :
-    if (!sequencesUnlocked[sequence_id])
+    if (!sequence->state == LOCKED)
         return 0;//TODO USAGE FAULT;
 
-    //If the sequence_id is correct, return the first task of the buffer;
-    uint8_t id = sequences[sequence_id]->get_and_discard_output();
+    //If the sequence exists and is unlocked, cache the first task of the buffer;
+    task_t *task = cbuffer_read_output(&sequence->tasks, 0);
 
-    //Mark the sequence locked;
-    sequencesUnlocked[sequence_id] = false;
+    //Discard the cached task;
+    cbuffer_discard_output(&sequence->tasks);
 
-    //Return the task's identifier;
-    return id;
+    //If the sequence must be locked (index not zero):
+    if (sequence_id) {
+
+        //Mark the sequence locked;
+        sequence->state = LOCKED;
+
+    }
+
+    //Return the cached task's pointer;
+    return task;
 
 }
 
 
 /*
- * enableSequence : this function unlocks the given sequence;
+ * sequence_unlock : this function unlocks the given sequence;
  */
-void TaskSequencer::unlockSequence(uint8_t sequence_id) {
+void sequence_unlock(uint8_t sequence_id) {
 
-    //If the sequence id is invalid, do nothing;
-    if (sequence_id >= NB_TASK_SEQUENCES)
-        return;
+    //If the type is not allocated, return zero;
+    if (sequence_id >= sequences.nb_elements)
+        return ;//TODO ERROR ?
+
+    //Cache the required task sequence;
+    sequence_t *sequence = *(sequence_t **) container_get_element(&sequences, sequence_id);
 
     //Unlock the sequence;
-    sequencesUnlocked[sequence_id] = true;
+    sequence->state = UNLOCKED;
+
 }
 
 
