@@ -7,6 +7,8 @@
 
 #include "stdint.h"
 
+#include "stdbool.h"
+
 #include "kinetis.h"
 
 //The stack element type;
@@ -48,7 +50,7 @@ static inline void core_set_thread_stack_pointer(const stack_ptr_t sp) {
  */
 
 static inline stack_ptr_t core_get_thread_stack_pointer() {
-    stack_ptr_t ptr = nullptr;
+    stack_ptr_t ptr = 0;
     __asm__ __volatile__ ("mrs %0, psp" : "=r" ((uint32_t) ptr):);
     return ptr;
 }
@@ -317,7 +319,9 @@ static inline stack_element_t core_get_process() {
  *  If they are 0, we are in thread mode;
  */
 
-#define core_in_thread_mode() (bool)(!(uint8_t ) SCB_ICSR)
+static inline bool core_in_thread_mode() {
+    return (bool)(!(uint8_t ) SCB_ICSR);
+}
 
 
 #endif

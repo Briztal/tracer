@@ -6,7 +6,7 @@
 #define TRACER_SEMAPHORE_H
 
 
-#include <DataStructures/Containers/Container.h>
+#include <DataStructures/Containers/container.h>
 #include "stdint.h"
 
 
@@ -34,27 +34,26 @@
 
 typedef struct {
 
+    //The allocation counter, initialised to the maximum number of concurrent code execution;
     uint16_t allocation_counter;
 
-} semaphore;
+    //The lock container. Contains pointers of all locked threads;
+    container_t locked_threads;
+
+} semaphore_t;
+
+
+#define SEMAPHORE(nb_accesses) {.allocation_counter = nbaccesses, .locked_threads = EMPTY_CONTAINER(process_t *)}
 
 
 //The P function : requires the execution;
-void sem_wait(semaphore *semaphore);
+void sem_wait(semaphore_t *semaphore);
 
 //The V function : lets an execution happen;
-void sem_post(semaphore semaphore);
+void sem_post(semaphore_t *semaphore);
 
-
-//------------------------------------------ Fields ------------------------------------------
-
-//The allocation counter : if superior, allocation is allowed. If not, initiator thread is put to sleep;
-uint16_t allocation_counter;
-
-//The Thread vector : memorises threads indices that are put to sleep;
-Container<uint8_t> locked_threads;
-
-
+//The deletion function. Unlocks all threads;
+void sem_delete(semaphore_t *semaphore);
 
 
 #endif //TRACER_SEMAPHORE_H

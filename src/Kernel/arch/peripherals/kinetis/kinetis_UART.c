@@ -3,7 +3,7 @@
 //
 
 #include <Kernel/Arch/Processors/core_arm_cortex_m4f.h>
-#include "UART.h"
+#include "kinetis_UART.h"
 
 
 //TODO RECEIVE OVERRUN
@@ -36,6 +36,20 @@
 #define CLEAR_BIT(data, bit_id, size) CLEAR(data, 1 << (bit_id), size)
 
 
+
+//Configure the packet format;
+void configure_packet_format(uart_config &);
+
+//Configure the state;
+void configure_state(uart_config &);
+
+//Configure the state;
+void configure_modem(uart_config &);
+
+//Configure the transmission layer;
+void configure_transmission_layer(uart_config &);
+
+
 /*
  * Constructor : initialises the data pointer and the frequency;w
  */
@@ -46,7 +60,7 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
         : data(data) {
 
     //Before anything, let's cache the registers pointer;
-    UARTRegisters *registers = data->registers;
+    UART_memory *registers = data->registers;
     /*
      * First, we will configure the peripheral hardware;
      */
@@ -191,7 +205,7 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
     //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
 
     //To avoid implicit double pointer access, we will cache data;
-    UARTRegisters *const registers = data->registers;
+    UART_memory *const registers = data->registers;
 
     /*
      * Number of bits; This peripheral only supports 8 or 9 data bits;
@@ -271,7 +285,7 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
 
 void teensy35::UART::configure_modem(uart_config &config) {
 
-    UARTRegisters *const registers = data->registers;
+    UART_memory *const registers = data->registers;
     /*
      * Rx_RTS_enable and Tx_Cts_enable are (resp) bits 3 and 0 of MODEM;
      */
@@ -315,7 +329,7 @@ void teensy35::UART::configure_modem(uart_config &config) {
 void teensy35::UART::configure_transmission_layer(uart_config &config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
-    UARTRegisters *registers = data->registers;
+    UART_memory *registers = data->registers;
 
 
     /*
@@ -396,7 +410,7 @@ void teensy35::UART::configure_transmission_layer(uart_config &config) {
 void teensy35::UART::configure_state(uart_config &config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
-    UARTRegisters *registers = data->registers;
+    UART_memory *registers = data->registers;
 
     /*
      * Rx state : RxE is the bit 2 of C2;
@@ -490,7 +504,7 @@ uint8_t teensy35::UART::transmission_available() {
 void teensy35::UART::transmit_all() {
 
     //As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-    UARTRegisters *registers = this->data->registers;
+    UART_memory *registers = this->data->registers;
 
     //Cache the number of spaces in the hardware buffer;
     uint8_t hw_buffer_spaces = transmission_available();
@@ -586,7 +600,7 @@ void teensy35::UART::transmit_break() {}
 void teensy35::UART::receive_all() {
 
     //To have a faster access, cache the register struct's pointer;
-    UARTRegisters *registers = data->registers;
+    UART_memory *registers = data->registers;
 
     //Cache the number of uint16_t in the rx buffer;
     uint8_t reception_available = registers->RCFIFO;
@@ -670,7 +684,7 @@ void teensy35::UART::receive_all() {
 void teensy35::UART::interrupt() {
 
     //First, cache the register pointer;
-    UARTRegisters *registers = data->registers;
+    UART_memory *registers = data->registers;
 
     //The logical AND of C2 and S1;
     uint8_t masked_flags = registers->C2 & registers->S1;
@@ -716,7 +730,7 @@ void teensy35::UART::error() {
 
 
     //First, cache the register pointer;
-    UARTRegisters *registers = data->registers;
+    UART_memory *registers = data->registers;
 
     //First, start by unlocking reception by checking the framing error flag. At the same time, check noise or parity;
     if (registers->C2  & (UART_S1_FE | UART_S1_NF | UART_S1_PF)) {
@@ -775,28 +789,3 @@ void teensy35::UART::error() {
 
 
 //-------------------------- UARTS Definitions --------------------------
-
-/*
- * The instantiation of an UART requires a bit of work, that is the same for all UARTs. A Macro will simplify our work;
- */
-
-#define INSTANTIATE_UART_DRIVERS(i, address, frequency, rxsize, txsize, status_index, error_index)\
-    teensy35::UARTRegisters *reg##i = ((teensy35::UARTRegisters *) (address));\
-    teensy35::UARTData UARTData##i{reg##i, (frequency)};\
-    void status_link_##i() {UART##i->interrupt();}\
-    void error_link_##i() {UART##i->error();}\
-    teensy35::UART *UART##i = new teensy35::UART(&UARTData##i, rxsize, txsize, status_index, error_index, status_link_##i, error_link_##i);
-
-
-/*
- * Now, we can instantiate all our drivers
- */
-
-/*
-INSTANTIATE_UART_DRIVERS(0, 0x4006A000, F_CPU, teensy35::size_8, teensy35::size_8, IRQ_UART0_STATUS, IRQ_UART0_ERROR);
-INSTANTIATE_UART_DRIVERS(1, 0x4006B000, F_CPU, teensy35::size_1, teensy35::size_1, IRQ_UART1_STATUS, IRQ_UART1_ERROR);
-INSTANTIATE_UART_DRIVERS(2, 0x4006C000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART2_STATUS, IRQ_UART2_ERROR);
-INSTANTIATE_UART_DRIVERS(3, 0x4006D000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART3_STATUS, IRQ_UART3_ERROR);
-INSTANTIATE_UART_DRIVERS(4, 0x400EA000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART4_STATUS, IRQ_UART4_ERROR);
-INSTANTIATE_UART_DRIVERS(5, 0x400EB000, F_BUS, teensy35::size_1, teensy35::size_1, IRQ_UART5_STATUS, IRQ_UART5_ERROR);
-*/

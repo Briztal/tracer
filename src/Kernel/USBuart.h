@@ -7,7 +7,7 @@
 
 
 #include <Kernel/Drivers/Driver.h>
-#include <Kernel/Scheduler/Semaphore.h>
+#include <Kernel/Scheduler/semaphore.h>
 
 namespace USBuart {
 

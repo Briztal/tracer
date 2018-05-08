@@ -1,4 +1,6 @@
 
+//TODO kERNEL MALLOC / realloc / free TO AVOID ERRORS AND TO BE THREAD SAFE;
+
 //TODO Synchronous and asynchronous tasks
 
 //TODO EXCEPTIONS : TRANSMIT ERROR MESSAGES WITH EXTERN VARS ?

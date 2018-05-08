@@ -30,6 +30,10 @@ void process_exit() { while (1); }
 //The process_t context switcher;
 void process_preempt();
 
+//The process currently in execution;
+process_t *current_process;
+
+
 
 //---------------------------- Process initialisation ----------------------------
 
@@ -95,7 +99,7 @@ void process_reset_context(process_t *process) {
  * process_lock : locks the required process_t;
  */
 
-void process_lock(process_t *process) {
+inline void process_lock(process_t *process) {
 
     //Lock the process_t if it is active;
     if (process->state == ACTIVE)
@@ -107,8 +111,7 @@ void process_lock(process_t *process) {
 /*
  * process_unlock : unlocks the required process_t;
  */
-
-void process_unlock(process_t *process) {
+inline void process_unlock(process_t *process) {
 
     //Unlock the process_t if it is stopped;
     if (process->state == STOPPED)
@@ -172,7 +175,7 @@ void process_function(volatile process_t *volatile process) {
 }
 
 
-//------------------------------------------ Execution ------------------------------------------
+//------------------------------------------ Runtime ------------------------------------------
 
 //TODO SCHEDULER
 
@@ -214,10 +217,18 @@ void process_start_execution() {
 }
 
 
+/*
+ * process_get_current : returns the process currently in execution;
+ */
+
+process_t *process_get_current() {
+
+    //Returns the current process;
+    return current_process;
+
+}
+
 //---------------------------- Context switch ----------------------------
-
-process_t *current_process;
-
 
 /*
  * The context switcher :

@@ -6,7 +6,7 @@
 #define TRACER_THREADMANAGER_H
 
 
-#include "Kernel/Arch/Processors/core_arm_cortex_m4f.h"
+#include "Kernel/ARCH/arch.h"
 
 #include "Kernel/Scheduler/tasks/task.h"
 
@@ -80,6 +80,9 @@ void process_reset_context(process_t *process);
 
 //Start the execution of processes;
 void process_start_execution();
+
+//Get the process currently in execution;
+process_t *process_get_current();
 
 //Set the working process_t's stack pointer;
 void process_save_sp(stack_ptr_t new_stack_pointer);
