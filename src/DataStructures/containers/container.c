@@ -8,18 +8,21 @@
 
 
 /*
- * container_create : takes a pointer to a declared container and initialise it;
+ * container_move : moves data from one container to another;
  */
 
-void container_create(container_t *container) {
+void container_move(container_t *dst, container_t *src) {
 
-    //Initialise the number of elements
-    container->nb_elements = 0;
+    //Cache dst;
+    const container_t tmp = *dst;
 
-    //Initialise the elements to null pointer;
-    container->elements = malloc(0);
+    //Copy src into dst;
+    *dst = *src;
 
+    //Copy the cached dst into src;
+    *src = tmp;
 }
+
 
 
 /*

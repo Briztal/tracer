@@ -18,7 +18,7 @@ typedef struct {
 
 } tree_t;
 
-#define EMPTY_TREE {EMPTY_CONTAINER(tree_t)};
+#define EMPTY_TREE {EMPTY_CONTAINER(tree_t)}
 
 
 

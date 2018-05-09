@@ -28,9 +28,8 @@ typedef struct {
 
 #define CONTAINER_GET_TYPED(type, container_p, index) *(type *)container_get_element(container_p, index)
 
-//Initialise the container to empty;
-void container_create(container_t *container);
-
+//Move data from one container to another;
+void container_move(container_t *dst, container_t *src);
 
 //Insert an element at the given index;
 void container_insert_element(container_t *container, container_index_t index, void *element_p);

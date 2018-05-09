@@ -153,6 +153,39 @@ void string_delete(const string_t *const string) {
 
 
 /*
+ * String move : creates a new string, and moves src's data to it. Then, resets src to an empty string;
+ */
+
+string_t *string_move(string_t *src) {
+
+    //First, create a copycat of src, phagocyting its data;
+    string_t *clone = string_create(src->length, src->data);
+
+    //Then, allocate data in the heap for an empty string;
+    void *ptr = malloc(length_to_size(0));
+
+    //If the allocation failed, error;
+    if (!ptr)
+        return 0;//TODO ERROR.
+
+    //Initialise the string to empty.
+    *(char *)ptr = 0;
+
+    //Re-initialise src with new data;
+    *src = {
+            .data = ptr,
+            .length = 0,
+    };
+
+    //Return the new string;
+    return clone;
+
+}
+
+
+
+
+/*
  * string_resize : resizes a string to the given length;
  */
 

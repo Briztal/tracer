@@ -27,6 +27,9 @@ typedef struct {
 //String deletion;
 void string_delete(const string_t *);
 
+//String move;
+string_t *string_move(string_t *);
+
 
 //Unsigned converters;
 
