@@ -1,7 +1,7 @@
 #ifndef TRACER_ARCH_TEENSY35_H
 #define TRACER_ARCH_TEENSY35_H
 
-#include "Kernel/ARCH/processors/arm_cortex_m4f.h"
+#include "Kernel/arch/processors/arm_cortex_m4f.h"
 
 #include <Kernel/drivers/UART.h>
 

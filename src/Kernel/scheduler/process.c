@@ -246,11 +246,14 @@ void process_preempt() {
     //Save the current process_t's stack pointer, while the process_t hasn't been deleted;
     current_process->stack_pointer = core_get_thread_stack_pointer();
 
-    //Get a new process_t to execute, and pass the old one for eventual relocation;
-    current_process = scheduler_schedule(current_process),
+    //Update the current process's status (ex : if terminated, will be stopped);
+    scheduler_update_process(current_process);
 
-            //Set the appropriate context;
-            core_set_thread_stack_pointer(current_process->stack_pointer);
+    //Get a new process_t to execute, and pass the old one for eventual relocation;
+    current_process = scheduler_select_process();
+
+    //Set the appropriate context;
+    core_set_thread_stack_pointer(current_process->stack_pointer);
 
     //------------- FROM HERE, ALL DATA IS IN THE NEW TASK'S STACK -------------
 

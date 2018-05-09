@@ -26,6 +26,7 @@ typedef struct {
 //A macro to help us safely initialising our containers;
 #define EMPTY_CONTAINER(type) {.nb_elements = 0, .element_size = sizeof(type), .elements = 0}
 
+#define CONTAINER_GET_TYPED(type, container_p, index) *(type *)container_get_element(container_p, index)
 
 //Initialise the container to empty;
 void container_create(container_t *container);

@@ -11,8 +11,9 @@
  *  It handles a simple UART that comprises hardware FIFOs for in/out buffering (FIFOs can be of size 1);
  */
 
-//Int types;
 #include "stdint.h"
+
+#include "stdbool.h"
 
 /*
  * -------------------------------- Configuration data types -----------------------------------
@@ -26,20 +27,20 @@
  * Number of possible data bits;
  */
 
-enum parity_bit_t {
+typedef enum {
     EVEN_PARITY,
     ODD_PARITY
-};
+} parity_bit_t;
 
 
 /*
  * The type of the transmission;
  */
 
-enum transmission_type_t {
+typedef enum {
     HALF_DUPLEX,
     FULL_DUPLEX
-};
+} transmission_type_t;
 
 
 /*
@@ -49,40 +50,55 @@ enum transmission_type_t {
 typedef struct {
 
     //The size of the reception software buffer;
-    uint16_t sw_rx_buffer_size = 64;
+    uint16_t sw_rx_buffer_size;
 
     //The size of the reception software buffer;
-    uint16_t sw_tx_buffer_size = 64;
+    uint16_t sw_tx_buffer_size;
 
     //The Number of data bits;
-    uint8_t nb_data_bits = 8;
+    uint8_t nb_data_bits;
 
     //Is the parity bit present ?
-    bool parity_bit_enabled = false;
+    bool parity_bit_enabled;
 
     //The type of the parity bit;
-    parity_bit_t parity_type = EVEN_PARITY;
+    parity_bit_t parity_type;
 
     //RTS enabled;
-    bool rts_enabled = false;
+    bool rts_enabled;
 
     //CTS check before detection enabled;
-    bool cts_enabled = false;
+    bool cts_enabled;
 
     //The transmission state;
-    transmission_type_t transmission_type = FULL_DUPLEX;
+    transmission_type_t transmission_type;
 
     //The Baudrate;
-    uint32_t baudrate = 9600;
+    uint32_t baudrate;
 
     //Is Tx enabled ?
-    bool tx_enabled = true;
+    bool tx_enabled;
 
     //Is Rx enabled ?
-    bool rx_enabled = true;
+    bool rx_enabled;
 
 } UART_config;
 
+
+#define UART_DEFAULT_CONFIG \
+{\
+    .sw_rx_buffer_size = 64,\
+    .sw_tx_buffer_size = 64,\
+    .nb_data_bits = 8,\
+    .parity_bit_enabled = false,\
+    .parity_type = EVEN_PARITY,\
+    .rts_enabled = false,\
+    .cts_enabled = false,\
+    .transmission_type = FULL_DUPLEX,\
+    .baudrate = 9600,\
+    .tx_enabled = true,\
+    .rx_enabled = true,\
+}
 
 typedef struct {
 
@@ -93,7 +109,7 @@ typedef struct {
     //-------------------------- Configuration methods --------------------------
 
     //Initialise the UART;
-    void (*initialise)(void *data, uart_config *);
+    void (*initialise)(void *data, UART_config *);
 
 
     //-------------------------------- Interrupts enable functions -----------------------------------

@@ -6,9 +6,9 @@
 #define TRACER_THREADMANAGER_H
 
 
-#include "Kernel/ARCH/arch.h"
+#include "Kernel/arch/arch.h"
 
-#include "Kernel/Scheduler/tasks/task.h"
+#include "Kernel/scheduler/tasks/task.h"
 
 
 //The set of execution states;

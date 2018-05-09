@@ -10,6 +10,9 @@
 //Initialise the Scheduling environment;
 scheduler_initialise();
 
+//Update a process;
+void scheduler_update_process(process_t *);
+
 //Select the thread to be executed;
 process_t* scheduler_select_process();
 
