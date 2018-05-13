@@ -21,13 +21,7 @@
 #ifndef TRACER_KERNEL_H
 #define TRACER_KERNEL_H
 
-#include <sanity_check.h>
-
-#include <Kernel/Interaction/CommunicationPipe.h>
-
-#include "setjmp.h"
-
-
+#include "stddef.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
 
@@ -40,6 +34,20 @@
 void kernel_start();
 
 
+//The malloc function to use across the code;
+void *kernel_malloc(size_t size);
+
+//The realloc function to use across the code;
+void *kernel_realloc(void *, size_t size);
+
+//The free function to use across the code;
+void kernel_free(void *);
+
+//Enter a critical section;
+void kernel_enter_critical_section();
+
+//Leave a critical section;
+void kernel_leave_critical_section();
 
 
 #endif //TRACER_KERNEL_H

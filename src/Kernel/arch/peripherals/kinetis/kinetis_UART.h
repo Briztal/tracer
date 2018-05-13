@@ -9,6 +9,8 @@
 
 #include <Kernel/drivers/UART.h>
 
+#include <data_structures/stream/stream.h>
+
 #include "kinetis.h"
 
 typedef enum {
@@ -23,7 +25,7 @@ typedef enum {
 
 
 /*
- * First, we define the UART registers map. As all data related to a specific UART are in a continuous memory zone,
+ * First, we define the UART memory map. As all data related to a specific UART are in a continuous memory zone,
  *  We can assimilate them as a struct, whose address is known in memory;
  */
 
@@ -82,7 +84,7 @@ typedef struct __attribute__ ((packed)) {
     volatile uint8_t RIDT;
     volatile uint8_t TIDT;
 
-} kinetis_UART_memory;
+} kinetis_UART_memory_t;
 
 
 /*
@@ -91,8 +93,8 @@ typedef struct __attribute__ ((packed)) {
 
 typedef struct {
 
-    //The registers struct;
-    kinetis_UART_memory *const registers;
+    //The memory struct;
+    kinetis_UART_memory_t *const memory;
 
     //The clock frequency;
     const uint32_t clockFrequency;
@@ -109,7 +111,7 @@ typedef struct {
     //The error interrupt index;
     const uint8_t error_interrupt_id;
 
-} kinetis_UART_data;
+} kinetis_UART_data_t;
 
 
 /*
@@ -148,35 +150,44 @@ typedef struct {
 
 //-------------------------- Configuration methods --------------------------
 
-//Initialise the uart;
-void kinetis_UART_init(kinetis_UART_data *, UART_config *);
+//Initialise the UART;
+void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *, data_flux_t *);
 
-//De-initialise the uart;
-void kinetis_UART_exit(kinetis_UART_data *);
+//De-initialise the UART;
+void kinetis_UART_exit(kinetis_UART_data_t *);
 
 
 //-------------------------------- Interrupts enable functions -----------------------------------
 
 //Enable the reception interrupt
-void kinetis_UART_enable_rx_int(kinetis_UART_data *);
+void kinetis_UART_enable_rx_int(kinetis_UART_data_t *);
 
 //Enable the transmission interrupt
-void kinetis_UART_enable_tx_int(kinetis_UART_data *);
+void kinetis_UART_enable_tx_int(kinetis_UART_data_t *);
 
 
 //-------------------------- Transmission methods --------------------------
 
 //How many uint16_t-s can we transmit to the UART ?
-uint8_t kinetis_UART_tx_available(kinetis_UART_data *);
+uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *);
 
 //Transmit a uint16_t to the UART;
-void kinetis_UART_transmit_all(kinetis_UART_data *);
+void kinetis_UART_transmit_all(kinetis_UART_data_t *);
+
+
+//-------------------------- Error and interrupt --------------------------
+
+//The interrupt function;
+void kinetis_UART_interrupt(kinetis_UART_data_t *data);
+
+//The error function;
+void kinetis_UART_error(kinetis_UART_data_t *data);
 
 
 //-------------------------- Reception methods --------------------------
 
 //Transmit a uint16_t to the UART;
-void kinetis_UART_receive_all(kinetis_UART_data *);
+void kinetis_UART_receive_all(kinetis_UART_data_t *);
 
 
 

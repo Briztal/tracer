@@ -82,7 +82,7 @@ typedef struct {
     //Is Rx enabled ?
     bool rx_enabled;
 
-} UART_config;
+} UART_config_t;
 
 
 #define UART_DEFAULT_CONFIG \

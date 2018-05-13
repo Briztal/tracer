@@ -6,9 +6,8 @@
 #define TRACER_TSTRINGCLASS_H
 
 
-#include <DataStructures/Containers/DynamicPointerBuffer.h>
 #include <DataStructures/string/string.h>
-#include "DataStructures/Containers/tree.h"
+#include "DataStructures/containers/tree.h"
 
 
 typedef struct {

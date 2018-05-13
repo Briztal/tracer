@@ -315,7 +315,7 @@ add_library(sensors
 
 #---------------------------------------------DATASTRUCTURES------------------------------------------------------------
 
-set(DP "DataStructures")
+set(DP "data_structures")
 include_directories(${DP}/)
 
 add_library(datastructures
@@ -427,6 +427,6 @@ add_library(movements
 #------------------------------------------------FIRMWARE---------------------------------------------------------------
 
 
-add_executable(TRACER main.cpp)
+add_executable(TRACER main.c)
 
 

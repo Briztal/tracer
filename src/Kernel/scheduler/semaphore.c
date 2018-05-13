@@ -2,14 +2,13 @@
 // Created by root on 4/29/18.
 //
 
-#include <DataStructures/Containers/container.h>
+#include <data_structures/containers/container.h>
 #include <malloc.h>
 #include "semaphore.h"
 
-#include "Kernel/ARCH/arch.h"
+#include "Kernel/arch/arch.h"
 
-#include "Kernel/Scheduler/process.h"
-#include "process.h"
+#include "Kernel/scheduler/process.h"
 
 
 void semaphore_unlock(semaphore_t *semaphore) {

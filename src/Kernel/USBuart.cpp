@@ -2,7 +2,9 @@
 // Created by root on 4/29/18.
 //
 
+/*
 #include <Kernel/Scheduler/systick.h>
+
 #include "USBuart.h"
 
 namespace USBuart {
@@ -26,3 +28,4 @@ void USBuart::write(String s) {
     semaphore.V();
 
 }
+*/

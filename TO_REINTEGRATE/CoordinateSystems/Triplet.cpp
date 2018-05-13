@@ -3,7 +3,7 @@
 //
 
 #include <string.h>
-#include <Kernel/Interaction/Interaction.h>
+
 #include "Triplet.h"
 
 
@@ -53,7 +53,7 @@ void Triplet::set(uint8_t index, float value) {
     if (index >= 3) {
 
         //Log :
-        std_out("Error in Triplet::set : invalid index");
+        //std_out("Error in Triplet::set : invalid index");
 
         //Fail;
         return;
@@ -99,7 +99,7 @@ float Triplet::get(uint8_t index) const {
     if (index >= 3) {
 
         //Log :
-        std_out("Error in Triplet::set : invalid index");
+        //std_out("Error in Triplet::set : invalid index");
 
         //Fail;
         return 0;
@@ -123,8 +123,11 @@ const float *const Triplet::get_data() const {
 
 }
 
+/*
 tstring Triplet::toString() {
 
     return string(data[0], 2) +" "+string(data[1], 2)+" "+string(data[2], 2);
 
 }
+
+ */

@@ -41,6 +41,7 @@ typedef stack_element_t *stack_ptr_t;
 
 static inline void core_set_thread_stack_pointer(const stack_ptr_t sp) {
     __asm__ __volatile__ ("msr psp, %0"::"r" (sp));\
+
 }
 
 
@@ -57,11 +58,11 @@ static inline stack_ptr_t core_get_thread_stack_pointer() {
 
 
 /*
- * core_stack_thread_context : injects assembly code in order to stack registers that are not
+ * core_stack_thread_context : injects assembly code in order to stack memory that are not
  *  stacked automatically in the process_t stack;
  *
- *  It moves psp into r0, and then stacks r4-r7, general purposes registers, and finally
- *      stacks s16- s31, floating point unit registers;
+ *  It moves psp into r0, and then stacks r4-r7, general purposes memory, and finally
+ *      stacks s16- s31, floating point unit memory;
  *
  *  You may notice that PSP remains unchanged after the stacking. This is done with purpose, in order to
  *      allow the processor to unstack properly even if core_unstack_context is called;
@@ -78,11 +79,11 @@ static inline void core_stack_thread_context() {
 
 
 /*
- * core_stack_thread_context : injects assembly code in order to stack registers that are not
+ * core_stack_thread_context : injects assembly code in order to stack memory that are not
  *  stacked automatically in the process_t stack;
  *
- *  It moves psp into r0, and then unstacks r4-r7, general purposes registers, and finally
- *      unstacks s16- s31, floating point unit registers;
+ *  It moves psp into r0, and then unstacks r4-r7, general purposes memory, and finally
+ *      unstacks s16- s31, floating point unit memory;
  *
  *  As core_stack_thread_context didn't alter PSP, this function doesn't either;
  */
@@ -109,14 +110,14 @@ static inline void core_unstack_thread_context() {
  */
 
 static inline void core_init_stack(void (*function)(), void (*end_loop)(), stack_element_t process_pointer) {
-        uint32_t *__core_init_stack_sp__ = core_get_thread_stack_pointer();
-        *(__core_init_stack_sp__ - 1) = 0x01000000;
-        *(__core_init_stack_sp__ - 2) = (uint32_t) (function);
-        *(__core_init_stack_sp__ - 3) = (uint32_t) (end_loop);
-        *(__core_init_stack_sp__ - 4) = (uint32_t) (process_pointer);
-        __core_init_stack_sp__ -= 8;
-        core_set_thread_stack_pointer(__core_init_stack_sp__);
-    }
+    uint32_t *__core_init_stack_sp__ = core_get_thread_stack_pointer();
+    *(__core_init_stack_sp__ - 1) = 0x01000000;
+    *(__core_init_stack_sp__ - 2) = (uint32_t) (function);
+    *(__core_init_stack_sp__ - 3) = (uint32_t) (end_loop);
+    *(__core_init_stack_sp__ - 4) = (uint32_t) (process_pointer);
+    __core_init_stack_sp__ -= 8;
+    core_set_thread_stack_pointer(__core_init_stack_sp__);
+}
 
 
 /*
@@ -237,12 +238,24 @@ static inline stack_element_t core_get_process() {
  *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
  */
 
-#define core_start_systick_timer(systick_period_us, systick_function)\
-    _VectorsRam[15] = systick_function;\
-    NVIC_SET_PRIORITY(-1, 0);\
-    SYST_RVR = (systick_period_us) * ((float) F_CPU / (float) 1000);\
-    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;\
-    SYST_CSR |= SYST_CSR_ENABLE;\
+inline void core_start_systick_timer(uint32_t systick_period_us, void (*systick_function)(void)) {
+
+    //Set the systick function;
+    _VectorsRam[15] = systick_function;
+
+    //Set the systick priority to the highest priority level;
+    NVIC_SET_PRIORITY(-1, 0);
+
+    //Update the reload value register;
+    SYST_RVR = (uint32_t) (((float) systick_period_us) * ((float) F_CPU / (float) 1000));
+
+    //Clear the systick flag;
+    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;
+
+    //Enable the systick interrupt;
+    SYST_CSR |= SYST_CSR_ENABLE;
+
+}
 
 
 /*
@@ -253,8 +266,9 @@ static inline stack_element_t core_get_process() {
  * core_enable_interrupt : enables the specified interrupt;
  */
 
-#define core_enable_interrupt(interrupt_index)\
+inline void core_enable_interrupt(uint8_t interrupt_index) {
     NVIC_ENABLE_IRQ(interrupt_index);
+}
 
 
 
@@ -278,16 +292,18 @@ static inline stack_element_t core_get_process() {
  * core_clear_interrupt_pending : marks the interrupt as not pending;
  */
 
-#define core_clear_interrupt_pending(interrupt_index)\
+inline void core_clear_interrupt_pending(uint8_t interrupt_index) {
     NVIC_CLEAR_PENDING(interrupt_index);
+}
 
 
 /*
  * core_set_interrupt_priority : sets the priority of the required interrupt to the povided;
  */
 
-#define core_set_interrupt_priority(interrupt_index, priority)\
+inline void core_set_interrupt_priority(uint8_t interrupt_index, uint8_t priority) {
     NVIC_SET_PRIORITY(interrupt_index, priority);
+}
 
 
 /*
@@ -307,8 +323,9 @@ static inline stack_element_t core_get_process() {
  * core_set_interrupt_handler : sets the handler of the required interrupt;
  */
 
-#define core_set_interrupt_handler(interrupt_index, handler)\
+inline void core_set_interrupt_handler(uint8_t interrupt_index, void (*handler)()) {
     _VectorsRam[16 + (interrupt_index)] = handler;
+}
 
 
 /*
@@ -320,7 +337,7 @@ static inline stack_element_t core_get_process() {
  */
 
 static inline bool core_in_thread_mode() {
-    return (bool)(!(uint8_t ) SCB_ICSR);
+    return (bool) (!(uint8_t) SCB_ICSR);
 }
 
 

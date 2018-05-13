@@ -70,7 +70,7 @@ string_t *string_create(const size_t string_length, const char *const heap_data)
     string_t *string = (string_t *) ptr;
 
     //Initialise the string;
-    *string = {
+    *string = (string_t) {
             .length = string_length,
             .data = heap_data,
     };

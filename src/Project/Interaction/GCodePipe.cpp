@@ -64,7 +64,7 @@ namespace GCodePipe {
 
 
 /*
- * This function creates a communication pipe and registers it in the kernel;
+ * This function creates a communication pipe and memory it in the kernel;
  */
 
 void GCodePipe::kernel_registration() {

@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include <Kernel/scheduler/process.h>
+#include <malloc.h>
 
 
 
@@ -52,6 +53,122 @@ void kernel_start() {
     process_start_execution();
 
 }
+
+
+
+/*
+ * kernel_malloc : the malloc to use across the code; It is thread safe, and checks for exceptions;
+ */
+
+void *kernel_malloc(size_t size) {
+
+    //Enter a critical section;
+    kernel_enter_critical_section();
+
+    //Allocate data in the heap;
+    void *ptr = malloc(size);
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    //If the allocation failed, error;
+    if (!ptr)
+        return 0;//TODO ERROR.
+
+    //Return the allocated data;
+    return ptr;
+
+}
+
+
+/*
+ * kernel_realloc : the realloc to use across the code; It is thread safe, and checks for exceptions;
+ */
+
+void *kernel_realloc(void *data, size_t size) {
+
+    //Enter a critical section;
+    kernel_enter_critical_section();
+
+    //Reallocate data in the heap;
+    void *ptr = realloc(data, size);
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    //If the reallocation failed, error;
+    if (!ptr)
+        return 0;//TODO ERROR.
+
+    //Return the reallocated data;
+    return ptr;
+
+
+}
+
+
+/*
+ * kernel_free : the free to use across the code; It is thread safe, and checks for exceptions;
+ */
+
+void kernel_free(void *data) {
+
+    //Enter a critical section;
+    kernel_enter_critical_section();
+
+    free(data);
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+}
+
+
+static uint32_t critical_section_counter = 0;
+
+/*
+ * kernel_enter_critical_section : called whenever any part of the code must execute a critical section;
+ */
+
+void kernel_enter_critical_section() {
+
+    //Disable interrupts;
+    core_disable_interrupts();
+
+    //Increment the section counter;
+    critical_section_counter++;
+
+}
+
+
+/*
+ * kernel_leave_critical_section : called whenever any part of the code leaves a critical section;
+ */
+
+void kernel_leave_critical_section() {
+
+    //To safely detect any code error, disable interrupts;
+    core_disable_interrupts();
+
+    //If there was a code error (more leave called than enter);
+    if (!critical_section_counter) {
+
+        //TODO EXCEPTION;
+
+    }
+
+    //If we must enable interrupts again :
+    if (--critical_section_counter) {
+
+        //Enable interrupts;
+        core_enable_interrupts();
+
+    }
+
+
+}
+
+
 
 
 

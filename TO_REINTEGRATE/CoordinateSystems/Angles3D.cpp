@@ -5,9 +5,7 @@
 
 #include "Angles3D.h"
 
-#include <Kernel/Interaction/Interaction.h>
-
-#include <Math/math_constants.h>
+//#include <Math/math_constants.h>
 
 
 void Angles3D::set(uint8_t index, float value) {
@@ -41,6 +39,7 @@ void Angles3D::wrapAngles_PI() {
 
 float Angles3D::wrapAngle_PI(float angle) {
 
+    /*
     //While the angle is below -pi, add 2pi;
     while(angle <= -(float)M_PI)
         angle += (float) M_2PI;
@@ -51,5 +50,6 @@ float Angles3D::wrapAngle_PI(float angle) {
 
     //Return the new angle;
     return angle;
+     */
 
 }

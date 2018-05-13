@@ -7,9 +7,6 @@
 
 #include "stdint.h"
 
-#include "hardware_language_abstraction.h"
-
-#include <DataStructures/string/tstring.h>
 
 class Triplet {
     
@@ -61,7 +58,7 @@ protected:
 
 public:
 
-    tstring toString();
+    //tstring toString();
 
 };
 

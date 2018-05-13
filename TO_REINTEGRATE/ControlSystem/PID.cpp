@@ -91,7 +91,7 @@ PID::PID_constants_t PID::getConstants() {
 
 
 /*
- * EEPROMRegister : this function registers the PID in the EEPROMMap;
+ * EEPROMRegister : this function memory the PID in the EEPROMMap;
  */
 
 void PID::EEPROMRegister(char *path, const char *name) {

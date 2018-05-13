@@ -76,7 +76,7 @@ namespace  TerminalPipe {
 
 
 /*
- * This function creates a communication pipe and registers it in the kernel;
+ * This function creates a communication pipe and memory it in the kernel;
  */
 
 void TerminalPipe::kernel_registration() {

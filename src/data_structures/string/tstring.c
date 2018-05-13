@@ -3,7 +3,11 @@
 //
 
 #include <Kernel/memory.h>
+
+#include <DataStructures/containers/container.h>
+
 #include "hardware_language_abstraction.h"
+
 #include "tstring.h"
 
 

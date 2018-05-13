@@ -3,6 +3,7 @@
 //
 
 #include <malloc.h>
+#include <string.h>
 
 #include "container.h"
 
@@ -17,10 +18,11 @@ void container_move(container_t *dst, container_t *src) {
     const container_t tmp = *dst;
 
     //Copy src into dst;
-    *dst = *src;
+    memcpy(dst, src, sizeof(container_t));
 
     //Copy the cached dst into src;
-    *src = tmp;
+    memcpy(src, &tmp, sizeof(container_t));
+
 }
 
 

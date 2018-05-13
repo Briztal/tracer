@@ -2,7 +2,8 @@
 // Created by root on 4/19/18.
 //
 
-#include <Kernel/Arch/Processors/core_arm_cortex_m4f.h>
+#include <Kernel/arch/arch.h>
+
 #include "kinetis_UART.h"
 
 
@@ -38,37 +39,38 @@
 
 
 //Configure the packet format;
-void configure_packet_format(uart_config &);
+void initialise_hardware(kinetis_UART_data_t *);
+
+//Configure the packet format;
+void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *);
 
 //Configure the state;
-void configure_state(uart_config &);
+void configure_state(kinetis_UART_data_t *data, UART_config_t *);
 
 //Configure the state;
-void configure_modem(uart_config &);
+void configure_modem(kinetis_UART_data_t *data, UART_config_t *);
 
 //Configure the transmission layer;
-void configure_transmission_layer(uart_config &);
+void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *);
 
 
 /*
  * Constructor : initialises the data pointer and the frequency;w
  */
 
-teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t tx_size,
-                     uint8_t status_interrupt_index, uint8_t error_interrupt_index,
-                     void (*status_interrupt_link)(void), void (*error_interrupt_link)(void))
-        : data(data) {
 
-    //Before anything, let's cache the registers pointer;
-    UART_memory *registers = data->registers;
+void initialise_hardware(kinetis_UART_data_t *data) {
+
+    //Before anything, let's cache the memory pointer;
+    kinetis_UART_memory_t *registers = data->memory;
+
     /*
      * First, we will configure the peripheral hardware;
      */
 
     //Set both FIFOs enabled, and their size set with provided values,
-    registers->PFIFO =
-            (uint8_t) UART_PFIFO_TXFE | (uint8_t) UART_PFIFO_RXFE | (uint8_t) UART_PFIFO_TXFIFOSIZE(tx_size) |
-            (uint8_t) UART_PFIFO_RXFIFOSIZE(rx_size);
+    registers->PFIFO = (uint8_t) UART_PFIFO_TXFE | (uint8_t) UART_PFIFO_RXFE |
+            (uint8_t) UART_PFIFO_TXFIFOSIZE(tx_size) | (uint8_t) UART_PFIFO_RXFIFOSIZE(rx_size);
 
     //The rx watermark will be set as the half of the rx buffer size;
     switch (rx_size) {
@@ -133,17 +135,20 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
     //Enable all interrupts,
     SET(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
 
+    //Cache the status interrupt index;
+    const uint8_t status_id = data->status_interrupt_id;
+
     //Set the status interrupt priority;
-    core_set_interrupt_priority(status_interrupt_index, DRIVER_STARUS_INTERRUPT_PRIORITY);
+    core_set_interrupt_priority(status_id, DRIVER_STARUS_INTERRUPT_PRIORITY);
 
     //Eventually de-activate a pending status interrupt;
-    core_clear_interrupt_pending(status_interrupt_index);
+    core_clear_interrupt_pending(status_id);
 
     //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(status_interrupt_index, status_interrupt_link);
+    core_set_interrupt_handler(status_id, status_interrupt_link);
 
     //Enable the status interrupt;
-    core_enable_interrupt(status_interrupt_index);
+    core_enable_interrupt(status_id);
 
 
     /*
@@ -161,17 +166,21 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
     //Enable reciver overflow, receiver underflow, transmitter overflow to generate interrupts;
     SET(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
 
+
+    //Cache the error interrupt index;
+    const uint8_t error_id = data->error_interrupt_id;
+
     //Set the error interrupt priority;
-    core_set_interrupt_priority(error_interrupt_index, DRIVER_ERROR_INTERRUPT_PRIORITY);
+    core_set_interrupt_priority(error_id, DRIVER_ERROR_INTERRUPT_PRIORITY);
 
     //Eventually de-activate a pending status interrupt;
-    core_clear_interrupt_pending(error_interrupt_index);
+    core_clear_interrupt_pending(error_id);
 
     //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(error_interrupt_index, error_interrupt_link);
+    core_set_interrupt_handler(error_id, error_interrupt_link);
 
     //Enable the status interrupt;
-    core_enable_interrupt(error_interrupt_index);
+    core_enable_interrupt(error_id);
 
 }
 
@@ -183,14 +192,15 @@ teensy35::UART::UART(teensy35::UARTData *data, fifo_size_t rx_size, fifo_size_t 
  *  that are all called;
  */
 
-void teensy35::UART::init(uart_config &config) {
+void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config, data_flux_t *output_stream) {
 
-    configure_packet_format(config);
-    configure_state(config);
-    configure_modem(config);
-    configure_transmission_layer(config);
+    configure_packet_format(data, config);
+    configure_state(data, config);
+    configure_modem(data, config);
+    configure_transmission_layer(data, config);
 
 }
+
 
 /*
  * Packet format configuration : sets :
@@ -199,14 +209,14 @@ void teensy35::UART::init(uart_config &config) {
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void teensy35::UART::configure_packet_format(uart_config &config) {
+void kinetis_UART_configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
 
     //TODO MSB FIRST
     //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
 
     //To avoid implicit double pointer access, we will cache data;
-    UART_memory *const registers = data->registers;
-
+    kinetis_UART_memory_t *const registers = data->memory;
+    
     /*
      * Number of bits; This peripheral only supports 8 or 9 data bits;
      *
@@ -214,7 +224,7 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
      */
 
     //Check the number of bits :
-    switch (config.nb_data_bits) {
+    switch (config->nb_data_bits) {
 
         case 8:
             //8 data bits, bit 4 cleared;
@@ -241,7 +251,7 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
     CLEAR_BIT(registers->C4, 5, 8);
 
     //If the parity bit must be enabled :
-    if (config.parity_bit_enabled) {
+    if (config->parity_bit_enabled) {
 
         //Bit 1 of C1 is set;
         SET_BIT(registers->C1, 1, 8);
@@ -249,7 +259,7 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
         //We must set the parity type too;
 
         //If the parity is of type EVEN (default) :
-        if (config.parity_type == EVEN_PARITY) {
+        if (config->parity_type == EVEN_PARITY) {
 
             //Bit 0 of C1 is cleared;
             CLEAR_BIT(registers->C1, 1, 8);
@@ -262,7 +272,7 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
         }
 
         //Finally, if the parity is enabled and there are 9 data bits, the 10-th bit must be declared;
-        if (config.nb_data_bits == 9) {
+        if (config->nb_data_bits == 9) {
 
             //Set M10, bit 5 of C4;
             SET_BIT(registers->C4, 5, 8);
@@ -283,15 +293,15 @@ void teensy35::UART::configure_packet_format(uart_config &config) {
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void teensy35::UART::configure_modem(uart_config &config) {
+void kinetis_UART_configure_modem(kinetis_UART_data_t *data, UART_config_t *config) {
 
-    UART_memory *const registers = data->registers;
+    kinetis_UART_memory_t *const registers = data->memory;
     /*
      * Rx_RTS_enable and Tx_Cts_enable are (resp) bits 3 and 0 of MODEM;
      */
 
     //If RTS must be enabled :
-    if (config.rts_enabled) {
+    if (config->rts_enabled) {
 
         //Set bit 3 of MODEM;
         SET(registers->MODEM, UART_MODEM_RXRTSE, 8);
@@ -303,7 +313,7 @@ void teensy35::UART::configure_modem(uart_config &config) {
     }
 
     //If CTS must be enabled :
-    if (config.cts_enabled) {
+    if (config->cts_enabled) {
 
         //Set bit 0 of MODEM;
         SET(registers->MODEM, UART_MODEM_TXCTSE, 8);
@@ -326,17 +336,17 @@ void teensy35::UART::configure_modem(uart_config &config) {
  *
  */
 
-void teensy35::UART::configure_transmission_layer(uart_config &config) {
+void kinetis_UART_configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
-    UART_memory *registers = data->registers;
+    kinetis_UART_memory_t *registers = data->memory;
 
 
     /*
      * First, we will configure the transmission type : Full or Half duplex;
      */
 
-    if (config.transmission_type == FULL_DUPLEX) {
+    if (config->transmission_type == FULL_DUPLEX) {
 
         //To achieve a full-duplex configuration, the MSB of C1 must be cleared;
         CLEAR(registers->C1, UART_C1_LOOPS, 8);
@@ -368,7 +378,7 @@ void teensy35::UART::configure_transmission_layer(uart_config &config) {
     //TODO USE MACROS IN KINETIS.H
 
     //First, determine Kb;
-    uint32_t Kb = ((uint32_t) ((uint32_t) (data->clockFrequency << 1)) / config.baudrate);
+    uint32_t Kb = ((uint32_t) ((uint32_t) (data->clockFrequency << 1)) / config->baudrate);
 
     //Then, determine SBR. A division by 32 is a shift by 5;
     uint16_t SBR = (uint16_t) (Kb >> 5);
@@ -377,7 +387,7 @@ void teensy35::UART::configure_transmission_layer(uart_config &config) {
     uint8_t BRFA = (uint8_t) Kb & (uint8_t) 32;
 
     /*
-     * Now we can update SBR, located in the two Baudrate registers;
+     * Now we can update SBR, located in the two Baudrate memory;
      */
 
     //Copy the first 8 bits of SBR in BDL;
@@ -407,17 +417,17 @@ void teensy35::UART::configure_transmission_layer(uart_config &config) {
  * configure_state : enables or disables the receiver or the transmitter;
  */
 
-void teensy35::UART::configure_state(uart_config &config) {
+void kinetis_UART_configure_state(kinetis_UART_data_t *data, UART_config_t *config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
-    UART_memory *registers = data->registers;
+    kinetis_UART_memory_t *registers = data->memory;
 
     /*
      * Rx state : RxE is the bit 2 of C2;
      */
 
     //If rx must be enabled :
-    if (config.rx_enabled) {
+    if (config->rx_enabled) {
 
         //Set bit 2 of C2;
         SET(registers->C2, UART_C2_RE, 8);
@@ -435,7 +445,7 @@ void teensy35::UART::configure_state(uart_config &config) {
      */
 
     //If tx must be enabled :
-    if (config.tx_enabled) {
+    if (config->tx_enabled) {
 
         //Set the TE bit;
         SET(registers->C2, UART_C2_TE, 8);
@@ -457,10 +467,10 @@ void teensy35::UART::configure_state(uart_config &config) {
  */
 
 
-void teensy35::UART::enable_reception_interrupt() {
+void kinetis_UART_enable_rx_int(kinetis_UART_data_t *data) {
 
     //Set the RIE bit in C2 to enable the transmission interrupt;
-    SET(data->registers->C2, UART_C2_RIE, 8);
+    SET(data->memory->C2, UART_C2_RIE, 8);
 
 }
 
@@ -469,10 +479,10 @@ void teensy35::UART::enable_reception_interrupt() {
  * enable_transmission_interrupt : enables the transmission interrupts;
  */
 
-void teensy35::UART::enable_transmission_interrupt() {
+void kinetis_UART_enable_tx_int(kinetis_UART_data_t *data) {
 
     //Set the TIE bit in C2 to enable the transmission interrupt;
-    SET(data->registers->C2, UART_C2_TIE, 8);
+    SET(data->memory->C2, UART_C2_TIE, 8);
 
 }
 
@@ -483,10 +493,10 @@ void teensy35::UART::enable_transmission_interrupt() {
  * transmission_available : this function will return true if a uint16_t can be transmitted to the UART;
  */
 
-uint8_t teensy35::UART::transmission_available() {
+uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *data) {
 
     //Return the maximum number of element minus the current number of elements present in the tx buffer;
-    return ((uint8_t)data->tx_max - (uint8_t)data->registers->TCFIFO);
+    return ((uint8_t)data->tx_max - (uint8_t)data->memory->TCFIFO);
 
 }
 
@@ -501,10 +511,10 @@ uint8_t teensy35::UART::transmission_available() {
  *  If it succeeds to transfer all data, it disables the transmission interrupt;
  */
 
-void teensy35::UART::transmit_all() {
+void kinetis_UART_transmit_all(kinetis_UART_data_t *data) {
 
     //As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-    UART_memory *registers = this->data->registers;
+    kinetis_UART_memory_t *registers = data->memory;
 
     //Cache the number of spaces in the hardware buffer;
     uint8_t hw_buffer_spaces = transmission_available();
@@ -581,10 +591,21 @@ void teensy35::UART::transmit_all() {
  * transmit_break : this function is not supported for instance;
  */
 
-void teensy35::UART::transmit_break() {}
+void kinetis_UART_transmit_break() {}
 
 
 //-------------------------- Reception methods --------------------------
+
+/*
+ * kinetis_UART_reception_available : determine how many chars are available;
+ */
+
+size_t kinetis_UART_reception_available(kinetis_UART_data_t *data) {
+
+    //Cache the number of uint16_t in the rx buffer;
+    return data->memory->RCFIFO;
+
+}
 
 
 /*
@@ -597,10 +618,10 @@ void teensy35::UART::transmit_break() {}
  *  If it succeeds to fill the software buffer, it disables the transmission interrupt;
  */
 
-void teensy35::UART::receive_all() {
+void kinetis_UART_receive_all(kinetis_UART_data_t *data) {
 
     //To have a faster access, cache the register struct's pointer;
-    UART_memory *registers = data->registers;
+    kinetis_UART_memory_t *registers = data->memory;
 
     //Cache the number of uint16_t in the rx buffer;
     uint8_t reception_available = registers->RCFIFO;
@@ -681,10 +702,10 @@ void teensy35::UART::receive_all() {
  * interrupt : this function processes UART's interrupts : Rx, and Tx;
  */
 
-void teensy35::UART::interrupt() {
+void kinetis_UART_interrupt(kinetis_UART_data_t *data) {
 
     //First, cache the register pointer;
-    UART_memory *registers = data->registers;
+    kinetis_UART_memory_t *registers = data->memory;
 
     //The logical AND of C2 and S1;
     uint8_t masked_flags = registers->C2 & registers->S1;
@@ -697,14 +718,14 @@ void teensy35::UART::interrupt() {
     if (masked_flags & UART_C2_RIE & UART_S1_RDRF) {
 
         //Receive as many data as possible;
-        receive_all();
+        kinetis_UART_receive_all(data);
 
     }
 
     //Then, is the tx interrupt is enabled, and if its flag is asserted :
     if (masked_flags & UART_C2_TIE & UART_S1_TDRE) {
 
-        //Transmit asmany data as possible;
+        //Transmit as many data as possible;
         transmit_all();
 
     }
@@ -717,7 +738,7 @@ void teensy35::UART::interrupt() {
  *  It supports different errors, that are described in the code below.
  */
 
-void teensy35::UART::error() {
+void kinetis_UART_error(kinetis_UART_data_t *data) {
 
     /*
      * Errors supported are :
@@ -730,7 +751,7 @@ void teensy35::UART::error() {
 
 
     //First, cache the register pointer;
-    UART_memory *registers = data->registers;
+    kinetis_UART_memory_t *registers = data->memory;
 
     //First, start by unlocking reception by checking the framing error flag. At the same time, check noise or parity;
     if (registers->C2  & (UART_S1_FE | UART_S1_NF | UART_S1_PF)) {

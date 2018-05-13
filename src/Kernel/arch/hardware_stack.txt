@@ -35,7 +35,7 @@ A microcontroller can be describes as the union of two elements :
 
         A Peripheral will have a theoretical description, (ex : for UART, packet format, baudrate), that is common to
         all peripherals of this kind, and an implementation, that is specific to a chip (ex : UART config
-        registers are different from one chip to another, but UART protocol doesn't differ);
+        memory are different from one chip to another, but UART protocol doesn't differ);
 
         For all peripherals, peripheral libs have to be written, to allow drivers to communicate in a standardised way
         with all peripherals of a certain kind;

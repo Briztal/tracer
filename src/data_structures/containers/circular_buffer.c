@@ -190,7 +190,7 @@ void cbuffer_resize(cbuffer_t *cbuffer, container_index_t new_size) {
 
         */
 
-    }
-
-
 }
+
+
+

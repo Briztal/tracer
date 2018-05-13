@@ -21,7 +21,6 @@
 
 #include "Vector3D.h"
 #include <math.h>
-#include <Kernel/Interaction/Interaction.h>
 
 
 
@@ -52,7 +51,7 @@ void Vector3D::set(uint8_t index, float value) {
     if (index >= 3) {
 
         //Log :
-        std_out("Error in Triplet::set : invalid index");
+        //std_out("Error in Triplet::set : invalid index");
 
         //Fail;
         return;
