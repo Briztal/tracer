@@ -119,7 +119,7 @@ void tree_DFS_post_order(tree_t *root, void (*const traversal_function)(tree_t *
 
 void tree_delete(tree_t *parent, void (*const destructor)(tree_t *)) {
 
-    //Iterate the destructor on DFS post order;
+    //Iterate the close on DFS post order;
     tree_DFS_post_order(parent, destructor);
 
 }

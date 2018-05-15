@@ -9,7 +9,7 @@
 
 #include <Kernel/drivers/UART.h>
 
-#include <data_structures/stream/stream.h>
+#include <data_structures/stream/connection.h>
 
 #include "kinetis.h"
 
@@ -151,7 +151,7 @@ typedef struct {
 //-------------------------- Configuration methods --------------------------
 
 //Initialise the UART;
-void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *, data_flux_t *);
+void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *, connection_flux_t *);
 
 //De-initialise the UART;
 void kinetis_UART_exit(kinetis_UART_data_t *);

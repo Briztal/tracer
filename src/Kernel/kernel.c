@@ -130,7 +130,7 @@ static uint32_t critical_section_counter = 0;
  * kernel_enter_critical_section : called whenever any part of the code must execute a critical section;
  */
 
-void kernel_enter_critical_section() {
+inline void kernel_enter_critical_section() {
 
     //Disable interrupts;
     core_disable_interrupts();
@@ -145,7 +145,7 @@ void kernel_enter_critical_section() {
  * kernel_leave_critical_section : called whenever any part of the code leaves a critical section;
  */
 
-void kernel_leave_critical_section() {
+inline void kernel_leave_critical_section() {
 
     //To safely detect any code error, disable interrupts;
     core_disable_interrupts();

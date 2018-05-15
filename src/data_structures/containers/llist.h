@@ -24,6 +24,7 @@ typedef struct {
 
 #define EMPTY_LINKED_ELEMENT() {.prev = 0, .next = 0}
 
+
 //Concatenate two linked lists elements;
 void llist_concat(linked_element_t *prev, linked_element_t *next);
 
@@ -32,6 +33,9 @@ void llist_insert_after(linked_element_t *src_prev, linked_element_t *new);
 
 //Inserts new before next;
 void llist_insert_before(linked_element_t *src_next, linked_element_t *new);
+
+
+/*
 
 //Executes process for all elements after the provided one:
 void llist_direct_process(linked_element_t *element, void (*process)(linked_element_t *));
@@ -46,5 +50,6 @@ void llist_reverse_process(linked_element_t *element, void (*process)(linked_ele
 void llist_reverse_process_full(linked_element_t *element, void (*process)(linked_element_t *));
 
 
+ */
 
 #endif //TRACER_LLIST_H

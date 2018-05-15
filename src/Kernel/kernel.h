@@ -44,10 +44,10 @@ void *kernel_realloc(void *, size_t size);
 void kernel_free(void *);
 
 //Enter a critical section;
-void kernel_enter_critical_section();
+inline void kernel_enter_critical_section();
 
 //Leave a critical section;
-void kernel_leave_critical_section();
+inline void kernel_leave_critical_section();
 
 
 #endif //TRACER_KERNEL_H

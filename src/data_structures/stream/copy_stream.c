@@ -13,10 +13,10 @@ void copy_stream_data_flux(linked_element_t *linked_element) {
     copy_stream_t *stream = (copy_stream_t*) linked_element;
 
     //Determine the transfer size;
-    size_t transfer_size = stream_get_flux_size((data_flux_t *)stream);
+    size_t transfer_size = data_flux_get_transfer_size((connection_flux_t *) stream);
 
     //Create an aligned memory region of the appropriate size. Can't be allocated on the stack, would be misaligned;
-    void *memory = kernel_malloc(stream->stream.element_size);
+    void *memory = kernel_malloc(stream->stream.data_size);
 
     //For each piece of data to transfer :
     for (;transfer_size--;) {

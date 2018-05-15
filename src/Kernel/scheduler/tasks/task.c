@@ -79,7 +79,7 @@ void task_cleanup(task_t *task_p) {
              *  They may still exist after their execution. We will only delete it if it has been marked deletable;
              */
 
-            if (task_p->persistent_task_state == DELETABLE) {
+            if (task_p->persistent_task_state == CLOSED) {
 
                 //Delete the task;
                 task_delete(task_p);

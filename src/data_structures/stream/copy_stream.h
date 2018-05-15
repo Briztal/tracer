@@ -5,7 +5,7 @@
 #ifndef TRACER_COPY_STREAM_H
 #define TRACER_COPY_STREAM_H
 
-#include "stream.h"
+#include "connection.h"
 
 /*
  * The copy stream is a stream composition, that copies data it transmits.
@@ -21,7 +21,7 @@ typedef struct {
     //--------- Composition ---------
 
     //The stream structure;
-    data_flux_t stream;
+    connection_flux_t stream;
 
 
     //--------- Transmission ---------

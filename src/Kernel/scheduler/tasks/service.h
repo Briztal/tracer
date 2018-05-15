@@ -32,14 +32,14 @@ void services_initialise();
 
 
 //----------------------------------- Builders -----------------------------------
-//TODO REMOVE PATCH : NOT DELETABLE
+//TODO REMOVE PATCH : NOT CLOSED
 //Program a repetitive task;
-void service_add_temporary(task_t *task, uint32_t offset, uint32_t period, uint32_t nb_execs);
+void service_add_temporary(void (*task)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs);
 
 
-//TODO REMOVE PATCH : DELETABLE;
+//TODO REMOVE PATCH : CLOSED;
 //Program an infinite task;
-void service_add_permanent(task_t *task, uint32_t offset, uint32_t period);
+void service_add_permanent(void (*task)(void *), uint32_t offset, uint32_t period);
 
 
 //----------------------------------- Execution -----------------------------------

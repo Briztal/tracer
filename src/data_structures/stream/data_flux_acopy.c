@@ -18,7 +18,7 @@ void data_flux_acopy_process(linked_element_t *linked_element) {
     data_flux_acopy *stream = (data_flux_acopy*) linked_element;
 
     //Determine the transfer size;
-    size_t transfer_size = stream_get_flux_size((data_flux_t *)stream);
+    size_t transfer_size = data_flux_get_transfer_size((connection_flux_t *) stream);
 
     //Create an array of the appropriate size;
     void *memory = kernel_malloc(transfer_size * stream->stream.element_size);

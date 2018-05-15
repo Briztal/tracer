@@ -1,4 +1,6 @@
 
+//TODO CHAINED lIST BASE FOR TASKS, CONNECTIONS;
+
 //TODO kERNEL MALLOC / realloc / free TO AVOID ERRORS AND TO BE THREAD SAFE;
 
 //TODO Synchronous and asynchronous tasks

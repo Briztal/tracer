@@ -192,7 +192,7 @@ void initialise_hardware(kinetis_UART_data_t *data) {
  *  that are all called;
  */
 
-void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config, data_flux_t *output_stream) {
+void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config, connection_flux_t *output_stream) {
 
     configure_packet_format(data, config);
     configure_state(data, config);

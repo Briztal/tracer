@@ -40,7 +40,7 @@ typedef enum {
             RUNNING,
 
     //The task is out of its container, must be deleted when it reaches task_cleanup;
-            DELETABLE
+            CLOSED
 
 } persistent_task_state_t;
 

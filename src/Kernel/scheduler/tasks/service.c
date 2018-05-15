@@ -19,11 +19,10 @@
 */
 
 
-#include <Kernel/Scheduler/systick.h>
+#include <Kernel/scheduler/systick.h>
 
-#include <DataStructures/Containers/container.h>
-#include <malloc.h>
-
+#include <data_structures/containers/container.h>
+#include <Kernel/kernel.h>
 
 #include "service.h"
 typedef struct {
@@ -49,7 +48,7 @@ typedef struct {
 //----------------------------------- Builders -----------------------------------
 
 //Add a service;
-void _service_add(task_t *task, uint32_t offset, uint32_t period, uint32_t nb_execs);
+void _service_add(void (*task)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs);
 
 
 //----------------------------------- Execution -----------------------------------
@@ -80,7 +79,7 @@ uint32_t next_check_time = 0;
  * program_repetitive_task : this function adds a temporary service task;
  */
 
-void void service_add_temporary(task_t *task, uint32_t offset, uint32_t period, uint32_t nb_execs) {
+void void service_add_temporary(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
 
     //If the service mustn't be scheduled, nothing to do;
     if (!nb_execs) {
@@ -91,7 +90,7 @@ void void service_add_temporary(task_t *task, uint32_t offset, uint32_t period, 
     }
 
     //Program the task
-    _service_add(task, offset, period, nb_execs);
+    _service_add(service_f, offset, period, nb_execs);
 
 }
 
@@ -101,10 +100,10 @@ void void service_add_temporary(task_t *task, uint32_t offset, uint32_t period, 
  * service_add_permanent : adds a permanent service;
  */
 
-void service_add_permanent(task_t *task, uint32_t offset, uint32_t period) {
+void service_add_permanent(void (*service_f)(void *), uint32_t offset, uint32_t period) {
 
     //Program the task;
-    _service_add(task, offset, period, 0);
+    _service_add(service_f, offset, period, 0);
 
 }
 
@@ -114,10 +113,10 @@ void service_add_permanent(task_t *task, uint32_t offset, uint32_t period) {
  * _program_task : programs a task with the given set of parameters;
  */
 
-void _service_add(task_t * task, uint32_t offset, uint32_t period, uint32_t remaining_execs) {
+void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs) {
 
     //If the task is null :
-    if (task == 0) {
+    if (service_f == 0) {
         
         //TODO ERROR NULL POINTER
         
@@ -135,20 +134,12 @@ void _service_add(task_t * task, uint32_t offset, uint32_t period, uint32_t rema
         return;
 
     }
-    
-    //First, allocate some heap memory for the new service data;
-    void *ptr = malloc(sizeof(service_t));
-    
-    //If the reallocation failed : 
-    if (!ptr) {
-        
-        //TODO ERROR MEMORY EXCEPTION;
-        return;
-        
-    }
+
+    //Create the task;
+    task_t *task = task_create(service_f, 0, 0, PERSISTENT_TASK);
     
     //Cache a casted copy for readability. Compiler optimised,
-    service_t *service = (service_t *)ptr;
+    service_t *service = kernel_malloc(sizeof(service_t));
 
     //Initialise the service;
     *service = {

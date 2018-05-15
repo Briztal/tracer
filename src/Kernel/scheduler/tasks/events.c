@@ -30,7 +30,7 @@
  * TODO EVENT REMOVAL PATCH :
  *
  *  There are three things to add to the model :
- *      - Modify the state variable in the event structure, to share its state : IDLE, PENDING, DELETABLE
+ *      - Modify the state variable in the event structure, to share its state : IDLE, PENDING, CLOSED
  *
  *      - The task recuperation function must check that the event is deletable after caching the task;
  *          if it is deletable, it will delete all its tasks, except the last one that is currently in execution;

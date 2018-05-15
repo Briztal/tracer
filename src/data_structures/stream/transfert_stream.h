@@ -5,14 +5,14 @@
 #ifndef TRACER_TRANSFERT_STREAM_H
 #define TRACER_TRANSFERT_STREAM_H
 
-#include "stream.h"
+#include "connection.h"
 
 typedef struct {
 
     //--------- Composition ---------
 
     //The stream structure;
-    data_flux_t stream;
+    connection_flux_t stream;
 
 
     //--------- Transmission ---------

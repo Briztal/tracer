@@ -158,8 +158,14 @@ void process_function(volatile process_t *volatile process) {
     //Execute the function, passing args;
     (*(process->process_function))(process->args);
 
-    //Execute the exit function;
-    (*(process->exit_function))();
+    //Cache the exit function;
+    void (*volatile exit_function)() = process->exit_function;
+
+    //If the function is not null, execute it;
+    if (exit_function) {
+        (*exit_function)();
+    }
+
 
     //Mark the process_t inactive; Scheduler will be notified at context switch;
     process->state = (volatile process_state) TERMINATED;

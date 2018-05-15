@@ -13,7 +13,7 @@ void transfer_stream_data_flux(linked_element_t *linked_element) {
     transfer_stream_t *stream = (transfer_stream_t*) linked_element;
 
     //Determine the transfer size;
-    size_t transfer_size = stream_get_flux_size((data_flux_t *)stream);
+    size_t transfer_size = data_flux_get_transfer_size((connection_flux_t *) stream);
 
     //Cache the output pointer;
     void *tx_ptr = stream->tx_get_ptr(stream->stream.tx_struct);
