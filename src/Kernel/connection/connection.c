@@ -61,6 +61,17 @@ inline connection_node_t *flux_get_next_node(connection_flux_t *flux) {
 
 }
 
+//Node query helper;
+inline connection_node_t *flux_get_previous_nodes_instance(connection_flux_t *flux) {
+    return flux_get_previous_node(flux)->instance;
+}
+
+//Node query helper;
+inline connection_node_t *flux_get_next_nodes_instance(connection_flux_t *flux) {
+    return flux_get_next_node(flux)->instance;
+}
+
+
 
 connection_node_t *node_get_first_node(connection_node_t *node) {
 
@@ -98,6 +109,8 @@ connection_node_t *node_get_last_node(connection_node_t *node) {
     return node;
 
 }
+
+
 
 
 //------------------------------- Creation -------------------------------
@@ -177,15 +190,28 @@ void connection_add_node(connection_t *connection, connection_flux_t *flux, conn
 
 inline void data_flux_process(connection_flux_t *flux) {
 
-    //TODO MUTEX
+    //Cache the critical state of the flux;
+    bool critical = flux->critical;
+
+    //If the flux is critical, enter a critical section;
+    if (critical) {
+        kernel_enter_critical_section();
+    }
 
     //If the data flux has to be deleted :
     if (flux->state == CLOSED) {
-        return;
+        goto end;
     }
 
     //Execute the data flux function, passing its arguments;
     flux->flux_function(flux);
+
+    end :
+
+    //If the flux was critical, leave the critical section;
+    if (critical) {
+        kernel_enter_critical_section();
+    }
 
 }
 
@@ -195,13 +221,13 @@ inline void data_flux_process(connection_flux_t *flux) {
  *  the minimum of their max transfer size;
  */
 
-size_t data_flux_get_transfer_size(connection_flux_t *flux) {
+size_t data_flux_get_transfer_size(connection_flux_t *flux, void *tx_instance, void *rx_instance) {
 
     //Get the tx spaces_amount;
-    size_t tx_size = flux->data_amount(((connection_node_t *)flux->link.prev)->instance);
+    size_t tx_size = flux->data_amount(tx_instance);
 
     //Get the rx spaces_amount;
-    size_t rx_size = flux->spaces_amount(((connection_node_t *)flux->link.prev)->instance);
+    size_t rx_size = flux->spaces_amount(rx_instance);
 
     //Return the minimal size;
     return (tx_size < rx_size) ? tx_size : rx_size;

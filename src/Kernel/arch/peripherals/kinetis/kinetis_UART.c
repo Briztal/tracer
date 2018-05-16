@@ -37,8 +37,40 @@
 #define CLEAR_BIT(data, bit_id, size) CLEAR(data, 1 << (bit_id), size)
 
 
+//-------------------------------- Interrupts enable functions -----------------------------------
 
-//Configure the packet format;
+//Enable the reception interrupt
+void enable_rx_int(kinetis_UART_data_t *);
+
+//Enable the transmission interrupt
+void enable_tx_int(kinetis_UART_data_t *);
+
+
+//-------------------------- Transmission methods --------------------------
+
+//How many uint16_t-s can we transmit to the UART ?
+uint8_t tx_available(kinetis_UART_data_t *);
+
+//Transmit a uint16_t to the UART;
+void transmit_all(kinetis_UART_data_t *);
+
+
+//-------------------------- Error and interrupt --------------------------
+
+//The interrupt function;
+void interrupt(kinetis_UART_data_t *data);
+
+//The error function;
+void error(kinetis_UART_data_t *data);
+
+
+//-------------------------- Reception methods --------------------------
+
+//Transmit a uint16_t to the UART;
+void read_rx(kinetis_UART_data_t *);
+
+
+//Initialise the hardware;
 void initialise_hardware(kinetis_UART_data_t *);
 
 //Configure the packet format;
@@ -54,8 +86,29 @@ void configure_modem(kinetis_UART_data_t *data, UART_config_t *);
 void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *);
 
 
+//-------------------------- Configuration methods --------------------------
+
 /*
- * Constructor : initialises the data pointer and the frequency;w
+ * configure_packet_format : this function configures the UART. Config is divided into several private functions
+ *  that are all called;
+ */
+
+void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config, connection_flux_t *output_stream) {
+
+    //Initialise the hardware;//TODO IS IT THE CORRECT ORDER ?
+    initialise_hardware(data);
+
+    configure_packet_format(data, config);
+    configure_state(data, config);
+    configure_modem(data, config);
+    configure_transmission_layer(data, config);
+
+}
+
+
+
+/*
+ * initialise_hardware : initialises the data pointer and the frequency;w
  */
 
 
@@ -70,7 +123,7 @@ void initialise_hardware(kinetis_UART_data_t *data) {
 
     //Set both FIFOs enabled, and their size set with provided values,
     registers->PFIFO = (uint8_t) UART_PFIFO_TXFE | (uint8_t) UART_PFIFO_RXFE |
-            (uint8_t) UART_PFIFO_TXFIFOSIZE(tx_size) | (uint8_t) UART_PFIFO_RXFIFOSIZE(rx_size);
+                       (uint8_t) UART_PFIFO_TXFIFOSIZE(tx_size) | (uint8_t) UART_PFIFO_RXFIFOSIZE(rx_size);
 
     //The rx watermark will be set as the half of the rx buffer size;
     switch (rx_size) {
@@ -185,23 +238,6 @@ void initialise_hardware(kinetis_UART_data_t *data) {
 }
 
 
-//-------------------------- Configuration methods --------------------------
-
-/*
- * configure_packet_format : this function configures the UART. Config is divided into several private functions
- *  that are all called;
- */
-
-void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config, connection_flux_t *output_stream) {
-
-    configure_packet_format(data, config);
-    configure_state(data, config);
-    configure_modem(data, config);
-    configure_transmission_layer(data, config);
-
-}
-
-
 /*
  * Packet format configuration : sets :
  *  - The number of data bits;
@@ -209,7 +245,7 @@ void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config, connect
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void kinetis_UART_configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
 
     //TODO MSB FIRST
     //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
@@ -293,7 +329,7 @@ void kinetis_UART_configure_packet_format(kinetis_UART_data_t *data, UART_config
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void kinetis_UART_configure_modem(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_modem(kinetis_UART_data_t *data, UART_config_t *config) {
 
     kinetis_UART_memory_t *const registers = data->memory;
     /*
@@ -336,7 +372,7 @@ void kinetis_UART_configure_modem(kinetis_UART_data_t *data, UART_config_t *conf
  *
  */
 
-void kinetis_UART_configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     kinetis_UART_memory_t *registers = data->memory;
@@ -417,7 +453,7 @@ void kinetis_UART_configure_transmission_layer(kinetis_UART_data_t *data, UART_c
  * configure_state : enables or disables the receiver or the transmitter;
  */
 
-void kinetis_UART_configure_state(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_state(kinetis_UART_data_t *data, UART_config_t *config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     kinetis_UART_memory_t *registers = data->memory;
@@ -463,11 +499,10 @@ void kinetis_UART_configure_state(kinetis_UART_data_t *data, UART_config_t *conf
 //-------------------------------- Interrupts enable functions -----------------------------------
 
 /*
- * enable_reception_interrupt : enables the reception interrupts;
+ * enable_rx_int : enables the reception interrupts;
  */
 
-
-void kinetis_UART_enable_rx_int(kinetis_UART_data_t *data) {
+void enable_rx_int(kinetis_UART_data_t *data) {
 
     //Set the RIE bit in C2 to enable the transmission interrupt;
     SET(data->memory->C2, UART_C2_RIE, 8);
@@ -476,10 +511,10 @@ void kinetis_UART_enable_rx_int(kinetis_UART_data_t *data) {
 
 
 /*
- * enable_transmission_interrupt : enables the transmission interrupts;
+ * enable_tx_int : enables the transmission interrupts;
  */
 
-void kinetis_UART_enable_tx_int(kinetis_UART_data_t *data) {
+void enable_tx_int(kinetis_UART_data_t *data) {
 
     //Set the TIE bit in C2 to enable the transmission interrupt;
     SET(data->memory->C2, UART_C2_TIE, 8);
@@ -490,7 +525,7 @@ void kinetis_UART_enable_tx_int(kinetis_UART_data_t *data) {
 //-------------------------- Transmission methods --------------------------
 
 /*
- * transmission_available : this function will return true if a uint16_t can be transmitted to the UART;
+ * tx_available : this function will return true if a uint16_t can be transmitted to the UART;
  */
 
 uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *data) {
@@ -511,7 +546,7 @@ uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *data) {
  *  If it succeeds to transfer all data, it disables the transmission interrupt;
  */
 
-void kinetis_UART_transmit_all(kinetis_UART_data_t *data) {
+void transmit_all(kinetis_UART_data_t *data) {
 
     //As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
     kinetis_UART_memory_t *registers = data->memory;
@@ -587,20 +622,13 @@ void kinetis_UART_transmit_all(kinetis_UART_data_t *data) {
 }
 
 
-/*
- * transmit_break : this function is not supported for instance;
- */
-
-void kinetis_UART_transmit_break() {}
-
-
 //-------------------------- Reception methods --------------------------
 
 /*
- * kinetis_UART_reception_available : determine how many chars are available;
+ * kinetis_UART_rx_available : determine how many chars are available;
  */
 
-size_t kinetis_UART_reception_available(kinetis_UART_data_t *data) {
+size_t kinetis_UART_rx_available(kinetis_UART_data_t *data) {
 
     //Cache the number of uint16_t in the rx buffer;
     return data->memory->RCFIFO;
@@ -609,16 +637,10 @@ size_t kinetis_UART_reception_available(kinetis_UART_data_t *data) {
 
 
 /*
- * receive_all : this function is called during the interrupt routine;
- *
- *  It is called when the number of elements in the reception buffer is higher (or equal) than the watermark.
- *
- *  This function must transfer the maximum amount of data from the hardware buffer to the software buffer;
- *
- *  If it succeeds to fill the software buffer, it disables the transmission interrupt;
+ * read_rx :
  */
 
-void kinetis_UART_receive_all(kinetis_UART_data_t *data) {
+void read_rx(kinetis_UART_data_t *data, size_t read_nb) {
 
     //To have a faster access, cache the register struct's pointer;
     kinetis_UART_memory_t *registers = data->memory;
@@ -718,7 +740,8 @@ void kinetis_UART_interrupt(kinetis_UART_data_t *data) {
     if (masked_flags & UART_C2_RIE & UART_S1_RDRF) {
 
         //Receive as many data as possible;
-        kinetis_UART_receive_all(data);
+        //TODO RX STREAM EXECUTION
+
 
     }
 
@@ -726,7 +749,7 @@ void kinetis_UART_interrupt(kinetis_UART_data_t *data) {
     if (masked_flags & UART_C2_TIE & UART_S1_TDRE) {
 
         //Transmit as many data as possible;
-        transmit_all();
+        //TODO TX STREAM EXECUTION
 
     }
 

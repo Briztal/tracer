@@ -5,7 +5,7 @@
 #ifndef TRACER_TRANSFERT_STREAM_H
 #define TRACER_TRANSFERT_STREAM_H
 
-#include "connection.h"
+#include "Kernel/connection/connection.h"
 
 typedef struct {
 

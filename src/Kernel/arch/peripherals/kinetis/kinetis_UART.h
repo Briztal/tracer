@@ -9,7 +9,7 @@
 
 #include <Kernel/drivers/UART.h>
 
-#include <data_structures/stream/connection.h>
+#include <Kernel/connection/connection.h>
 
 #include "kinetis.h"
 
@@ -115,10 +115,7 @@ typedef struct {
 
 
 /*
- * Finally, we can define our UARTDriver, that will inherit of the UARTDriver class, and implements peripheral
- *  for hardware UARTS;
- *
- *  The teensy35's UART integrates a hardware buffer for both rx and tx canals, whose sizes depend on the module;
+ * The kinetis UART integrates a hardware buffer for both rx and tx canals, whose sizes depend on the module;
  *
  *  It implements a watermark functionality in those buffers. When the amount of data in a buffer is greater
  *      (or lesser) or equal than the watermark, an interrupt is triggered;
@@ -157,37 +154,25 @@ void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *, connection_flux_t
 void kinetis_UART_exit(kinetis_UART_data_t *);
 
 
-//-------------------------------- Interrupts enable functions -----------------------------------
+//Get the number of chars in the rx hw buffer;
+size_t kinetis_UART_rx_available(kinetis_UART_data_t *data);
 
-//Enable the reception interrupt
-void kinetis_UART_enable_rx_int(kinetis_UART_data_t *);
-
-//Enable the transmission interrupt
-void kinetis_UART_enable_tx_int(kinetis_UART_data_t *);
+//Get the number of spaces in the tx hw buffer;
+uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *data);
 
 
-//-------------------------- Transmission methods --------------------------
+//The function for the transmitter to copy its data;
+void (*copy_data_in)(void *data, void *data_array, size_t size);
 
-//How many uint16_t-s can we transmit to the UART ?
-uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *);
+//The function for the transmitter to receive its data;
+void (*copy_data_from)(void *data, void *data_array, size_t size);
 
-//Transmit a uint16_t to the UART;
-void kinetis_UART_transmit_all(kinetis_UART_data_t *);
-
-
-//-------------------------- Error and interrupt --------------------------
 
 //The interrupt function;
 void kinetis_UART_interrupt(kinetis_UART_data_t *data);
 
 //The error function;
 void kinetis_UART_error(kinetis_UART_data_t *data);
-
-
-//-------------------------- Reception methods --------------------------
-
-//Transmit a uint16_t to the UART;
-void kinetis_UART_receive_all(kinetis_UART_data_t *);
 
 
 

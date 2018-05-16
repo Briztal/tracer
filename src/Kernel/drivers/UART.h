@@ -15,6 +15,11 @@
 
 #include "stdbool.h"
 
+#include "driver.h"
+
+#include "Kernel/connection/connection.h"
+
+
 /*
  * -------------------------------- Configuration data types -----------------------------------
  *
@@ -43,11 +48,18 @@ typedef enum {
 } transmission_type_t;
 
 
+//The constructor for the driver configuration;
+#define DRIVER_CONFIG(type) {.driver_type = (type)}
+
+
 /*
- * The transmission configuration structure;
+ * The UART configuration structure;
  */
 
 typedef struct {
+
+    //Composes the driver config;
+    driver_config_t driver_config;
 
     //The size of the reception software buffer;
     uint16_t sw_rx_buffer_size;
@@ -76,69 +88,49 @@ typedef struct {
     //The Baudrate;
     uint32_t baudrate;
 
+
+    //TODO NOT NECESSARY, MAKE A STATE SET FUNCTION
+
     //Is Tx enabled ?
     bool tx_enabled;
 
     //Is Rx enabled ?
     bool rx_enabled;
 
+
+    //The data flux to receive from the UART;
+    connection_flux_t *rx_flux;
+
+    //The data flux to transmit to the UART;
+    connection_flux_t *tx_flux;
+
+
 } UART_config_t;
 
 
-#define UART_DEFAULT_CONFIG \
-{\
-    .sw_rx_buffer_size = 64,\
-    .sw_tx_buffer_size = 64,\
-    .nb_data_bits = 8,\
-    .parity_bit_enabled = false,\
-    .parity_type = EVEN_PARITY,\
-    .rts_enabled = false,\
-    .cts_enabled = false,\
-    .transmission_type = FULL_DUPLEX,\
-    .baudrate = 9600,\
-    .tx_enabled = true,\
-    .rx_enabled = true,\
+/*
+ * An inline function obtain the default configuration;
+ */
+
+inline void UART_default_config(UART_config_t *uart_config, connection_flux_t *rx_flux, connection_flux_t *tx_flux) {
+
+    //Set the default configuration;
+    *uart_config = {
+            .driver_config = DRIVER_CONFIG(UART),
+            .sw_rx_buffer_size = 64,
+            .sw_tx_buffer_size = 64,
+            .nb_data_bits = 8,
+            .parity_bit_enabled = false,
+            .parity_type = EVEN_PARITY,
+            .rts_enabled = false,
+            .cts_enabled = false,
+            .transmission_type = FULL_DUPLEX,
+            .baudrate = 9600,
+            .tx_enabled = true,
+            .rx_enabled = true,
+            .rx_flux = (rx_flux),
+            .tx_flux = (tx_flux),
+    };
 }
-
-typedef struct {
-
-    //The UART data pointer;
-    void *UART_data;
-
-
-    //-------------------------- Configuration methods --------------------------
-
-    //Initialise the UART;
-    void (*initialise)(void *data, UART_config *);
-
-
-    //-------------------------------- Interrupts enable functions -----------------------------------
-
-    //Enable the reception interrupt
-    void (*enable_reception_interrupt)(void *UART_data);
-
-    //Enable the transmission interrupt
-    void (*enable_transmission_interrupt)(void *UART_data);
-
-
-    //-------------------------- Transmission methods --------------------------
-
-    //How many uint16_t-s can we receive_all from the UART ?
-    uint8_t (*transmission_available)(void *UART_data);
-
-    //Transmit as many uint16_t as possible to the UART peripheral;
-    void (*transmit_all)(void *UART_data);
-
-    //Transmit a break through the UART;
-    void (*transmit_break)(void *UART_data);
-
-
-    //-------------------------- Reception methods --------------------------
-
-    //Receive as many data as possible from the UART Peripheral;
-    void (*receive_all)(void *UART_data);
-
-} UART_driver_t;
-
 
 #endif //TRACER_UARTDRIVER_H

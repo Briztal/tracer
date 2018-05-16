@@ -35,7 +35,7 @@ void copy_stream_data_flux(linked_element_t *linked_element) {
 }
 
 
-void copy_stream_data_flux_critical(linked_element_t *linked_element) {
+void critical_element_flux(linked_element_t *linked_element) {
 
     //Enter a critical section;
     kernel_enter_critical_section();

@@ -47,8 +47,9 @@
 #include <stddef.h>
 
 #include <Kernel/scheduler/semaphore.h>
-#include <data_structures/containers/llist.h>
 
+#include <data_structures/containers/llist.h>
+#include <stdbool.h>
 
 /*
  * The connection node structure.
@@ -104,7 +105,10 @@ typedef struct {
     linked_element_t link;
 
 
-    //--------- State ---------;
+    //--------- Critical or not ---------;
+
+    //Is the flux critical ?
+    bool critical;
 
     //The state of the stream;
     connection_state_t state;
@@ -126,8 +130,6 @@ typedef struct {
 
     //A function to get the max amount of spaces to transfer;
     size_t (*spaces_amount)(void *rx_struct);
-
-
 
 } connection_flux_t;
 
@@ -170,11 +172,17 @@ void connection_add_node(connection_t *connection, connection_flux_t *flux, conn
 
 //------------------------------- Data flux -------------------------------
 
+//Node query helper;
+inline connection_node_t *flux_get_previous_nodes_instance(connection_flux_t *flux);
+
+//Node query helper;
+inline connection_node_t *flux_get_next_nodes_instance(connection_flux_t *flux);
+
 //Process a data flux;
 void data_flux_process(connection_flux_t *);
 
 //Size determination;
-size_t data_flux_get_transfer_size(connection_flux_t *);
+size_t data_flux_get_transfer_size(connection_flux_t *, void *prev_instance, void *next_instance);
 
 
 //------------------------------- Deletion -------------------------------

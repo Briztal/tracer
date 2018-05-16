@@ -5,7 +5,7 @@
 #ifndef TRACER_COPY_STREAM_H
 #define TRACER_COPY_STREAM_H
 
-#include "connection.h"
+#include "Kernel/connection/connection.h"
 
 /*
  * The copy stream is a stream composition, that copies data it transmits.
@@ -31,7 +31,7 @@ typedef struct {
     //The function for the transmitter to receive its data;
     void (*rx_process)(void *rx_struct, void *data_array, size_t size);
 
-} data_flux_acopy;
+} element_array_flux_t;
 
 
 //The data flux function for a copy stream;

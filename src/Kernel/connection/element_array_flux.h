@@ -5,7 +5,7 @@
 #ifndef TRACER_COPY_STREAM_H
 #define TRACER_COPY_STREAM_H
 
-#include "Kernel/connection/connection.h"
+#include "connection.h"
 
 /*
  * The copy stream is a stream composition, that copies data it transmits.
@@ -21,32 +21,22 @@ typedef struct {
     //--------- Composition ---------
 
     //The stream structure;
-    connection_flux_t stream;
-
+    connection_flux_t flux;
 
     //--------- Transmission ---------
 
     //The function for the transmitter to copy its data;
-    void (*tx_push)(void *tx_struct, void *data_array);
+    void (*copy_data_in)(void *tx_struct, void *data_array, size_t size);
 
     //The function for the transmitter to receive its data;
-    void (*rx_pull)(void *rx_struct, void *data_array);
+    void (*copy_data_from)(void *rx_struct, void *data_array, size_t size);
 
-} copy_stream_t;
-
-
-#define EMPTY_COPY_STREAM(size, tx_push_f, rx_pull_f) {\
-    EMPTY_STREAM(size, copy_stream_data_flux), .tx_push = (tx_push_f), .rx_pull = (rx_pull_f)}
-
-#define EMPTY_CRITICAL_COPY_STREAM(size, tx_push_f, rx_pull_f) {\
-    EMPTY_STREAM(size, copy_stream_data_flux_critical), .tx_push = (tx_push_f), .rx_pull = (rx_pull_f)}
+} element_array_flux_t;
 
 
 //The data flux function for a copy stream;
-void copy_stream_data_flux(linked_element_t *linked_element);
+void elemeny_array_flux(connection_flux_t *flux);
 
-//The data flux function for a copy stream;
-void critical_element_flux(linked_element_t *linked_element);
 
 
 #endif //TRACER_COPY_STREAM_H

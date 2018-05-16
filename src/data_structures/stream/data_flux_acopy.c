@@ -15,7 +15,7 @@
 void data_flux_acopy_process(linked_element_t *linked_element) {
 
     //Cache the copy stream in the correct type;
-    data_flux_acopy *stream = (data_flux_acopy*) linked_element;
+    element_array_flux_t *stream = (element_array_flux_t*) linked_element;
 
     //Determine the transfer size;
     size_t transfer_size = data_flux_get_transfer_size((connection_flux_t *) stream);
