@@ -25,6 +25,7 @@ typedef void (*array_processor)(void *instance, void *dest, size_t size);
  *  - process data;
  *  - notify that a certain number of data were processed;
  */
+
 typedef struct {
 
     //Get a pointer to process data;
@@ -33,8 +34,7 @@ typedef struct {
     //Discard a certain number of elements;
     void (*data_processed)(void *tx_struct, size_t transfer_size);
 
-} indirect_accessor_t
-;
+} indirect_accessor_t;
 
 
 //------------------------------- Connection flux -------------------------------
@@ -92,7 +92,7 @@ cnode_t *flux_get_previous_nodes_instance(cflux_t *flux);
 cnode_t *flux_get_next_nodes_instance(cflux_t *flux);
 
 //Process a data flux;
-void data_flux_process(cflux_t *);
+void flux_process(cflux_t *);
 
 //Size determination;
 size_t data_flux_get_transfer_size(cflux_t *, void *prev_instance, void *next_instance);

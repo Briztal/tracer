@@ -6,10 +6,10 @@
 
 
 /*
- * data_flux_process : executes the flux function;
+ * flux_process : executes the flux function;
  */
 
-void data_flux_process(cflux_t *flux) {
+void flux_process(cflux_t *flux) {
 
     //Cache the critical state of the flux;
     bool critical = flux->critical;

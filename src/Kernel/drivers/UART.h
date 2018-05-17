@@ -98,11 +98,11 @@ typedef struct {
     bool rx_enabled;
 
 
-    //The data flux to receive from the UART;
-    connection_flux_t *rx_flux;
+    //The data flux to receive from the UART; Must be constructed before;
+    cflux_t *rx_flux;
 
-    //The data flux to transmit to the UART;
-    connection_flux_t *tx_flux;
+    //The data flux to transmit to the UART; Must be constructed before;
+    cflux_t *tx_flux;
 
 
 } UART_config_t;

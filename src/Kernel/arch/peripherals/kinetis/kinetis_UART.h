@@ -100,16 +100,29 @@ typedef struct {
     const uint32_t clockFrequency;
 
     //The maximum number of uint16_t in the rx hardware buffer;
-    const kinetis_UART_fifo_size_t rx_max;
+    const uint8_t rx_max;
 
     //The maximum number of uint16_t in the tx hardware buffer;
-    const kinetis_UART_fifo_size_t tx_max;
+    const uint8_t tx_max;
 
     //The status interrupt index;
     const uint8_t status_interrupt_id;
 
     //The error interrupt index;
     const uint8_t error_interrupt_id;
+
+    //The rx_watermark update function;
+    uint8_t (*rx_water_function)(uint8_t nb_elements, uint8_t rx_max);
+
+    //The rx_watermark update function;
+    uint8_t (*tx_water_function)(uint8_t nb_elements);
+
+    //The data flux to receive from the UART; Will interact with rx;
+    cflux_t *rx_flux;
+
+    //The data flux to transmit to the UART; Will interact with tx;
+    cflux_t *tx_flux;
+
 
 } kinetis_UART_data_t;
 
@@ -148,31 +161,31 @@ typedef struct {
 //-------------------------- Configuration methods --------------------------
 
 //Initialise the UART;
-void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *, connection_flux_t *);
+void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *);
 
 //De-initialise the UART;
-void kinetis_UART_exit(kinetis_UART_data_t *);
+void kinetis_UART_exit(const kinetis_UART_data_t *);
 
 
 //Get the number of chars in the rx hw buffer;
-size_t kinetis_UART_rx_available(kinetis_UART_data_t *data);
+size_t kinetis_UART_rx_available(const void * data);
 
 //Get the number of spaces in the tx hw buffer;
-uint8_t kinetis_UART_tx_available(kinetis_UART_data_t *data);
+uint8_t kinetis_UART_tx_available(const void *data);
 
 
-//The function for the transmitter to copy its data;
-void (*copy_data_in)(void *data, void *data_array, size_t size);
+//Get a certain amount of data from rx;
+void kinetis_UART_copy_from_rx(const void *data, void *dest, size_t size);
 
-//The function for the transmitter to receive its data;
-void (*copy_data_from)(void *data, void *data_array, size_t size);
+//Pass a certain amount of to tx;
+void kinetis_UART_copy_to_tx(const void *data, const void *src, size_t size);
 
 
 //The interrupt function;
-void kinetis_UART_interrupt(kinetis_UART_data_t *data);
+void kinetis_UART_interrupt(const kinetis_UART_data_t *data);
 
 //The error function;
-void kinetis_UART_error(kinetis_UART_data_t *data);
+void kinetis_UART_error(const kinetis_UART_data_t *data);
 
 
 

@@ -258,7 +258,7 @@ void connection_process(connection_t *connection) {
         }
 
         //If the data flux is active, process it;
-        data_flux_process(flux);
+        flux_process(flux);
 
         //Update the current node as the successor of the current flux;
         node = flux_get_next_node(flux);
