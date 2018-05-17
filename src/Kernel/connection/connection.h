@@ -46,10 +46,14 @@
 
 #include <stddef.h>
 
+#include <stdbool.h>
+
+#include "Kernel/connection/flux/flux.h"
+
 #include <Kernel/scheduler/semaphore.h>
 
 #include <data_structures/containers/llist.h>
-#include <stdbool.h>
+
 
 /*
  * The connection node structure.
@@ -73,7 +77,7 @@ typedef struct {
     void (*close)(void *);
 
 
-} connection_node_t;
+} cnode_t;
 
 
 /*
@@ -84,54 +88,16 @@ typedef struct {
 typedef enum {
 
     //The stream is active, it can be executed;
-    ACTIVE,
+            ACTIVE,
 
     //The stream has to be deleted, as soon as its mutex is released;
-    CLOSED,
+            CLOSED,
 
 } connection_state_t;
 
 
-/*
- * The data transfer between nodes is realised by connection flux;
- *
- *  Connection flux link two connection nodes, and so possess function pointers related to them;
- */
 
-typedef struct {
-
-    //--------- Linked list composition ---------;
-
-    linked_element_t link;
-
-
-    //--------- Critical or not ---------;
-
-    //Is the flux critical ?
-    bool critical;
-
-    //The state of the stream;
-    connection_state_t state;
-
-
-    //--------- Data flux function ---------;
-
-    //The size of an element that transmits;
-    size_t data_size;
-
-    //Move data; Will take a struct in entry, must be casted;
-    void (*flux_function)(connection_flux_t *);
-
-
-    //--------- Size determination part ---------;
-
-    //A function to get the max amount of data to transfer;
-    size_t (*data_amount)(void *tx_struct);
-
-    //A function to get the max amount of spaces to transfer;
-    size_t (*spaces_amount)(void *rx_struct);
-
-} connection_flux_t;
+//------------------------------- Connection -------------------------------
 
 
 /*
@@ -149,10 +115,10 @@ typedef struct {
     //--------------- Data and spaces input nodes ---------------
 
     //The stream's first data processor;
-    connection_node_t *data_input;
+    cnode_t *data_input;
 
     //The stream's last data processor;
-    connection_node_t *spaces_input;
+    cnode_t *spaces_input;
 
 
 } connection_t;
@@ -161,34 +127,19 @@ typedef struct {
 //------------------------------- Creation -------------------------------
 
 //Create a data processor from its base parameters;
-connection_node_t *connection_create_data_processor(void *instance, void (*destructor)(void *));
+cnode_t *connection_create_data_processor(void *instance, void (*destructor)(void *));
 
 //Create a stream from a heap allocated data processor;
-connection_t *connection_create(connection_node_t *node);
+connection_t *connection_create(cnode_t *node);
 
 //Add a data processor to an existing stream;
-void connection_add_node(connection_t *connection, connection_flux_t *flux, connection_node_t *node);
-
-
-//------------------------------- Data flux -------------------------------
-
-//Node query helper;
-inline connection_node_t *flux_get_previous_nodes_instance(connection_flux_t *flux);
-
-//Node query helper;
-inline connection_node_t *flux_get_next_nodes_instance(connection_flux_t *flux);
-
-//Process a data flux;
-void data_flux_process(connection_flux_t *);
-
-//Size determination;
-size_t data_flux_get_transfer_size(connection_flux_t *, void *prev_instance, void *next_instance);
+void connection_add_node(connection_t *connection, cflux_t *flux, cnode_t *node);
 
 
 //------------------------------- Deletion -------------------------------
 
 //Marks a stream to be deleted. Will be deleted at next iteration of stream service;
-void connection_close(connection_flux_t *);
+void connection_close(cflux_t  *);
 
 
 //------------------------------- Service -------------------------------
@@ -201,6 +152,7 @@ void connection_transfer_ownership(connection_t *);
 
 //Stop the connection service;
 void connection_stop_service();
+
 
 
 #endif //TRACER_STREAM_H

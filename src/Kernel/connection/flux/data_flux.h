@@ -21,24 +21,28 @@ typedef struct {
     //--------- Composition ---------
 
     //The stream structure;
-    connection_flux_t data_flux;
+    cflux_t flux;
 
-    //--------- Transmission ---------
+
+    //--------- Flux functions ---------
 
     //The function for the transmitter to copy its data;
-    void (*tx_copy)(void *tx_struct, void *data_array, size_t size);
+    data_processor tx_copier;
 
-    //The function for the transmitter to receive its data;
-    void (*rx_process)(void *rx_struct, void *data_array, size_t size);
-
-} element_array_flux_t;
+    //The function for the receiver to receive its data;
+    data_processor rx_copier;
 
 
-//The data flux function for a copy stream;
-void data_flux_acopy_process(linked_element_t *linked_element);
+} data_flux_t;
 
-//The data flux function for a copy stream;
-void data_flux_acopy_process_critical(linked_element_t *linked_element);
+
+//Create an array fux in the heap;
+data_flux_t *data_flux_create(bool critical, size_t element_size,
+                                                size_t (*data_amount)(void *),
+                                                size_t (*spaces_amount)(void *),
+                                                data_processor tx_copy,
+                                                data_processor rx_receive);
+
 
 
 #endif //TRACER_COPY_STREAM_H
