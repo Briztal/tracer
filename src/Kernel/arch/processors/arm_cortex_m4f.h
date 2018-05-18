@@ -276,8 +276,9 @@ inline void core_enable_interrupt(uint8_t interrupt_index) {
  * core_disable_interrupt : disables the specified interrupt;
  */
 
-#define core_disable_interrupt(interrupt_index)\
+inline void core_disable_interrupt(uint8_t interrupt_index) {
     NVIC_DISABLE_IRQ(interrupt_index);
+}
 
 
 /*

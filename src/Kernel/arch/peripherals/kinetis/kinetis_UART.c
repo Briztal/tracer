@@ -3,11 +3,54 @@
 //
 
 #include <Kernel/arch/arch.h>
+#include <Kernel/drivers/UART.h>
 
 #include "kinetis_UART.h"
 
 
 //TODO RECEIVE OVERRUN
+
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
+//TODO DRIVER CONSTRUCTION
 
 /*
  * SET : will set [data]'s bits that are set to 1 in [mask]. [data] is of size [size];
@@ -37,29 +80,10 @@
 #define CLEAR_BIT(data, bit_id, size) CLEAR(data, 1 << (bit_id), size)
 
 
-//-------------------------------- Interrupts enable functions -----------------------------------
-
-//Enable the reception interrupt
-void enable_rx_int(kinetis_UART_data_t *);
-
-//Enable the transmission interrupt
-void enable_tx_int(kinetis_UART_data_t *);
-
-
-//-------------------------- Error and interrupt --------------------------
-
-//The interrupt function;
-void interrupt(kinetis_UART_data_t *data);
-
-//The error function;
-void error(kinetis_UART_data_t *data);
-
-
 //-------------------------- Reception methods --------------------------
 
-//Transmit a uint16_t to the UART;
-void read_rx(kinetis_UART_data_t *);
-
+//Set the watermark functions depending on the config;
+void set_watermark_policies(kinetis_UART_data_t *data, UART_config_t *config);
 
 //Initialise the hardware;
 void initialise_hardware(kinetis_UART_data_t *);
@@ -68,35 +92,92 @@ void initialise_hardware(kinetis_UART_data_t *);
 void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *);
 
 //Configure the state;
-void configure_state(kinetis_UART_data_t *data, UART_config_t *);
-
-//Configure the state;
 void configure_modem(kinetis_UART_data_t *data, UART_config_t *);
 
 //Configure the transmission layer;
 void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *);
 
 
+//-------------------------- Watermark policies --------------------------
+
+//Update the tx watermark;
+uint8_t update_tx_watermark(const kinetis_UART_data_t *data, uint8_t nb_transmissions);
+
+//The strict tx watermark policy;
+uint8_t tx_watermark_strict(uint8_t nb_elements);
+
+//The half remaining tx watermark policy;
+uint8_t tx_watermark_half(uint8_t nb_elements);
+
+
+//Update the rx watermark;
+uint8_t update_rx_watermark(const kinetis_UART_data_t *data, uint8_t nb_readings);
+
+//The strict rx watermark policy;
+uint8_t rx_watermark_strict(uint8_t, uint8_t);
+
+//The half remaining rx watermark policy;
+uint8_t rx_watermark_half(uint8_t, uint8_t);
+
+
 //-------------------------- Configuration methods --------------------------
 
 /*
- * configure_packet_format : this function configures the UART. Config is divided into several private functions
+ * kinetis_UART_init : this function initialises the UART. Config is divided into several private functions
  *  that are all called;
  */
 
 void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config) {
 
-    //Initialise the hardware;//TODO IS IT THE CORRECT ORDER ?
+    //First, initialise the UART data-structure according to the config;
+    set_watermark_policies(data, config);
+
+    //Initialise the hardware in a safe state;
     initialise_hardware(data);
 
+    //Initialise different parts of the UART;
     configure_packet_format(data, config);
-    configure_state(data, config);
     configure_modem(data, config);
     configure_transmission_layer(data, config);
 
 }
 
 
+/*
+ * set_watermark_policies : sets rx and tx watermark calculators, according to the configuration;
+ */
+
+void set_watermark_policies(kinetis_UART_data_t *data, UART_config_t *config) {
+
+    switch (config->tx_water_policy) {
+
+        //If the policy is half remaining :
+        case HALF_REMAINING:
+            data->tx_water_function = tx_watermark_half;
+            break;
+
+            //If the policy is STRICT or another, use the strict policy;
+        default:
+            data->tx_water_function = tx_watermark_strict;
+            break;
+    }
+
+    switch (config->rx_water_policy) {
+
+        //If the policy is half remaining :
+        case HALF_REMAINING:
+            data->rx_water_function = rx_watermark_half;
+            break;
+
+            //If the policy is STRICT or another, use the strict policy;
+        default:
+            data->rx_water_function = rx_watermark_strict;
+            break;
+
+    }
+
+}
+
 //TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
 //TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
 //TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
@@ -124,6 +205,31 @@ void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config) {
 //TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
 //TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
 //TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
+
+
+/*
+ * fifo_size_to_index : this function converts the required size to its fifo index;
+ */
+
+uint8_t fifo_size_to_index(uint8_t size) {
+
+    //If the provided size was 1, the id is 0 (only irregular index);
+    if (size == 1)
+        return 0;
+
+    //We will invert 'size = 1 << (index = 1)';
+
+    //Initialise the index;
+    uint8_t index = 0;
+
+    //Increment the index while we have not obtained zero after shifting;
+    while (size >>= 1)
+        index++;
+
+    //Decrement and return the index;
+    return --index;
+
+}
 
 
 /*
@@ -136,65 +242,46 @@ void initialise_hardware(kinetis_UART_data_t *data) {
     kinetis_UART_memory_t *registers = data->memory;
 
     /*
-     * First, we will configure the peripheral hardware;
+     * Configure FIFOs;
      */
+
+    //Determine their indices; WARNING : SIZES MUST BE CORRECT;
+    uint8_t tx_index = fifo_size_to_index(data->tx_size);
+    uint8_t rx_index = fifo_size_to_index(data->rx_size);
 
     //Set both FIFOs enabled, and their size set with provided values,
     registers->PFIFO = (uint8_t) UART_PFIFO_TXFE | (uint8_t) UART_PFIFO_RXFE |
-                       (uint8_t) UART_PFIFO_TXFIFOSIZE(tx_size) | (uint8_t) UART_PFIFO_RXFIFOSIZE(rx_size);
+                       (uint8_t) UART_PFIFO_TXFIFOSIZE(tx_index) | (uint8_t) UART_PFIFO_RXFIFOSIZE(rx_index);
 
-    //The rx watermark will be set as the half of the rx buffer size;
-    switch (rx_size) {
-        case size_1 :
-            registers->RWFIFO = 1;
-            break;
-        case size_4 :
-            registers->RWFIFO = 2;
-            break;
-        case size_8 :
-            registers->RWFIFO = 4;
-            break;
-        case size_16 :
-            registers->RWFIFO = 8;
-            break;
-        case size_32 :
-            registers->RWFIFO = 16;
-            break;
-        case size_64 :
-            registers->RWFIFO = 32;
-            break;
-        case size_128 :
-            registers->RWFIFO = 64;
-            break;
-    }
 
-    //The rx watermark will be set as the half of the rx buffer size;
-    switch (tx_size) {
-        case size_1 :
-            registers->TWFIFO = 0;
-            break;
-        case size_4 :
-            registers->TWFIFO = 2;
-            break;
-        case size_8 :
-            registers->TWFIFO = 4;
-            break;
-        case size_16 :
-            registers->TWFIFO = 8;
-            break;
-        case size_32 :
-            registers->TWFIFO = 16;
-            break;
-        case size_64 :
-            registers->TWFIFO = 32;
-            break;
-        case size_128 :
-            registers->TWFIFO = 64;
-            break;
-    }
 
     /*
-     * Interrupts to enable are :
+     * Stop the UART, to avoid premature interrupts;
+     */
+
+    //Disable rx and tx;
+    CLEAR(registers->C2, UART_C2_RE, 8);
+    CLEAR(registers->C2, UART_C2_TE, 8);
+
+
+    //Disable the transmission interrupt, to avoid interrupts as soon as tx water will be set;
+    CLEAR_BIT(registers->C2, UART_C2_TIE, 8);
+
+    //Enable the reception interrupt, to allow interrupts as soon as rx will be started;
+    SET(registers->C2, UART_C2_RIE, 8);
+
+
+    //Flush fifos;
+    registers->CFIFO |= UART_CFIFO_RXFLUSH;
+    registers->CFIFO |= UART_CFIFO_TXFLUSH;
+
+    //Set the tx watermark to 0, and the rx to 1.
+    registers->TWFIFO = 0;
+    registers->RWFIFO = 1;
+
+
+    /*
+     * Supported interrupts are :
      *  - transmission complete; TODO INTERRUPT SUPPORT FOR HALF DUPLEX
      *  - transmission buffer empty (below water);
      *  - reception buffer empty (beyond water);
@@ -203,8 +290,6 @@ void initialise_hardware(kinetis_UART_data_t *data) {
      *  All those are located in the C2 register;
      */
 
-    //Enable all interrupts,
-    SET(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
 
     //Cache the status interrupt index;
     const uint8_t status_id = data->status_interrupt_id;
@@ -216,10 +301,10 @@ void initialise_hardware(kinetis_UART_data_t *data) {
     core_clear_interrupt_pending(status_id);
 
     //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(status_id, status_interrupt_link);
+    core_set_interrupt_handler(status_id, data->status_interrupt_function);
 
-    //Enable the status interrupt;
-    core_enable_interrupt(status_id);
+    //Disable the status interrupt;
+    core_disable_interrupt(status_id);
 
 
     /*
@@ -231,10 +316,10 @@ void initialise_hardware(kinetis_UART_data_t *data) {
      *  - noise flag - parity error (informative) -> read and forget last element;
      */
 
-    //Enable framing, overrun, noise and parity errors to generate interrupt;
+    //Enable framing, overrun, noise and parity errors exceptions;
     SET(registers->C3, UART_C3_FEIE | UART_C3_ORIE | UART_C3_NEIE | UART_C3_PEIE, 8);
 
-    //Enable reciver overflow, receiver underflow, transmitter overflow to generate interrupts;
+    //Enable receiver overflow, receiver underflow and transmitter overflow exceptions;
     SET(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
 
 
@@ -248,10 +333,10 @@ void initialise_hardware(kinetis_UART_data_t *data) {
     core_clear_interrupt_pending(error_id);
 
     //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(error_id, error_interrupt_link);
+    core_set_interrupt_handler(error_id, data->status_interrupt_function);
 
-    //Enable the status interrupt;
-    core_enable_interrupt(error_id);
+    //Disable the status interrupt, will be activated at startup;
+    core_disable_interrupt(error_id);
 
 }
 
@@ -428,9 +513,6 @@ void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *conf
      */
 
 
-
-    //TODO USE MACROS IN KINETIS.H
-
     //First, determine Kb;
     uint32_t Kb = ((uint32_t) ((uint32_t) (data->clockFrequency << 1)) / config->baudrate);
 
@@ -468,74 +550,94 @@ void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *conf
 
 
 /*
- * configure_state : enables or disables the receiver or the transmitter;
+ * kinetis_UART_start : enables the receiver and transmitter;
  */
 
-void configure_state(kinetis_UART_data_t *data, UART_config_t *config) {
+void kinetis_UART_start(kinetis_UART_data_t *data) {
 
-    //First, cache the data pointer to avoid permanent implicit double pointer access;
+    //Cache the data pointer to avoid permanent implicit double pointer access;
     kinetis_UART_memory_t *registers = data->memory;
 
-    /*
-     * Rx state : RxE is the bit 2 of C2;
-     */
+    //Enable the status interrupt;
+    core_enable_interrupt(data->status_interrupt_id);
 
-    //If rx must be enabled :
-    if (config->rx_enabled) {
+    //Enable the error interrupt;
+    core_enable_interrupt(data->error_interrupt_id);
 
-        //Set bit 2 of C2;
-        SET(registers->C2, UART_C2_RE, 8);
+    //Set bit RE of C2;
+    SET(registers->C2, UART_C2_RE, 8);
 
-    } else {
-
-        //If rx must be disabled, clear bit 2 of C2;
-        CLEAR(registers->C2, UART_C2_RE, 8);
-
-    }
-
-
-    /*
-     * Tx state : TxE is the bit 3 of C2;
-     */
-
-    //If tx must be enabled :
-    if (config->tx_enabled) {
-
-        //Set the TE bit;
-        SET(registers->C2, UART_C2_TE, 8);
-
-    } else {
-
-        //If rx must be disabled, clear bit 3 of C2;
-        CLEAR(registers->C2, UART_C2_TE, 8);
-
-    }
-
-}
-
-
-//-------------------------------- Interrupts enable functions -----------------------------------
-
-/*
- * enable_rx_int : enables the reception interrupts;
- */
-
-void enable_rx_int(kinetis_UART_data_t *data) {
-
-    //Set the RIE bit in C2 to enable the transmission interrupt;
-    SET(data->memory->C2, UART_C2_RIE, 8);
+    //Set bit TE of C2;
+    SET(registers->C2, UART_C2_TE, 8);
 
 }
 
 
 /*
- * enable_tx_int : enables the transmission interrupts;
+ * kinetis_UART_init : this function stops the UART and resets the hardware;
  */
 
-void enable_tx_int(kinetis_UART_data_t *data) {
+void kinetis_UART_exit(const kinetis_UART_data_t *data) {
 
-    //Set the TIE bit in C2 to enable the transmission interrupt;
-    SET(data->memory->C2, UART_C2_TIE, 8);
+    kinetis_UART_memory_t *const registers = data->memory;
+
+    /*
+     * Stop the UART;
+     */
+
+    //Disable rx and tx;
+    CLEAR(registers->C2, UART_C2_RE, 8);
+    CLEAR(registers->C2, UART_C2_TE, 8);
+
+
+    //Disable interrupts;
+    CLEAR_BIT(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
+
+    //Flush FIFOs;
+    registers->CFIFO |= UART_CFIFO_RXFLUSH;
+    registers->CFIFO |= UART_CFIFO_TXFLUSH;
+
+    //Set the tx watermark to 0, and the rx to 1.
+    registers->TWFIFO = 0;
+    registers->RWFIFO = 1;
+
+    //Disable the status interrupt;
+    core_disable_interrupt(data->status_interrupt_id);
+
+
+    //Disable the status interrupt;
+    core_disable_interrupt(data->error_interrupt_id);
+    /*
+     * Errors supported are :
+     *  - framing errors (locking) - read and forget last element;
+     *  - receiver overrun (locking) - receiver overflow (same ones) -> receiver flush;
+     *  - receiver underflow (misalignment) -> receiver flush;
+     *  - transmitter overflow (misalignment) -> transmitter flush;
+     *  - noise flag - parity error (informative) -> read and forget last element;
+     */
+
+    //Disable framing, overrun, noise and parity errors exceptions;
+    CLEAR_BIT(registers->C3, UART_C3_FEIE | UART_C3_ORIE | UART_C3_NEIE | UART_C3_PEIE, 8);
+
+    //Disable receiver overflow, receiver underflow and transmitter overflow exceptions;
+    CLEAR(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
+
+
+    //Cache the error interrupt index;
+    const uint8_t error_id = data->error_interrupt_id;
+
+    //Set the error interrupt priority;
+    core_set_interrupt_priority(error_id, DRIVER_ERROR_INTERRUPT_PRIORITY);
+
+    //Eventually de-activate a pending status interrupt;
+    core_clear_interrupt_pending(error_id);
+
+    //Set the provided interrupt link as the interrupt function;
+    core_set_interrupt_handler(error_id, data->status_interrupt_function);
+
+    //Enable the status interrupt;
+    core_enable_interrupt(error_id);
+
 
 }
 
@@ -552,7 +654,7 @@ uint8_t kinetis_UART_tx_available(const void *data_c) {
     kinetis_UART_data_t *data = (kinetis_UART_data_t *) data_c;
 
     //Return the maximum number of element minus the current number of elements present in the tx buffer;
-    return ((uint8_t) data->tx_max - (uint8_t) data->memory->TCFIFO);
+    return ((uint8_t) data->tx_size - (uint8_t) data->memory->TCFIFO);
 
 }
 
@@ -579,7 +681,7 @@ uint8_t update_tx_watermark(const kinetis_UART_data_t *const data, uint8_t nb_tr
     const uint8_t hw_tx_nb_elements = registers->TCFIFO;
 
     //Cache the number of spaces in the hardware buffer;
-    const uint8_t hw_tx_nb_spaces = data->tx_max - hw_tx_nb_elements;
+    const uint8_t hw_tx_nb_spaces = data->tx_size - hw_tx_nb_elements;
 
     //If we must transmit more characters that we can, major the size to transfer;
     if (nb_transmissions > hw_tx_nb_spaces) nb_transmissions = hw_tx_nb_spaces;
@@ -592,6 +694,30 @@ uint8_t update_tx_watermark(const kinetis_UART_data_t *const data, uint8_t nb_tr
 
     //Return the correct number of transmissions to execute;
     return nb_transmissions;
+
+}
+
+
+/*
+ * tx_watermark_strict : the strict tx watermark policy;
+ */
+
+uint8_t tx_watermark_strict(const uint8_t nb_elements) {
+
+    //If the number of elements is not null, return its integer predecessor; if null, return 0;
+    return (nb_elements) ? nb_elements - (uint8_t) 1 : (uint8_t) 0;
+
+}
+
+
+/*
+ * tx_watermark_half : the half remaining tx watermark policy;
+ */
+
+uint8_t tx_watermark_half(const uint8_t nb_elements) {
+
+    //Return the half of the final number of elements;
+    return nb_elements >> 1;
 
 }
 
@@ -701,7 +827,7 @@ uint8_t update_rx_watermark(const kinetis_UART_data_t *const data, uint8_t nb_re
     const uint8_t final_nb = hw_rx_nb - nb_readings;
 
     //Call the watermark specific function;
-    registers->RWFIFO = data->rx_water_function(final_nb, data->rx_max);
+    registers->RWFIFO = data->rx_water_function(final_nb, data->rx_size);
 
     //Return the safest maxmimum number of readings to perform;
     return nb_readings;
@@ -842,7 +968,8 @@ void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
 
         //If the interrupt is still active, the stream didn't succeed in transferring data;
         if (registers->S1 & UART_S1_TDRE) {
-/*
+
+            /*
              * The flux had no data to proceed in spite of elements in the reception buffer;
              * There is no data available in the other side of the flux, and only an external call will provide some;
              * There is no reason to keep the interrupt active. We will disable the interrupt;

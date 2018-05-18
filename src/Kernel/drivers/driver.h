@@ -31,6 +31,11 @@ typedef struct {
 
 } driver_config_t;
 
+
+//The constructor for the driver configuration;
+#define DRIVER_CONFIG(type) {.driver_type = (type)}
+
+
 typedef struct {
 
     //Data structure;
@@ -44,6 +49,7 @@ typedef struct {
 
 
 } driver_t;
+
 
 
 /*

@@ -48,8 +48,14 @@ typedef enum {
 } transmission_type_t;
 
 
-//The constructor for the driver configuration;
-#define DRIVER_CONFIG(type) {.driver_type = (type)}
+/*
+ * The buffer watermark policy;
+ */
+
+typedef enum {
+    STRICT,
+    HALF_REMAINING
+} watermark_policy_t;
 
 
 /*
@@ -89,6 +95,13 @@ typedef struct {
     uint32_t baudrate;
 
 
+    //The tx watermark policy;
+    watermark_policy_t tx_water_policy;
+
+    //The tx watermark policy;
+    watermark_policy_t rx_water_policy;
+
+
     //TODO NOT NECESSARY, MAKE A STATE SET FUNCTION
 
     //Is Tx enabled ?
@@ -112,7 +125,7 @@ typedef struct {
  * An inline function obtain the default configuration;
  */
 
-inline void UART_default_config(UART_config_t *uart_config, connection_flux_t *rx_flux, connection_flux_t *tx_flux) {
+inline void UART_default_config(UART_config_t *uart_config, cflux_t *rx_flux, cflux_t *tx_flux) {
 
     //Set the default configuration;
     *uart_config = {
@@ -132,5 +145,16 @@ inline void UART_default_config(UART_config_t *uart_config, connection_flux_t *r
             .tx_flux = (tx_flux),
     };
 }
+
+
+typedef struct {
+
+    //The driver part;
+    driver_t driver;
+
+    //TODO FUNCTION POINTERS
+
+
+} UART_driver_t;
 
 #endif //TRACER_UARTDRIVER_H

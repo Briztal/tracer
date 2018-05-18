@@ -100,10 +100,10 @@ typedef struct {
     const uint32_t clockFrequency;
 
     //The maximum number of uint16_t in the rx hardware buffer;
-    const uint8_t rx_max;
+    const uint8_t rx_size;
 
     //The maximum number of uint16_t in the tx hardware buffer;
-    const uint8_t tx_max;
+    const uint8_t tx_size;
 
     //The status interrupt index;
     const uint8_t status_interrupt_id;
@@ -111,18 +111,23 @@ typedef struct {
     //The error interrupt index;
     const uint8_t error_interrupt_id;
 
-    //The rx_watermark update function;
-    uint8_t (*rx_water_function)(uint8_t nb_elements, uint8_t rx_max);
+    //The error interrupt function;
+    void (*const error_interrupt_function)(void);
+
+    //The status interrupt function;
+    void (*const status_interrupt_function)(void);
 
     //The rx_watermark update function;
-    uint8_t (*tx_water_function)(uint8_t nb_elements);
+    uint8_t (*rx_water_function)(const uint8_t nb_elements, const uint8_t rx_max);
+
+    //The rx_watermark update function;
+    uint8_t (*tx_water_function)(const uint8_t nb_elements);
 
     //The data flux to receive from the UART; Will interact with rx;
     cflux_t *rx_flux;
 
     //The data flux to transmit to the UART; Will interact with tx;
     cflux_t *tx_flux;
-
 
 } kinetis_UART_data_t;
 
@@ -160,12 +165,25 @@ typedef struct {
 
 //-------------------------- Configuration methods --------------------------
 
+
+/*
+ * Init, start and exit functions : public to allow the UART driver creation;
+ */
+
 //Initialise the UART;
 void kinetis_UART_init(kinetis_UART_data_t *, UART_config_t *);
+
+//Start the UART;
+void kinetis_UART_start(kinetis_UART_data_t *);
 
 //De-initialise the UART;
 void kinetis_UART_exit(const kinetis_UART_data_t *);
 
+
+
+/*
+ * size functions : public to allow the UART driver creation;
+ */
 
 //Get the number of chars in the rx hw buffer;
 size_t kinetis_UART_rx_available(const void * data);
@@ -174,12 +192,21 @@ size_t kinetis_UART_rx_available(const void * data);
 uint8_t kinetis_UART_tx_available(const void *data);
 
 
+
+/*
+ * flux functions : public to allow the UART driver creation;
+ */
+
 //Get a certain amount of data from rx;
 void kinetis_UART_copy_from_rx(const void *data, void *dest, size_t size);
 
 //Pass a certain amount of to tx;
 void kinetis_UART_copy_to_tx(const void *data, const void *src, size_t size);
 
+
+/*
+ * Exception functions : public to allow the creation of the interrupt link;
+ */
 
 //The interrupt function;
 void kinetis_UART_interrupt(const kinetis_UART_data_t *data);
