@@ -18,8 +18,9 @@
 
 */
 
-#include <DataStructures/Containers/container.h>
-#include <DataStructures/string/string.h>
+#include <data_structures/containers/container.h>
+#include <data_structures/string/string.h>
+#include <string.h>
 
 #include "events.h"
 
@@ -193,9 +194,6 @@ void events_register(const char *name, task_t *task) {
 
 event_t *event_search(const char *name) {
 
-    //First, cache the current number of events;
-    const container_index_t nb_events = events.nb_elements;
-
     //For every system event :
     for (container_index_t event_index = events.nb_elements; event_index--;) {
 
@@ -203,7 +201,7 @@ event_t *event_search(const char *name) {
         event_t *event = get_event(event_index);
 
         //If the event name matches the searched name :
-        if (cstring::strcmp(name, event->name)) {
+        if (strcmp(name, event->name)) {
 
             //Return the matching event;
             return event;

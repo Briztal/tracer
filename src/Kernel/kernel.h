@@ -35,7 +35,10 @@ void kernel_start();
 
 
 //The malloc function to use across the code;
-void *kernel_malloc(size_t size);
+void *kernel_mallocc(size_t size);
+
+//A shortcut to allocate and copy from a memory zone;
+void *kernel_malloc_copy(size_t size, const void *initialiser);
 
 //The realloc function to use across the code;
 void *kernel_realloc(void *, size_t size);
@@ -44,10 +47,10 @@ void *kernel_realloc(void *, size_t size);
 void kernel_free(void *);
 
 //Enter a critical section;
-inline void kernel_enter_critical_section();
+void kernel_enter_critical_section();
 
 //Leave a critical section;
-inline void kernel_leave_critical_section();
+void kernel_leave_critical_section();
 
 
 #endif //TRACER_KERNEL_H

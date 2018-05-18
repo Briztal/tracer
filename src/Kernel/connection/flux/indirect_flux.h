@@ -11,11 +11,11 @@ typedef struct {
 
     //--------- Composition ---------
 
-    //The flux structure;
-    cflux_t flux;
+    //The cflux structure;
+    flux_t flux;
 
 
-    //--------- Data flux functions ---------
+    //--------- Data cflux functions ---------
 
     //A boolean to determine whether rx or tx is passive;
     bool tx_passive;
@@ -31,14 +31,14 @@ typedef struct {
 
 
 
-//Construct an indirect flux where the receiver is passive;
+//Construct an indirect cflux where the receiver is passive;
 indirect_flux_t *indirect_flux_create_tx_passive(bool critical, size_t element_size,
                                                 size_t (*data_amount)(void *),
                                                 size_t (*spaces_amount)(void *),
                                                 indirect_accessor_t tx_accessor,
                                                 array_processor rx_copier);
 
-//Construct an indirect flux where the receiver is passive;
+//Construct an indirect cflux where the receiver is passive;
 indirect_flux_t *indirect_flux_create_rx_passive(bool critical, size_t element_size,
                                                 size_t (*data_amount)(void *),
                                                 size_t (*spaces_amount)(void *),

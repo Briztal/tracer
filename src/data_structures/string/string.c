@@ -3,10 +3,10 @@
 //
 
 #include <malloc.h>
+#include <Kernel/kernel.h>
+#include <string.h>
 
 #include "string.h"
-
-#include "Arduino.h"
 
 #define SIZE_LIMIT (uint16_t) 255
 
@@ -59,21 +59,14 @@ inline size_t length_to_size(const size_t length) {
 //Create a string of the given length
 string_t *string_create(const size_t string_length, const char *const heap_data) {
 
-    //Allocate some memory for the string;
-    void *ptr = malloc(sizeof(string_t));
-
-    //If the allocation failed, error;
-    if (!ptr)
-        return 0;//TODO ERROR.
-
-    //If the allocation completed, cache a casted copy of the pointer. Compiler optimised;
-    string_t *string = (string_t *) ptr;
-
-    //Initialise the string;
-    *string = (string_t) {
+    //Create the string initializer;
+    string_t init = {
             .length = string_length,
             .data = heap_data,
     };
+
+    //If the allocation completed, cache a casted copy of the pointer. Compiler optimised;
+    string_t *string = kernel_malloc_copy(sizeof(string_t), &init);
 
     //Return the created string;
     return string;
@@ -93,17 +86,13 @@ string_t *string_create_from_symmetric(const size_t string_length, const char *c
     size_t size = length_to_size(string_length);
 
     //Create a memory space in the heap for data;
-    void *ptr = malloc(size);
-
-    //If the allocation failed, error;
-    if (!ptr)
-        return 0;//TODO ERROR.
+    void *ptr = kernel_mallocc(size);
 
     //Symmetric copy from stack to heap; dest is null-terminated;
     string_symmetric_copy(ptr, stack_src, string_length);
 
     //Built the string and return the result;
-    string_create(string_length, ptr);
+    return string_create(string_length, ptr);
 
 }
 
@@ -132,7 +121,7 @@ string_t *string_create_from_stack(const size_t string_length, const char *const
     *((char *)ptr + string_length) = 0;
 
     //Built the string and return the result;
-    string_create(string_length, ptr);
+    return string_create(string_length, ptr);
 
 }
 
@@ -162,20 +151,19 @@ string_t *string_move(string_t *src) {
     string_t *clone = string_create(src->length, src->data);
 
     //Then, allocate data in the heap for an empty string;
-    void *ptr = malloc(length_to_size(0));
-
-    //If the allocation failed, error;
-    if (!ptr)
-        return 0;//TODO ERROR.
+    char *ptr = kernel_mallocc(length_to_size(0));
 
     //Initialise the string to empty.
-    *(char *)ptr = 0;
+    *ptr = 0;
 
-    //Re-initialise src with new data;
-    *src = {
+    //Create a stack initialiser;
+    string_t init =  {
             .data = ptr,
             .length = 0,
     };
+
+    //Re-initialise src with new data;
+    memcpy(src, &init, sizeof(string_t));
 
     //Return the new string;
     return clone;
@@ -374,7 +362,7 @@ string_t *str_f(float f, uint8_t resolution) {
     }
 
     //Create a string from the stack array;
-    string_t *frac_string = string_create_from_stack(resolution + 1, frac_part);
+    //string_t *frac_string = string_create_from_stack(resolution + 1, frac_part);TODO
 
     //For instance, return the integer part;
     //TODO TSTRING;

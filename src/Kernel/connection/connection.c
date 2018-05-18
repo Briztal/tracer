@@ -5,9 +5,8 @@
 #include "connection.h"
 
 #include <Kernel/kernel.h>
-#include <data_structures/containers/llist.h>
 
-#include "stdbool.h"
+#include <Kernel/connection/flux/flux.h>
 
 #include "Kernel/scheduler/tasks/service.h"
 
@@ -36,18 +35,18 @@ connection_t *connections = 0;
 
 cnode_t *node_get_first_node(cnode_t *node) {
 
-    //Cache a case for the previous flux;
-    cflux_t *flux;
+    //Cache a case for the previous cflux;
+    flux_t *flux;
 
-    //While there is a previous flux :
+    //While there is a previous cflux :
     while ((flux = node_get_previous_flux(node))) {
 
-        //Cache the previous flux's previous node;
+        //Cache the previous cflux's previous node;
         node = flux_get_previous_node(flux);
 
     }
 
-    //Return the first node, that has no previous flux;
+    //Return the first node, that has no previous cflux;
     return node;
 
 }
@@ -55,18 +54,18 @@ cnode_t *node_get_first_node(cnode_t *node) {
 
 cnode_t *node_get_last_node(cnode_t *node) {
 
-    //Cache a case for the previous flux;
-    cflux_t *flux;
+    //Cache a case for the previous cflux;
+    flux_t *flux;
 
-    //While there is a previous flux :
+    //While there is a previous cflux :
     while ((flux = node_get_next_flux(node))) {
 
-        //Cache the previous flux's previous node;
+        //Cache the previous cflux's previous node;
         node = flux_get_next_node(flux);
 
     }
 
-    //Return the last node, that has no next flux;
+    //Return the last node, that has no next cflux;
     return node;
 
 }
@@ -82,15 +81,15 @@ cnode_t *node_get_last_node(cnode_t *node) {
 
 cnode_t *connection_create_data_processor(void *instance, void (*destructor)(void *)) {
 
-    //Allocate some memory in the heap for the node;
-    cnode_t *node = kernel_malloc(sizeof(cnode_t));
-
-    //Initialise the node;
-    *node = {
+    //Create the initialiser;
+    cnode_t init = {
             .link = EMPTY_LINKED_ELEMENT(),
             .instance = instance,
             .close = destructor,
     };
+
+    //Allocate some memory in the heap for the node ad initialise it;
+    cnode_t *node = kernel_malloc_copy(sizeof(cnode_t), &init);
 
     //Return the initialised node;
     return node;
@@ -104,15 +103,15 @@ cnode_t *connection_create_data_processor(void *instance, void (*destructor)(voi
 
 connection_t *connection_create(cnode_t *node) {
 
-    //Allocate some heap memory for the connection;
-    connection_t *connection = kernel_malloc(sizeof(connection_t));
-
     //Initialise the connection;
-    *connection =  {
+    connection_t init = {
             .link = EMPTY_LINKED_ELEMENT(),
             .data_input = node,
             .spaces_input = node,
     };
+
+    //Allocate some memory in the heap for the conneection ad initialise it;
+    connection_t *connection = kernel_malloc_copy(sizeof(connection_t), &init);
 
     //Return the initialised connection;
     return connection;
@@ -126,15 +125,15 @@ connection_t *connection_create(cnode_t *node) {
  *  The new node takes the place of the space input in the connection struct;
  */
 
-void connection_add_node(connection_t *connection, cflux_t *flux, cnode_t *node) {
+void connection_add_node(connection_t *connection, flux_t *flux, cnode_t *node) {
 
     //Cache the last node of the connection;
     cnode_t *spaces_input_node = connection->spaces_input;
 
-    //Concatenate the last node and the flux;
+    //Concatenate the last node and the cflux;
     llist_concat((linked_element_t *) spaces_input_node, (linked_element_t *) flux);
 
-    //Concatenate the flux and the new node;
+    //Concatenate the cflux and the new node;
     llist_concat((linked_element_t *) flux, (linked_element_t *) node);
 
     //Set the new node as the
@@ -149,22 +148,22 @@ void connection_add_node(connection_t *connection, cflux_t *flux, cnode_t *node)
  * connection_close : marks a connection to be deleted. Called by anyone;
  */
 
-void connection_close(cflux_t *flux) {
+void connection_close(flux_t *flux) {
 
     //First, disable all interrupts;
     kernel_enter_critical_section();//TODO NOT A CRITICAL SECTION !!! USE A MUTEX !!
 
-    //Cache the flux's previous node;
+    //Cache the cflux's previous node;
     cnode_t *node = flux_get_previous_node(flux);
 
     //Get the node node of the list;
     node = node_get_first_node(node);
 
-    //While the node has a next flux to mark deletable :
+    //While the node has a next cflux to mark deletable :
     while ((flux = node_get_next_flux(node))) {
 
-        //Mark the flux as closed;
-        flux->state = CLOSED;
+        //Mark the cflux as closed;
+        flux->state = CLOSED_TASK;
 
         //Update the node;
         node = flux_get_next_node(flux);
@@ -189,17 +188,17 @@ void _connection_close(connection_t *connection) {
     kernel_enter_critical_section(); //TODO NO CRITICAL SECTION, MUTEX + CRITICAL SECTION ON CRITICAL NODE DELETON
 
     /*
-     * This function is exclusively called from the connection stream, same as the flux processor.
+     * This function is exclusively called from the connection stream, same as the cflux processor.
      * It can safely delete a connection;
      */
 
     //Cache the first data processor of the list;
     cnode_t *node = connection->data_input;
 
-    //Cache a space for the next connection flux;
-    cflux_t *flux;
+    //Cache a space for the next connection cflux;
+    flux_t *flux;
 
-    //While there is an output flux :
+    //While there is an output cflux :
     while ((flux = node_get_next_flux(node))) {
 
         //Delete the node;
@@ -208,7 +207,7 @@ void _connection_close(connection_t *connection) {
         //Cache the next processor, so that next iteration can safely use it;
         node = flux_get_next_node(flux);
 
-        //Delete the flux;
+        //Delete the cflux;
         kernel_free(flux);
 
     }
@@ -240,16 +239,16 @@ void connection_process(connection_t *connection) {
     //Cache the first node of the list;
     cnode_t *node = connection->data_input;
 
-    //Cache a space for the next eventual flux;
-    cflux_t *flux;
+    //Cache a space for the next eventual cflux;
+    flux_t *flux;
 
-    //While there is a flux after the current node :
+    //While there is a cflux after the current node :
     while ((flux = node_get_next_flux(node))) {
 
-        //If the data flux has to be deleted :
-        if (flux->state == CLOSED) {
+        //If the data cflux has to be deleted :
+        if (flux->state == (flux_state_t)CLOSED_TASK) {
 
-            //Delete the data flux; It will be made empty, and will be removed during the service's next iteration;
+            //Delete the data cflux; It will be made empty, and will be removed during the service's next iteration;
             _connection_close(connection);
 
             //Stop here;
@@ -257,10 +256,10 @@ void connection_process(connection_t *connection) {
 
         }
 
-        //If the data flux is active, process it;
+        //If the data cflux is active, process it;
         flux_process(flux);
 
-        //Update the current node as the successor of the current flux;
+        //Update the current node as the successor of the current cflux;
         node = flux_get_next_node(flux);
 
     }
@@ -350,8 +349,8 @@ connection_t *connection_delete(connection_t *connection) {
     kernel_enter_critical_section();
 
     //Cache the previous and the next element;
-    linked_element_t *prev = connection->link.prev;
-    linked_element_t *next = connection->link.next;
+    linked_element_t *prev = (linked_element_t *) connection->link.prev;
+    linked_element_t *next = (linked_element_t *) connection->link.next;
 
     //If the previous element is null, we have the first element of the chain;
     if (!prev) {

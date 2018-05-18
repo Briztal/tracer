@@ -6,7 +6,7 @@
 #define TRACER_TREE_H
 
 
-#include <DataStructures/containers/container.h>
+#include <data_structures/containers/container.h>
 
 /*
  * A tree in the strictest meaning contains a container of sub-trees;
@@ -29,7 +29,12 @@ void tree_append_child(tree_t *parent, tree_t *child);
 void tree_insert_child(tree_t *parent, container_index_t index, tree_t *child);
 
 //Get the number of children;
-inline container_index_t tree_nb_children(tree_t *parent);
+inline container_index_t tree_nb_children(tree_t *parent) {
+
+    //Return the nb of elements in the children container;
+    return parent->children.nb_elements;
+
+}
 
 //Get a child;
 tree_t *get_child(tree_t *parent, container_index_t index);

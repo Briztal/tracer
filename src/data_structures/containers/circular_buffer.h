@@ -44,7 +44,7 @@ void cbuffer_validate_input(cbuffer_t*);
  * Read an element from the input point, at a given offset.
  * An offset of 0 hits the input element, 1 hits the element inserted just before, etc...
  */
-inline void *cbuffer_read_input(cbuffer_t*, container_index_t offset);
+void *cbuffer_read_input(cbuffer_t*, container_index_t offset);
 
 
 //------------------------------------ Output ------------------------------------

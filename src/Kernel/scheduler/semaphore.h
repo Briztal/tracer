@@ -6,8 +6,7 @@
 #define TRACER_SEMAPHORE_H
 
 
-#include <DataStructures/Containers/container.h>
-#include "stdint.h"
+#include <data_structures/containers/container.h>
 
 
 

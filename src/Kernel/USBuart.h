@@ -6,17 +6,16 @@
 #define TRACER_USBUART_H
 
 
-#include <Kernel/Drivers/Driver.h>
-#include <Kernel/Scheduler/semaphore.h>
+#include <Kernel/drivers/driver.h>
+#include <Kernel/scheduler/semaphore.h>
+#include <WString.h>
 
-namespace USBuart {
+#include "Arduino.h"
 
-    void init(uint32_t baudrate);
 
-    void write(String s);
+void USBUART_init(uint32_t baudrate);
 
-};
-
+//void USBUART_write(String s);
 
 
 #endif //TRACER_USBUART_H

@@ -18,12 +18,9 @@
 
 */
 
-#include <Config/control_config.h>
-
 
 #ifndef TRACER_TREEINTERFACECOMMANDS_H
 #define TRACER_TREEINTERFACECOMMANDS_H
-
 
 
 

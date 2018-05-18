@@ -2,9 +2,7 @@
 // Created by root on 5/9/18.
 //
 
-#include <DataStructures/Containers/container.h>
 #include "tree.h"
-
 
 /*
  * Append a child to our children container;
@@ -26,18 +24,6 @@ void tree_insert_child(tree_t *parent, container_index_t index, tree_t *child) {
 
     //Append the child to the tree;
     container_insert_element(&parent->children, index, &child);
-
-}
-
-
-/*
- * Get the number of children; As the parent function has already access to this piece of data, the function is inine;
- */
-
-inline container_index_t tree_nb_children(tree_t *parent) {
-
-    //Return the nb of elements in the children container;
-    return parent->children.nb_elements;
 
 }
 

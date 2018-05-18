@@ -70,17 +70,17 @@
  *      - Determination of the thread's PSP;
  */
 
-#include <Kernel/Arch/Chips/teensy35/USBuart.h>
-#include <Kernel/Scheduler/process.h>
-#include <Kernel/Scheduler/tasks.h>
-#include <Kernel/Scheduler/systick.h>
+#include <Kernel/USBuart.h>
+#include <Kernel/scheduler/process.h>
+#include <Kernel/scheduler/tasks/task.h>
+#include <Kernel/scheduler/systick.h>
 #include "Arduino.h"
 
 void end_function() {
-    USBuart::write("END FUNCTION REACHED");
+    //USBuart::write("END FUNCTION REACHED");
 }
 
-
+/*
 Semaphore S(1);
 
 //digitalWrite(13, !digitalRead(13));
@@ -166,6 +166,8 @@ task_state_t task_3(void *) {
     return complete;
 
 }
+
+ */
 int main() {
 
     pinMode(13, OUTPUT);
@@ -173,7 +175,7 @@ int main() {
     digitalWrite(13, HIGH);
 
     delay(2000);
-
+    /*
     USBuart::init(115200);
 
     //Initialise all threads;
@@ -220,6 +222,7 @@ int main() {
 
     //Run threads;
     ThreadManager::start();
+     */
 
     //Never reached;
     while (true);

@@ -10,7 +10,7 @@
 
 #include "stdbool.h"
 
-#include <Kernel/Scheduler/tasks/task.h>
+#include <Kernel/scheduler/tasks/task.h>
 
 
 //--------------------- Initialisation ---------------------

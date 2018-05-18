@@ -10,7 +10,7 @@
 /*
  * The copy stream is a stream composition, that copies data it transmits.
  *
- *  Its data flux function determines the amount of data to transit, declares an array of the appropriate size, and
+ *  Its data cflux function determines the amount of data to transit, declares an array of the appropriate size, and
  *  passes it to the transmitter, that copies its data in it.
  *
  *  Then, it passes the array to the receiver that processes it;
@@ -21,7 +21,7 @@ typedef struct {
     //--------- Composition ---------
 
     //The stream structure;
-    cflux_t flux;
+    flux_t flux;
 
 
     //--------- Flux functions ---------

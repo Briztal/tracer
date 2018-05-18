@@ -6,8 +6,8 @@
 #define TRACER_TSTRINGCLASS_H
 
 
-#include <DataStructures/string/string.h>
-#include "DataStructures/containers/tree.h"
+#include <data_structures/string/string.h>
+#include "data_structures/containers/tree.h"
 
 
 typedef struct {
@@ -20,7 +20,7 @@ typedef struct {
 } tstring_t;
 
 //The struct default initialiser;
-#define EMPTY_TSTRING(s) {.tree_data = EMPTY_TREE, .string = (s)}
+#define EMPTY_TSTRING(s) (tstring_t ) {.tree_data = EMPTY_TREE, .string = (s)}
 
 
 //Create a tstring from a string; Moves data;

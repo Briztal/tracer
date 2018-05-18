@@ -79,7 +79,7 @@ uint32_t next_check_time = 0;
  * program_repetitive_task : this function adds a temporary service task;
  */
 
-void void service_add_temporary(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
+void service_add_temporary(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
 
     //If the service mustn't be scheduled, nothing to do;
     if (!nb_execs) {
@@ -137,18 +137,18 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
 
     //Create the task;
     task_t *task = task_create(service_f, 0, 0, PERSISTENT_TASK);
-    
-    //Cache a casted copy for readability. Compiler optimised,
-    service_t *service = kernel_malloc(sizeof(service_t));
 
     //Initialise the service;
-    *service = {
+    service_t init = {
             .next_exec_time = offset + systick_milliseconds(),
             .remaining_execs = remaining_execs,
             .period = period,
             .task = task,
             .executionFlag = false,
     };
+
+    //Cache a casted copy for readability. Compiler optimised,
+    service_t *service = kernel_malloc_copy(sizeof(service_t), &init);
 
     //Add the service to the services array;
     container_append_element(&services, &service);

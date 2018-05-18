@@ -34,13 +34,13 @@ typedef enum {
 typedef enum {
 
     //The task is not started, and is stored in its container;
-            STORED,
+            STORED_TASK,
 
     //The task is started, but is still stored in its container. Mustn't be deleted;
-            RUNNING,
+            RUNNING_TASK,
 
     //The task is out of its container, must be deleted when it reaches task_cleanup;
-            CLOSED
+            CLOSED_TASK,
 
 } persistent_task_state_t;
 

@@ -11,8 +11,8 @@ We will define an arbitrary point, 0, in the rover referential, that will be the
         - ux> is unitary and defines the front view of the rover;
         - uy> is unitary and defines the left view of the rover;
 
-    Each wheel will rotate over a given axis, let's name ur> the positive rotation vector;
-    If we name un> the unitary normal vector to the reference plane, we can define the unitary direction vector ud> as :
+    Each wheel will rotate over a given axis, let's id ur> the positive rotation vector;
+    If we id un> the unitary normal vector to the reference plane, we can define the unitary direction vector ud> as :
 
     ud> = (normalised) ur> ^ un>;
 

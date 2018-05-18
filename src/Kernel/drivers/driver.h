@@ -42,14 +42,15 @@ typedef struct {
     void *data;
 
     //Driver initialisation;
-    void (*initialise)(void *data, driver_config_t *);
+    void (*initialise)(void *data, const driver_config_t *);
 
     //De-initialise the UART;
-    void (*exit)(void *data);
+    void (*exit)(const void *data);
 
 
 } driver_t;
 
+#define DRIVER(data_p, init_p, exit_p) {.data = (data_p), .initialise = (init_p), .exit = (exit_p)}
 
 
 /*

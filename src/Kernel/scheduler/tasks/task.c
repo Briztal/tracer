@@ -5,6 +5,8 @@
 #include "task.h"
 
 #include <malloc.h>
+#include <string.h>
+#include <Kernel/kernel.h>
 
 
 //---------------------- Private Functions ----------------------
@@ -21,28 +23,18 @@ void task_delete(task_t *);
 
 task_t *task_create(void (*func)(void *), void *args, void (*cleanup)(), task_type_t origin) {
 
-    //First, let's allocate a memory zone in the heap to contain our struct;
-    void *data = malloc(sizeof(task_t));
-
-    //Then, if the malloc failed, error;
-    if (!data) {
-
-        //Error TODO KERNEL PANIC;
-        return 0;
-
-    }
-
-    //To ease readability, cache a copy of our pointer casted to the correct type. Optimised by the compiler;
-    task_t *task_p = (task_t *)data;
-
-    //Now, we can initialise our struct;
-    *task_p = {
+    //Now, we can initialise a task;
+    task_t init = {
             .function = func,
             .args = args,
             .cleanup = cleanup,
             .task_type = origin,
             .sequence_id = 0,//Will zero all union's data;
     };
+
+
+    //Allocate heap memory for our task;
+    task_t *task_p = kernel_malloc_copy(sizeof(task_t), &init);
 
     //Finally, we can return our task;
     return task_p;
@@ -79,7 +71,7 @@ void task_cleanup(task_t *task_p) {
              *  They may still exist after their execution. We will only delete it if it has been marked deletable;
              */
 
-            if (task_p->persistent_task_state == CLOSED) {
+            if (task_p->persistent_task_state == CLOSED_TASK) {
 
                 //Delete the task;
                 task_delete(task_p);
@@ -87,7 +79,7 @@ void task_cleanup(task_t *task_p) {
             } else {
 
                 //If the task has reached the cleanup function without being deletable, it is stored;
-                task_p->persistent_task_state = STORED;
+                task_p->persistent_task_state = STORED_TASK;
             }
 
             //nothing else to do;

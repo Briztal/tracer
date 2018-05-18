@@ -8,75 +8,75 @@
 #include <Kernel/kernel.h>
 
 
-//Header for tx passive flux
-void indirect_flux(cflux_t *flux_c);
+//Header for tx passive cflux
+void indirect_flux(flux_t *flux_c);
 
-//Construct an indirect flux where the receiver is passive;
+//Construct an indirect cflux where the receiver is passive;
 indirect_flux_t *indirect_flux_create_tx_passive(bool critical, size_t element_size,
                                                  size_t (*data_amount)(void *),
                                                  size_t (*spaces_amount)(void *),
                                                  indirect_accessor_t tx_accessor,
                                                  array_processor rx_copier) {
 
-    //Allocate some space for the flux;
-    indirect_flux_t *flux = kernel_malloc(sizeof(indirect_flux_t));
+    //Allocate some space for the cflux;
+    indirect_flux_t *flux = kernel_mallocc(sizeof(indirect_flux_t));
 
     //Initialise the cflux base;
-    cflux_initialise((cflux_t *) flux, critical, element_size, indirect_flux, data_amount, spaces_amount);
+    cflux_initialise((flux_t *) flux, critical, element_size, indirect_flux, data_amount, spaces_amount);
 
     //The tx side is passive, and the rx size is active
     flux->tx_passive = true;
     flux->indirect_accessor = tx_accessor;
     flux->copier = rx_copier;
 
-    //Return the initialised flux;
+    //Return the initialised cflux;
     return flux;
 
 }
 
-//Construct an indirect flux where the receiver is passive;
+//Construct an indirect cflux where the receiver is passive;
 indirect_flux_t *indirect_flux_create_rx_passive(bool critical, size_t element_size,
                                                  size_t (*data_amount)(void *),
                                                  size_t (*spaces_amount)(void *),
                                                  array_processor tx_copier,
                                                  indirect_accessor_t rx_accessor) {
 
-    //Allocate some space for the flux;
-    indirect_flux_t *flux = kernel_malloc(sizeof(indirect_flux_t));
+    //Allocate some space for the cflux;
+    indirect_flux_t *flux = kernel_mallocc(sizeof(indirect_flux_t));
 
     //Initialise the cflux base;
-    cflux_initialise((cflux_t *) flux, critical, element_size, indirect_flux, data_amount, spaces_amount);
+    cflux_initialise((flux_t *) flux, critical, element_size, indirect_flux, data_amount, spaces_amount);
 
     //The rx side is passive, and the tx size is active
     flux->tx_passive = false;
     flux->indirect_accessor = rx_accessor;
     flux->copier = tx_copier;
 
-    //Return the initialised flux;
+    //Return the initialised cflux;
     return flux;
 }
 
 
 /*
- * indirect_tx_passive_flux : data flux for indirect processor, where tx is passive.
+ * indirect_tx_passive_flux : data cflux for indirect processor, where tx is passive.
  *
  *  As tx is passive, we must get its data pointer, let rx process its data, and notify tx
  *  that data has been processed;
  */
 
-void indirect_flux(cflux_t *flux_c) {
+void indirect_flux(flux_t *flux_c) {
 
-    //Cache the casted version of the flux;
+    //Cache the casted version of the cflux;
     indirect_flux_t *flux = (indirect_flux_t *) flux_c;
 
     //Cache the previous node's instance;
-    void *tx_instance = flux_get_previous_nodes_instance((cflux_t *) flux);
+    void *tx_instance = flux_get_previous_nodes_instance((flux_t *) flux);
 
     //Cache the next node's instance;
-    void *rx_instance = flux_get_next_nodes_instance((cflux_t *) flux);
+    void *rx_instance = flux_get_next_nodes_instance((flux_t *) flux);
 
     //Determine the transfer size;
-    size_t transfer_size = data_flux_get_transfer_size((cflux_t *) flux, tx_instance, rx_instance);
+    size_t transfer_size = data_flux_get_transfer_size((flux_t *) flux, tx_instance, rx_instance);
 
     //Declare passive and active instances;
     void *passive_instance, *active_instance;

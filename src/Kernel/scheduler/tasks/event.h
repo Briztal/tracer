@@ -25,10 +25,11 @@
 
 #include "stdbool.h"
 
-#include <Kernel/Scheduler/tasks/task.h>
+#include <Kernel/scheduler/tasks/task.h>
 
-#include <DataStructures/Containers/container.h>
+#include <data_structures/containers/container.h>
 
+//TODO CONFIG FILE
 #define EVENT_NAME_SIZE 11
 
 typedef struct {

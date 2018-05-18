@@ -17,7 +17,7 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
+#ifdef error
 
 #include "TemperatureController.h"
 
@@ -377,3 +377,6 @@ m::hotbed_state_t m::hotbed_state = m::hotbed_state_t();
 
 PID t_hot_pids[4];
 PID *m::pid_hotends = t_hot_pids, m::pid_hotbed;
+
+
+#endif

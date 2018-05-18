@@ -18,6 +18,8 @@
 
 */
 
+#ifdef ERROR
+
 #include "MachineController.h"
 
 #include <Kernel/Interaction/Interaction.h>
@@ -710,3 +712,5 @@ float *const MachineController::axis_positions = tmpos;
 uint8_t MachineController::mode = 0;
 
 MachineController::coordinate_interfaces_data_t MachineController::coordinate_interfaces_data = MachineController::coordinate_interfaces_data_t();
+
+#endif

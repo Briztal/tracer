@@ -2,55 +2,15 @@
 // Created by root on 4/19/18.
 //
 
-#include <Kernel/arch/arch.h>
-#include <Kernel/drivers/UART.h>
 
 #include "kinetis_UART.h"
+
+#include <Kernel/arch/arch.h>
+#include <Kernel/connection/flux/flux.h>
 
 
 //TODO RECEIVE OVERRUN
 
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
-//TODO DRIVER CONSTRUCTION
 
 /*
  * SET : will set [data]'s bits that are set to 1 in [mask]. [data] is of size [size];
@@ -83,19 +43,19 @@
 //-------------------------- Reception methods --------------------------
 
 //Set the watermark functions depending on the config;
-void set_watermark_policies(kinetis_UART_data_t *data, UART_config_t *config);
+void set_watermark_policies(kinetis_UART_data_t *data, const UART_config_t *config);
 
 //Initialise the hardware;
-void initialise_hardware(kinetis_UART_data_t *);
+void initialise_hardware(const kinetis_UART_data_t *);
 
 //Configure the packet format;
-void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *);
+void configure_packet_format(const kinetis_UART_data_t *data, const UART_config_t *);
 
 //Configure the state;
-void configure_modem(kinetis_UART_data_t *data, UART_config_t *);
+void configure_modem(const kinetis_UART_data_t *data, const UART_config_t *);
 
 //Configure the transmission layer;
-void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *);
+void configure_transmission_layer(const kinetis_UART_data_t *data, const UART_config_t *);
 
 
 //-------------------------- Watermark policies --------------------------
@@ -127,7 +87,11 @@ uint8_t rx_watermark_half(uint8_t, uint8_t);
  *  that are all called;
  */
 
-void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config) {
+void kinetis_UART_init(void *const data_p, const driver_config_t *const config_p) {
+
+    //Cache pointers in the correct type;
+    kinetis_UART_data_t *const data = data_p;
+    const UART_config_t *const config = (const UART_config_t *) config_p;
 
     //First, initialise the UART data-structure according to the config;
     set_watermark_policies(data, config);
@@ -147,7 +111,7 @@ void kinetis_UART_init(kinetis_UART_data_t *data, UART_config_t *config) {
  * set_watermark_policies : sets rx and tx watermark calculators, according to the configuration;
  */
 
-void set_watermark_policies(kinetis_UART_data_t *data, UART_config_t *config) {
+void set_watermark_policies(kinetis_UART_data_t *data, const UART_config_t *const config) {
 
     switch (config->tx_water_policy) {
 
@@ -177,34 +141,6 @@ void set_watermark_policies(kinetis_UART_data_t *data, UART_config_t *config) {
     }
 
 }
-
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
-//TODO CORRECT FLUX, TXRXSIZES AND DATA INITIALISATION
 
 
 /*
@@ -236,7 +172,7 @@ uint8_t fifo_size_to_index(uint8_t size) {
  * initialise_hardware : initialises the data pointer and the frequency;w
  */
 
-void initialise_hardware(kinetis_UART_data_t *data) {
+void initialise_hardware(const kinetis_UART_data_t *const data) {
 
     //Before anything, let's cache the memory pointer;
     kinetis_UART_memory_t *registers = data->memory;
@@ -265,7 +201,7 @@ void initialise_hardware(kinetis_UART_data_t *data) {
 
 
     //Disable the transmission interrupt, to avoid interrupts as soon as tx water will be set;
-    CLEAR_BIT(registers->C2, UART_C2_TIE, 8);
+    CLEAR(registers->C2, UART_C2_TIE, 8);
 
     //Enable the reception interrupt, to allow interrupts as soon as rx will be started;
     SET(registers->C2, UART_C2_RIE, 8);
@@ -348,7 +284,7 @@ void initialise_hardware(kinetis_UART_data_t *data) {
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_packet_format(const kinetis_UART_data_t *const data, const UART_config_t *const config) {
 
     //TODO MSB FIRST
     //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
@@ -366,13 +302,13 @@ void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
     switch (config->nb_data_bits) {
 
         case 8:
-            //8 data bits, bit 4 cleared;
-            CLEAR_BIT(registers->C1, 4, 8);
+            //8 data bits, bit M cleared;
+            CLEAR(registers->C1, UART_C1_M, 8);
             break;
 
         case 9:
             //9 data bits, bit 4 set;
-            CLEAR_BIT(registers->C1, 4, 8);
+            SET(registers->C1, UART_C1_M, 8);
             break;
 
         default:
@@ -387,26 +323,28 @@ void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
      */
 
     //By default, disable the 10-th bit by clearing bit 5 of C4. Will be re-enabled if necessary;
-    CLEAR_BIT(registers->C4, 5, 8);
+    CLEAR(registers->C4, UART_C4_M10, 8);
+
 
     //If the parity bit must be enabled :
     if (config->parity_bit_enabled) {
 
         //Bit 1 of C1 is set;
-        SET_BIT(registers->C1, 1, 8);
+        SET(registers->C1, UART_C1_PE, 8);
 
         //We must set the parity type too;
 
         //If the parity is of type EVEN (default) :
         if (config->parity_type == EVEN_PARITY) {
 
-            //Bit 0 of C1 is cleared;
-            CLEAR_BIT(registers->C1, 1, 8);
+            //Bit PT of C1 is cleared;
+            CLEAR(registers->C1, UART_C1_PT, 8);
+
 
         } else {
 
             //If the parity is odd, bit 0 of C1 is set;
-            SET_BIT(registers->C1, 1, 8);
+            SET(registers->C1, UART_C1_PT, 8);
 
         }
 
@@ -414,14 +352,14 @@ void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
         if (config->nb_data_bits == 9) {
 
             //Set M10, bit 5 of C4;
-            SET_BIT(registers->C4, 5, 8);
+            SET(registers->C4, UART_C4_M10, 8);
 
         }
 
     } else {
 
         //Parity bit disabled, bit 1 of C1 is cleared;
-        CLEAR_BIT(registers->C1, 1, 8);
+        CLEAR(registers->C1, UART_C1_PE, 8);
 
     }
 
@@ -432,7 +370,7 @@ void configure_packet_format(kinetis_UART_data_t *data, UART_config_t *config) {
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void configure_modem(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_modem(const kinetis_UART_data_t *const data, const UART_config_t *const config) {
 
     kinetis_UART_memory_t *const registers = data->memory;
     /*
@@ -475,7 +413,7 @@ void configure_modem(kinetis_UART_data_t *data, UART_config_t *config) {
  *
  */
 
-void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *config) {
+void configure_transmission_layer(const kinetis_UART_data_t *const data, const UART_config_t *const config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     kinetis_UART_memory_t *registers = data->memory;
@@ -553,7 +491,10 @@ void configure_transmission_layer(kinetis_UART_data_t *data, UART_config_t *conf
  * kinetis_UART_start : enables the receiver and transmitter;
  */
 
-void kinetis_UART_start(kinetis_UART_data_t *data) {
+void kinetis_UART_start(const void *const data_p) {
+
+    //Cache pointer in the correct type;
+    const kinetis_UART_data_t *const data = data_p;
 
     //Cache the data pointer to avoid permanent implicit double pointer access;
     kinetis_UART_memory_t *registers = data->memory;
@@ -577,8 +518,12 @@ void kinetis_UART_start(kinetis_UART_data_t *data) {
  * kinetis_UART_init : this function stops the UART and resets the hardware;
  */
 
-void kinetis_UART_exit(const kinetis_UART_data_t *data) {
+void kinetis_UART_exit(const void *const data_p) {
 
+    //Cache pointer in the correct type;
+    const kinetis_UART_data_t *const data = data_p;
+
+    //Cache memory register;
     kinetis_UART_memory_t *const registers = data->memory;
 
     /*
@@ -591,7 +536,7 @@ void kinetis_UART_exit(const kinetis_UART_data_t *data) {
 
 
     //Disable interrupts;
-    CLEAR_BIT(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
+    CLEAR(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
 
     //Flush FIFOs;
     registers->CFIFO |= UART_CFIFO_RXFLUSH;
@@ -617,7 +562,7 @@ void kinetis_UART_exit(const kinetis_UART_data_t *data) {
      */
 
     //Disable framing, overrun, noise and parity errors exceptions;
-    CLEAR_BIT(registers->C3, UART_C3_FEIE | UART_C3_ORIE | UART_C3_NEIE | UART_C3_PEIE, 8);
+    CLEAR(registers->C3, UART_C3_FEIE | UART_C3_ORIE | UART_C3_NEIE | UART_C3_PEIE, 8);
 
     //Disable receiver overflow, receiver underflow and transmitter overflow exceptions;
     CLEAR(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
@@ -648,7 +593,7 @@ void kinetis_UART_exit(const kinetis_UART_data_t *data) {
  * tx_available : this function will return true if a uint16_t can be transmitted to the UART;
  */
 
-uint8_t kinetis_UART_tx_available(const void *data_c) {
+size_t kinetis_UART_tx_available(const void *data_c) {
 
     //Cache data in the correct type;
     kinetis_UART_data_t *data = (kinetis_UART_data_t *) data_c;
@@ -731,7 +676,7 @@ uint8_t tx_watermark_half(const uint8_t nb_elements) {
  *  If the uint16_t it copies is the last, it reads S1 to clear the interrupt flag;
  */
 
-void kinetis_UART_copy_to_tx(const void *const data_c, const void *src_c, const size_t size) {
+void kinetis_UART_copy_to_tx(const void *const data_c, void *src_c, const size_t size) {
 
     //Cache data in the correct type;
     const kinetis_UART_data_t *const instance = data_c;
@@ -923,7 +868,7 @@ void kinetis_UART_copy_from_rx(const void *const data_c, void *dest_c, size_t si
  * interrupt : this function processes UART's interrupts : Rx, and Tx;
  */
 
-void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
+void kinetis_UART_status_interrupt(const kinetis_UART_data_t *data) {
 
     //First, cache the register pointer;
     kinetis_UART_memory_t *registers = data->memory;
@@ -938,10 +883,10 @@ void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
     //First, if the rx interrupt is enabled, and if its flag is asserted :
     if (masked_flags & UART_C2_RIE & UART_S1_RDRF) {
 
-        //Execute the reception flux;
+        //Execute the reception cflux;
         flux_process(data->rx_flux);
 
-        //If the interrupt is still active, the flux didn't succeed in transferring data;
+        //If the interrupt is still active, the cflux didn't succeed in transferring data;
         if (registers->S1 & UART_S1_RDRF) {
 
             /*
@@ -954,7 +899,7 @@ void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
              */
 
             //Clear RIE bit of uint8_t C2 to disable the reading interrupt;
-            CLEAR_BIT(registers->C2, UART_C2_RIE, 8);
+            CLEAR(registers->C2, UART_C2_RIE, 8);
 
         }
 
@@ -963,7 +908,7 @@ void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
     //Then, is the tx interrupt is enabled, and if its flag is asserted :
     if (masked_flags & UART_C2_TIE & UART_S1_TDRE) {
 
-        //Execute the transmission flux;
+        //Execute the transmission cflux;
         flux_process(data->tx_flux);
 
         //If the interrupt is still active, the stream didn't succeed in transferring data;
@@ -979,7 +924,7 @@ void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
              */
 
             //Clear RIE bit of uint8_t C2 to disable the reading interrupt;
-            CLEAR_BIT(registers->C2, UART_C2_TIE, 8);
+            CLEAR(registers->C2, UART_C2_TIE, 8);
 
         }
 
@@ -994,7 +939,7 @@ void kinetis_UART_interrupt(const kinetis_UART_data_t *const data) {
  *  It supports different errors, that are described in the code below.
  */
 
-void kinetis_UART_error(const kinetis_UART_data_t *const data) {
+void kinetis_UART_error_interrupt(const kinetis_UART_data_t *data) {
 
     /*
      * Errors supported are :

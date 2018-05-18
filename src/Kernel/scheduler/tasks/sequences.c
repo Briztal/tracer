@@ -2,12 +2,12 @@
 // Created by root on 3/23/18.
 //
 
-#include <Kernel/Interaction/Interaction.h>
+
+
+#include <Kernel/scheduler/tasks/task.h>
+#include <data_structures/containers/circular_buffer.h>
 #include <Kernel/kernel.h>
-#include <DataStructures/Containers/CircularBuffer.h>
-#include <Kernel/Scheduler/tasks.h>
-#include <DataStructures/Containers/circular_buffer.h>
-#include <DataStructures/Containers/container.h>
+#include <string.h>
 #include "sequences.h"
 
 
@@ -48,27 +48,15 @@ container_t sequences = EMPTY_CONTAINER(sequence_t *);
 
 void sequences_add_sequence(container_index_t sequence_size) {
 
-    //First, we must create a sequence in the heap;
-
-    //Allocate data;
-    void *ptr = malloc(sizeof(sequence_t));
-
-    //If the allocation failed :
-    if (!ptr) {
-
-        //fail; TODO ERROR;
-        return;
-
-    }
-
-    //If the allocation succeeded, let's cache a casted copy for readability. Compiler optimised;
-    sequence_t *sequence = (sequence_t *) ptr;
-
-    //Initialise the sequence;
-    *sequence = {
+    //Initialise a new sequence;
+    sequence_t init = {
             .tasks = EMPTY_CBUFFER(task_t *),
             .state = UNLOCKED,
     };
+
+    //Allocate some memory for the new sequence;
+    sequence_t *sequence = kernel_malloc_copy(sizeof(sequence_t), &init);
+
 
     //Resize the task buffer;
     cbuffer_resize(&sequence->tasks, sequence_size);

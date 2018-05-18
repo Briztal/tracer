@@ -24,6 +24,7 @@
 
 #include <Kernel/scheduler/process.h>
 #include <malloc.h>
+#include <string.h>
 
 
 
@@ -46,8 +47,6 @@ void kernel_start() {
     started = true;
 
     //TODO IN CORE_INIT FUNCTION, CALLED BEFORE KERNEL start
-    //Initialise the hardware and the framework
-    hl_init();
 
     //Start the thread manager;
     process_start_execution();
@@ -74,6 +73,35 @@ void *kernel_malloc(size_t size) {
     //If the allocation failed, error;
     if (!ptr)
         return 0;//TODO ERROR.
+
+    //Return the allocated data;
+    return ptr;
+
+}
+
+
+/*
+ * kernel_malloc_copy : allocates a memory zone, and copies the correct amount of data from the initialiser to
+ *  the allocated zone;
+ */
+
+void *kernel_malloc_copy(const size_t size, const void *const initialiser) {
+
+    //Enter a critical section;
+    kernel_enter_critical_section();
+
+    //Allocate data in the heap;
+    void *ptr = malloc(size);
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    //If the allocation failed, error;
+    if (!ptr)
+        return 0;//TODO ERROR.
+
+    //Copy the initialiser data;
+    memcpy(ptr, initialiser, size);
 
     //Return the allocated data;
     return ptr;

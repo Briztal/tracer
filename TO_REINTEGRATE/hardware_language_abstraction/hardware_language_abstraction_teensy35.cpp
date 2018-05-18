@@ -19,7 +19,6 @@
 */
 
 #include "kinetis.h"
-#include "hardware_language_abstraction.h"
 
 /*
  * The Board Abstraction file.

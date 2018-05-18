@@ -18,6 +18,9 @@
 
 */
 
+
+#ifdef ENABLE_TERMINAL_INTERFACE
+
 #include "TerminalPipe.h"
 
 #include <Config/control_config.h>
@@ -37,9 +40,6 @@
 #include "Kernel/Storage/EEPROMMap.h"
 
 #include "hardware_language_abstraction.h"
-
-#ifdef ENABLE_TERMINAL_INTERFACE
-
 
 namespace  TerminalPipe {
     

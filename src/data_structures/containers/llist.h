@@ -11,13 +11,14 @@
  *  It contains pointer for previous and next;
  */
 
-typedef struct {
+
+typedef struct linked_element_t {
 
     //The previous element;
-    linked_element_t *prev;
+    struct linked_element_t *prev;
 
     //The next element;
-    linked_element_t *next;
+    struct linked_element_t *next;
 
 } linked_element_t;
 

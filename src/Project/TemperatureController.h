@@ -30,8 +30,9 @@
 #ifndef TRACER_CLOSEDLOOPS_H
 #define TRACER_CLOSEDLOOPS_H
 
+#ifdef error
 
-#include <Kernel/Scheduler/TaskScheduler/TaskScheduler.h>
+#include <Kernel/scheduler/TaskScheduler/TaskScheduler.h>
 #include <ControlSystem/PID.h>
 
 class TemperatureController {
@@ -164,5 +165,6 @@ private:
 
 };
 
+#endif
 
 #endif //TRACER_CLOSEDLOOPS_H

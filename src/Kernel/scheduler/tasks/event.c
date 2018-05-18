@@ -17,11 +17,10 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
-#include <malloc.h>
-#include <DataStructures/Containers/container.h>
 #include "event.h"
 
+#include <Kernel/kernel.h>
+#include <string.h>
 
 //-------------------------------- Initialisation --------------------------------
 
@@ -31,30 +30,16 @@
 
 event_t *event_create(const char *name) {
 
-    //First, let's allocate some space in the heap;
-    void *ptr = malloc(sizeof(event_t));
-
-    //If malloc failed :
-    if (!ptr) {
-
-        //Fail //TODO KERNEL PANIC;
-        return 0;
-
-    }
-
-    /*
-     * Now that the malloc has completed for sure, let's initialise it;
-     */
-
-    //Cache a casted copy of pointer to ease readability. Compiler optimised;
-    event_t *event = (event_t *)ptr;
-
-    //Initialise the event;
-    *event = {
+    //Define the new event;
+    event_t init =  {
             .pending = false,
             .tasks = EMPTY_CONTAINER(task_t *),
             .next_task = 0,
     };
+
+    //Allocate some memory in the heap;
+    event_t *event = kernel_malloc_copy(sizeof(event_t), &init);
+
 
     //Everything has been initialised except the name;
 
@@ -140,6 +125,9 @@ bool event_set_pending(event_t *event) {
     //Update the next task's index to the last task;
     event->next_task = 0;
 
+    //Complete;
+    return true;
+
 }
 
 
@@ -161,7 +149,7 @@ task_t *event_get_task(event_t *event) {
     container_index_t next_task_id = event->next_task;
 
     //First, we must get the next task, and increase the next task id; elements (task_t *) are returned by pointer;
-    task_t *task = *(task_t **)container_get_element(&event->tasks, next_task_id++);
+    task_t *task = *(task_t **) container_get_element(&event->tasks, next_task_id++);
 
     //Then, we must update the next task pointer.
 

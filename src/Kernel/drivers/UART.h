@@ -111,11 +111,11 @@ typedef struct {
     bool rx_enabled;
 
 
-    //The data flux to receive from the UART; Must be constructed before;
-    cflux_t *rx_flux;
+    //The data cflux to receive from the UART; Must be constructed before;
+    flux_t *rx_flux;
 
-    //The data flux to transmit to the UART; Must be constructed before;
-    cflux_t *tx_flux;
+    //The data cflux to transmit to the UART; Must be constructed before;
+    flux_t *tx_flux;
 
 
 } UART_config_t;
@@ -125,10 +125,10 @@ typedef struct {
  * An inline function obtain the default configuration;
  */
 
-inline void UART_default_config(UART_config_t *uart_config, cflux_t *rx_flux, cflux_t *tx_flux) {
+inline void UART_default_config(UART_config_t *uart_config, flux_t *rx_flux, flux_t *tx_flux) {
 
     //Set the default configuration;
-    *uart_config = {
+    *uart_config = (UART_config_t) {
             .driver_config = DRIVER_CONFIG(UART),
             .sw_rx_buffer_size = 64,
             .sw_tx_buffer_size = 64,
@@ -144,6 +144,7 @@ inline void UART_default_config(UART_config_t *uart_config, cflux_t *rx_flux, cf
             .rx_flux = (rx_flux),
             .tx_flux = (tx_flux),
     };
+
 }
 
 
@@ -152,9 +153,34 @@ typedef struct {
     //The driver part;
     driver_t driver;
 
-    //TODO FUNCTION POINTERS
+    //The start method;
+    void (*start)(const void *);
 
+    //Size methods to pass to cflux
+    size_t (*tx_size)(const void *);
+    size_t (*rx_size)(const void *);
+
+    //Processing methods to pass to cflux;
+    array_processor tx_processor;
+    array_processor rx_processor;
 
 } UART_driver_t;
+
+
+/*
+ * UART_DRIVER : definition of an UART driver;
+ */
+
+#define UART_DRIVER(data_p, init_p, start_p, exit_p, txsize_p, rxsize_p, txproc_p, rxproc_p)\
+    {.driver = DRIVER(data_p, init_p, exit_p), .start = (start_p), .tx_size = (txsize_p), .rx_size = (rxsize_p), .tx_processor = (txproc_p), .rx_processor = (rxproc_p)}
+
+
+/*
+ * KINETIS_UART_DRIVER_DECLARE : declares the required UART driver structure;
+ */
+
+#define UART_DRIVER_DECLARE(id)\
+    extern UART_driver_t UART_##id;
+
 
 #endif //TRACER_UARTDRIVER_H

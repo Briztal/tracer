@@ -8,7 +8,7 @@
 #include "process.h"
 
 //Initialise the Scheduling environment;
-scheduler_initialise();
+void scheduler_initialise();
 
 //Update a process;
 void scheduler_update_process(process_t *);

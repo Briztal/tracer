@@ -89,7 +89,7 @@ inline void *cbuffer_read_input(cbuffer_t *cbuffer, container_index_t offset) {
 void cbuffer_discard_output(cbuffer_t *cbuffer) {
 
     //If no elements are available (nb of spaces equal to the max nb of elements), discarding is impossible;
-    if (!cbuffer->nb_spaces == cbuffer->container.nb_elements)
+    if (cbuffer->nb_spaces == cbuffer->container.nb_elements)
         return;//TODO ERROR;
 
     //Increment safely;

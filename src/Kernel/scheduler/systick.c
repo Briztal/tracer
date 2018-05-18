@@ -2,7 +2,7 @@
 // Created by root on 4/10/18.
 //
 
-#include <Kernel/Scheduler/process.h>
+#include <Kernel/scheduler/process.h>
 
 #include "systick.h"
 

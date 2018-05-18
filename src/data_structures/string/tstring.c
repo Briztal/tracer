@@ -2,14 +2,9 @@
 // Created by root on 3/14/18.
 //
 
-#include <Kernel/memory.h>
-
-#include <DataStructures/containers/container.h>
-
-#include "hardware_language_abstraction.h"
-
 #include "tstring.h"
 
+#include <Kernel/kernel.h>
 
 /*
  * tstring_from_string : creates a tstring from a string; Moves data;
@@ -20,11 +15,11 @@ tstring_t *tstring_from_string(string_t *src) {
     //Move src's string;
     string_t *clone = string_move(src);
 
-    //Allocate some space for the new tstring;
-    tstring_t *tstring = (tstring_t *)kernel_malloc(sizeof(tstring_t));
+    //Initialise a stack version of the clone;
+    tstring_t init = EMPTY_TSTRING(clone);
 
-    //Initialise the tstring with the moved string;
-    *tstring = EMPTY_TSTRING(clone);
+    //Allocate some space for the new tstring and initialise it;
+    tstring_t *tstring = kernel_malloc_copy(sizeof(tstring_t), &init);
 
     //Return the new initialised tstring;
     return tstring;
@@ -41,14 +36,17 @@ tstring_t *tstring_from_tstring(tstring_t *src) {
     //Move src's string;
     string_t *clone = string_move(src->string);
 
-    //Allocate some space for the new tstring;
-    tstring_t *tstring = (tstring_t *)kernel_malloc(sizeof(tstring_t));
-
     //Initialise the tstring with the moved string;
-    *tstring = EMPTY_TSTRING(clone);
+    tstring_t init = EMPTY_TSTRING(clone);
+
+    //Allocate some space for the new tstring and initialise it;
+    tstring_t *tstring = (tstring_t *)kernel_malloc_copy(sizeof(tstring_t), &init);
 
     //Move container data from src to the new tstring;
     container_move((container_t *)tstring, (container_t *)src);
+
+    //Return moved tstring;
+    return tstring;
 
 }
 

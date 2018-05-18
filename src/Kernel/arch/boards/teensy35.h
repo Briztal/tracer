@@ -16,12 +16,11 @@
  * The teensy35 supports 5 UARTS;
  */
 
-extern UART_driver_t UART0;
-extern UART_driver_t UART1;
-extern UART_driver_t UART2;
-extern UART_driver_t UART3;
-extern UART_driver_t UART4;
-
-
+UART_DRIVER_DECLARE(0);
+UART_DRIVER_DECLARE(1);
+UART_DRIVER_DECLARE(2);
+UART_DRIVER_DECLARE(3);
+UART_DRIVER_DECLARE(4);
+UART_DRIVER_DECLARE(5);
 
 #endif

@@ -6,30 +6,30 @@
 
 
 /*
- * flux_process : executes the flux function;
+ * flux_process : executes the cflux function;
  */
 
-void flux_process(cflux_t *flux) {
+void flux_process(flux_t *flux) {
 
-    //Cache the critical state of the flux;
+    //Cache the critical state of the cflux;
     bool critical = flux->critical;
 
-    //If the flux is critical, enter a critical section;
+    //If the cflux is critical, enter a critical section;
     if (critical) {
         kernel_enter_critical_section();
     }
 
-    //If the data flux has to be deleted :
-    if (flux->state == CLOSED) {
+    //If the data cflux has to be deleted :
+    if (flux->state == (flux_state_t)CLOSED_FLUX) {
         goto end;
     }
 
-    //Execute the data flux function, passing its arguments;
+    //Execute the data cflux function, passing its arguments;
     flux->flux_function(flux);
 
     end :
 
-    //If the flux was critical, leave the critical section;
+    //If the cflux was critical, leave the critical section;
     if (critical) {
         kernel_enter_critical_section();
     }
@@ -42,7 +42,7 @@ void flux_process(cflux_t *flux) {
  *  the minimum of their max transfer size;
  */
 
-size_t data_flux_get_transfer_size(cflux_t *flux, void *tx_instance, void *rx_instance) {
+size_t data_flux_get_transfer_size(flux_t *flux, void *tx_instance, void *rx_instance) {
 
     //Get the tx spaces_amount;
     size_t tx_size = flux->data_amount(tx_instance);

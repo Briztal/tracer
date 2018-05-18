@@ -19,8 +19,6 @@
 */
 
 
-#include <Config/control_config.h>
-
 #ifdef ENABLE_GCODE_INTERFACE
 
 #include <Kernel/Interaction/Interaction.h>
