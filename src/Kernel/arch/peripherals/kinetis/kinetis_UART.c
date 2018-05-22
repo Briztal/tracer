@@ -5,7 +5,7 @@
 
 #include "kinetis_UART.h"
 
-#include <Kernel/arch/arch.h>
+#include <Kernel/arch/arch_headers.h>
 #include <Kernel/connection/flux/flux.h>
 
 

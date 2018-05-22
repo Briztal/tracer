@@ -6,7 +6,7 @@
 #define TRACER_THREADMANAGER_H
 
 
-#include "Kernel/arch/arch.h"
+#include "Kernel/arch/arch_headers.h"
 
 #include "Kernel/scheduler/tasks/task.h"
 

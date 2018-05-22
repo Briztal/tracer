@@ -1,10 +1,4 @@
-
-
-#include "Kernel/arch/boards/teensy35.h"
-
-/*
- * A Macro combination to ease the architecture peripheral classes locations
- */
+#define architecture teensy35
 
 //String conversion call
 #define STR_MACRO1(x) STR_MACRO(x)
@@ -16,4 +10,4 @@
 #define EXPAND(x) x
 
 //arch PATH GENERATOR.
-#define ARCH_PATH(peripheral) EXPAND(STR_MACRO1(EXPAND(Kernel/Arch/Chips/)EXPAND(arch)EXPAND(/)EXPAND(peripheral)EXPAND(.h)))
+#define ARCH_PATH(type) EXPAND(STR_MACRO1(EXPAND(Kernel/arch/boards/)EXPAND(architecture)EXPAND(_)EXPAND(type)EXPAND(.h)))

@@ -3,14 +3,25 @@
 
 #include "Kernel/arch/processors/arm_cortex_m4f.h"
 
-#include <Kernel/drivers/UART.h>
+
 
 #define arch teensy35
 
+
 /*
- * --------------------------------------- Supported peripherals ---------------------------------------
+ * --------------------------------------- GPIO ---------------------------------------
  */
 
+//We will use the kinetis GPIO module;
+#include "Kernel/arch/peripherals/kinetis/kinetis_GPIO.h"
+
+
+/*
+ * --------------------------------------- UARTS ---------------------------------------
+ */
+
+//To define UART drivers we must include the UART driver header;
+#include <Kernel/drivers/UART.h>
 
 /*
  * The teensy35 supports 5 UARTS;

@@ -11,7 +11,6 @@
 
 #include <data_structures/containers/llist.h>
 
-s
 
 //Process a data cflux;
 void flux_process(flux_t *);

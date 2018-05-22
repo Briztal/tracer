@@ -6,7 +6,7 @@
 #include <malloc.h>
 #include "semaphore.h"
 
-#include "Kernel/arch/arch.h"
+#include "Kernel/arch/arch_headers.h"
 
 #include "Kernel/scheduler/process.h"
 
