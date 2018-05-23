@@ -3,7 +3,7 @@
 //
 
 #include <malloc.h>
-#include <Kernel/kernel.h>
+#include <kernel/kernel.h>
 #include <string.h>
 
 #include "string.h"

@@ -4,7 +4,7 @@
 
 #include "tstring.h"
 
-#include <Kernel/kernel.h>
+#include <kernel/kernel.h>
 
 /*
  * tstring_from_string : creates a tstring from a string; Moves data;

@@ -70,10 +70,10 @@ linked_element_t *llist_get_first(linked_element_t *element) {
  * llist_insert_after : inserts the whole list where new belongs between prev and its eventual successor
  */
 
-void llist_insert_after(linked_element_t *src_prev, linked_element_t *new) {
+void llist_insert_after(linked_element_t *src_prev, linked_element_t *new_element) {
 
-    linked_element_t *new_first = llist_get_first(new);
-    linked_element_t *new_last = llist_get_last(new);
+    linked_element_t *new_first = llist_get_first(new_element);
+    linked_element_t *new_last = llist_get_last(new_element);
 
     //Cache the current successor of src_prev;
     linked_element_t *src_next = src_prev->next;
@@ -96,10 +96,10 @@ void llist_insert_after(linked_element_t *src_prev, linked_element_t *new) {
  * llist_insert_before : inserts the whole list where new belongs between next and its eventual predecessor;
  */
 
-void llist_insert_before(linked_element_t *src_next, linked_element_t *new) {
+void llist_insert_before(linked_element_t *src_next, linked_element_t *new_element) {
 
-    linked_element_t *new_first = llist_get_first(new);
-    linked_element_t *new_last = llist_get_last(new);
+    linked_element_t *new_first = llist_get_first(new_element);
+    linked_element_t *new_last = llist_get_last(new_element);
 
     //Cache the predecessor of src_next;
     linked_element_t *src_prev = src_next->prev;

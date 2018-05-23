@@ -30,10 +30,10 @@ typedef struct linked_element_t {
 void llist_concat(linked_element_t *prev, linked_element_t *next);
 
 //Inserts new after prev;
-void llist_insert_after(linked_element_t *src_prev, linked_element_t *new);
+void llist_insert_after(linked_element_t *src_prev, linked_element_t *new_element);
 
 //Inserts new before next;
-void llist_insert_before(linked_element_t *src_next, linked_element_t *new);
+void llist_insert_before(linked_element_t *src_next, linked_element_t *new_element);
 
 
 /*

@@ -1,0 +1,211 @@
+//
+// Created by root on 3/23/18.
+//
+
+
+
+#include <kernel/scheduler/tasks/task.h>
+#include <data_structures/containers/circular_buffer.h>
+#include <kernel/kernel.h>
+#include <string.h>
+#include "sequences.h"
+
+
+//-------------------------------------------- Const variable init --------------------------------------------
+/*
+ * The sequence type;
+ */
+
+typedef enum {
+    LOCKED,
+
+    UNLOCKED
+} sequence_state_t;
+
+
+/*
+ * The sequence struct;
+ */
+
+typedef struct {
+
+    //The sequence's state;
+    sequence_state_t state;
+
+    //The tasks buffer;
+    cbuffer_t tasks;
+
+} sequence_t;
+
+
+//Task sequences;
+container_t sequences = EMPTY_CONTAINER(sequence_t *);
+
+
+/*
+ * sequences_add_sequence : adds a sequence to the container;
+ */
+
+void sequences_add_sequence(container_index_t sequence_size) {
+
+    //Initialise a new sequence;
+    sequence_t init = {
+            .tasks = EMPTY_CBUFFER(task_t *),
+            .state = UNLOCKED,
+    };
+
+    //Allocate some memory for the new sequence;
+    sequence_t *sequence = kernel_malloc_copy(sizeof(sequence_t), &init);
+
+
+    //Resize the task buffer;
+    cbuffer_resize(&sequence->tasks, sequence_size);
+
+    //Add the sequence to the sequences container;
+    container_append_element(&sequences, &sequence);
+
+}
+
+
+
+//------------------------------------------------- Sequence query --------------------------------------------------
+
+sequence_t *sequences_query_sequence(uint8_t sequence_id) {
+
+    //If the index is invalid, the container library will generate an error;
+    return *(sequence_t **) container_get_element(&sequences, sequence_id);
+
+}
+
+
+//-------------------------------------------------Type Verification ---------------------------------------------------
+
+
+/*
+ * sequences_add_task : determines the required sequence, and appends the task to it, if there is one space.
+ */
+
+bool sequences_add_task(uint8_t sequence_id, task_t *task) {
+
+
+    //If a null pointer was provided :
+    if (task == 0) {
+
+        //TODO ERROR NULL PTR;
+
+        //Ignore;
+        return false;
+
+    }
+
+    //Query the appropriate sequence;
+    sequence_t *sequence = sequences_query_sequence(sequence_id);
+
+    //If the sequence is full, fail;
+    if (!sequence->tasks.nb_spaces)
+        return false;//TODO kernel PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
+
+    //Copy the pointer in the cbuffer and validate it;
+    cbuffer_insert(&sequence->tasks, &task);
+
+    //Succeed;
+    return true;
+
+
+    //TODO kernel PANIC. INVALID SEQUENCE ID, THE TASK WILL BE LOST;
+    //Fail;
+    return false;
+
+}
+
+
+/*
+ * nb_spaces : this function returns the number of spaces available in the required sequence;
+ */
+
+container_index_t sequences_available_spaces(uint8_t sequence_id) {
+
+    //If the index is invalid, return zero for safety;
+    if (sequence_id >= sequences.nb_elements)
+        return 0;//TODO ERROR ?
+
+    //Cache the required task sequence;
+    sequence_t *sequence = sequences_query_sequence(sequence_id);
+
+    //If the sequence is full, fail;
+    return (sequence->tasks.nb_spaces);
+
+}
+
+
+/*
+ * sequenceProcessable : returns true if tasks are available in the required sequence (255 for task pool);
+ */
+
+bool sequences_available_task(uint8_t sequence_id) {
+
+    //If the type is not allocated, return zero;
+    if (sequence_id >= sequences.nb_elements)
+        return 0;//TODO ERROR ?
+
+    //Cache the required task sequence;
+    sequence_t *sequence = *(sequence_t **) container_get_element(&sequences, sequence_id);
+
+    //A task is available if the sequence is unlocked and not empty;
+    return (sequence->state == UNLOCKED) && (sequence->tasks.container.nb_elements - sequence->tasks.nb_spaces);
+
+}
+
+
+/*
+ * getPoolTask : returns a task identifier from the task pool;
+ */
+
+task_t *sequences_get_task(uint8_t sequence_id) {
+
+    //Get the required sequence. An invalid index will generate an error;
+    sequence_t *sequence = sequences_query_sequence(sequence_id);
+
+    //If the sequence is locked :
+    if (!sequence->state == LOCKED)
+        return 0;//TODO USAGE FAULT;
+
+    //If the sequence exists and is unlocked, cache the first task of the buffer;
+    task_t *task = cbuffer_read_output(&sequence->tasks, 0);
+
+    //Discard the cached task;
+    cbuffer_discard_output(&sequence->tasks);
+
+    //If the sequence must be locked (index not zero):
+    if (sequence_id) {
+
+        //Mark the sequence locked;
+        sequence->state = LOCKED;
+
+    }
+
+    //Return the cached task's pointer;
+    return task;
+
+}
+
+
+/*
+ * sequence_unlock : this function unlocks the given sequence;
+ */
+
+void sequence_unlock(uint8_t sequence_id) {
+
+    //If the type is not allocated, return zero;
+    if (sequence_id >= sequences.nb_elements)
+        return ;//TODO ERROR ?
+
+    //Cache the required task sequence;
+    sequence_t *sequence = *(sequence_t **) container_get_element(&sequences, sequence_id);
+
+    //Unlock the sequence;
+    sequence->state = UNLOCKED;
+
+}
+
+

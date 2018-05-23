@@ -19,7 +19,7 @@
 */
 
 /*
-#include "Kernel/Kernel.h"
+#include "kernel/kernel.h"
 #include "setjmp.h"
 
  */
@@ -69,12 +69,6 @@
  *      - Selection of the next thread to run;
  *      - Determination of the thread's PSP;
  */
-
-#include <Kernel/USBuart.h>
-#include <Kernel/scheduler/process.h>
-#include <Kernel/scheduler/tasks/task.h>
-#include <Kernel/scheduler/systick.h>
-#include "Arduino.h"
 
 void end_function() {
     //USBuart::write("END FUNCTION REACHED");
@@ -168,13 +162,103 @@ task_state_t task_3(void *) {
 }
 
  */
+
+#include <kernel/drivers/PORT.h>
+#include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
+#include "Arduino.h"
+
+//#include <Kernel/drivers/PORT.h>
+
+void blink_high() {
+    while(true) {
+
+
+        pinMode(13, OUTPUT);
+        digitalWriteFast(13, !digitalReadFast(13));
+
+        delay(30);
+
+    };
+
+}
+
+
+void blink_low() {
+    while(true) {
+
+
+        pinMode(13, OUTPUT);
+        digitalWriteFast(13, !digitalReadFast(13));
+
+        delay(500);
+
+    };
+
+}
+
+void finish() {
+    pinMode(13, OUTPUT);
+    digitalWriteFast(13, HIGH);
+
+}
+
+void test(bool b) {
+    if (b) blink_high();
+    else blink_low();
+}
+
 int main() {
+
+
+
+    PORT_pin_config_t config;
+
+
+    PORT_get_pin_config(&PORT_C, 5, &config);
+
+    config.mux_channel = 1;
+    config.direction = PORT_OUTPUT;
+    config.output_mode = PORT_HIGH_DRIVE;
+
+    PORT_set_pin_configuration(&PORT_A, 5, &config);
+    PORT_set_pin_configuration(&PORT_B, 5, &config);
+    PORT_set_pin_configuration(&PORT_C, 5, &config);
+    PORT_set_pin_configuration(&PORT_D, 5, &config);
+    PORT_set_pin_configuration(&PORT_E, 5, &config);
+
+    //test(config.direction == PORT_OUTPUT);
+    GPIO_output_registers_t Aregisters;
+    GPIO_output_registers_t Bregisters;
+    GPIO_output_registers_t Cregisters;
+    GPIO_output_registers_t Dregisters;
+    GPIO_output_registers_t Eregisters;
+
+    PORT_get_GPIO_registers(&PORT_C, &Aregisters);
+    PORT_get_GPIO_registers(&PORT_C, &Bregisters);
+    PORT_get_GPIO_registers(&PORT_C, &Cregisters);
+    PORT_get_GPIO_registers(&PORT_C, &Dregisters);
+    PORT_get_GPIO_registers(&PORT_C, &Eregisters);
+
+
+    //pinMode(13, OUTPUT);
+
+    PORT_C.GPIO_data->PSOR = (uint32_t) 1<<5;
+
+    //GPIO_data(Cregisters.data_register, (uint32_t) 1<<5);
+    //test(*(volatile uint32_t *)Aregisters.data_register == (uint32_t)1<<5);
+
+    //finish();
+
+    while(true);
+    /*
 
     pinMode(13, OUTPUT);
 
     digitalWrite(13, HIGH);
 
     delay(2000);
+
+     */
     /*
     USBuart::init(115200);
 

@@ -23,7 +23,7 @@
 
 #include <hardware_language_abstraction.h>
 #include <DataStructures/ArgumentsContainer.h>
-#include <Kernel/task_state_t.h>
+#include <kernel/task_state_t.h>
 
 #if !defined(HL_SERIAL_FLAG)
 #error Program requires Serial. If your board and language supports those, enable them in file "hardware_language_abstraction.h"
@@ -44,7 +44,7 @@
  * The Program class is in charge of receiving data from the outside, and to process_t them, according to
  *      the syntax specified in "interface_config.h" (More description about the syntax itself is in the config_files file).
  *
- * When it received a command, it enqueues it in Kernel's external_tasks queue.
+ * When it received a command, it enqueues it in kernel's external_tasks queue.
  */
 
 class Program {
