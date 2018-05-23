@@ -25,31 +25,31 @@
 typedef enum {
 
     //No interruption enabled;
-    PORT_NO_INTERRUPT,
+            PORT_NO_INTERRUPT,
 
     //DMA request on rising edge;
-    PORT_DMA_RISING_EDGE,
+            PORT_DMA_RISING_EDGE,
 
     //DMA request on falling edge;
-    PORT_DMA_FALLING_EDGE,
+            PORT_DMA_FALLING_EDGE,
 
     //DMA request on rising or falling edge;
-    PORT_DMA_EDGE,
+            PORT_DMA_EDGE,
 
     //Interrupt request when logical 0;
-    PORT_INTERRUPT_0,
+            PORT_INTERRUPT_0,
 
     //Interrupt request when logical 1;
-    PORT_INTERRUPT_1,
+            PORT_INTERRUPT_1,
 
     //Interrupt request on rising edge;
-    PORT_INTERRUPT_RISING_EDGE,
+            PORT_INTERRUPT_RISING_EDGE,
 
     //Interrupt request on falling edge;
-    PORT_INTERRUPT_FALLING_EDGE,
+            PORT_INTERRUPT_FALLING_EDGE,
 
     //Interrupt request on rising or falling edge;
-    PORT_INTERRUPT_EDGE,
+            PORT_INTERRUPT_EDGE,
 
 } PORT_interrupt_t;
 
@@ -61,10 +61,10 @@ typedef enum {
 typedef enum {
 
     //Pin is used to collect data;
-    PORT_INPUT,
+            PORT_INPUT,
 
     //Pin is used to provide data;
-    PORT_OUTPUT
+            PORT_OUTPUT
 
 } PORT_pin_direction_t;
 
@@ -76,16 +76,20 @@ typedef enum {
 typedef enum {
 
     //High impedance configuration;
-    PORT_HIGH_IMPEDANCE,
+            PORT_HIGH_IMPEDANCE,
 
     //Pull-up configuration;
-    PORT_PULL_UP,
+            PORT_PULL_UP,
 
     //Pull-down configuration;
-    PORT_PULL_DOWN,
+            PORT_PULL_DOWN,
 
     //Hysteresis configuration;
-    PORT_HYSTERSIS,
+            PORT_HYSTERSIS,
+
+
+    //Repeater configuration;
+            PORT_REPEATER,
 
 } PORT_input_mode_t;
 
@@ -97,13 +101,13 @@ typedef enum {
 typedef enum {
 
     //Open drain configuration;
-    PORT_OPEN_DRAIN,
+            PORT_OPEN_DRAIN,
 
     //Push-pull configuration;
-    PORT_PUSH_PULL,
+            PORT_PUSH_PULL,
 
     //High current drive configuration;
-    PORT_HIGH_DRIVE,
+            PORT_HIGH_DRIVE,
 
 } PORT_output_mode_t;
 
@@ -115,10 +119,10 @@ typedef enum {
 typedef enum {
 
     //Low slew rate;
-    PORT_LOW_RATE,
+            PORT_LOW_RATE,
 
     //High slew rate;
-    PORT_HIGH_RATE,
+            PORT_HIGH_RATE,
 
 } PORT_slew_rate_t;
 
@@ -174,14 +178,49 @@ typedef struct {
 } PORT_pin_config_t;
 
 
+/*
+ * To transmit data through GPIOs, the specialised registers must be known.
+ *
+ *  They will be transmitted through this struct;
+ */
+
+typedef struct {
+
+    //The output data register. Used to update the entire port;
+    volatile void *data_register;
+
+    //The set register. Used to set bits in the port;
+    volatile void *set_register;
+
+    //The clear register. Used to clear bits in the port;
+    volatile void *clear_register;
+
+    //The toggle register. Used to toggle bits in the port;
+    volatile void *toggle_register;
+
+} GPIO_output_registers_t;
+
+
 #include "Kernel/arch/arch_types.h"
 
 
+/*
+ * ---------------------------- Configuration ----------------------------
+ */
+
 //Get a pin's current configuration (avoid defaults mistakes);
-void PORT_get_pin_config(PORT_data_t port, uint8_t bit, PORT_pin_config_t *);
+void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *);
 
 //Set a pin's configuration. Config might have been queried before with the function behind;
-void PORT_set_pin_configuration(PORT_data_t port, uint8_t bit, PORT_pin_config_t *);
+void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *);
+
+
+/*
+ * ---------------------------- GPIO ----------------------------
+ */
+
+//Get GPIO's hardware registers;
+void PORT_get_GPIO_registers(PORT_data_t *port, uint8_t bit, GPIO_output_registers_t *);
 
 
 #endif //TRACER_PORT_H
