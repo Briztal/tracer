@@ -179,7 +179,7 @@ typedef struct {
  * KINETIS_UART_DRIVER_DECLARE : declares the required UART driver structure;
  */
 
-#define UART_DRIVER_DECLARE(id)\
+#define KINETIS_UART_DECLARE(id)\
     extern UART_driver_t UART_##id;
 
 

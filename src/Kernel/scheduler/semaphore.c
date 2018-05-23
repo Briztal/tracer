@@ -6,7 +6,7 @@
 #include <malloc.h>
 #include "semaphore.h"
 
-#include "Kernel/arch/arch_headers.h"
+#include "Kernel/arch/arch.h"
 
 #include "Kernel/scheduler/process.h"
 
@@ -23,6 +23,7 @@ void semaphore_unlock(semaphore_t *semaphore) {
     container_remove_element(&semaphore->locked_threads, 0);
 
 }
+
 
 /*
  * Destructor : If the locked threads array is not empty, throws an exception.

@@ -2,10 +2,10 @@
 // Created by root on 4/19/18.
 //
 
+#include <Kernel/arch/arch.h>
 
 #include "kinetis_UART.h"
 
-#include <Kernel/arch/arch_headers.h>
 #include <Kernel/connection/flux/flux.h>
 
 

@@ -11,8 +11,6 @@
 
 #include <Kernel/connection/connection.h>
 
-
-
 /*
  * First, we define the UART memory map. As all data related to a specific UART are in a continuous memory zone,
  *  We can assimilate them as a struct, whose address is known in memory;
@@ -249,14 +247,14 @@ typedef enum {
 
 
 /*
- * KINETIS_UART :
+ * KINETIS_UART_DEFINE :
  *  - Declares the UART data structure;
  *  - Declares and defines interrupt functions;
  *  - Defines the UART data structure;
  *  - Defines the UART driver struct;
  */
 
-#define KINETIS_UART(id, mem_p, clock_f, rsize, tsize, status_int_id, error_int_id)\
+#define KINETIS_UART_DEFINE(id, mem_p, clock_f, rsize, tsize, status_int_id, error_int_id)\
     extern kinetis_UART_data_t UART_##id##_data;\
     KINETIS_UART_FUNCTIONS(id);\
     kinetis_UART_data_t UART_##id##_data = KINETIS_UART_DATA(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, UART_##id##_data##_status_int, UART_##id##_data##_error_int);\

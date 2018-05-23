@@ -6,7 +6,6 @@
 
 #include "kinetis_PORT.h"
 
-#include "Kernel/drivers/PORT.h"
 
 
 //TODO BITWISE.h
@@ -133,10 +132,10 @@ PORT_interrupt_t IRQ_bits_to_type(uint8_t bits) {
 
 
 /*
- * PORT_get_pin_config : retreives a pin's current configuration (avoid defaults mistakes);
+ * PORT_get_pin_config : retrieves a pin's current configuration (avoid defaults mistakes);
  */
 
-void PORT_get_pin_config(volatile PORT_data_t *port, uint8_t bit, PORT_pin_config_t *config) {
+void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *config) {
 
     //Declare the configuration register to write; Set the flag bit to clear it by default;
     uint32_t config_register = port->PORT_data->PCR[bit];
@@ -158,7 +157,7 @@ void PORT_get_pin_config(volatile PORT_data_t *port, uint8_t bit, PORT_pin_confi
     config->mux_channel = (uint8_t) PORT_PCR_FROM_MUX(config_register);
 
     //If the direction is output, set it. Otherwise, set input;
-    if (port->GPIO_data->PDDR & (uint32_t) 1 << 32) {
+    if (port->GPIO_data->PDDR & (uint32_t) 1 << bit) {
         config->direction = PORT_OUTPUT;
     } else {
         config->direction = PORT_INPUT;
@@ -206,7 +205,7 @@ void PORT_get_pin_config(volatile PORT_data_t *port, uint8_t bit, PORT_pin_confi
         if (config_register & PORT_PCR_PFE) {
             config->input_filter.input_filter = PORT_PASSIVE_FILTERING;
         } else {
-            config->input_filter = PORT_NO_FILTERING;
+            config->input_filter.input_filter = PORT_NO_FILTERING;
         }
 
     }
@@ -248,7 +247,7 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
     //TODO ERRORS IN CASE OF BAD CONFIGURATION;
 
     //Declare the configuration register to write; Set the flag bit to clear it by default;
-    uint32_t config_register = 1 << PORT_PCR_ISF;
+    uint32_t config_register = PORT_PCR_ISF;
 
     //Get IRQ bits;
     uint8_t IRQ_bits = type_to_IRQ_bits(config->interrupt_type);
@@ -366,52 +365,5 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
     port->PORT_data->PCR[bit] = config_register;
 
 }
-
-
-/*
- * Declaration
- */
-
-//TODO PJRC TRIBUTE
-
-#define PORT_A_DATA     (volatile uint32_t *)0x40049000
-#define PORT_B_DATA     (volatile uint32_t *)0x4004A000
-#define PORT_C_DATA     (volatile uint32_t *)0x4004B000
-#define PORT_D_DATA     (volatile uint32_t *)0x4004C000
-#define PORT_E_DATA     (volatile uint32_t *)0x4004D000
-
-#define GPIO_A_DATA     (volatile uint32_t *)0x400FF000
-#define GPIO_B_DATA     (volatile uint32_t *)0x400FF040
-#define GPIO_C_DATA     (volatile uint32_t *)0x400FF080
-#define GPIO_D_DATA     (volatile uint32_t *)0x400FF0C0
-#define GPIO_E_DATA     (volatile uint32_t *)0x400FF100
-
-/*
- * The kinetis PORT peripheral always presents 5 distinct ports;
- */
-
-PORT_data_t PORT_A{
-        .PORT_data = (kinetis_PORT_memory_t *) PORT_A_DATA,
-        .GPIO_data = (kinetis_GPIO_memory_t *) GPIO_A_DATA
-};
-
-PORT_data_t PORT_B{
-        .PORT_data = (kinetis_PORT_memory_t *) PORT_B_DATA,
-        .GPIO_data = (kinetis_GPIO_memory_t *) GPIO_B_DATA
-};
-
-PORT_data_t PORT_C{
-        .PORT_data = (kinetis_PORT_memory_t *) PORT_C_DATA,
-        .GPIO_data = (kinetis_GPIO_memory_t *) GPIO_C_DATA
-};
-
-PORT_data_t PORT_D{
-        .PORT_data = (kinetis_PORT_memory_t *) PORT_D_DATA,
-        .GPIO_data = (kinetis_GPIO_memory_t *) GPIO_D_DATA
-};
-PORT_data_t PORT_E{
-        .PORT_data = (kinetis_PORT_memory_t *) PORT_E_DATA,
-        .GPIO_data = (kinetis_GPIO_memory_t *) GPIO_E_DATA
-};
 
 

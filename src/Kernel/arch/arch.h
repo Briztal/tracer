@@ -1,3 +1,7 @@
+
+#include "Kernel/arch/boards/teensy35.h"
+
+/*
 #define architecture teensy35
 
 //String conversion call
@@ -11,3 +15,4 @@
 
 //arch PATH GENERATOR.
 #define ARCH_PATH(type) EXPAND(STR_MACRO1(EXPAND(Kernel/arch/boards/)EXPAND(architecture)EXPAND(_)EXPAND(type)EXPAND(.h)))
+*/

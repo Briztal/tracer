@@ -16,7 +16,7 @@
 
 #include "stdint.h"
 
-#include "Kernel/arch/arch_types.h"
+#include "Kernel/arch/arch.h"
 
 /*
  * Types of interruptions;
@@ -219,8 +219,60 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
  * ---------------------------- GPIO ----------------------------
  */
 
-//Get GPIO's hardware registers;
+
+/*
+ * GPIO functions are critical functions, that must task the least time as possible.
+ *
+ *  To enable the hardware abstraction, without loss of efficiency, the control of a GPIO pin is done by the
+ *  following :
+ *  - Get hardware registers for the required GPIO pin;
+ *  - Call a GPIO function, providing the register.
+ *
+ *  GPIO functions are inline, to enable full optimisation, and are trivial (register assignment) if GPIO functions
+ *  (data set, bits set, bits clear, bits toggle) are supported by the hardware;
+ *
+ *  This method is a bit heavy to setup, but guarantees the best optimisation, regarding the hardware abstraction;
+ */
+
+
+//Get a GPIO pin's hardware registers. This function is used for the setup, and is not made to be fast or optimised;
 void PORT_get_GPIO_registers(PORT_data_t *port, uint8_t bit, GPIO_output_registers_t *);
 
+/*
+ * GPIO functions are time critical, and so are inline. If your hardware supports GPIO action, you may define
+ * GPIO inline functions in your PORT driver's header, and include it in yout arch's header.
+ *
+ * To ease inter-compatibility, please use function signatures as listed below.
+ *
+
+//Define the GPIO mask type to be of your register length;
+typedef x GPIO_mask_t;
+
+//Define GPIO hardware register;
+typedef volatile GPIO_mask_t *GPIO_hw_register;
+
+
+//Determine the mask from a bit index;
+static inline GPIO_mask_t GPIO_get_mask(uint8_t bit);
+
+
+// ---------------------------------- GPIO functions ----------------------------------
+
+//The software setter : no software process to do, all is supported by the hardware;
+static inline void GPIO_set(volatile void *hw, GPIO_mask_t value);
+
+
+//The software bitwise setter : no software process to do, all is supported by the hardware;
+static inline void GPIO_set_bits(volatile void *hw, GPIO_mask_t value);
+
+
+//The software bitwise clearer : no software process to do, all is supported by the hardware;
+static inline void GPIO_clear_bits(volatile void *hw, GPIO_mask_t value);
+
+
+//The software bitwise toggler : no software process to do, all is supported by the hardware;
+static inline void GPIO_toggle_bits(volatile void * hw, GPIO_mask_t value);
+
+*/
 
 #endif //TRACER_PORT_H

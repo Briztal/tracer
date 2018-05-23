@@ -43,7 +43,7 @@ typedef struct {
 typedef struct __attribute__ ((packed)) {
 
     //32 Pin Configuration Registers;
-    volatile uint32_t PCR [32];
+    volatile uint32_t PCR[32];
 
     //Global Pin Control Low Regiser;
     volatile uint32_t GPCLR;
@@ -64,7 +64,6 @@ typedef struct __attribute__ ((packed)) {
     volatile uint32_t DFWR;
 
 } kinetis_PORT_memory_t;
-
 
 
 /*
@@ -95,7 +94,7 @@ typedef struct __attribute__ ((packed)) {
 
 
 /*
- * The port structure is coposed of two pointer to hardware configuration zones, one for PORT, and the other for GPIO;
+ * The port structure is composed of two pointer to hardware configuration zones, one for PORT, and the other for GPIO;
  */
 
 typedef struct {
@@ -109,15 +108,60 @@ typedef struct {
 } PORT_data_t;
 
 
+#define KINETIS_PORT_DECLARE(id) extern PORT_data_t PORT_##id
+
+#define KINETIS_PORT_DEFINE(id, PORT_DATA, GPIO_DATA) \
+PORT_data_t PORT_##id = {\
+        .PORT_data = (kinetis_PORT_memory_t *) (PORT_DATA),\
+        .GPIO_data = (kinetis_GPIO_memory_t *) (GPIO_DATA)\
+};
+
+//Define the GPIO mask type to be 4 bytes length;
+typedef uint32_t GPIO_mask_t;
+
+
 /*
- * The kinetis PORT peripheral always presents 5 distinct ports;
+ * ---------------------------------- Standard GPIO functions implementations ----------------------------------
  */
 
-extern PORT_data_t PORT_A;
-extern PORT_data_t PORT_B;
-extern PORT_data_t PORT_C;
-extern PORT_data_t PORT_D;
-extern PORT_data_t PORT_E;
+
+// ---------------------------------- GPIO Calculator ----------------------------------
+
+/*
+ * Determine the mask from a bit index;
+ */
+
+inline GPIO_mask_t GPIO_get_mask(uint8_t bit) { return ((uint32_t) 1 << bit); }
+
+
+// ---------------------------------- GPIO functions ----------------------------------
+
+/*
+ * The software setter : no software process to do, all is supported by the hardware;
+ */
+
+inline void GPIO_set(volatile void *hw, GPIO_mask_t value) { *(volatile GPIO_mask_t *) hw = value; }
+
+
+/*
+ * The software bitwise setter : no software process to do, all is supported by the hardware;
+ */
+
+inline void GPIO_set_bits(volatile void *hw, GPIO_mask_t value) { *(volatile GPIO_mask_t *) hw = value; }
+
+
+/*
+ * The software bitwise clearer : no software process to do, all is supported by the hardware;
+ */
+
+inline void GPIO_clear_bits(volatile void *hw, GPIO_mask_t value) { *(volatile GPIO_mask_t *) hw = value; }
+
+
+/*
+ * The software bitwise toggler : no software process to do, all is supported by the hardware;
+ */
+
+inline void GPIO_toggle_bits(volatile void *hw, GPIO_mask_t value) { *(volatile GPIO_mask_t *) hw = value; }
 
 
 #endif //TRACER_KINETIS_PORT_H
