@@ -40,7 +40,7 @@ process_t *current_process;
 /*
  * initialise_thread : this function allocates a stack, and then initialises stack pointers;
  *
- *  Finally, it sets the thread's state as Terminated;
+ *  Finally, it sets the thread's sequences_initialised as Terminated;
  */
 
 void process_create_context(process_t *process, uint32_t stack_size) {
@@ -253,7 +253,7 @@ void process_preempt() {
     current_process->stack_pointer = core_get_thread_stack_pointer();
 
     //Update the current process's status (ex : if terminated, will be stopped);
-    scheduler_update_process(current_process);
+    scheduler_clean_process(current_process);
 
     //Get a new process_t to execute, and pass the old one for eventual relocation;
     current_process = scheduler_select_process();

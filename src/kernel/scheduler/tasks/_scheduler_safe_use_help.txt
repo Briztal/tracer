@@ -192,4 +192,4 @@ When you implement tasks for an interface (in [interface]Commands.cpp) :
         number of nb_spaces. If not, never forget to lock very sequence related to your function.
     - Some functions plan tasks by themselves (Stepper movements plan for example). When you use them, systematically
         check the return value : if it returns "reprogram", your function must stop, eventually lock the appropriate
-        sequence, and return the same state.
+        sequence, and return the same sequences_initialised.

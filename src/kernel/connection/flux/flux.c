@@ -11,7 +11,7 @@
 
 void flux_process(flux_t *flux) {
 
-    //Cache the critical state of the cflux;
+    //Cache the critical sequences_initialised of the cflux;
     bool critical = flux->critical;
 
     //If the cflux is critical, enter a critical section;

@@ -18,59 +18,79 @@
 
 */
 
+#include "service.h"
 
 #include <kernel/scheduler/systick.h>
 
 #include <data_structures/containers/container.h>
 #include <kernel/kernel.h>
-
-#include "service.h"
-typedef struct {
-
-    //The time at which the next execution is supposed to happen;
-    uint32_t next_exec_time;
-
-    //The remaining number of times the service must be executed;
-    uint32_t remaining_execs;
-
-    //The service's period;
-    uint32_t period;
-
-    //The task itself;
-    task_t * task;
-
-    //A flag, set if the task must be executed;
-    bool executionFlag;
-
-} service_t;
+#include <data_structures/containers/llist.h>
 
 
-//----------------------------------- Builders -----------------------------------
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+//TODO MAKE THE SCHEDULER LIBRARY
+
+
+//----------------------------------- Builder -----------------------------------
 
 //Add a service;
-void _service_add(void (*task)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs);
+void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs);
 
-
-//----------------------------------- Execution -----------------------------------
-
-//Mark all services that can be executed;
-void services_check_executability();
-
-
-//----------------------------------- Timeline reset -----------------------------------
-
-//Update all tasks durations according to the new timeline;
-void services_reset_timeline(uint32_t diff);
+//Insert a service in the queue;
+void services_insert(service_t *service);
 
 
 //----------------------------------- Fields -----------------------------------
 
+/*
+ * The service manager starts in the uninitialised sequences_initialised,
+ * then becomes initialised, and is finally started;
+ */
+bool services_initialised = false;
+
 //Programmed tasks;
-container_t services = EMPTY_CONTAINER(service_t *);
+linked_list_t *pending_services;
 
-//Next time that we must check for a schedulable task; At init, a check must be made;
-uint32_t next_check_time = 0;
 
+//----------------------------------- Initialisation -----------------------------------
+
+/*
+ * services_initialise : initialises the service linked list;
+ */
+
+void services_initialise(size_t max_nb_services) {
+
+    //If the service manager has already been initialised :
+    if (services_initialised) {
+
+        //Error, must not be initialised twice;
+        return;//TODO ERROR
+
+    }
+
+}
 
 //----------------------------------- Builders -----------------------------------
 
@@ -79,7 +99,15 @@ uint32_t next_check_time = 0;
  * program_repetitive_task : this function adds a temporary service task;
  */
 
-void service_add_temporary(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
+void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
+
+    //If the service manager has not been initialised :
+    if (!services_initialised) {
+
+        //Error, must be initialised before usage;
+        return;//TODO ERROR
+
+    }
 
     //If the service mustn't be scheduled, nothing to do;
     if (!nb_execs) {
@@ -90,23 +118,29 @@ void service_add_temporary(void (*service_f)(void *), uint32_t offset, uint32_t 
     }
 
     //Program the task
-    _service_add(service_f, offset, period, nb_execs);
+    _service_add(task_function, offset, period, nb_execs);
 
 }
-
 
 
 /*
  * service_add_permanent : adds a permanent service;
  */
 
-void service_add_permanent(void (*service_f)(void *), uint32_t offset, uint32_t period) {
+void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period) {
+
+    //If the service manager has not been initialised :
+    if (!services_initialised) {
+
+        //Error, must be initialised before usage;
+        return;//TODO ERROR
+
+    }
 
     //Program the task;
-    _service_add(service_f, offset, period, 0);
+    _service_add(task_function, offset, period, 0);
 
 }
-
 
 
 /*
@@ -117,9 +151,9 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
 
     //If the task is null :
     if (service_f == 0) {
-        
+
         //TODO ERROR NULL POINTER
-        
+
         //Ignore;
         return;
 
@@ -129,123 +163,213 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
     if (!period) {
 
         //TODO ERROR NULL PERIOD
-        
+
         //Ignore;
         return;
 
     }
 
-    //Create the task;
-    task_t *task = task_create(service_f, 0, 0, PERSISTENT_TASK);
-
-    //Initialise the service;
+    //Create the service initializer;
     service_t init = {
+            .task = {
+                    .linked_element = EMPTY_LINKED_ELEMENT(),
+                    .function = service_f,
+                    .args = 0,
+                    .cleanup = 0,
+                    .task_type = SERVICE_TASK,
+            },
             .next_exec_time = offset + systick_milliseconds(),
             .remaining_execs = remaining_execs,
             .period = period,
-            .task = task,
             .executionFlag = false,
     };
 
-    //Cache a casted copy for readability. Compiler optimised,
+    //Create and initialise the service in the heap;
     service_t *service = kernel_malloc_copy(sizeof(service_t), &init);
 
-    //Add the service to the services array;
-    container_append_element(&services, &service);
-
-    //Cache the next execution time of the new task;
-    const uint32_t next = service->next_exec_time;
-
-    //Eventually modify the check time;
-    if (next < next_check_time) next_check_time = next;
+    //Insert the service in the pending services list;
+    services_insert(service);
 
 }
 
 
-//----------------------------------- Execution -----------------------------------
-
 /*
- * check_executability : this function will compare each task's scheduling time to the current time, and mark
- *
- *  them as executable if the current time is greater;
+ * service_insert : inserts a service in the pending ordered list;
  */
 
-void services_check_executability() {
+void service_insert(service_t *service) {
 
-    //Cache the current time;
-    uint32_t current_time = systick_milliseconds();
+    //Cache the next execution time;
+    uint32_t next_execution = service->next_exec_time;
 
-    //If the next check time is not passed, nothing to do;
-    if (current_time < next_check_time)
-        return;
+    //The access to the list is critical;//TODO CRITICAL PATCH;
+    kernel_enter_critical_section();
 
-    //Declare the next time;
-    uint32_t next_time = 0;
+    //Cache the first element of the list;
+    service_t *element = (service_t *) (pending_services->first);
 
-    //For each task :
-    for (container_index_t service_index = services.nb_elements; service_index--;) {
+    //While the element exists :
+    while (element) {
 
-        //Cache the service;
-        service_t *service = *(service_t **)container_get_element(&services, service_index);
+        //If we have reached the first greater element :
+        if (next_execution < element->next_exec_time) {
 
-        //Cache the local scheduling time;
-        uint32_t task_time = service->next_exec_time;
+            //Insert the new service before the first greater element;
+            llist_insert_before(pending_services, (linked_element_t *) element, (linked_element_t *) service);
 
-        //If the current time is superior to the task's scheduling time :
-        if (current_time > task_time) {
-
-            //Mask the task as executable;
-            service->executionFlag = true;
-
-            //update the task's period;
-            service->next_exec_time = (task_time += service->period);
-
-        }
-
-        //If the next time is null or greater than the task's scheduling time :
-        if ((!next_time) || (task_time < next_time)) {
-
-            //Update the next check time;
-            next_time = task_time;
+            //Go to the end of the function;
+            goto inserted;
 
         }
 
     }
 
-    //Update the next check time with the minimum of all execution times;
-    next_check_time = next_time;
+    //If we reached the end of the list : the element must be inserted at the end;
+    llist_insert_end(pending_services, (linked_element_t *) service);
+
+    inserted:
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
 
 }
 
-//----------------------------------- Timeline reset -----------------------------------
+
+//----------------------------------- Scheduler interaction -----------------------------------
 
 /*
- * reset_timeline : update all tasks execution time according to the new timeline;
+ * services_available : this function asserts if services are available.
  */
 
-void service_reset_timeline(uint32_t diff) {
+bool services_available() {
 
-    //For each task :
-    for (container_index_t service_index = services.nb_elements; service_index--;) {
+    //If the service manager has not been initialised :
+    if (!services_initialised) {
 
-        //Cache the task;
-        service_t *service = *(service_t **)container_get_element(&services, service_index);
-
-        if (service->next_exec_time < diff) {
-
-            //Minor the execution time;
-            service->next_exec_time = 0;
-
-        } else {
-
-            //Subtract the difference;
-            service->next_exec_time -= diff;
-
-        }
+        //Error, must be initialised before usage;
+        return false;//TODO ERROR
 
     }
 
-    //Plan an executability check;
-    next_check_time = 0;
+    //The access to the list is critical;//TODO CRITICAL PATCH;
+    kernel_enter_critical_section();
+
+    //Cache the number of pending services;
+    size_t nb_elements = pending_services->nb_elements;
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    //If the services list is empty, no services available;
+    if (!nb_elements)
+        return false;
+
+    //Cache the timeline;
+    uint32_t millis = systick_milliseconds();
+
+    //Services are stored by increasing execution time;
+
+
+    //The access to the list is critical;//TODO CRITICAL PATCH;
+    kernel_enter_critical_section();
+
+    //Services are available if and only if the first service has to be executed;
+    service_t * service = (service_t *) (pending_services->first);
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    //Services are available if and only if the first service has to be executed;
+    return service->next_exec_time < millis;
+
+}
+
+
+/*
+ * services_get : get the first service of the list. Doesn't check if the service must be executed;
+ */
+
+service_t *services_get() {
+
+
+    //If the service manager has not been initialised :
+    if (!services_initialised) {
+
+        //Error, must be initialised before usage;
+        return 0;//TODO ERROR
+
+    }
+    //The access to the list is critical;//TODO CRITICAL PATCH;
+    kernel_enter_critical_section();
+
+    //Cache the number of pending services;
+    size_t nb_elements = pending_services->nb_elements;
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    //If the services list is empty, no services available; This shouldn't have happened;
+    if (!nb_elements)
+        return 0;//TODO ERROR;
+
+
+    //Cache the timeline;
+    uint32_t millis = systick_milliseconds();
+
+    //Services are stored by increasing execution time;
+
+
+    //The access to the list is critical;//TODO CRITICAL PATCH;
+    kernel_enter_critical_section();
+
+    //Services are available if and only if the first service has to be executed;
+    service_t * service = (service_t *) (pending_services->first);
+
+    //Leave the critical section;
+    kernel_leave_critical_section();
+
+    if (service->next_exec_time < millis)
+        return 0;//TODO ERROR, SERVICE MUSTN'T BE EXECUTED;
+
+    //Return the first service of the list;
+    return service;
+
+}
+
+
+/*
+ * services_reprogram : reprograms an executed service if necessary, or delete it if its lifetime ended;
+ */
+
+void services_reprogram(service_t *service) {
+
+    //If the service is not permanent, and has reached the end of its lifetime :
+    if (service->remaining_execs == 1) {
+
+        //Delete the service;
+        task_delete((task_t *)service);
+
+    } else {
+        //If the service must be reprogrammed :
+
+        //Cache the timeline;
+        uint32_t millis = systick_milliseconds();
+
+        //Cache the previous execution time, and the period;
+        uint32_t period = service->period, next_exec = service->next_exec_time + period;
+
+
+        //TODO CONDITION. SET A VARIABLE TO DETERMINE STRICTNESS;
+
+        //If the execution is not strict, determine the next time the service must be executed;
+        while(next_exec < millis) next_exec += period;
+
+        //Update the next execution time;
+        service->next_exec_time = next_exec;
+
+        //Re-insert the service in the pending services queue;
+        services_insert(service);
+
+    }
 
 }

@@ -21,6 +21,7 @@
 #include <data_structures/containers/container.h>
 #include <data_structures/string/string.h>
 #include <string.h>
+#include <data_structures/containers/llist.h>
 
 #include "events.h"
 
@@ -31,12 +32,12 @@
  * TODO EVENT REMOVAL PATCH :
  *
  *  There are three things to add to the model :
- *      - Modify the state variable in the event structure, to share its state : IDLE, PENDING, CLOSED
+ *      - Modify the sequences_initialised variable in the event structure, to share its sequences_initialised : IDLE, PENDING, CLOSED
  *
  *      - The task recuperation function must check that the event is deletable after caching the task;
  *          if it is deletable, it will delete all its tasks, except the last one that is currently in execution;
  *
- *      - A function that will search by name for an event to delete, and then check for its state.
+ *      - A function that will search by name for an event to delete, and then check for its sequences_initialised.
  *          If it is idle, delete it, and if it is pending, mark it as deletable;
  *
  */
@@ -44,82 +45,23 @@
 
 //------------------------------------- Fields -------------------------------------
 
-//Registered events;
-container_t events = EMPTY_CONTAINER(event_t *);
+//Non pending events;
+linked_list_t events = EMPTY_LINKED_LIST();
 
-//Triggered events, initialised to null;
-container_t pending_events = EMPTY_CONTAINER(event_t *);
+//Pending events;
+linked_list_t pending_events = EMPTY_LINKED_LIST();
 
+//Events can only be created by the scheduler;
+bool locked = false;
 
 //------------------------------------- Private functions -------------------------------------
 
 //Get the index of an event by its name;
-event_t *event_search(const char *name);
+event_t *event_search(linked_list_t list, const char *name);
 
 
-/*
- * get_event : this function helps avoiding errors getting elements,
- */
-
-inline event_t *get_event(container_index_t index) {
-
-    //The container returns a pointer to the event pointer;
-    return *(event_t **) container_get_element(&events, index);
-
-}
-
-
-/*
- * append_event : this function helps avoiding errors appending elements;
- */
-
-inline void append_event(event_t *event) {
-
-    //Container elements (event_t *) are passed by pointer;
-    container_append_element(&events, &event);
-
-}
-
-
-/*
- * get_pending : this function helps avoiding errors getting pending events indices,
- */
-
-inline event_t *get_pending(container_index_t index) {
-
-    //The container returns a pointer to the event pointer;
-    return *(event_t **) container_get_element(&pending_events, index);
-
-}
-
-
-/*
- * get_pending : this function helps avoiding errors getting pending events indices,
- */
-
-inline void append_pending(event_t *event) {
-
-    //The container returns a pointer to the event pointer;
-    container_append_element(&events, &event);
-
-}
 
 //------------------------------------- Implementation -------------------------------------
-
-/*
- * reset : start the event array;
- */
-
-void events_reset() {
-
-    //Delete all events;
-    container_clear(&events);
-
-    //Mark all events as not pending;
-    container_clear(&pending_events);
-
-}
-
 
 /*
  * events_add : creates an event and store it in the event container;
@@ -127,10 +69,12 @@ void events_reset() {
 
 void events_add(const char *name) {
 
-    //First, we must check that the event is not already registered;
+    //If events are locked :
+    if (locked)
+        return;//TODO ERROR;
 
-    //If the event name already exists :
-    if (event_search(name)) {
+    //If the event name already exists (unlocked -> pending empty):
+    if (event_search(events, name)) {
 
         //Nothing to do;
         return;
@@ -140,8 +84,8 @@ void events_add(const char *name) {
     //Create an event in the heap with the required name;
     event_t *event = event_create(name);
 
-    //Insert the newly created event at the end of the event container;
-    append_event(event);
+    //Insert the newly created event at the end of the pending events list;
+    llist_insert_end(&events, (linked_element_t *) event);
 
 }
 
@@ -164,7 +108,11 @@ void events_register(const char *name, task_t *task) {
     }
 
     //Search for an event matching the given name;
-    event_t *matching_event = event_search(name);
+    //event_t *matching_event = event_search(name);
+
+    /*
+    if (!matching_event)
+        matching_event = event_sear
 
     //If the given name doesn't match any event :
     if (!matching_event) {
@@ -177,8 +125,11 @@ void events_register(const char *name, task_t *task) {
 
     }
 
+
     //Register the provided function to the event's tasks;
     event_append_task(matching_event, task);
+
+     */
 
 }
 
@@ -192,13 +143,16 @@ void events_register(const char *name, task_t *task) {
  *  and return true if it was found;
  */
 
-event_t *event_search(const char *name) {
+event_t *event_search(linked_list_t list, const char *name) {
 
-    //For every system event :
-    for (container_index_t event_index = events.nb_elements; event_index--;) {
+    //Cache the number of events;
+    size_t nb_events = events.nb_elements;
 
-        //Cache the event;
-        event_t *event = get_event(event_index);
+    //Cache the first event;
+    event_t *event = (event_t *) events.first;
+
+    //While the event exists :
+    while (nb_events--) {
 
         //If the event name matches the searched name :
         if (strcmp(name, event->name)) {
@@ -224,6 +178,7 @@ event_t *event_search(const char *name) {
 
 void events_trigger(const char *name) {
 
+    /*
     //Declare the search index;
     event_t *matching_event = event_search(name);
 
@@ -249,6 +204,7 @@ void events_trigger(const char *name) {
 
     }
 
+     */
 }
 
 
@@ -270,6 +226,7 @@ bool events_task_executable() {
 
 task_t *events_get_task() {
 
+    /*
     if (!events_task_executable()) //TODO KERNEL PANIC;
         return 0;
 
@@ -296,6 +253,8 @@ task_t *events_get_task() {
 
     //Return the task to execute;
     return task;
+
+     */
 
 }
 

@@ -18,7 +18,7 @@ typedef struct {
 
 } tree_t;
 
-#define EMPTY_TREE {EMPTY_CONTAINER(tree_t)}
+#define EMPTY_TREE(max_nb_children) {EMPTY_CONTAINER(tree_t, max_nb_children)}
 
 
 
@@ -26,10 +26,10 @@ typedef struct {
 void tree_append_child(tree_t *parent, tree_t *child);
 
 //Add a child in our container array;
-void tree_insert_child(tree_t *parent, container_index_t index, tree_t *child);
+void tree_insert_child(tree_t *parent, size_t index, tree_t *child);
 
 //Get the number of children;
-inline container_index_t tree_nb_children(tree_t *parent) {
+inline size_t tree_nb_children(tree_t *parent) {
 
     //Return the nb of elements in the children container;
     return parent->children.nb_elements;
@@ -37,13 +37,13 @@ inline container_index_t tree_nb_children(tree_t *parent) {
 }
 
 //Get a child;
-tree_t *get_child(tree_t *parent, container_index_t index);
+tree_t *get_child(tree_t *parent, size_t index);
 
 //Delete a tree;
 void tree_delete(tree_t *parent, void (*destructor)(tree_t *));
 
 //Remove a child; Pass a function that will properly destruct the child tree;
-void remove_child(tree_t *parent, container_index_t index, void (*destructor)(tree_t *));
+void remove_child(tree_t *parent, size_t index, void (*destructor)(tree_t *));
 
 //Remove all children; Pass a function that will properly destruct the child tree;
 void remove_all(tree_t *parent, void (*destructor)(tree_t *));

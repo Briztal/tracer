@@ -23,29 +23,61 @@
 #define TRACER_TASKPROGRAMMER_H
 
 #include "stdint.h"
+
 #include "task.h"
+
+
+/*
+ * A service is composed of a task, and time parameters;
+ */
+
+typedef struct {
+
+    //The task itself;
+    task_t task;
+
+    //The time at which the next execution is supposed to happen;
+    uint32_t next_exec_time;
+
+    //The remaining number of times the service must be executed;
+    uint32_t remaining_execs;
+
+    //The service's period;
+    const uint32_t period;
+
+} service_t;
+
 
 //----------------------------------- Initialisation -----------------------------------
 
-//Initialise task queues in a safe state;
-void services_initialise();
+//Initialise the service linked list;
+void services_initialise(size_t max_nb_services);
 
 
 //----------------------------------- Builders -----------------------------------
+
+
 //TODO REMOVE PATCH : NOT CLOSED
 //Program a repetitive task;
-void service_add_temporary(void (*task)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs);
+void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs);
 
 
 //TODO REMOVE PATCH : CLOSED;
 //Program an infinite task;
-void service_add_permanent(void (*task)(void *), uint32_t offset, uint32_t period);
+void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period);
 
 
-//----------------------------------- Execution -----------------------------------
+//----------------------------------- Scheduler interaction -----------------------------------
 
-//Schedule tasks according to the current time (provided by kernel)
-void process_services();
+//Are there services available ?
+bool services_available();
+
+//Get a service to execute;
+service_t *services_get();
+
+//Reprogram an executed service;
+void services_reprogram(service_t *service);
+
 
 
 #endif //TRACER_TASKPROGRAMMER_H

@@ -88,7 +88,7 @@ typedef struct {
     //CTS check before detection enabled;
     bool cts_enabled;
 
-    //The transmission state;
+    //The transmission sequences_initialised;
     transmission_type_t transmission_type;
 
     //The Baudrate;

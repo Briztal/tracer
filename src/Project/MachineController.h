@@ -20,18 +20,18 @@
 
 
 /*
- * The MachineController class is one of the two state-controllers of the project.
+ * The MachineController class is one of the two sequences_initialised-controllers of the project.
  *
- *  This class handles the mechanics state of the machine (movement, cooling, extrusion, position, ...).
+ *  This class handles the mechanics sequences_initialised of the machine (movement, cooling, extrusion, position, ...).
  *      The Temperature control is handled by the named class.
  *
  *
  *  As this class can configure a lot of parameters, and trigger a lot of machine commands, it is built on
- *    the state manager model :
- *      - All its public functions (called state modifiers) take state structs in arguments.
- *      - A state struct is a structure where for all data field, there is a flag (bool) that defined if the
+ *    the sequences_initialised manager model :
+ *      - All its public functions (called sequences_initialised modifiers) take sequences_initialised structs in arguments.
+ *      - A sequences_initialised struct is a structure where for all data field, there is a flag (bool) that defined if the
  *          data field's value is intentionnaly set.
- *      - When a state modifier is called, it reads all flags, and only proceeds data with their field set.
+ *      - When a sequences_initialised modifier is called, it reads all flags, and only proceeds data with their field set.
  *
  *  This model is useful, because it allows the programmer (you !!) to call a single function to modify several
  *      related parameters, for example, modify the speed of the working carriage and the speed
@@ -60,7 +60,7 @@ class MachineController {
 
 public:
 
-    //Initialise the class in a safe state;
+    //Initialise the class in a safe sequences_initialised;
     static void initialise_data();
 
 
@@ -71,7 +71,7 @@ private:
     /*
      * State structures, and inheritance schema :
      *
-     *  Below are defined state structures, that will be used to modify the machine's state.
+     *  Below are defined sequences_initialised structures, that will be used to modify the machine's sequences_initialised.
      *
      *  They follow an inheritance schema, which is described.
      */
@@ -87,7 +87,7 @@ private:
         float e = 0;
     };
 
-    //A state structure derived of coordinate struct
+    //A sequences_initialised structure derived of coordinate struct
     struct hl_coord_flags_t {
 
         //Add flags
@@ -98,14 +98,14 @@ private:
 
     };
 
-    //A state structure derived of coordinate struct
+    //A sequences_initialised structure derived of coordinate struct
     struct hl_coord_state_t : hl_coord_t, hl_coord_flags_t {};
 
 
 public :
 
     /*
-     * The homing state structure. It contains a flag for all steppers
+     * The homing sequences_initialised structure. It contains a flag for all steppers
      */
 
     struct home_state_t : hl_coord_flags_t{
@@ -118,7 +118,7 @@ public :
 public :
 
     /*
-     * The carriages state structure :
+     * The carriages sequences_initialised structure :
      *
      *  This struct will will be used to modify the working carriage, and its speed, and also to
      *      mofify a designated carriage's speed.
@@ -156,7 +156,7 @@ public :
 public:
 
     /*
-     * The movement state structure :
+     * The movement sequences_initialised structure :
      *
      *  This structure is the union of structs coord_state_t (movement coordinates) and carriages_state_t.
      *
@@ -177,11 +177,11 @@ public:
 public:
 
     /*
-     * The offset state structure :
+     * The offset sequences_initialised structure :
      *
      *  This structure will be used to modify the offsets of the high level (4 axis) coordinate system.
      *
-     *  It is a simple coordinate state structure.
+     *  It is a simple coordinate sequences_initialised structure.
      */
 
     struct offsets_state_t : hl_coord_state_t {
@@ -191,12 +191,12 @@ public:
 public:
 
     /*
-     * The cooling state structure :
+     * The cooling sequences_initialised structure :
      *
      *  This struct will be used to modify the cooling power, and to enable / disable it.
      *
      *  It will contain flags and data for:
-     *      - enable state (is the cooling enabled)
+     *      - enable sequences_initialised (is the cooling enabled)
      *      - the power of the cooling
      */
 
@@ -215,7 +215,7 @@ public:
 public:
 
     /*
-     * The coordinate interface state structure :
+     * The coordinate interface sequences_initialised structure :
      *
      *  This struct will be used to modify coordinate interface variables.
      *
@@ -240,8 +240,8 @@ public:
      * -------------------------------------------------------------------------------------------------
      * -------------------------------------------------------------------------------------------------
      *
-     * State modifiers : functions below are in charge of modifying the machine's state, according to
-     *  state structures they read_rx in arguments.
+     * State modifiers : functions below are in charge of modifying the machine's sequences_initialised, according to
+     *  sequences_initialised structures they read_rx in arguments.
      *
      * -------------------------------------------------------------------------------------------------
      * -------------------------------------------------------------------------------------------------
@@ -353,9 +353,9 @@ GENERATE_SCHEDULER(enable_steppers, 0, bool, enable);
 public:
 
     /*
-     * The carriages state modifier : this function can modify the state of the extrusion, and can be scheduled.
+     * The carriages sequences_initialised modifier : this function can modify the sequences_initialised of the extrusion, and can be scheduled.
      *
-     *  It receives a state, vith various flags enabled, and makes the appropriate modifications,
+     *  It receives a sequences_initialised, vith various flags enabled, and makes the appropriate modifications,
      *      calling simple set functions :
      *
      *      - set_speed;
@@ -367,7 +367,7 @@ public:
     //The Scheduler for the function.
 GENERATE_SCHEDULER(set_carriages_state, 0, carriages_state_t, data);
 
-    //Get the current extrusion state;
+    //Get the current extrusion sequences_initialised;
     static const carriages_state_t get_extrusion_state();
 
     //The current mode.
@@ -376,7 +376,7 @@ GENERATE_SCHEDULER(set_carriages_state, 0, carriages_state_t, data);
 
 private :
 
-    //The current extrusion state;
+    //The current extrusion sequences_initialised;
     static carriages_state_t extrusion_state;
 
     //Mofify the current working extruder.
@@ -398,7 +398,7 @@ GENERATE_SCHEDULER(set_cooling_state, 0, cooling_state_t, state);
 
 private:
 
-    //The cooling state, that contains all current cooling parameters.
+    //The cooling sequences_initialised, that contains all current cooling parameters.
     static cooling_state_t cooling_state;
 
 

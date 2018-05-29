@@ -23,7 +23,7 @@ void stream_service(void *);
 
 //----------------------------------- Connection service data -----------------------------------
 
-//The state of the service;
+//The sequences_initialised of the service;
 bool service_started = false;
 
 //The linked list of connections owned by the service; CRITICAL
@@ -131,10 +131,10 @@ void connection_add_node(connection_t *connection, flux_t *flux, cnode_t *node) 
     cnode_t *spaces_input_node = connection->spaces_input;
 
     //Concatenate the last node and the cflux;
-    llist_concat((linked_element_t *) spaces_input_node, (linked_element_t *) flux);
+    lelmt_concat((linked_element_t *) spaces_input_node, (linked_element_t *) flux);
 
     //Concatenate the cflux and the new node;
-    llist_concat((linked_element_t *) flux, (linked_element_t *) node);
+    lelmt_concat((linked_element_t *) flux, (linked_element_t *) node);
 
     //Set the new node as the
     connection->spaces_input = node;
@@ -307,7 +307,7 @@ void connection_transfer_ownership(connection_t *connection) {
     if (connections) {
 
         //Concatenate the existing list to the new connection;
-        llist_concat((linked_element_t *) connection, (linked_element_t *) connections);
+        lelmt_concat((linked_element_t *) connection, (linked_element_t *) connections);
 
     }
 

@@ -165,6 +165,7 @@ task_state_t task_3(void *) {
 
 #include <kernel/drivers/PORT.h>
 #include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
+#include <kernel/kernel.h>
 #include "Arduino.h"
 
 //#include <Kernel/drivers/PORT.h>
@@ -209,7 +210,7 @@ void test(bool b) {
 
 int main() {
 
-
+    /*
 
     PORT_pin_config_t config;
 
@@ -250,6 +251,12 @@ int main() {
     //finish();
 
     while(true);
+
+     */
+
+    kernel_start();
+
+
     /*
 
     pinMode(13, OUTPUT);

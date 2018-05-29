@@ -27,39 +27,37 @@
 
 #include <kernel/scheduler/tasks/task.h>
 
-#include <data_structures/containers/container.h>
 
 //TODO CONFIG FILE
-#define EVENT_NAME_SIZE 11
+#define EVENT_NAME_LENGTH 10
+
+
+/*
+ * An event is composed of a linked list, a name and a status;
+ */
 
 typedef struct {
 
-    //Is the event isPending
-    bool pending;
+    //The linked list base;
+    linked_ring_t tasks;
 
-    //The index of the next task to schedule, in case of a isPending event;
-    container_index_t next_task;
+    //The number of pending tasks;
+    size_t nb_pending;
 
     //The event's name;
-    char name[EVENT_NAME_SIZE];
-
-    //The event's tasks;
-    container_t tasks;
+    char name[EVENT_NAME_LENGTH + 1];
 
 } event_t;
 
 
-/*
- * Due to their size, events are stored in the heap, and accessed by pointer; This function will create and initialise
- *  an event;
- */
+//Create an event in the heap;
 event_t *event_create(const char *name);
 
 //Register a task to the event;
 void event_append_task(event_t *, task_t *);
 
 //Un-register all tasks of an event;
-void event_clear(event_t *);
+//TODO REMOVE PATCH void event_clear(event_t *);
 
 //Try to set the given event pending;
 bool event_set_pending(event_t *event);

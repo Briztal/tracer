@@ -31,7 +31,7 @@
 
 
 /*
- * reset : this function initialises data in a safe state, and memory PID in the Storage;
+ * reset : this function initialises data in a safe sequences_initialised, and memory PID in the Storage;
  */
 
 void TemperatureController::initialise_data() {
@@ -39,7 +39,7 @@ void TemperatureController::initialise_data() {
     memset(hotends_enabled, 0, 4 * sizeof(bool));
     memset(hotends_temps, 0, 4 * sizeof(float));
 
-    //Declare and define the hotbed state (flags and vars for activity and temperature targetVector).
+    //Declare and define the hotbed sequences_initialised (flags and vars for activity and temperature targetVector).
     hotbed_state = hotbed_state_t();
 
     //Reinit all PIDs;
@@ -100,7 +100,7 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
         return invalid_arguments;
     }
 
-    //If the state of a hotend must be changed
+    //If the sequences_initialised of a hotend must be changed
     if (new_state.enabled_flag) {
 
         //if the hotend must be enabled
@@ -137,35 +137,35 @@ task_state_t TemperatureController::set_hotends_state(hotend_state_t new_state) 
 
 
 /*
- * get_hotend_state : this function returns a copy of the required hotend state.
+ * get_hotend_state : this function returns a copy of the required hotend sequences_initialised.
  *
- *  As hotends states are not stored in a state structure (too heavy to manipulate), a state is created and returned.
+ *  As hotends states are not stored in a sequences_initialised structure (too heavy to manipulate), a sequences_initialised is created and returned.
  */
 
 TemperatureController::hotend_state_t TemperatureController::get_hotend_state(uint8_t hotend_id) {
 
-    //Create a state with all flags to zero
-    hotend_state_t state = hotend_state_t();
+    //Create a sequences_initialised with all flags to zero
+    hotend_state_t sequences_initialised = hotend_state_t();
 
-    //If the hotend identifier is valid, fill the state.
+    //If the hotend identifier is valid, fill the sequences_initialised.
     if (hotend_id<4) {
 
         //Ste all flags (valid data)
-        state.hotend_flag = state.enabled_flag = state.temperature_flag = true;
+        sequences_initialised.hotend_flag = sequences_initialised.enabled_flag = sequences_initialised.temperature_flag = true;
 
         //Set the hotend id;
-        state.hotend = hotend_id;
+        sequences_initialised.hotend = hotend_id;
 
         //Set the temperature.
-        state.temperature = hotends_temps[hotend_id];
+        sequences_initialised.temperature = hotends_temps[hotend_id];
 
         //Set the activity (enabled or disbaled);
-        state.enabled = hotends_enabled[hotend_id];
+        sequences_initialised.enabled = hotends_enabled[hotend_id];
 
     }
 
-    //Return the state.
-    return state;
+    //Return the sequences_initialised.
+    return sequences_initialised;
 
 }
 
@@ -240,7 +240,7 @@ task_state_t TemperatureController::set_hotbed_state(hotbed_state_t new_state) {
 
 
 /*
- * get_hotbeds_state : this function will return a copy of the current hotbed state.
+ * get_hotbeds_state : this function will return a copy of the current hotbed sequences_initialised.
  */
 
 TemperatureController::hotbed_state_t TemperatureController::get_hotbeds_state() {
@@ -364,7 +364,7 @@ void TemperatureController::regulation_finalisation() {
 
 #define m TemperatureController
 
-//Declare and define the hotends state (flags and vars for activities and temperature targets).
+//Declare and define the hotends sequences_initialised (flags and vars for activities and temperature targets).
 bool t_hotends_en[4]{false};
 float t_hotends_temps[4]{0};
 
@@ -372,7 +372,7 @@ bool *const m::hotends_enabled = t_hotends_en;
 float *const m::hotends_temps = t_hotends_temps;
 
 
-//Declare and define the hotbed state (flags and vars for activity and temperature targetVector).
+//Declare and define the hotbed sequences_initialised (flags and vars for activity and temperature targetVector).
 m::hotbed_state_t m::hotbed_state = m::hotbed_state_t();
 
 PID t_hot_pids[4];

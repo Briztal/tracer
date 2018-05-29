@@ -238,7 +238,7 @@ task_state_t GCodePipe::home() {
     FAIL_IF_CANT_SCHEDULE(1);
 
     //Declare the structure;
-    MachineController::home_state_t state;
+    MachineController::home_state_t sequences_initialised;
 
     //If the home must use endstops
     if (CHECK_ARGUMENT('E')) {
@@ -249,10 +249,10 @@ task_state_t GCodePipe::home() {
         //If the movement must just be a line to zero
 
         //Reset the flag;
-        state.endstops_flag = false;
+        sequences_initialised.endstops_flag = false;
 
         //Schedule a reset of the carriages
-        MachineController::home_scheduled_0(state);
+        MachineController::home_scheduled_0(sequences_initialised);
 
     }
 
@@ -277,15 +277,15 @@ task_state_t GCodePipe::line() {
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("XYZE");
 
-    MachineController::movement_state_t state = MachineController::movement_state_t();
+    MachineController::movement_state_t sequences_initialised = MachineController::movement_state_t();
 
     /*
      * To save repetitive lines of code, a macro that, if a coord is provided, sets its flag and its value.
      */
 #define CHECK_COORDINATE(coord, coord_char)\
     if (CHECK_ARGUMENT(coord_char)) {\
-        state.coord##_flag = true;\
-        state.coord = GET_ARG_VALUE(coord_char);\
+        sequences_initialised.coord##_flag = true;\
+        sequences_initialised.coord = GET_ARG_VALUE(coord_char);\
     }\
 
     //If a coordinate was provided, enable this coordinate, and get it.
@@ -301,12 +301,12 @@ task_state_t GCodePipe::line() {
     if (CHECK_ARGUMENT('R')) {
 
         //Mark the movement to be relative.
-        state.relative_flag = true;
+        sequences_initialised.relative_flag = true;
 
     }
 
     //Schedule a line to the specified coordinates
-    return MachineController::line_scheduled_0(state);
+    return MachineController::line_scheduled_0(sequences_initialised);
 
 }
 
@@ -354,15 +354,15 @@ task_state_t GCodePipe::set_position() {
     //verify that almost one movement coordinate is provided.
     REQUIRE_ONE_ARGUMENTS("xyze");
 
-    MachineController::offsets_state_t state = MachineController::offsets_state_t();
+    MachineController::offsets_state_t sequences_initialised = MachineController::offsets_state_t();
 
     /*
      * To save repetitive lines of code, a macro that, if a coord is provided, sets its flag and its value.
      */
 #define CHECK_COORDINATE(coord, coord_char)\
     if (CHECK_ARGUMENT(coord_char)) {\
-        state.coord##_flag = true;\
-        state.coord = GET_ARG_VALUE(coord_char);\
+        sequences_initialised.coord##_flag = true;\
+        sequences_initialised.coord = GET_ARG_VALUE(coord_char);\
     }\
 
     //If a coordinate was provided, enable this coordinate, and get it.
@@ -376,7 +376,7 @@ task_state_t GCodePipe::set_position() {
 
 
     //Schedule a line to the specified coordinates
-    return MachineController::set_current_position_scheduled_0(state);
+    return MachineController::set_current_position_scheduled_0(sequences_initialised);
 
 }
 
@@ -440,7 +440,7 @@ task_state_t GCodePipe::set_extrusion() {
 
     }
 
-    //Modify the extrusion state.
+    //Modify the extrusion sequences_initialised.
 
     return MachineController::set_carriages_state_scheduled_0(new_state);;
 
@@ -448,7 +448,7 @@ task_state_t GCodePipe::set_extrusion() {
 
 
 /*
- * set_cooling : this function modifies the cooling state.
+ * set_cooling : this function modifies the cooling sequences_initialised.
  *
  *  It takes the following data :
  *      -e : 0 means disable the cooling, other values will enable it.
@@ -466,7 +466,7 @@ task_state_t GCodePipe::set_cooling() {
 
     MachineController::cooling_state_t new_state = MachineController::cooling_state_t();
 
-    //Set the enable state if required
+    //Set the enable sequences_initialised if required
     if (CHECK_ARGUMENT('E')) {
 
 
@@ -495,7 +495,7 @@ task_state_t GCodePipe::set_cooling() {
 
 
 /*
- * set_hotend : this function sets the state of a particular hotend.
+ * set_hotend : this function sets the sequences_initialised of a particular hotend.
  *
  *  It takes the following data :
  *      -h : the hotend to modify, mandatory.
@@ -515,19 +515,19 @@ task_state_t GCodePipe::set_hotend() {
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
     REQUIRE_ONE_ARGUMENTS("TE");
-    TemperatureController::hotend_state_t state = TemperatureController::hotend_state_t();
+    TemperatureController::hotend_state_t sequences_initialised = TemperatureController::hotend_state_t();
 
-    state.hotend_flag = true;
-    state.hotend = (uint8_t) GET_ARG_VALUE('H');
+    sequences_initialised.hotend_flag = true;
+    sequences_initialised.hotend = (uint8_t) GET_ARG_VALUE('H');
 
     //If the temperature must be adjusted
     if (CHECK_ARGUMENT('T')) {
 
         //Set the temperature flag
-        state.temperature_flag = true;
+        sequences_initialised.temperature_flag = true;
 
         //Get the temperature
-        state.temperature = GET_ARG_VALUE('T');
+        sequences_initialised.temperature = GET_ARG_VALUE('T');
 
     }
 
@@ -535,21 +535,21 @@ task_state_t GCodePipe::set_hotend() {
     if (CHECK_ARGUMENT('E')) {
 
         //Set the enable flag
-        state.enabled_flag = true;
+        sequences_initialised.enabled_flag = true;
 
         //Get the temperature
-        state.enabled = (bool) GET_ARG_VALUE('E');
+        sequences_initialised.enabled = (bool) GET_ARG_VALUE('E');
 
     }
 
     //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::set_hotends_state_scheduled_0(state);
+    return TemperatureController::set_hotends_state_scheduled_0(sequences_initialised);
 
 }
 
 
 /*
- * set_hotbed : this function sets the hotbed's state
+ * set_hotbed : this function sets the hotbed's sequences_initialised
  *
  *  It takes the following data :
  *      -e : 0 means disable the power on the hotbed, other values will enable it.
@@ -565,17 +565,17 @@ task_state_t GCodePipe::set_hotbed() {
 
     //Fail if neither temperature (t) or enable_state (e) are provided.
     REQUIRE_ONE_ARGUMENTS("TE");
-    TemperatureController::hotbed_state_t state = TemperatureController::hotbed_state_t();
+    TemperatureController::hotbed_state_t sequences_initialised = TemperatureController::hotbed_state_t();
 
 
     //If the temperature must be adjusted
     if (CHECK_ARGUMENT('T')) {
 
         //Set the temperature flag
-        state.temperature_flag = true;
+        sequences_initialised.temperature_flag = true;
 
         //Get the temperature
-        state.temperature = GET_ARG_VALUE('T');
+        sequences_initialised.temperature = GET_ARG_VALUE('T');
 
     }
 
@@ -583,15 +583,15 @@ task_state_t GCodePipe::set_hotbed() {
     if (CHECK_ARGUMENT('E')) {
 
         //Set the enable flag
-        state.enabled_flag = true;
+        sequences_initialised.enabled_flag = true;
 
         //Get the temperature
-        state.enabled = (bool) GET_ARG_VALUE('E');
+        sequences_initialised.enabled = (bool) GET_ARG_VALUE('E');
 
     }
 
     //Schedule an enable/disable of the hotbed regulation.
-    return TemperatureController::set_hotbed_state_scheduled_0(state);
+    return TemperatureController::set_hotbed_state_scheduled_0(sequences_initialised);
 
 }
 

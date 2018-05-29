@@ -63,15 +63,15 @@
 
 
 /*
- * reset : this function initialises data in a safe state;
+ * reset : this function initialises data in a safe sequences_initialised;
  */
 
 void MachineController::initialise_data() {
 
-    //Reset the cooling state;
+    //Reset the cooling sequences_initialised;
     cooling_state = cooling_state_t();
 
-    //Reset the extrusion state;
+    //Reset the extrusion sequences_initialised;
     extrusion_state = carriages_state_t();
 
     //Reset the current position;
@@ -106,9 +106,9 @@ void MachineController::initialise_data() {
  *          then this carriage becomes the reference
  */
 
-task_state_t MachineController::home(home_state_t state) {
+task_state_t MachineController::home(home_state_t sequences_initialised) {
 
-    if (state.endstops_flag) {
+    if (sequences_initialised.endstops_flag) {
 
         std_out("Endstops not supported for instance.");
 
@@ -227,10 +227,10 @@ task_state_t MachineController::line(movement_state_t movement_state) {
         return reprogram;
     };
 
-    //Initialise a state
-    task_state_t state = complete;
+    //Initialise a sequences_initialised
+    task_state_t sequences_initialised = complete;
 
-    //The movement_state_t inherits the carriage_state_t, that allows us to modify the extrusion state before moving.
+    //The movement_state_t inherits the carriage_state_t, that allows us to modify the extrusion sequences_initialised before moving.
     task_state_t return_state = set_carriages_state((carriages_state_t) movement_state);
 
     //If the modification failed, fail.
@@ -262,16 +262,16 @@ task_state_t MachineController::line(movement_state_t movement_state) {
     //Try to prepare_movement to the specified position
     switch (mode) {
         case 0:
-            state = move_mode_0(&movement_state);
+            sequences_initialised = move_mode_0(&movement_state);
         default:
             break;
     }
 
-    if (state == complete) {
+    if (sequences_initialised == complete) {
         persist_coords(&movement_state);
     }
 
-    return state;
+    return sequences_initialised;
 
 }
 
@@ -356,9 +356,9 @@ task_state_t MachineController::move_mode_0(movement_state_t *coords) {
     //sanity_check(position);
 
     //Plan movement.
-    task_state_t state = StepperController::linear_movement(axis_positions);
+    task_state_t sequences_initialised = StepperController::linear_movement(axis_positions);
 
-    return state;
+    return sequences_initialised;
 }
 
 
@@ -479,17 +479,17 @@ task_state_t MachineController::enable_steppers(bool enable) {
 
 task_state_t MachineController::set_carriages_state(carriages_state_t new_state) {
 
-    //Initialise a state, that will be updated at each modification;
-    task_state_t state = complete;
+    //Initialise a sequences_initialised, that will be updated at each modification;
+    task_state_t sequences_initialised = complete;
 
     //if the working extruder must be changed :
     if (new_state.working_carriage_flag) {
 
         //Change the working extruder;
-        state = set_working_extruder(new_state.working_carriage);
+        sequences_initialised = set_working_extruder(new_state.working_carriage);
 
         //Fail if the function failed;
-        if (state != complete) return state;
+        if (sequences_initialised != complete) return sequences_initialised;
 
 
     }
@@ -504,7 +504,7 @@ task_state_t MachineController::set_carriages_state(carriages_state_t new_state)
         StepperController::set_speed_for_group(speed_group, new_speed);\
         \
         /*Fail if the function failed;*/\
-        if (state!=complete) return state;\
+        if (sequences_initialised!=complete) return sequences_initialised;\
         \
     }
 
@@ -570,7 +570,7 @@ task_state_t MachineController::set_working_extruder(uint8_t carriage) {
 
 
 /*
- * get_extrusion_state : this function returns the current state of the cooling.
+ * get_extrusion_state : this function returns the current sequences_initialised of the cooling.
  *
  */
 
@@ -585,14 +585,14 @@ const MachineController::carriages_state_t MachineController::get_extrusion_stat
 /*
  * set_cooling_state : this function can modify all parameters related to cooling, namely :
  *  - cooling power;
- *  - cooling enable state (enabled, disabled).
+ *  - cooling enable sequences_initialised (enabled, disabled).
  *
  *  Parameters will be modified only if their flags are set.
  */
 
 task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
 
-    //If the enable state must be changed
+    //If the enable sequences_initialised must be changed
     if (new_state.enabled_flag) {
 
         if (new_state.enabled) {
@@ -633,7 +633,7 @@ task_state_t MachineController::set_cooling_state(cooling_state_t new_state) {
 
 
 /*
- * get_cooling_state : this function returns the current state of the cooling.
+ * get_cooling_state : this function returns the current sequences_initialised of the cooling.
  */
 
 const MachineController::cooling_state_t MachineController::get_cooling_state() {
@@ -649,7 +649,7 @@ const MachineController::cooling_state_t MachineController::get_cooling_state() 
 /*
  * set_cooling_state : this function can modify all parameters related to cooling, namely :
  *  - cooling power;
- *  - cooling enable state (enabled, disabled).
+ *  - cooling enable sequences_initialised (enabled, disabled).
  *
  *  Parameters will be modified only if their flags are set.
  */
@@ -671,7 +671,7 @@ task_state_t MachineController::set_coord_interface_state(coord_interface_state_
 
 
 /*
- * get_cooling_state : this function returns the current state of the cooling.
+ * get_cooling_state : this function returns the current sequences_initialised of the cooling.
  */
 
 const MachineController::coord_interface_state_t MachineController::get_coord_interface_state() {

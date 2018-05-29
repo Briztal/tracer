@@ -20,7 +20,7 @@ void tree_append_child(tree_t *parent, tree_t *child) {
  * Append a child to our children container;
  */
 
-void tree_insert_child(tree_t *parent, container_index_t index, tree_t *child) {
+void tree_insert_child(tree_t *parent, size_t index, tree_t *child) {
 
     //Append the child to the tree;
     container_insert_element(&parent->children, index, &child);
@@ -32,7 +32,7 @@ void tree_insert_child(tree_t *parent, container_index_t index, tree_t *child) {
  * Get a child; This function is inline;
  */
 
-tree_t *get_child(tree_t *parent, container_index_t index) {
+tree_t *get_child(tree_t *parent, size_t index) {
 
     //Call the macro get to avoid a syntax mistake;
     return CONTAINER_GET_TYPED(tree_t*, &parent->children, index);
@@ -53,7 +53,7 @@ void tree_DFS_pre_order(tree_t *root, void (*const traversal_function)(tree_t *)
     traversal_function(root);
 
     //Then, for each sub_tree, call the function;
-    for (container_index_t child_index = root->children.nb_elements; child_index--;) {
+    for (size_t child_index = root->children.nb_elements; child_index--;) {
 
         //Cache the child;
         tree_t *child = CONTAINER_GET_TYPED(tree_t *, &root->children, child_index);
@@ -78,7 +78,7 @@ void tree_DFS_pre_order(tree_t *root, void (*const traversal_function)(tree_t *)
 void tree_DFS_post_order(tree_t *root, void (*const traversal_function)(tree_t *)) {
 
     //First, for each sub_tree, call the function;
-    for (container_index_t child_index = root->children.nb_elements; child_index--;) {
+    for (size_t child_index = root->children.nb_elements; child_index--;) {
 
         //Cache the child;
         tree_t *child = CONTAINER_GET_TYPED(tree_t *, &root->children, child_index);
@@ -114,7 +114,7 @@ void tree_delete(tree_t *parent, void (*const destructor)(tree_t *)) {
  * Remove a child; Pass a function that will properly destruct the child tree;
  */
 
-void remove_child(tree_t *parent, const container_index_t index, void (*const destructor)(tree_t *)) {
+void remove_child(tree_t *parent, const size_t index, void (*const destructor)(tree_t *)) {
 
     //First, delete the child tree of the memory;
     tree_delete(CONTAINER_GET_TYPED(tree_t*, &parent->children, index), destructor);

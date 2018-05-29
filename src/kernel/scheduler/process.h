@@ -64,7 +64,7 @@ typedef struct {
 
 
     /*
-     * process_t state;
+     * process_t sequences_initialised;
      */
 
     process_state state;

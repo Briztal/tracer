@@ -2,11 +2,14 @@
 // Created by root on 3/10/18.
 //
 
-#include <malloc.h>
-#include <kernel/kernel.h>
 #include <string.h>
 
 #include "string.h"
+
+
+#include <kernel/kernel.h>
+
+
 
 #define SIZE_LIMIT (uint16_t) 255
 
@@ -108,13 +111,9 @@ string_t *string_create_from_stack(const size_t string_length, const char *const
     size_t size = length_to_size(string_length);
 
     //Create a memory space in the heap for data;
-    void *ptr = malloc(size);
+    void *ptr = kernel_malloc(size);
 
-    //If the allocation failed, error;
-    if (!ptr)
-        return 0;//TODO ERROR.
-
-    //Symmetric copy from stack to heap; NO NULL TERMINATION;
+    //Copy from stack to heap; NO NULL TERMINATION;
     memcpy(ptr, stack_src, string_length);
 
     //Null terminate the string;
@@ -133,10 +132,10 @@ string_t *string_create_from_stack(const size_t string_length, const char *const
 void string_delete(const string_t *const string) {
 
     //Free the string's data;
-    free((void *) string->data);
+    kernel_free((void *) string->data);
 
     //Free the string;
-    free((void *)string);
+    kernel_free((void *)string);
 
 }
 

@@ -25,11 +25,11 @@
 
 #include "stdbool.h"
 
-#include "task.h"
+#include "kernel/scheduler/tasks/task.h"
 
 //------------------------------------- Initialisation -------------------------------------
 
-//Initialise events data in a safe state;
+//Initialise events data in a safe sequences_initialised;
 void events_reset();
 
 

@@ -1,28 +1,28 @@
-The Kalman filter is a recursive estimator, that will at first predict a state, get a measure,
-    and compute the new state, depending on incertitude on state and measure.
+The Kalman filter is a recursive estimator, that will at first predict a sequences_initialised, get a measure,
+    and compute the new sequences_initialised, depending on incertitude on sequences_initialised and measure.
 
     We will maintain across the algorithm the following set of variables :
-        - X : the state (vector);
-        - P : the covariance matrix of the error on state (matrix);
+        - X : the sequences_initialised (vector);
+        - P : the covariance matrix of the error on sequences_initialised (matrix);
         - M : the measure (vector);
 
     We will also use three constant matrices :
-        - H : the translation matrix, used to compute the measure from the state;
+        - H : the translation matrix, used to compute the measure from the sequences_initialised;
         - Q : The covariance matrix of the process_t noise;
         - R : The covariance matrix of the measure noise;
 
 
 Step 0 : the prediction.
 
-    The current state X of the system is known (initial state given, or previously computed).
+    The current sequences_initialised X of the system is known (initial sequences_initialised given, or previously computed).
 
-    A prediction is made, from this current state :
+    A prediction is made, from this current sequences_initialised :
 
         X+ = A * X (vector)
 
-    The covariance matrix is updated, as the random variable of the state is known to follow the following rule :
+    The covariance matrix is updated, as the random variable of the sequences_initialised is known to follow the following rule :
         VX+ = A * VX + Pn (Random variable)
-            with VX is the random variable of the state, Pn is a centered gaussian random variable,
+            with VX is the random variable of the sequences_initialised, Pn is a centered gaussian random variable,
             representing the process_t noise;
 
         P+ = A * P * At + Q (matrix)
@@ -36,7 +36,7 @@ Step 1 : Measure.
 
     The prediction is translated to a prediction on the measure, with the linear relation :
         M+ = H * X+ (vector);
-            with H the translation matrix of state to measure, M+ the predicted measure, X+ the predicted state;
+            with H the translation matrix of sequences_initialised to measure, M+ the predicted measure, X+ the predicted sequences_initialised;
 
     The innovation is given by :
         Y = M - M+ = M - H * X (vector)
@@ -51,7 +51,7 @@ Step 2 : Computation.
 
         VM = H * VX + Mn (Random variable)
 
-        with VX is the random variable of the state, VM the random variable of the measure, Mn is a centered gaussian
+        with VX is the random variable of the sequences_initialised, VM the random variable of the measure, Mn is a centered gaussian
             random variable, representing the measure noise;
 
         S = H * P+ * Ht + R (matrix)
@@ -70,11 +70,11 @@ Step 2 : Computation.
 
 Step 3 : Update.
 
-    We can now update the current state, with the following formula :
+    We can now update the current sequences_initialised, with the following formula :
 
         newX = X+ + K * Y (vector)
 
-        with newX the new state, X+ the predicted state, K the Kalman gain, Y the innovation;
+        with newX the new sequences_initialised, X+ the predicted sequences_initialised, K the Kalman gain, Y the innovation;
 
 
     Finally, we can update the covariance matrix with the following formula :
@@ -82,5 +82,5 @@ Step 3 : Update.
         newP = (I - K * H) * P+ (matrix)
 
         with I the identity matrix, K the Kalman gain, H the transformation matrix, P+ the covariance of the predicted
-            state;
+            sequences_initialised;
 

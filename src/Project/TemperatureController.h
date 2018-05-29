@@ -41,7 +41,7 @@ class TemperatureController {
 
 public:
 
-    //Initialise the class in a safe state;
+    //Initialise the class in a safe sequences_initialised;
     static void initialise_data();
 
 
@@ -63,9 +63,9 @@ public:
     //---------------------------HotEnds---------------------------
 
     /*
-     * The hotend state structure : This structure is used to modify the state of a particular hotend.
+     * The hotend sequences_initialised structure : This structure is used to modify the sequences_initialised of a particular hotend.
      *
-     *  It contains fields (and flags) to identify the hotend, and to update its state (activity and tempertaure).
+     *  It contains fields (and flags) to identify the hotend, and to update its sequences_initialised (activity and tempertaure).
      */
 
     struct hotend_state_t {
@@ -95,13 +95,13 @@ public:
     };
 
 
-    //Set the current hotends state.
-    static task_state_t set_hotends_state(hotend_state_t state);
+    //Set the current hotends sequences_initialised.
+    static task_state_t set_hotends_state(hotend_state_t sequences_initialised);
 
-    //Scheduler for the state setter
-GENERATE_SCHEDULER(set_hotends_state, 0, hotend_state_t, state);
+    //Scheduler for the sequences_initialised setter
+GENERATE_SCHEDULER(set_hotends_state, 0, hotend_state_t, sequences_initialised);
 
-    //Get the current hotends state.
+    //Get the current hotends sequences_initialised.
     static hotend_state_t get_hotend_state(uint8_t hotend_id);
 
     //Get a hotend's real-time temperature.
@@ -123,7 +123,7 @@ public:
 
 
     /*
-     * The hotbed state structure : This structure is used to modify hotbed's state (activity and temperature)
+     * The hotbed sequences_initialised structure : This structure is used to modify hotbed's sequences_initialised (activity and temperature)
      */
     struct hotbed_state_t {
 
@@ -136,13 +136,13 @@ public:
 
     };
 
-    //Set the current hotbeds state.
-    static task_state_t set_hotbed_state(hotbed_state_t state);
+    //Set the current hotbeds sequences_initialised.
+    static task_state_t set_hotbed_state(hotbed_state_t sequences_initialised);
 
-    //Scheduler for the state setter
-GENERATE_SCHEDULER(set_hotbed_state, 0, hotbed_state_t, state);
+    //Scheduler for the sequences_initialised setter
+GENERATE_SCHEDULER(set_hotbed_state, 0, hotbed_state_t, sequences_initialised);
 
-    //Get the current hotbeds state.
+    //Get the current hotbeds sequences_initialised.
     static hotbed_state_t get_hotbeds_state();
 
     //Get the hotbed's real-time temperature.
@@ -151,7 +151,7 @@ GENERATE_SCHEDULER(set_hotbed_state, 0, hotbed_state_t, state);
 
 private:
 
-    //The local hotbed state.
+    //The local hotbed sequences_initialised.
     static hotbed_state_t hotbed_state;
 
 

@@ -39,7 +39,7 @@ typedef struct {
 
 /*
  * As the connection is shared between its endpoints, and managed by the connection service, we will define a
- *  connection state, that will indicate to the service that the connection must be closed;
+ *  connection sequences_initialised, that will indicate to the service that the connection must be closed;
  */
 
 typedef enum flux_state_t{
@@ -125,7 +125,7 @@ typedef struct flux_t{
     //Is the cflux critical ?
     bool critical;
 
-    //The state of the stream;
+    //The sequences_initialised of the stream;
     flux_state_t state;
 
 

@@ -51,7 +51,7 @@ void initialise_hardware(const kinetis_UART_data_t *);
 //Configure the packet format;
 void configure_packet_format(const kinetis_UART_data_t *data, const UART_config_t *);
 
-//Configure the state;
+//Configure the sequences_initialised;
 void configure_modem(const kinetis_UART_data_t *data, const UART_config_t *);
 
 //Configure the transmission layer;
@@ -96,7 +96,7 @@ void kinetis_UART_init(void *const data_p, const driver_config_t *const config_p
     //First, initialise the UART data-structure according to the config;
     set_watermark_policies(data, config);
 
-    //Initialise the hardware in a safe state;
+    //Initialise the hardware in a safe sequences_initialised;
     initialise_hardware(data);
 
     //Initialise different parts of the UART;
@@ -981,7 +981,7 @@ void kinetis_UART_error_interrupt(const kinetis_UART_data_t *data) {
 
     }
 
-    //Cache C2 (contains the state of tx and rx);
+    //Cache C2 (contains the sequences_initialised of tx and rx);
     uint8_t C2 = registers->C2;
 
     //If there was a receiver overrun or overflow :
@@ -1019,7 +1019,7 @@ void kinetis_UART_error_interrupt(const kinetis_UART_data_t *data) {
 
     }
 
-    //Restore C2's previous state (will re-enable rx or tx if necessary;
+    //Restore C2's previous sequences_initialised (will re-enable rx or tx if necessary;
     registers->C2 = C2;
 
 }

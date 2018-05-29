@@ -7,6 +7,8 @@
 
 #include "stdint.h"
 
+#include <data_structures/containers/llist.h>
+
 
 typedef struct {
     //TODO INTERGRATE THE PRIORITY DATA;
@@ -19,7 +21,7 @@ typedef struct {
 typedef enum {
 
     //The task is persistent (event or synchronous) Must not be deleted after completion;
-            PERSISTENT_TASK,
+            SERVICE_TASK,
 
     //The task comes from a sequence; Must be deleted after completion;
             SEQUENCE_TASK,
@@ -47,42 +49,35 @@ typedef enum {
 
 /*
  * The task structure;
+ *
+ *  Tasks are are not executed and removed in a particular order. They must be stored as linked elements.
+ *
+ *  A task is composed of a linked element, and of all data related to a task;
  */
 
 typedef struct {
 
+    //The linked element part;
+    linked_element_t linked_element;
+
     //The task's function;
-    void (*function)(void *args);
+    void (*const function)(void *args);
 
     //The function's arguments;
-    void *args;
+    const void *const args;
 
     //The cleanup function to execute after the task's function;
-    void (*cleanup)();
+    void (*const cleanup)();
 
     //The origin of the task
     const task_type_t task_type;
-
-    //An union, that specifies information depending on the task's origin;
-    union {
-
-        //If the task comes from a sequence, its id;
-        uint8_t sequence_id;
-
-        //If the task comes from an event, or is synchronous, its state;
-        persistent_task_state_t persistent_task_state;
-
-    };
 
 } task_t;
 
 
 //---------------------- Public Functions ----------------------
 
-//Add a task;
-task_t *task_create(void (*func)(void *), void *args, void (*cleanup)(), task_type_t origin);
-
-//Eventually delete a task;
-void task_cleanup(task_t *);
+//Delete entirely a heap stored task composed struct;
+void task_delete(task_t *task_p);
 
 #endif //TRACER_TASKDATA_H

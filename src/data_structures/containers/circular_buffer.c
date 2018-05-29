@@ -48,7 +48,7 @@ void cbuffer_validate_input(cbuffer_t *cbuffer) {
 
 
     //Increment safely;
-    cbuffer->input_index = (cbuffer->input_index + (container_index_t) 1) % cbuffer->container.nb_elements;
+    cbuffer->input_index = (cbuffer->input_index + (size_t) 1) % cbuffer->container.nb_elements;
 
 }
 
@@ -58,7 +58,7 @@ void cbuffer_validate_input(cbuffer_t *cbuffer) {
  *  An offset of 0 hits the input element, 1 hits the element inserted just before, etc...
  */
 
-inline void *cbuffer_read_input(cbuffer_t *cbuffer, container_index_t offset) {
+inline void *cbuffer_read_input(cbuffer_t *cbuffer, size_t offset) {
 
     /*
      * read_input is used to access previously inserted data, but also to update the element we will validate;
@@ -71,10 +71,10 @@ inline void *cbuffer_read_input(cbuffer_t *cbuffer, container_index_t offset) {
     }
 
     //First, cache the input index;
-    container_index_t input_index = cbuffer->input_index;
+    size_t input_index = cbuffer->input_index;
 
     //Then determine the index of the element to read;
-    container_index_t index = (input_index >= offset) ? input_index - offset : cbuffer->container.nb_elements -
+    size_t index = (input_index >= offset) ? input_index - offset : cbuffer->container.nb_elements -
                                                                                (offset - input_index);
 
     //Get the element at the required position. A modulo is applied to ensure to hit a container's element;
@@ -93,7 +93,7 @@ void cbuffer_discard_output(cbuffer_t *cbuffer) {
         return;//TODO ERROR;
 
     //Increment safely;
-    cbuffer->output_index = (cbuffer->output_index + (container_index_t) 1) % cbuffer->container.nb_elements;
+    cbuffer->output_index = (cbuffer->output_index + (size_t) 1) % cbuffer->container.nb_elements;
 
 }
 
@@ -103,7 +103,7 @@ void cbuffer_discard_output(cbuffer_t *cbuffer) {
  * An offset of 0 hits the output element, 1 hits the element inserted right after, ...
  */
 
-void *cbuffer_read_output(cbuffer_t *cbuffer, container_index_t offset) {
+void *cbuffer_read_output(cbuffer_t *cbuffer, size_t offset) {
 
     //TODO ERROR IF BOUNDS OVERRUN
 
@@ -118,13 +118,13 @@ void *cbuffer_read_output(cbuffer_t *cbuffer, container_index_t offset) {
     }
 
     //First, cache the output_index index;
-    container_index_t output_index = cbuffer->output_index;
+    size_t output_index = cbuffer->output_index;
 
     //As an addition is required, we will switch to the larger type to avoid a type overflow;
     uint32_t larger_index = (uint32_t) output_index + (uint32_t) offset;
 
     //Then determine the index of the element to read by a modulo;
-    container_index_t index = (uint16_t) (larger_index % (uint32_t) cbuffer->container.nb_elements);
+    size_t index = (uint16_t) (larger_index % (uint32_t) cbuffer->container.nb_elements);
 
     //Get the element at the required position. A modulo is applied to ensure to hit a container's element;
     return container_get_element(&cbuffer->container, index);
@@ -139,7 +139,7 @@ void *cbuffer_read_output(cbuffer_t *cbuffer, container_index_t offset) {
  *  All elements pointers that have been queried are invalidated;
  */
 
-void cbuffer_resize(cbuffer_t *cbuffer, container_index_t new_size) {
+void cbuffer_resize(cbuffer_t *cbuffer, size_t new_size) {
 
     //Dynamic resize is not supported for instance;
     if (cbuffer->nb_spaces != cbuffer->container.nb_elements) {
@@ -174,7 +174,7 @@ void cbuffer_resize(cbuffer_t *cbuffer, container_index_t new_size) {
     bool rearrangement = (cbuffer->input_index < cbuffer->output_index) || cbuffer->nb_spaces;
 
     //Cache the old size of the container;
-    container_index_t old_size =  cbuffer->container.nb_elements;
+    size_t old_size =  cbuffer->container.nb_elements;
 
     //Cache the number of added elements;
     uint8_t added_elements =

@@ -2,8 +2,9 @@
 // Created by root on 5/5/18.
 //
 
-#include <malloc.h>
 #include <string.h>
+
+#include <kernel/kernel.h>
 
 #include "container.h"
 
@@ -35,7 +36,7 @@ void container_move(container_t *dst, container_t *src) {
  *  Finally, it copies the referenced element;
  */
 
-void container_insert_element(container_t *container, const container_index_t index, void *element) {
+void container_insert_element(container_t *container, const size_t index, void *element) {
 
     //If the index is invalid, fail;
     if (index > container->nb_elements)
@@ -43,10 +44,10 @@ void container_insert_element(container_t *container, const container_index_t in
         return;
 
     //Resize the array;
-    container_resize(container, container->nb_elements + (container_index_t) 1);
+    container_resize(container, container->nb_elements + (size_t) 1);
 
     //Cache the number of elements;
-    const container_index_t nb_elements = container->nb_elements;
+    const size_t nb_elements = container->nb_elements;
 
     //Cache the size of an element;
     const uint8_t element_size = container->element_size;
@@ -61,7 +62,7 @@ void container_insert_element(container_t *container, const container_index_t in
     uint8_t *src_ptr = dst_ptr - element_size;
 
     //All value has been reallocated, now we must shift value from the insertion index;
-    for (container_index_t shift_counts = nb_elements - (index + (container_index_t) 1); shift_counts--;) {
+    for (size_t shift_counts = nb_elements - (index + (size_t) 1); shift_counts--;) {
 
         //Copy the value from source to dest, and decrease both pointers;
         *(dst_ptr--) = *(src_ptr--);
@@ -100,7 +101,7 @@ void container_append_element(container_t *container, void *element) {
  * container_get_element : returns a pointer to the element at the given index;
  */
 
-void *container_get_element(container_t *container, container_index_t index) {
+void *container_get_element(container_t *container, size_t index) {
 
     //If the index is invalid :
     if (index >= container->nb_elements) {
@@ -111,7 +112,7 @@ void *container_get_element(container_t *container, container_index_t index) {
     }
 
     //Determine the adequate pointer to return;
-    return container->elements + (uint32_t) (index * (container_index_t) container->element_size);
+    return container->elements + (uint32_t) (index * (size_t) container->element_size);
 
 }
 
@@ -120,7 +121,7 @@ void *container_get_element(container_t *container, container_index_t index) {
  * container_set_element : sets the element at the given index;
  */
 
-void container_set_element(container_t *container, container_index_t index, void *element) {
+void container_set_element(container_t *container, size_t index, void *element) {
 
     //If the index is invalid :
     if (index >= container->nb_elements) {
@@ -131,7 +132,7 @@ void container_set_element(container_t *container, container_index_t index, void
     }
 
     //Cache the src and dst pointer;
-    uint8_t *dst_ptr = container->elements + (uint32_t) (index * (container_index_t) container->element_size);
+    uint8_t *dst_ptr = container->elements + (uint32_t) (index * (size_t) container->element_size);
     uint8_t *src_ptr = element;
 
     //For each byte to copy;
@@ -146,10 +147,10 @@ void container_set_element(container_t *container, container_index_t index, void
 
 
 //Remove an element;
-void container_remove_element(container_t *container, container_index_t index) {
+void container_remove_element(container_t *container, size_t index) {
 
     //First, cache the current size of the array;
-    container_index_t current_size = container->nb_elements;
+    size_t current_size = container->nb_elements;
 
     //If the index is invalid :
     if (index >= container->nb_elements) {
@@ -168,11 +169,11 @@ void container_remove_element(container_t *container, container_index_t index) {
     const uint8_t element_size = container->element_size;
 
     //Determine source and dest pointers : addresses of (resp) the element to delete and the next one;
-    uint8_t *dst_ptr = (uint8_t *) (container->elements + (index * (container_index_t) element_size));
+    uint8_t *dst_ptr = (uint8_t *) (container->elements + (index * (size_t) element_size));
     uint8_t *src_ptr = dst_ptr + element_size;
 
     //Determine the number of bytes to shift;
-    uint32_t shift_counter = element_size * (container->nb_elements - index - (container_index_t) 1);
+    uint32_t shift_counter = element_size * (container->nb_elements - index - (size_t) 1);
 
     //For each byte to shift :
     for (; shift_counter--;) {
@@ -183,7 +184,7 @@ void container_remove_element(container_t *container, container_index_t index) {
     }
 
     //Now, we can decrease our size of 1;
-    container_resize(container, current_size - (container_index_t) 1);
+    container_resize(container, current_size - (size_t) 1);
 
 }
 
@@ -195,7 +196,7 @@ void container_remove_element(container_t *container, container_index_t index) {
 void container_remove_last_element(container_t *container) {
 
     //Determine the last index, and call remove on it;
-    container_remove_element(container, container->nb_elements - (container_index_t) 1);
+    container_remove_element(container, container->nb_elements - (size_t) 1);
 
 }
 
@@ -218,7 +219,12 @@ void container_clear(container_t *container) {
  *  The size is expressed in number of elements;
  */
 
-void container_resize(container_t *container, const container_index_t new_size) {
+void container_resize(container_t *container, const size_t new_size) {
+
+    //If the new size is superior to the max size :
+    if (new_size > container->max_nb_elements) {
+        return;//TODO ERROR
+    }
 
     //Cache the element size;
     const uint8_t element_size = container->element_size;
@@ -227,7 +233,7 @@ void container_resize(container_t *container, const container_index_t new_size) 
     uint32_t new_array_size = (uint32_t) new_size * (uint32_t) element_size;
 
     //Try to reallocate the array;
-    void *new_array = realloc(container->elements, new_array_size);
+    void *new_array = kernel_realloc(container->elements, new_array_size);
 
     //If the size was not zero, and the resulting pointer is null (reallocation failure);
     if (new_array_size && !new_array) {
@@ -242,6 +248,5 @@ void container_resize(container_t *container, const container_index_t new_size) 
 
     //Update the size;
     container->nb_elements = new_size;
-
 
 }

@@ -24,7 +24,7 @@ A microcontroller can be describes as the union of two elements :
         various tasks, independently of the processor;
 
         They share parts of the RAM with the processor. More precisely, they own a part of the RAM (a set of contiguous memory
-        cases) that can be used to configure them, to know their state, or to get data from them.
+        cases) that can be used to configure them, to know their sequences_initialised, or to get data from them.
 
         As their tasks are asynchronous in the processor's point of view (ex : the processor doesn't explicitly know when the
         UART will have sent its data), they can communicate directly with the processor through interrupts.

@@ -21,7 +21,6 @@
 
 #include <kernel/kernel.h>
 
-#include <string.h>
 
 //-------------------------------- Initialisation --------------------------------
 
@@ -33,9 +32,8 @@ event_t *event_create(const char *name) {
 
     //Define the new event;
     event_t init =  {
-            .pending = false,
-            .tasks = EMPTY_CONTAINER(task_t *),
-            .next_task = 0,
+            .tasks = EMPTY_LINKED_RING(),
+            .nb_pending = 0,
     };
 
     //Allocate some memory in the heap;
@@ -48,7 +46,7 @@ event_t *event_create(const char *name) {
     char *dst = event->name;
 
     //For each byte of the name, while termination is not encountered :
-    for (uint8_t i = EVENT_NAME_SIZE; i--;) {
+    for (uint8_t i = EVENT_NAME_LENGTH; i--;) {
 
         //Copy the byte and cache it;
         char c = *(dst++) = *(name++);
@@ -61,6 +59,9 @@ event_t *event_create(const char *name) {
         }
 
     }
+
+    //Nullify the end of the name;
+    event->name[EVENT_NAME_LENGTH + 1] = 0;
 
     //If all letters were copied but no termination has been encountered, the name was too big. Error;
     return event;//TODO kernel PANIC;
@@ -77,26 +78,12 @@ event_t *event_create(const char *name) {
 
 void event_append_task(event_t *event, task_t *task) {
 
-    //elements (task_t *) are passer by pointer for insertion;
-    container_append_element(&event->tasks, &task);
+    //Append the task to the event's tasks list;
+    lring_insert_after(&event->tasks, (linked_element_t *) task);
 
-}
-
-
-/*
- * event_clear : this function removes all tasks of the given event
- */
-
-void event_clear(event_t *event) {
-
-    //Clear the event's tasks container;
-    container_clear(&event->tasks);
-
-    //No more task to schedule;
-    event->next_task = 0;
-
-    //Event is no more pending;
-    event->pending = false;
+    //If the event is pending, increment the number of pending tasks;
+    if (event->nb_pending)
+        event->nb_pending++;
 
 }
 
@@ -109,22 +96,15 @@ void event_clear(event_t *event) {
 
 bool event_set_pending(event_t *event) {
 
-    //If the event is already pending, nothing to do;
-    if (event->pending)
-        return false;
-
     //Cache the number of tasks in the event;
-    const container_index_t nb_tasks = event->tasks.nb_elements;
+    const size_t nb_tasks = event->tasks.nb_elements;
+
+    //Mark the event pending;
+    event->nb_pending = nb_tasks;
 
     //If the event doesn't contain any tasks, nothing to do;
     if (!nb_tasks)
         return false;
-
-    //Mark the event pending;
-    event->pending = true;
-
-    //Update the next task's index to the last task;
-    event->next_task = 0;
 
     //Complete;
     return true;
@@ -139,33 +119,21 @@ bool event_set_pending(event_t *event) {
 task_t *event_get_task(event_t *event) {
 
     //If the event is not pending :
-    if (!event->pending) {
+    if (!event->nb_pending) {
 
         //System error;
         return 0;//TODO ERROR;
 
     }
 
-    //To avoid redundant access, let's cache the current task's id;
-    container_index_t next_task_id = event->next_task;
+    //Decrement the number of pending tasks;
+    event->nb_pending--;
 
-    //First, we must get the next task, and increase the next task id; elements (task_t *) are returned by pointer;
-    task_t *task = *(task_t **) container_get_element(&event->tasks, next_task_id++);
+    //Get the next task;
+    task_t *task = (task_t *) &event->tasks.current;
 
-    //Then, we must update the next task pointer.
-
-    //If the next task's id is outside the task's array :
-    if (next_task_id >= event->tasks.nb_elements) {
-
-        //All tasks have been executed, the event is not pending anymore;
-        event->pending = false;
-        event->next_task = 0;
-
-    } else {
-
-        //Almost another task has to be executed. Save the next task's id;
-        event->next_task = next_task_id;
-    }
+    //Go to the next task;
+    lring_incr((linked_ring_t *) event);
 
     //Finally, return the cached task;
     return task;

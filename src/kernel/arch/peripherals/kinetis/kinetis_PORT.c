@@ -222,7 +222,7 @@ void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *conf
         //Reset the filtering length;
         config->input_filter.filtering_length = 1;
 
-        //If the passive filtering is enabled, mark it. Otherwise, mark the non filtering state;
+        //If the passive filtering is enabled, mark it. Otherwise, mark the non filtering sequences_initialised;
         if (config_register & PORT_PCR_PFE) {
             config->input_filter.input_filter = PORT_PASSIVE_FILTERING;
         } else {
@@ -236,7 +236,7 @@ void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *conf
     /*
      * Output mode :
      *
-     * Set the output mode. The section is left verbose to clearly state that all cases are handled;
+     * Set the output mode. The section is left verbose to clearly sequences_initialised that all cases are handled;
      *  Compiler optimised;
      */
 
@@ -357,7 +357,7 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
         /*
          * Output mode :
          *
-         * Set the output mode. The section is left verbose to clearly state that all cases are handled;
+         * Set the output mode. The section is left verbose to clearly sequences_initialised that all cases are handled;
          *  Compiler optimised;
          */
 
