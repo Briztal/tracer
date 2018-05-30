@@ -8,6 +8,7 @@
 
 //TODO PREEMPTIVE PATCH FOR EVENTS;
 
+
 //----------------------------- Prioritary -----------------------------
 
 //TODO SCHEDULER GENERAL LIBRARY
@@ -36,6 +37,12 @@
 
 
 //LONG TERM :
+
+//INTEGRATE THE NON-PREEMPTION TIME IN THE TASK (1 FORBIDDEN, BECOMES 2);
+
+//INTEGRATE PRIORITY DATA IN THE TASK;
+
+//TODO VARIABLE PREEMPTION TIME PATCH FOR PROCESSES AND TASKS;
 
 //TODO Timeline reset patch in systick and services;
 

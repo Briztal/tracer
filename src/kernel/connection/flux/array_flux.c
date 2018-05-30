@@ -32,7 +32,7 @@ array_flux_t *array_flux_create(bool critical, size_t element_size,
     flux->tx_copier = tx_copier;
     flux->rx_copier = rx_copier;
 
-    //Return the initialised cflux;
+    //Return the scheduler_initialised cflux;
     return flux;
 
 }

@@ -29,7 +29,7 @@ indirect_flux_t *indirect_flux_create_tx_passive(bool critical, size_t element_s
     flux->indirect_accessor = tx_accessor;
     flux->copier = rx_copier;
 
-    //Return the initialised cflux;
+    //Return the scheduler_initialised cflux;
     return flux;
 
 }
@@ -52,7 +52,7 @@ indirect_flux_t *indirect_flux_create_rx_passive(bool critical, size_t element_s
     flux->indirect_accessor = rx_accessor;
     flux->copier = tx_copier;
 
-    //Return the initialised cflux;
+    //Return the scheduler_initialised cflux;
     return flux;
 }
 

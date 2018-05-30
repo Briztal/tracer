@@ -20,6 +20,9 @@ typedef struct {
  */
 typedef enum {
 
+    //The task is the loop executed by the scheduler when in inactive state;
+            EMPTY_TASK,
+
     //The task is persistent (event or synchronous) Must not be deleted after completion;
             SERVICE_TASK,
 
@@ -32,7 +35,7 @@ typedef enum {
 /*
  * If the task is persistent, we must know its status, to be sure that we don't delete a running task;
  */
-
+/*
 typedef enum {
 
     //The task is not started, and is stored in its container;
@@ -46,7 +49,7 @@ typedef enum {
 
 } persistent_task_state_t;
 
-
+*/
 /*
  * The task structure;
  *

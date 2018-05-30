@@ -20,7 +20,10 @@ typedef struct {
 } tstring_t;
 
 //The struct default initialiser;
-#define EMPTY_TSTRING(s) (tstring_t ) {.tree_data = EMPTY_TREE, .string = (s)}
+#define EMPTY_TSTRING(s) (tstring_t ) {.tree_data = EMPTY_TREE(10), .string = (s)}
+
+//The struct default initialiser;
+#define EMPTY_SIZED_TSTRING(max_nb_children, s) (tstring_t ) {.tree_data = EMPTY_TREE(max_nb_children), .string = (s)}
 
 
 //Create a tstring from a string; Moves data;

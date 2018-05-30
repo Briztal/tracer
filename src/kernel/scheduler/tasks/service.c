@@ -66,7 +66,7 @@ void services_insert(service_t *service);
 
 /*
  * The service manager starts in the uninitialised sequences_initialised,
- * then becomes initialised, and is finally started;
+ * then becomes scheduler_initialised, and is finally started;
  */
 bool services_initialised = false;
 
@@ -82,10 +82,10 @@ linked_list_t *pending_services;
 
 void services_initialise(size_t max_nb_services) {
 
-    //If the service manager has already been initialised :
+    //If the service manager has already been scheduler_initialised :
     if (services_initialised) {
 
-        //Error, must not be initialised twice;
+        //Error, must not be scheduler_initialised twice;
         return;//TODO ERROR
 
     }
@@ -101,10 +101,10 @@ void services_initialise(size_t max_nb_services) {
 
 void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
 
-    //If the service manager has not been initialised :
+    //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be initialised before usage;
+        //Error, must be scheduler_initialised before usage;
         return;//TODO ERROR
 
     }
@@ -129,10 +129,10 @@ void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint3
 
 void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period) {
 
-    //If the service manager has not been initialised :
+    //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be initialised before usage;
+        //Error, must be scheduler_initialised before usage;
         return;//TODO ERROR
 
     }
@@ -181,7 +181,6 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
             .next_exec_time = offset + systick_milliseconds(),
             .remaining_execs = remaining_execs,
             .period = period,
-            .executionFlag = false,
     };
 
     //Create and initialise the service in the heap;
@@ -243,10 +242,10 @@ void service_insert(service_t *service) {
 
 bool services_available() {
 
-    //If the service manager has not been initialised :
+    //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be initialised before usage;
+        //Error, must be scheduler_initialised before usage;
         return false;//TODO ERROR
 
     }
@@ -292,10 +291,10 @@ bool services_available() {
 service_t *services_get() {
 
 
-    //If the service manager has not been initialised :
+    //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be initialised before usage;
+        //Error, must be scheduler_initialised before usage;
         return 0;//TODO ERROR
 
     }

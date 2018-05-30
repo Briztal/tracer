@@ -21,7 +21,7 @@ tstring_t *tstring_from_string(string_t *src) {
     //Allocate some space for the new tstring and initialise it;
     tstring_t *tstring = kernel_malloc_copy(sizeof(tstring_t), &init);
 
-    //Return the new initialised tstring;
+    //Return the new scheduler_initialised tstring;
     return tstring;
 
 }

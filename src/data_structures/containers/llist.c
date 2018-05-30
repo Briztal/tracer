@@ -351,6 +351,55 @@ linked_element_t *llist_remove_end(linked_list_t *list) {
 
 
 /*
+ * llist_remove_element : un-links an element of the list;
+ */
+
+void llist_remove_element(linked_list_t *list, linked_element_t *element) {
+
+    //If the element is null, error;
+    if (!element) {
+        return;//TODO ERROR;
+    }
+
+    //Cache the element's successor;
+    linked_element_t *next = element->next;
+
+    //If the successor is null, the element is the end of the list;
+    if (!next) {
+
+        //Remove the last element of the list;
+        llist_remove_end(list);
+
+    } else {
+
+        //Cache the element's predecessor;
+        linked_element_t *prev = element->prev;
+
+
+        //If the predecessor is null, the element is the list's first;
+        if (!prev) {
+
+            //Remove the first element of the list;
+            llist_remove_begin(list);
+
+        } else {
+
+            //Link the predecessor and the successor;
+            prev->next = next;
+            next->prev = prev;
+
+            //Unlink the element;
+            element->prev = element->next = 0;
+
+        }
+
+    }
+
+}
+
+
+
+/*
  * ------------------------------ Linked list ------------------------------
  */
 
@@ -358,7 +407,7 @@ linked_element_t *llist_remove_end(linked_list_t *list) {
  * lring_insert_after : insert an element after the current element of the ring;
  */
 
-void lring_insert_after(linked_ring_t * ring, linked_element_t * element) {
+void lring_insert_after(linked_ring_t *ring, linked_element_t *element) {
 
     //If the maximum size is reached :
     if (ring->nb_elements == ring->max_nb_elements)
@@ -388,7 +437,7 @@ void lring_insert_after(linked_ring_t * ring, linked_element_t * element) {
 }
 
 
-void lring_insert_before(linked_ring_t * ring, linked_element_t * element) {
+void lring_insert_before(linked_ring_t *ring, linked_element_t *element) {
 
     //If the maximum size is reached :
     if (ring->nb_elements == ring->max_nb_elements)
@@ -419,7 +468,7 @@ void lring_insert_before(linked_ring_t * ring, linked_element_t * element) {
 
 
 //Focus on the next element;
-void lring_incr(linked_ring_t * ring) {
+void lring_incr(linked_ring_t *ring) {
 
     //If the ring is empty, nothing to do;
     if (!ring->nb_elements) {
@@ -432,7 +481,7 @@ void lring_incr(linked_ring_t * ring) {
 }
 
 //Focus on the previous element;
-void lring_decr(linked_ring_t * ring) {
+void lring_decr(linked_ring_t *ring) {
 
     //If the ring is empty, nothing to do;
     if (!ring->nb_elements) {

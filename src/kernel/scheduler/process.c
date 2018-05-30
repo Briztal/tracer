@@ -4,6 +4,8 @@
 
 
 #include <malloc.h>
+#include <kernel/scheduler/tasks/task.h>
+#include <kernel/kernel.h>
 #include "stdint.h"
 
 #include "stdbool.h"
@@ -88,34 +90,7 @@ void process_reset_context(process_t *process) {
     process->stack_pointer = core_get_thread_stack_pointer();
 
     //As the process_t is just reset, he potentially have no function to execute. It is so terminated by default;
-    process->state = TERMINATED;
-
-}
-
-
-//---------------------------- State alteration ----------------------------
-
-/*
- * process_lock : locks the required process_t;
- */
-
-inline void process_lock(process_t *process) {
-
-    //Lock the process_t if it is active;
-    if (process->state == ACTIVE)
-        process->state = STOPPED;
-
-}
-
-
-/*
- * process_unlock : unlocks the required process_t;
- */
-inline void process_unlock(process_t *process) {
-
-    //Unlock the process_t if it is stopped;
-    if (process->state == STOPPED)
-        process->state = ACTIVE;
+    process->state = PROCESS_TERMINATED;
 
 }
 
@@ -146,35 +121,37 @@ void process_init() {
 void process_function(volatile process_t *volatile process) {
 
     //The process_t must be pending, otherwise, there has been an error in the scheduler.
-    if ((volatile process_state) process->state != PENDING) {
+    if ((volatile process_state_t) process->state != PROCESS_PENDING) {
 
         //Kernel panic;
         //TODO KERNEL PANIC;
 
     }
-    //Mark the process_t active;
-    process->state = (volatile process_state) ACTIVE;
+
+    //Cache the task pointer;
+    volatile task_t *volatile task = process->task;
 
     //Execute the function, passing args;
-    (*(process->process_function))(process->args);
+    (*(task->function))((void *) task->args);
 
     //Cache the exit function;
-    void (*volatile exit_function)() = process->exit_function;
+    void (*volatile cleanup)() = task->cleanup;
 
     //If the function is not null, execute it;
-    if (exit_function) {
-        (*exit_function)();
+    if (cleanup) {
+        (*cleanup)();
     }
 
-
     //Mark the process_t inactive; Scheduler will be notified at context switch;
-    process->state = (volatile process_state) TERMINATED;
+    process->state = (volatile process_state_t) PROCESS_TERMINATED;
+
+    //Require a context switch, as the task is finished;
+    core_trigger_context_switch();
 
     //Infinite loop;
     while (true) {
 
-        //Require a context switch, as the task is finished;
-        core_trigger_context_switch();
+        //TODO ERROR, FUNCTION CALLED FROM INTERRUPT OR CRITICAL SECTION LEAVE FORGOT IN THE CODE;
 
     }
 
@@ -195,7 +172,7 @@ void process_function(volatile process_t *volatile process) {
 void process_start_execution() {
 
     //First, we must initialise the scheduler, that will configure threads before the actual start;
-    scheduler_initialise();
+    scheduler_impl_initialise();
 
     //Get the first process to execute;
     process_t *first_process = scheduler_select_process();
@@ -253,10 +230,13 @@ void process_preempt() {
     current_process->stack_pointer = core_get_thread_stack_pointer();
 
     //Update the current process's status (ex : if terminated, will be stopped);
-    scheduler_clean_process(current_process);
+    scheduler_cleanup_process(current_process);
 
     //Get a new process_t to execute, and pass the old one for eventual relocation;
     current_process = scheduler_select_process();
+
+    //Set the next preemption time in 2 ms (1ms would leave potentially 0 ms);
+    systick_set_process_duration(2);
 
     //Set the appropriate context;
     core_set_thread_stack_pointer(current_process->stack_pointer);

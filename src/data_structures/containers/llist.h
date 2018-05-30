@@ -68,7 +68,7 @@ typedef struct {
 } linked_list_t ;
 
 //Initializer
-#define EMPTY_LINKED_LIST(max_nb) {.first = 0, .last = 0, .nb_elements = 0, .max_nb_elements = (max_nb)}
+#define EMPTY_LINKED_LIST(max_nb) (linked_list_t) {.first = 0, .last = 0, .nb_elements = 0, .max_nb_elements = (max_nb)}
 
 
 //Verify that an element can be inserted;
@@ -91,29 +91,12 @@ void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_elem
 //Remove the first element of the list;
 linked_element_t *llist_remove_begin(linked_list_t *list);
 
+//Remove an element of the list;
+void llist_remove_element(linked_list_t *list, linked_element_t *element);
+
 //Remove the last element of the list;
 linked_element_t *llist_remove_end(linked_list_t *list);
 
-
-/*
- * ------------------------------ Sorted list ------------------------------
- */
-
-typedef struct {
-
-    //The list's first element;
-    linked_element_t *first;
-
-    //The list's last element;
-    linked_element_t *last;
-
-    //The number of elements;
-    size_t nb_elements;
-
-    //The maximum number of elements;
-    size_t max_nb_elements;
-
-}
 
 /*
  * ------------------------------ Linked ring ------------------------------

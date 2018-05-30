@@ -15,18 +15,21 @@
 typedef enum {
 
     //Execution required;
-            PENDING = 0,
+            PROCESS_PENDING = 0,
 
-    //Execution in progress;
-            ACTIVE = 1,
+    //Process stop required by a semaphore;
+            PROCESS_STOP_REQUIRED = 1,
 
-    //Thread stopped by a semaphore;
-            STOPPED = 2,
+    //Thread stopped;
+            PROCESS_STOPPED = 2,
 
     //Execution done;
-            TERMINATED = 3
+            PROCESS_TERMINATION_REQUIRED = 3,
 
-} process_state;
+    //Execution done;
+            PROCESS_TERMINATED = 4,
+
+} process_state_t;
 
 
 /*
@@ -35,22 +38,10 @@ typedef enum {
 
 typedef struct {
 
-    /*
-     * The priority determination structure;
-     */
+    //The task data;
+    task_t *task;
 
     //TODO PRIO DATA;
-
-    /*
-     * The execution data : the main function, its args, and the exit function;
-     */
-
-    void (*process_function)(void *);
-
-    void *args;
-
-    void (*exit_function)();
-
 
     /*
      * Context data : the stack pointer, stack bounds;
@@ -67,7 +58,7 @@ typedef struct {
      * process_t sequences_initialised;
      */
 
-    process_state state;
+    process_state_t state;
 
 } process_t;
 
@@ -84,14 +75,7 @@ void process_start_execution();
 //Get the process currently in execution;
 process_t *process_get_current();
 
-//Set the working process_t's stack pointer;
-void process_save_sp(stack_ptr_t new_stack_pointer);
 
-//Lock a thread (semaphore call);
-void process_lock(process_t *process);
-
-//Unlock a thread (semaphore call);
-void process_unlock(process_t *process);
 
 
 #endif //TRACER_THREADMANAGER_H

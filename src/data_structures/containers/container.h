@@ -37,7 +37,7 @@ typedef struct {
 void container_move(container_t *dst, container_t *src);
 
 //Verify that an element can be inserted;
-inline bool lring_insertion_available(container_t *container) {
+inline bool container_insertion_available(container_t *container) {
     return container->nb_elements < container->max_nb_elements;
 }
 

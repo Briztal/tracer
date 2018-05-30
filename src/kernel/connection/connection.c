@@ -91,7 +91,7 @@ cnode_t *connection_create_data_processor(void *instance, void (*destructor)(voi
     //Allocate some memory in the heap for the node ad initialise it;
     cnode_t *node = kernel_malloc_copy(sizeof(cnode_t), &init);
 
-    //Return the initialised node;
+    //Return the scheduler_initialised node;
     return node;
 
 }
@@ -113,7 +113,7 @@ connection_t *connection_create(cnode_t *node) {
     //Allocate some memory in the heap for the conneection ad initialise it;
     connection_t *connection = kernel_malloc_copy(sizeof(connection_t), &init);
 
-    //Return the initialised connection;
+    //Return the scheduler_initialised connection;
     return connection;
 
 }
@@ -163,7 +163,7 @@ void connection_close(flux_t *flux) {
     while ((flux = node_get_next_flux(node))) {
 
         //Mark the cflux as closed;
-        flux->state = CLOSED_TASK;
+        flux->state = CLOSED_FLUX;
 
         //Update the node;
         node = flux_get_next_node(flux);
@@ -246,7 +246,7 @@ void connection_process(connection_t *connection) {
     while ((flux = node_get_next_flux(node))) {
 
         //If the data cflux has to be deleted :
-        if (flux->state == (flux_state_t)CLOSED_TASK) {
+        if (flux->state == (flux_state_t)CLOSED_FLUX) {
 
             //Delete the data cflux; It will be made empty, and will be removed during the service's next iteration;
             _connection_close(connection);

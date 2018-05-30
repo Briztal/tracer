@@ -30,10 +30,11 @@
  *  You must take that in consideration when writing your ISRs. Use it carefully;
  */
 
+//TODO COMPOSITION;
 
 typedef struct {
 
-    //The allocation counter, initialised to the maximum number of concurrent code execution;
+    //The allocation counter, scheduler_initialised to the maximum number of concurrent code execution;
     uint16_t allocation_counter;
 
     //The lock container. Contains pointers of all locked threads;

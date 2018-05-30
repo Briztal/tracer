@@ -26,20 +26,6 @@ typedef enum {
 
 
 /*
- * The sequence task type is composed of a task and of a sequence identifier;
- */
-
-typedef struct {
-
-    //Task composition;
-    task_t task;
-
-    //Sequence identifier;
-    uint8_t sequence_id;
-
-} sequence_task_t;
-
-/*
  * The sequence struct;
  */
 
@@ -56,7 +42,7 @@ typedef struct {
 
 
 /*
- * The sequence manager starts in the uninitialised sequences_initialised, then becomes initialised, and is finally started;
+ * The sequence manager starts in the uninitialised sequences_initialised, then becomes scheduler_initialised, and is finally started;
  */
 
 bool sequences_initialised = false;
@@ -77,7 +63,7 @@ size_t nb_sequences = 0;
 void sequences_initialise(const size_t unordered_sequence_size, const size_t nb_ordered_sequences,
                           const size_t *ordered_sizes) {
 
-    //If sequences are already initialised, error;
+    //If sequences are already scheduler_initialised, error;
     if (sequences_initialised) {
         return;//TODO ERROR;
     }
@@ -114,7 +100,7 @@ void sequences_initialise(const size_t unordered_sequence_size, const size_t nb_
 
     }
 
-    //Update the sequences_initialised to initialised;
+    //Update the sequences_initialised to scheduler_initialised;
     sequences_initialised = true;
 
 }
@@ -139,7 +125,7 @@ void sequences_initialise(const size_t unordered_sequence_size, const size_t nb_
 
 bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)()) {
 
-    //If sequences are not initialised :
+    //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
 
         //Error;
@@ -210,7 +196,7 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
 
 bool sequence_insertion_available(uint8_t sequence_id) {
 
-    //If sequences are not initialised :
+    //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
 
         //Error;
@@ -247,7 +233,7 @@ bool sequence_insertion_available(uint8_t sequence_id) {
 
 bool sequences_available_task(uint8_t sequence_id) {
 
-    //If sequences are not initialised :
+    //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
 
         //Error;
@@ -284,7 +270,7 @@ bool sequences_available_task(uint8_t sequence_id) {
 
 task_t *sequences_get_task(uint8_t sequence_id) {
 
-    //If sequences are not initialised :
+    //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
 
         //Error;
@@ -339,12 +325,12 @@ task_t *sequences_get_task(uint8_t sequence_id) {
 
 
 /*
- * sequence_unlock : this function unlocks the given sequence;
+ * sequences_remove_task : this function receives an executed task, unlocks its sequence, and destroys it;
  */
 
-void sequence_unlock(uint8_t sequence_id) {
+void sequences_remove_task(sequence_task_t *task) {
 
-    //If sequences are not initialised :
+    //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
 
         //Error;
@@ -352,12 +338,18 @@ void sequence_unlock(uint8_t sequence_id) {
 
     }
 
+    //Cache the sequence id;
+    uint8_t sequence_id = task->sequence_id;
+
     //If the sequence identifier is invalid :
     if (sequence_id >= nb_sequences) {
 
         return;//TODO ERROR;
 
     }
+
+    //Destroy the task;
+    task_delete((task_t *) task);
 
     //Cache the required task sequence;
     sequence_t *sequence = sequences + sequence_id;

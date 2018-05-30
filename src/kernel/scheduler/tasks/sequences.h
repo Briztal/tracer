@@ -12,6 +12,20 @@
 
 #include <kernel/scheduler/tasks/task.h>
 
+/*
+ * The sequence task type is composed of a task and of a sequence identifier;
+ */
+
+typedef struct {
+
+    //Task composition;
+    task_t task;
+
+    //Sequence identifier;
+    uint8_t sequence_id;
+
+} sequence_task_t;
+
 
 //--------------------- Initialisation ---------------------
 
@@ -35,10 +49,8 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
 
 //--------------------- Tasks execution --------------------
 
-//
-
 //Remove the current task of the given sequence;
-void sequences_unlock_sequence(uint8_t sequence_id);
+void sequences_remove_task(sequence_task_t *task);
 
 //Get the first task of the given sequence;
 task_t *sequences_get_task(uint8_t sequence_id);
