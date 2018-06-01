@@ -38,6 +38,9 @@ typedef enum {
 
 typedef struct {
 
+    //Composed of a linked element;
+    linked_element_t link;
+
     //The task data;
     task_t *task;
 
@@ -71,6 +74,9 @@ void process_reset_context(process_t *process);
 
 //Start the execution of processes;
 void process_start_execution();
+
+//Stop the execution of processes;
+void process_stop_execution();
 
 //Get the process currently in execution;
 process_t *process_get_current();

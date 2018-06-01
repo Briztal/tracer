@@ -33,6 +33,10 @@
 
 void kernel_start();
 
+
+//Raise an error, halt the code, log;
+void kernel_error(const char *log_message);
+
 //The malloc function to use across the code;
 void *kernel_mallocc(size_t size);
 

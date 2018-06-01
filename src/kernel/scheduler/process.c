@@ -2,17 +2,11 @@
 // Created by root on 4/2/18.
 //
 
-
-#include <malloc.h>
-#include <kernel/scheduler/tasks/task.h>
 #include <kernel/kernel.h>
-#include "stdint.h"
-
-#include "stdbool.h"
-
-
 #include "process.h"
-#include "systick.h"
+
+#include "kernel/systick.h"
+
 #include "scheduler.h"
 
 
@@ -48,15 +42,7 @@ process_t *current_process;
 void process_create_context(process_t *process, uint32_t stack_size) {
 
     //Then, allocate a memory zone of the required size;
-    void *ptr = malloc(stack_size * sizeof(stack_element_t));
-
-    //If the reallocation failed :
-    if (ptr == 0) {
-        return;//TODO EXCEPTION;
-    }
-
-    //Initialise the thread's stack data;
-    stack_ptr_t sp = (stack_ptr_t) ptr;
+    stack_ptr_t sp = kernel_mallocc(stack_size * sizeof(stack_element_t));
 
     //Set the stack's begin;
     process->stack_pointer = process->stack_begin = core_get_stack_begin(sp, stack_size);
@@ -171,22 +157,23 @@ void process_function(volatile process_t *volatile process) {
 
 void process_start_execution() {
 
+    //TODO IN KERNEL INIT
+    //Start the systick timer, and set the systick function;
+    core_start_systick_timer(1, &systick_tick);
+
+    kernel_error("SUUS");
+
     //First, we must initialise the scheduler, that will configure threads before the actual start;
     scheduler_impl_initialise();
 
     //Get the first process to execute;
     process_t *first_process = scheduler_select_process();
 
-    //TODO IN KERNEL INIT
     //Set the context switcher;
     core_set_context_switcher(&process_preempt);
 
-    //TODO IN KERNEL INIT
-    //Start the systick timer, and set the systick function;
-    core_start_systick_timer(1, &systick_tick);
-
     //Enable the preemption in one millisecond;
-    systick_set_process_duration(1);
+    systick_set_process_duration(2);
 
     //Set the current stack pointer to the first thread's stack begin;;
     core_set_thread_stack_pointer(first_process->stack_begin);
@@ -199,6 +186,33 @@ void process_start_execution() {
 
 }
 
+/*
+ * process_stop_execution : disables the context switching;
+ */
+
+void process_stop_execution() {
+
+    //Enable the preemption in one millisecond;
+    systick_set_process_duration(0);
+
+    //TODO DELETE THREADS;
+
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+    //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
+
+
+}
 
 /*
  * process_get_current : returns the process currently in execution;

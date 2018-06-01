@@ -1,6 +1,7 @@
 
 #include "teensy35.h"
 
+
 /*
  * --------------------------------------- PORT ---------------------------------------
  */
@@ -44,3 +45,55 @@ KINETIS_UART_DEFINE(4, 0x400EA000, F_BUS, 1, 1, IRQ_UART4_STATUS, IRQ_UART4_ERRO
 KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERROR)
 
  */
+
+// --------------------------------------- ERROR HANDLING ---------------------------------------
+
+
+#include <kernel/drivers/PORT.h>
+
+#include <kernel/systick.h>
+
+//Notify that an error occurred;
+void arch_handle_error(const char *msg) {
+
+    //Cache a pin configuration for pin C5 (LED);
+    PORT_pin_config_t config;
+
+    //Get the current configuration;
+    PORT_get_pin_config(&PORT_C, 5, &config);
+
+    //Update the configuration for led blink
+    config.mux_channel = 1;
+    config.direction = PORT_OUTPUT;
+    config.output_mode = PORT_HIGH_DRIVE;
+
+    //Update the configuration;
+    PORT_set_pin_configuration(&PORT_C, 5, &config);
+
+    //Create registers structs;
+    GPIO_output_registers_t c_registers;
+
+    //Get GPIO output registers for port C;
+    PORT_get_GPIO_output_registers(&PORT_C, &c_registers);
+
+    //Create the bitmask for C5;
+    uint32_t mask = 1<<5;
+
+    //Indefinately :
+    while(true){
+
+        //Turn on the LED;
+        GPIO_set_bits(c_registers.set_register, mask);
+
+        //Wait 10 ms;
+        systick_wait(50);
+
+        //Turn off the LED;
+        GPIO_clear_bits(c_registers.clear_register, mask);
+
+        //Wait 10 ms;
+        systick_wait(50);
+
+
+    }
+}

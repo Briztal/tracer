@@ -64,7 +64,7 @@ void systick_tick() {
  *  - x (!= 0) : duration of x systick_milliseconds;
  */
 
-void setTaskDuration(uint16_t ms) {
+void systick_set_process_duration(uint16_t ms) {
 
     //Update the task's duration;
     task_duration = ms;
@@ -87,7 +87,7 @@ uint32_t systick_milliseconds() {
  * Wait till time has reached the given limit;
  */
 
-void sleep(uint32_t delta_t) {
+void systick_wait(uint32_t delta_t) {
 
     //Determine the limit;
     volatile uint32_t limit = systick_millis + delta_t;
@@ -96,28 +96,5 @@ void sleep(uint32_t delta_t) {
     while ((volatile uint32_t) systick_millis < limit) {
     };
 
-
-}
-
-
-/*
- * msResetRequired : this function will return true if the st_millis reference has to be reset;
- */
-
-bool msResetRequired() {
-
-    //If the systick_milliseconds counter has reached the half of its maximal value, it's time to reset;
-    return (systick_millis > (uint32_t) -1 >> 1);
-
-}
-
-
-/*
- * msReset : resets the time reference to 0;
- */
-void msReset() {
-
-    //Reset the st_millis counter;
-    systick_millis = 0;
 
 }

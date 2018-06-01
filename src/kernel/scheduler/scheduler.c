@@ -23,7 +23,11 @@ void scheduler_stopped_to_pending(process_t *process);
 void scheduler_pending_to_terminated(process_t *process);
 
 
-inline void scheduler_inactive_loop(void * unused) {
+/*
+ * The task to execute when the scheduler has no task to run;
+ */
+
+void scheduler_inactive_loop(void * unused) {
     while(true);
 }
 //---------------------------------- Scheduler globals ----------------------------------
@@ -61,39 +65,8 @@ task_t empty_task = {
  * scheduler_initialise : initialises different linkes lists;
  */
 
-void scheduler_initialise(size_t max_nb_processes) {
+void scheduler_initialise(size_t nb_processes) {
 
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO CREATE PROCESSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     if (scheduler_initialised) {
         //TODO ERROR;
@@ -101,9 +74,37 @@ void scheduler_initialise(size_t max_nb_processes) {
     }
 
     //Initialise the list of processes;
-    pending_processes = EMPTY_LINKED_LIST(max_nb_processes);
-    stopped_processes = EMPTY_LINKED_LIST(max_nb_processes);
-    terminated_processes = EMPTY_LINKED_LIST(max_nb_processes);
+    pending_processes = EMPTY_LINKED_LIST(nb_processes);
+    stopped_processes = EMPTY_LINKED_LIST(nb_processes);
+    terminated_processes = EMPTY_LINKED_LIST(nb_processes);
+
+
+    /*
+     * All processes have 1kb of RAM;
+     */
+
+    for (;nb_processes--;) {
+
+        //Const initializer for a terminated process;
+        const process_t init = {
+                .link = EMPTY_LINKED_ELEMENT(),
+                .task = 0,
+                .state = PROCESS_TERMINATED,
+                .stack_pointer = 0,
+                .stack_begin = 0,
+                .stack_end = 0,
+        };
+
+        //Create the process in the heap;
+        process_t *process = kernel_malloc_copy(sizeof(process_t), &init);
+
+        //Create the new process's context;
+        process_create_context(process, 1024);
+
+        //Add the process to the linked list;
+        llist_insert_end(&terminated_processes, (linked_element_t *) process);
+
+    }
 
     //Mark the scheduler scheduler_initialised;
     scheduler_initialised = true;

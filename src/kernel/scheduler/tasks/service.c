@@ -20,7 +20,7 @@
 
 #include "service.h"
 
-#include <kernel/scheduler/systick.h>
+#include <kernel/systick.h>
 
 #include <data_structures/containers/container.h>
 #include <kernel/kernel.h>
@@ -196,7 +196,7 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
  * service_insert : inserts a service in the pending ordered list;
  */
 
-void service_insert(service_t *service) {
+void services_insert(service_t *service) {
 
     //Cache the next execution time;
     uint32_t next_execution = service->next_exec_time;

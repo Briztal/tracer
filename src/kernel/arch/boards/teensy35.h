@@ -3,6 +3,15 @@
 
 #include "kernel/arch/processors/arm_cortex_m4f.h"
 
+
+/*
+ * --------------------------------------- ERROR HANDLING ---------------------------------------
+ */
+
+//Notify that an error occurred;
+void arch_handle_error(const char *);
+
+
 /*
  * --------------------------------------- PORT ---------------------------------------
  */

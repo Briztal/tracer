@@ -46,10 +46,33 @@ void kernel_start() {
     //Set the flag to prevent multiple executions;
     started = true;
 
-    //TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel start
+    //TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel star
 
     //Start the thread manager;
     process_start_execution();
+
+}
+
+/*
+ * kernel_error : this function is called when an error is encountered in the code;
+ *
+ *  It will signal the error in various ways.
+ */
+
+void kernel_error(const char *log_message) {
+
+    //Stop all started processes;
+    process_stop_execution();
+
+
+    //TODO DISABLE INTERRRUPTS;
+
+    //TODO RESET CRITICAL SECTIONS;
+
+    //TODO THREAD MODES;
+
+    //Handle the error;
+    arch_handle_error(log_message);
 
 }
 
@@ -195,9 +218,6 @@ inline void kernel_leave_critical_section() {
 
 
 }
-
-
-
 
 
 //------------------------------------------- Config checking -------------------------------------------

@@ -236,7 +236,7 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
 
 
 //Get a GPIO pin's hardware registers. This function is used for the setup, and is not made to be fast or optimised;
-void PORT_get_GPIO_registers(PORT_data_t *port, GPIO_output_registers_t *);
+void PORT_get_GPIO_output_registers(PORT_data_t *port, GPIO_output_registers_t *);
 
 /*
  * GPIO functions are time critical, and so are inline. If your hardware supports GPIO action, you may define

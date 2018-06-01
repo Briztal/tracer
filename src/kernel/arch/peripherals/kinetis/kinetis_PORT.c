@@ -59,7 +59,7 @@ PORT_interrupt_t IRQ_bits_to_type(uint8_t bits);
  * ------------------------------- Definitions -------------------------------
  */
 
-void PORT_get_GPIO_registers(PORT_data_t *port, GPIO_output_registers_t *registers) {
+void PORT_get_GPIO_output_registers(PORT_data_t *port, GPIO_output_registers_t *registers) {
 
     //Cache GPIO data pointer;
     volatile kinetis_GPIO_memory_t *const memory = port->GPIO_data;
