@@ -3,6 +3,7 @@
 //
 
 #include "scheduler.h"
+#include "process.h"
 
 #include <kernel/kernel.h>
 
@@ -28,6 +29,9 @@ void scheduler_pending_to_terminated(process_t *process);
  */
 
 void scheduler_inactive_loop(void * unused) {
+
+    kernel_halt(2000);
+
     while(true);
 }
 //---------------------------------- Scheduler globals ----------------------------------
@@ -78,7 +82,6 @@ void scheduler_initialise(size_t nb_processes) {
     stopped_processes = EMPTY_LINKED_LIST(nb_processes);
     terminated_processes = EMPTY_LINKED_LIST(nb_processes);
 
-
     /*
      * All processes have 1kb of RAM;
      */
@@ -99,7 +102,7 @@ void scheduler_initialise(size_t nb_processes) {
         process_t *process = kernel_malloc_copy(sizeof(process_t), &init);
 
         //Create the new process's context;
-        process_create_context(process, 1024);
+        process_create_context(process, 200);
 
         //Add the process to the linked list;
         llist_insert_end(&terminated_processes, (linked_element_t *) process);
@@ -207,6 +210,14 @@ void scheduler_cleanup_process(process_t *process) {
 
     //Access to process is critical;
     kernel_enter_critical_section();
+
+    //If the scheduler is executing the empty task :
+    if (scheduler_inactive) {
+
+        //Mark the task terminated;
+        process->state = PROCESS_TERMINATION_REQUIRED;
+
+    }
 
     //If the process is terminated :
     switch (process->state) {
@@ -394,8 +405,12 @@ process_t *scheduler_select_process() {
 
     }
 
+    //Mark the process pending;
+    process->state = PROCESS_PENDING;
+
     //Leave the critical section;
     kernel_leave_critical_section();
+
 
     //Return the process;
     return process;

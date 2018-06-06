@@ -23,7 +23,7 @@ array_flux_t *array_flux_create(bool critical, size_t element_size,
                                 array_processor rx_copier) {
 
     //Allocate some space for the cflux;
-    array_flux_t *flux = kernel_mallocc(sizeof(array_flux_t));
+    array_flux_t *flux = kernel_malloc(sizeof(array_flux_t));
 
     //Initialise the cflux base;
     cflux_initialise((flux_t *) flux, critical, element_size, element_array_flux, data_amount, spaces_amount);
@@ -57,7 +57,7 @@ void element_array_flux(flux_t *flux_c) {
     size_t transfer_size = data_flux_get_transfer_size((flux_t *) flux, tx_instance, rx_instance);
 
     //Create an array of the appropriate size;
-    void *memory = kernel_mallocc(transfer_size * flux->flux.data_size);
+    void *memory = kernel_malloc(transfer_size * flux->flux.data_size);
 
     //Call the transmitter to fill the array;
     flux->tx_copier(tx_instance, memory, transfer_size);

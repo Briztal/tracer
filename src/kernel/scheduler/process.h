@@ -41,27 +41,16 @@ typedef struct {
     //Composed of a linked element;
     linked_element_t link;
 
+    //The process stack;
+	stack_t stack;
+
+    //The process state;
+    process_state_t state;
+
     //The task data;
     task_t *task;
 
     //TODO PRIO DATA;
-
-    /*
-     * Context data : the stack pointer, stack bounds;
-     */
-
-    stack_ptr_t stack_pointer;
-
-    stack_ptr_t stack_begin;
-
-    stack_ptr_t stack_end;
-
-
-    /*
-     * process_t sequences_initialised;
-     */
-
-    process_state_t state;
 
 } process_t;
 

@@ -11,179 +11,123 @@
 
 #include "kinetis.h"
 
+/*
+ * -------------------------------------- Types --------------------------------------
+ */
+
 //The stack element type;
 typedef uint32_t stack_element_t;
 
 //The stack pointer type;
 typedef stack_element_t *stack_ptr_t;
 
+//The process stack type;
+typedef struct {
+	
+	//The current stack pointer;
+    stack_ptr_t stack_pointer;
+
+	//The beginning of the stack;
+    stack_ptr_t stack_begin;
+	
+	//The end of the stack;
+    stack_ptr_t stack_end;
+
+} stack_t;
+
 
 /*
- * Notice :
+ * -------------------------------------- Headers --------------------------------------
+ */
+
+//TODO CORE_EXECUTE(privilege level, function);
+//Get the current thread stack pointer;//TODO get_thread_stack_pointer
+//static inline void core_get_stack_pointer(sp);
+
+
+//------------------------------------- Stack bounds -------------------------------------
+
+//Get the stack begin from the allocated region;
+inline void core_get_stack_begin(allocated_pointer, size);
+
+//Get the stack end from the allocated region;
+inline void core_get_stack_end(allocated_pointer, size);
+
+
+//------------------------------------- Stack management  -------------------------------------
+
+//Initialise a stack for a future unstacking. An arg pointer can be passed
+void core_init_stack(void (*function)(), void (*end_loop)(), void *init_arg);
+
+//Get the argument stored at stack init. Must be called at the very beginning of the process function;
+void *core_get_init_arg();
+
+
+//------------------------------------- Context switch -------------------------------------
+
+//Trigger the preemption;
+inline void core_preempt_process();
+
+
+//------------------------------------- Execution modes and privilleges -------------------------------------
+
+//Enter into process mode;
+inline void core_enter_process_mode();
+
+//Returns true if the current code runs in thread mode
+inline bool core_in_interrupt();
+
+
+//------------------------------------- Systick -------------------------------------
+
+//Start the systick timer;
+inline void core_systick_start(uint32_t systick_period_us, void (*systick_function)(void));
+
+
+//------------------------------------- Interrupts ------------------------------------- 
+
+/*
+ * Priority levels : these are the standard interrupt priorities for drivers;
  *
- *
- *  ARM Cortex M4 Stack Frame :
- *
- *      ----------- <- Pre IRQ
- *      XPSR
- *      PC
- *      LR
- *      R12
- *      R3
- *      R2
- *      R1
- *      R0--------- <- Post IRQ
- */
-/*
- * core_set_thread_stack_pointer : creates a temporary variable to contain the casted stack pointer,
- *  and injects assembly inline to move the data of the temp into psp;
+ * Cortex-M4: 0,16,32,48,64,80,96,112,128,144,160,176,192,208,224,240
  */
 
-static inline void core_set_thread_stack_pointer(const stack_ptr_t sp) {
-    __asm__ __volatile__ ("msr psp, %0"::"r" (sp));\
 
-}
+//The standard priority for status interrupt;
+#define DRIVER_STARUS_INTERRUPT_PRIORITY 32
 
-
-/*
- * core_get_thread_stack_pointer : injects assembly code in order to move the data of psp into the
- *  provided variable -> sp must be an existing variable name;
- */
-
-static inline stack_ptr_t core_get_thread_stack_pointer() {
-    stack_ptr_t ptr = 0;
-    __asm__ __volatile__ ("mrs %0, psp" : "=r" ((uint32_t) ptr):);
-    return ptr;
-}
+//The standard priority for error interrupt;
+#define DRIVER_ERROR_INTERRUPT_PRIORITY 16
 
 
-/*
- * core_stack_thread_context : injects assembly code in order to stack memory that are not
- *  stacked automatically in the process_t stack;
- *
- *  It moves psp into r0, and then stacks r4-r7, general purposes memory, and finally
- *      stacks s16- s31, floating point unit memory;
- *
- *  You may notice that PSP remains unchanged after the stacking. This is done with purpose, in order to
- *      allow the processor to unstack properly even if core_unstack_context is called;
- */
+//Enable all interrupts;
+inline void core_enable_interrupts();
 
-static inline void core_stack_thread_context() {
-    uint32_t scratch;
-    __asm__ __volatile__ (\
-        "mrs %0, psp \n\t"\
-        "stmdb %0!, {r4 - r11}\n\t"\
-        "vstmdb %0!, {s16 - s31}" : "=r" (scratch)\
-    );
-}
+//Disable all interrupts;
+inline void core_disable_interrupts();
+
+
+//Enable the specified interrupt;
+inline void core_IC_enable(uint8_t interrupt_index);
+
+//Disable the specified interrupt
+inline void core_IC_disable(uint8_t interrupt_index); 
+
+//Mark the interrupt pending. Will be executed asap;
+inline void core_IC_set_pending(interrupt_index);
+  
+//Mark the interrupt as not pending;
+inline void core_IC_clear_pending(uint8_t interrupt_index);
+
+//Set the priority of the required interrupt to the povided;
+inline void core_IC_set_priority(uint8_t interrupt_index, uint8_t priority); 
+
+//Set the handler of the required interrupt;
+inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)());
 
 
 /*
- * core_stack_thread_context : injects assembly code in order to stack memory that are not
- *  stacked automatically in the process_t stack;
- *
- *  It moves psp into r0, and then unstacks r4-r7, general purposes memory, and finally
- *      unstacks s16- s31, floating point unit memory;
- *
- *  As core_stack_thread_context didn't alter PSP, this function doesn't either;
- */
-
-static inline void core_unstack_thread_context() {
-    uint32_t scratch;
-    __asm__ __volatile__ (\
-        "mrs %0, psp \n\t"\
-        "ldmdb %0!, {r4 - r11} \n\t"\
-        "vldmdb %0!, {s16 - s31} " : "=r" (scratch)\
-    );
-}
-
-
-/*
- * core_init_stack : this function initialises the unstacking environment, so that the given function will
- *  be executed at context switch time;
- *
- *  It starts by caching the process_t stack pointer, and stacks the thread functions pointers, and the PSR.
- *
- *  Then, it saves the thread index in R12 (next word);
- *
- *  Finally, it leaves space for empty stack frame and saves the stack pointer;
- */
-
-static inline void core_init_stack(void (*function)(), void (*end_loop)(), stack_element_t process_pointer) {
-    uint32_t *__core_init_stack_sp__ = core_get_thread_stack_pointer();
-    *(__core_init_stack_sp__ - 1) = 0x01000000;
-    *(__core_init_stack_sp__ - 2) = (uint32_t) (function);
-    *(__core_init_stack_sp__ - 3) = (uint32_t) (end_loop);
-    *(__core_init_stack_sp__ - 4) = (uint32_t) (process_pointer);
-    __core_init_stack_sp__ -= 8;
-    core_set_thread_stack_pointer(__core_init_stack_sp__);
-}
-
-
-/*
- * core_get_process : this function will set thread_id to the value sored in r12, where was stored the thread
- *  index in the core_init_stack macro;
- */
-
-static inline stack_element_t core_get_process() {
-    stack_element_t thread_index = 0;
-    __asm__ __volatile__("mov %0, r12": "=r" (thread_index):);
-    return thread_index;
-
-}
-
-
-/*
- * core_trigger_context_switch : sets the pendSV exception isPending flag;
- */
-
-#define core_trigger_context_switch()\
-    SCB_ICSR |= SCB_ICSR_PENDSVSET
-
-
-/*
- * core_trigger_context_switch : sets the pendSV exception isPending flag;
- */
-
-#define core_untriggerr_context_switch()\
-    SCB_ICSR |= SCB_ICSR_PENDSVCLR
-
-
-/*
- * core_enable_interrupts : injects inline assembly code to disable all interrupts. Fault handling is still enabled;
- */
-
-#define core_enable_interrupts() __asm__ __volatile__("cpsie i")
-
-/*
- * core_disable_interrupts : injects inline assembly code to disable all interrupts. Fault handling is still enabled;
- */
-
-#define core_disable_interrupts() __asm__ __volatile__("cpsid i")
-
-
-/*
- * core_set_thread_mode : set the processor to use the psp, and stay privileged in thread mode;
- */
-
-//TODO UNPRIVILEGE
-#define core_set_thread_mode()\
-    __asm__ __volatile__(\
-        "mov r4, #2 \n\t"\
-        "msr control, r4\n\t"\
-    )/* Exec. ISB after changing CONTORL (recommended) */\
-
-
-
-#define core_get_stack_pointer(sp)\
-    __asm__ __volatile__(\
-        "mov %0, sp" : "=r" (sp)\
-    )
-
-
-
-/*
- * ------------------------------------- Stack bound -------------------------------------
+ * ------------------------------------- Stack bounds -------------------------------------
  */
 
 /*
@@ -192,28 +136,68 @@ static inline stack_element_t core_get_process() {
  *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
  */
 
-#define core_get_stack_begin(allocated_pointer, size) ((allocated_pointer) + (size))
+inline void core_get_stack_begin(allocated_pointer, size) {
+	return ((allocated_pointer) + (size));
+}
 
 
 /*
- * core_get_stack_begin : determines the stacks end case from the allocated pointer and the size;
+ * core_get_stack_end : determines the stacks end case from the allocated pointer and the size;
  *
  *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
  */
 
-#define core_get_stack_end(allocated_pointer, size) (allocated_pointer)
+inline void core_get_stack_end(allocated_pointer, size) {
+	return  (allocated_pointer);
+}
+
+
 
 /*
  * ------------------------------------- Context switch -------------------------------------
  */
 
 /*
- * core_set_context_switcher : sets the function to be called when a context switch is required;
+ * core_preempt_process : sets the pendSV exception isPending flag;
  */
 
-#define core_set_context_switcher(context_switcher)\
-    _VectorsRam[14] = context_switcher;\
-    NVIC_SET_PRIORITY(-2, 240);
+static inline void core_preempt_process() {}
+    SCB_ICSR |= SCB_ICSR_PENDSVSET;
+}
+
+
+/*
+ * ------------------------------------- Execution modes and privilleges -------------------------------------
+ */
+
+/*
+ * core_enter_process_mode : updates the control register to use the process stack;
+ */
+
+static inline void core_enter_process_mode() {
+
+	//TODO UNPRIVILEGE
+   	
+	//TODO Exec. ISB after changing CONTORL (recommended);
+	__asm__ __volatile__(\
+        "mov r4, #2 \n\t"\
+        "msr control, r4\n\t"\
+	);
+
+}
+
+
+/*
+ * core_in_interrupt : this function return true if the current code is ran from an interrup;
+ *
+ *  If we are an interrupt, the 8 first bits of the System Control Block will contain the exception number.
+ *
+ *  If those are 0, no interupt is running yet;
+ */
+
+static inline bool core_in_interrupt() {
+    return (bool) ((uint8_t) SCB_ICSR);
+}
 
 
 /*
@@ -238,7 +222,7 @@ static inline stack_element_t core_get_process() {
  *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
  */
 
-inline void core_start_systick_timer(uint32_t systick_period_us, void (*systick_function)(void)) {
+inline void core_systick_start(uint32_t systick_period_us, void (*systick_function)(void)) {
 
     //Set the systick function;
     _VectorsRam[15] = systick_function;
@@ -263,89 +247,94 @@ inline void core_start_systick_timer(uint32_t systick_period_us, void (*systick_
  */
 
 /*
- * core_enable_interrupt : enables the specified interrupt;
+ * core_enable_interrupts : injects inline assembly code to disable all interrupts. 
+ * 	Fault handling is still enabled;
  */
 
-inline void core_enable_interrupt(uint8_t interrupt_index) {
+static inline void core_enable_interrupts() {
+	__asm__ __volatile__("cpsie i");
+}
+
+
+/*
+ * core_disable_interrupts : injects inline assembly code to disable all interrupts. 
+ * 	Fault handling is still enabled;
+ */
+
+static inline void core_disable_interrupts() {
+	__asm__ __volatile__("cpsid i");
+}
+
+
+/*
+ * core_IC_enable : enables the specified interrupt;
+ */
+
+inline void core_IC_enable(uint8_t interrupt_index) {
     NVIC_ENABLE_IRQ(interrupt_index);
 }
 
 
-
 /*
- * core_disable_interrupt : disables the specified interrupt;
+ * core_IC_disable : disables the specified interrupt;
  */
 
-inline void core_disable_interrupt(uint8_t interrupt_index) {
+inline void core_IC_disable(uint8_t interrupt_index) {
     NVIC_DISABLE_IRQ(interrupt_index);
 }
 
 
 /*
- * core_set_interrupt_pending : marks the interrupt as pending. Will be executed asap;
+ * core_IC_set_pending : marks the interrupt as pending. Will be executed asap;
  */
 
-#define core_set_interrupt_pending(interrupt_index)\
+inline void core_IC_set_pending(uint8_t interrupt_index) {
     NVIC_SET_PENDING(interrupt_index);
+}
 
 
 /*
- * core_clear_interrupt_pending : marks the interrupt as not pending;
+ * core_IC_clear_pending :  marks the interrupt as not pending;
  */
 
-inline void core_clear_interrupt_pending(uint8_t interrupt_index) {
+inline void core_IC_clear_pending(uint8_t interrupt_index) {
     NVIC_CLEAR_PENDING(interrupt_index);
 }
 
 
 /*
- * core_set_interrupt_priority : sets the priority of the required interrupt to the povided;
+ * core_IC_set_priority : sets the priority of the required interrupt to the povided;
  */
 
-inline void core_set_interrupt_priority(uint8_t interrupt_index, uint8_t priority) {
+inline void core_IC_set_priority(uint8_t interrupt_index, uint8_t priority) {
     NVIC_SET_PRIORITY(interrupt_index, priority);
 }
 
 
 /*
- * Priority levels : these are the standard interrupt priorities for drivers;
- *
- * Cortex-M4: 0,16,32,48,64,80,96,112,128,144,160,176,192,208,224,240
+ * core_IC_set_handler : sets the handler of the required interrupt;
  */
 
-//The standard priority for status interrupt;
-#define DRIVER_STARUS_INTERRUPT_PRIORITY 32
-
-//The standard priority for error interrupt;
-#define DRIVER_ERROR_INTERRUPT_PRIORITY 16
-
-
-/*
- * core_set_interrupt_handler : sets the handler of the required interrupt;
- */
-
-inline void core_set_interrupt_handler(uint8_t interrupt_index, void (*handler)()) {
+inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)()) {
     _VectorsRam[16 + (interrupt_index)] = handler;
 }
 
 
 /*
- * core_in_thread_mode : this function return true if the current code runs in thread mode;
- *
- *  If we are in an interrupt, the 8 first bits of the System Control Block will contain the exception number.
- *
- *  If they are 0, we are in thread mode;
+ * ------------------------------------- Context switch -------------------------------------
  */
 
-static inline bool core_in_thread_mode() {
-    return (bool) (!(uint8_t) SCB_ICSR);
+/*
+ * core_set_context_switcher : sets the function to be called when a context switch is required;
+ */
+
+/*
+
+inline void core_set_context_switcher(context_switcher) {
+    _VectorsRam[14] = context_switcher;
+    NVIC_SET_PRIORITY(-2, 240);
 }
 
+*/
 
 #endif
-
-
-
-
-
-

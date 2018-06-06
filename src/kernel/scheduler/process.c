@@ -2,12 +2,14 @@
 // Created by root on 4/2/18.
 //
 
-#include <kernel/kernel.h>
 #include "process.h"
 
 #include "kernel/systick.h"
 
 #include "scheduler.h"
+
+#include <kernel/kernel.h>
+
 
 
 //---------------------------- Private functions ----------------------------
@@ -42,7 +44,7 @@ process_t *current_process;
 void process_create_context(process_t *process, uint32_t stack_size) {
 
     //Then, allocate a memory zone of the required size;
-    stack_ptr_t sp = kernel_mallocc(stack_size * sizeof(stack_element_t));
+    stack_ptr_t sp = kernel_malloc(stack_size * sizeof(stack_element_t));
 
     //Set the stack's begin;
     process->stack_pointer = process->stack_begin = core_get_stack_begin(sp, stack_size);
@@ -86,6 +88,33 @@ void process_reset_context(process_t *process) {
  *  a context switch;
  *
  * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ *
+ *  TODO INITIALISE THE FIRST PROCESS WITH ITS CONTEXT AND CALL PROCESS INIT;
+ *
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
+ * TODO CHANGE THIS SHIT ! INITIALISE ALL THREADS AND EXECUTE THREAD 0 WITH A LONGJMP
  *
  *  As the process_t pointer has been saved in the register at the thread initialisation, the first step is to get it back;
  *
@@ -106,7 +135,7 @@ void process_init() {
 
 void process_function(volatile process_t *volatile process) {
 
-    //The process_t must be pending, otherwise, there has been an error in the scheduler.
+    //The process must be pending, otherwise, there has been an error in the scheduler.
     if ((volatile process_state_t) process->state != PROCESS_PENDING) {
 
         //Kernel panic;
@@ -114,11 +143,24 @@ void process_function(volatile process_t *volatile process) {
 
     }
 
+    kernel_halt(20);
+
     //Cache the task pointer;
     volatile task_t *volatile task = process->task;
 
+    if (process->task == &empty_task) {
+
+        kernel_halt(200);
+
+    } else {
+
+        kernel_halt(2000);
+
+    }
+
     //Execute the function, passing args;
     (*(task->function))((void *) task->args);
+
 
     //Cache the exit function;
     void (*volatile cleanup)() = task->cleanup;
@@ -161,25 +203,36 @@ void process_start_execution() {
     //Start the systick timer, and set the systick function;
     core_start_systick_timer(1, &systick_tick);
 
-    kernel_error("SUUS");
-
     //First, we must initialise the scheduler, that will configure threads before the actual start;
     scheduler_impl_initialise();
 
     //Get the first process to execute;
     process_t *first_process = scheduler_select_process();
 
+
+
     //Set the context switcher;
     core_set_context_switcher(&process_preempt);
 
     //Enable the preemption in one millisecond;
-    systick_set_process_duration(2);
+    systick_set_process_duration(0);
 
     //Set the current stack pointer to the first thread's stack begin;;
     core_set_thread_stack_pointer(first_process->stack_begin);
 
     //Require the user mode;
     core_set_thread_mode();
+
+
+    if (first_process->task == &empty_task) {
+
+        kernel_halt(200);
+
+    } else {
+
+        kernel_halt(2000);
+
+    }
 
     //Execute the first task;
     process_function(first_process);

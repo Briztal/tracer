@@ -19,7 +19,7 @@ indirect_flux_t *indirect_flux_create_tx_passive(bool critical, size_t element_s
                                                  array_processor rx_copier) {
 
     //Allocate some space for the cflux;
-    indirect_flux_t *flux = kernel_mallocc(sizeof(indirect_flux_t));
+    indirect_flux_t *flux = kernel_malloc(sizeof(indirect_flux_t));
 
     //Initialise the cflux base;
     cflux_initialise((flux_t *) flux, critical, element_size, indirect_flux, data_amount, spaces_amount);
@@ -42,7 +42,7 @@ indirect_flux_t *indirect_flux_create_rx_passive(bool critical, size_t element_s
                                                  indirect_accessor_t rx_accessor) {
 
     //Allocate some space for the cflux;
-    indirect_flux_t *flux = kernel_mallocc(sizeof(indirect_flux_t));
+    indirect_flux_t *flux = kernel_malloc(sizeof(indirect_flux_t));
 
     //Initialise the cflux base;
     cflux_initialise((flux_t *) flux, critical, element_size, indirect_flux, data_amount, spaces_amount);

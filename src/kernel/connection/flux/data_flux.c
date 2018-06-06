@@ -22,7 +22,7 @@ data_flux_t *data_flux_create(bool critical, size_t element_size,
                                                 data_processor rx_copier) {
 
     //Allocate some space for the cflux;
-    data_flux_t *flux = kernel_mallocc(sizeof(data_flux_t));
+    data_flux_t *flux = kernel_malloc(sizeof(data_flux_t));
 
     //Initialise the cflux base;
     cflux_initialise((flux_t *) flux, critical, element_size, data_flux, data_amount, spaces_amount);
@@ -52,7 +52,7 @@ void data_flux(flux_t *flux_c) {
     size_t transfer_size = data_flux_get_transfer_size((flux_t *) flux, tx_instance, rx_instance);
 
     //Create an aligned memory region of the appropriate size. Can't be allocated on the stack, would be misaligned;
-    void *memory = kernel_mallocc(flux->flux.data_size);
+    void *memory = kernel_malloc(flux->flux.data_size);
 
     //For each piece of data to transfer :
     for (;transfer_size--;) {

@@ -237,10 +237,10 @@ void services_insert(service_t *service) {
 //----------------------------------- Scheduler interaction -----------------------------------
 
 /*
- * services_available : this function asserts if services are available.
+ * services_available_task : this function asserts if services are available.
  */
 
-bool services_available() {
+bool services_available_task() {
 
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
@@ -285,11 +285,10 @@ bool services_available() {
 
 
 /*
- * services_get : get the first service of the list. Doesn't check if the service must be executed;
+ * services_get_task : get the first service of the list. Doesn't check if the service must be executed;
  */
 
-service_t *services_get() {
-
+task_t *services_get_task() {
 
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
@@ -331,7 +330,7 @@ service_t *services_get() {
         return 0;//TODO ERROR, SERVICE MUSTN'T BE EXECUTED;
 
     //Return the first service of the list;
-    return service;
+    return (task_t *)service;
 
 }
 

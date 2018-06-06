@@ -21,6 +21,7 @@
 #ifndef TRACER_KERNEL_H
 #define TRACER_KERNEL_H
 
+#include <stdint.h>
 #include "stddef.h"
 
 //------------------------------------------- Entry Point -------------------------------------------
@@ -33,12 +34,14 @@
 
 void kernel_start();
 
+//Raise an error, halt the code, log;
+void kernel_halt(uint16_t blink_delay);
 
 //Raise an error, halt the code, log;
 void kernel_error(const char *log_message);
 
 //The malloc function to use across the code;
-void *kernel_mallocc(size_t size);
+void *kernel_malloc(size_t size);
 
 //A shortcut to allocate and copy from a memory zone;
 void *kernel_malloc_copy(size_t size, const void *initialiser);

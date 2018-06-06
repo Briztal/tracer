@@ -53,8 +53,15 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
 
 #include <kernel/systick.h>
 
-//Notify that an error occurred;
 void arch_handle_error(const char *msg) {
+
+    arch_blink(50);
+}
+
+//Notify that an error occurred;
+void arch_blink(uint16_t delay) {
+
+    core_enable_interrupts();
 
     //Cache a pin configuration for pin C5 (LED);
     PORT_pin_config_t config;
@@ -86,14 +93,17 @@ void arch_handle_error(const char *msg) {
         GPIO_set_bits(c_registers.set_register, mask);
 
         //Wait 10 ms;
-        systick_wait(50);
+        systick_wait(delay);
 
         //Turn off the LED;
         GPIO_clear_bits(c_registers.clear_register, mask);
 
         //Wait 10 ms;
-        systick_wait(50);
-
+        systick_wait(delay);
 
     }
+
 }
+
+
+

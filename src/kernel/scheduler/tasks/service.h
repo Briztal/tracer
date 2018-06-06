@@ -70,10 +70,10 @@ void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint3
 //----------------------------------- Scheduler interaction -----------------------------------
 
 //Are there services available ?
-bool services_available();
+bool services_available_task();
 
 //Get a service to execute;
-service_t *services_get();
+task_t *services_get_task();
 
 //Reprogram an executed service;
 void services_reprogram(service_t *service);

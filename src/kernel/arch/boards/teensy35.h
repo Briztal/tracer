@@ -11,6 +11,7 @@
 //Notify that an error occurred;
 void arch_handle_error(const char *);
 
+void arch_blink(uint16_t delay);
 
 /*
  * --------------------------------------- PORT ---------------------------------------

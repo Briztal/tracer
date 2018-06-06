@@ -30,10 +30,9 @@ typedef struct {
 //--------------------- Initialisation ---------------------
 
 //Set the pool size;
-void sequences_init(size_t pool_size);
+void sequences_initialise(size_t unordered_sequence_size, size_t nb_ordered_sequences,
+                          const size_t *ordered_sizes);
 
-//Add a sequence of the given size;
-void sequences_add_sequence(size_t sequence_size);
 
 
 //--------------------- Tasks containers management ---------------------
@@ -42,7 +41,7 @@ void sequences_add_sequence(size_t sequence_size);
 bool sequence_insertion_available(uint8_t sequence_id);
 
 //Verify that tasks are available in the required sequences;
-bool sequences_available_task(uint8_t type);
+bool sequences_available(uint8_t type);
 
 //Build and schedule a task;
 bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)());

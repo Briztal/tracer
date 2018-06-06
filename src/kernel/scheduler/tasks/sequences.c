@@ -2,14 +2,11 @@
 // Created by root on 3/23/18.
 //
 
-
-
-#include <kernel/scheduler/tasks/task.h>
-#include <data_structures/containers/circular_buffer.h>
-#include <kernel/kernel.h>
-#include <string.h>
-#include <data_structures/containers/llist.h>
 #include "sequences.h"
+
+#include <string.h>
+
+#include <kernel/kernel.h>
 
 
 //-------------------------------------------- Const variable init --------------------------------------------
@@ -72,7 +69,7 @@ void sequences_initialise(const size_t unordered_sequence_size, const size_t nb_
     nb_sequences = nb_ordered_sequences + 1;
 
     //Create an array in the heap to contain all sequences;
-    sequences = kernel_mallocc(nb_sequences * sizeof(sequence_t));
+    sequences = kernel_malloc(nb_sequences * sizeof(sequence_t));
 
     //Initializer for the first sequence (unordered);
     sequence_t init = {
@@ -111,17 +108,6 @@ void sequences_initialise(const size_t unordered_sequence_size, const size_t nb_
 /*
  * sequences_add_task : determines the required sequence, and appends the task to it, if there is one space.
  */
-
-
-#define EMPTY_SEQUENCE_TASK(function_p, args_p, cleanup_p, id) {\
-    .linked_element = EMPTY_LINKED_ELEMENT(),\
-    .function = (function_p),\
-    .args = (args_p),\
-    .cleanup = (cleanup_p),\
-    .task_type = SEQUENCE_TASK,\
-    .sequence_id = (id),\
-}
-
 
 bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)()) {
 
@@ -228,10 +214,10 @@ bool sequence_insertion_available(uint8_t sequence_id) {
 
 
 /*
- * sequences_available_task : returns true if tasks are available in the required sequence (255 for task pool);
+ * sequences_available : returns true if tasks are available in the required sequence (255 for task pool);
  */
 
-bool sequences_available_task(uint8_t sequence_id) {
+bool sequences_available(uint8_t sequence_id) {
 
     //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {

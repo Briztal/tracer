@@ -89,7 +89,7 @@ string_t *string_create_from_symmetric(const size_t string_length, const char *c
     size_t size = length_to_size(string_length);
 
     //Create a memory space in the heap for data;
-    void *ptr = kernel_mallocc(size);
+    void *ptr = kernel_malloc(size);
 
     //Symmetric copy from stack to heap; dest is null-terminated;
     string_symmetric_copy(ptr, stack_src, string_length);
@@ -150,7 +150,7 @@ string_t *string_move(string_t *src) {
     string_t *clone = string_create(src->length, src->data);
 
     //Then, allocate data in the heap for an empty string;
-    char *ptr = kernel_mallocc(length_to_size(0));
+    char *ptr = kernel_malloc(length_to_size(0));
 
     //Initialise the string to empty.
     *ptr = 0;

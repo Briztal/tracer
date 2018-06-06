@@ -44,7 +44,7 @@ void scheduler_impl_insert_process(linked_list_t *, process_t *);
 //Select the process to be executed : called from preemption;
 process_t* scheduler_impl_select_process(linked_list_t *);
 
-
+extern task_t empty_task;
 
 
 #endif //TRACER_SCHEDULER_H

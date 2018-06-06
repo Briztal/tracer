@@ -21,15 +21,19 @@
 #include "kernel.h"
 
 #include <stdbool.h>
-
-#include <kernel/scheduler/process.h>
 #include <malloc.h>
 #include <string.h>
+
+
+#include <kernel/scheduler/process.h>
 
 
 
 //The start flag, set only once, at the entry point. Prevents start to be called a second time.
 bool started = false;
+
+//The critical section counter;
+static uint32_t critical_section_counter = 0;
 
 //------------------------------------------- Entry Point -------------------------------------------
 
@@ -59,20 +63,51 @@ void kernel_start() {
  *  It will signal the error in various ways.
  */
 
+void dumb(){};
+
 void kernel_error(const char *log_message) {
 
     //Stop all started processes;
     process_stop_execution();
 
+    //Enable all interrupts;
+    core_enable_interrupts();
 
-    //TODO DISABLE INTERRRUPTS;
+    //Reset the critical section counter;
+    critical_section_counter = 0;
 
-    //TODO RESET CRITICAL SECTIONS;
+    //Disable the context switcher;
+    core_set_context_switcher(&dumb);
+
+    //TODO RESET IDLE INTERRUPT HANDLERS
 
     //TODO THREAD MODES;
 
     //Handle the error;
     arch_handle_error(log_message);
+
+}
+
+void kernel_halt(uint16_t delay) {
+
+    //Stop all started processes;
+    process_stop_execution();
+
+    //Enable all interrupts;
+    core_enable_interrupts();
+
+    //Reset the critical section counter;
+    critical_section_counter = 0;
+
+    //Disable the context switcher;
+    core_set_context_switcher(&dumb);
+
+    //TODO RESET IDLE INTERRUPT HANDLERS
+
+    //TODO THREAD MODES;
+
+    //Handle the error;
+    arch_blink(delay);
 
 }
 
@@ -95,7 +130,7 @@ void *kernel_malloc(size_t size) {
 
     //If the allocation failed, error;
     if (!ptr)
-        return 0;//TODO ERROR.
+        kernel_error("kernel.c : kernel_malloc : malloc failed");
 
     //Return the allocated data;
     return ptr;
@@ -121,13 +156,15 @@ void *kernel_malloc_copy(const size_t size, const void *const initialiser) {
 
     //If the allocation failed, error;
     if (!ptr)
-        return 0;//TODO ERROR.
+        kernel_error("kernel.c : kernel_malloc_copy : malloc failed");
 
     //Copy the initialiser data;
     memcpy(ptr, initialiser, size);
 
     //Return the allocated data;
     return ptr;
+
+
 
 }
 
@@ -149,7 +186,7 @@ void *kernel_realloc(void *data, size_t size) {
 
     //If the reallocation failed, error;
     if (!ptr)
-        return 0;//TODO ERROR.
+        kernel_error("kernel.c : kernel_realloc : realloc failed");
 
     //Return the reallocated data;
     return ptr;
@@ -174,8 +211,6 @@ void kernel_free(void *data) {
 
 }
 
-
-static uint32_t critical_section_counter = 0;
 
 /*
  * kernel_enter_critical_section : called whenever any part of the code must execute a critical section;
@@ -209,7 +244,7 @@ inline void kernel_leave_critical_section() {
     }
 
     //If we must enable interrupts again :
-    if (--critical_section_counter) {
+    if (!(--critical_section_counter)) {
 
         //Enable interrupts;
         core_enable_interrupts();

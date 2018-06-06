@@ -26,6 +26,14 @@
 
 //URGENT :
 
+/* 
+ * TRACER STRUCTURE : Arch stack starts, kernel_init called by process lib. 
+ * 
+ *  TODO Choice given btw scheduler start or single loop start. 
+ *  
+ * 	TODO Each lib selected must add its cleanup function to the error handler, so that it can be cleaned correctly;
+ */
+
 //TODO WHILE TRUE AFTER TASK TERMINATION AND WARNING MESSAGE IN CASE OF FORGETTING THE LEAVE_CRITICAL_SECTION
 
 //TODO kERNEL MALLOC CLEAN. EXECUTE A FIND AND CORRECT EVERYTHING
