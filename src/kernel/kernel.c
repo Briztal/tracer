@@ -21,12 +21,14 @@
 #include "kernel.h"
 
 #include <stdbool.h>
+
 #include <malloc.h>
+
 #include <string.h>
 
+#include <kernel/systick.h>
 
-#include <kernel/scheduler/process.h>
-
+#include <kernel/scheduler/scheduler.h>
 
 
 //The start flag, set only once, at the entry point. Prevents start to be called a second time.
@@ -50,12 +52,22 @@ void kernel_start() {
     //Set the flag to prevent multiple executions;
     started = true;
 
-    //TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel star
+    
+	//TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel star
 
-    //Start the thread manager;
-    process_start_execution();
+    //Start the systick timer, and set the systick function;
+    core_systick_start(1, &systick_tick);
+	
+	//Enable the preemption in one millisecond;
+    systick_set_process_duration(0);
+
+	//TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel star
+
+    //Start the scheduler;
+    scheduler_start();
 
 }
+
 
 /*
  * kernel_error : this function is called when an error is encountered in the code;
@@ -67,17 +79,14 @@ void dumb(){};
 
 void kernel_error(const char *log_message) {
 
-    //Stop all started processes;
-    process_stop_execution();
+    //Stop the scheduler;
+    scheduler_stop();
 
     //Enable all interrupts;
     core_enable_interrupts();
 
     //Reset the critical section counter;
     critical_section_counter = 0;
-
-    //Disable the context switcher;
-    core_set_context_switcher(&dumb);
 
     //TODO RESET IDLE INTERRUPT HANDLERS
 
@@ -88,19 +97,17 @@ void kernel_error(const char *log_message) {
 
 }
 
+
 void kernel_halt(uint16_t delay) {
 
     //Stop all started processes;
-    process_stop_execution();
+    scheduler_stop();
 
     //Enable all interrupts;
     core_enable_interrupts();
 
     //Reset the critical section counter;
     critical_section_counter = 0;
-
-    //Disable the context switcher;
-    core_set_context_switcher(&dumb);
 
     //TODO RESET IDLE INTERRUPT HANDLERS
 
@@ -111,7 +118,65 @@ void kernel_halt(uint16_t delay) {
 
 }
 
+/*
+ * -------------------------------------------- Stack management ---------------------------------------------
+ */
 
+/*
+ * kernel_stack_alloc : this function allocates a stack, and then initialises stack pointers;
+ *
+ *  Finally, it sets the thread's sequences_initialised as Terminated;
+ */
+
+void kernel_stack_alloc(stack_t *stack, size_t stack_size, 
+		void (*function)(), void (*exit_loop)(), void *arg) {
+
+	//Truncate the size to get a size matchng with the primitive type;
+	stack_size = core_correct_size(stack_size);
+    
+	//Then, allocate a memory zone of the required size;
+    void *sp = kernel_malloc(stack_size);
+
+    //Set the stack's begin;
+    stack->stack_begin = core_get_stack_begin(sp, stack_size);
+
+    //Set the stack's end;
+    stack->stack_end = core_get_stack_end(sp, stack_size);
+
+    //Reset the stack;
+    kernel_stack_reset(stack, function, exit_loop, arg);
+
+}
+
+
+/*
+ * kernel_reset_stack : resets the process_t to its initial stack pointer,
+ * 	and initialises the context to its beginning;
+ */
+
+void kernel_stack_reset(stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg) {
+
+    //Initialise the stack;
+    stack->stack_pointer = core_init_stack(stack->stack_begin, init_f, exit_f, arg);
+
+}
+
+
+/*
+ * kernel_stack_free : frees the stack;
+ */
+
+void kernel_stack_free(stack_t *stack) {
+	
+	//Free the stack;
+	kernel_free(stack);
+
+}
+
+
+/*
+ * -------------------------------------------- Heap management ---------------------------------------------
+ */
 
 /*
  * kernel_malloc : the malloc to use across the code; It is thread safe, and checks for exceptions;

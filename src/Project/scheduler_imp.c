@@ -16,12 +16,12 @@
 void scheduler_impl_initialise() {
 
     //The scheduler will comprise 16 processes;
-    scheduler_initialise(16);
+    scheduler_create_sprocesses(16);
 
     //The service manager will contain at most 255 simultaneous services;
     services_initialise(255);
 
-    //The sequences manager will have 3 ordered sequences of size 16, added to the 16 tasks unordered sequence;
+    //The sequences manager will have 3 ordered sequences of size 16, and the 16 tasks unordered sequence;
     size_t sizes[3] = {16, 16, 16};
     sequences_initialise(16, 3, sizes);
 
@@ -75,10 +75,10 @@ task_t *scheduler_impl_get_task() {
  *  This implementation is a simple round robin. It inserts the process at the end of the list;
  */
 
-void scheduler_impl_insert_process(linked_list_t *pending_processes, process_t *process) {
+void scheduler_impl_insert_sprocess(linked_list_t *pending_sprocesses, sprocess_t *sprocess) {
 
     //Insert the process at the end of the list;
-    llist_insert_end(pending_processes, (linked_element_t *) process);
+    llist_insert_end(pending_sprocesses, (linked_element_t *) sprocess);
 
 }
 
@@ -91,15 +91,15 @@ void scheduler_impl_insert_process(linked_list_t *pending_processes, process_t *
  *  If the list is empty, it returns 0 so that the scheduler can go in sleep mode;
  */
 
-process_t* scheduler_impl_select_process(linked_list_t *pending_processes) {
+sprocess_t* scheduler_impl_select_sprocess(linked_list_t *pending_sprocesses) {
 
     //If the process list is empty, return 0 to trigger the sleep mode;
-    if (!pending_processes->nb_elements) {
+    if (!pending_sprocesses->nb_elements) {
         return 0;
     }
 
     //If the process list is not empty, remove and return the first process of the list;
-    return (process_t *) llist_remove_begin(pending_processes);
+    return (sprocess_t *) llist_remove_begin(pending_sprocesses);
 
 }
 

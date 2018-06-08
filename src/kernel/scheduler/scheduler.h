@@ -5,7 +5,18 @@
 #ifndef TRACER_SCHEDULER_H
 #define TRACER_SCHEDULER_H
 
-#include "process.h"
+#include "sprocess.h"
+
+
+/*
+ * ------------------------ Scheduler entry point ------------------------
+ */
+
+//Start the scheduler
+void scheduler_start();
+
+//Stop the scheduler;
+void scheduler_stop();
 
 
 /*
@@ -13,19 +24,22 @@
  */
 
 //Initialise the scheduling environment : called from the kernel at init;
-void scheduler_initialise(size_t max_nb_processes);
+void scheduler_create_sprocesses(size_t max_nb_processes);
 
-//Update a process after its preemption;
-void scheduler_cleanup_process(process_t *);
+//Update a sprocess after its preemption;
+void scheduler_cleanup_sprocess(sprocess_t *);
 
-//Process reactivation : called from threads;
-void scheduler_activate_process(process_t *);
+//Clean a task;
+void scheduler_cleanup_task(task_t *);
+
+//Process reactivation : called from processes;
+void scheduler_activate_sprocess(sprocess_t *);
 
 //Process stop : called from preemption.
-void scheduler_stop_process(process_t *);
+sprocess_t *scheduler_stop_current_sprocess();
 
-//Select a process to execute;
-process_t *scheduler_select_process();
+//Select a sprocess to execute;
+sprocess_t *scheduler_select_sprocess();
 
 
 /*
@@ -38,11 +52,11 @@ void scheduler_impl_initialise();
 //Search in task containers for a task to execute;
 task_t *scheduler_impl_get_task();
 
-//Insert a process in the provided list; called from preemption;
-void scheduler_impl_insert_process(linked_list_t *, process_t *);
+//Insert a sprocess in the provided list; called from preemption;
+void scheduler_impl_insert_sprocess(linked_list_t *, sprocess_t *);
 
-//Select the process to be executed : called from preemption;
-process_t* scheduler_impl_select_process(linked_list_t *);
+//Select the sprocess to be executed : called from preemption;
+sprocess_t* scheduler_impl_select_sprocess(linked_list_t *);
 
 extern task_t empty_task;
 

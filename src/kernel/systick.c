@@ -2,7 +2,7 @@
 // Created by root on 4/10/18.
 //
 
-#include <kernel/scheduler/process.h>
+#include <kernel/scheduler/sprocess.h>
 
 #include "systick.h"
 
@@ -44,7 +44,7 @@ void systick_tick() {
         if (!--task_duration) {
 
             //Trigger the preemption;
-            core_trigger_context_switch();
+            core_preempt_process();
 
             //Task duration becomes 0, preemption won't be called anymore;
 

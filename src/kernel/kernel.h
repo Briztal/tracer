@@ -22,7 +22,10 @@
 #define TRACER_KERNEL_H
 
 #include <stdint.h>
-#include "stddef.h"
+
+#include <stddef.h>
+
+#include <kernel/arch/arch.h>
 
 //------------------------------------------- Entry Point -------------------------------------------
 
@@ -40,6 +43,24 @@ void kernel_halt(uint16_t blink_delay);
 //Raise an error, halt the code, log;
 void kernel_error(const char *log_message);
 
+
+//------------------------------------------- Stack management -------------------------------------------
+
+//Allocate a stack for a process;
+void kernel_stack_alloc(stack_t *stack, size_t stack_size, 
+	void (*function)(), void (*exit_loop)(), void *arg);
+
+
+
+//Reset an allocated stack;
+void kernel_stack_reset(stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg);
+
+//Free an allocated stack;
+void kernel_stack_free(stack_t *);
+
+
+//------------------------------------------- Heap management -------------------------------------------
+
 //The malloc function to use across the code;
 void *kernel_malloc(size_t size);
 
@@ -51,6 +72,8 @@ void *kernel_realloc(void *, size_t size);
 
 //The free function to use across the code;
 void kernel_free(void *);
+
+//------------------------------------------- Entry Point -------------------------------------------
 
 //Enter a critical section;
 void kernel_enter_critical_section();

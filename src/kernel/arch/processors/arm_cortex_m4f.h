@@ -9,6 +9,8 @@
 
 #include "stdbool.h"
 
+#include "stddef.h"
+
 #include "kinetis.h"
 
 /*
@@ -16,24 +18,27 @@
  */
 
 //The stack element type;
-typedef uint32_t stack_element_t;
+//typedef uint32_t stack_element_t;
 
 //The stack pointer type;
-typedef stack_element_t *stack_ptr_t;
+//typedef stack_element_t *stack_ptr_t;
 
 //The process stack type;
 typedef struct {
 	
 	//The current stack pointer;
-    stack_ptr_t stack_pointer;
+    void *stack_pointer;
 
 	//The beginning of the stack;
-    stack_ptr_t stack_begin;
+    void *stack_begin;
 	
 	//The end of the stack;
-    stack_ptr_t stack_end;
+    void *stack_end;
 
 } stack_t;
+
+//The empty stack initializer;
+#define EMPTY_STACK() (stack_t) {.stack_pointer = 0, .stack_begin = 0, .stack_end = 0,}
 
 
 /*
@@ -47,23 +52,35 @@ typedef struct {
 
 //------------------------------------- Stack bounds -------------------------------------
 
+//Correct a size to get a 4 bytes multiple;
+inline size_t core_correct_size(size_t size);
+
 //Get the stack begin from the allocated region;
-inline void core_get_stack_begin(allocated_pointer, size);
+inline void *core_get_stack_begin(void *allocated_pointer, size_t size);
 
 //Get the stack end from the allocated region;
-inline void core_get_stack_end(allocated_pointer, size);
+inline void *core_get_stack_end(void *allocated_pointer, size_t size);
 
 
 //------------------------------------- Stack management  -------------------------------------
 
 //Initialise a stack for a future unstacking. An arg pointer can be passed
-void core_init_stack(void (*function)(), void (*end_loop)(), void *init_arg);
+void *core_init_stack(void *sp, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //Get the argument stored at stack init. Must be called at the very beginning of the process function;
 void *core_get_init_arg();
 
 
-//------------------------------------- Context switch -------------------------------------
+//------------------------------------- Execution -------------------------------------
+
+//Set the stack provider;
+void core_set_stack_provider(stack_t *(*stack_provider)(stack_t *));
+
+//Reset the stack provider;
+void core_reset_stack_provider();
+
+//Execute a process, defined by its initialised stack;
+void core_execute_process();
 
 //Trigger the preemption;
 inline void core_preempt_process();
@@ -71,17 +88,14 @@ inline void core_preempt_process();
 
 //------------------------------------- Execution modes and privilleges -------------------------------------
 
-//Enter into process mode;
-inline void core_enter_process_mode();
-
 //Returns true if the current code runs in thread mode
-inline bool core_in_interrupt();
+inline bool core_in_handler_mode();
 
 
 //------------------------------------- Systick -------------------------------------
 
 //Start the systick timer;
-inline void core_systick_start(uint32_t systick_period_us, void (*systick_function)(void));
+void core_systick_start(uint32_t systick_period_us, void (*systick_function)(void));
 
 
 //------------------------------------- Interrupts ------------------------------------- 
@@ -114,7 +128,7 @@ inline void core_IC_enable(uint8_t interrupt_index);
 inline void core_IC_disable(uint8_t interrupt_index); 
 
 //Mark the interrupt pending. Will be executed asap;
-inline void core_IC_set_pending(interrupt_index);
+inline void core_IC_set_pending(uint8_t interrupt_index);
   
 //Mark the interrupt as not pending;
 inline void core_IC_clear_pending(uint8_t interrupt_index);
@@ -131,13 +145,25 @@ inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)());
  */
 
 /*
+ * core_correct_size : corrects the size to get a multiple of 4.
+ */
+
+inline size_t core_correct_size(size_t size) {
+	
+	//Set the two first bytes to zero to obtain a multiple of 4;
+	return size & ~(size_t)3;
+	
+}
+
+
+/*
  * core_get_stack_begin : determines the stacks beginning case from the allocated pointer and the size;
  *
  *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
  */
 
-inline void core_get_stack_begin(allocated_pointer, size) {
-	return ((allocated_pointer) + (size));
+inline void *core_get_stack_begin(void *allocated_pointer, size_t size) {
+	return ((uint8_t *)(allocated_pointer)) + size;
 }
 
 
@@ -147,8 +173,8 @@ inline void core_get_stack_begin(allocated_pointer, size) {
  *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
  */
 
-inline void core_get_stack_end(allocated_pointer, size) {
-	return  (allocated_pointer);
+inline void *core_get_stack_end(void *allocated_pointer, size_t size) {
+	return  allocated_pointer;
 }
 
 
@@ -161,7 +187,7 @@ inline void core_get_stack_end(allocated_pointer, size) {
  * core_preempt_process : sets the pendSV exception isPending flag;
  */
 
-static inline void core_preempt_process() {}
+inline void core_preempt_process() {
     SCB_ICSR |= SCB_ICSR_PENDSVSET;
 }
 
@@ -171,74 +197,15 @@ static inline void core_preempt_process() {}
  */
 
 /*
- * core_enter_process_mode : updates the control register to use the process stack;
- */
-
-static inline void core_enter_process_mode() {
-
-	//TODO UNPRIVILEGE
-   	
-	//TODO Exec. ISB after changing CONTORL (recommended);
-	__asm__ __volatile__(\
-        "mov r4, #2 \n\t"\
-        "msr control, r4\n\t"\
-	);
-
-}
-
-
-/*
- * core_in_interrupt : this function return true if the current code is ran from an interrup;
+ * core_in_handler_mode : this function returns true if the current code is ran from an interrupt;
  *
  *  If we are an interrupt, the 8 first bits of the System Control Block will contain the exception number.
  *
  *  If those are 0, no interupt is running yet;
  */
 
-static inline bool core_in_interrupt() {
+inline bool core_in_handler_mode() {
     return (bool) ((uint8_t) SCB_ICSR);
-}
-
-
-/*
- * ------------------------------------- Systick -------------------------------------
- */
-
-/*
- * core_start_systick_timer :
- *  - sets the system timer reload value;
- *  - sets the function to execute at undf;
- *  - resets the undf flag;
- *  - enables the timer;
- *
- *  the reload value is determined by :
- *
- *
- *      timer_period_seconds = 1 / F_CPU seconds;
- *      systick_period_seconds = systick_period_ms / 1000;
- *
- *      nb_ticks = systick_period / timer_period = F_CPU * systick_period_ms / 1000
- *
- *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
- */
-
-inline void core_systick_start(uint32_t systick_period_us, void (*systick_function)(void)) {
-
-    //Set the systick function;
-    _VectorsRam[15] = systick_function;
-
-    //Set the systick priority to the highest priority level;
-    NVIC_SET_PRIORITY(-1, 0);
-
-    //Update the reload value register;
-    SYST_RVR = (uint32_t) (((float) systick_period_us) * ((float) F_CPU / (float) 1000));
-
-    //Clear the systick flag;
-    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;
-
-    //Enable the systick interrupt;
-    SYST_CSR |= SYST_CSR_ENABLE;
-
 }
 
 
@@ -251,7 +218,7 @@ inline void core_systick_start(uint32_t systick_period_us, void (*systick_functi
  * 	Fault handling is still enabled;
  */
 
-static inline void core_enable_interrupts() {
+inline void core_enable_interrupts() {
 	__asm__ __volatile__("cpsie i");
 }
 
@@ -261,7 +228,7 @@ static inline void core_enable_interrupts() {
  * 	Fault handling is still enabled;
  */
 
-static inline void core_disable_interrupts() {
+inline void core_disable_interrupts() {
 	__asm__ __volatile__("cpsid i");
 }
 

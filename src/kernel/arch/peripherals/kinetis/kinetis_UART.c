@@ -231,16 +231,16 @@ void initialise_hardware(const kinetis_UART_data_t *const data) {
     const uint8_t status_id = data->status_interrupt_id;
 
     //Set the status interrupt priority;
-    core_set_interrupt_priority(status_id, DRIVER_STARUS_INTERRUPT_PRIORITY);
+    core_IC_set_priority(status_id, DRIVER_STARUS_INTERRUPT_PRIORITY);
 
     //Eventually de-activate a pending status interrupt;
-    core_clear_interrupt_pending(status_id);
+    core_IC_clear_pending(status_id);
 
     //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(status_id, data->status_interrupt_function);
+    core_IC_set_handler(status_id, data->status_interrupt_function);
 
     //Disable the status interrupt;
-    core_disable_interrupt(status_id);
+    core_IC_disable(status_id);
 
 
     /*
@@ -263,16 +263,16 @@ void initialise_hardware(const kinetis_UART_data_t *const data) {
     const uint8_t error_id = data->error_interrupt_id;
 
     //Set the error interrupt priority;
-    core_set_interrupt_priority(error_id, DRIVER_ERROR_INTERRUPT_PRIORITY);
+    core_IC_set_priority(error_id, DRIVER_ERROR_INTERRUPT_PRIORITY);
 
     //Eventually de-activate a pending status interrupt;
-    core_clear_interrupt_pending(error_id);
+    core_IC_clear_pending(error_id);
 
     //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(error_id, data->status_interrupt_function);
+    core_IC_set_handler(error_id, data->status_interrupt_function);
 
     //Disable the status interrupt, will be activated at startup;
-    core_disable_interrupt(error_id);
+    core_IC_disable(error_id);
 
 }
 
@@ -500,10 +500,10 @@ void kinetis_UART_start(const void *const data_p) {
     kinetis_UART_memory_t *registers = data->memory;
 
     //Enable the status interrupt;
-    core_enable_interrupt(data->status_interrupt_id);
+    core_IC_enable(data->status_interrupt_id);
 
     //Enable the error interrupt;
-    core_enable_interrupt(data->error_interrupt_id);
+    core_IC_enable(data->error_interrupt_id);
 
     //Set bit RE of C2;
     SET(registers->C2, UART_C2_RE, 8);
@@ -547,11 +547,10 @@ void kinetis_UART_exit(const void *const data_p) {
     registers->RWFIFO = 1;
 
     //Disable the status interrupt;
-    core_disable_interrupt(data->status_interrupt_id);
-
+    core_IC_disable(data->status_interrupt_id);
 
     //Disable the status interrupt;
-    core_disable_interrupt(data->error_interrupt_id);
+    core_IC_disable(data->error_interrupt_id);
     /*
      * Errors supported are :
      *  - framing errors (locking) - read and forget last element;
@@ -566,23 +565,6 @@ void kinetis_UART_exit(const void *const data_p) {
 
     //Disable receiver overflow, receiver underflow and transmitter overflow exceptions;
     CLEAR(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
-
-
-    //Cache the error interrupt index;
-    const uint8_t error_id = data->error_interrupt_id;
-
-    //Set the error interrupt priority;
-    core_set_interrupt_priority(error_id, DRIVER_ERROR_INTERRUPT_PRIORITY);
-
-    //Eventually de-activate a pending status interrupt;
-    core_clear_interrupt_pending(error_id);
-
-    //Set the provided interrupt link as the interrupt function;
-    core_set_interrupt_handler(error_id, data->status_interrupt_function);
-
-    //Enable the status interrupt;
-    core_enable_interrupt(error_id);
-
 
 }
 

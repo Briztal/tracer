@@ -15,21 +15,21 @@
 typedef enum {
 
     //Execution required;
-            PROCESS_PENDING = 0,
+            SPROCESS_PENDING = 0,
 
     //Process stop required by a semaphore;
-            PROCESS_STOP_REQUIRED = 1,
+            SPROCESS_STOP_REQUIRED = 1,
 
     //Thread stopped;
-            PROCESS_STOPPED = 2,
+            SPROCESS_STOPPED = 2,
 
     //Execution done;
-            PROCESS_TERMINATION_REQUIRED = 3,
+            SPROCESS_TERMINATION_REQUIRED = 3,
 
     //Execution done;
-            PROCESS_TERMINATED = 4,
+            SPROCESS_TERMINATED = 4,
 
-} process_state_t;
+} sprocess_state_t;
 
 
 /*
@@ -45,32 +45,27 @@ typedef struct {
 	stack_t stack;
 
     //The process state;
-    process_state_t state;
+   	sprocess_state_t state;
 
     //The task data;
     task_t *task;
 
     //TODO PRIO DATA;
 
-} process_t;
+} sprocess_t;
 
 
-//Allocate a stack for a process_t;
-void process_create_context(process_t *process_p, uint32_t stack_size);
+//Create a sprocess in the heap with a stack of the required size;
+sprocess_t *sprocess_create(size_t stack_size);
 
-//Reset a process_t's context;
-void process_reset_context(process_t *process);
+//Reset a process;
+void sprocess_reset(sprocess_t *sprocess);
 
-//Start the execution of processes;
-void process_start_execution();
+//Delete a process, and free its stack;
+void sprocess_delete(sprocess_t *sprocess);
 
-//Stop the execution of processes;
-void process_stop_execution();
-
-//Get the process currently in execution;
-process_t *process_get_current();
-
-
+//Execute a process. If succeeds, doesn't return;
+void sprocess_execute(sprocess_t *sprocess);
 
 
 #endif //TRACER_THREADMANAGER_H
