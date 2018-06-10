@@ -1,5 +1,5 @@
 /*
-  Taskprogrammer.h - Part of TRACER
+  service.h - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 

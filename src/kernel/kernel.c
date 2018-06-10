@@ -1,5 +1,5 @@
 /*
-  kernel.cpp Part of TRACER
+  kernel.c Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
