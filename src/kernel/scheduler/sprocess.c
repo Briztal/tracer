@@ -120,6 +120,8 @@ void sprocess_init() {
 
 void sprocess_function(volatile sprocess_t *volatile sprocess) {
 
+	
+/*
     //The sprocess must be pending, otherwise, there has been an error in the scheduler.
     if ((volatile sprocess_state_t) sprocess->state != SPROCESS_PENDING) {
 
@@ -127,21 +129,24 @@ void sprocess_function(volatile sprocess_t *volatile sprocess) {
         //TODO KERNEL PANIC;
 
     }
-
-    kernel_halt(20);
+*/
 
     //Cache the task pointer;
     volatile task_t *volatile task = sprocess->task;
+	
+	//kernel_halt(30);
+		
+	/*		
+	if (sprocess->task == &empty_task) {
 
-    if (sprocess->task == &empty_task) {
-
-        kernel_halt(200);
+        	kernel_halt(50);
 
     } else {
 
         kernel_halt(2000);
 
-    }
+    }	
+*/
 
     //Execute the function, passing args;
     (*(task->function))((void *) task->args);
@@ -180,7 +185,7 @@ void sprocess_function(volatile sprocess_t *volatile sprocess) {
 
 void sprocess_execute(sprocess_t *sprocess) {
 
-    //Execute the first process; 
+    //Execute the first process; //TODO CLEANUP;
     core_execute_process(&sprocess->stack, sprocess_function, sprocess);
 
 }

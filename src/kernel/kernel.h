@@ -30,12 +30,12 @@
 //------------------------------------------- Entry Point -------------------------------------------
 
 /*
- * start : this function is called once, by main only. It is the project's entry point.
+ * init : this function is called once, by the core library only. It is the project's entry point.
  *
  *  It will call initialise_hardware, and then call iterate indefinitely.
  */
 
-void kernel_start();
+void kernel_init();
 
 //Raise an error, halt the code, log;
 void kernel_halt(uint16_t blink_delay);

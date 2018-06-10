@@ -40,28 +40,10 @@ static uint32_t critical_section_counter = 0;
 //------------------------------------------- Entry Point -------------------------------------------
 
 /*
- * start : this function is called once, by the core initialisation only. It is the project's entry point.
+ * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
-void kernel_start() {
-
-    //This function can be called only once. If it has already been called, fail.
-    if (started)
-        return;
-
-    //Set the flag to prevent multiple executions;
-    started = true;
-
-    
-	//TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel star
-
-    //Start the systick timer, and set the systick function;
-    core_systick_start(1, &systick_tick);
-	
-	//Enable the preemption in one millisecond;
-    systick_set_process_duration(0);
-
-	//TODO IN CORE_INIT FUNCTION, CALLED BEFORE kernel star
+void kernel_init() {
 
     //Start the scheduler;
     scheduler_start();
@@ -117,6 +99,7 @@ void kernel_halt(uint16_t delay) {
     arch_blink(delay);
 
 }
+
 
 /*
  * -------------------------------------------- Stack management ---------------------------------------------

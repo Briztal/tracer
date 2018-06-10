@@ -254,8 +254,7 @@ int main() {
 
      */
 
-    kernel_start();
-
+    core_init();
 
     /*
 

@@ -41,13 +41,13 @@ typedef struct {
 #define EMPTY_STACK() (stack_t) {.stack_pointer = 0, .stack_begin = 0, .stack_end = 0,}
 
 
-/*
- * -------------------------------------- Headers --------------------------------------
- */
+//TODO STACK MANAGEMENT;
 
-//TODO CORE_EXECUTE(privilege level, function);
-//Get the current thread stack pointer;//TODO get_thread_stack_pointer
-//static inline void core_get_stack_pointer(sp);
+
+//-------------------------------------- Init --------------------------------------
+
+//Initialise the core;
+void core_init();
 
 
 //------------------------------------- Stack bounds -------------------------------------
@@ -80,7 +80,7 @@ void core_set_stack_provider(stack_t *(*stack_provider)(stack_t *));
 void core_reset_stack_provider();
 
 //Execute a process, defined by its initialised stack;
-void core_execute_process();
+void core_execute_process(stack_t *stack, void (*volatile function)(void *), void *volatile arg);
 
 //Trigger the preemption;
 inline void core_preempt_process();
@@ -90,12 +90,6 @@ inline void core_preempt_process();
 
 //Returns true if the current code runs in thread mode
 inline bool core_in_handler_mode();
-
-
-//------------------------------------- Systick -------------------------------------
-
-//Start the systick timer;
-void core_systick_start(uint32_t systick_period_us, void (*systick_function)(void));
 
 
 //------------------------------------- Interrupts ------------------------------------- 
@@ -286,22 +280,5 @@ inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)()) {
     _VectorsRam[16 + (interrupt_index)] = handler;
 }
 
-
-/*
- * ------------------------------------- Context switch -------------------------------------
- */
-
-/*
- * core_set_context_switcher : sets the function to be called when a context switch is required;
- */
-
-/*
-
-inline void core_set_context_switcher(context_switcher) {
-    _VectorsRam[14] = context_switcher;
-    NVIC_SET_PRIORITY(-2, 240);
-}
-
-*/
 
 #endif
