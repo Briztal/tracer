@@ -26,7 +26,7 @@
 
 #include "stdbool.h"
 
-#include <kernel/scheduler/tasks/task.h>
+#include <kernel/scheduler/tasks/stask.h>
 
 /*
  * The sequence task type is composed of a task and of a sequence identifier;
@@ -35,7 +35,7 @@
 typedef struct {
 
     //Task composition;
-    task_t task;
+    stask_t task;
 
     //Sequence identifier;
     uint8_t sequence_id;
@@ -60,7 +60,9 @@ bool sequence_insertion_available(uint8_t sequence_id);
 bool sequences_available(uint8_t type);
 
 //Build and schedule a task;
-bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)());
+bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)()
+        , uint16_t activity_time);
+
 
 //--------------------- Tasks execution --------------------
 
@@ -68,7 +70,7 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
 void sequences_remove_task(sequence_task_t *task);
 
 //Get the first task of the given sequence;
-task_t *sequences_get_task(uint8_t sequence_id);
+stask_t *sequences_get_task(uint8_t sequence_id);
 
 
 #endif //TRACER_TASKSEQUENCER_H

@@ -125,7 +125,8 @@ void sequences_initialise(const size_t unordered_sequence_size, const size_t nb_
  * sequences_add_task : determines the required sequence, and appends the task to it, if there is one space.
  */
 
-bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)()) {
+bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, void (*cleanup)()
+        , uint16_t activity_time) {
 
     //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
@@ -167,7 +168,8 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
                     .function = (func),
                     .args = (args),
                     .cleanup = (cleanup),
-                    .task_type = SEQUENCE_TASK,
+                    .task_type = SEQUENCE_STASK,
+                    .activity_time = activity_time,
             },
 
             .sequence_id = sequence_id,
@@ -181,7 +183,7 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
     kernel_enter_critical_section();
 
     //Add the task to the list;
-    llist_insert_end((linked_list_t *) sequence, (linked_element_t *) task);
+    llist_insert_last((linked_list_t *) sequence, (linked_element_t *) task);
 
     //Leave the critical section;
     kernel_leave_critical_section();
@@ -270,7 +272,7 @@ bool sequences_available(uint8_t sequence_id) {
  * sequences_get_task : returns a task identifier from the task pool;
  */
 
-task_t *sequences_get_task(uint8_t sequence_id) {
+stask_t *sequences_get_task(uint8_t sequence_id) {
 
     //If sequences are not scheduler_initialised :
     if (!sequences_initialised) {
@@ -307,7 +309,7 @@ task_t *sequences_get_task(uint8_t sequence_id) {
     kernel_enter_critical_section();
 
     //If the sequence exists and is unlocked, cache the first task of the buffer;
-    task_t *task = (task_t *) llist_remove_begin((linked_list_t *) sequence);
+    stask_t *task = (stask_t *) llist_remove_first((linked_list_t *) sequence);
 
     //If the sequence must be locked (index not zero):
     if (sequence_id) {
@@ -351,7 +353,7 @@ void sequences_remove_task(sequence_task_t *task) {
     }
 
     //Destroy the task;
-    task_delete((task_t *) task);
+    stask_delete((stask_t *) task);
 
     //Cache the required task sequence;
     sequence_t *sequence = sequences + sequence_id;

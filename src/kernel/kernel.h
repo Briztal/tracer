@@ -41,22 +41,25 @@ void kernel_init();
 void kernel_halt(uint16_t blink_delay);
 
 //Raise an error, halt the code, log;
+void kernel_count(size_t to_count);
+
+//Raise an error, halt the code, log;
 void kernel_error(const char *log_message);
 
 
 //------------------------------------------- Stack management -------------------------------------------
 
 //Allocate a stack for a process;
-void kernel_stack_alloc(stack_t *stack, size_t stack_size, 
+void kernel_stack_alloc(core_stack_t *stack, size_t stack_size,
 	void (*function)(), void (*exit_loop)(), void *arg);
 
 
 
 //Reset an allocated stack;
-void kernel_stack_reset(stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg);
+void kernel_stack_reset(core_stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg);
 
 //Free an allocated stack;
-void kernel_stack_free(stack_t *);
+void kernel_stack_free(core_stack_t *);
 
 
 //------------------------------------------- Heap management -------------------------------------------

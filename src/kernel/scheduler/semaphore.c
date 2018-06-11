@@ -24,9 +24,6 @@
 
 #include <kernel/kernel.h>
 
-#include <kernel/arch/arch.h>
-
-#include "kernel/scheduler/sprocess.h"
 
 /*
  * Destructor : If the locked threads array is not empty, throws an exception.
@@ -60,6 +57,7 @@ void sem_delete(semaphore_t *semaphore) {
 }
 
 
+
 /*
  * sem_wait : required the execution;
  */
@@ -76,10 +74,10 @@ void sem_wait(semaphore_t *semaphore) {
         if (!semaphore->allocation_counter) {
 
             //Get our sprocess's index;
-            sprocess_t *sprocess = scheduler_stop_current_sprocess();
+            stopped_process_id_t process = scheduler_stop_sprocess();
 
             //Add the sprocess pointer to the locked threads array;
-            container_append_element(&semaphore->locked_threads, &sprocess);
+            container_append_element(&semaphore->locked_threads, &process);
 
             //Trigger the context switch; Will be effective after the critical section exit;
             core_preempt_process();
@@ -115,10 +113,10 @@ void sem_post(semaphore_t *semaphore) {
         if (semaphore->locked_threads.nb_elements) {
 
             //Get the sprocess to unlock;
-            sprocess_t *sprocess = *(sprocess_t **)container_get_element(&semaphore->locked_threads, 0);
+            stopped_process_id_t process = *(sprocess_t **)container_get_element(&semaphore->locked_threads, 0);
 
             //Re-activate the sprocess;
-            scheduler_activate_sprocess(sprocess);
+            scheduler_activate_sprocess(process);
 
             //Remove the index of the array;
             container_remove_element(&semaphore->locked_threads, 0);
@@ -139,5 +137,4 @@ void sem_post(semaphore_t *semaphore) {
     kernel_leave_critical_section();
 
 }
-
 

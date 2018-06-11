@@ -21,6 +21,9 @@
 
 #include "llist.h"
 
+#include <kernel/kernel.h>
+
+
 
 /*
  * ------------------------------ Linked element ------------------------------
@@ -36,7 +39,7 @@ void lelmt_concat(linked_element_t *prev, linked_element_t *next) {
     if (prev->next || next->prev) {
 
         //Error. Association must not overwrite previous associations;
-        return;//TODO EXCEPTION;
+        kernel_error("SUUS");//TODO
 
     }
 
@@ -112,7 +115,6 @@ void lelmt_insert_after(linked_element_t *src_prev, linked_element_t *new_elemen
 
 }
 
-
 /*
  * lelmt_insert_before : inserts the whole list where new belongs between next and its eventual predecessor;
  */
@@ -138,134 +140,45 @@ void lelmt_insert_before(linked_element_t *src_next, linked_element_t *new_eleme
 
 }
 
-
 /*
  * ------------------------------ Linked list ------------------------------
  */
 
 /*
- * llist_insert_begin : inserts the new element at the beginning of the list;
+ * llist_insert_first : inserts the new element at the beginning of the list;
  */
 
-void llist_insert_begin(linked_list_t *list, linked_element_t *element) {
+void llist_insert_first(linked_list_t *list, linked_element_t *element) {
+
+    //If the element is null :
+    if (!list || !element) {
+        kernel_error("SUUS");//TODO
+        return;
+    }
 
     //If the maximum size is reached :
     if (list->nb_elements == list->max_nb_elements) {
-        return;//TODO ERROR;
+        kernel_error("SUUS");//TODO
+        return;
     }
 
+    //Reset the element;
+    element->next = element->prev = 0;
+
     //If the list is currently empty (increase the number of elements by the way);
-    if (list->nb_elements++ == 0) {
+    if (list->nb_elements == 0) {
 
         //Set the element as the first and the last;
         list->first = list->last = element;
 
     } else {
 
-        //Concatenate the new element and the list's first one;
-        lelmt_concat(element, list->first);
+        //The first element exists. Cache it;
+        linked_element_t *next = list->first;
 
-        //Update the list's first element;
-        list->first = element;
-
-    }
-
-}
-
-/*
- * llist_insert_end : inserts the new element at the end of the list;
- */
-
-void llist_insert_end(linked_list_t *list, linked_element_t *element) {
-
-    //If the list is currently empty (increase the number of elements by the way);
-    if (list->nb_elements++ == 0) {
-
-        //Set the element as the first and the last;
-        list->first = list->last = element;
-
-    } else {
-
-        //Concatenate the new element and the list's last one;
-        lelmt_concat(list->last, element);
-
-        //Update the list's last element;
-        list->last = element;
-
-    }
-
-}
-
-
-//Insert the new element after an element of the list;
-void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
-
-    //If src is null, the list is supposedly empty;
-    if (!src) {
-
-        //If the list is not empty (update the number of elements by the way):
-        if (list->nb_elements++) {
-
-            //Error : null provided but list not empty;
-            return;//TODO ERROR;
-
-        }
-
-        //Set the element as the first and the last;
-        list->first = list->last = element;
-
-        //Nothing else to do;
-        return;
-
-    }
-
-    //src is not null; The case where src doesn't belong to the list is not caught;
-
-    //If the successor is null, src is the last element of the list;
-    if (!src->next) {
-
-        //Update the list's last element;
-        list->last = element;
-
-    }
-
-    //Increase the number of elements;
-    list->nb_elements++;
-
-    //insert the element after src;
-    lelmt_insert_after(src, element);
-
-}
-
-/*
- * llist_insert_before : inserts the new element before an element of the list;
- */
-
-void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
-
-    //If src is null, the list is supposedly empty;
-    if (!src) {
-
-        //If the list is not empty (update the number of elements by the way):
-        if (list->nb_elements++) {
-
-            //Error : null provided but list not empty;
-            return;//TODO ERROR;
-
-        }
-
-        //Set the element as the first and the last;
-        list->first = list->last = element;
-
-        //Nothing else to do;
-        return;
-
-    }
-
-    //src is not null; The case where src doesn't belong to the list is not caught;
-
-    //If the successor is null, src is the first element of the list;
-    if (!src->prev) {
+        //Link both first and new element;
+        next->prev = element;
+        element->next = next;
 
         //Update the list's first element;
         list->first = element;
@@ -275,23 +188,74 @@ void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_elem
     //Increase the number of elements;
     list->nb_elements++;
 
-    //Insert the element before src;
-    lelmt_insert_before(src, element);
+}
+
+/*
+ * llist_insert_last : inserts the new element at the end of the list;
+ */
+
+void llist_insert_last(linked_list_t *list, linked_element_t *element) {
+
+    //If the element is null :
+    if (!list || !element) {
+        kernel_error("SUUS");//TODO
+        return;
+    }
+
+    //If the maximum size is reached :
+    if (list->nb_elements == list->max_nb_elements) {
+        kernel_error("SUUS");//TODO
+        return;
+    }
+
+    //Reset the element;
+    element->next = element->prev = 0;
+
+    //If the list is currently empty (increase the number of elements by the way);
+    if (list->nb_elements == 0) {
+
+        //Set the element as the first and the last;
+        list->first = list->last = element;
+
+    } else {
+
+        //The last element exists, cache it;
+        linked_element_t *prev = list->last;
+
+        //Link both previous and new element;
+        prev->next = element;
+        element->prev = prev;
+
+        //Update the list's last element;
+        list->last = element;
+
+    }
+
+    //Increase the number of elements;
+    list->nb_elements++;
 
 }
 
 
 /*
- * llist_remove_begin : removes the first element of the list;
+ * llist_remove_first : removes the first element of the list;
  */
 
-linked_element_t *llist_remove_begin(linked_list_t *list) {
+linked_element_t *llist_remove_first(linked_list_t *list) {
+
+    //If the lst is null :
+    if (!list) {
+        kernel_error("SUUS");//TODO
+        return 0;
+    }
 
     //If the list is empty :
     if (!list->nb_elements) {
 
         //error;
-        return 0;//TODO ERROR;
+        kernel_error("SUUS");//TODO
+
+        return 0;
 
     } else {
 
@@ -310,6 +274,11 @@ linked_element_t *llist_remove_begin(linked_list_t *list) {
             //Reset its predecessor;
             next->prev = 0;
 
+        } else {
+
+            //If list comprises only one element :
+            list->last = 0;
+
         }
 
         //Update the first element of the list;
@@ -326,13 +295,21 @@ linked_element_t *llist_remove_begin(linked_list_t *list) {
 }
 
 //Remove the last element of the list;
-linked_element_t *llist_remove_end(linked_list_t *list) {
+linked_element_t *llist_remove_last(linked_list_t *list) {
+
+    //If the lst is null :
+    if (!list) {
+        kernel_error("SUUS");//TODO
+        return 0;
+    }
 
     //If the list is empty :
     if (!list->nb_elements) {
 
         //error;
-        return 0;//TODO ERROR;
+        kernel_error("SUUS");//TODO
+
+        return 0;
 
     } else {
 
@@ -351,6 +328,10 @@ linked_element_t *llist_remove_end(linked_list_t *list) {
             //Reset its successor;
             prev->next = 0;
 
+        } else {
+
+            //If the list only comprised one element :
+            list->first = 0;
         }
 
         //Update the last element of the list;
@@ -374,8 +355,9 @@ linked_element_t *llist_remove_end(linked_list_t *list) {
 void llist_remove_element(linked_list_t *list, linked_element_t *element) {
 
     //If the element is null, error;
-    if (!element) {
-        return;//TODO ERROR;
+    if (!list || !element) {
+        kernel_error("SUUS");//TODO
+        return;
     }
 
     //Cache the element's successor;
@@ -385,7 +367,7 @@ void llist_remove_element(linked_list_t *list, linked_element_t *element) {
     if (!next) {
 
         //Remove the last element of the list;
-        llist_remove_end(list);
+        llist_remove_last(list);
 
     } else {
 
@@ -397,7 +379,7 @@ void llist_remove_element(linked_list_t *list, linked_element_t *element) {
         if (!prev) {
 
             //Remove the first element of the list;
-            llist_remove_begin(list);
+            llist_remove_first(list);
 
         } else {
 
@@ -428,7 +410,7 @@ void lring_insert_after(linked_ring_t *ring, linked_element_t *element) {
 
     //If the maximum size is reached :
     if (ring->nb_elements == ring->max_nb_elements)
-        return;//TODO ERROR;
+        kernel_error("SUUS");//TODO
 
     //If the ring has no elements (increase it by the way);
     if (ring->nb_elements++ == 0) {
@@ -458,7 +440,7 @@ void lring_insert_before(linked_ring_t *ring, linked_element_t *element) {
 
     //If the maximum size is reached :
     if (ring->nb_elements == ring->max_nb_elements)
-        return;//TODO ERROR;
+        kernel_error("SUUS");//TODO
 
     //If the ring has no elements (increase it by the way);
     if (ring->nb_elements++ == 0) {
@@ -587,4 +569,94 @@ void llist_reverse_process_full(linked_element_t *element, void (*process)(linke
     llist_reverse_process(last, process);
 
 }
+
+
+/*
+
+//Insert the new element after an element of the list;
+void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
+
+    //If src is null, the list is supposedly empty;
+    if (!src) {
+
+        //If the list is not empty (update the number of elements by the way):
+        if (list->nb_elements++) {
+
+            //Error : null provided but list not empty;
+            kernel_error("SUUS");//TODO
+
+        }
+
+        //Set the element as the first and the last;
+        list->first = list->last = element;
+
+        //Nothing else to do;
+        return;
+
+    }
+
+    //src is not null; The case where src doesn't belong to the list is not caught;
+
+    //If the successor is null, src is the last element of the list;
+    if (!src->next) {
+
+        //Update the list's last element;
+        list->last = element;
+
+    }
+
+    //Increase the number of elements;
+    list->nb_elements++;
+
+    //insert the element after src;
+    lelmt_insert_after(src, element);
+
+}
+
+ */
+
+
+/*
+ * llist_insert_before : inserts the new element before an element of the list;
+ */
+/*
+void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
+
+    //If src is null, the list is supposedly empty;
+    if (!src) {
+
+        //If the list is not empty (update the number of elements by the way):
+        if (list->nb_elements++) {
+
+            //Error : null provided but list not empty;
+            kernel_error("SUUS");//TODO
+
+        }
+
+        //Set the element as the first and the last;
+        list->first = list->last = element;
+
+        //Nothing else to do;
+        return;
+
+    }
+
+    //src is not null; The case where src doesn't belong to the list is not caught;
+
+    //If the successor is null, src is the first element of the list;
+    if (!src->prev) {
+
+        //Update the list's first element;
+        list->first = element;
+
+    }
+
+    //Increase the number of elements;
+    list->nb_elements++;
+
+    //Insert the element before src;
+    lelmt_insert_before(src, element);
+
+}
+*/
 

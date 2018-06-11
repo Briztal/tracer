@@ -25,6 +25,7 @@
 #include <kernel/systick.h>
 
 #include <kernel/kernel.h>
+#include <kernel/scheduler/tasks/stask.h>
 
 
 //---------------------------- Private functions ----------------------------
@@ -52,7 +53,7 @@ sprocess_t *sprocess_create(size_t stack_size) {
 	//Create the initializer;
 	sprocess_t init = {
 		.link = EMPTY_LINKED_ELEMENT(), 
-		.stack = EMPTY_STACK(), 
+		.stack = EMPTY_CORE_STACK(),
 		.state = SPROCESS_TERMINATED,
 		.task = 0,
 	};
@@ -80,11 +81,10 @@ void sprocess_reset(sprocess_t *sprocess) {
 	kernel_stack_reset(&sprocess->stack, &sprocess_init, &sprocess_exit, sprocess);
 	
 	//Cache the sprocess's task;
-	task_t *task = sprocess->task;
+	stask_t *task = sprocess->task;
 
 	//If the sprocess's has a pending task, clean it;
 	if (task) {
-		//TODO;
 		scheduler_cleanup_task(task);
 	}	
 
@@ -136,37 +136,20 @@ void sprocess_init() {
 
 void sprocess_function(volatile sprocess_t *volatile sprocess) {
 
-	
-/*
+
     //The sprocess must be pending, otherwise, there has been an error in the scheduler.
     if ((volatile sprocess_state_t) sprocess->state != SPROCESS_PENDING) {
 
         //Kernel panic;
-        //TODO KERNEL PANIC;
+        kernel_error("sprocess.c : sprocess_function : Attempted to start a non pending process;");
 
     }
-*/
 
     //Cache the task pointer;
-    volatile task_t *volatile task = sprocess->task;
-	
-	//kernel_halt(30);
-		
-	/*		
-	if (sprocess->task == &empty_task) {
-
-        	kernel_halt(50);
-
-    } else {
-
-        kernel_halt(2000);
-
-    }	
-*/
+    volatile stask_t *volatile task = sprocess->task;
 
     //Execute the function, passing args;
     (*(task->function))((void *) task->args);
-
 
     //Cache the exit function;
     void (*volatile cleanup)() = task->cleanup;
@@ -182,12 +165,11 @@ void sprocess_function(volatile sprocess_t *volatile sprocess) {
     //Require a context switch, as the task is finished;
     core_preempt_process();
 
-    //Infinite loop;
-    while (true) {
+	kernel_error("sprocess.c : sprocess_function : preemption invoked but failed."
+						 "Might be caused by an unfinished critical section;");
 
-        //TODO ERROR, FUNCTION CALLED FROM INTERRUPT OR CRITICAL SECTION LEAVE FORGOT IN THE CODE;
-
-    }
+	//Infinite loop;
+    while (true);
 
 }
 
@@ -201,8 +183,14 @@ void sprocess_function(volatile sprocess_t *volatile sprocess) {
 
 void sprocess_execute(sprocess_t *sprocess) {
 
-    //Execute the first process; //TODO CLEANUP;
-    core_execute_process(&sprocess->stack, sprocess_function, sprocess);
+	//Compute the core process from the sprocess;
+	core_process_t core_process = {
+			.process_stack = &sprocess->stack,
+			.activity_time = sprocess->task->activity_time,
+	};
+
+    //Execute the first process;
+    core_execute_process(&core_process, (void (*)(void *volatile)) sprocess_function, sprocess);
 
 }
 

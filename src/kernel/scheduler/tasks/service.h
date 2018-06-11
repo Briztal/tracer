@@ -24,7 +24,7 @@
 
 #include "stdint.h"
 
-#include "task.h"
+#include "stask.h"
 
 
 /*
@@ -34,7 +34,7 @@
 typedef struct {
 
     //The task itself;
-    task_t task;
+    stask_t task;
 
     //The time at which the next execution is supposed to happen;
     uint32_t next_exec_time;
@@ -59,12 +59,13 @@ void services_initialise(size_t max_nb_services);
 
 //TODO REMOVE PATCH : NOT CLOSED
 //Program a repetitive task;
-void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs);
+void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs,
+                           uint16_t activity_time);
 
 
 //TODO REMOVE PATCH : CLOSED;
 //Program an infinite task;
-void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period);
+void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period, uint16_t activity_time);
 
 
 //----------------------------------- Scheduler interaction -----------------------------------
@@ -73,7 +74,7 @@ void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint3
 bool services_available_task();
 
 //Get a service to execute;
-task_t *services_get_task();
+stask_t *services_get_task();
 
 //Reprogram an executed service;
 void services_reprogram(service_t *service);

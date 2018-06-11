@@ -24,7 +24,7 @@
 
 #include "kernel/arch/arch.h"
 
-#include "kernel/scheduler/tasks/task.h"
+#include "kernel/scheduler/tasks/stask.h"
 
 
 //The set of execution states;
@@ -58,13 +58,15 @@ typedef struct {
     linked_element_t link;
 
     //The process stack;
-	stack_t stack;
+	core_stack_t stack;
 
     //The process state;
    	sprocess_state_t state;
 
     //The task data;
-    task_t *task;
+    stask_t *task;
+
+    uint8_t counter;
 
     //TODO PRIO DATA;
 

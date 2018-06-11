@@ -29,7 +29,7 @@
 /*
  * The systick is the reference clock for software;
  *
- * The library receives ticks, supposedly every millisecond, and updates its internal counter;
+ * The library receives ticks, supposedly every half millisecond, and updates its internal counter;
  *
  * Every time its receives a systick, it verifies if it must trigger the context switch, and does it if so;
  */
@@ -42,7 +42,7 @@ void systick_tick();
 
 //---------------------- Context Switch ----------------------
 
-//Update the current task's duration;
+//Update the current task's activity_time;
 void systick_set_process_duration(uint16_t ms);
 
 
@@ -52,7 +52,7 @@ void systick_set_process_duration(uint16_t ms);
 uint32_t systick_milliseconds();
 
 //Wait till time has reached the given limit;
-void systick_wait(uint32_t delta_t);
+void systick_wait(uint16_t ms_delay);
 
 
 #endif //TRACER_SYSTICK_H

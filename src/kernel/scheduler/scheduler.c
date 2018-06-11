@@ -20,8 +20,6 @@
 
 #include "scheduler.h"
 
-#include "sprocess.h"
-
 #include <kernel/systick.h>
 
 #include <kernel/kernel.h>
@@ -37,7 +35,7 @@
 void scheduler_delete_sprocesses();
 
 //Provide a new sprocess;
-stack_t *scheduler_select_new_sprocess(stack_t *);
+void scheduler_select_new_sprocess(core_process_t *);
 
 //Transfer the sprocess from the pending list to the stopped list
 void scheduler_pending_to_stopped(sprocess_t *sprocess);
@@ -53,7 +51,7 @@ void scheduler_pending_to_terminated(sprocess_t *sprocess);
  * The task to execute when the scheduler has no task to run;
  */
 
-void scheduler_inactive_loop(void *unused) {
+void scheduler_inactive_loop(void *ignored) {
 
     systick_set_process_duration(0);
 
@@ -68,34 +66,35 @@ void dumb_blink(void *);
 //---------------------------------- Scheduler globals ----------------------------------
 
 //The list of pending sprocesses;
-linked_list_t pending_sprocesses;
+static linked_list_t *pending_sprocesses;
 
 //The list of stopped sprocesses;
-linked_list_t stopped_sprocesses;
+static linked_list_t *stopped_sprocesses;
 
 //The list of terminated sprocesses;
-linked_list_t terminated_sprocesses;
+static linked_list_t *terminated_sprocesses;
 
 //The state of the scheduler;
-bool scheduler_initialised = false;
+static bool scheduler_initialised = false;
 
 //The flag for inactive state;
-bool scheduler_inactive = false;
+static bool scheduler_inactive = false;
 
 //The current sprocess in execution;
-sprocess_t *current_sprocess;
+static sprocess_t *current_sprocess;
 
 
 /*
  * The inactive mode task;
  */
 
-volatile task_t empty_task = {
+stask_t empty_task = {
         .function = scheduler_inactive_loop,
         .cleanup = 0,
         .args = 0,
         .linked_element = EMPTY_LINKED_ELEMENT(),
-        .task_type = EMPTY_TASK,
+        .task_type = EMPTY_STASK,
+        .activity_time = 1,
 };
 
 
@@ -103,12 +102,13 @@ volatile task_t empty_task = {
  * The inactive mode task;
  */
 
-volatile task_t blink_task = {
+stask_t blink_task = {
         .function = dumb_blink,
         .cleanup = 0,
         .args = 0,
         .linked_element = EMPTY_LINKED_ELEMENT(),
-        .task_type = SERVICE_TASK,
+        .task_type = SERVICE_STASK,
+        .activity_time = 2000
 };
 
 
@@ -123,6 +123,7 @@ volatile task_t blink_task = {
 
 void scheduler_start() {
 
+
     //Disable the preemption;
     systick_set_process_duration(0);
 
@@ -130,25 +131,13 @@ void scheduler_start() {
     scheduler_impl_initialise();
 
     //Provide our stack provider to the core lib;
-    core_set_stack_provider(&scheduler_select_new_sprocess);
+    core_set_process_provider(&scheduler_select_new_sprocess);
 
     //Get the first sprocess to execute;
     current_sprocess = scheduler_select_sprocess();
 
-    /*
-    if (current_sprocess->task == &empty_task) {
-
-        kernel_halt(200);
-
-    } else {
-
-        kernel_halt(2000);
-
-    }
-    */
-
     //Enable the preemption in 2 ms;
-    systick_set_process_duration(2000);
+    systick_set_process_duration(current_sprocess->task->activity_time);
 
     //Execute the first process;
     sprocess_execute(current_sprocess);
@@ -175,7 +164,7 @@ void scheduler_stop() {
     scheduler_delete_sprocesses();
 
     //Reset the stack provider;
-    core_reset_stack_provider();
+    core_reset_process_provider();
 
     //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
     //TODO DISABLE THE CONTEXT SWITCHING ::::::::::::::::::::
@@ -195,12 +184,7 @@ void scheduler_stop() {
 }
 
 
-#include "kernel/arch/arch.h"
-
 #include <kernel/drivers/PORT.h>
-
-#include <kernel/systick.h>
-#include <kernel/scheduler/tasks/task.h>
 
 
 uint16_t gf = 1;
@@ -209,15 +193,9 @@ volatile bool init = false;
 
 void dumb_blink(void *unused) {
 
-    volatile uint16_t delay = gf * (uint16_t)100;
+    volatile uint16_t delay = gf * (uint16_t) 30;
 
-    gf++;
-
-    if (init) {
-
-        kernel_halt(50);
-
-    }
+    gf *= 2;
 
     init = true;
 
@@ -270,36 +248,43 @@ void dumb_blink(void *unused) {
 void scheduler_create_sprocesses(size_t nb_processes) {
 
     if (scheduler_initialised) {
-        //TODO ERROR;
+        kernel_error("scheduler.c : scheduler_create_sprocesses : the scheduler is already initialised;");
         return;
     }
 
+    linked_list_t init = EMPTY_LINKED_LIST(nb_processes);
+
     //Initialise lists of sprocesses;
-    pending_sprocesses = EMPTY_LINKED_LIST(nb_processes);
-    stopped_sprocesses = EMPTY_LINKED_LIST(nb_processes);
-    terminated_sprocesses = EMPTY_LINKED_LIST(nb_processes);
+    pending_sprocesses = kernel_malloc_copy(sizeof(linked_list_t), &init);
+    stopped_sprocesses = kernel_malloc_copy(sizeof(linked_list_t), &init);
+    terminated_sprocesses = kernel_malloc_copy(sizeof(linked_list_t), &init);
 
 
     /*
      * All sprocesses have 200 bytes of RAM;
      */
 
+    uint8_t ctr = 1;
+
     for (; nb_processes--;) {
 
         //Create the sprocess in the heap with a 200 bytes long stack;
-        sprocess_t *sprocess = sprocess_create(200);
+        sprocess_t *sprocess = sprocess_create(2000);
 
         sprocess->task = &blink_task;
 
         sprocess->state = SPROCESS_PENDING;
 
-        llist_insert_end(&pending_sprocesses, (linked_element_t *) sprocess);
+        sprocess->counter = ctr++;
+
+        llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
         //----------------------------------------------
 
         //Add the process to the linked list;
-        //llist_insert_end(&terminated_sprocesses, (linked_element_t *) sprocess);
+        //llist_insert_last(terminated_sprocesses, (linked_element_t *) sprocess);
 
     }
+
 
     //Mark the scheduler initialised;
     scheduler_initialised = true;
@@ -316,10 +301,11 @@ void scheduler_delete_sprocesses() {
 //---------------------------------- Scheduling ----------------------------------
 
 /*
- * scheduler_select_new_sprocess : receives the old stack, selects a new process, returns its stack;
+ * scheduler_select_new_sprocess : receives the old stack, selects a new process, updates the stack and returns the
+ *  new time to preemption in milliseconds;
  */
 
-stack_t *scheduler_select_new_sprocess(stack_t *old_stack) {
+void scheduler_select_new_sprocess(core_process_t *core_process) {
 
     //Update the current process's status (ex : if terminated, will be stopped);
     scheduler_cleanup_sprocess(current_sprocess);
@@ -328,7 +314,10 @@ stack_t *scheduler_select_new_sprocess(stack_t *old_stack) {
     current_sprocess = scheduler_select_sprocess();
 
     //Return the stack of the new process;
-    return &current_sprocess->stack;
+    *core_process = (core_process_t) {
+            .process_stack = &current_sprocess->stack,
+            .activity_time = current_sprocess->task->activity_time,
+    };
 
 }
 
@@ -366,7 +355,8 @@ void scheduler_cleanup_sprocess(sprocess_t *sprocess) {
         case SPROCESS_STOPPED:
             //If the process is stopped :
 
-            //TODO ERROR CLEANED A STOPPED PROCESS;
+            kernel_error("scheduler.c : scheduler_cleanup_sprocess : attempted to clean a stopped process;");
+
             break;
 
             //If the process has to be terminated :
@@ -378,7 +368,7 @@ void scheduler_cleanup_sprocess(sprocess_t *sprocess) {
             break;
 
         case SPROCESS_TERMINATED:
-            //TODO ERROR CLEANED A TERMINATED PROCESS;
+            kernel_error("scheduler.c : scheduler_cleanup_sprocess : attempted to clean a terminated process;");
             break;
 
     }
@@ -388,25 +378,26 @@ void scheduler_cleanup_sprocess(sprocess_t *sprocess) {
 
 }
 
+
 /*
  * scheduler_cleanup_task : receives an executed task and transmits it to its source storage module;
  */
 
-void scheduler_cleanup_task(task_t *task) {
+void scheduler_cleanup_task(stask_t *task) {
 
     //Examine the type of the task;
     switch (task->task_type) {
 
-        case EMPTY_TASK:
+        case EMPTY_STASK:
             //If the task is empty, nothing to do;
             break;
 
-        case SEQUENCE_TASK:
+        case SEQUENCE_STASK:
             //If the task comes from a sequence, give it to the sequencer;
             sequences_remove_task((sequence_task_t *) task);
             break;
 
-        case SERVICE_TASK:
+        case SERVICE_STASK:
             //If the task comes from a service, give it to the service manager;
             services_reprogram((service_t *) task);
             break;
@@ -433,28 +424,28 @@ sprocess_t *scheduler_select_sprocess() {
      * Integrate tasks in the scheduler;
      */
 
+
     //If it is possible to integrate a task in the scheduler;
-    if (terminated_sprocesses.nb_elements) {
+    if (terminated_sprocesses->nb_elements) {
 
         //Query a task from task containers;
-        task_t *task = scheduler_impl_get_task();
+        stask_t *task = scheduler_impl_get_task();
 
         //If an available task was found :
         if (task) {
 
             //Remove the first terminated sprocess;
-            sprocess_t *sprocess = (sprocess_t *) llist_remove_begin(&terminated_sprocesses);
+            sprocess_t *sprocess = (sprocess_t *) llist_remove_first(terminated_sprocesses);
 
             //Assign the sprocess's task;
             sprocess->task = task;
 
             //Insert the process in the pending list; Implementation call is made;
-            scheduler_impl_insert_sprocess(&pending_sprocesses, sprocess);
+            scheduler_impl_insert_sprocess(pending_sprocesses, sprocess);
 
         }
 
     }
-
 
     /*
      * Select the next task to execute;
@@ -464,22 +455,24 @@ sprocess_t *scheduler_select_sprocess() {
     sprocess_t *sprocess;
 
     //If there are active processes :
-    if (pending_sprocesses.nb_elements) {
+    if (pending_sprocesses->nb_elements) {
 
         //Select the most urgent process to execute;
-        sprocess = scheduler_impl_select_sprocess(&pending_sprocesses);
+        sprocess = scheduler_impl_get_sprocess(pending_sprocesses);
 
         //The scheduler is active, and a non-empty process is running;
         scheduler_inactive = false;
 
+
     } else {
+
         //If there are no active sprocesses :
 
         //Remove the first terminated sprocess;
-        sprocess = (sprocess_t *) llist_remove_begin(&terminated_sprocesses);
+        sprocess = (sprocess_t *) llist_remove_first(terminated_sprocesses);
 
         //Insert it in the pending processes list;
-        llist_insert_begin(&pending_sprocesses, (linked_element_t *) sprocess);
+        llist_insert_first(pending_sprocesses, (linked_element_t *) sprocess);
 
         //Assign the empty task to the sprocess;
         sprocess->task = &empty_task;
@@ -497,7 +490,6 @@ sprocess_t *scheduler_select_sprocess() {
     //Leave the critical section;
     kernel_leave_critical_section();
 
-
     //Return the sprocess;
     return sprocess;
 
@@ -510,7 +502,20 @@ sprocess_t *scheduler_select_sprocess() {
  * scheduler_activate_sprocess : reactivates a sprocess, called from threads;
  */
 
-void scheduler_activate_sprocess(sprocess_t *sprocess) {
+void scheduler_activate_sprocess(stopped_process_id_t stopped_process) {
+
+    //If the provided pointer is null:
+    if (!stopped_process) {
+
+        //Error;
+        kernel_error("scheduler.c : scheduler_activate_sprocess : received a null pointer;");
+
+        return;
+
+    }
+
+    //First, cast the given pointer;
+    sprocess_t *sprocess = (sprocess_t *) stopped_process;
 
     //Access to processes is critical;
     kernel_enter_critical_section();
@@ -535,7 +540,7 @@ void scheduler_activate_sprocess(sprocess_t *sprocess) {
     } else {
 
         //If the state is invalid for a reactivation, error;
-        //TODO ERRO, ATTEMPTED TO ACTIVE A NON STOPPED PROCESS
+        kernel_error("scheduler.c : scheduler_activate_sprocess : attempted to activate a non-stopped process;");
 
     }
 
@@ -550,7 +555,7 @@ void scheduler_activate_sprocess(sprocess_t *sprocess) {
  *  The scheduler will stop it effectively after context switch.
  */
 
-sprocess_t *scheduler_stop_current_sprocess() {
+stopped_process_id_t scheduler_stop_sprocess() {
 
     //Access to process is critical;
     kernel_enter_critical_section();
@@ -559,16 +564,20 @@ sprocess_t *scheduler_stop_current_sprocess() {
     if (current_sprocess->state == SPROCESS_PENDING) {
         current_sprocess->state = SPROCESS_STOP_REQUIRED;
     } else {
-        //TODO ERROR, THE CURRENT PROCESS IS NOT IN THE PENDING STATE; 
+
+        //Error;
+        kernel_error("scheduler.c : scheduler_stop_sprocess : attempted to stop a non-pending process;");
+
     }
 
     //Leave the critical section;
     kernel_leave_critical_section();
 
     //Return the current process;
-    return current_sprocess;
+    return (stopped_process_id_t) current_sprocess;
 
 }
+
 
 
 //---------------------------------- List transfers ----------------------------------
@@ -584,10 +593,10 @@ void scheduler_stopped_to_pending(sprocess_t *sprocess) {
     kernel_enter_critical_section();
 
     //Remove the sprocess from the stopped list;
-    llist_remove_element(&stopped_sprocesses, (linked_element_t *) sprocess);
+    llist_remove_element(stopped_sprocesses, (linked_element_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
-    scheduler_impl_insert_sprocess(&pending_sprocesses, sprocess);
+    scheduler_impl_insert_sprocess(pending_sprocesses, sprocess);
 
     //For safety, set the sprocess state to stopped;
     sprocess->state = SPROCESS_PENDING;
@@ -596,6 +605,7 @@ void scheduler_stopped_to_pending(sprocess_t *sprocess) {
     kernel_leave_critical_section();
 
 }
+
 
 /*
  * scheduler_pending_to_stopped : transfers a sprocess from the pending list to the stopped list;
@@ -607,10 +617,10 @@ void scheduler_pending_to_stopped(sprocess_t *sprocess) {
     kernel_enter_critical_section();
 
     //Remove the sprocess from the stopped list;
-    llist_remove_element(&pending_sprocesses, (linked_element_t *) sprocess);
+    llist_remove_element(pending_sprocesses, (linked_element_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
-    llist_insert_end(&stopped_sprocesses, (linked_element_t *) sprocess);
+    llist_insert_last(stopped_sprocesses, (linked_element_t *) sprocess);
 
     //For safety, set the sprocess state to stopped;
     sprocess->state = SPROCESS_STOPPED;
@@ -634,10 +644,10 @@ void scheduler_pending_to_terminated(sprocess_t *sprocess) {
     sprocess_reset(sprocess);
 
     //Remove the sprocess from the stopped list;
-    llist_remove_element(&pending_sprocesses, (linked_element_t *) sprocess);
+    llist_remove_element(pending_sprocesses, (linked_element_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
-    llist_insert_end(&terminated_sprocesses, (linked_element_t *) sprocess);
+    llist_insert_last(terminated_sprocesses, (linked_element_t *) sprocess);
 
     //Leave the critical section;
     kernel_leave_critical_section();

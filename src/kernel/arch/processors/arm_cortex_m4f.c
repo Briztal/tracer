@@ -30,8 +30,8 @@
 
 //--------------------------------------------- Private headers ---------------------------------------------
 
-//The default stack provider. Simply returns the provided stack;
-stack_t *default_stack_provider(stack_t *old_stack) { return old_stack;}
+//The default stack provider. Simply return 1ms for process time and does not change the stack pointer;
+void default_stack_provider(core_process_t *old_process) {}
 
 //Initialise the systick timer;
 void core_systick_init();
@@ -47,10 +47,10 @@ void core_preemption();
 //--------------------------------------------- Fields ---------------------------------------------
 
 //The process's stack;
-stack_t *process_stack = 0;
+static core_process_t *core_process = 0;
 
 //The process stack provider; Initialised to the default provider;
-stack_t *(*process_stack_provider)(stack_t*) = &default_stack_provider;
+static void (*process_stack_provider)(core_process_t *) = &default_stack_provider;
 
 
 //------------------------------------- Core init -------------------------------------
@@ -59,21 +59,6 @@ void core_init() {
 
     //Disable all interrupts;
     core_disable_interrupts();
-
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
-    //TODO MAKE A CORE INIT FUNCTION THAT WILL BE CALED FIRST BY MAIN; IT WILL INITIALISE THE CORE, SET PREEMPT FUNCTION, START SYSTICK AND CALL KERNEL_INIT;
 
     //Reset the stack provider;
     process_stack_provider = default_stack_provider;
@@ -106,7 +91,7 @@ void core_init() {
  *
  *  The timer must overflow every 1ms, and call the systick_tick function;
  *
- *  It must reset the process duration to 0ms to disable preemption;
+ *  It must reset the process activity_time to 0ms to disable preemption;
  *
  *  the reload value is determined by :
  *
@@ -120,7 +105,7 @@ void core_init() {
 
 void core_systick_init() {
 
-    //Reset the systick process duration to disable preemption;
+    //Reset the systick process activity_time to disable preemption;
     systick_set_process_duration(0);
 
     //Set the systick function;
@@ -133,7 +118,7 @@ void core_systick_init() {
     //NVIC_SET_PRIORITY(-1, 0);
 
     //Update the reload value register;
-    SYST_RVR = (uint32_t) (((float) 1) * ((float) F_CPU / (float) 1000));
+    SYST_RVR = (uint32_t) ((float) F_CPU / (float) 2000);
 
     //Clear the systick flag;
     SCB_ICSR &= ~SCB_ICSR_PENDSTSET;
@@ -190,40 +175,20 @@ void core_preemption() {
 
 
     //Save the current process_t's stack pointer, while the process_t hasn't been deleted;
-    __asm__ __volatile__ ("mrs %0, psp" : "=r" (process_stack->stack_pointer):);
+    __asm__ __volatile__ ("mrs %0, psp" : "=r" (core_process->process_stack->stack_pointer):);
 
     //Execute an ISB;
     __asm__ __volatile__ ("ISB");
 
 
     //Provide the old stack and get a new one;
-    process_stack = process_stack_provider(process_stack);
+    process_stack_provider(core_process);
 
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS BORDEL !!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-    //TODO POURQUOI CA MARCHE PAS!!!!!!!!!!!!!!!!
-
-    arch_blink(500);
-
+    //Update the process duration;
+    systick_set_process_duration(core_process->activity_time);
 
     __asm__ __volatile__ (\
-            "msr psp, %0"::"r" (process_stack->stack_pointer)
+            "msr psp, %0"::"r" (core_process->process_stack->stack_pointer)
     );
 
     //Execute an ISB;
@@ -273,10 +238,13 @@ void core_preemption() {
  *  Finally, it leaves space for empty stack frame and saves the stack pointer;
  */
 
-void *core_init_stack(void *sp, void (*function)(), void (*exit_loop)(), void *arg) {
-	
-	//Cast the pointer to a manipulable pointer;	
-	uint32_t *sp4 = (uint32_t *)sp;
+void core_init_stack(core_stack_t *stack, void (*function)(), void (*exit_loop)(), void *arg) {
+
+    //Reset the stack;
+    stack->stack_pointer = stack->stack_begin;
+
+	//Cast the pointer to a manipulable pointer;
+	uint32_t *sp4 = (uint32_t *)stack->stack_pointer;
 
     //Store the mode //TODO DOC
 	*(sp4 - 1) = 0x01000000;
@@ -294,13 +262,13 @@ void *core_init_stack(void *sp, void (*function)(), void (*exit_loop)(), void *a
    	sp4 -= 8;
 
 	//Return the stack pointer;
-	return (void *)sp4;
+	stack->stack_pointer = sp4;
 
 }
 
 
 /*
- * core_get_init_arg : this function will return the value of r12. If called by the process init function, 
+ * core_get_init_arg : this function will return the value of r12. If called by the process init function,
  *  it will be equal to the previous function's arg;
  */
 
@@ -314,11 +282,11 @@ void *core_get_init_arg() {
 //------------------------------------- Execution -------------------------------------
 
 /*
- * core_set_stack_provider : updates the stack provider;
+ * core_set_process_provider : updates the stack provider;
  */
 
-void core_set_stack_provider(stack_t *(*new_provider)(stack_t*)) {
-	
+void core_set_process_provider(void (*new_provider)(core_process_t *)) {
+
 	//Update the new provider;
 	process_stack_provider = new_provider;
 
@@ -326,54 +294,58 @@ void core_set_stack_provider(stack_t *(*new_provider)(stack_t*)) {
 
 
 /*
- * core_reset_stack_provider : resets the stack provider;
+ * core_reset_process_provider : resets the stack provider;
  */
 
-void core_reset_stack_provider() {
-	
+void core_reset_process_provider() {
+
 	//Update the new provider;
 	process_stack_provider = &default_stack_provider;
 
 }
 
 
-
-
 /*
- * core_execute_process : executes the provided process, discarding what was executed before; 
+ * core_execute_process : executes the provided process, discarding what was executed before;
  * 	Must have been initialised by core_init_stack;
  */
 
-void core_execute_process(stack_t *stack, void (*volatile function)(void *), void *volatile arg) {
-	
+void core_execute_process(core_process_t *process, void (*function)(void *), void *arg) {
+
 	//If we are in handler mode, ignore the request;
 	if (core_in_handler_mode()) {
 		return;
 	}
-   
+
 	//As this function contains a context switch, we will copy our args in static variables;
 	static void (*volatile sf)(void *volatile);
 	static void *volatile sa;
-	
+
 	//Cache the function and the arg in static vars;
 	sf = function;
 	sa = arg;
 
+    //Cache the stack_t pointer;
+    core_stack_t *stack = process->process_stack;
+
 	//Reset the stack;
 	stack->stack_pointer = stack->stack_begin;
 
+    //Set the process duration;
+    systick_set_process_duration(process->activity_time);
+
     //Save the current stack;
-    process_stack = stack;
+    core_process = process;
 
     //Update the process stack pointer;
 	 __asm__ __volatile__ (\
 			"msr psp, %0\n\t"::"r" (stack->stack_pointer):"memory"
 	);
-	
+
 	//Execute an ISB;
     __asm__ __volatile__ ("ISB");
 
-	
+
 	//Update the control register to use PSP;//TODO UNPRIVILLEGE
     __asm__ __volatile__(\
         "mov r4, #2 \n\t"\
@@ -383,7 +355,6 @@ void core_execute_process(stack_t *stack, void (*volatile function)(void *), voi
 
 	//Execute an ISB;
     __asm__ __volatile__ ("ISB");
-
 
 	//Execute the cached function with the cached arg;
 	(*sf)(sa);

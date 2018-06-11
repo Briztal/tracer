@@ -23,7 +23,6 @@
 #include <kernel/scheduler/scheduler.h>
 #include <kernel/scheduler/tasks/service.h>
 #include <kernel/scheduler/tasks/sequences.h>
-#include <data_structures/containers/llist.h>
 
 /*
  * scheduler_impl_initialise : initializes task managers and scheduler;
@@ -32,7 +31,7 @@
 void scheduler_impl_initialise() {
 
     //The scheduler will comprise 16 processes;
-    scheduler_create_sprocesses(16);
+    scheduler_create_sprocesses(4);
 
     //The service manager will contain at most 255 simultaneous services;
     services_initialise(255);
@@ -53,7 +52,7 @@ void scheduler_impl_initialise() {
  *  If it finds no task, it returns 0;
  */
 
-task_t *scheduler_impl_get_task() {
+stask_t *scheduler_impl_get_task() {
 
     //First, search for available services;
     if (services_available_task()) {
@@ -94,7 +93,7 @@ task_t *scheduler_impl_get_task() {
 void scheduler_impl_insert_sprocess(linked_list_t *pending_sprocesses, sprocess_t *sprocess) {
 
     //Insert the process at the end of the list;
-    llist_insert_end(pending_sprocesses, (linked_element_t *) sprocess);
+    llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
 
 }
 
@@ -107,15 +106,25 @@ void scheduler_impl_insert_sprocess(linked_list_t *pending_sprocesses, sprocess_
  *  If the list is empty, it returns 0 so that the scheduler can go in sleep mode;
  */
 
-sprocess_t* scheduler_impl_select_sprocess(linked_list_t *pending_sprocesses) {
+sprocess_t *scheduler_impl_get_sprocess(linked_list_t *pending_sprocesses) {
 
     //If the process list is empty, return 0 to trigger the sleep mode;
     if (!pending_sprocesses->nb_elements) {
+
+        kernel_error("scheduler_impl.c : scheduler_impl_get_sprocess : "
+                             "no processes in the array; Not supposed to happen.");
+
         return 0;
     }
 
-    //If the process list is not empty, remove and return the first process of the list;
-    return (sprocess_t *) llist_remove_begin(pending_sprocesses);
+    //If the process list is not empty, remove the first process of the list;
+    sprocess_t *sprocess = (sprocess_t *) llist_remove_first(pending_sprocesses);
+
+    //Insert the process at the end of the list(round robin);
+    llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
+
+    //Return the selected process;
+    return sprocess;
 
 }
 

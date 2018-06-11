@@ -2,7 +2,7 @@
 include_directories(".")
 #------------------------------------------------PROJECT----------------------------------------------------------------
 
-set(PP "Project")
+set(PP "project")
 
 include_directories(${PC}/)
 
@@ -49,7 +49,7 @@ add_library(project_config
 #--------------------------------------PROJECT INTERFACES COMMANDS------------------------------------------------------
 
 
-set(PIP "Project/Interaction")
+set(PIP "project/Interaction")
 
 include_directories(${PIP}/)
 

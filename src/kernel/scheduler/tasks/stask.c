@@ -18,7 +18,7 @@
 
 */
 
-#include "task.h"
+#include "stask.h"
 
 #include <malloc.h>
 #include <string.h>
@@ -30,10 +30,10 @@
 
 
 /*
- * task_delete : delete entirely a task's content; Must be heap-stored;
+ * stask_delete : delete entirely a task's content; Must be heap-stored;
  */
 
-void task_delete(task_t *task_p) {
+void stask_delete(stask_t *task_p) {
 
     //Free arguments;
     kernel_free((void *) task_p->args);

@@ -26,10 +26,10 @@
 
 
 //The systick_milliseconds reference;
-volatile uint32_t systick_millis = 0;
+volatile uint32_t systick_half_millis = 0;
 
-//The current task's duration. At init, preemption disabled;
-volatile uint16_t task_duration = 0;
+//The current task's activity_time. At init, preemption disabled;
+volatile uint32_t task_duration = 0;
 
 
 //---------------------- System tick ----------------------
@@ -46,12 +46,8 @@ volatile uint16_t task_duration = 0;
 
 void systick_tick() {
 
-    if (!(systick_millis % 1000)) {
-        //Serial.println("SUUS "+String(st_millis));
-    }
-
-    //Increment the ms counter;
-    systick_millis++;
+    //Increment the ms/2 counter;
+    systick_half_millis++;
 
     //If the current task can pe preempted :
     if (task_duration) {
@@ -62,7 +58,7 @@ void systick_tick() {
             //Trigger the preemption;
             core_preempt_process();
 
-            //Task duration becomes 0, preemption won't be called anymore;
+            //Task activity_time becomes 0, preemption won't be called anymore;
 
         }
 
@@ -75,15 +71,15 @@ void systick_tick() {
 
 
 /*
- * setTaskDuration : sets the current task's duration :
+ * setTaskDuration : sets the current task's activity_time :
  *  - 0 : infinite;
- *  - x (!= 0) : duration of x systick_milliseconds;
+ *  - x (!= 0) : activity_time of x systick_milliseconds;
  */
 
 void systick_set_process_duration(uint16_t ms) {
 
-    //Update the task's duration;
-    task_duration = ms;
+    //Update the task's activity_time to the double of the provided activity_time;
+    task_duration = ((uint32_t) ms) << 1;
 
 }
 
@@ -91,11 +87,11 @@ void systick_set_process_duration(uint16_t ms) {
 //---------------------- Time reference ----------------------
 
 /*
- * milliseconds : returns a copy of the systick_milliseconds reference;
+ * milliseconds : returns the systick_milliseconds reference. It is obtained by dividing the ms/2 reference by 2;
  */
 
 uint32_t systick_milliseconds() {
-    return systick_millis;
+    return systick_half_millis >> 1;
 }
 
 
@@ -103,13 +99,13 @@ uint32_t systick_milliseconds() {
  * Wait till time has reached the given limit;
  */
 
-void systick_wait(uint32_t delta_t) {
+void systick_wait(uint16_t ms_delay) {
 
     //Determine the limit;
-    volatile uint32_t limit = systick_millis + delta_t;
+    volatile uint32_t limit = systick_half_millis + (((uint32_t) ms_delay) << 1);
 
     //Sleep till the limit;
-    while ((volatile uint32_t) systick_millis < limit) {
+    while ((volatile uint32_t) systick_half_millis < limit) {
     };
 
 

@@ -29,10 +29,8 @@
 #include <kernel/systick.h>
 
 #include <kernel/scheduler/scheduler.h>
+#include <data_structures/containers/llist.h>
 
-
-//The start flag, set only once, at the entry point. Prevents start to be called a second time.
-bool started = false;
 
 //The critical section counter;
 static uint32_t critical_section_counter = 0;
@@ -42,6 +40,26 @@ static uint32_t critical_section_counter = 0;
 /*
  * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
  */
+
+
+typedef struct {
+
+    linked_element_t link;
+
+    uint8_t counter;
+
+} test_struct_t;
+
+
+#define ETEST(i) { .link = EMPTY_LINKED_ELEMENT(), .counter = i,}
+
+test_struct_t *test_alloc(uint8_t i) {
+
+    test_struct_t init = ETEST(i);
+
+    return kernel_malloc_copy(sizeof(test_struct_t), &init);
+
+}
 
 void kernel_init() {
 
@@ -77,6 +95,8 @@ void kernel_error(const char *log_message) {
     //Handle the error;
     arch_handle_error(log_message);
 
+    while(true);
+
 }
 
 
@@ -101,6 +121,28 @@ void kernel_halt(uint16_t delay) {
 }
 
 
+
+void kernel_count(size_t count) {
+
+    //Stop all started processes;
+    scheduler_stop();
+
+    //Enable all interrupts;
+    core_enable_interrupts();
+
+    //Reset the critical section counter;
+    critical_section_counter = 0;
+
+    //TODO RESET IDLE INTERRUPT HANDLERS
+
+    //TODO THREAD MODES;
+
+    //Handle the error;
+    arch_count(count);
+
+}
+
+
 /*
  * -------------------------------------------- Stack management ---------------------------------------------
  */
@@ -111,7 +153,7 @@ void kernel_halt(uint16_t delay) {
  *  Finally, it sets the thread's sequences_initialised as Terminated;
  */
 
-void kernel_stack_alloc(stack_t *stack, size_t stack_size, 
+void kernel_stack_alloc(core_stack_t *stack, size_t stack_size,
 		void (*function)(), void (*exit_loop)(), void *arg) {
 
 	//Truncate the size to get a size matchng with the primitive type;
@@ -137,10 +179,10 @@ void kernel_stack_alloc(stack_t *stack, size_t stack_size,
  * 	and initialises the context to its beginning;
  */
 
-void kernel_stack_reset(stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg) {
+void kernel_stack_reset(core_stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg) {
 
     //Initialise the stack;
-    stack->stack_pointer = core_init_stack(stack->stack_begin, init_f, exit_f, arg);
+    core_init_stack(stack, init_f, exit_f, arg);
 
 }
 
@@ -149,7 +191,7 @@ void kernel_stack_reset(stack_t *stack, void (*init_f)(), void (*exit_f)(), void
  * kernel_stack_free : frees the stack;
  */
 
-void kernel_stack_free(stack_t *stack) {
+void kernel_stack_free(core_stack_t *stack) {
 	
 	//Free the stack;
 	kernel_free(stack);

@@ -56,7 +56,8 @@
 //----------------------------------- Builder -----------------------------------
 
 //Add a service;
-void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs);
+void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs
+        , uint16_t activity_time);
 
 //Insert a service in the queue;
 void services_insert(service_t *service);
@@ -99,7 +100,8 @@ void services_initialise(size_t max_nb_services) {
  * program_repetitive_task : this function adds a temporary service task;
  */
 
-void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs) {
+void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs,
+                           uint16_t activit_time) {
 
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
@@ -118,7 +120,7 @@ void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint3
     }
 
     //Program the task
-    _service_add(task_function, offset, period, nb_execs);
+    _service_add(task_function, offset, period, nb_execs, activit_time);
 
 }
 
@@ -127,7 +129,8 @@ void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint3
  * service_add_permanent : adds a permanent service;
  */
 
-void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period) {
+void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period,
+                           uint16_t activity_time) {
 
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
@@ -138,7 +141,7 @@ void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint3
     }
 
     //Program the task;
-    _service_add(task_function, offset, period, 0);
+    _service_add(task_function, offset, period, 0, activity_time);
 
 }
 
@@ -147,7 +150,8 @@ void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint3
  * _program_task : programs a task with the given set of parameters;
  */
 
-void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs) {
+void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs,
+                  uint16_t activity_time) {
 
     //If the task is null :
     if (service_f == 0) {
@@ -176,7 +180,8 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
                     .function = service_f,
                     .args = 0,
                     .cleanup = 0,
-                    .task_type = SERVICE_TASK,
+                    .task_type = SERVICE_STASK,
+                    .activity_time = activity_time,
             },
             .next_exec_time = offset + systick_milliseconds(),
             .remaining_execs = remaining_execs,
@@ -213,8 +218,9 @@ void services_insert(service_t *service) {
         //If we have reached the first greater element :
         if (next_execution < element->next_exec_time) {
 
+            //TODO DISABLED, RESTORE WHEN LINKED LISTS ARE TESTED;
             //Insert the new service before the first greater element;
-            llist_insert_before(pending_services, (linked_element_t *) element, (linked_element_t *) service);
+            //llist_insert_before(pending_services, (linked_element_t *) element, (linked_element_t *) service);
 
             //Go to the end of the function;
             goto inserted;
@@ -224,7 +230,7 @@ void services_insert(service_t *service) {
     }
 
     //If we reached the end of the list : the element must be inserted at the end;
-    llist_insert_end(pending_services, (linked_element_t *) service);
+    llist_insert_last(pending_services, (linked_element_t *) service);
 
     inserted:
 
@@ -288,7 +294,7 @@ bool services_available_task() {
  * services_get_task : get the first service of the list. Doesn't check if the service must be executed;
  */
 
-task_t *services_get_task() {
+stask_t *services_get_task() {
 
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
@@ -330,7 +336,7 @@ task_t *services_get_task() {
         return 0;//TODO ERROR, SERVICE MUSTN'T BE EXECUTED;
 
     //Return the first service of the list;
-    return (task_t *)service;
+    return (stask_t *)service;
 
 }
 
@@ -345,7 +351,7 @@ void services_reprogram(service_t *service) {
     if (service->remaining_execs == 1) {
 
         //Delete the service;
-        task_delete((task_t *)service);
+        stask_delete((stask_t *) service);
 
     } else {
         //If the service must be reprogrammed :

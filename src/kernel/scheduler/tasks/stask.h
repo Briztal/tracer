@@ -38,37 +38,19 @@ typedef struct {
 typedef enum {
 
     //The task is the loop executed by the scheduler when in inactive state;
-            EMPTY_TASK,
+            EMPTY_STASK,
 
     //The task is persistent (event or synchronous) Must not be deleted after completion;
-            SERVICE_TASK,
+            SERVICE_STASK,
 
     //The task comes from a sequence; Must be deleted after completion;
-            SEQUENCE_TASK,
+            SEQUENCE_STASK,
 
-} task_type_t;
+} stask_type_t;
 
 
 /*
- * If the task is persistent, we must know its status, to be sure that we don't delete a running task;
- */
-/*
-typedef enum {
-
-    //The task is not started, and is stored in its container;
-            STORED_TASK,
-
-    //The task is started, but is still stored in its container. Mustn't be deleted;
-            RUNNING_TASK,
-
-    //The task is out of its container, must be deleted when it reaches task_cleanup;
-            CLOSED_TASK,
-
-} persistent_task_state_t;
-
-*/
-/*
- * The task structure;
+ * The service task (stask) struct;
  *
  *  Tasks are are not executed and removed in a particular order. They must be stored as linked elements.
  *
@@ -90,14 +72,17 @@ typedef struct {
     void (*const cleanup)();
 
     //The origin of the task
-    const task_type_t task_type;
+    const stask_type_t task_type;
 
-} task_t;
+    //The period between two preemptions for this task;
+    uint16_t activity_time;
+
+} stask_t;
 
 
 //---------------------- Public Functions ----------------------
 
 //Delete entirely a heap stored task composed struct;
-void task_delete(task_t *task_p);
+void stask_delete(stask_t *task_p);
 
 #endif //TRACER_TASKDATA_H

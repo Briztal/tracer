@@ -21,9 +21,9 @@
 #ifndef CORE_ARM_CORTEXM4F
 #define CORE_ARM_CORTEXM4F
 
-#include "stdint.h"
-
 #include "stdbool.h"
+
+#include "stdint.h"
 
 #include "stddef.h"
 
@@ -32,12 +32,6 @@
 /*
  * -------------------------------------- Types --------------------------------------
  */
-
-//The stack element type;
-//typedef uint32_t stack_element_t;
-
-//The stack pointer type;
-//typedef stack_element_t *stack_ptr_t;
 
 //The process stack type;
 typedef struct {
@@ -51,13 +45,24 @@ typedef struct {
 	//The end of the stack;
     void *stack_end;
 
-} stack_t;
+} core_stack_t;
+
 
 //The empty stack initializer;
-#define EMPTY_STACK() (stack_t) {.stack_pointer = 0, .stack_begin = 0, .stack_end = 0,}
+#define EMPTY_CORE_STACK() (core_stack_t) {.stack_pointer = 0, .stack_begin = 0, .stack_end = 0,}
 
 
-//TODO STACK MANAGEMENT;
+//The core process structure;
+typedef struct {
+
+    //The process's stack;
+    core_stack_t *process_stack;
+
+    //The execution time granted to the process before its preemption;
+    uint16_t activity_time;
+
+} core_process_t;
+
 
 
 //-------------------------------------- Init --------------------------------------
@@ -80,8 +85,8 @@ inline void *core_get_stack_end(void *allocated_pointer, size_t size);
 
 //------------------------------------- Stack management  -------------------------------------
 
-//Initialise a stack for a future unstacking. An arg pointer can be passed
-void *core_init_stack(void *sp, void (*function)(), void (*end_loop)(), void *init_arg);
+//Initialise a stack for a future unstacking. An arg pointer can be passed;//TODO PASS A CORE_STACK_t
+void core_init_stack(core_stack_t *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //Get the argument stored at stack init. Must be called at the very beginning of the process function;
 void *core_get_init_arg();
@@ -89,14 +94,14 @@ void *core_get_init_arg();
 
 //------------------------------------- Execution -------------------------------------
 
-//Set the stack provider;
-void core_set_stack_provider(stack_t *(*stack_provider)(stack_t *));
+//Set the process provider;
+void core_set_process_provider(void (*stack_provider)(core_process_t *));
 
-//Reset the stack provider;
-void core_reset_stack_provider();
+//Reset the process provider;
+void core_reset_process_provider();
 
-//Execute a process, defined by its initialised stack;
-void core_execute_process(stack_t *stack, void (*volatile function)(void *), void *volatile arg);
+//Execute a process, defined by its initialised stack, its duration, and its function. An arg can be passed;
+void core_execute_process(core_process_t *process, void (*function)(void *), void *arg);
 
 //Trigger the preemption;
 inline void core_preempt_process();
@@ -173,7 +178,7 @@ inline size_t core_correct_size(size_t size) {
  */
 
 inline void *core_get_stack_begin(void *allocated_pointer, size_t size) {
-	return ((uint8_t *)(allocated_pointer)) + size;
+	return ((uint8_t *)(allocated_pointer)) + (size>>1);
 }
 
 

@@ -32,7 +32,6 @@
 //Process a stream;
 void connection_process(connection_t *connection);
 
-
 //The stream process service;
 void stream_service(void *);
 
@@ -303,8 +302,8 @@ void connection_start_service(uint32_t period_ms) {
     //Leave the critical section;
     kernel_leave_critical_section();
 
-    //Add the service;
-    service_add_permanent(stream_service, period_ms, period_ms);
+    //Add the service; Will not be preempted;
+    service_add_permanent(stream_service, period_ms, period_ms, 0);
 
 }
 

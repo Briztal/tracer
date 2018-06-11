@@ -93,25 +93,40 @@ inline bool llist_insertion_available(const linked_list_t *const list) {
 }
 
 //Insert the new element at the beginning of the list;
-void llist_insert_begin(linked_list_t *list, linked_element_t *element);
+void llist_insert_first(linked_list_t *list, linked_element_t *element);
 
 //Insert the new element at the end of the list;
-void llist_insert_end(linked_list_t *list, linked_element_t *element);
+void llist_insert_last(linked_list_t *list, linked_element_t *element);
 
 //Insert the new element after an element of the list;
-void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element);
+//void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element);
 
 //Insert the new element before an element of the list;
-void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element);
+//void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element);
 
 //Remove the first element of the list;
-linked_element_t *llist_remove_begin(linked_list_t *list);
+linked_element_t *llist_remove_first(linked_list_t *list);
 
 //Remove an element of the list;
 void llist_remove_element(linked_list_t *list, linked_element_t *element);
 
 //Remove the last element of the list;
-linked_element_t *llist_remove_end(linked_list_t *list);
+linked_element_t *llist_remove_last(linked_list_t *list);
+
+
+//Debug helper;
+inline size_t count_chain(linked_list_t *list) {
+
+    size_t count = 0;
+    linked_element_t *e = list->first;
+
+    while(e) {
+        count++;
+        e = e->next;
+    }
+
+    return count;
+}
 
 
 /*
@@ -121,7 +136,6 @@ linked_element_t *llist_remove_end(linked_list_t *list);
 /*
  * The linked ring is composed of the current element, and of the element counter;
  */
-
 typedef struct {
 
     //The list's first element;
@@ -134,6 +148,7 @@ typedef struct {
     size_t max_nb_elements;
 
 } linked_ring_t ;
+/*
 
 //Initialize;
 #define EMPTY_LINKED_RING(max_nb) {.current = 0, .nb_elements = 0, .max_nb_elements = (max_nb)}
@@ -155,6 +170,7 @@ void lring_incr(linked_ring_t *ring);
 //Focus on the previous element;
 void lring_decr(linked_ring_t *ring);
 
+*/
 /*
 
 //Executes process for all elements after the provided one:
