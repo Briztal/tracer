@@ -31,40 +31,96 @@
 #include <kernel/scheduler/scheduler.h>
 #include <data_structures/containers/llist.h>
 
+#include <kernel/arch/processors/arm_cortex_m4f.h>
+#include <kernel/scheduler/tasks/sequences.h>
+#include <kernel/scheduler/tasks/service.h>
+
 
 //The critical section counter;
 static uint32_t critical_section_counter = 0;
 
+
+//As exit functions are registered by enabled modules, we need a linked struct to store function pointers;
+typedef struct {
+
+    //The linked element part;
+    linked_element_t link;
+
+    //The function part;
+    void (*exit_function)(void);
+
+} exit_function_t;
+
+//The exit functions list;
+linked_list_t exit_list = EMPTY_LINKED_LIST(255);
+
+
 //------------------------------------------- Entry Point -------------------------------------------
+
+
+
+/*
+ * The first function called by the scheduler;
+ */
+
+void first_function(void *args) {
+
+
+}
+
 
 /*
  * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
-
-typedef struct {
-
-    linked_element_t link;
-
-    uint8_t counter;
-
-} test_struct_t;
-
-
-#define ETEST(i) { .link = EMPTY_LINKED_ELEMENT(), .counter = i,}
-
-test_struct_t *test_alloc(uint8_t i) {
-
-    test_struct_t init = ETEST(i);
-
-    return kernel_malloc_copy(sizeof(test_struct_t), &init);
-
-}
-
 void kernel_init() {
 
     //Start the scheduler;
-    scheduler_start();
+    scheduler_start(&first_function);
+
+}
+
+
+/*
+ * kernel_register_exit_function : adds the function to the list of exit functions;
+ */
+
+void kernel_register_exit_function(void (*exit_function)(void)) {
+
+    //Initialise the exit function struct;
+    exit_function_t init =  {
+            .link = EMPTY_LINKED_ELEMENT(),
+            .exit_function = exit_function,
+    };
+
+    //Allocate some heap data for the exit function struct;
+    exit_function_t *data = kernel_malloc_copy(sizeof(exit_function_t), &init);
+
+    //Append the exit function struct at the end of the exit list;
+    llist_insert_last(&exit_list, (linked_element_t *) data);
+
+}
+
+
+/*
+ * kernel_exit : executes all exit functions, and delete them;
+ */
+
+void kernel_exit() {
+
+    //For each exit functions :
+    for (size_t exit_counter = exit_list.nb_elements; exit_counter--;) {
+
+        //Remove and cache the first element of the list;
+        const exit_function_t *function = (exit_function_t *) llist_remove_first(&exit_list);
+
+        //Execute the function;
+        (*(function->exit_function))();
+
+        //Delete the exit function struct;
+        kernel_free((void *) function);
+
+    }
 
 }
 
@@ -74,8 +130,6 @@ void kernel_init() {
  *
  *  It will signal the error in various ways.
  */
-
-void dumb(){};
 
 void kernel_error(const char *log_message) {
 
@@ -95,7 +149,7 @@ void kernel_error(const char *log_message) {
     //Handle the error;
     arch_handle_error(log_message);
 
-    while(true);
+    while (true);
 
 }
 
@@ -119,7 +173,6 @@ void kernel_halt(uint16_t delay) {
     arch_blink(delay);
 
 }
-
 
 
 void kernel_count(size_t count) {
@@ -154,12 +207,12 @@ void kernel_count(size_t count) {
  */
 
 void kernel_stack_alloc(core_stack_t *stack, size_t stack_size,
-		void (*function)(), void (*exit_loop)(), void *arg) {
+                        void (*function)(), void (*exit_loop)(), void *arg) {
 
-	//Truncate the size to get a size matchng with the primitive type;
-	stack_size = core_correct_size(stack_size);
-    
-	//Then, allocate a memory zone of the required size;
+    //Truncate the size to get a size matchng with the primitive type;
+    stack_size = core_correct_size(stack_size);
+
+    //Then, allocate a memory zone of the required size;
     void *sp = kernel_malloc(stack_size);
 
     //Set the stack's begin;
@@ -192,9 +245,9 @@ void kernel_stack_reset(core_stack_t *stack, void (*init_f)(), void (*exit_f)(),
  */
 
 void kernel_stack_free(core_stack_t *stack) {
-	
-	//Free the stack;
-	kernel_free(stack);
+
+    //Free the stack;
+    kernel_free(stack);
 
 }
 
@@ -253,7 +306,6 @@ void *kernel_malloc_copy(const size_t size, const void *const initialiser) {
 
     //Return the allocated data;
     return ptr;
-
 
 
 }
@@ -343,150 +395,3 @@ inline void kernel_leave_critical_section() {
 
 
 }
-
-
-//------------------------------------------- Config checking -------------------------------------------
-
-/*
- * check_config : this function will call _ConfigChecker, and blink the led and display the error message
- *  if it fails;
- */
-
-/*
- * TODO REBUILD
-
-void kernel::check_config() {
-
-    //Declare the error message;
-    tstring error_message = "Error : ";
-
-    //If the config is ok, return;
-    if (_ConfigChecker::check_config(error_message)) {
-        return;
-    }
-
-    const char *m = error_message.data();
-
-    //If the config is not ok :
-
-    //If a led is provided :
-#ifdef HL_LED_FLAG
-    //Enable the led output;
-    pin_mode_output(LED_PIN);
-#endif
-
-    //Enable all transmission layers.
-
-    //A macro to enable all interfaces;
-#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::begin();
-
-    //Initialise every interface;
-#include "Config/control_config.h"
-
-    //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
-
-    delay_ms(2000);
-
-    //Infinite loop, as the code is badly configured;
-    while(true) {
-
-        //If a led is provided :
-#ifdef HL_LED_FLAG
-        //Blink the led;
-        digital_write(LED_PIN, !digital_read(LED_PIN));
-#endif
-
-        //TODO CORRECT SEND
-        //A macro to enable all interfaces;
-#define EXTERNAL_CONTROL(c, p, s, transmission) transmission::send_str(m);
-
-        //Initialise every interface;
-#include "Config/control_config.h"
-
-        //Undef the macro for safety;
-#undef EXTERNAL_CONTROL
-
-        //Wait
-        delay_ms(1000);
-
-    }
-
-}
-
-  */
-
-
-//------------------------------------------- Initialisation -------------------------------------------
-
-
-/*
- * initialise_hardware : this function is called once, by start only. It is the project initialisation function.
- *
- *  As its name suggests, it will initialise_hardware every module of the code.
- */
-
-/*
- * TODO REBUILD
-void kernel::initialise_hardware() {
-
-
-    //Initialise all enabled interfaces
-    Interaction::initialise_hardware();
-
-    //Initialise the SteppersController module only if it is enabled
-#ifdef ENABLE_STEPPER_CONTROL
-
-    StepperController::initialise_hardware();
-
-#endif
-
-
-}
- */
-
-
-/*
- * initialise_hardware : this function is called once, by start only. It is the project initialisation function.
- *
- *  As its name suggests, it will initialise_hardware every module of the code.
- */
-
-/*
- * TODO REBUILD
-
-void kernel::initialise_data() {
-
-    //Clear the EEPROMMap profile;
-    EEPROMMap::initialise_data();
-
-    //Initialise all enabled interfaces
-    Interaction::initialise_data();
-
-    //Initialise the task scheduler;
-    TaskScheduler::initialise_data();
-
-    //Initalise the event manager;
-    EventManager::reset();
-
-    //Initialise the task programmer;
-    TaskProgrammer::reset();
-
-
-    //Initialise the SteppersController module only if it is enabled
-#ifdef ENABLE_STEPPER_CONTROL
-
-    StepperController::initialise_data();
-
-#endif
-
-    //Finally, solve the project;
-    Project::initialise_data();
-
-    //Lock the EEPROMMap tree, and solve data across the code if a relevant profile is found in the Storage;
-    EEPROMMap::lock_tree();
-
-
-}
-  */
-

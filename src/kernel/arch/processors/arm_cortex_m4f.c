@@ -180,7 +180,6 @@ void core_preemption() {
     //Execute an ISB;
     __asm__ __volatile__ ("ISB");
 
-
     //Provide the old stack and get a new one;
     process_stack_provider(core_process);
 

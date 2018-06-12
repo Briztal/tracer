@@ -61,10 +61,13 @@ stask_t *scheduler_impl_get_task() {
         return services_get_task();
 
     } else {
+
         //If no service was found, examine sequences;
+
 
         //For each sequence starting by the unordered one :
         for (uint8_t sequence_index = 0; sequence_index < 4; sequence_index++) {
+
 
             //If a task is available in the sequence :
             if (sequences_available(sequence_index)) {
@@ -77,6 +80,7 @@ stask_t *scheduler_impl_get_task() {
         }
 
     }
+
 
     //If no task was found, return 0
     return 0;

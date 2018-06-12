@@ -236,6 +236,100 @@ void llist_insert_last(linked_list_t *list, linked_element_t *element) {
 
 }
 
+//Insert the new element after an element of the list;
+void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
+
+    //If src is null, the list is supposedly empty;
+    if (!src) {
+
+        //If the list is not empty (update the number of elements by the way):
+        if (list->nb_elements++) {
+
+            //Error : null provided but list not empty;
+            kernel_error("SUUS");//TODO
+
+        }
+
+        //Set the element as the first and the last;
+        list->first = list->last = element;
+
+        //Nothing else to do;
+        return;
+
+    }
+
+    //src is not null; The case where src doesn't belong to the list is not caught;
+
+    //If the successor is null, src is the last element of the list;
+    if (!src->next) {
+
+        //Update the list's last element;
+        list->last = element;
+
+    }
+
+    //Increase the number of elements;
+    list->nb_elements++;
+
+    //insert the element after src;
+    lelmt_insert_after(src, element);
+
+}
+
+
+/*
+ * llist_insert_before : inserts the new element before an element of the list;
+ */
+
+void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
+
+    if (!list || !element ) {
+
+        kernel_error("llist.c : llist_insert_before : null list or element provided;");
+
+        return;
+    }
+
+    //If src is null, the list is supposedly empty;
+    if (!src) {
+
+        //If the list is not empty (update the number of elements by the way):
+        if (list->nb_elements++) {
+
+            //Error : null provided but list not empty;
+            kernel_error("SUUS");//TODO
+
+        }
+
+        //Set the element as the first and the last;
+        list->first = list->last = element;
+
+        //
+
+        //Nothing else to do;
+        return;
+
+    }
+
+    //src is not null; The case where src doesn't belong to the list is not caught;
+
+    //If the successor is null, src is the first element of the list;
+    if (!src->prev) {
+
+        //Update the list's first element;
+        list->first = element;
+
+    }
+
+    //Increase the number of elements;
+    list->nb_elements++;
+
+    //Insert the element before src;
+    lelmt_insert_before(src, element);
+
+}
+
+
 
 /*
  * llist_remove_first : removes the first element of the list;
@@ -569,94 +663,4 @@ void llist_reverse_process_full(linked_element_t *element, void (*process)(linke
     llist_reverse_process(last, process);
 
 }
-
-
-/*
-
-//Insert the new element after an element of the list;
-void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
-
-    //If src is null, the list is supposedly empty;
-    if (!src) {
-
-        //If the list is not empty (update the number of elements by the way):
-        if (list->nb_elements++) {
-
-            //Error : null provided but list not empty;
-            kernel_error("SUUS");//TODO
-
-        }
-
-        //Set the element as the first and the last;
-        list->first = list->last = element;
-
-        //Nothing else to do;
-        return;
-
-    }
-
-    //src is not null; The case where src doesn't belong to the list is not caught;
-
-    //If the successor is null, src is the last element of the list;
-    if (!src->next) {
-
-        //Update the list's last element;
-        list->last = element;
-
-    }
-
-    //Increase the number of elements;
-    list->nb_elements++;
-
-    //insert the element after src;
-    lelmt_insert_after(src, element);
-
-}
-
- */
-
-
-/*
- * llist_insert_before : inserts the new element before an element of the list;
- */
-/*
-void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element) {
-
-    //If src is null, the list is supposedly empty;
-    if (!src) {
-
-        //If the list is not empty (update the number of elements by the way):
-        if (list->nb_elements++) {
-
-            //Error : null provided but list not empty;
-            kernel_error("SUUS");//TODO
-
-        }
-
-        //Set the element as the first and the last;
-        list->first = list->last = element;
-
-        //Nothing else to do;
-        return;
-
-    }
-
-    //src is not null; The case where src doesn't belong to the list is not caught;
-
-    //If the successor is null, src is the first element of the list;
-    if (!src->prev) {
-
-        //Update the list's first element;
-        list->first = element;
-
-    }
-
-    //Increase the number of elements;
-    list->nb_elements++;
-
-    //Insert the element before src;
-    lelmt_insert_before(src, element);
-
-}
-*/
 

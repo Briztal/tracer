@@ -87,9 +87,21 @@ void services_initialise(size_t max_nb_services) {
     if (services_initialised) {
 
         //Error, must not be scheduler_initialised twice;
-        return;//TODO ERROR
+        kernel_error("service.c : services_initialise : the service manager is already initialised;");
+
+        //Never reached;
+        return;
 
     }
+
+    //Create an initializer for the linked list;
+    linked_list_t init = EMPTY_LINKED_LIST(max_nb_services);
+
+    //Allocate some heap data for the list and copy the initializer;
+    pending_services = kernel_malloc_copy(sizeof(linked_list_t), &init);
+
+    //Mark the service maanager initialised;
+    services_initialised = true;
 
 }
 
@@ -103,11 +115,15 @@ void services_initialise(size_t max_nb_services) {
 void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint32_t period, uint32_t nb_execs,
                            uint16_t activit_time) {
 
+
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be scheduler_initialised before usage;
-        return;//TODO ERROR
+        //Error, service manager must be initialised before usage;
+        kernel_error("service.c : service_add_temporary : the service manager was not initialised;");
+
+        //Never reached;
+        return;
 
     }
 
@@ -135,7 +151,20 @@ void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint3
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be scheduler_initialised before usage;
+        //Error, service manager must be initialised before usage;
+        kernel_error("service.c : service_add_permanent : the service manager was not initialised;");
+
+        //Never reached;
+        return;
+
+    }
+
+    //If the service manager has not been scheduler_initialised :
+    if (!services_initialised) {
+
+        kernel_halt(30);
+
+        //Error, service manager must be initialised before usage;
         return;//TODO ERROR
 
     }
@@ -153,10 +182,11 @@ void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint3
 void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, uint32_t remaining_execs,
                   uint16_t activity_time) {
 
+
     //If the task is null :
     if (service_f == 0) {
 
-        //TODO ERROR NULL POINTER
+        kernel_error("service.c : _service_add : provided a null function pointer;");
 
         //Ignore;
         return;
@@ -166,12 +196,13 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
     //If the period is null :
     if (!period) {
 
-        //TODO ERROR NULL PERIOD
+        kernel_error("service.c : _service_add : provided a null period;");
 
         //Ignore;
         return;
 
     }
+
 
     //Create the service initializer;
     service_t init = {
@@ -203,6 +234,17 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
 
 void services_insert(service_t *service) {
 
+    //If the service manager has not been scheduler_initialised :
+    if (!services_initialised) {
+
+        //Error, service manager must be initialised before usage;
+        kernel_error("service.c : services_insert : the service manager was not initialised;");
+
+        //Never reached;
+        return;
+
+    }
+
     //Cache the next execution time;
     uint32_t next_execution = service->next_exec_time;
 
@@ -218,16 +260,19 @@ void services_insert(service_t *service) {
         //If we have reached the first greater element :
         if (next_execution < element->next_exec_time) {
 
-            //TODO DISABLED, RESTORE WHEN LINKED LISTS ARE TESTED;
             //Insert the new service before the first greater element;
-            //llist_insert_before(pending_services, (linked_element_t *) element, (linked_element_t *) service);
+            llist_insert_before(pending_services, (linked_element_t *) element, (linked_element_t *) service);
 
             //Go to the end of the function;
             goto inserted;
 
         }
 
+        //Update the element;
+        element = (service_t *) ((linked_element_t *)element)->next;
+
     }
+
 
     //If we reached the end of the list : the element must be inserted at the end;
     llist_insert_last(pending_services, (linked_element_t *) service);
@@ -251,8 +296,11 @@ bool services_available_task() {
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be scheduler_initialised before usage;
-        return false;//TODO ERROR
+        //Error, service manager must be initialised before usage;
+        kernel_error("service.c : services_available_task : the service manager was not initialised;");
+
+        //Never reached;
+        return false;
 
     }
 
@@ -266,8 +314,12 @@ bool services_available_task() {
     kernel_leave_critical_section();
 
     //If the services list is empty, no services available;
-    if (!nb_elements)
+    if (!nb_elements) {
+
         return false;
+
+
+    }
 
     //Cache the timeline;
     uint32_t millis = systick_milliseconds();
@@ -296,13 +348,36 @@ bool services_available_task() {
 
 stask_t *services_get_task() {
 
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+    //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
+
     //If the service manager has not been scheduler_initialised :
     if (!services_initialised) {
 
-        //Error, must be scheduler_initialised before usage;
-        return 0;//TODO ERROR
+        //Error, service manager must be initialised before usage;
+        kernel_error("service.c : services_get_task : the service manager was not initialised;");
+
+        //Never reached;
+        return false;
 
     }
+
     //The access to the list is critical;//TODO CRITICAL PATCH;
     kernel_enter_critical_section();
 
@@ -313,9 +388,12 @@ stask_t *services_get_task() {
     kernel_leave_critical_section();
 
     //If the services list is empty, no services available; This shouldn't have happened;
-    if (!nb_elements)
-        return 0;//TODO ERROR;
+    if (!nb_elements) {
 
+        //Error, no services can be executed;
+        kernel_error("service.c : services_get_task : no services have been registered. Shouldn't have happened;");
+
+    }
 
     //Cache the timeline;
     uint32_t millis = systick_milliseconds();
@@ -332,8 +410,19 @@ stask_t *services_get_task() {
     //Leave the critical section;
     kernel_leave_critical_section();
 
-    if (service->next_exec_time < millis)
-        return 0;//TODO ERROR, SERVICE MUSTN'T BE EXECUTED;
+
+    //If we haven't yet reached the trigger time :
+    if (millis < service->next_exec_time) {
+
+        //Error, no services can be executed;
+        kernel_error("service.c : services_get_task : no services can be executed. Shouldn't have happened;");
+
+    }
+
+    //The first service exists and can be executed;
+
+    //Remove it;
+    llist_remove_first(pending_services);
 
     //Return the first service of the list;
     return (stask_t *)service;
@@ -346,6 +435,18 @@ stask_t *services_get_task() {
  */
 
 void services_reprogram(service_t *service) {
+
+    //If the service manager has not been scheduler_initialised :
+    if (!services_initialised) {
+
+        //Error, service manager must be initialised before usage;
+        kernel_error("service.c : services_reprogram : the service manager was not initialised;");
+
+        //Never reached;
+        return;
+
+    }
+
 
     //If the service is not permanent, and has reached the end of its lifetime :
     if (service->remaining_execs == 1) {

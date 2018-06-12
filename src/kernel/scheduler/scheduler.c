@@ -53,11 +53,8 @@ void scheduler_pending_to_terminated(sprocess_t *sprocess);
 
 void scheduler_inactive_loop(void *ignored) {
 
-    systick_set_process_duration(0);
-
-    kernel_halt(1000);
-
     while (true);
+
 }
 
 void dumb_blink(void *);
@@ -94,12 +91,12 @@ stask_t empty_task = {
         .args = 0,
         .linked_element = EMPTY_LINKED_ELEMENT(),
         .task_type = EMPTY_STASK,
-        .activity_time = 1,
+        .activity_time = 50,
 };
 
 
 /*
- * The inactive mode task;
+ * The blink task;
  */
 
 stask_t blink_task = {
@@ -121,8 +118,7 @@ stask_t blink_task = {
  * 	- selects and executed the first process;
  */
 
-void scheduler_start() {
-
+void scheduler_start(void (*init_function)(void *)) {
 
     //Disable the preemption;
     systick_set_process_duration(0);
@@ -133,14 +129,20 @@ void scheduler_start() {
     //Provide our stack provider to the core lib;
     core_set_process_provider(&scheduler_select_new_sprocess);
 
+    //The init task must be scheduled via the sequencer (type 0 = exec asap), no args no cleanup, no preemption;
+    sequences_add_task(0, init_function, 0, 0, 0);
+
     //Get the first sprocess to execute;
     current_sprocess = scheduler_select_sprocess();
+
 
     //Enable the preemption in 2 ms;
     systick_set_process_duration(current_sprocess->task->activity_time);
 
     //Execute the first process;
     sprocess_execute(current_sprocess);
+
+
 
     //While loop for safety. Will not happen, as previous call never returns;
     while (1);
@@ -185,6 +187,7 @@ void scheduler_stop() {
 
 
 #include <kernel/drivers/PORT.h>
+#include <kernel/scheduler/tasks/stask.h>
 
 
 uint16_t gf = 1;
@@ -252,6 +255,7 @@ void scheduler_create_sprocesses(size_t nb_processes) {
         return;
     }
 
+
     linked_list_t init = EMPTY_LINKED_LIST(nb_processes);
 
     //Initialise lists of sprocesses;
@@ -261,16 +265,14 @@ void scheduler_create_sprocesses(size_t nb_processes) {
 
 
     /*
-     * All sprocesses have 200 bytes of RAM;
+     * All sprocesses have 2000 bytes of RAM;
      */
-
-    uint8_t ctr = 1;
-
     for (; nb_processes--;) {
 
-        //Create the sprocess in the heap with a 200 bytes long stack;
+        //Create the sprocess in the heap with a 2k bytes long stack;
         sprocess_t *sprocess = sprocess_create(2000);
 
+        /*
         sprocess->task = &blink_task;
 
         sprocess->state = SPROCESS_PENDING;
@@ -278,13 +280,18 @@ void scheduler_create_sprocesses(size_t nb_processes) {
         sprocess->counter = ctr++;
 
         llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
+
         //----------------------------------------------
 
+        */
+
+
+
+
         //Add the process to the linked list;
-        //llist_insert_last(terminated_sprocesses, (linked_element_t *) sprocess);
+        llist_insert_last(terminated_sprocesses, (linked_element_t *) sprocess);
 
     }
-
 
     //Mark the scheduler initialised;
     scheduler_initialised = true;
@@ -424,7 +431,6 @@ sprocess_t *scheduler_select_sprocess() {
      * Integrate tasks in the scheduler;
      */
 
-
     //If it is possible to integrate a task in the scheduler;
     if (terminated_sprocesses->nb_elements) {
 
@@ -447,6 +453,7 @@ sprocess_t *scheduler_select_sprocess() {
 
     }
 
+
     /*
      * Select the next task to execute;
      */
@@ -463,10 +470,11 @@ sprocess_t *scheduler_select_sprocess() {
         //The scheduler is active, and a non-empty process is running;
         scheduler_inactive = false;
 
-
     } else {
 
         //If there are no active sprocesses :
+
+        //TODO WHAT IF ALL PROCESSES ARE STOPPED ????????
 
         //Remove the first terminated sprocess;
         sprocess = (sprocess_t *) llist_remove_first(terminated_sprocesses);
@@ -489,6 +497,7 @@ sprocess_t *scheduler_select_sprocess() {
 
     //Leave the critical section;
     kernel_leave_critical_section();
+
 
     //Return the sprocess;
     return sprocess;

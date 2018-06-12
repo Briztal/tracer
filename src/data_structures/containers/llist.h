@@ -99,10 +99,10 @@ void llist_insert_first(linked_list_t *list, linked_element_t *element);
 void llist_insert_last(linked_list_t *list, linked_element_t *element);
 
 //Insert the new element after an element of the list;
-//void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element);
+void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element);
 
 //Insert the new element before an element of the list;
-//void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element);
+void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element);
 
 //Remove the first element of the list;
 linked_element_t *llist_remove_first(linked_list_t *list);

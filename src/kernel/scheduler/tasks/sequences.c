@@ -156,7 +156,8 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
     kernel_leave_critical_section();
 
     //If the sequence is full, fail;
-    if (available) {
+    if (!available) {
+
         return false;//TODO kernel PANIC. SHOULD HAVE VERIFIED, THE TASK WILL BE LOST;
     }
 

@@ -29,6 +29,7 @@
 
 #include "kinetis.h"
 
+
 /*
  * -------------------------------------- Types --------------------------------------
  */
@@ -85,7 +86,7 @@ inline void *core_get_stack_end(void *allocated_pointer, size_t size);
 
 //------------------------------------- Stack management  -------------------------------------
 
-//Initialise a stack for a future unstacking. An arg pointer can be passed;//TODO PASS A CORE_STACK_t
+//Initialise a stack for a future unstacking. An arg pointer can be passed;
 void core_init_stack(core_stack_t *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //Get the argument stored at stack init. Must be called at the very beginning of the process function;
@@ -178,7 +179,9 @@ inline size_t core_correct_size(size_t size) {
  */
 
 inline void *core_get_stack_begin(void *allocated_pointer, size_t size) {
-	return ((uint8_t *)(allocated_pointer)) + (size>>1);
+
+    //Count 16 bytes less to avoid stack underflow;
+    return  (void *) ((uint32_t)(allocated_pointer) + ((uint32_t)size - 16));
 }
 
 

@@ -57,11 +57,11 @@ sprocess_t *sprocess_create(size_t stack_size) {
 		.state = SPROCESS_TERMINATED,
 		.task = 0,
 	};
-		
+
 	//Allocate heap memory and initialise it;
 	sprocess_t *sprocess = kernel_malloc_copy(sizeof(sprocess_t), &init);
 
-	//Create a stack of the required size;
+    //Create a stack of the required size;
 	kernel_stack_alloc(&sprocess->stack, stack_size, &sprocess_init, &sprocess_exit, sprocess);
 
 	//Return the created process;
@@ -137,6 +137,7 @@ void sprocess_init() {
 void sprocess_function(volatile sprocess_t *volatile sprocess) {
 
 
+
     //The sprocess must be pending, otherwise, there has been an error in the scheduler.
     if ((volatile sprocess_state_t) sprocess->state != SPROCESS_PENDING) {
 
@@ -160,12 +161,13 @@ void sprocess_function(volatile sprocess_t *volatile sprocess) {
     }
 
     //Mark the process_t inactive; Scheduler will be notified at context switch;
-    sprocess->state = (volatile sprocess_state_t) SPROCESS_TERMINATED;
+    sprocess->state = (volatile sprocess_state_t) SPROCESS_TERMINATION_REQUIRED;
 
     //Require a context switch, as the task is finished;
     core_preempt_process();
 
-	kernel_error("sprocess.c : sprocess_function : preemption invoked but failed."
+
+    kernel_error("sprocess.c : sprocess_function : preemption invoked but failed."
 						 "Might be caused by an unfinished critical section;");
 
 	//Infinite loop;
