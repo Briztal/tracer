@@ -89,7 +89,7 @@ public:
 
 private:
 
-    //Increment and position for every stepper
+    //Increment and position for every steppers
 #define STEPPER(i, ...) \
     static int32_t incr##i;\
     public:static int32_t pos##i;\

@@ -101,14 +101,14 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
     //The final time
     float min_time = 0;
 
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
 
-        //Get the maximum speed for the stepper
-        float maximum_speed = SteppersData::steppers_data[stepper].jerk * SteppersData::steppers_data[stepper].steps_per_unit;
+        //Get the maximum speed for the steppers
+        float maximum_speed = SteppersData::steppers_data[steppers].jerk * SteppersData::steppers_data[steppers].steps_per_unit;
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
-        float down_time = f_step_distances[stepper] / maximum_speed;
+        float down_time = f_step_distances[steppers] / maximum_speed;
 
         //update minimum time, as the maximum of the new time and the current beginning time :
         min_time = (down_time < min_time) ? min_time : down_time;
@@ -131,7 +131,7 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
  *
  *  The movement is passed in he form of :
  *      - movement distance : the high level distance
- *      - stepper_distances : the effective stepper step_distances of the current movement;
+ *      - stepper_distances : the effective steppers step_distances of the current movement;
  *
  *  It starts to determine the largest time window, at the current speeds. This window is the intersection of
  *      time windows for all steppers.
@@ -159,16 +159,16 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
     float min_time = 0, max_time = 0;
     bool first = true;
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
 
-        //Get the regulation_speed on last movement, on stepper [stepper]
-        float act_speed = steppers_speeds[stepper];
+        //Get the regulation_speed on last movement, on steppers [steppers]
+        float act_speed = steppers_speeds[steppers];
 
         //Get the regulation_speed limit
         //Formula : delta_speed = acceleration * steps_per_unit * time; acceleration * steps_per_unit is pre-computed (optimisation)
-        float max_delta_speed = delta_speed_constants[stepper] * last_time;
+        float max_delta_speed = delta_speed_constants[steppers] * last_time;
 
-        //if the current stepper can stop, no processing is required :
+        //if the current steppers can stop, no processing is required :
 
         float s;
 
@@ -176,7 +176,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
             //update the maximum time, the new regulation_speed = act_speed - regulation_speed limit.
             //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
-            float up_time = f_step_distances[stepper] / s;
+            float up_time = f_step_distances[steppers] / s;
 
             //update maximum time, as the minimum of the new time and the current ending time :
             max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
@@ -187,7 +187,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
 
         float maximum_speed = act_speed + max_delta_speed;
-        float maximum_speed_bound = max_speed_constants[stepper];
+        float maximum_speed_bound = max_speed_constants[steppers];
 
         if (maximum_speed > maximum_speed_bound) {
             maximum_speed = maximum_speed_bound;
@@ -195,7 +195,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
-        float down_time = f_step_distances[stepper] / maximum_speed;
+        float down_time = f_step_distances[steppers] / maximum_speed;
 
         //update minimum time, as the maximum of the new time and the current beginning time :
         min_time = (down_time < min_time) ? min_time : down_time;
@@ -239,13 +239,13 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
 
 /*
- * update_speeds : this function updates all stepper's speeds.
+ * update_speeds : this function updates all steppers's speeds.
  *
  */
 
 void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time) {
 
-    //Cache var for stepper distances
+    //Cache var for steppers distances
     const float *const f_stepper_distances = sub_movement_data->f_step_distances;
 
 
@@ -256,34 +256,34 @@ void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time
     int32_t *end_distances = SubMovementManager::end_distances;
     int32_t *jerk_distances = SubMovementManager::jerk_distances;
 
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        //set the current regulation_speed on the stepper [stepper]
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
+        //set the current regulation_speed on the steppers [steppers]
 
-        //get the regulation_speed for the stepper
+        //get the regulation_speed for the steppers
         //Formula : v = d / t -> v = d * (1 / t).
-        float v = steppers_speeds[stepper] = f_stepper_distances[stepper] * inv_time;
+        float v = steppers_speeds[steppers] = f_stepper_distances[steppers] * inv_time;
 
         //If a deceleration is required, no need for deceleration_distance checking
         if (deceleration_required)
             continue;
 
-        //Compute the deceleration deceleration_distance on the stepper
+        //Compute the deceleration deceleration_distance on the steppers
         //Formula : v * v / (2 * acceleration * steps_per_unit); the denominator is pre-computed for optimisation purposes.
-        uint32_t deceleration_distance = (uint32_t) (v * v * deceleration_constants[stepper]);
+        uint32_t deceleration_distance = (uint32_t) (v * v * deceleration_constants[steppers]);
 
         //get the algebraic end distance.
-        int32_t end_distance = end_distances[stepper], jerk_distance = jerk_distances[stepper];
+        int32_t end_distance = end_distances[steppers], jerk_distance = jerk_distances[steppers];
 
         //get the absolute
         if (end_distance < 0) end_distance = -end_distance;
         if (jerk_distance < 0) jerk_distance = -jerk_distance;
 
-        //require a deceleration if the end distance on the stepper is below the deceleration_distance;
+        //require a deceleration if the end distance on the steppers is below the deceleration_distance;
         if (deceleration_distance > (uint32_t) end_distance) {
             deceleration_required = true;
         }
 
-        if (deceleration_distance > (uint32_t) jerk_distance + jerk_offsets[stepper]) {
+        if (deceleration_distance > (uint32_t) jerk_distance + jerk_offsets[steppers]) {
             deceleration_required = true;
         }
     }
@@ -299,7 +299,7 @@ void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time
 void K2Physics::compute_jerk_offsets(float speed, k2_movement_data *previous_movement) {
 
 
-    //-----------maximum stepper speeds------------
+    //-----------maximum steppers speeds------------
 
     //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
 
@@ -309,19 +309,19 @@ void K2Physics::compute_jerk_offsets(float speed, k2_movement_data *previous_mov
     //Cache var for ending_jjerk_ratios
     float *ending_jerk_ratios = previous_movement->ending_jerk_ratios;
 
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
 
         //get the maximum regulation_speed on the current axis :
         //Formula : max_stepper_speed = max_speed * stepper_distance / high_level_distance;
-        float stepper_speed = speed * ending_jerk_ratios[stepper];
+        float stepper_speed = speed * ending_jerk_ratios[steppers];
 
-        stepper_data_t *data = SteppersData::steppers_data + stepper;
+        stepper_data_t *data = SteppersData::steppers_data + steppers;
 
         //Get the deceleration distance offset :
-        //Formula : the deceleration distance for a stepper at the regulation_speed s (steps_per_unit/s) is given by
+        //Formula : the deceleration distance for a steppers at the regulation_speed s (steps_per_unit/s) is given by
         //      s * s / (2 * acceleration (steps_per_unit/s^2))
         //TODO PRE-COMPUTATION OPTIMISATION
-        jerk_distances_offsets[stepper] = (uint32_t) (stepper_speed * stepper_speed /
+        jerk_distances_offsets[steppers] = (uint32_t) (stepper_speed * stepper_speed /
                                                       (2 * data->acceleration * data->steps_per_unit));
 
     }
@@ -346,23 +346,23 @@ void K2Physics::propagate_jerk_offsets(const movement_data_t *current_movement, 
     const uint32_t *current_jerk_offsets = current_movement->jerk_offsets;
     uint32_t *previous_jerk_offsets = previous_movement->jerk_offsets;
 
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
 
         //get the absolute distance on the axis
-        int32_t dist = current_jerk_pos[stepper] - previous_jerk_pos[stepper];
+        int32_t dist = current_jerk_pos[steppers] - previous_jerk_pos[steppers];
         if (dist < 0) dist = -dist;
 
         //cache
-        uint32_t jd = current_jerk_offsets[stepper];
+        uint32_t jd = current_jerk_offsets[steppers];
 
         //If the new jerk absorbs the old one
-        if (previous_jerk_offsets[stepper] + dist < jd) {
+        if (previous_jerk_offsets[steppers] + dist < jd) {
 
             //Replace old offsets
-            previous_jerk_offsets[stepper] = jd;
+            previous_jerk_offsets[steppers] = jd;
 
             //Replace old position
-            previous_jerk_pos[stepper] = current_jerk_pos[stepper];
+            previous_jerk_pos[steppers] = current_jerk_pos[steppers];
         }
 
     }
@@ -386,13 +386,13 @@ void K2Physics::update_jerk_offsets(const uint32_t *const new_offsets) {
 
 void K2Physics::pre_compute_speed_constants() {
 
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
-        stepper_data_t *data = SteppersData::steppers_data + stepper;
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
+        stepper_data_t *data = SteppersData::steppers_data + steppers;
         float steps = data->steps_per_unit;
         float as = data->acceleration * steps;
-        max_speed_constants[stepper] = data->maximum_speed * steps;
-        delta_speed_constants[stepper] = as;
-        deceleration_constants[stepper] = (float) 1 / ((float) 2 * as);
+        max_speed_constants[steppers] = data->maximum_speed * steps;
+        delta_speed_constants[steppers] = as;
+        deceleration_constants[steppers] = (float) 1 / ((float) 2 * as);
     }
 
 }
@@ -436,7 +436,7 @@ float t_msp_const[NB_STEPPERS];
 float *const m::max_speed_constants = t_msp_const;
 
 
-//The stepper jerk offsets;
+//The steppers jerk offsets;
 uint32_t k2jot[NB_STEPPERS]{0};
 uint32_t *const m::jerk_offsets = k2jot;
 

@@ -63,7 +63,6 @@ typedef struct {
     //De-initialise the UART;
     void (*exit)(const void *data);
 
-
 } driver_t;
 
 #define DRIVER(data_p, init_p, exit_p) {.data = (data_p), .initialise = (init_p), .exit = (exit_p)}

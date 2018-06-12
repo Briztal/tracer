@@ -58,7 +58,7 @@ private:
     //Check the sensors config;
     static bool check_sensors(String *message);
 
-    //Check the stepper control module config;
+    //Check the steppers control module config;
     static bool check_stepper_control(String *message);
 
 };

@@ -21,6 +21,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include "stdint.h"
+
 /*
  * This file defines the timer interaction structures;
  *
@@ -39,7 +41,7 @@
 
 typedef struct {
 		
-	//The register that contains/dermines the controlled state; 
+	//The register that contains/determines the controlled state;
 	volatile uint8_t *state_register;
 
 	//The mask to manipulate exclusively timer state bits;
@@ -91,14 +93,14 @@ static inline bool state_register_get(state_register_t *data) {
 
 typedef struct {
 	
-	//The register that contains/dermines the timer state;
+	//The register that contains/determines the timer state;
 	state_register_t timer_state;
 
 	//The conversion factor, used to convert number of tics to a register value;
 	float conversion_factor;
 	
 	//The function to update a count register;
-	void (*count_register_update)(void *register_p, float *new_register_value;
+	void (*count_register_update)(void *register_p, float *new_register_value);
 
 } timer_data_t;
 
@@ -134,9 +136,8 @@ typedef struct {
  * 	this inline function simplifies the process; 
  */
 
-static inline void 
-	timer_update_period_register(const timer_data_t *const timer_data, 
-		const timer_interrupt_data_t *const interrupt_data, float period) {
+static inline void timer_update_period_register(const timer_data_t *const timer_data,
+												const timer_interrupt_data_t *const interrupt_data, float period) {
 	
 	//Call the timer's specialised function
 	//converting period to register value;

@@ -63,7 +63,7 @@ public :
 
 private :
 
-    //Get the stepper distances between positions indexed by p0 and p1 over the trajectory function.
+    //Get the steppers distances between positions indexed by p0 and p1 over the trajectory function.
     static void get_stepper_distances(const float p0, const float p1, void (*trajectory_function)(float, float *),
                                       float *distances);
 

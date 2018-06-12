@@ -394,15 +394,15 @@ bool _ConfigChecker::check_sensors(tstring &message) {
 
 bool _ConfigChecker::check_stepper_control(tstring &message) {
 
-    //First, we will count the number of stepper motors.
+    //First, we will count the number of steppers motors.
 
     //Reset the counter;
     uint8_t counter =
 
-            //A macro to increment the counter for each stepper;
+            //A macro to increment the counter for each steppers;
 #define STEPPER(...) 1 +
 
-            //Count every stepper;
+            //Count every steppers;
 #include <Config/stepper_control_config.h>
 
             //Undef the macro for safety
@@ -413,7 +413,7 @@ bool _ConfigChecker::check_stepper_control(tstring &message) {
     if (counter != NB_STEPPERS) {
 
         //Return a message and fail;
-        message = tstring() + "There should be " + (uint8_t) NB_STEPPERS + " stepper motor declarations, but only " +
+        message = tstring() + "There should be " + (uint8_t) NB_STEPPERS + " steppers motor declarations, but only " +
                   counter + " are provided. Check stepper_config.h.";
         return false;
 
@@ -438,15 +438,15 @@ bool _ConfigChecker::check_stepper_control(tstring &message) {
     //Undef the macro for safety;
 #undef STEPPER
 
-    //Next, we will count the number of stepper data declaration.
+    //Next, we will count the number of steppers data declaration.
 
     //Reset the counter;
     counter =
 
-            //A macro to increment the counter for each stepper;
+            //A macro to increment the counter for each steppers;
 #define STEPPER_DATA(...) 1 +
 
-//Count every stepper;
+//Count every steppers;
 #include <Config/stepper_control_config.h>
 
 //Undef the macro for safety
@@ -458,7 +458,7 @@ bool _ConfigChecker::check_stepper_control(tstring &message) {
 
         //Return a message and fail;
         message =
-                tstring("There should be ") + (uint8_t) NB_STEPPERS + " stepper data declarations, but only " + counter +
+                tstring("There should be ") + (uint8_t) NB_STEPPERS + " steppers data declarations, but only " + counter +
                 " are provided. Check stepper_config.h.";
         return false;
 
@@ -489,10 +489,10 @@ bool _ConfigChecker::check_stepper_control(tstring &message) {
     //Reset the counter;
     counter =
 
-            //A macro to increment the counter for each stepper;
+            //A macro to increment the counter for each steppers;
 #define CARTESIAN_GROUP(...) 1 +
 
-//Count every stepper;
+//Count every steppers;
 #include <Config/stepper_control_config.h>
 
 //Undef the macro for safety
@@ -510,7 +510,7 @@ bool _ConfigChecker::check_stepper_control(tstring &message) {
     }
 
     /*
-     * Then, we will check if indices are consecutives, if all positive_rotation motor index refer to an existing stepper,
+     * Then, we will check if indices are consecutives, if all positive_rotation motor index refer to an existing steppers,
      *  and if all maximum speeds are strictly positive_rotation;
      */
     counter = 0;

@@ -214,13 +214,13 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
 
     STEP_AND_WAIT;
 
-    //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per stepper
+    //4us 4 steppers, 13us 17 steppers : 1.23us + 0.7 per steppers
     //Step 3 : Update the regulation_speed movementDistance with the new heuristic step_distances
     float time = K2Physics::get_sub_movement_time(sub_movement_data);
 
     STEP_AND_WAIT;
 
-    //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per stepper
+    //5us 4 steppers, 9us 17 steppers : 3.76us + 0.3us per steppers
 
     //Step 4 : Update the steppers speeds
     K2Physics::update_speeds(sub_movement_data, time);
@@ -240,7 +240,7 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
 /*
  * send_position : this function sends the high level position to the controller.
  *
- *  It first inverts the current stepper positions, to obtain the high level position.
+ *  It first inverts the current steppers positions, to obtain the high level position.
  *
  *  Then, it sends it using the interface.
  *

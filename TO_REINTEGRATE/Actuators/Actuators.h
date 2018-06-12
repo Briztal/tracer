@@ -23,7 +23,7 @@
 
 #include "DigitalGPIO.h"
 #include "PWMGPIO.h"
-#include "Servo.h"
+#include "../../src/modules/servo/servo.h"
 
 /*
  * This class is a simple formalisation. I use it to centralise hardware and

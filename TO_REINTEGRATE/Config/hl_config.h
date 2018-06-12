@@ -36,7 +36,7 @@
  *      with the desired interrupt frequency;
  *
  *  You must set these frequencies accordingly with timer allocation, as module may require a particular frequency :
- *      - the stepper module requires a 1MHz frequency;
+ *      - the steppers module requires a 1MHz frequency;
  *      - the servo module requires a 1MHz frequency;
  *      - control loops require a 1KHz frequency;
  *
@@ -71,7 +71,7 @@
  *      the module name and the timer index.
  *
  *  Module names are :
- *      - stepper for the stepper module;
+ *      - steppers for the steppers module;
  *      - servo for the servo module;
  *      - taskprog for the task programmer module;
 
@@ -96,7 +96,7 @@
 
 
 /*
- * The stepper timer will be attached to timer zero.
+ * The steppers timer will be attached to timer zero.
  */
 
 #define stepper_period_to_reload(period) period_to_reload_0(period);

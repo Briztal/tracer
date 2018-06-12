@@ -49,10 +49,10 @@ public:
 
 private:
 
-    //The current positions of stepper motors
+    //The current positions of steppers motors
     static float *const current_steppers_positions;
 
-    //Remark : the current stepper position is the translation if the high level positions, by StepperAbstraction.
+    //Remark : the current steppers position is the translation if the high level positions, by StepperAbstraction.
 
 
     //-----------------------------------------------Sub_movement_queue-------------------------------------------------
@@ -177,19 +177,19 @@ public:
     //End step_distances update
     static void update_end_jerk_distances(const sig_t negative_signatures, const uint8_t *elementary_dists);
 
-    //the stepper end step_distances;
+    //the steppers end step_distances;
     static int32_t *const end_distances;
 
-    //the stepper jerk step_distances;
+    //the steppers jerk step_distances;
     static int32_t *const jerk_distances;
 
 
 private:
 
-    //The stepper end positions;
+    //The steppers end positions;
     static int32_t *const end_position;
 
-    //The stepper jerk positions;
+    //The steppers jerk positions;
     static int32_t *const jerk_position;
 
 

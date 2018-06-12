@@ -344,7 +344,7 @@ public:
     //Enable or disable all steppers
     static task_state_t enable_steppers(bool enable);
 
-    //A scheduler for the stepper manager
+    //A scheduler for the steppers manager
 GENERATE_SCHEDULER(enable_steppers, 0, bool, enable);
 
 

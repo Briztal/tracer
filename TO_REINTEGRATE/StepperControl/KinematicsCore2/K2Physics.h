@@ -89,7 +89,7 @@ private :
     //Current steppers deceleration step_distances
     static uint32_t *const deceleration_distances;
 
-    //The stepper jerk offsets;
+    //The steppers jerk offsets;
     static uint32_t *const jerk_offsets;
 
 
@@ -102,12 +102,12 @@ private :
 
     /*
      * The array containing the deceleration constants : in the deceleration distance formula :
-     *      (((v * v) / (2 * EEPROMMap::accelerations[stepper] * EEPROMMap::steps_per_unit[stepper]));
+     *      (((v * v) / (2 * EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers]));
      *
      *  the denominator is constant. This array wil contain the float value
-     *      1.0 / (2.0 * EEPROMMap::accelerations[stepper] * EEPROMMap::steps_per_unit[stepper]));
+     *      1.0 / (2.0 * EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers]));
      *
-     *      for each stepper.
+     *      for each steppers.
      */
 
     static float *const deceleration_constants;
@@ -115,24 +115,24 @@ private :
 
     /*
      * The array containing the delta regulation_speed constants : in the deceleration distance formula :
-     *      max_delta_speed = EEPROMMap::accelerations[stepper] * EEPROMMap::steps_per_unit[stepper] * time;
+     *      max_delta_speed = EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers] * time;
      *
      *  the product of the two first terms is constant. This array wil contain the float value
-     *      EEPROMMap::accelerations[stepper] * EEPROMMap::steps_per_unit[stepper]
+     *      EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers]
      *
-     *      for each stepper.
+     *      for each steppers.
      */
 
     static float *const delta_speed_constants;
 
     /*
      * The array containing the maximum regulation_speed constants : in the deceleration distance formula :
-     *      max_speed = EEPROMMap::speeds[stepper] * EEPROMMap::steps_per_unit[stepper] * time;
+     *      max_speed = EEPROMMap::speeds[steppers] * EEPROMMap::steps_per_unit[steppers] * time;
      *
      *  the product is constant. This array wil contain the float value
-     *      EEPROMMap::speeds[stepper] * EEPROMMap::steps_per_unit[stepper]
+     *      EEPROMMap::speeds[steppers] * EEPROMMap::steps_per_unit[steppers]
      *
-     *      for each stepper.
+     *      for each steppers.
      */
 
     static float *const max_speed_constants;

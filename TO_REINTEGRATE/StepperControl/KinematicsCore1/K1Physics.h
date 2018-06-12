@@ -91,7 +91,7 @@ private:
 
     static float get_delay_numerator(void (*trajectory_function)(float, float*), float p0, float p1, uint8_t *max_axis, float *sav_max_distance);
 
-    static float _get_delay_numerator(uint8_t stepper, float distance);
+    static float _get_delay_numerator(uint8_t steppers, float distance);
 
 
     //---------------------------------------------Movement initialisation----------------------------------------------
@@ -134,7 +134,7 @@ public:
 
 private:
 
-    //The stepper jerk offset;
+    //The steppers jerk offset;
     static uint32_t jerk_distance_offset;
 
     //The offset heuristic distance to the next jerk point

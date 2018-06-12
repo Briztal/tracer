@@ -321,7 +321,7 @@ sig_t LinearMovement::process_position(uint8_t *step_distances) {//2n-2
 }
 
 /*
- * The Speed processing function : it sets the period of the stepper interrupt
+ * The Speed processing function : it sets the period of the steppers interrupt
  */
 void LinearMovement::process_speed() {
     set_stepper_int_period(K1RealTimeProcessor::delay0);

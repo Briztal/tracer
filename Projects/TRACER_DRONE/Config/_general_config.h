@@ -7,6 +7,6 @@
 //Uncomment this line to enable the control loop module;
 #define ENABLE_CONTROL_LOOPS
 
-//Uncomment this line to enable the stepper control module
+//Uncomment this line to enable the steppers control module
 #define ENABLE_STEPPER_CONTROL
 

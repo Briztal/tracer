@@ -149,7 +149,7 @@ inline static void delay_ms(uint16_t time_ms){
 
 //--------------------------------------StepperTimer_Interrupt----------------------------------------------------
 
-//For the stepper interrupt, the TIM2 (32 bis is used)
+//For the steppers interrupt, the TIM2 (32 bis is used)
 
 #define F_BUS 48000000
 

@@ -255,9 +255,9 @@ COORD_INTERFACE_VARIABLE(y_max_sum, 400)
  * The high level coordinate system is the system you will use to send explicit coordinates. They will be interpreted
  *  by the kernel, who will trace you movements.
  *
- *  High level coordinates are not meant to have a physical meaning (a particular stepper orientation).
+ *  High level coordinates are not meant to have a physical meaning (a particular steppers orientation).
  *
- *  you must also define the translation from high level coordinates to stepper positions, in implementing
+ *  you must also define the translation from high level coordinates to steppers positions, in implementing
  *      the translate and revert methods in the MachineAbstraction class.
  *
  */
@@ -286,14 +286,14 @@ AXIS(   8,  'D')
 //------------------------------------------------------Stepper Motors--------------------------------------------------
 
 /*
- * The stepper motors are the physical actuators the kernel will manipulate. Each one represents a physical axis of
+ * The steppers motors are the physical actuators the kernel will manipulate. Each one represents a physical axis of
  *      your machine.
  */
 
-//Number of stepper motors, must be set accordingly to the next lines
+//Number of steppers motors, must be set accordingly to the next lines
 #define NB_STEPPERS 9
 
-//Steppers settings : for each stepper of the machine, put one line like behind, and provide all parameters//TODO DOC
+//Steppers settings : for each steppers of the machine, put one line like behind, and provide all parameters//TODO DOC
 
 #ifdef STEPPER
 

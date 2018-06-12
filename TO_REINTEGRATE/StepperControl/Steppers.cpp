@@ -34,7 +34,7 @@
 //-------------------------------------------------------Initialisation--------------------------------------------------
 
 /*
- * initialise_hardware : this function initialises pins for stepper management
+ * initialise_hardware : this function initialises pins for steppers management
  */
 void Steppers::initialise_hardware() {
 
@@ -62,8 +62,8 @@ void Steppers::initialise_data() {
  * enable : this function enables a specific group of steppers, and disables others.
  *
  *  The argument_t is a signature, where the i-th bit means :
- *      - 1 : enable the i-th stepper
- *      - 0 : disable the i-th stepper
+ *      - 1 : enable the i-th steppers
+ *      - 0 : disable the i-th steppers
  *
  */
 void Steppers::enable(sig_t signature) {
@@ -129,8 +129,8 @@ void Steppers::disable() {
  * set_directions : this function sets direction for all steppers.
  *
  *  The argument_t is a signature, where the i-th bit means :
- *      - 1 : negative direction for the i-th stepper
- *      - 0 : positive_rotation direction for the i-th stepper
+ *      - 1 : negative direction for the i-th steppers
+ *      - 0 : positive_rotation direction for the i-th steppers
  *
  */
 
@@ -181,11 +181,11 @@ void Steppers::set_directions(sig_t negative_signatures) {
 //----------------------------------------------------------Step--------------------------------------------------------
 
 /*
- * fastStep : this function steps_per_unit a specific group of stepper.
+ * fastStep : this function steps_per_unit a specific group of steppers.
  *
  * The argument_t is a signature, where the i-th bit means :
- *      - 1 : the i-th stepper must step;
- *      - 0 : the i-th stepper must not step.
+ *      - 1 : the i-th steppers must step;
+ *      - 0 : the i-th steppers must not step.
  */
 
 

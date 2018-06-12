@@ -47,13 +47,13 @@ void SteppersData::EEPROM_registration() {
     //Cache the current tree;
     EEPROMTree *parent_tree = new EEPROMTree(string("steppers"), EEPROMData(), 0);
 
-    //cache for the stepper data;
+    //cache for the steppers data;
     stepper_data_t *stepper_data;
 
-    //Cache for the stepper tree
+    //Cache for the steppers tree
     EEPROMTree *stepper_tree;
 
-    //Register one stepper data;
+    //Register one steppers data;
 #define STEPPER_DATA(i, m_steps_per_unit, m_speed, m_acceleration, m_jerk)\
     /*Create the tree for the current stepper.*/\
     stepper_tree  = new EEPROMTree(string(#i), EEPROMData(), 4);\
@@ -91,7 +91,7 @@ void SteppersData::reset_data() {
 
     stepper_data_t *step_p;
 
-    //Initialise one stepper data;
+    //Initialise one steppers data;
 #define STEPPER_DATA(i, d_steps, d_speed, d_acc, d_jerk)\
     step_p = steppers_data+(i);\
     step_p->steps_per_unit = d_steps;\

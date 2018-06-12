@@ -44,23 +44,23 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
     //Wait for movement to be finished;
     while (MovementCoordinator::started());
 
-    //Reserve the usage of the stepper routine
+    //Reserve the usage of the steppers routine
     MovementCoordinator::reserve();
 
 
     /*
      * Delays update :
      *
-     * The sleep for a stepper simply corresponds to its max jerk;
+     * The sleep for a steppers simply corresponds to its max jerk;
      */
 
-    //For each stepper :
+    //For each steppers :
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
 
-        //Cache the appropriate stepper data;
+        //Cache the appropriate steppers data;
         stepper_data_t *data = SteppersData::steppers_data + axis;
 
-        //Set the sleep for the i-th stepper
+        //Set the sleep for the i-th steppers
         delays[axis] = (uint32_t) (1000000 / (data->jerk * data->steps_per_unit));
     }
 
@@ -133,7 +133,7 @@ uint8_t HomingMovement::cardinal(sig_t signature) {
 
 void HomingMovement::phase_1() {
 
-    //Disable the stepper interrupt for safety;
+    //Disable the steppers interrupt for safety;
     disable_stepper_interrupt();
 
     //Step;
@@ -193,7 +193,7 @@ float HomingMovement::get_movement_delay(sig_t signature, const float *const del
     //For each axis :
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
 
-        //If the stepper must move :
+        //If the steppers must move :
         if (signature & (uint32_t) 1) {
 
             //Cache the sleep for the current axis;
@@ -230,13 +230,13 @@ sig_t HomingMovement::read_endstops() {
     //For every axis to reset :
     for (uint8_t i = 0; i < nb_axis; i++) {
 
-        //Get the index of the stepper assigned to the current stepper;
+        //Get the index of the steppers assigned to the current steppers;
         uint8_t index = endstops_indices[i];
 
-        //If the bit at positon [index] is reset (if the [i-th] stepper must still move) :
+        //If the bit at positon [index] is reset (if the [i-th] steppers must still move) :
         if (!(endstops_signature & (1 << index))) {
 
-            //Set the [i]-th bit in the movement signature, so that stepper [i] keeps moving;
+            //Set the [i]-th bit in the movement signature, so that steppers [i] keeps moving;
             movement_signature |= (1 << i);
 
         }

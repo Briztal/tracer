@@ -87,7 +87,7 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
  *      - get_position : a trajectory function
  *      - point : a float, of the dimension of get_function's input.
  *      - increment : a distance from point, of the same dimension than point
- *      - distance_target : a distance in the stepper coordinate system.
+ *      - distance_target : a distance in the steppers coordinate system.
  *
  *  With these inputs, it extracts a value of increment that verifies the property below.
  *
@@ -104,7 +104,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     //Arrays initialisation
     float initial_positions[NB_STEPPERS], positions[NB_STEPPERS];
 
-    //Get the initial stepper position
+    //Get the initial steppers position
     StepperController::get_stepper_positions_for(get_position, point, initial_positions);
 
     //Get the candidate stepper_position
@@ -140,9 +140,9 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
 
 /*
- * get_max_dists : this function gets the step_distances between the two provided stepper positions, p0 and p1.
+ * get_max_dists : this function gets the step_distances between the two provided steppers positions, p0 and p1.
  *
- *  For each stepper, it determines the real distance (float), and determines the absolute integer distance.
+ *  For each steppers, it determines the real distance (float), and determines the absolute integer distance.
  *
  */
 
@@ -151,12 +151,12 @@ uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
     //initialise_hardware the maimum distance
     uint32_t max_dist = 0;
 
-    //for each stepper
-    for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
+    //for each steppers
+    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
 
 
         //get the algebric distance
-        int32_t dist = (int32_t) p1[stepper] - (int32_t) p0[stepper];
+        int32_t dist = (int32_t) p1[steppers] - (int32_t) p0[steppers];
 
         //obtain the absolute distance
         if (dist < 0) {

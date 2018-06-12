@@ -22,7 +22,7 @@
 /*
  * MovementCoordinator : this class is the authority that manages the access to the movement routine;
  *
- *  When a function needs to execute a function in the stepper routine, it requires the schedule to this class,
+ *  When a function needs to execute a function in the steppers routine, it requires the schedule to this class,
  *      which authorises it or not, whether the access is already reserved or not;
  */
 

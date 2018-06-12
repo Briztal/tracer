@@ -201,7 +201,7 @@ task_state_t ProgramInterfaceCommands::actions_system_canal(char *data, uint8_t 
     char sub_canal = *data;
 
     switch (sub_canal) {
-        case 0 ://The initialisation case : send_packet a packet for each stepper
+        case 0 ://The initialisation case : send_packet a packet for each steppers
 
 #define BINARY(i, name, powerPin, enableValue)\
             TI::prepare_system_packet();TI::add_char_out(ACTION_SUBCANAL);TI::add_char_out(0);TI::add_char_out(0);\
@@ -242,7 +242,7 @@ task_state_t ProgramInterfaceCommands::steppers_system_canal(char *data, uint8_t
     int group_size;
 
     switch (sub_canal) {
-        case 0 ://The initialisation case : send_packet a packet for each stepper
+        case 0 ://The initialisation case : send_packet a packet for each steppers
 
 #define STEPPER_DATA(i, j, ...)\
             TI::prepare_system_packet();TI::add_char_out(STEPPER_SUBCANAL);TI::add_char_out(0);TI::add_char_out(0);\

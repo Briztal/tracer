@@ -197,7 +197,7 @@ float KinematicsCore1::compute_us_time_for_sub_movement(k1_sub_movement_data *su
 /*
  * send_position : this function sends the high level position to the controller.
  *
- *  It first inverts the current stepper positions, to obtain the high level position.
+ *  It first inverts the current steppers positions, to obtain the high level position.
  *
  *  Then, it sends it using the interface.
  *

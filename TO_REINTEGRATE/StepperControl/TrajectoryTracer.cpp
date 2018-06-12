@@ -141,7 +141,7 @@ void TrajectoryTracer::start() {
     if (started)
         return;
 
-    //For safety, disable the stepper interrupt;
+    //For safety, disable the steppers interrupt;
     MovementCoordinator::disable_interrupt();
 
     if (!movement_data_queue.available_objects()) {
@@ -177,7 +177,7 @@ void TrajectoryTracer::start() {
     MovementCoordinator::set_interrupt_period((uint32_t) delay_us);
     MovementCoordinator::set_interrupt_function(prepare_next_sub_movement);
 
-    //Reserve the usage of the stepper routine
+    //Reserve the usage of the steppers routine
     MovementCoordinator::reserve();
 
     //Mark the movement procedure as started;
@@ -684,13 +684,13 @@ void TrajectoryTracer::prepare_first_sub_movement() {
 
 void TrajectoryTracer::prepare_next_sub_movement() {
 
-    //Disable the stepper interrupt for preventing infinite call (causes stack overflow);
+    //Disable the steppers interrupt for preventing infinite call (causes stack overflow);
     MovementCoordinator::disable_interrupt();
 
     //-------------------Initialisation-------------------
 
     //update the current movement data, and get the correct signature container for the current sub_movement;
-    //3us 4 steppers, 8us 17 stepper : 1.5 us + 0.37us per stepper
+    //3us 4 steppers, 8us 17 steppers : 1.5 us + 0.37us per steppers
     sig_t *step_signatures = initialise_sub_movement();
 
     //Step 1 : Get a new position to reach
@@ -768,7 +768,7 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Set the light interrupt function to give time_us to background processes;
     MovementCoordinator::set_interrupt_function(finish_sub_movement);
 
-    //Re-enable the stepper interrupt :
+    //Re-enable the steppers interrupt :
     MovementCoordinator::enable_interrupt();
 
 }
@@ -909,7 +909,7 @@ int k2_position_indice = 4;
 
 void TrajectoryTracer::finish_sub_movement() {
 
-    //Disable the stepper interrupt for preventing infinite call (causes stack overflow);
+    //Disable the steppers interrupt for preventing infinite call (causes stack overflow);
     MovementCoordinator::disable_interrupt();
 
     //Get the correct signature;

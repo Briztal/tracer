@@ -7,7 +7,7 @@
 
 /*
  * geometry_translate : this function defines the geometry of your machine, aka the relation between
- *      the control coordinate system and the stepper coordinate system;
+ *      the control coordinate system and the steppers coordinate system;
  */
 
 inline void geometry_translate(const float *const hl_coordinates, float *const steppers_coordinates) {

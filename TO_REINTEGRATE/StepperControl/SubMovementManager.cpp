@@ -34,7 +34,7 @@
 
 void SubMovementManager::initialise_data() {
 
-    //Reset the current stepper position;
+    //Reset the current steppers position;
     memset(current_steppers_positions, 0, NB_STEPPERS * sizeof(float));
 
     //Reset the sub movement data queue;
@@ -71,7 +71,7 @@ void SubMovementManager::initialise_data() {
  *  Parameters passed update all variables used to compute positions :
  *      - beginning and ending, the minimum and the maximum of index (beginning and ending of movement)
  *      - incr : the index increment for the first plan_movement (pre computed and supposedly accurate)
- *      - trajectory_function : the function that actually computes stepper positions.
+ *      - trajectory_function : the function that actually computes steppers positions.
  *
  */
 
@@ -151,7 +151,7 @@ bool SubMovementManager::is_movement_processed() {
  *      In all cases, the increment is updated to converge to the distance targetVector.
  *
  *      Notes :
- *          - The distance is given by the maximum of all step_distances on each stepper.
+ *          - The distance is given by the maximum of all step_distances on each steppers.
  *          - The second criteria is (far) more restrictive than the first, but gives a better regulation_speed regulation
  */
 
@@ -183,7 +183,7 @@ void SubMovementManager::push_new_sub_movement() {
     }
 
 
-    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per stepper
+    //8us 4 steppers, 11us 17 steppers ; 7.07us + 0.23us per steppers
     //get a new sub-movement;
     compute_new_sub_movement(sub_movement_data);
 
@@ -192,7 +192,7 @@ void SubMovementManager::push_new_sub_movement() {
 
     //As the computation occurred without errors, we must now verify the computed movement.
 
-    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per stepper
+    //5us 4 steppers, 11us 17steppers : 3.15us + 0.46us per steppers
     //validate the sub-movement;
     execution_flag = confirm_sub_movement(sub_movement_data);
 
@@ -276,7 +276,7 @@ void SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
 bool SubMovementManager::confirm_sub_movement(sub_movement_data_t *sub_movement_data) {
 
 
-    //Get the steppers step_distances, high level step_distances, and the maximal stepper and distance
+    //Get the steppers step_distances, high level step_distances, and the maximal steppers and distance
     float max_distance = get_steppers_distances(current_steppers_positions, sub_movement_data);
 
     //Distance Validity_Verification : fail if an error is detected
@@ -334,9 +334,9 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
 
 
 /*
- * get_steppers_distances : this function determines the distance between a position and a targetVector, for all stepper.
+ * get_steppers_distances : this function determines the distance between a position and a targetVector, for all steppers.
  *
- * It also computes the direction signature, as step_distances are positive_rotation numbers, and saves the maximum stepper
+ * It also computes the direction signature, as step_distances are positive_rotation numbers, and saves the maximum steppers
  *      and the maximum distance.
  */
 
@@ -353,7 +353,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
     sig_t dir_signature = 0;
 
 
-    //We must determine the distance for every stepper
+    //We must determine the distance for every steppers
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
 
 
@@ -491,7 +491,7 @@ void SubMovementManager::update_end_position(const float *const new_hl_position)
 
     StepperController::translate(new_hl_position, stepper_end_position);
 
-    //Disable the stepper routine for safety, as we will modify volatile data;
+    //Disable the steppers routine for safety, as we will modify volatile data;
     MovementCoordinator::disable_interrupt();
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -511,7 +511,7 @@ void SubMovementManager::update_end_position(const float *const new_hl_position)
 
 void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_position) {
 
-    //Disable the stepper routine for safety, as we will modify volatile data;
+    //Disable the steppers routine for safety, as we will modify volatile data;
     MovementCoordinator::disable_interrupt();
 
     for (uint8_t stepper = 0; stepper < NB_STEPPERS; stepper++) {
@@ -520,7 +520,7 @@ void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_p
         jerk_position[stepper] = d;
     }
 
-    //Re-enable the stepper routine (will take effect only if it was already started;
+    //Re-enable the steppers routine (will take effect only if it was already started;
     MovementCoordinator::enable_interrupt();
 }
 
@@ -528,11 +528,11 @@ void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_p
 /*
  * update_end_jerk_distances : this function updates step_distances to end point and jerk point.
  *
- *  It takes in data the absolute step_distances on each stepper of the next sub_movement, and their negative signature.
+ *  It takes in data the absolute step_distances on each steppers of the next sub_movement, and their negative signature.
  *
- *      Reminder : the i_th bit of direction_signature is 1 if the distance on the i_th stepper is negative.
+ *      Reminder : the i_th bit of direction_signature is 1 if the distance on the i_th steppers is negative.
  *
- *  The global distance is given by the maximum of all distance on each stepper.
+ *  The global distance is given by the maximum of all distance on each steppers.
  *
  */
 
@@ -555,7 +555,7 @@ void SubMovementManager::update_end_jerk_distances(const sig_t negative_signatur
 
 #define m SubMovementManager
 
-//Current stepper position;
+//Current steppers position;
 float t_cur_pos[NB_STEPPERS]{0};
 float *const m::current_steppers_positions = t_cur_pos;
 
@@ -581,11 +581,11 @@ int32_t *const m::end_distances = k2ted;
 int32_t k2tep[NB_STEPPERS]{0};
 int32_t *const m::end_position = k2tep;
 
-//The stepper jerk positions;
+//The steppers jerk positions;
 int32_t k2jpt[NB_STEPPERS]{0};
 int32_t *const m::jerk_position = k2jpt;
 
-//the stepper jerk step_distances;
+//the steppers jerk step_distances;
 int32_t k2jdt[NB_STEPPERS]{0};
 int32_t *const m::jerk_distances = k2jdt;
 

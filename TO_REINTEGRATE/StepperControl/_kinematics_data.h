@@ -237,7 +237,7 @@ typedef struct k2_sub_movement_data : sub_movement_data {
 
 /*
  * k2_linear_data : this structure contains all data related to a linear movement :
- *  - offsets : the stepper positions at the starting point of the line;
+ *  - offsets : the steppers positions at the starting point of the line;
  *  - slopes : the slopes of the line, relatively to the greater axis;
  *  - max_axis : the greater axis, in term of movement distance.
  *
