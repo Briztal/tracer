@@ -39,6 +39,7 @@
 #define GPIO_D_DATA     (volatile uint32_t *)0x400FF0C0
 #define GPIO_E_DATA     (volatile uint32_t *)0x400FF100
 
+
 //Define ports;
 KINETIS_PORT_DEFINE(A, PORT_A_DATA, GPIO_A_DATA);
 KINETIS_PORT_DEFINE(B, PORT_B_DATA, GPIO_B_DATA);
@@ -69,7 +70,7 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
 // --------------------------------------- ERROR HANDLING ---------------------------------------
 
 
-#include <kernel/drivers/PORT.h>
+#include <kernel/drivers/port.h>
 
 #include <kernel/systick.h>
 

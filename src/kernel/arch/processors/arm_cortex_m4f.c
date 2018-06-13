@@ -26,7 +26,7 @@
 #include <kernel/scheduler/scheduler.h>
 #include <kernel/systick.h>
 #include <kernel/kernel.h>
-#include <kernel/drivers/PORT.h>
+#include <kernel/drivers/port.h>
 
 //--------------------------------------------- Private headers ---------------------------------------------
 

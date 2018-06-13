@@ -21,11 +21,13 @@
 #include "servo.h"
 
 #include <kernel/kernel.h>
+#include <kernel/drivers/timer.h>
 
 
 typedef struct {
 
-    //TODO TIMER DATA;
+    //The microsecond based timer used by the controller;
+    timer_ovf_int_t *us_timer;
 
     //The list of started channels;
     linked_list_t started_channels;
@@ -34,13 +36,16 @@ typedef struct {
     linked_list_t stopped_channels;
 
     //The currently active channel;
-    servo_channel_t *active_channel;
+    const servo_channel_t *active_channel;
 
     //The period of all servo channels;
-    uint16_t period;
+    float period;
 
     //The free time after a cycle;
-    uint16_t complement;
+    float complement;
+
+    //A flag set if the controller is initialiser;
+    bool initialised;
 
     //A flag to stop the isr handler;
     bool started;
@@ -50,9 +55,17 @@ typedef struct {
 
 //------------------------------- Globals -------------------------------
 
-
 //There exists only one servo controller, for interrupt;
-static servo_controller_t servo_controller;
+static servo_controller_t servo_controller = {
+        .us_timer = 0,
+        .started_channels = EMPTY_LINKED_LIST(255),
+        .stopped_channels = EMPTY_LINKED_LIST(255),
+        .active_channel = 0,
+        .period = 20000,
+        .complement = 20000,
+        .initialised = false,
+        .started = false,
+};
 
 
 //------------------------------- Private headers -------------------------------
@@ -65,6 +78,68 @@ void servo_isr_handler();
 
 //TODO PINMODES
 
+
+//------------------------------- Init - Exit -------------------------------
+
+/*
+ * servo_init : initialises the servo controller; Must provide a us based timer with an ovf interrupt capability;
+ */
+
+void servo_init(timer_ovf_int_t *us_timer) {
+
+    //Cache the controller;
+    servo_controller_t *controller = &servo_controller;
+
+    //If the controller is already initialised :
+    if (controller->initialised) {
+
+        //Error;
+        kernel_error("servo.c : servo_init : the servo controller is already initialised");
+
+    }
+
+    //Initialise the servo controller;
+    *controller = (servo_controller_t) {
+            .us_timer = us_timer,
+            .started_channels = EMPTY_LINKED_LIST(255),
+            .stopped_channels = EMPTY_LINKED_LIST(255),
+            .active_channel = 0,
+            .period = 20000,
+            .complement = 20000,
+            .initialised = true,
+            .started = false,
+    };
+
+}
+
+
+/*
+ * servo_exit : de-initialises the servo controller;
+ */
+
+void servo_exit() {
+
+    //Cache the controller;
+    servo_controller_t *controller = &servo_controller;
+
+    //If the controller is not initialised :
+    if (!controller->initialised) {
+
+        //Nothing to do;
+        return;
+
+    }
+
+    //De initialise the timer;
+    timer_ovf_int_exit(controller->us_timer);
+
+    //Mark the controller de-initialised and stopped;
+    controller->initialised = controller->started = false;
+
+}
+
+
+//------------------------------- Start - Stop -------------------------------
 
 /*
  * start : this function starts the servo interrupt routine.
@@ -85,11 +160,14 @@ void servo_start() {
     //Reset the active channel;
     controller->active_channel = 0;
 
-    //Set the interrupt function;
-    set_servo_int_function(interrupt_routine);
+    //Cache the timer;
+    timer_ovf_int_t *timer = controller->us_timer;
 
-    //Enable the servo timer;
-    enable_servo_timer();
+    //Set the interrupt function;
+    timer_interrupt_set_handler(&timer->ovf_interrupt, servo_isr_handler);
+
+    //Start the timer;
+    timer_start_timer((const timer_base_t *) timer);
 
     //Start the interrupt routine;
     servo_isr_handler();
@@ -106,9 +184,6 @@ void servo_stop() {
     //Cache the servo controller pointer;
     servo_controller_t *controller = &servo_controller;
 
-    //Reset the active channel;
-    controller->active_channel = 0;
-
     //Access to started flag is critical;
     kernel_enter_critical_section();
 
@@ -117,6 +192,8 @@ void servo_stop() {
 
     //Leave the critical section
     kernel_leave_critical_section();
+
+    //The routine will be stopped and cleaned at next interrupt;
 
 }
 
@@ -140,13 +217,7 @@ void servo_controller_set_channel_value(servo_channel_t *channel, float value) {
     float imp_max = channel->impulse_max;
 
     //Determine the impulse length;
-    float impulse_length = imp_min + ((imp_max - imp_min) * (value - v_min) / (v_max - v_min));
-
-    //Write an impulse
-    channel->impulse_duration = timer_get_reload_value(impulse_length);
-
-    //Redetermine the complement value;
-    servo_update_complement();
+    channel->impulse_duration = imp_min + ((imp_max - imp_min) * (value - v_min) / (v_max - v_min));
 
 }
 
@@ -162,7 +233,7 @@ void servo_update_complement() {
     servo_controller_t *controller = &servo_controller;
 
     //Cache the value complement;
-    float reload = controller->period;
+    float complement = controller->period;
 
     //Cache the number of active channels;
     size_t nb_channels = controller->started_channels.nb_elements;
@@ -174,7 +245,7 @@ void servo_update_complement() {
     while (nb_channels--) {
 
         //Subtract the channel's value;
-        reload -= ((servo_channel_t *) channel)->value;
+        complement -= ((servo_channel_t *) channel)->impulse_duration;
 
         //Update the next channel;
         channel = channel->next;
@@ -182,7 +253,7 @@ void servo_update_complement() {
     }
 
     //Initialise the new complement to its default value;
-    controller->complement = servo_period_to_reload(reload);
+    controller->complement = complement;
 
 }
 
@@ -193,15 +264,17 @@ void servo_update_complement() {
 
 void servo_isr_handler() {
 
+    //Cache the servo controller pointer;
+    servo_controller_t *const controller = &servo_controller;
+
+    //Cache the servo timer pointer;
+    const timer_ovf_int_t *const timer = controller->us_timer;
 
     //Prevent the handler from being called again;;
-    disable_servo_interrupt();
-
-    //Cache the servo controller pointer;
-    servo_controller_t *controller = &servo_controller;
+    timer_interrupt_disable(&timer->ovf_interrupt);
 
     //Cache the previously set channel;
-    servo_channel_t *active_channel = controller->active_channel;
+    const servo_channel_t *active_channel = controller->active_channel;
 
     //If the previous channel exists :
     if (active_channel) {
@@ -219,22 +292,39 @@ void servo_isr_handler() {
 
     }
 
+    //If we must stop the routine :
+    if (!controller->started) {
+
+        //Reset the active channel
+        controller->active_channel = 0;
+
+        //Stop the timer;
+        timer_stop_timer((const timer_base_t *) timer);
+
+        //Complete, as the interrupt is disabled;
+        return;
+
+    }
+
     //If the newly active channel exists :
     if (active_channel) {
 
         //TODO PIN ENABLE;
 
         //Set the new period;
-        set_servo_int_reload(active_channel->impulse_duration);
+        timer_set_period((const timer_base_t *const) timer, active_channel->impulse_duration);
 
     } else {
 
         //Set the new period;
-        set_servo_int_reload(controller->complement);
+        timer_set_period((const timer_base_t *const) timer, controller->complement);
 
     }
 
     //Save the active channel in the servo controller;
     controller->active_channel = active_channel;
+
+    //Enable the servo interrupt;
+    timer_interrupt_enable(&timer->ovf_interrupt);
 
 }

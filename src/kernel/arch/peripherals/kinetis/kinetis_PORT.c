@@ -19,7 +19,7 @@
 */
 
 
-#include <kernel/drivers/PORT.h>
+#include <kernel/drivers/port.h>
 
 #include "kinetis_PORT.h"
 

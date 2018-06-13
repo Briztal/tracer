@@ -163,7 +163,7 @@ task_state_t task_3(void *) {
 
  */
 
-#include <kernel/drivers/PORT.h>
+#include <kernel/drivers/port.h>
 #include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
 #include <kernel/kernel.h>
 #include "Arduino.h"

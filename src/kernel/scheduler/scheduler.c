@@ -186,7 +186,7 @@ void scheduler_stop() {
 }
 
 
-#include <kernel/drivers/PORT.h>
+#include <kernel/drivers/port.h>
 #include <kernel/scheduler/tasks/stask.h>
 
 

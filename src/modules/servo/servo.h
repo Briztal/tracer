@@ -21,12 +21,15 @@
 #ifndef CODE_SERVOACTIONS_H
 #define CODE_SERVOACTIONS_H
 
-#include <data_structures/containers/llist.h>
 #include "stdbool.h"
 
 #include "stdint.h"
 
 #include "stddef.h"
+
+#include <kernel/drivers/timer.h>
+
+#include <data_structures/containers/llist.h>
 
 
 typedef struct {
@@ -54,8 +57,8 @@ typedef struct {
 } servo_channel_t;
 
 
-//Start the servo controller;
-void servo_init();//TODO TIMER DATA
+//Start the servo controller; Must provide a us based timer with an ovf interrupt capability;
+void servo_init(timer_ovf_int_t *us_timer);
 
 //Stop the servo controller;
 void servo_exit();
@@ -67,6 +70,9 @@ void servo_start();
 //Stop the interrupt process;
 void servo_stop();
 
+
+//Set the period of the servo controller;
+void servo_controller_set_period();
 
 //Add a channel to the servo controller;
 servo_channel_t *servo_controller_add_channel(float value_min, float value_max, uint16_t impulse_min, uint16_t impulse_max);

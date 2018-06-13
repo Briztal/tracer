@@ -23,6 +23,11 @@
 
 #include "stdint.h"
 
+#include "stdbool.h"
+
+
+//------------------------------------- State Register -------------------------------------
+
 /*
  * This file defines the timer interaction structures;
  *
@@ -42,68 +47,72 @@
 typedef struct {
 		
 	//The register that contains/determines the controlled state;
-	volatile uint8_t *state_register;
+	volatile uint8_t *const state_register;
 
-	//The mask to manipulate exclusively timer state bits;
-	const uint8_t state_bits;
+	//The mask to manipulate only relevant bits;
+	const uint8_t bit_mask;
+
+	//The value to write to enable the register;
+	const uint8_t enabled_value;
+
+	//The value to write to disable the register;
+    const uint8_t disabled_value;
 
 } state_register_t;
 
+//Enable the register;
+static inline void state_register_enable(const state_register_t *data);
+
+//Disable the register;
+static inline void state_register_disable(const state_register_t *data);
+
+//Is the register enabled ?
+static inline bool state_register_is_enabled(const state_register_t *data);
+
+
+//------------------------------------- Base Timer -------------------------------------
 
 /*
- * state_register_set: sets state bits in the timer state register
- */
-
-static inline void state_register_set(state_register_t *data) {
-
-	//Set timer state bits in the state register;
-	data->state_register |=	data->timer_state_bits;
-
-}
-
-
-/*
- * state_register_clear: clears state bits in the timer state register
- */
-
-static inline void state_register_clear(state_register_t *data) {
-
-	//Clear timer state bits in the state register;
-	data->state_register &=	~data->timer_state_bits;
-
-}
-
-
-/*
- * state_register_get : get the state. returns 0 for cleared and other for set;
- */
-
-static inline bool state_register_get(state_register_t *data) {
-
-	//Get timer state bits in the state register;
-	return (bool) data->state_register & data->timer_state_bits;
-
-}
-
-
-/*
- * A basic  timer contains one state register (enabled / disabled), 
+ * A basic timer contains one state register (enabled / disabled),
  * 	a value register, and a conversion factor; 
  */
 
 typedef struct {
+
+    //The timer data structure, required for de-init;
+    void *data;
 	
 	//The register that contains/determines the timer state;
 	state_register_t timer_state;
 
+	//The interrupt period register;
+	void *period_register;
+
 	//The conversion factor, used to convert number of tics to a register value;
-	float conversion_factor;
+	float period_to_tics;
 	
 	//The function to update a count register;
-	void (*count_register_update)(void *register_p, float *new_register_value);
+	void (*count_register_update)(void *register_p, float new_register_value);
 
-} timer_data_t;
+    //The function to de-init the timer;
+    void (*timer_exit)(void*);
 
+} timer_base_t;
+
+//Start the timer;
+static inline void timer_start_timer(const timer_base_t *timer_data);
+
+//Start the timer;
+static inline void timer_stop_timer(const timer_base_t *timer_data);
+
+//Update the period register with the provided value;
+static inline void timer_set_period(const timer_base_t *timer_data, float period);
+
+//De initialise the timer and delete the structure;
+static inline void timer_exit(timer_base_t *);
+
+
+//------------------------------------- Timer interrupt -------------------------------------
 
 /*
  * A timer interrupt is represented by : 
@@ -120,44 +129,50 @@ typedef struct {
 	
 	//The register that contains/clears the interrupt flag
 	state_register_t interrupt_flag;
-	
-	//The interrupt period register;
-	void *period_register;
-	
+
 	//A pointer to the IRQ function pointer for fast update;
-	void (**IRQ_update)(void);	
+	void (**hander_update)(void);
 
 } timer_interrupt_data_t;
 
 
+//Enable the timer interrupt;
+static inline void timer_interrupt_enable(timer_interrupt_data_t *timer_data);
+
+//Disable the timer interrupt;
+static inline void timer_interrupt_disable(timer_interrupt_data_t *timer_data);
+
+
+//Clear the timer interrupt flag;
+static inline void timer_interrupt_flag_clear(timer_interrupt_data_t *timer_data);
+
+//Is the the timer interrupt flag set;
+static inline void timer_interrupt_flag(timer_interrupt_data_t *timer_data);
+
+
+//Update the handler.
+static inline void timer_interrupt_set_handler(timer_interrupt_data_t *timer_data, void (*IRQ_function)(void));
+
+
+//------------------------------------- Timer complex structs -------------------------------------
+
 /*
- * timer_update_period_register : as manipulating the period required a 
- * 	conversion and the call of a specialised function, 
- * 	this inline function simplifies the process; 
+ * A struct to represent a timer with an overflow interrupt;
  */
 
-static inline void timer_update_period_register(const timer_data_t *const timer_data,
-												const timer_interrupt_data_t *const interrupt_data, float period) {
-	
-	//Call the timer's specialised function
-	//converting period to register value;
-	(*(timer_data->count_register_update))(interrupt_data->period_register, 
-		register_p, period * timer_data->conversion_factor);
+typedef struct {
 
-}
+	//The timer base;
+	timer_base_t timer;
 
+	//The ovf interrupt;
+	timer_interrupt_data_t ovf_interrupt;
 
-/*
- * timer_set_IRQ : updates the timer's IRQ function;
- */
+} timer_ovf_int_t;
 
-static inline void timer_set_IRQ(timer_data_t *timer_data, 
-	void (*IRQ_function)(void)) {
+static inline void timer_ovf_int_exit(const timer_ovf_int_t *timer);
 
-	//Update the IRQ function;
-	*timer_data->IRQ_update = IRQ_function; 
-	
-}
-
+#include "timer.c"
 
 #endif
+

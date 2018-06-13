@@ -32,7 +32,17 @@
 
 #include "stdint.h"
 
-#include "kernel/arch/arch.h"
+//#include <kernel/arch/arch.h>
+
+typedef struct {
+
+    //The port data pointer;
+    PORT_data_t *port_data;
+
+    //The pin index;
+    uint8_t pin_index;
+
+};
 
 /*
  * Types of interruptions;
@@ -217,7 +227,6 @@ typedef struct {
 } GPIO_output_registers_t;
 
 
-#include "kernel/arch/arch_types.h"
 
 
 /*
@@ -235,7 +244,6 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
  * ---------------------------- GPIO ----------------------------
  */
 
-
 /*
  * GPIO functions are critical functions, that must task the least time as possible.
  *
@@ -250,13 +258,13 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
  *  This method is a bit heavy to setup, but guarantees the best optimisation, regarding the hardware abstraction;
  */
 
-
 //Get a GPIO pin's hardware registers. This function is used for the setup, and is not made to be fast or optimised;
 void PORT_get_GPIO_output_registers(PORT_data_t *port, GPIO_output_registers_t *);
 
+
 /*
  * GPIO functions are time critical, and so are inline. If your hardware supports GPIO action, you may define
- * GPIO inline functions in your PORT driver's header, and include it in yout arch's header.
+ * GPIO inline functions in your PORT driver's header, and include it in your arch's header.
  *
  * To ease inter-compatibility, please use function signatures as listed below.
  *
