@@ -22,11 +22,9 @@
 
 #include "arm_cortex_m4f.h"
 
-
-#include <kernel/scheduler/scheduler.h>
 #include <kernel/systick.h>
+
 #include <kernel/kernel.h>
-#include <kernel/drivers/port.h>
 
 //--------------------------------------------- Private headers ---------------------------------------------
 

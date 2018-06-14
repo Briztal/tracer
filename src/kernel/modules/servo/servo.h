@@ -31,6 +31,7 @@
 
 #include <data_structures/containers/llist.h>
 
+//--------------------------------------------------- Public structs ---------------------------------------------------
 
 typedef struct {
 
@@ -57,45 +58,37 @@ typedef struct {
 } servo_channel_t;
 
 
+//----------------------------------------------------- Init - Exit ----------------------------------------------------
+
 //Start the servo controller; Must provide a us based timer with an ovf interrupt capability;
-void servo_init(timer_ovf_int_t *us_timer);
+void servo_module_init(timer_ovf_int_t *us_timer, float period_us);
 
 //Stop the servo controller;
-void servo_exit();
+void servo_module_exit();
 
 
-//Start the interrupt process;
-void servo_start();
-
-//Stop the interrupt process;
-void servo_stop();
-
+//-------------------------------------------------- Controller setup --------------------------------------------------
 
 //Set the period of the servo controller;
-void servo_controller_set_period();
+void servo_module_set_period(float new_period);
 
 //Add a channel to the servo controller;
-servo_channel_t *servo_controller_add_channel(float value_min, float value_max, uint16_t impulse_min, uint16_t impulse_max);
+servo_channel_t *servo_module_add_channel(float value_min, float value_max, uint16_t impulse_min, uint16_t impulse_max);
 
 //Remove a channel from the servo controller;
-void servo_controller_remove_channel(servo_channel_t *channel);
+void servo_module_remove_channel(servo_channel_t *channel);
 
+
+//--------------------------------------------------- Channels setup ---------------------------------------------------
 
 //Update a channel's value;
-void servo_controller_set_channel_value(servo_channel_t *channel, float value);
-
-
-//Enable a channel;
-void servo_controller_enable_channel(servo_channel_t *channel, float value);
+void servo_module_set_channel_value(servo_channel_t *channel, float value);
 
 //Disable a channel;
-void servo_controller_disable_channel(servo_channel_t *channel, float value);
+void servo_module_disable_channel(servo_channel_t *channel);
 
+//Disable all channels;
+void servo_module_disable_all(servo_channel_t *channel);
 
-//Enable all channels
-void servo_controller_enable();
-
-//Disable all channels
-void servo_controller_disable();
 
 #endif //CODE_SERVOACTIONS_H

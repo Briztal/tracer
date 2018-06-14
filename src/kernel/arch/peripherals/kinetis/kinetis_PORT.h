@@ -41,6 +41,10 @@ typedef enum {
 } PORT_input_filter_t;
 
 
+/*
+ * The filtering struct : a filtering type and some additional data;
+ */
+
 typedef struct {
 
     //The type of input filtering;
@@ -127,36 +131,48 @@ typedef struct {
     //The GPIO part;
     volatile kinetis_GPIO_memory_t *const GPIO_data;
 
-} PORT_data_t;
+} PORT_t;
 
 
-#define KINETIS_PORT_DECLARE(id) extern PORT_data_t PORT_##id
-
-#define KINETIS_PORT_DEFINE(id, PORT_DATA, GPIO_DATA) \
-PORT_data_t PORT_##id = {\
-        .PORT_data = (volatile kinetis_PORT_memory_t *) (PORT_DATA),\
-        .GPIO_data = (volatile kinetis_GPIO_memory_t *) (GPIO_DATA)\
-};
-
-//Define the GPIO mask type to be 4 bytes length;
+//The GPIO mask type : a 4 byte word;
 typedef uint32_t GPIO_mask_t;
 
 
 /*
- * ---------------------------------- Standard GPIO functions implementations ----------------------------------
+ * The Port pin struct : a port and a bit;
  */
+typedef struct {
+
+    //The port data pointer;
+    PORT_t *port_data;
+
+    //The pin index;
+    uint8_t bit_index;
+
+} PORT_pin_t;
 
 
-// ---------------------------------- GPIO Calculator ----------------------------------
+//------------------------------------------ PORTS declarations - definitions ------------------------------------------
 
-/*
- * Determine the mask from a bit index;
- */
+//Declare a port (for arch header);
+#define KINETIS_PORT_DECLARE(id) extern PORT_t PORT_##id
 
-inline GPIO_mask_t GPIO_get_mask(uint8_t bit) { return ((uint32_t) 1 << bit); }
+//Define a port (for arch source);
+#define KINETIS_PORT_DEFINE(id, PORT_DATA, GPIO_DATA) \
+PORT_t PORT_##id = {\
+        .PORT_data = (volatile kinetis_PORT_memory_t *) (PORT_DATA),\
+        .GPIO_data = (volatile kinetis_GPIO_memory_t *) (GPIO_DATA)\
+};
 
 
-// ---------------------------------- GPIO functions ----------------------------------
+//--------------------------------------------------- General header ---------------------------------------------------
+
+//Now, include the port general header;
+#include <kernel/drivers/port.h>
+
+
+
+//--------------------------------------------------- GPIO Operations --------------------------------------------------
 
 /*
  * The software setter : no software process to do, all is supported by the hardware;

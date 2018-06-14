@@ -22,6 +22,15 @@
 #define TRACER_PORT_H
 
 /*
+ * The port general header. THIS FILE MUST NOT BE INCLUDED IN YOUR CODE
+ *
+ *  This file contains enums and struct typedefs for general PORT modules.
+ *
+ *  It must only be included in the PORT implementation's header, to provide definitions for general functions,
+ *  as it counts on previous definition of (for ex) the PORT_input_filter_data_t type, and provide definitions for
+ *  inline functions;
+ *
+ *
  * The port module manages the pins behaviour.
  *
  *  It manages :
@@ -31,18 +40,6 @@
  */
 
 #include "stdint.h"
-
-//#include <kernel/arch/arch.h>
-
-typedef struct {
-
-    //The port data pointer;
-    PORT_data_t *port_data;
-
-    //The pin index;
-    uint8_t pin_index;
-
-};
 
 /*
  * Types of interruptions;
@@ -227,17 +224,15 @@ typedef struct {
 } GPIO_output_registers_t;
 
 
-
-
 /*
  * ---------------------------- Configuration ----------------------------
  */
 
 //Get a pin's current configuration (avoid defaults mistakes);
-void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *);
+void PORT_get_pin_config(PORT_pin_t *pin, PORT_pin_config_t *);
 
 //Set a pin's configuration. Config might have been queried before with the function behind;
-void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *);
+void PORT_set_pin_configuration(PORT_pin_t *pin, PORT_pin_config_t *);
 
 
 /*
@@ -258,8 +253,9 @@ void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_
  *  This method is a bit heavy to setup, but guarantees the best optimisation, regarding the hardware abstraction;
  */
 
+
 //Get a GPIO pin's hardware registers. This function is used for the setup, and is not made to be fast or optimised;
-void PORT_get_GPIO_output_registers(PORT_data_t *port, GPIO_output_registers_t *);
+void PORT_get_GPIO_output_registers(PORT_t *port, GPIO_output_registers_t *);
 
 
 /*
@@ -267,18 +263,7 @@ void PORT_get_GPIO_output_registers(PORT_data_t *port, GPIO_output_registers_t *
  * GPIO inline functions in your PORT driver's header, and include it in your arch's header.
  *
  * To ease inter-compatibility, please use function signatures as listed below.
- *
-
-//Define the GPIO mask type to be of your register length;
-typedef x GPIO_mask_t;
-
-//Define GPIO hardware register;
-typedef volatile GPIO_mask_t *GPIO_hw_register;
-
-
-//Determine the mask from a bit index;
-static inline GPIO_mask_t GPIO_get_mask(uint8_t bit);
-
+ */
 
 // ---------------------------------- GPIO functions ----------------------------------
 
@@ -297,6 +282,5 @@ static inline void GPIO_clear_bits(volatile void *hw, GPIO_mask_t value);
 //The software bitwise toggler : no software process to do, all is supported by the hardware;
 static inline void GPIO_toggle_bits(volatile void * hw, GPIO_mask_t value);
 
-*/
 
 #endif //TRACER_PORT_H

@@ -19,8 +19,6 @@
 */
 
 
-#include <kernel/drivers/port.h>
-
 #include "kinetis_PORT.h"
 
 
@@ -76,7 +74,7 @@ PORT_interrupt_t IRQ_bits_to_type(uint8_t bits);
  * ------------------------------- Definitions -------------------------------
  */
 
-void PORT_get_GPIO_output_registers(PORT_data_t *port, GPIO_output_registers_t *registers) {
+void PORT_get_GPIO_output_registers(PORT_t *port, GPIO_output_registers_t *registers) {
 
     //Cache GPIO data pointer;
     volatile kinetis_GPIO_memory_t *const memory = port->GPIO_data;
@@ -171,7 +169,10 @@ PORT_interrupt_t IRQ_bits_to_type(uint8_t bits) {
  * PORT_get_pin_config : retrieves a pin's current configuration (avoid defaults mistakes);
  */
 
-void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *config) {
+void PORT_get_pin_config(PORT_pin_t *pin, PORT_pin_config_t *config) {
+
+    PORT_t *port = pin->port_data;
+    uint8_t bit = pin->bit_index;
 
     //Declare the configuration register to write; Set the flag bit to clear it by default;
     uint32_t config_register = port->PORT_data->PCR[bit];
@@ -282,7 +283,10 @@ void PORT_get_pin_config(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *conf
  *  An invalid configuration generates an error;
  */
 
-void PORT_set_pin_configuration(PORT_data_t *port, uint8_t bit, PORT_pin_config_t *config) {
+void PORT_set_pin_configuration(PORT_pin_t *pin, PORT_pin_config_t *config) {
+
+    PORT_t *port = pin->port_data;
+    uint8_t bit = pin->bit_index;
 
     //TODO ERRORS IN CASE OF BAD CONFIGURATION;
 

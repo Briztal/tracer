@@ -69,9 +69,6 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
 
 // --------------------------------------- ERROR HANDLING ---------------------------------------
 
-
-#include <kernel/drivers/port.h>
-
 #include <kernel/systick.h>
 
 void arch_handle_error(const char *msg) {
@@ -87,8 +84,14 @@ void arch_blink(uint16_t delay) {
     //Cache a pin configuration for pin C5 (LED);
     PORT_pin_config_t config;
 
+    //Cache the LED pin;
+    PORT_pin_t pin = {
+            .port_data = &PORT_C,
+            .bit_index = 5,
+    };
+
     //Get the current configuration;
-    PORT_get_pin_config(&PORT_C, 5, &config);
+    PORT_get_pin_config(&pin, &config);
 
     //Update the configuration for led blink
     config.mux_channel = 1;
@@ -96,7 +99,7 @@ void arch_blink(uint16_t delay) {
     config.output_mode = PORT_HIGH_DRIVE;
 
     //Update the configuration;
-    PORT_set_pin_configuration(&PORT_C, 5, &config);
+    PORT_set_pin_configuration(&pin, &config);
 
     //Create registers structs;
     GPIO_output_registers_t c_registers;
@@ -135,8 +138,14 @@ void arch_count(size_t count) {
     //Cache a pin configuration for pin C5 (LED);
     PORT_pin_config_t config;
 
+    //Cache the LED pin;
+    PORT_pin_t pin = {
+            .port_data = &PORT_C,
+            .bit_index = 5,
+    };
+
     //Get the current configuration;
-    PORT_get_pin_config(&PORT_C, 5, &config);
+    PORT_get_pin_config(&pin, &config);
 
     //Update the configuration for led blink
     config.mux_channel = 1;
@@ -144,7 +153,7 @@ void arch_count(size_t count) {
     config.output_mode = PORT_HIGH_DRIVE;
 
     //Update the configuration;
-    PORT_set_pin_configuration(&PORT_C, 5, &config);
+    PORT_set_pin_configuration(&pin, &config);
 
     //Create registers structs;
     GPIO_output_registers_t c_registers;

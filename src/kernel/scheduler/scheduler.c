@@ -185,11 +185,6 @@ void scheduler_stop() {
 
 }
 
-
-#include <kernel/drivers/port.h>
-#include <kernel/scheduler/tasks/stask.h>
-
-
 uint16_t gf = 1;
 volatile bool init = false;
 
@@ -205,8 +200,14 @@ void dumb_blink(void *unused) {
     //Cache a pin configuration for pin C5 (LED);
     PORT_pin_config_t config;
 
+    //Cache the LED pin;
+    PORT_pin_t pin = {
+            .port_data = &PORT_C,
+            .bit_index = 5,
+    };
+
     //Get the current configuration;
-    PORT_get_pin_config(&PORT_C, 5, &config);
+    PORT_get_pin_config(&pin, &config);
 
     //Update the configuration for led blink
     config.mux_channel = 1;
@@ -214,7 +215,7 @@ void dumb_blink(void *unused) {
     config.output_mode = PORT_HIGH_DRIVE;
 
     //Update the configuration;
-    PORT_set_pin_configuration(&PORT_C, 5, &config);
+    PORT_set_pin_configuration(&pin, &config);
 
     //Create registers structs;
     GPIO_output_registers_t c_registers;

@@ -166,8 +166,8 @@ inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)());
 
 inline size_t core_correct_size(size_t size) {
 	
-	//Set the two first bytes to zero to obtain a multiple of 4;
-	return size & ~(size_t)3;
+	//Set the two first bytes to zero to obtain a multiple of 8;
+	return size & ~(size_t)7;
 	
 }
 
