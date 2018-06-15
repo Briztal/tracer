@@ -257,7 +257,6 @@ void PORT_set_pin_configuration(PORT_pin_t *pin, PORT_pin_config_t *);
 //Get a GPIO pin's hardware registers. This function is used for the setup, and is not made to be fast or optimised;
 void PORT_get_GPIO_output_registers(PORT_t *port, GPIO_output_registers_t *);
 
-
 /*
  * GPIO functions are time critical, and so are inline. If your hardware supports GPIO action, you may define
  * GPIO inline functions in your PORT driver's header, and include it in your arch's header.
@@ -267,20 +266,23 @@ void PORT_get_GPIO_output_registers(PORT_t *port, GPIO_output_registers_t *);
 
 // ---------------------------------- GPIO functions ----------------------------------
 
+//Get a GPIO pin's mask;
+inline GPIO_mask_t GPIO_get_mask(PORT_pin_t *pin);
+
 //The software setter : no software process to do, all is supported by the hardware;
-static inline void GPIO_data(volatile void *hw, GPIO_mask_t value);
+inline void GPIO_data(volatile void *hw, GPIO_mask_t value);
 
 
 //The software bitwise setter : no software process to do, all is supported by the hardware;
-static inline void GPIO_set_bits(volatile void *hw, GPIO_mask_t value);
+inline void GPIO_set_bits(volatile void *hw, GPIO_mask_t value);
 
 
 //The software bitwise clearer : no software process to do, all is supported by the hardware;
-static inline void GPIO_clear_bits(volatile void *hw, GPIO_mask_t value);
+inline void GPIO_clear_bits(volatile void *hw, GPIO_mask_t value);
 
 
 //The software bitwise toggler : no software process to do, all is supported by the hardware;
-static inline void GPIO_toggle_bits(volatile void * hw, GPIO_mask_t value);
+inline void GPIO_toggle_bits(volatile void * hw, GPIO_mask_t value);
 
 
 #endif //TRACER_PORT_H

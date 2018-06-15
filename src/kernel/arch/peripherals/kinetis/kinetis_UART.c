@@ -244,7 +244,7 @@ void initialise_hardware(const kinetis_UART_data_t *const data) {
 
 
     //Cache the status interrupt index;
-    const uint8_t status_id = data->status_interrupt_id;
+    const uint8_t status_id = data->status_int_channel;
 
     //Set the status interrupt priority;
     core_IC_set_priority(status_id, DRIVER_STARUS_INTERRUPT_PRIORITY);
@@ -276,7 +276,7 @@ void initialise_hardware(const kinetis_UART_data_t *const data) {
 
 
     //Cache the error interrupt index;
-    const uint8_t error_id = data->error_interrupt_id;
+    const uint8_t error_id = data->error_int_channel;
 
     //Set the error interrupt priority;
     core_IC_set_priority(error_id, DRIVER_ERROR_INTERRUPT_PRIORITY);
@@ -516,10 +516,10 @@ void kinetis_UART_start(const void *const data_p) {
     kinetis_UART_memory_t *registers = data->memory;
 
     //Enable the status interrupt;
-    core_IC_enable(data->status_interrupt_id);
+    core_IC_enable(data->status_int_channel);
 
     //Enable the error interrupt;
-    core_IC_enable(data->error_interrupt_id);
+    core_IC_enable(data->error_int_channel);
 
     //Set bit RE of C2;
     SET(registers->C2, UART_C2_RE, 8);
@@ -563,10 +563,10 @@ void kinetis_UART_exit(const void *const data_p) {
     registers->RWFIFO = 1;
 
     //Disable the status interrupt;
-    core_IC_disable(data->status_interrupt_id);
+    core_IC_disable(data->status_int_channel);
 
     //Disable the status interrupt;
-    core_IC_disable(data->error_interrupt_id);
+    core_IC_disable(data->error_int_channel);
     /*
      * Errors supported are :
      *  - framing errors (locking) - read and forget last element;

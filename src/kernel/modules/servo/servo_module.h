@@ -30,6 +30,7 @@
 #include <kernel/drivers/timer.h>
 
 #include <data_structures/containers/llist.h>
+#include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
 
 //--------------------------------------------------- Public structs ---------------------------------------------------
 
@@ -38,7 +39,14 @@ typedef struct {
     //Servo channels are stored in linked lists;
     linked_element_t link;
 
-    //TODO PIN;
+    //The register to use for setting the pin;
+    volatile void *pin_set_register;
+
+    //The register to use for clearing the pin;
+    volatile void *pin_clear_register;
+
+    //The mask to use for GPIO manipulation;
+    GPIO_mask_t pin_mask;
 
     //The minimal value of the chanel;
     float value_min;
@@ -61,7 +69,7 @@ typedef struct {
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
 
 //Start the servo controller; Must provide a us based timer with an ovf interrupt capability;
-void servo_module_init(timer_ovf_int_t *us_timer, float period_us);
+void servo_module_init(timer_base_t *us_timer, float period_us);
 
 //Stop the servo controller;
 void servo_module_exit();
@@ -73,7 +81,8 @@ void servo_module_exit();
 void servo_module_set_period(float new_period);
 
 //Add a channel to the servo controller;
-servo_channel_t *servo_module_add_channel(float value_min, float value_max, uint16_t impulse_min, uint16_t impulse_max);
+servo_channel_t *
+servo_module_add_channel(PORT_pin_t *initialised_pin, float value_min, float value_max, uint16_t impulse_min, uint16_t impulse_max);
 
 //Remove a channel from the servo controller;
 void servo_module_remove_channel(servo_channel_t *channel);

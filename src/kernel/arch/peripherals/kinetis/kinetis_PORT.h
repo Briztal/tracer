@@ -175,6 +175,15 @@ PORT_t PORT_##id = {\
 //--------------------------------------------------- GPIO Operations --------------------------------------------------
 
 /*
+ * GPIO_get_mask : determines the mask for the appropriate pin;
+ */
+
+inline GPIO_mask_t GPIO_get_mask(PORT_pin_t *pin) {
+	return (GPIO_mask_t)1 << pin->bit_index;
+}
+
+
+/*
  * The software setter : no software process to do, all is supported by the hardware;
  */
 

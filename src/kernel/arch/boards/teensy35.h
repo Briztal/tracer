@@ -52,13 +52,26 @@ KINETIS_PORT_DECLARE(E);
 
 
 /*
- * --------------------------------------- UARTS ---------------------------------------
+ * --------------------------------------- PIT ---------------------------------------
+ */
+
+//To define PITs, we will use the kinetis PIT module;
+#include <kernel/arch/peripherals/kinetis/kinetis_PIT.h>
+
+//The teensy35 supports 4 PITs;
+KINETIS_PIT_DECLARE(0);
+KINETIS_PIT_DECLARE(1);
+KINETIS_PIT_DECLARE(2);
+KINETIS_PIT_DECLARE(3);
+
+/*
+ * --------------------------------------- UART ---------------------------------------
  */
 
 //To define UART drivers we must include the UART driver header;
 #include <kernel/drivers/UART.h>
 
-//The teensy35 supports 5 UARTS;
+//The teensy35 supports 6 UARTS;
 KINETIS_UART_DECLARE(0);
 KINETIS_UART_DECLARE(1);
 KINETIS_UART_DECLARE(2);

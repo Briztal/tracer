@@ -96,7 +96,7 @@ typedef struct __attribute__ ((packed)) {
  * Then, we define the UART data structure, that will contain a memory map, and a set of hardware constants;
  */
 
-typedef struct {
+typedef struct __attribute__ ((packed)) {
 
     //The memory struct;
     kinetis_UART_memory_t *const memory;
@@ -104,11 +104,11 @@ typedef struct {
     //The clock frequency;
     const uint32_t clockFrequency;
 
-    //The status interrupt index;
-    const uint8_t status_interrupt_id;
+    //The status interrupt channel;
+    const uint8_t status_int_channel;
 
-    //The error interrupt index;
-    const uint8_t error_interrupt_id;
+    //The error interrupt channel;
+    const uint8_t error_int_channel;
 
     //The status interrupt function;
     void (*const status_interrupt_function)(void);
@@ -244,8 +244,8 @@ typedef enum {
     .clockFrequency = (clock_f),\
     .rx_size = (rsize),\
     .tx_size = (tsize), \
-    .status_interrupt_id = (status_int_id),\
-    .error_interrupt_id = (error_int_id),\
+    .status_int_channel = (status_int_id),\
+    .error_int_channel = (error_int_id),\
     .status_interrupt_function = (status_int_f),\
     .error_interrupt_function = (error_int_f),\
     .rx_water_function = 0,\

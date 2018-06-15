@@ -25,20 +25,20 @@
 /*
  * --------------------------------------- PORT ---------------------------------------
  */
+
 //TODO PJRC TRIBUTE
 
 //Define port structs addresses;
-#define PORT_A_DATA     (volatile uint32_t *)0x40049000
-#define PORT_B_DATA     (volatile uint32_t *)0x4004A000
-#define PORT_C_DATA     (volatile uint32_t *)0x4004B000
-#define PORT_D_DATA     (volatile uint32_t *)0x4004C000
-#define PORT_E_DATA     (volatile uint32_t *)0x4004D000
-#define GPIO_A_DATA     (volatile uint32_t *)0x400FF000
-#define GPIO_B_DATA     (volatile uint32_t *)0x400FF040
-#define GPIO_C_DATA     (volatile uint32_t *)0x400FF080
-#define GPIO_D_DATA     (volatile uint32_t *)0x400FF0C0
-#define GPIO_E_DATA     (volatile uint32_t *)0x400FF100
-
+#define PORT_A_DATA	(volatile uint32_t *)0x40049000
+#define PORT_B_DATA	(volatile uint32_t *)0x4004A000
+#define PORT_C_DATA	(volatile uint32_t *)0x4004B000
+#define PORT_D_DATA	(volatile uint32_t *)0x4004C000
+#define PORT_E_DATA	(volatile uint32_t *)0x4004D000
+#define GPIO_A_DATA	(volatile uint32_t *)0x400FF000
+#define GPIO_B_DATA	(volatile uint32_t *)0x400FF040
+#define GPIO_C_DATA	(volatile uint32_t *)0x400FF080
+#define GPIO_D_DATA	(volatile uint32_t *)0x400FF0C0
+#define GPIO_E_DATA	(volatile uint32_t *)0x400FF100
 
 //Define ports;
 KINETIS_PORT_DEFINE(A, PORT_A_DATA, GPIO_A_DATA);
@@ -49,13 +49,24 @@ KINETIS_PORT_DEFINE(E, PORT_E_DATA, GPIO_E_DATA);
 
 
 /*
- * --------------------------------------- UARTS ---------------------------------------
+ * --------------------------------------- PIT ---------------------------------------
+ */
+
+//The teensy35 supports 4 PITs.
+KINETIS_PIT_DEFINE(0, 0x40037100, IRQ_PIT_CH0, F_BUS)
+KINETIS_PIT_DEFINE(1, 0x40037110, IRQ_PIT_CH1, F_BUS)
+KINETIS_PIT_DEFINE(2, 0x40037120, IRQ_PIT_CH2, F_BUS)
+KINETIS_PIT_DEFINE(3, 0x40037130, IRQ_PIT_CH3, F_BUS)
+
+
+/*
+ * --------------------------------------- UART ---------------------------------------
  */
 
 //Include the kinetis driver header;
 #include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
 
-//The teensy35 supports 5 UARTS;
+//The teensy35 supports 6 UARTS;
 KINETIS_UART_DEFINE(0, 0x4006A000, F_CPU, 8, 8, IRQ_UART0_STATUS, IRQ_UART0_ERROR)
 
 /*
@@ -74,7 +85,9 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
 void arch_handle_error(const char *msg) {
 
     arch_blink(50);
+
 }
+
 
 //Notify that an error occurred;
 void arch_blink(uint16_t delay) {
@@ -133,6 +146,7 @@ void arch_blink(uint16_t delay) {
 //Notify that an error occurred;
 void arch_count(size_t count) {
 
+    //Enable all interrupts;
     core_enable_interrupts();
 
     //Cache a pin configuration for pin C5 (LED);

@@ -127,6 +127,10 @@ void core_systick_init() {
 }
 
 
+//------------------------------- IC -------------------------------
+
+//The default interrupt handler;
+void CORE_IC_default_handler(void) {}
 
 //------------------------------- Preemtion -------------------------------
 
@@ -160,6 +164,13 @@ void core_preemption_init() {
 
 void core_preemption() {
 
+	/*
+	 * This function happens in an interrupt basis. Will not happen during a critical section.
+	 * Ints can be safely disabled;
+	 */
+
+	//Disable all interrupts during context switching;
+	__asm__ __volatile__("cpsid i");
 
     //As R0 is already saved in memory, we can use it;
     __asm__ __volatile__ (\
@@ -178,12 +189,21 @@ void core_preemption() {
     //Execute an ISB;
     __asm__ __volatile__ ("ISB");
 
-    //Provide the old stack and get a new one;
+	//Re-enable interrupts;
+	__asm__ __volatile__("cpsie i");
+
+
+	//Provide the old stack and get a new one;
     process_stack_provider(core_process);
 
     //Update the process duration;
     systick_set_process_duration(core_process->activity_time);
 
+
+	//Disable all interrupts during context switching;
+	__asm__ __volatile__("cpsid i");
+
+	//Update the PSP;
     __asm__ __volatile__ (\
             "msr psp, %0"::"r" (core_process->process_stack->stack_pointer)
     );
@@ -200,6 +220,9 @@ void core_preemption() {
 
     //Execute an ISB;
     __asm__ __volatile__ ("ISB");
+
+	//Re-enable interrupts;
+	__asm__ __volatile__("cpsie i");
 
 
 }
@@ -314,6 +337,9 @@ void core_execute_process(core_process_t *process, void (*function)(void *), voi
 		return;
 	}
 
+	//Process interruption is critical;
+	kernel_enter_critical_section();
+
 	//As this function contains a context switch, we will copy our args in static variables;
 	static void (*volatile sf)(void *volatile);
 	static void *volatile sa;
@@ -352,6 +378,9 @@ void core_execute_process(core_process_t *process, void (*function)(void *), voi
 
 	//Execute an ISB;
     __asm__ __volatile__ ("ISB");
+
+	//Leave the critical section;
+	kernel_leave_critical_section();
 
 	//Execute the cached function with the cached arg;
 	(*sf)(sa);

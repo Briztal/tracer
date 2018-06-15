@@ -18,11 +18,13 @@
 
 */
 
-#include "servo.h"
+#include "servo_module.h"
 
 #include <kernel/kernel.h>
 #include <kernel/drivers/timer.h>
 #include <data_structures/containers/llist.h>
+#include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
+#include <kernel/drivers/port.h>
 
 
 //--------------------------------------------------- Private structs --------------------------------------------------
@@ -30,7 +32,7 @@
 typedef struct {
 
     //The microsecond based timer used by the controller;
-    timer_ovf_int_t *us_timer;
+    timer_base_t *us_timer;
 
     //The list of started channels;
     linked_list_t enabled_channels;
@@ -97,11 +99,8 @@ void servo_service_start(servo_controller_t *);
 //Stop the timer routine;
 void servo_service_stop(servo_controller_t *);
 
-
 //The interrupt function;
 void servo_isr_handler();
-
-//TODO PINMODES
 
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
@@ -110,7 +109,7 @@ void servo_isr_handler();
  * servo_module_init : initialises the servo controller; Must provide a us based timer with an ovf interrupt capability;
  */
 
-void servo_module_init(timer_ovf_int_t *const us_timer, const float period_us) {
+void servo_module_init(timer_base_t *const us_timer, const float period_us) {
 
     //Cache the controller;
     servo_controller_t *controller = &servo_controller;
@@ -156,7 +155,7 @@ void servo_module_exit() {
     }
 
     //De initialise the timer;
-    timer_ovf_int_exit(controller->us_timer);
+    timer_exit(controller->us_timer);
 
     //Mark the controller de-initialised and stopped;
     controller->initialised = controller->started = false;
@@ -253,14 +252,17 @@ float servo_check_duration(const linked_list_t *const channels) {
 
     }
 
+	//Return the total duration;
+	return duration;
+
 }
 
 /* 
- * servo_module_add_channel : adds a channel to the servo controller;
+ * servo_module_add_channel : adds a channel to the servo controller; The pin must have been properly initialised;
  */
 
-servo_channel_t *
-servo_module_add_channel(const float value_min, const float value_max, const uint16_t impulse_min, const uint16_t impulse_max) {
+servo_channel_t *servo_module_add_channel(PORT_pin_t *initialised_pin, const float value_min, const float value_max,
+                         const uint16_t impulse_min, const uint16_t impulse_max) {
 
     //Cache the servo controller pointer;
     servo_controller_t *controller = &servo_controller;
@@ -297,10 +299,21 @@ servo_module_add_channel(const float value_min, const float value_max, const uin
 
     }
 
+    //Create registers structs;
+    GPIO_output_registers_t GPIO_regs;
+
+    //Get GPIO output registers for provided port;
+    PORT_get_GPIO_output_registers(initialised_pin->port_data, &GPIO_regs);
+
+    //Create the bitmask for C5;
+    GPIO_mask_t mask = GPIO_get_mask(initialised_pin);
+
     //Create the servo channel initializer;
     servo_channel_t init = {
             .link = EMPTY_LINKED_ELEMENT(),
-            //TODO PIN;
+            .pin_set_register = GPIO_regs.data_register,
+            .pin_clear_register = GPIO_regs.data_register,
+            .pin_mask = mask,
             .value_min = value_min,
             .value_max = value_max,
             .impulse_min = impulse_min,
@@ -308,14 +321,14 @@ servo_module_add_channel(const float value_min, const float value_max, const uin
             .impulse_duration = 0,//Stopped -> duration of 0;
     };
 
-    //TODO PIN INIT
-
     //Create the servo channel in the kernel heap;
     servo_channel_t *channel = kernel_malloc_copy(sizeof(servo_channel_t), &init);
 
     //Add the channel at the end of the stopped list;
     llist_insert_last(&controller->disabled_channels, (linked_element_t *) channel);
 
+	//Return the channel;
+	return channel;
 }
 
 
@@ -343,8 +356,6 @@ void servo_module_remove_channel(servo_channel_t *const channel) {
         kernel_error("servo.c : servo_module_add_channel : the servo controller is currently started;");
 
     }
-
-    //TODO PIN DEINIT
 
     //If the channel is in the started list (impulse not null) :
     if (channel->impulse_duration) {
@@ -397,13 +408,13 @@ void servo_module_set_channel_value(servo_channel_t *const channel, float value)
     //Access to channels is servo-critical;
 
     //Cache the timer;
-    timer_ovf_int_t *timer = controller->us_timer;
+    timer_base_t *timer = controller->us_timer;
 
     //If the module is enabled :
     if (controller->started) {
 
         //Enter the servo-critical section
-        timer_interrupt_disable(&timer->ovf_interrupt);
+        timer_interrupt_disable(&timer->reload_interrupt);
 
     }
 
@@ -447,7 +458,7 @@ void servo_module_set_channel_value(servo_channel_t *const channel, float value)
     if (controller->started) {
 
         //Leave the servo-critical section
-        timer_interrupt_disable(&timer->ovf_interrupt);
+        timer_interrupt_disable(&timer->reload_interrupt);
 
     }
 
@@ -470,13 +481,13 @@ void servo_module_disable_channel(servo_channel_t *const channel) {
     //Access to channels is servo-critical;
 
     //Cache the timer;
-    timer_ovf_int_t *timer = controller->us_timer;
+    timer_base_t *timer = controller->us_timer;
 
     //If the module is enabled :
     if (controller->started) {
 
         //Enter the servo-critical section
-        timer_interrupt_disable(&timer->ovf_interrupt);
+        timer_interrupt_disable(&timer->reload_interrupt);
 
     }
 
@@ -490,7 +501,7 @@ void servo_module_disable_channel(servo_channel_t *const channel) {
     if (controller->started) {
 
         //Leave the servo-critical section
-        timer_interrupt_disable(&timer->ovf_interrupt);
+        timer_interrupt_disable(&timer->reload_interrupt);
 
     }
 
@@ -501,7 +512,8 @@ void servo_module_disable_channel(servo_channel_t *const channel) {
  * servo_enable_channel : enables a channel. Private method, no critical check is made;
  */
 
-void servo_enable_channel(servo_controller_t *const controller, servo_channel_t *const channel, const float impulse_duration) {
+void servo_enable_channel(servo_controller_t *const controller, servo_channel_t *const channel,
+                          const float impulse_duration) {
 
     //Update the channel's duration;
     channel->impulse_duration = impulse_duration;
@@ -531,22 +543,6 @@ void servo_enable_channel(servo_controller_t *const controller, servo_channel_t 
 
 void servo_disable_channel(servo_controller_t *controller, servo_channel_t *channel) {
 
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-    //TODO GPIO
-
     //Reset the channel's duration;
     channel->impulse_duration = 0;
 
@@ -554,7 +550,7 @@ void servo_disable_channel(servo_controller_t *controller, servo_channel_t *chan
     if (channel == controller->active_channel) {
 
         //Disable its line;
-        //TODO PIN DISABLE;
+        GPIO_clear_bits(channel->pin_clear_register, channel->pin_mask);
 
         //Update the channel;
         controller->active_channel = (const servo_channel_t *) ((linked_element_t *) channel)->prev;
@@ -627,10 +623,10 @@ void servo_service_start(servo_controller_t *const controller) {
     controller->active_channel = 0;
 
     //Cache the timer;
-    timer_ovf_int_t *timer = controller->us_timer;
+    timer_base_t *timer = controller->us_timer;
 
     //Set the interrupt function;
-    timer_interrupt_set_handler(&timer->ovf_interrupt, servo_isr_handler);
+    timer_interrupt_set_handler(&timer->reload_interrupt, servo_isr_handler);
 
     //Start the timer;
     timer_start_timer((const timer_base_t *) timer);
@@ -674,10 +670,10 @@ void servo_isr_handler() {
     servo_controller_t *const controller = &servo_controller;
 
     //Cache the servo timer pointer;
-    const timer_ovf_int_t *const timer = controller->us_timer;
+    const timer_base_t *const timer = controller->us_timer;
 
     //Prevent the handler from being called again;;
-    timer_interrupt_disable(&timer->ovf_interrupt);
+    timer_interrupt_disable(&timer->reload_interrupt);
 
     //Cache the previously set channel;
     const servo_channel_t *active_channel = controller->active_channel;
@@ -686,7 +682,7 @@ void servo_isr_handler() {
     if (active_channel) {
 
         //Disable the channel
-        //TODO PIN DISABLE;
+        GPIO_clear_bits(active_channel->pin_clear_register, active_channel->pin_mask);
 
         //Update the active channel;
         active_channel = (servo_channel_t *) ((linked_element_t *) active_channel)->next;
@@ -705,7 +701,7 @@ void servo_isr_handler() {
         controller->active_channel = 0;
 
         //Stop the timer;
-        timer_stop_timer((const timer_base_t *) timer);
+        timer_stop_timer(timer);
 
         //Complete, as the interrupt is disabled;
         return;
@@ -715,15 +711,16 @@ void servo_isr_handler() {
     //If the newly active channel exists :
     if (active_channel) {
 
-        //TODO PIN ENABLE;
+        //Disable the channel
+        GPIO_set_bits(active_channel->pin_set_register, active_channel->pin_mask);
 
         //Set the new period;
-        timer_set_period((const timer_base_t *const) timer, active_channel->impulse_duration);
+        timer_set_period(timer, active_channel->impulse_duration);
 
     } else {
 
         //Set the new period;
-        timer_set_period((const timer_base_t *const) timer, controller->complement);
+        timer_set_period(timer, controller->complement);
 
     }
 
@@ -731,6 +728,6 @@ void servo_isr_handler() {
     controller->active_channel = active_channel;
 
     //Enable the servo interrupt;
-    timer_interrupt_enable(&timer->ovf_interrupt);
+    timer_interrupt_enable(&timer->reload_interrupt);
 
 }

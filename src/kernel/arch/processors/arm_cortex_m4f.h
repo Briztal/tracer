@@ -65,7 +65,6 @@ typedef struct {
 } core_process_t;
 
 
-
 //-------------------------------------- Init --------------------------------------
 
 //Initialise the core;
@@ -130,6 +129,9 @@ inline bool core_in_handler_mode();
 #define DRIVER_ERROR_INTERRUPT_PRIORITY 16
 
 
+//The default interrupt handler;
+void CORE_IC_default_handler(void);
+
 //Enable all interrupts;
 inline void core_enable_interrupts();
 
@@ -138,22 +140,30 @@ inline void core_disable_interrupts();
 
 
 //Enable the specified interrupt;
-inline void core_IC_enable(uint8_t interrupt_index);
+inline void core_IC_enable(uint8_t int_channel);
 
 //Disable the specified interrupt
-inline void core_IC_disable(uint8_t interrupt_index); 
+inline void core_IC_disable(uint8_t int_channel);
 
 //Mark the interrupt pending. Will be executed asap;
-inline void core_IC_set_pending(uint8_t interrupt_index);
+inline void core_IC_set_pending(uint8_t int_channel);
   
 //Mark the interrupt as not pending;
-inline void core_IC_clear_pending(uint8_t interrupt_index);
+inline void core_IC_clear_pending(uint8_t int_channel);
 
 //Set the priority of the required interrupt to the povided;
-inline void core_IC_set_priority(uint8_t interrupt_index, uint8_t priority); 
+inline void core_IC_set_priority(uint8_t int_channel, uint8_t priority);
 
 //Set the handler of the required interrupt;
-inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)());
+inline void core_IC_set_handler(uint8_t int_channel, void (*handler)());
+
+//Set the default handler for the required interrupt;
+inline void core_IC_set_default_handler(uint8_t int_channel);
+
+//Set the handler of the required interrupt;
+inline void *core_IC_get_handler_address(uint8_t int_channel);
+
+
 
 
 /*
@@ -191,7 +201,7 @@ inline void *core_get_stack_begin(void *allocated_pointer, size_t size) {
  *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
  */
 
-inline void *core_get_stack_end(void *allocated_pointer, size_t size) {
+inline void *core_get_stack_end(void *allocated_pointer, size_t unused) {
 	return  allocated_pointer;
 }
 
@@ -255,8 +265,8 @@ inline void core_disable_interrupts() {
  * core_IC_enable : enables the specified interrupt;
  */
 
-inline void core_IC_enable(uint8_t interrupt_index) {
-    NVIC_ENABLE_IRQ(interrupt_index);
+inline void core_IC_enable(const uint8_t int_channel) {
+    NVIC_ENABLE_IRQ(int_channel);
 }
 
 
@@ -264,8 +274,8 @@ inline void core_IC_enable(uint8_t interrupt_index) {
  * core_IC_disable : disables the specified interrupt;
  */
 
-inline void core_IC_disable(uint8_t interrupt_index) {
-    NVIC_DISABLE_IRQ(interrupt_index);
+inline void core_IC_disable(const uint8_t int_channel) {
+    NVIC_DISABLE_IRQ(int_channel);
 }
 
 
@@ -273,8 +283,8 @@ inline void core_IC_disable(uint8_t interrupt_index) {
  * core_IC_set_pending : marks the interrupt as pending. Will be executed asap;
  */
 
-inline void core_IC_set_pending(uint8_t interrupt_index) {
-    NVIC_SET_PENDING(interrupt_index);
+inline void core_IC_set_pending(const uint8_t int_channel) {
+    NVIC_SET_PENDING(int_channel);
 }
 
 
@@ -282,8 +292,8 @@ inline void core_IC_set_pending(uint8_t interrupt_index) {
  * core_IC_clear_pending :  marks the interrupt as not pending;
  */
 
-inline void core_IC_clear_pending(uint8_t interrupt_index) {
-    NVIC_CLEAR_PENDING(interrupt_index);
+inline void core_IC_clear_pending(const uint8_t int_channel) {
+    NVIC_CLEAR_PENDING(int_channel);
 }
 
 
@@ -291,8 +301,8 @@ inline void core_IC_clear_pending(uint8_t interrupt_index) {
  * core_IC_set_priority : sets the priority of the required interrupt to the povided;
  */
 
-inline void core_IC_set_priority(uint8_t interrupt_index, uint8_t priority) {
-    NVIC_SET_PRIORITY(interrupt_index, priority);
+inline void core_IC_set_priority(const uint8_t int_channel, uint8_t priority) {
+    NVIC_SET_PRIORITY(int_channel, priority);
 }
 
 
@@ -300,9 +310,34 @@ inline void core_IC_set_priority(uint8_t interrupt_index, uint8_t priority) {
  * core_IC_set_handler : sets the handler of the required interrupt;
  */
 
-inline void core_IC_set_handler(uint8_t interrupt_index, void (*handler)()) {
-    _VectorsRam[16 + (interrupt_index)] = handler;
+inline void core_IC_set_handler(const uint8_t int_channel, void (*handler)()) {
+    _VectorsRam[16 + int_channel] = handler;
 }
+
+
+/*
+ * core_IC_set_default_handler : sets the default handler of the required interrupt;
+ */
+
+inline void core_IC_set_default_handler(const uint8_t int_channel) {
+
+	//Set the default handler for the required channel;
+	core_IC_set_handler(int_channel, &CORE_IC_default_handler);
+
+}
+
+
+/*
+ * core_IC_get_handler_address : sets the handler of the required interrupt;
+ */
+
+inline void *core_IC_get_handler_address(const uint8_t int_channel) {
+
+	//Return the appropriate address of the handler array;
+	return _VectorsRam + 16 + int_channel;
+
+}
+
 
 
 #endif
