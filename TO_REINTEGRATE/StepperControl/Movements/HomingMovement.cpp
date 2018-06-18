@@ -44,23 +44,23 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
     //Wait for movement to be finished;
     while (MovementCoordinator::started());
 
-    //Reserve the usage of the steppers routine
+    //Reserve the usage of the trajectory_control routine
     MovementCoordinator::reserve();
 
 
     /*
      * Delays update :
      *
-     * The sleep for a steppers simply corresponds to its max jerk;
+     * The sleep for a trajectory_control simply corresponds to its max jerk;
      */
 
-    //For each steppers :
+    //For each trajectory_control :
     for (int axis = 0; axis < NB_STEPPERS; axis++) {
 
-        //Cache the appropriate steppers data;
+        //Cache the appropriate trajectory_control data;
         stepper_data_t *data = SteppersData::steppers_data + axis;
 
-        //Set the sleep for the i-th steppers
+        //Set the sleep for the i-th trajectory_control
         delays[axis] = (uint32_t) (1000000 / (data->jerk * data->steps_per_unit));
     }
 
@@ -86,10 +86,10 @@ void HomingMovement::prepare_movement(sig_t reset, uint8_t *endstops, sig_t dire
      * Steppers config :
      */
 
-    //Set the steppers directions;
+    //Set the trajectory_control directions;
     Steppers::set_directions(directions);
 
-    //Enable all steppers
+    //Enable all trajectory_control
     Steppers::enable(255);
 
 }
@@ -133,7 +133,7 @@ uint8_t HomingMovement::cardinal(sig_t signature) {
 
 void HomingMovement::phase_1() {
 
-    //Disable the steppers interrupt for safety;
+    //Disable the trajectory_control interrupt for safety;
     disable_stepper_interrupt();
 
     //Step;
@@ -156,7 +156,7 @@ void HomingMovement::phase_1() {
 
     }
 
-    //If steppers still need to move;
+    //If trajectory_control still need to move;
     if (movement_signature) {
 
         //Re-schedule the phase 1;
@@ -166,7 +166,7 @@ void HomingMovement::phase_1() {
 
         return;
         /*
-        //If steppers still need to move;
+        //If trajectory_control still need to move;
 
         //Schedule the phase 1;
         set_stepper_int_function(phase_2);
@@ -193,7 +193,7 @@ float HomingMovement::get_movement_delay(sig_t signature, const float *const del
     //For each axis :
     for (uint8_t axis = 0; axis < NB_STEPPERS; axis++) {
 
-        //If the steppers must move :
+        //If the trajectory_control must move :
         if (signature & (uint32_t) 1) {
 
             //Cache the sleep for the current axis;
@@ -230,13 +230,13 @@ sig_t HomingMovement::read_endstops() {
     //For every axis to reset :
     for (uint8_t i = 0; i < nb_axis; i++) {
 
-        //Get the index of the steppers assigned to the current steppers;
+        //Get the index of the trajectory_control assigned to the current trajectory_control;
         uint8_t index = endstops_indices[i];
 
-        //If the bit at positon [index] is reset (if the [i-th] steppers must still move) :
+        //If the bit at positon [index] is reset (if the [i-th] trajectory_control must still move) :
         if (!(endstops_signature & (1 << index))) {
 
-            //Set the [i]-th bit in the movement signature, so that steppers [i] keeps moving;
+            //Set the [i]-th bit in the movement signature, so that trajectory_control [i] keeps moving;
             movement_signature |= (1 << i);
 
         }

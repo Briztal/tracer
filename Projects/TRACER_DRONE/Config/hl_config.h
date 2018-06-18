@@ -67,7 +67,7 @@
  *      the module name and the timer index.
  *
  *  Module names are :
- *      - steppers for the steppers module;
+ *      - trajectory_control for the trajectory_control module;
  *      - servo for the servo module;
  *      - loop_i for the i-th control loop of the control-loops module;
 

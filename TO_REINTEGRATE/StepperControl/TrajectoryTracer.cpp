@@ -141,7 +141,7 @@ void TrajectoryTracer::start() {
     if (started)
         return;
 
-    //For safety, disable the steppers interrupt;
+    //For safety, disable the trajectory_control interrupt;
     MovementCoordinator::disable_interrupt();
 
     if (!movement_data_queue.available_objects()) {
@@ -157,7 +157,7 @@ void TrajectoryTracer::start() {
 
     Kinematics::start_tracing_procedure();
 
-    //Enable all steppers;
+    //Enable all trajectory_control;
     Steppers::enable();
 
     //Initialise the end booleans;
@@ -177,7 +177,7 @@ void TrajectoryTracer::start() {
     MovementCoordinator::set_interrupt_period((uint32_t) delay_us);
     MovementCoordinator::set_interrupt_function(prepare_next_sub_movement);
 
-    //Reserve the usage of the steppers routine
+    //Reserve the usage of the trajectory_control routine
     MovementCoordinator::reserve();
 
     //Mark the movement procedure as started;
@@ -210,7 +210,7 @@ void TrajectoryTracer::stop() {
     //Enable the movement enqueuing;
     movement_queue_lock_flag = false;
 
-    //Display the steppers position;
+    //Display the trajectory_control position;
     Steppers::send_position();
 
     //Notify that the movement is stopped;
@@ -684,13 +684,13 @@ void TrajectoryTracer::prepare_first_sub_movement() {
 
 void TrajectoryTracer::prepare_next_sub_movement() {
 
-    //Disable the steppers interrupt for preventing infinite call (causes stack overflow);
+    //Disable the trajectory_control interrupt for preventing infinite call (causes stack overflow);
     MovementCoordinator::disable_interrupt();
 
     //-------------------Initialisation-------------------
 
     //update the current movement data, and get the correct signature container for the current sub_movement;
-    //3us 4 steppers, 8us 17 steppers : 1.5 us + 0.37us per steppers
+    //3us 4 trajectory_control, 8us 17 trajectory_control : 1.5 us + 0.37us per trajectory_control
     sig_t *step_signatures = initialise_sub_movement();
 
     //Step 1 : Get a new position to reach
@@ -768,14 +768,14 @@ void TrajectoryTracer::prepare_next_sub_movement() {
     //Set the light interrupt function to give time_us to background processes;
     MovementCoordinator::set_interrupt_function(finish_sub_movement);
 
-    //Re-enable the steppers interrupt :
+    //Re-enable the trajectory_control interrupt :
     MovementCoordinator::enable_interrupt();
 
 }
 
 
 /*
- * initialise_sub_movement : sets the step_period_us, the trajectory index, the steppers directions
+ * initialise_sub_movement : sets the step_period_us, the trajectory index, the trajectory_control directions
  *      and returns the pointer to the elementary signatures processed before
  */
 
@@ -900,7 +900,7 @@ int k2_position_indice = 4;
  *
  * finish_sub_movement : this function is called repeatedly when the next sub_movement has been fully planned.
  *
- *  The only thing it does is stepping steppers according to the current sub_movement signatures, and end
+ *  The only thing it does is stepping trajectory_control according to the current sub_movement signatures, and end
  *      to leave time for background tasks.
  *
  *  If the current sub_movement is finished, then it programs the processing of the next sub_movement.
@@ -909,7 +909,7 @@ int k2_position_indice = 4;
 
 void TrajectoryTracer::finish_sub_movement() {
 
-    //Disable the steppers interrupt for preventing infinite call (causes stack overflow);
+    //Disable the trajectory_control interrupt for preventing infinite call (causes stack overflow);
     MovementCoordinator::disable_interrupt();
 
     //Get the correct signature;

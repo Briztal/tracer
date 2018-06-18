@@ -26,7 +26,7 @@
 
 #ifdef ENABLE_STEPPER_CONTROL
 
-//The steppers data structure : contains all data related to a steppers motor
+//The trajectory_control data structure : contains all data related to a trajectory_control motor
 struct stepper_data_t {
     float steps_per_unit;
     float maximum_speed;
@@ -45,7 +45,7 @@ public:
     //Reset data to its default value;
     static void reset_data();
 
-    //The steppers data array;
+    //The trajectory_control data array;
     static stepper_data_t *const steppers_data;
 
     static void EEPROM_registration();

@@ -115,7 +115,7 @@ void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement
     const float beginning = current_movement->beginning;
     const float beginning_increment = current_movement->beginning_increment;
 
-    //Declare an array that will contain the steppers positions;
+    //Declare an array that will contain the trajectory_control positions;
     float stepper_positions[NB_STEPPERS];
 
     //Cache for the current movement's trajectory function;
@@ -128,8 +128,8 @@ void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement
     int32_t *jerk_pos = previous_movement->jerk_position;
 
     //Convert to int32_t;
-    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
-        jerk_pos[steppers] = (int32_t) stepper_positions[steppers];
+    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
+        jerk_pos[trajectory_control] = (int32_t) stepper_positions[trajectory_control];
     }
 
     //We need an array to contain the jerk distances.
@@ -167,14 +167,14 @@ void JerkPlanner::get_ending_jerk_ratios(float *final_steps_distances, const uin
             1 / StepperController::get_movement_distance_for_group(speed_group, final_steps_distances);
 
     //Then, update the end ratios :
-    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
-        final_jerk_ratios[steppers] = final_steps_distances[steppers] / distance_inverse;
+    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
+        final_jerk_ratios[trajectory_control] = final_steps_distances[trajectory_control] / distance_inverse;
     }
 
 }
 
 /*
- * get_stepper_distances : this function gets the algebraic step_distances on each steppers, between the two provided
+ * get_stepper_distances : this function gets the algebraic step_distances on each trajectory_control, between the two provided
  *      positions of the provided trajectory.
  */
 
@@ -184,15 +184,15 @@ void JerkPlanner::get_stepper_distances(const float p0, const float p1, void (*t
     //Local arrays to contain positions;
     float t0[NB_STEPPERS]{0}, t1[NB_STEPPERS]{0};
 
-    //Get the steppers position for the point p0;
+    //Get the trajectory_control position for the point p0;
     StepperController::get_stepper_positions_for(trajectory_function, p0, t0);
 
-    //Get the steppers position for the point p1;
+    //Get the trajectory_control position for the point p1;
     StepperController::get_stepper_positions_for(trajectory_function, p1, t1);
 
     //Get distances;
-    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
-        distances[steppers] = t1[steppers] - t0[steppers];
+    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
+        distances[trajectory_control] = t1[trajectory_control] - t0[trajectory_control];
     }
 
 }
@@ -217,26 +217,26 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
     //A flag for the first iteration;
     bool first = true;
 
-    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
+    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
 
-        //determine the initial jerk_ratio for the current steppers;
-        float initial_jerk_ratio = initial_steps_distances[steppers] * distance_inverse;
+        //determine the initial jerk_ratio for the current trajectory_control;
+        float initial_jerk_ratio = initial_steps_distances[trajectory_control] * distance_inverse;
 
         //determine the algebric ratio difference;
-        float algebraic_difference = final_jerk_ratios[steppers] - initial_jerk_ratio;
+        float algebraic_difference = final_jerk_ratios[trajectory_control] - initial_jerk_ratio;
 
         //extract the absolute difference;
         if (algebraic_difference < 0) algebraic_difference = -algebraic_difference;
 
         //Get the maximum regulation_speed;
         //Formula : regulation_speed(unit/s) < max_jerk(steps_per_unit/s) / abs( final_ratio(steps_per_unit/unit) - initial_ratio(steps_per_unit/unit) ).
-        stepper_data_t *data = SteppersData::steppers_data + steppers;
+        stepper_data_t *data = SteppersData::steppers_data + trajectory_control;
         float max_speed = data->jerk * data->steps_per_unit / algebraic_difference;
 
         //Update the maximum regulation_speed;
         maximum_speed = (first) ? maximum_speed : ((maximum_speed < max_speed) ? maximum_speed : max_speed);
 
-        //first steppers is done;
+        //first trajectory_control is done;
         first = false;
 
     }
@@ -259,7 +259,7 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
         This distance has a physical meaning (the distance a carriage traveled in space for example), has its unit (unit)
         and is controlled during the movement.
 
-     Definition 2 : jerk limit Ji. A steppers mustn't have its speed changing more than its jerk limit in a brief time
+     Definition 2 : jerk limit Ji. A trajectory_control mustn't have its speed changing more than its jerk limit in a brief time
         period.
 
         CoefficientArray (E1) : |vi+ - vi-| < Ji;
@@ -269,11 +269,11 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
         - V+ (unit/s)   : global speed after the jerk movement;
         - D- (unit)     : global distance of the sub movement before the jerk point;
         - D+ (unit)     : global distance of the sub movement after the jerk point;
-        - vi- (steps_per_unit/s) : steppers motor i speed before the movement (steps_per_unit/s);
-        - vi+ (steps_per_unit/s) : steppers motor i speed after the movement (steps_per_unit/s);
-        - si- (steps_per_unit)   : steppers motor i distance for the sub movement before the jerk point;
-        - si+ (steps_per_unit)   : steppers motor i distance for the sub movement after the jerk point;
-        - Ji (steps_per_unit/s)  : jerk limit on steppers i;
+        - vi- (steps_per_unit/s) : trajectory_control motor i speed before the movement (steps_per_unit/s);
+        - vi+ (steps_per_unit/s) : trajectory_control motor i speed after the movement (steps_per_unit/s);
+        - si- (steps_per_unit)   : trajectory_control motor i distance for the sub movement before the jerk point;
+        - si+ (steps_per_unit)   : trajectory_control motor i distance for the sub movement after the jerk point;
+        - Ji (steps_per_unit/s)  : jerk limit on trajectory_control i;
         - t- (s)        : the duration of the sub movement before the jerk point;
         - t+ (s)        : the duration of the sub movement after the jerk point;
 
@@ -287,7 +287,7 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
         Explanation : The speed variation is regulated by the machine, and can only occur continuously (or, as the
             movement is discrete, during a movement). A jerk point is (as its name says), a point, and the global speed
             must, as a consequence, remain the same before and after.
-            This means that only steppers speeds will vary during the jerk.
+            This means that only trajectory_control speeds will vary during the jerk.
 
         ie :  V+ = V- = V;
 
@@ -295,13 +295,13 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
             - t+ = D+ / V
             - t- = D- / V
 
-    Definition 3 : targetVector speed. The targetVector speed Vt, for a jerk point, is the maximum speed that allow all steppers to
+    Definition 3 : targetVector speed. The targetVector speed Vt, for a jerk point, is the maximum speed that allow all trajectory_control to
         stay beyond their jerk limit.
 
 
     Determination of Vt :
 
-        For all steppers, we must have
+        For all trajectory_control, we must have
 
         (E1)    |vi+ - vi-| < Ji
             =>  |si+ / t+ - si- / t-| < Ji
@@ -311,7 +311,7 @@ float JerkPlanner::get_jerk_point_speed(const float *initial_steps_distances, co
 
     Result :
 
-        Vt is the greater speed that verifies for all steppers the following condition :
+        Vt is the greater speed that verifies for all trajectory_control the following condition :
 
             Vt < Ji / |si+ / D+ - si- / D-|
 

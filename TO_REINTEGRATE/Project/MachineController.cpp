@@ -451,12 +451,12 @@ task_state_t MachineController::enable_steppers(bool enable) {
 
     if (enable) {
 
-        //Enable all steppers
+        //Enable all trajectory_control
         Steppers::enable();
 
     } else {
 
-        //Disable all steppers
+        //Disable all trajectory_control
         Steppers::disable();
 
     }

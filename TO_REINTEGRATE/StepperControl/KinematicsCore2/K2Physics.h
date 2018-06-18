@@ -59,7 +59,7 @@ public :
     //the function to compute the time for the current sub_movement.
     static float get_sub_movement_time(sub_movement_data_t *sub_movement_data);
 
-    //the function to update the current regulation_speed of the steppers, knowing the current movement time
+    //the function to update the current regulation_speed of the trajectory_control, knowing the current movement time
     static void update_speeds(sub_movement_data_t *sub_movement_data, float time);
 
 
@@ -83,13 +83,13 @@ private :
     //Previous sub_movement duration
     static float last_time;
 
-    //Current regulation_speed of steppers
+    //Current regulation_speed of trajectory_control
     static float *const steppers_speeds;
 
-    //Current steppers deceleration step_distances
+    //Current trajectory_control deceleration step_distances
     static uint32_t *const deceleration_distances;
 
-    //The steppers jerk offsets;
+    //The trajectory_control jerk offsets;
     static uint32_t *const jerk_offsets;
 
 
@@ -102,12 +102,12 @@ private :
 
     /*
      * The array containing the deceleration constants : in the deceleration distance formula :
-     *      (((v * v) / (2 * EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers]));
+     *      (((v * v) / (2 * EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]));
      *
      *  the denominator is constant. This array wil contain the float value
-     *      1.0 / (2.0 * EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers]));
+     *      1.0 / (2.0 * EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]));
      *
-     *      for each steppers.
+     *      for each trajectory_control.
      */
 
     static float *const deceleration_constants;
@@ -115,24 +115,24 @@ private :
 
     /*
      * The array containing the delta regulation_speed constants : in the deceleration distance formula :
-     *      max_delta_speed = EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers] * time;
+     *      max_delta_speed = EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control] * time;
      *
      *  the product of the two first terms is constant. This array wil contain the float value
-     *      EEPROMMap::accelerations[steppers] * EEPROMMap::steps_per_unit[steppers]
+     *      EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]
      *
-     *      for each steppers.
+     *      for each trajectory_control.
      */
 
     static float *const delta_speed_constants;
 
     /*
      * The array containing the maximum regulation_speed constants : in the deceleration distance formula :
-     *      max_speed = EEPROMMap::speeds[steppers] * EEPROMMap::steps_per_unit[steppers] * time;
+     *      max_speed = EEPROMMap::speeds[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control] * time;
      *
      *  the product is constant. This array wil contain the float value
-     *      EEPROMMap::speeds[steppers] * EEPROMMap::steps_per_unit[steppers]
+     *      EEPROMMap::speeds[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]
      *
-     *      for each steppers.
+     *      for each trajectory_control.
      */
 
     static float *const max_speed_constants;

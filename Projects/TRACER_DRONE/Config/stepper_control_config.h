@@ -33,17 +33,17 @@
 #define NB_STEPPERS 9
 
 /*
- * Steppers settings : for each steppers of the machine, put one line like behind, and provide all parameters;
+ * Steppers settings : for each trajectory_control of the machine, put one line like behind, and provide all parameters;
  *
  *  STEPPER(i, signature, relative, pin_step, pin_dir, positive_dir,  power_pin, enable_value, endstop_min_pin, on_value_min, endstop_max_pin, on_value_max)
  *
- *  - i : the index of the steppers. Indices start at 0, and are strictly consecutive;
- *  - sig : the signature of the steppers : constant that must be set to 2 ^ i;
+ *  - i : the index of the trajectory_control. Indices start at 0, and are strictly consecutive;
+ *  - sig : the signature of the trajectory_control : constant that must be set to 2 ^ i;
  *  - pin_step : the pin used to trigger a step;
  *  - pin_dir : the pin used to set the step direction;
  *  - positive_dir : the boolean value for the positive direction (makes coordinates increase);
- *  - power_pin : the pin used to power the steppers;
- *  - enable_value : the boolean value to provide to power up steppers;
+ *  - power_pin : the pin used to power the trajectory_control;
+ *  - enable_value : the boolean value to provide to power up trajectory_control;
  */
 
 #ifdef STEPPER
@@ -79,18 +79,18 @@ STEPPER(8,  256,    1,      36,     35,     LOW,    34,     LOW,    0,      HIGH
 
 
 /*
- * Steppers data settings : every steppers has data stored in the EEPROMMap. You must provide default values
- *  for every steppers, using command STEPPER_DATA, and the same indexation than in the last paragraph;
+ * Steppers data settings : every trajectory_control has data stored in the EEPROMMap. You must provide default values
+ *  for every trajectory_control, using command STEPPER_DATA, and the same indexation than in the last paragraph;
  *
- * for each steppers of the machine, put one line like behind, and provide all parameters :
+ * for each trajectory_control of the machine, put one line like behind, and provide all parameters :
  *
  * STEPPER_DATA(id, letter, size, steps_per_unit, speed, acceleration, jerk)
  *
- *  - i : the index of the steppers. Indices start at 0, and are strictly consecutive;
- *  - steps_per_unit : the default steps_per_unit per unit for steppers i;
- *  - speed : the default maximum speed for steppers i;
- *  - acceleration : the default maximal acceleration for steppers i;
- *  - jerk : the default maximum jerk for steppers i;
+ *  - i : the index of the trajectory_control. Indices start at 0, and are strictly consecutive;
+ *  - steps_per_unit : the default steps_per_unit per unit for trajectory_control i;
+ *  - speed : the default maximum speed for trajectory_control i;
+ *  - acceleration : the default maximal acceleration for trajectory_control i;
+ *  - jerk : the default maximum jerk for trajectory_control i;
  *
  */
 
@@ -122,10 +122,10 @@ STEPPER_DATA(   8,  80.16,  1000.,   1000.,      20.)
  *
  *  Stepper coordinates are images of high_level coordinates through the geometry_translate function.
  *
- *  They might have no physical meaning for steppers, but are used to control the machine.
+ *  They might have no physical meaning for trajectory_control, but are used to control the machine.
  *
  *  Ex :
- *      A polar machine har a polar steppers coordinate system, but can be controlled with a cartesian
+ *      A polar machine har a polar trajectory_control coordinate system, but can be controlled with a cartesian
  *          high level coordinate system, as long as the translation from (x, y) to (theta, phi) is known,
  *          and implemented in geometry_translate.
  *
@@ -141,7 +141,7 @@ STEPPER_DATA(   8,  80.16,  1000.,   1000.,      20.)
  *
  *  CARTESIAN_GROUP(id, s0, s1, s2, max_speed)
  *      - i : the index of the cartesian group. Indices start at 0, and are strictly consecutive;
- *      - s{0, 1, 2} : indices of steppers belonging to the group. If it contains less than 3 steppers,
+ *      - s{0, 1, 2} : indices of trajectory_control belonging to the group. If it contains less than 3 trajectory_control,
  *          pad with one or two -1;
  *      - max_speed : the speed group's maximum speed;
  */
@@ -193,11 +193,11 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 //------------------------------------------------------ Data types ----------------------------------------------------
 
-/* The signature type. The type size depends on the number of steppers you want to control. Set :
- *  - uint8_t for at most 8 steppers;
- *  - uint16_t for at most 16 steppers;
- *  - uint32_t for at most 32 steppers;
- *  - uint64_t for at most 64 steppers; (not tested, tell me if it works !)
+/* The signature type. The type size depends on the number of trajectory_control you want to control. Set :
+ *  - uint8_t for at most 8 trajectory_control;
+ *  - uint16_t for at most 16 trajectory_control;
+ *  - uint32_t for at most 32 trajectory_control;
+ *  - uint64_t for at most 64 trajectory_control; (not tested, tell me if it works !)
  */
 
 #define sig_t uint32_t

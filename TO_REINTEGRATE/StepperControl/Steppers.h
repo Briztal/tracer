@@ -46,13 +46,13 @@ public:
 
 public:
 
-    //Enable a specific group of steppers, and disable the others.
+    //Enable a specific group of trajectory_control, and disable the others.
     static void enable(sig_t signature);
 
-    //Enable all steppers
+    //Enable all trajectory_control
     static void enable();
 
-    //Disable all steppers
+    //Disable all trajectory_control
     static void disable();
 
 
@@ -60,7 +60,7 @@ public:
 
 public:
 
-    //Set the directions of all steppers, according to signatures
+    //Set the directions of all trajectory_control, according to signatures
     static void set_directions(sig_t negative_signatures);
 
 private:
@@ -73,7 +73,7 @@ private:
 
 public:
 
-    //Step a specific group of steppers
+    //Step a specific group of trajectory_control
     static void fastStep(sig_t id);
 
 
@@ -89,7 +89,7 @@ public:
 
 private:
 
-    //Increment and position for every steppers
+    //Increment and position for every trajectory_control
 #define STEPPER(i, ...) \
     static int32_t incr##i;\
     public:static int32_t pos##i;\

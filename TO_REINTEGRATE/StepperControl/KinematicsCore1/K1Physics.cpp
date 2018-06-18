@@ -56,7 +56,7 @@ void K1Physics::initialise_data() {
     current_movement_first_sub_movement_hl_distances = 0;
 
 
-    //The steppers jerk offset;
+    //The trajectory_control jerk offset;
     jerk_distance_offset = 0;
 
     //The heuristic distance to the end point;
@@ -355,18 +355,18 @@ K1Physics::get_delay_numerator(void (*trajectory_function)(float, float *), floa
  *
  */
 
-float K1Physics::_get_delay_numerator(uint8_t steppers, float distance) {
+float K1Physics::_get_delay_numerator(uint8_t trajectory_control, float distance) {
 
     /*
      * FORMULA : D = 10^6 * distance / (steps_per_unit * sqrt(2 * acceleration)) with :
      *      - D : the step_period_us numerator;
-     *      - distance (steps_per_unit) : the distance on the steppers;
-     *      - steps_per_unit (steps_per_unit/unit) : the steps_per_unit per unit of steppers;
-     *      - acceleration (unit / s^2) : the acceleration on the steppers.
+     *      - distance (steps_per_unit) : the distance on the trajectory_control;
+     *      - steps_per_unit (steps_per_unit/unit) : the steps_per_unit per unit of trajectory_control;
+     *      - acceleration (unit / s^2) : the acceleration on the trajectory_control.
      *
      */
 
-    stepper_data_t *data = EEPROMStorage::steppers_data + steppers;
+    stepper_data_t *data = EEPROMStorage::steppers_data + trajectory_control;
 
     return (float) 1000000 * distance / (sqrtf(2 * data->steps_per_unit * data->acceleration));
 }
@@ -384,20 +384,20 @@ uint8_t K1Physics::get_distances(const float *const t0, float *const t1) {
     float max_dist = 0;
 
     //get distances in t_dist
-    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
+    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
 
         //Get the algebric distance
-        float dist = t1[steppers] - t0[steppers];
+        float dist = t1[trajectory_control] - t0[trajectory_control];
 
         //Get the absolute distance
         if (dist < 0) dist = -dist;
 
         //Save it
-        t1[steppers] = dist;
+        t1[trajectory_control] = dist;
 
         //Update the maximal axis index.
         if (dist > max_dist) {
-            max_index = steppers;
+            max_index = trajectory_control;
         }
     }
 
@@ -431,14 +431,14 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
     //The final time
     float min_time = 0;
 
-    for (uint8_t steppers = 0; steppers < NB_STEPPERS; steppers++) {
+    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
 
-        stepper_data_t *data = EEPROMStorage::steppers_data+steppers;
+        stepper_data_t *data = EEPROMStorage::steppers_data+trajectory_control;
         float maximum_speed = data->steps_per_unit * data->jerk;
 
         //update the minimum time :
         //Formula : low_time_bound = stepper_distance / maximum_speed
-        float down_time = f_step_distances[steppers] / maximum_speed;
+        float down_time = f_step_distances[trajectory_control] / maximum_speed;
 
         //update minimum time, as the maximum of the new time and the current beginning time :
         min_time = (down_time < min_time) ? min_time : down_time;
@@ -554,7 +554,7 @@ void K1Physics::update_heuristic_jerk_distance() {
 
 void K1Physics::compute_jerk_offsets(float speed, k1_movement_data *previous_movement) {
 
-    //-----------maximum steppers speeds------------
+    //-----------maximum trajectory_control speeds------------
 
     //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
 
@@ -794,7 +794,7 @@ float m::last_movement_first_sub_movement_hl_distances = 0;
 float m::current_movement_first_sub_movement_hl_distances = 0;
 
 
-//The steppers jerk offset;
+//The trajectory_control jerk offset;
 uint32_t m::jerk_distance_offset;
 
 //The heuristic distance to the end point;

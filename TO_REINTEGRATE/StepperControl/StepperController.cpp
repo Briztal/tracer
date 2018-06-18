@@ -41,7 +41,7 @@
 //---------------------------------------------------- Init -----------------------------------------------------
 
 /*
- * Initialise the steppers Actuators;
+ * Initialise the trajectory_control Actuators;
  */
 
 void StepperController::initialise_hardware() {
@@ -61,7 +61,7 @@ void StepperController::initialise_data() {
     //Initialise Steppers;
     Steppers::initialise_data();
 
-    //Initialise the steppers data class
+    //Initialise the trajectory_control data class
     SteppersData::initialise_data();
 
 
@@ -165,7 +165,7 @@ void StepperController::update_position(const float *const new_position) {
 
 /*
  * translate : this function translates a position expressed in the high level coordinate system into
- *      its image, in the steppers coordinate system.
+ *      its image, in the trajectory_control coordinate system.
  *
  *  The procedure depends on the machine it runs for, so it simply calls an inline function in Project/geometry.h.
  *
@@ -179,7 +179,7 @@ void StepperController::translate(const float *const hl_coordinates, float *cons
 
 
 /*
- * get_stepper_positions_for : this function gets the steppers positions, for the provided point, according to
+ * get_stepper_positions_for : this function gets the trajectory_control positions, for the provided point, according to
  *      the provided trajectory_function (get_position).
  *
  */
@@ -192,7 +192,7 @@ void StepperController::get_stepper_positions_for(void (*get_position)(float, fl
     //Get the initial high level position
     get_position(point, hl_positions);
 
-    //Translate it to obtain the initial steppers position
+    //Translate it to obtain the initial trajectory_control position
     StepperController::translate(hl_positions, positions);
 
 }
@@ -304,15 +304,15 @@ float StepperController::get_movement_distance_for_group(uint8_t speed_group, co
 
     float square_dist_sum = 0;
 
-    //Initialise the steppers index pointer
+    //Initialise the trajectory_control index pointer
     const int8_t *indexes = (speed_groups_indices + 3 * speed_group);
 
 
     //Sum the square of all distance :
-    for (uint8_t steppers = 0; steppers < 3; steppers++) {
+    for (uint8_t trajectory_control = 0; trajectory_control < 3; trajectory_control++) {
 
         //Get the current axis value
-        int8_t index = indexes[steppers];
+        int8_t index = indexes[trajectory_control];
 
         //if the cartesian group comprises less than 3 axis;
         if (index == -1) break;
