@@ -111,7 +111,7 @@ As you can guess, this problem cannot be solved without implementing some securi
 
 1 - during its execution, a type-255 task can lock a particular sequence, preventing any adding for this sequence.
 
-2 - at the beginning of its execution, a type-255 task must verify that every sequence it may enqueue tasks is not locked,
+2 - at the initial of its execution, a type-255 task must verify that every sequence it may enqueue tasks is not locked,
     and have enough space to contain all tasks the function wants to enqueue.
     If not, the function locks all queues where it has to insert tasks, and fails.
 

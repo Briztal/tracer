@@ -22,24 +22,57 @@
 #ifndef TRACER_TRAJECTORY_H
 #define TRACER_TRAJECTORY_H
 
-#include "trajectory_t.h"
-
 #include "actuation.h"
 
-#include "movement_t.h"
+#include "geometry.h"
+#include "movement.h"
 
 
+typedef struct {
+
+	//The trajectory's dimension;
+	uint8_t dimension;
+
+	//The movements lists;
+	linked_list_t movements;
+
+	//The trajectory's geometry;
+	geometry_t *geometry;
+
+	//The trajectory's actuation layer;
+	actuation_t *actuation;
+
+} trajectory_controller_t;
+
+//--------------------------------------------------- Initialisation ---------------------------------------------------
+
+//Create a trajectory;
+trajectory_controller_t *trajectory_init();//TODO;
+
+//Delete a trajectory;
+void trajectory_delete(trajectory_controller_t *);//TODO
+
+
+//------------------------------------------------ Movement manipulation -----------------------------------------------
+
+//Add a movement to the trajectory;
+void trajectory_enqueue_movement(movement_t *movement);//TODO;
+
+//Delete a trajectory;
+void trajectory_delete(trajectory_controller_t *);//TODO
+
+//TODO START STOP
 
 //--------------------------------------- Functions called by the actuation layer --------------------------------------
 
 //Get a new sub_movement to execute;
-elementary_movement_t *trajectory_get_elementary_movement(trajectory_t *);
+elementary_movement_t *trajectory_get_elementary_movement(trajectory_controller_t *);
 
 //Update the number of steps which will compose the current elementary movement;
-void trajectory_update_movement_steps(trajectory_t *, uint16_t mv_steps);
+void trajectory_update_movement_steps(trajectory_controller_t *, uint16_t mv_steps);
 
 //Execute a step in the processing of the next elementary movement;
-void trajectory_sub_process(trajectory_t *);
+void trajectory_sub_process(trajectory_controller_t *);
 
 
 #endif //TRACER_TRAJECTORY_H

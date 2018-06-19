@@ -54,8 +54,8 @@ void JerkPlanner::save_final_jerk_offsets(movement_data_t *current_movement) {
 
     //---------------------Stepper positions computation---------------------
 
-    //Cache var for ending index and increment;
-    const float ending = current_movement->ending;
+    //Cache var for final index and increment;
+    const float final = current_movement->final;
     const float ending_increment = current_movement->ending_increment;
 
     //Cache for the current movement's trajectory function;
@@ -65,14 +65,14 @@ void JerkPlanner::save_final_jerk_offsets(movement_data_t *current_movement) {
     float stepper_positions[NB_STEPPERS];
 
     //Get the step_distances for the last sub_movement;
-    get_stepper_distances(ending, ending - ending_increment, trajectory_function, stepper_positions);
+    get_stepper_distances(final, final - ending_increment, trajectory_function, stepper_positions);
 
     //---------------------Jerk ratios computation---------------------
 
     //Cache for speed group;
     const uint8_t speed_group = current_movement->speed_group;
 
-    //Get ending jerk ratios;
+    //Get final jerk ratios;
     get_ending_jerk_ratios(stepper_positions, speed_group, current_movement->ending_jerk_ratios);
 
 }
@@ -111,8 +111,8 @@ void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement
 
     //---------------------Initial Jerk Ratios pre computation---------------------
 
-    //cache vars for beginning index and increment;
-    const float beginning = current_movement->beginning;
+    //cache vars for initial index and increment;
+    const float initial = current_movement->initial;
     const float beginning_increment = current_movement->beginning_increment;
 
     //Declare an array that will contain the trajectory_control positions;
@@ -122,7 +122,7 @@ void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement
     void (*trajectory_function)(float, float *) = current_movement->pre_process_trajectory_function;
 
     //Get the jerk position;
-    StepperController::get_stepper_positions_for(trajectory_function, beginning, stepper_positions);
+    StepperController::get_stepper_positions_for(trajectory_function, initial, stepper_positions);
 
     //cache var for jerk pos;
     int32_t *jerk_pos = previous_movement->jerk_position;
@@ -137,7 +137,7 @@ void JerkPlanner::compute_jerk(const movement_data_t *current_movement, movement
     float *jerk_distances = stepper_positions;
 
     //Get the step_distances for the first sub_movement;
-    get_stepper_distances(beginning, beginning + beginning_increment, trajectory_function, jerk_distances);
+    get_stepper_distances(initial, initial + beginning_increment, trajectory_function, jerk_distances);
 
 
     //---------------------Limitation speed computation---------------------

@@ -19,11 +19,12 @@
 */
 
 
-#ifndef TRACER_PHYSICAL_LAYER_H
-#define TRACER_PHYSICAL_LAYER_H
+#ifndef TRACER_ACTUATION_H
+#define TRACER_ACTUATION_H
 
 #include "stdint.h"
-#include "trajectory_t.h"
+
+#include "trajectory.h"
 
 #include <kernel/drivers/timer.h>
 
@@ -79,10 +80,13 @@ typedef struct actuation_t {
 	timer_base_t *timer;
 
 	//The trajectory object we rely on;
-	trajectory_t *trajectory;
+	trajectory_controller_t *trajectory;
 
 	//The current state;
 	actuation_state_t state;
+
+	//The maximal distance target for one movement;
+	uint16_t distance_target;
 
 
 	/*
@@ -108,10 +112,10 @@ typedef struct actuation_t {
 
 
 //Initialise the actuation layer, enter in stopped state;
-void actuation_init(actuation_t *actuation, timer_base_t *timer);
+void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distance_target);
 
 //Start the actuation layer, handler will be called immediately;
-void actuation_start(actuation_t *actuation, trajectory_t *);
+void actuation_start(actuation_t *actuation, trajectory_controller_t *);
 
 //Abort the current movement; An offset may happen depending on the implementation;
 void actuation_abort(actuation_t *actuation);
@@ -120,4 +124,4 @@ void actuation_abort(actuation_t *actuation);
 void actuation_handler(actuation_t *actuation);
 
 
-#endif //TRACER_PHYSICAL_LAYER_H
+#endif //TRACER_ACTUATION_H

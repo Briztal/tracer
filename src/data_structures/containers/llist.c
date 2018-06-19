@@ -145,7 +145,7 @@ void lelmt_insert_before(linked_element_t *src_next, linked_element_t *new_eleme
  */
 
 /*
- * llist_insert_first : inserts the new element at the beginning of the list;
+ * llist_insert_first : inserts the new element at the initial of the list;
  */
 
 void llist_insert_first(linked_list_t *list, linked_element_t *element) {

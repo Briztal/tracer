@@ -69,7 +69,7 @@ void SubMovementManager::initialise_data() {
  * initialise_movement : this function is called when the current movement is finished.
  *
  *  Parameters passed update all variables used to compute positions :
- *      - beginning and ending, the minimum and the maximum of index (beginning and ending of movement)
+ *      - initial and final, the minimum and the maximum of index (initial and final of movement)
  *      - incr : the index increment for the first plan_movement (pre computed and supposedly accurate)
  *      - trajectory_function : the function that actually computes trajectory_control positions.
  *
@@ -383,7 +383,7 @@ float SubMovementManager::get_steppers_distances(float *const pos, sub_movement_
         real_dists[stepper] = distance;
         int_dists[stepper] = int_dist;
 
-        //Update ending dist
+        //Update final dist
         if (int_dist > max_int_dist) {
             max_int_dist = int_dist;
             max_f_dist = distance;

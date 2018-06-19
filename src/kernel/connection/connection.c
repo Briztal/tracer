@@ -316,7 +316,7 @@ void connection_transfer_ownership(connection_t *connection) {
     //The access to connections is critical;
     kernel_enter_critical_section();
 
-    //We will insert the provided connection at the beginning of the connection list;
+    //We will insert the provided connection at the initial of the connection list;
 
     //If the first place is already occupied :
     if (connections) {
@@ -327,7 +327,7 @@ void connection_transfer_ownership(connection_t *connection) {
     }
 
 
-    //Mark the new connection to be the list beginning;
+    //Mark the new connection to be the list initial;
     connections = connection;
 
     //Leave the critical section;

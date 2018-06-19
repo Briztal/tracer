@@ -22,7 +22,7 @@
  * The JerkPlanner class. This class handles the jerk planning, and for this, has two public functions :
  *
  *  - save_final_jerk_offsets : this function is called for every movement planned. Its goal is to prepare the jerk
- *      computation for this movement's ending point. The eventual computation will eventually occur if another
+ *      computation for this movement's final point. The eventual computation will eventually occur if another
  *      movement is planned right after this one, if the movement procedure is not ended.
  *
  *  - compute_jerk : this function called when a movement is being planned, and almost another one has already been

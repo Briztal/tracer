@@ -110,7 +110,7 @@ float K2Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
         //Formula : low_time_bound = stepper_distance / maximum_speed
         float down_time = f_step_distances[trajectory_control] / maximum_speed;
 
-        //update minimum time, as the maximum of the new time and the current beginning time :
+        //update minimum time, as the maximum of the new time and the current initial time :
         min_time = (down_time < min_time) ? min_time : down_time;
 
     }
@@ -178,7 +178,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
             //Formula : up_time_bound = stepper_distance / (actual_speed - max_delta_speed)
             float up_time = f_step_distances[trajectory_control] / s;
 
-            //update maximum time, as the minimum of the new time and the current ending time :
+            //update maximum time, as the minimum of the new time and the current final time :
             max_time = (first) ? up_time : ((up_time < max_time) ? up_time : max_time);
 
             first = false;
@@ -197,7 +197,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
         //Formula : low_time_bound = stepper_distance / maximum_speed
         float down_time = f_step_distances[trajectory_control] / maximum_speed;
 
-        //update minimum time, as the maximum of the new time and the current beginning time :
+        //update minimum time, as the maximum of the new time and the current initial time :
         min_time = (down_time < min_time) ? min_time : down_time;
 
 
@@ -216,7 +216,7 @@ float K2Physics::get_sub_movement_time(sub_movement_data_t *sub_movement_data) {
 
     } else if (regulation_time < min_time) {
 
-        //If the regulation time is lower than the beginning time :
+        //If the regulation time is lower than the initial time :
 
         //choose the time corresponding to the maximum acceleration.
         new_time = min_time;
@@ -292,7 +292,7 @@ void K2Physics::update_speeds(sub_movement_data_t *sub_movement_data, float time
 
 /*
  * compute_jerk_offsets : this function computes the jerk offsets caused by the current movement, depending on the
- *      previous movement's ending.
+ *      previous movement's final.
  *
  */
 

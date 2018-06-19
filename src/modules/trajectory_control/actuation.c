@@ -31,7 +31,7 @@
 void actuation_stop(actuation_t *actuation);
 
 //Query a new movement; returns true if succeeded;
-bool actuation_query_movement(actuation_t *actuation, trajectory_t *trajectory);
+bool actuation_query_movement(actuation_t *actuation, trajectory_controller_t *trajectory);
 
 
 //--------------------------------------------------- Initialisation --------------------------------------------------
@@ -40,10 +40,13 @@ bool actuation_query_movement(actuation_t *actuation, trajectory_t *trajectory);
  * actuation_init : Initialises the timer pointer and enter in stopped state;
  */
 
-void actuation_init(actuation_t *actuation, timer_base_t *timer) {
+void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distance_target) {
 
 	//Initialise the timer pointer;
 	actuation->timer = timer;
+
+	//Initialise the distance target;
+	actuation->distance_target = distance_target;
 
 	//Stop the actuation;
 	actuation_stop(actuation);
@@ -60,7 +63,7 @@ void actuation_init(actuation_t *actuation, timer_base_t *timer) {
  * 	- handler will be called immediately;
  */
 
-void actuation_start(actuation_t *actuation, trajectory_t *trajectory) {
+void actuation_start(actuation_t *actuation, trajectory_controller_t *trajectory) {
 
 	//If the actuation is already started :
 	if (actuation->state == ACTUATION_STARTED) {
@@ -151,7 +154,7 @@ void actuation_stop(actuation_t *actuation) {
  * actuation_query_movement : queries a new movement, stop if it is null, initialises the environment if not;
  */
 
-bool actuation_query_movement(actuation_t *actuation, trajectory_t *trajectory) {
+bool actuation_query_movement(actuation_t *actuation, trajectory_controller_t *trajectory) {
 
 	//Query a new movement;
 	elementary_movement_t *next_movement = trajectory_get_elementary_movement(trajectory);
@@ -214,7 +217,7 @@ void actuation_handler(actuation_t *const actuation) {
 	actuation->mv_steps--;
 
 	//Cache the trajectory pointer;
-	trajectory_t *trajectory = actuation->trajectory;
+	trajectory_controller_t *trajectory = actuation->trajectory;
 
 	//If the movement is finished :
 	if (!actuation->mv_steps) {

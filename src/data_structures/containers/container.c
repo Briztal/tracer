@@ -69,7 +69,7 @@ void container_insert_element(container_t *container, const size_t index, void *
     const uint8_t element_size = container->element_size;
 
 
-    //As we shift to the right, We must shift from the end to the beginning;
+    //As we shift to the right, We must shift from the end to the initial;
 
     //Cache the destination;
     uint8_t *dst_ptr = container->elements + (nb_elements - (uint8_t) 1);

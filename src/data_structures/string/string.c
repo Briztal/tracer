@@ -219,7 +219,7 @@ void string_resize(string_t *string, size_t new_length) {
     if (!ptr)
         return;//TODO ERROR.
     
-    //Cache the beginning of the string's new part;
+    //Cache the initial of the string's new part;
     uint8_t *new_part = (uint8_t*) ptr + current_size;
     
     //Now, reset the new part of the string;
@@ -440,7 +440,7 @@ uint8_t string_length(const char *in_buffer) {
 //TODO RE-COMMENT, THIS IS THE OLD FUNCTION
 
 /*
- * string_count_until_char : this function will return the number of chars to enumerate from the string's beginning
+ * string_count_until_char : this function will return the number of chars to enumerate from the string's initial
  * before encountering the required char;
  */
 
@@ -467,7 +467,7 @@ uint8_t string_count_until_char(const char *in_buffer, const char limit_char) {
 
 
 /*
- * string_lstrip : this function counts the number of time that 'verif_char' is present (consecutively) at the beginning
+ * string_lstrip : this function counts the number of time that 'verif_char' is present (consecutively) at the initial
  *  of in_buffer. For example, with in_buffer containing   '0' '0' '0' '0' '5' '2' '\0', the result of the command
  *      lstrip(in_buffer, '0') will be 4.
  *
@@ -511,7 +511,7 @@ uint8_t string_count_words(const char *in_buffer) {
 
     do {
 
-        //Remove unnecessary nb_spaces at the beginning of the char sequence.
+        //Remove unnecessary nb_spaces at the initial of the char sequence.
         in_buffer += string_lstrip(in_buffer, ' ');
 
         //Get the size of the next word (will ne zero only if the sequence is finished).

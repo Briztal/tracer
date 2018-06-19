@@ -25,7 +25,7 @@
  *
  *  This version is the most advanced, and offers the following features :
  *      - tracing of trajectories expressed in the high level coordinates. Any kind of trajectory is supported;
- *      - exact acceleration regulation in beginning and ending points, for each trajectory_control;
+ *      - exact acceleration regulation in beginning and final points, for each trajectory_control;
  *      - real-time acceleration / deceleration regulation during movements;
  *      - exact jerk regulation for each trajectory_control;
  *      - regulation_speed regulation by cartesian groups of the high level coordinates;

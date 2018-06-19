@@ -280,7 +280,7 @@ void K1Physics::get_delay_numerator_data(k1_movement_data *movement_data) {
     //TODO MAX SPEED CHECKING
 
     //Cache vars
-    float min = movement_data->beginning, maximum = movement_data->ending;
+    float min = movement_data->initial, maximum = movement_data->final;
     float min_increment = movement_data->beginning_increment, max_increment = movement_data->ending_increment;
 
     //Get step_period_us numerators
@@ -440,7 +440,7 @@ float K1Physics::get_first_sub_movement_time(sub_movement_data_t *sub_movement_d
         //Formula : low_time_bound = stepper_distance / maximum_speed
         float down_time = f_step_distances[trajectory_control] / maximum_speed;
 
-        //update minimum time, as the maximum of the new time and the current beginning time :
+        //update minimum time, as the maximum of the new time and the current initial time :
         min_time = (down_time < min_time) ? min_time : down_time;
 
     }
@@ -468,7 +468,7 @@ void K1Physics::get_sub_movement_time(movement_data_t *movement_data, uint8_t sp
     float t_point[NB_STEPPERS];
     float t_dist[NB_STEPPERS];
 
-    float min = movement_data->beginning, min_increment = movement_data->beginning_increment;
+    float min = movement_data->initial, min_increment = movement_data->beginning_increment;
 
     //get the positions for the minimal position
     (*movement_data->pre_process_trajectory_function)(min, t_point);

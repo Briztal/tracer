@@ -40,7 +40,7 @@ typedef struct {
 	//The current stack pointer;
     void *stack_pointer;
 
-	//The beginning of the stack;
+	//The initial of the stack;
     void *stack_begin;
 	
 	//The end of the stack;
@@ -88,7 +88,7 @@ inline void *core_get_stack_end(void *allocated_pointer, size_t size);
 //Initialise a stack for a future unstacking. An arg pointer can be passed;
 void core_init_stack(core_stack_t *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
-//Get the argument stored at stack init. Must be called at the very beginning of the process function;
+//Get the argument stored at stack init. Must be called at the very initial of the process function;
 void *core_get_init_arg();
 
 
@@ -183,7 +183,7 @@ inline size_t core_correct_size(size_t size) {
 
 
 /*
- * core_get_stack_begin : determines the stacks beginning case from the allocated pointer and the size;
+ * core_get_stack_begin : determines the stacks initial case from the allocated pointer and the size;
  *
  *  In an arm cortex, the stack decreases, and the stack pointer points to the last pushed element;
  */

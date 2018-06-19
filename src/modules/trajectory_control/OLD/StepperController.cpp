@@ -19,9 +19,6 @@
 */
 
 
-#include <config.h>
-
-#ifdef ENABLE_STEPPER_CONTROL
 
 #include <stdint.h>
 
@@ -451,4 +448,3 @@ const int8_t *const m::speed_groups_indices = t_sg_indices;
 
 #undef m
 
-#endif

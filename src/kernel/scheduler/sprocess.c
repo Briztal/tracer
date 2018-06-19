@@ -72,7 +72,7 @@ sprocess_t *sprocess_create(size_t stack_size) {
 
 /*
  * sprocess_reset : resets the sprocess to its initial stack pointer,
- * and initialises the context to its beginning;
+ * and initialises the context to its initial;
  */
 
 void sprocess_reset(sprocess_t *sprocess) {

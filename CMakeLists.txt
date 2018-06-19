@@ -51,4 +51,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} src/kernel/arch/peripherals/kinetis/kinetis_PIT.h src/modules/trajectory_control/actuation.h src/modules/trajectory_control/trajectory.h src/modules/trajectory_control/movement_t.h)
+add_executable(${PROJECT_NAME} ${SRC_LIST} src/kernel/arch/peripherals/kinetis/kinetis_PIT.h src/modules/trajectory_control/actuation.h src/modules/trajectory_control/trajectory.h src/modules/trajectory_control/movement.h src/modules/trajectory_control/geometry.h src/modules/trajectory_control/curve.h)

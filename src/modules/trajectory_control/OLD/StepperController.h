@@ -30,10 +30,6 @@
 #ifndef TRACER_STEPPER_ABSTRACTION_H
 #define TRACER_STEPPER_ABSTRACTION_H
 
-#include <config.h>
-
-#ifdef ENABLE_STEPPER_CONTROL
-
 #include "stdint.h"
 
 #include <Kernel/Scheduler/TaskScheduler/task_state_t.h>
@@ -161,6 +157,3 @@ private :
 };
 
 
-#endif //TRACER_STEPPER_ABSTRACTION_H
-
-#endif

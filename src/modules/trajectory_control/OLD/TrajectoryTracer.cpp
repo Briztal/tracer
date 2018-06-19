@@ -19,7 +19,7 @@
 */
 
 #include "TrajectoryTracer.h"
-#include "IncrementComputer.h"
+#include "modules/trajectory_control/IncrementComputer.h"
 #include "SubMovementManager.h"
 #include "MovementCoordinator.h"
 #include <Kernel/Interaction/Interaction.h>
@@ -263,7 +263,7 @@ void TrajectoryTracer::emergency_stop() {
  * enqueue_movement : this function adds the movement provided in argument_t to the motion queue.
  *
  *  The movement is provided in the form of :
- *      - beginning and ending, the index variable minimum and maximum values, for (resp) the beginning and end positions
+ *      - initial and final, the index variable minimum and maximum values, for (resp) the initial and end positions
  *      - increment : the index increment for the first movement;
  *      - movement_initialisation : the movement's in_real_time initialisation function;
  *      - trajectory_function : the function that will be used to compute new positions in_real_time.
@@ -370,7 +370,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     //---------------Increment computing, kernel invariant-----------------
 
-    //The increment computer will determine the beginning and ending increment;
+    //The increment computer will determine the initial and final increment;
     if (!IncrementComputer::determine_increments(current_movement)) {
 
         //If the increment computer detects a micro movement, the machine will not prepare_movement;
@@ -434,7 +434,7 @@ task_state_t TrajectoryTracer::enqueue_movement(float min, float max, void (*mov
 
     }
 
-    //Anyway, we must save the current movement's ending jerk ratios;
+    //Anyway, we must save the current movement's final jerk ratios;
     JerkPlanner::save_final_jerk_offsets(current_movement);
 
 
@@ -888,7 +888,7 @@ int k2_position_indice = 4;
  *
  *  This procedure comprises the following feedrate :
  *      - change the trajectory function;
- *      - change the trajectory variables (beginning, ending, index)
+ *      - change the trajectory variables (initial, final, index)
  *      - initialise_hardware the new movement
  *
  *
@@ -1093,7 +1093,7 @@ bool m::is_es_0;
 //The elementary signature array;
 sig_t *m::saved_elementary_signatures = tces0;
 
-//Trajectory beginning indices;
+//Trajectory initial indices;
 const uint8_t ctti[8]{0, 2, 6, 14, 30, 62, 126, 254};
 const uint8_t *const m::trajectory_beginning_indices = ctti;
 

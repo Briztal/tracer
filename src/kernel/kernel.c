@@ -229,7 +229,7 @@ void kernel_stack_alloc(core_stack_t *stack, size_t stack_size,
 
 /*
  * kernel_reset_stack : resets the process_t to its initial stack pointer,
- * 	and initialises the context to its beginning;
+ * 	and initialises the context to its initial;
  */
 
 void kernel_stack_reset(core_stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg) {

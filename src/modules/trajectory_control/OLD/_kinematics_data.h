@@ -49,8 +49,8 @@
 
 /*
  * movement_data : this structure contains all data related to one movement :
- *  - the index variables : beginning, ending, increment;
- *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
+ *  - the index variables : initial, final, increment;
+ *  - the initialisation and finailisation function, called (resp) at the initial and final of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
  *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
  *  - The tools signature, indicating tools enabled during this movement.
@@ -72,16 +72,16 @@ typedef struct kernel_movement_data {
     //  the movement. It takes a real value (the index) and outputs a position;
     void (*pre_process_trajectory_function)(float, float *);
 
-    //The beginning value of the trajectory index;
+    //The initial value of the trajectory index;
     float beginning;
 
-    //The ending value of the trajectory index;
+    //The final value of the trajectory index;
     float ending;
 
     //The increment at the beginning point;
     float beginning_increment;
 
-    //The increment at the ending point;
+    //The increment at the final point;
     float ending_increment;
 
 
@@ -111,7 +111,7 @@ typedef struct kernel_movement_data {
      *  The following lines contain all data required to perform the jerk regulation
      */
 
-    //A boolean, determining whether the ending point is a jerk point
+    //A boolean, determining whether the final point is a jerk point
     bool jerk_point = false;
 
     //The position of the jerk point
@@ -195,8 +195,8 @@ typedef sub_movement_data k1_sub_movement_data;
 
 /*
  * k2_movement_data : this structure contains all data related to one movement :
- *  - the index variables : beginning, ending, increment;
- *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
+ *  - the index variables : initial, final, increment;
+ *  - the initialisation and finailisation function, called (resp) at the initial and final of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
  *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
  *  - The tools signature, indicating tools enabled during this movement.
@@ -213,8 +213,8 @@ typedef struct k2_movement_data : movement_data {
 
 /*
  * k2_movement_data : this structure contains all data related to one movement :
- *  - the index variables : beginning, ending, increment;
- *  - the initialisation and finailisation function, called (resp) at the beginning and ending of the movement;
+ *  - the index variables : initial, final, increment;
+ *  - the initialisation and finailisation function, called (resp) at the initial and final of the movement;
  *  - the trajectory function, used continuously during the movement to get positions;
  *  - The regulation_speed variables : the regulation_speed and the regulation_speed group,
  *  - The tools signature, indicating tools enabled during this movement.

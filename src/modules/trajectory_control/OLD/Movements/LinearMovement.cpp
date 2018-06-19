@@ -54,11 +54,11 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 
     //Move choice : a m
     if (absolute_distances[max_axis] < PROCESSING_STEPS) {
-        //ending distance < feedrate per elementary-plan_movement -> only one micro enqueue_movement
+        //final distance < feedrate per elementary-plan_movement -> only one micro enqueue_movement
         //TODO micro_move(absolute_distances);
     } else {
-        //A enqueue_movement is indexed on an int value -> ending distance must not be > INT_OVF
-        //ending distance < ending value for int : only one enqueue_movement
+        //A enqueue_movement is indexed on an int value -> final distance must not be > INT_OVF
+        //final distance < final value for int : only one enqueue_movement
         enqueue_movement(absolute_distances);
     }
 
@@ -129,7 +129,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
                 direction_signature |= SpeedPlanner::axis_signatures[axis];
             }
 
-            //Take the absolute distance, and compare if it is the greatest distance. If true, memorise the ending axis.
+            //Take the absolute distance, and compare if it is the greatest distance. If true, memorise the final axis.
             uint32_t absolute_distance = (uint32_t) distance;
             if (absolute_distance > max_dist) {
                 max_dist = absolute_distance;
@@ -274,7 +274,7 @@ void LinearMovement::set_motion_data(uint32_t *motion_dists) {
         }
     }
 
-    //Fill ending signatures
+    //Fill final signatures
     TrajectoryExecuter::fill_movement_data(false, step_distances, count, nsig);
 }
 
