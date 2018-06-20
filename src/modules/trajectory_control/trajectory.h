@@ -25,7 +25,27 @@
 #include "actuation.h"
 
 #include "geometry.h"
+
 #include "movement.h"
+
+#include <data_structures/containers/circular_buffer.h>
+
+/*
+ * The trajectory controller's possible states;
+ */
+typedef enum {
+
+		//The tracing routine is disabled;
+		TCONTROLLER_STOPPED,
+
+		//The tracing routine is enabled, the current movement is not finished;
+		TCONTROLLER_STARTED,
+
+		//The tracing routine is enabled, the current movement is finished but elementary movements are still to do.
+		// No movement manipulation is authorised until all elementary movements are executed;
+		TCONTROLLER_FINISHING,
+
+} tcontroller_state_t;
 
 
 typedef struct {
@@ -33,8 +53,14 @@ typedef struct {
 	//The trajectory's dimension;
 	uint8_t dimension;
 
+	//The trajectory controller's state;
+	volatile tcontroller_state_t state;
+
 	//The movements lists;
 	linked_list_t movements;
+
+	//The elementary movements buffer;
+	cbuffer_t elementary_movements;
 
 	//The trajectory's geometry;
 	geometry_t *geometry;
@@ -42,37 +68,50 @@ typedef struct {
 	//The trajectory's actuation layer;
 	actuation_t *actuation;
 
-} trajectory_controller_t;
+} tcontroller_t;
+
 
 //--------------------------------------------------- Initialisation ---------------------------------------------------
 
-//Create a trajectory;
-trajectory_controller_t *trajectory_init();//TODO;
+//Create and initialise a trajectory controller;
+tcontroller_t *tcontroller_create(uint8_t dimension, size_t elementary_buffer_size, geometry_t *geometry,
+								  actuation_t *actuation);//TODO;
 
-//Delete a trajectory;
-void trajectory_delete(trajectory_controller_t *);//TODO
+//Delete a trajectory controller;
+void tcontroller_delete(tcontroller_t *);//TODO
 
 
-//------------------------------------------------ Movement manipulation -----------------------------------------------
+//--------------------------------------------- Movement queue manipulation --------------------------------------------
 
-//Add a movement to the trajectory;
-void trajectory_enqueue_movement(movement_t *movement);//TODO;
+//Enqueue a movement to the trajectory;
+void tcontroller_enqueue(tcontroller_t *controller, movement_t *movement);//TODO;
 
-//Delete a trajectory;
-void trajectory_delete(trajectory_controller_t *);//TODO
+//Remove movements from the end of the trajectory. Stops if all movements are removed;
+void tcontroller_dequeue(tcontroller_t *controller, size_t nb_movements);//TODO
 
-//TODO START STOP
+
+//---------------------------------------------------- Start - Stop ----------------------------------------------------
+
+//Start moving;
+void tcontroller_start(tcontroller_t *controller);//TODO;
+
+//Stop moving. All undone movements / elementary movements will be deleted. Position is updated; Offset may appear;
+void tcontroller_stop(tcontroller_t *controller);//TODO;
+
+//TODO PAUSE PATCH:
+//void tcontroller_set_pause_point(tcontroller_t *controller, bool (*restart_flag)());
+
 
 //--------------------------------------- Functions called by the actuation layer --------------------------------------
 
 //Get a new sub_movement to execute;
-elementary_movement_t *trajectory_get_elementary_movement(trajectory_controller_t *);
+elementary_movement_t *trajectory_get_elementary_movement(tcontroller_t *);//TODO;
 
 //Update the number of steps which will compose the current elementary movement;
-void trajectory_update_movement_steps(trajectory_controller_t *, uint16_t mv_steps);
+void trajectory_update_movement_steps(tcontroller_t *, uint16_t mv_steps);//TODO;
 
 //Execute a step in the processing of the next elementary movement;
-void trajectory_sub_process(trajectory_controller_t *);
+void trajectory_sub_process(tcontroller_t *);//TODO;
 
 
 #endif //TRACER_TRAJECTORY_H

@@ -96,12 +96,14 @@ typedef struct movement_t {
 	//Jerk data;
 	jerk_data_t jerk_data;
 
+	//Deletion function;
+	void (*deletion_function)(struct movement_t *);
 
 } movement_t;
 
 
 //Initialise a movement with its primary data, and add it to the trajectory;
-void movement_init(movement_t *movement, uint8_t dimension, const curve_t *curve, trajectory_controller_t *trajectory);
+void movement_init(movement_t *movement, uint8_t dimension, const curve_t *curve, tcontroller_t *trajectory);
 
 //Delete a movement's dynamic data;
 void movement_delete(movement_t *);

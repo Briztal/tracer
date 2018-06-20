@@ -39,10 +39,14 @@
  */
 typedef enum {
 
+	//Timer is started, interrupt is enabled;
 	ACTUATION_STARTED,
 
+	//Timer is started, interrupt is disabled;
+	ACTUATION_PAUSED,
+
+	//Timer is stopped, interrupt is disabled;
 	ACTUATION_STOPPED,
-	//TODO ?
 
 } actuation_state_t;
 
@@ -80,7 +84,7 @@ typedef struct actuation_t {
 	timer_base_t *timer;
 
 	//The trajectory object we rely on;
-	trajectory_controller_t *trajectory;
+	tcontroller_t *trajectory;
 
 	//The current state;
 	actuation_state_t state;
@@ -115,13 +119,59 @@ typedef struct actuation_t {
 void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distance_target);
 
 //Start the actuation layer, handler will be called immediately;
-void actuation_start(actuation_t *actuation, trajectory_controller_t *);
+void actuation_start(actuation_t *actuation, tcontroller_t *);
 
 //Abort the current movement; An offset may happen depending on the implementation;
-void actuation_abort(actuation_t *actuation);
+void actuation_stop(actuation_t *actuation);
 
 //The actuation handler;
 void actuation_handler(actuation_t *actuation);
 
+
+//------------------------------------------------------- Inline -------------------------------------------------------
+
+/*
+ * actuation_pause : disables the interrupt if required;
+ */
+
+inline void actuation_pause(actuation_t *actuation) {
+
+	//If the actuation is started :
+	if (actuation->state == ACTUATION_STARTED) {
+
+		//Disable the interrupt;
+		timer_interrupt_disable(&actuation->timer->reload_interrupt);
+
+		//Update the state;
+		actuation->state = ACTUATION_PAUSED;
+
+	}
+
+	//If not, nothing to do;
+
+}
+
+
+/*
+ * actuation_resume : enables the interrupt; If in stopped state, errors;
+ */
+
+inline void actuation_resume(actuation_t *actuation) {
+
+	//If the actuation is stopped:
+	if (actuation->state == ACTUATION_STOPPED) {
+
+		//Error, cannot resume from paused state;
+		kernel_error("actuation.c : actuation_start : the actuation layer is not stopped;");
+
+	}
+
+	//Enable the interrupt;
+	timer_interrupt_enable(&actuation->timer->reload_interrupt);
+
+	//Update the state;
+	actuation->state = ACTUATION_STARTED;
+
+}
 
 #endif //TRACER_ACTUATION_H

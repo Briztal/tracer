@@ -27,12 +27,12 @@
 //-------------------------------------------------- Private headers ---------------------------------------------------
 
 //Determine increments;
-bool movement_determine_increments(const trajectory_controller_t *trajectory, const curve_t *curve,
+bool movement_determine_increments(const tcontroller_t *trajectory, const curve_t *curve,
 								   trajectory_increments_t *increments);
 
 
 //Extract the increment for a particular point;
-float movement_extract_increment(const trajectory_controller_t *trajectory, const curve_t *curve, float point, float increment);
+float movement_extract_increment(const tcontroller_t *trajectory, const curve_t *curve, float point, float increment);
 
 
 
@@ -50,7 +50,7 @@ uint32_t get_max_dist(uint8_t dimension, const float *p0, const float *p1);
  */
 
 void movement_init(movement_t *movement, const uint8_t dimension, const curve_t *const curve,
-				   trajectory_controller_t *trajectory) {
+				   tcontroller_t *trajectory) {
 
 	//Initialise the increments struct;
 	trajectory_increments_t increments {};
@@ -107,7 +107,7 @@ void movement_init(movement_t *movement, const uint8_t dimension, const curve_t 
 	memcpy(movement, &init, sizeof(init));
 
 	//Enqueue the movement to the trajectory;
-	trajectory_enqueue_movement(trajectory, movement);
+	tcontroller_enqueue(trajectory, movement);
 
 }
 
@@ -117,6 +117,9 @@ void movement_init(movement_t *movement, const uint8_t dimension, const curve_t 
  */
 
 void movement_delete(movement_t *movement) {
+
+	//Call the implementation deletion;
+	(*(movement->deletion_function))(movement);
 
 	//Free the jerk position;
 	kernel_free(movement->jerk_data.jerk_position);
@@ -140,7 +143,7 @@ void movement_delete(movement_t *movement) {
  * It handles the micro movement case.
  */
 
-bool movement_determine_increments(const trajectory_controller_t *trajectory, const curve_t *curve,
+bool movement_determine_increments(const tcontroller_t *trajectory, const curve_t *curve,
 								   trajectory_increments_t *increments) {
 
 	//Cache indices
@@ -210,7 +213,7 @@ bool movement_determine_increments(const trajectory_controller_t *trajectory, co
  *
  */
 
-float movement_extract_increment(const trajectory_controller_t *const trajectory, const curve_t *const curve, float point, float increment) {
+float movement_extract_increment(const tcontroller_t *const trajectory, const curve_t *const curve, float point, float increment) {
 
 	//Cache the dimension;
 	const uint8_t dimension = trajectory->(trajectory);

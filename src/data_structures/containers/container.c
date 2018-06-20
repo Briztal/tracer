@@ -80,7 +80,7 @@ void container_insert_element(container_t *container, const size_t index, void *
     //All value has been reallocated, now we must shift value from the insertion index;
     for (size_t shift_counts = nb_elements - (index + (size_t) 1); shift_counts--;) {
 
-        //Copy the value from source to dest, and decrease both pointers;
+        //Copy the value from source to destination, and decrease both pointers;
         *(dst_ptr--) = *(src_ptr--);
 
     }
@@ -93,7 +93,7 @@ void container_insert_element(container_t *container, const size_t index, void *
     //Now, copy the element;
     for (uint8_t copy_index = element_size; copy_index--;) {
 
-        //Copy the value from source to dest, and decrease both pointers;
+        //Copy the value from source to destination, and decrease both pointers;
         *(dst_ptr--) = *(src_ptr--);
 
     }
@@ -184,7 +184,7 @@ void container_remove_element(container_t *container, size_t index) {
     //Cache the element size;
     const uint8_t element_size = container->element_size;
 
-    //Determine source and dest pointers : addresses of (resp) the element to delete and the next one;
+    //Determine source and destination pointers : addresses of (resp) the element to delete and the next one;
     uint8_t *dst_ptr = (uint8_t *) (container->elements + (index * (size_t) element_size));
     uint8_t *src_ptr = dst_ptr + element_size;
 
@@ -194,7 +194,7 @@ void container_remove_element(container_t *container, size_t index) {
     //For each byte to shift :
     for (; shift_counter--;) {
 
-        //Copy the src byte in the dest position and increment both pointers;
+        //Copy the src byte in the destination position and increment both pointers;
         (*dst_ptr++) = (*src_ptr++);
 
     }

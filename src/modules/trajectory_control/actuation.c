@@ -28,10 +28,10 @@
 //--------------------------------------------------- Private headers --------------------------------------------------
 
 //The function to stop the actuation layer;
-void actuation_stop(actuation_t *actuation);
+void _actuation_stop(actuation_t *actuation);
 
 //Query a new movement; returns true if succeeded;
-bool actuation_query_movement(actuation_t *actuation, trajectory_controller_t *trajectory);
+bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory);
 
 
 //--------------------------------------------------- Initialisation --------------------------------------------------
@@ -49,7 +49,7 @@ void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distan
 	actuation->distance_target = distance_target;
 
 	//Stop the actuation;
-	actuation_stop(actuation);
+	_actuation_stop(actuation);
 
 }
 
@@ -63,13 +63,13 @@ void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distan
  * 	- handler will be called immediately;
  */
 
-void actuation_start(actuation_t *actuation, trajectory_controller_t *trajectory) {
+void actuation_start(actuation_t *actuation, tcontroller_t *trajectory) {
 
 	//If the actuation is already started :
-	if (actuation->state == ACTUATION_STARTED) {
+	if (actuation->state != ACTUATION_STOPPED) {
 
 		//Error, can't be started twice;
-		kernel_error("actuation.c : actuation_start : the actuation layer is already started;");
+		kernel_error("actuation.c : actuation_start : the actuation layer is not stopped;");
 
 	}
 
@@ -102,24 +102,24 @@ void actuation_start(actuation_t *actuation, trajectory_controller_t *trajectory
 
 
 /*
- * actuation_abort : stops the actuation layer, position accuracy is not guaranteed;
+ * actuation_stop : stops the actuation layer, position accuracy is not guaranteed;
  */
 
-void actuation_abort(actuation_t *actuation) {
+void actuation_stop(actuation_t *actuation) {
 
 	//TODO POSITION PATCH : FILL AN ARRAY WITH REALISED TICS;
 
 	//Stop the actuation;
-	actuation_stop(actuation);
+	_actuation_stop(actuation);
 
 }
 
 
 /*
- * actuation_stop : resets the timer, resets dynamic data, enter in stopped state;
+ * _actuation_stop : resets the timer, resets dynamic data, enter in stopped state;
  */
 
-void actuation_stop(actuation_t *actuation) {
+void _actuation_stop(actuation_t *actuation) {
 
 	//Cache the timer;
 	const timer_base_t *const timer = actuation->timer;
@@ -154,7 +154,7 @@ void actuation_stop(actuation_t *actuation) {
  * actuation_query_movement : queries a new movement, stop if it is null, initialises the environment if not;
  */
 
-bool actuation_query_movement(actuation_t *actuation, trajectory_controller_t *trajectory) {
+bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory) {
 
 	//Query a new movement;
 	elementary_movement_t *next_movement = trajectory_get_elementary_movement(trajectory);
@@ -163,7 +163,7 @@ bool actuation_query_movement(actuation_t *actuation, trajectory_controller_t *t
 	if (!next_movement) {
 
 		//We can stop the actuation layer;
-		actuation_stop(actuation);
+		_actuation_stop(actuation);
 
 		//Fail;
 		return false;
@@ -206,7 +206,7 @@ void actuation_handler(actuation_t *const actuation) {
 	if (!actuation->mv_steps) {
 
 		//Stop the actuation layer;
-		actuation_stop(actuation);
+		_actuation_stop(actuation);
 
 	}
 
@@ -217,7 +217,7 @@ void actuation_handler(actuation_t *const actuation) {
 	actuation->mv_steps--;
 
 	//Cache the trajectory pointer;
-	trajectory_controller_t *trajectory = actuation->trajectory;
+	tcontroller_t *trajectory = actuation->trajectory;
 
 	//If the movement is finished :
 	if (!actuation->mv_steps) {

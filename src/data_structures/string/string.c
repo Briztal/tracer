@@ -107,7 +107,7 @@ string_t *string_create_from_symmetric(const size_t string_length, const char *c
     //Create a memory space in the heap for data;
     void *ptr = kernel_malloc(size);
 
-    //Symmetric copy from stack to heap; dest is null-terminated;
+    //Symmetric copy from stack to heap; destination is null-terminated;
     string_symmetric_copy(ptr, stack_src, string_length);
 
     //Built the string and return the result;
