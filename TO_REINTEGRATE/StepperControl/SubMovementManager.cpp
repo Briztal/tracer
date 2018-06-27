@@ -237,6 +237,7 @@ void SubMovementManager::push_new_sub_movement() {
 
 void SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movement_data) {
 
+
     //------------------Index computing-----------------------------
 
     //Get the new index candidate;

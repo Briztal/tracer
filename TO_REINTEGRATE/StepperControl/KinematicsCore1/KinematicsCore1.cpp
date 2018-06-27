@@ -20,9 +20,6 @@
 
 #include <config.h>
 
-#include <Config/stepper_control_config.h>
-
-#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 1)
 
 #include "K1Physics.h"
 #include "KinematicsCore1.h"
@@ -224,4 +221,3 @@ float *const m::current_hl_position = t_c_hl_p_1;
 
 #undef m
 
-#endif

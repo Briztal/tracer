@@ -34,7 +34,7 @@ Step 1 : Measure.
 
     A new measure M is made.
 
-    The prediction is translated to a prediction on the measure, with the linear relation :
+    The prediction is translated to a prediction on the measure, with the affine_curve relation :
         M+ = H * X+ (vector);
             with H the translation matrix of sequences_initialised to measure, M+ the predicted measure, X+ the predicted sequences_initialised;
 

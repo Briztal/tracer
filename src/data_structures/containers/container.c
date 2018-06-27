@@ -52,7 +52,7 @@ void container_move(container_t *dst, container_t *src) {
  *  Finally, it copies the referenced element;
  */
 
-void container_insert_element(container_t *container, const size_t index, void *element) {
+void container_insert_element(container_t *const container, const size_t index, const void *element) {
 
     //If the index is invalid, fail;
     if (index > container->nb_elements)
@@ -105,7 +105,7 @@ void container_insert_element(container_t *container, const size_t index, void *
  * container_append_element : insert the element at the end of the array;
  */
 
-void container_append_element(container_t *container, void *element) {
+void container_append_element(container_t *const container, const void *element) {
 
     //Insert the element at the end of the array;
     container_insert_element(container, container->nb_elements, element);
@@ -117,7 +117,7 @@ void container_append_element(container_t *container, void *element) {
  * container_get_element : returns a pointer to the element at the given index;
  */
 
-void *container_get_element(container_t *container, size_t index) {
+void *container_get_element(const container_t *const container, size_t index) {
 
     //If the index is invalid :
     if (index >= container->nb_elements) {
@@ -137,7 +137,7 @@ void *container_get_element(container_t *container, size_t index) {
  * container_set_element : sets the element at the given index;
  */
 
-void container_set_element(container_t *container, size_t index, void *element) {
+void container_set_element(container_t *const container, size_t index, const void *element) {
 
     //If the index is invalid :
     if (index >= container->nb_elements) {
@@ -163,7 +163,7 @@ void container_set_element(container_t *container, size_t index, void *element) 
 
 
 //Remove an element;
-void container_remove_element(container_t *container, size_t index) {
+void container_remove_element(container_t *const container, size_t index) {
 
     //First, cache the current size of the array;
     size_t current_size = container->nb_elements;
@@ -209,7 +209,7 @@ void container_remove_element(container_t *container, size_t index) {
  * container_remove_last_element : removes the last element of the array;
  */
 
-void container_remove_last_element(container_t *container) {
+void container_remove_last_element(container_t *const container) {
 
     //Determine the last index, and call remove on it;
     container_remove_element(container, container->nb_elements - (size_t) 1);
@@ -221,7 +221,7 @@ void container_remove_last_element(container_t *container) {
  * container_clear : resize to null pointer;
  */
 
-void container_clear(container_t *container) {
+void container_clear(container_t *const container) {
 
     //Call resize with size-zero to delete all elements;
     container_resize(container, 0);
@@ -235,7 +235,7 @@ void container_clear(container_t *container) {
  *  The size is expressed in number of elements;
  */
 
-void container_resize(container_t *container, const size_t new_size) {
+void container_resize(container_t *const container, const size_t new_size) {
 
     //If the new size is superior to the max size :
     if (new_size > container->max_nb_elements) {

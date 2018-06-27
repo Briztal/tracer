@@ -22,9 +22,6 @@
 
 #include <config.h>
 
-#include <Config/stepper_control_config.h>
-
-#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 1)
 
 #include <math.h>
 #include <Actuators/PWMGPIO.h>
@@ -848,6 +845,3 @@ bool m::speed_regulation_enabled = true;
 
 
 #undef m
-
-
-#endif

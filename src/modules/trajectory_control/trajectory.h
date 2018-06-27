@@ -22,96 +22,136 @@
 #ifndef TRACER_TRAJECTORY_H
 #define TRACER_TRAJECTORY_H
 
+#include "stdint.h"
+
 #include "actuation.h"
 
 #include "geometry.h"
+#include "jerk.h"
 
-#include "movement.h"
+#include <data_structures/containers/llist.h>
 
-#include <data_structures/containers/circular_buffer.h>
+
+
+//The curve function type; Receives a curve data and an index and updates the positions array;
+typedef void (*curve_function_t)(struct curve_t *curve, float index, float *positions);
 
 /*
- * The trajectory controller's possible states;
+ * The parametric equation struct;
  */
-typedef enum {
+typedef struct {
 
-		//The tracing routine is disabled;
-		TCONTROLLER_STOPPED,
+	//The curve's dimension;
+	const uint8_t dimension;
 
-		//The tracing routine is enabled, the current movement is not finished;
-		TCONTROLLER_STARTED,
+	//The trajectory function : it takes a real value (the index) and outputs a position;
+	const curve_function_t function;
 
-		//The tracing routine is enabled, the current movement is finished but elementary movements are still to do.
-		// No movement manipulation is authorised until all elementary movements are executed;
-		TCONTROLLER_FINISHING,
+	//The initial value of the trajectory index;
+	const float initial_index;
 
-} tcontroller_state_t;
+	//The final value of the trajectory index;
+	const float final_index;
 
+} curve_t;
+
+
+//Get a particular point of the curve;
+static void curve_evaluate(const curve_t *curve, const float index, float *const dest) {
+
+	//Get the function, and call it with all args;
+	(*(curve->function))(curve, index, dest);
+
+}
+
+
+//--------------------------------------------------- Geometric base ---------------------------------------------------
+
+/*
+ * This struct eases arguments passing during geometric computations;
+ */
 
 typedef struct {
 
-	//The trajectory's dimension;
+	//The dimension (duplicate of the curve dimension);
 	uint8_t dimension;
 
-	//The trajectory controller's state;
-	volatile tcontroller_state_t state;
+	//The curve pointer;
+	const curve_t *const curve;
 
-	//The movements lists;
-	linked_list_t movements;
+	//The geometry pointer;
+	const geometry_t *const geometry;
 
-	//The elementary movements buffer;
-	cbuffer_t elementary_movements;
+	//The distance bounds;
+	const dbounds_t dbounds;
 
-	//The trajectory's geometry;
-	geometry_t *geometry;
-
-	//The trajectory's actuation layer;
-	actuation_t *actuation;
-
-} tcontroller_t;
+} geometric_base_t;
 
 
-//--------------------------------------------------- Initialisation ---------------------------------------------------
-
-//Create and initialise a trajectory controller;
-tcontroller_t *tcontroller_create(uint8_t dimension, size_t elementary_buffer_size, geometry_t *geometry,
-								  actuation_t *actuation);//TODO;
-
-//Delete a trajectory controller;
-void tcontroller_delete(tcontroller_t *);//TODO
+//Evaluate the curve in one point and translate the result in control coordinates;
+void curve_evaluate_convert(const geometric_base_t *geometric_base, float index, float *dest);
 
 
-//--------------------------------------------- Movement queue manipulation --------------------------------------------
-
-//Enqueue a movement to the trajectory;
-void tcontroller_enqueue(tcontroller_t *controller, movement_t *movement);//TODO;
-
-//Remove movements from the end of the trajectory. Stops if all movements are removed;
-void tcontroller_dequeue(tcontroller_t *controller, size_t nb_movements);//TODO
+//Evaluate the curve in one point and translate the result in control coordinates; Uses a provided temporary array;
+void curve_evaluate_convert_tmp_provided(const geometric_base_t *geometric_base, float *tmp, float index, float *dest);
 
 
-//---------------------------------------------------- Start - Stop ----------------------------------------------------
-
-//Start moving;
-void tcontroller_start(tcontroller_t *controller);//TODO;
-
-//Stop moving. All undone movements / elementary movements will be deleted. Position is updated; Offset may appear;
-void tcontroller_stop(tcontroller_t *controller);//TODO;
-
-//TODO PAUSE PATCH:
-//void tcontroller_set_pause_point(tcontroller_t *controller, bool (*restart_flag)());
+//----------------------------------------------------- Trajectory -----------------------------------------------------
 
 
-//--------------------------------------- Functions called by the actuation layer --------------------------------------
+/*
+ * Increments struct : contains initial and final increments;
+ */
+typedef struct {
 
-//Get a new sub_movement to execute;
-elementary_movement_t *trajectory_get_elementary_movement(tcontroller_t *);//TODO;
+	//The increment at the initial point;
+	float initial;
 
-//Update the number of steps which will compose the current elementary movement;
-void trajectory_update_movement_steps(tcontroller_t *, uint16_t mv_steps);//TODO;
+	//The increment at the final point;
+	float final;
 
-//Execute a step in the processing of the next elementary movement;
-void trajectory_sub_process(tcontroller_t *);//TODO;
+} trajectory_increments_t;
+
+
+
+/*
+ * A trajectory is composed of :
+ * 	- a linked element on is base, to allow storage in linked lists;
+ * 	- a dimension;
+ * 	- a curve, determining the path;
+ * 	- base increments for initial an final trajectories;
+ * 	- storage data for jerk management;
+ */
+
+typedef struct trajectory_t {
+
+	//Trajectories are stored in linked lists;
+	linked_element_t link;
+
+	//Trajectory curve;
+	const curve_t curve;
+
+	//A flag to determine if the distance computation can be optimised;
+	bool affine_curve;
+
+	//Increments;
+	trajectory_increments_t increments;
+
+	//Jerk data;
+	jerk_data_t jerk_data;
+
+
+	//Deletion function;
+	void (*deletion_function)(struct trajectory_t *);
+
+} trajectory_t;
+
+
+//Initialise a trajectory with its primary data, and send it to the actuation layer;
+void trajectory_init(trajectory_t *trajectory, const curve_t *curve, bool affine_curve, actuation_t *actuation);
+
+//Delete a trajectory's dynamic data;
+void trajectory_delete(trajectory_t *trajectory);
 
 
 #endif //TRACER_TRAJECTORY_H

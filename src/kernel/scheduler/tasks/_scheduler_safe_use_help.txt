@@ -190,6 +190,6 @@ GOOD PRACTICES :
 When you implement tasks for an interface (in [interface]Commands.cpp) :
     - If you function plans a/some type-non255 task/s, always verify that the corresponding sequence does have to required
         number of nb_spaces. If not, never forget to lock very sequence related to your function.
-    - Some functions plan tasks by themselves (Stepper movements plan for example). When you use them, systematically
+    - Some functions plan tasks by themselves (Stepper trajectories plan for example). When you use them, systematically
         check the return value : if it returns "reprogram", your function must stop, eventually lock the appropriate
         sequence, and return the same sequences_initialised.

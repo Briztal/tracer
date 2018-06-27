@@ -20,9 +20,6 @@
 
 #include <config.h>
 
-#include <Config/stepper_control_config.h>
-
-#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 2)
 
 #include "K2Physics.h"
 
@@ -444,4 +441,3 @@ uint32_t *const m::jerk_offsets = k2jot;
 
 #undef m
 
-#endif

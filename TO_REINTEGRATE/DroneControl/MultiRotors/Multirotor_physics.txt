@@ -35,7 +35,7 @@ Power command :
 
     The voltage is delivered to motors via a power signal p_i, comprised between 0 and max_i.
 
-    This power commands will cause the motor to rotate, and we will suppose that there is a linear relation between
+    This power commands will cause the motor to rotate, and we will suppose that there is a affine_curve relation between
         the power command, and the rotation speed of the motor :
 
         n_i = kv_i * voltage_i; k_i : (r/m)/V

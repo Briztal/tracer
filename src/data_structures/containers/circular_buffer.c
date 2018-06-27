@@ -19,6 +19,7 @@
 */
 
 #include <stdbool.h>
+#include <kernel/kernel.h>
 #include "circular_buffer.h"
 #include "container.h"
 
@@ -27,13 +28,16 @@
  * discard_all : discards all elements in the buffer, but doesn't change the container's size;
  */
 
-void discard_all(cbuffer_t *cbuffer) {
+void cbuffer_discard_all(cbuffer_t *const cbuffer) {
 
-    //Set the number of spaces at its maximum;
-    cbuffer->nb_spaces = cbuffer->container.nb_elements;
+	//Set the number of spaces at its maximum;
+	cbuffer->nb_spaces = cbuffer->container.nb_elements;
 
-    //Set input and output indices at their initial value;
-    cbuffer->input_index = cbuffer->output_index = 0;
+	//Set the number of elements to 0;
+	cbuffer->nb_elements = 0;
+
+	//Set input and output indices at their initial value;
+	cbuffer->input_index = cbuffer->output_index = 0;
 
 }
 
@@ -43,28 +47,42 @@ void discard_all(cbuffer_t *cbuffer) {
  * cbuffer_insert : adds an element in the buffer, at the insertion position; Integrity guaranteed;
  */
 
-void cbuffer_insert(cbuffer_t *cbuffer, void *element_p) {
+void cbuffer_insert(cbuffer_t *const cbuffer, const void *const element_p) {
 
-    //Spaces will be verified during cbuffer_validate_input;
+	//Spaces will be verified during cbuffer_validate_input;
 
-    //Set the element at the correct position;
-    container_set_element(&cbuffer->container, cbuffer->input_index, element_p);
+	//Set the element at the correct position;
+	container_set_element(&cbuffer->container, cbuffer->input_index, element_p);
 
-    //Validate the input position;
-    cbuffer_validate_input(cbuffer);
+	//Validate the input position;
+	cbuffer_validate_input(cbuffer);
 
 }
 
-//Increase the input index, and guarantee the integrity of the input element;
-void cbuffer_validate_input(cbuffer_t *cbuffer) {
+/*
+ * cbuffer_validate_input : increase the input index, and guarantee the integrity of the input element;
+ */
 
-    //If no spaces are available, validation is impossible;
-    if (!cbuffer->nb_spaces)
-        return;//TODO ERROR;
+void cbuffer_validate_input(cbuffer_t *const cbuffer) {
 
+	//If no spaces are available, validation is impossible;
+	if (!cbuffer->nb_spaces) {
 
-    //Increment safely;
-    cbuffer->input_index = (cbuffer->input_index + (size_t) 1) % cbuffer->container.nb_elements;
+		//Error;
+		kernel_error("circular_buffer.c : cbuffer_validate_input : the buffer is full;");
+
+		//Fail. Never reached;
+		return;
+	}
+
+	//Increment safely;
+	cbuffer->input_index = (cbuffer->input_index + (size_t) 1) % cbuffer->container.nb_elements;
+
+	//Increment the number of elements;
+	cbuffer->nb_elements++;
+
+	//Decrement the number spaces;
+	cbuffer->nb_spaces--;
 
 }
 
@@ -74,42 +92,64 @@ void cbuffer_validate_input(cbuffer_t *cbuffer) {
  *  An offset of 0 hits the input element, 1 hits the element inserted just before, etc...
  */
 
-inline void *cbuffer_read_input(cbuffer_t *cbuffer, size_t offset) {
+void *cbuffer_read_input(const cbuffer_t *const cbuffer, const size_t offset) {
 
-    /*
-     * read_input is used to access previously inserted data, but also to update the element we will validate;
-     * As a consequence, the reading will be invalid if the offset is strictly greater than the number of elements
-     *  in the buffer;
-     */
+	/*
+	 * read_input is used to access previously inserted data, but also to update the element we will validate;
+	 * As a consequence, the reading will be invalid if the offset is strictly greater than the number of elements
+	 *  in the buffer;
+	 */
 
-    if (offset > (cbuffer->container.nb_elements - cbuffer->nb_spaces)) {
-        return 0; //TODO ERROR;
-    }
+	if (offset > cbuffer->nb_elements) {
 
-    //First, cache the input index;
-    size_t input_index = cbuffer->input_index;
+		//Error;
+		kernel_error("circular_buffer.c : cbuffer_read_input : offset is greater than the number of elements;;");
 
-    //Then determine the index of the element to read;
-    size_t index = (input_index >= offset) ? input_index - offset : cbuffer->container.nb_elements -
-                                                                               (offset - input_index);
+		//Fail. Never reached;
+		return 0;
 
-    //Get the element at the required position. A modulo is applied to ensure to hit a container's element;
-    return container_get_element(&cbuffer->container, index);
+	}
+
+	//First, cache the input index;
+	size_t input_index = cbuffer->input_index;
+
+	//Then determine the index of the element to read;
+	size_t index = (input_index >= offset) ? input_index - offset : cbuffer->container.nb_elements -
+																	(offset - input_index);
+
+	//Get the element at the required position. A modulo is applied to ensure to hit a container's element;
+	return container_get_element(&cbuffer->container, index);
 
 }
 
 
 //------------------------------------ Output ------------------------------------
 
-//Discard the output element. Integrity not guaranteed anymore;
-void cbuffer_discard_output(cbuffer_t *cbuffer) {
+/*
+ * cbuffer_discard_output : discards the output element. Its integrity not guaranteed anymore;
+ */
 
-    //If no elements are available (nb of spaces equal to the max nb of elements), discarding is impossible;
-    if (cbuffer->nb_spaces == cbuffer->container.nb_elements)
-        return;//TODO ERROR;
+void cbuffer_discard_output(cbuffer_t *const cbuffer) {
 
-    //Increment safely;
-    cbuffer->output_index = (cbuffer->output_index + (size_t) 1) % cbuffer->container.nb_elements;
+	//If no elements are available, discarding is impossible;
+	if (!cbuffer->nb_elements) {
+
+		//Error;
+		kernel_error("circular_buffer.c : cbuffer_discard_output : the buffer is empty;");
+
+		//Fail. Never reached;
+		return;
+
+	}
+
+	//Increment safely;
+	cbuffer->output_index = (cbuffer->output_index + (size_t) 1) % cbuffer->container.nb_elements;
+
+	//Decrement the number of elements;
+	cbuffer->nb_elements--;
+
+	//Increment the number of spaces;
+	cbuffer->nb_spaces++;
 
 }
 
@@ -119,31 +159,36 @@ void cbuffer_discard_output(cbuffer_t *cbuffer) {
  * An offset of 0 hits the output element, 1 hits the element inserted right after, ...
  */
 
-void *cbuffer_read_output(cbuffer_t *cbuffer, size_t offset) {
+void *cbuffer_read_output(cbuffer_t *const cbuffer, const size_t offset) {
 
-    //TODO ERROR IF BOUNDS OVERRUN
+	/*
+	 * read_output is used to access previously inserted data
+	 * As a consequence, the reading will be invalid if the offset is greater or equal to the number of elements
+	 *  in the buffer;
+	 */
 
-    /*
-     * read_output is used to access previously inserted data
-     * As a consequence, the reading will be invalid if the offset is greater or equal to the number of elements
-     *  in the buffer;
-     */
+	if (offset >= cbuffer->nb_elements) {
 
-    if (offset >= (cbuffer->container.nb_elements - cbuffer->nb_spaces)) {
-        return 0; //TODO ERROR;
-    }
+		//Error;
+		kernel_error("circular_buffer.c : cbuffer_read_output : offset is greater or equal"
+						 " than the number of elements;");
 
-    //First, cache the output_index index;
-    size_t output_index = cbuffer->output_index;
+		//Fail. Never reached;
+		return 0;
 
-    //As an addition is required, we will switch to the larger type to avoid a type overflow;
-    uint32_t larger_index = (uint32_t) output_index + (uint32_t) offset;
+	}
 
-    //Then determine the index of the element to read by a modulo;
-    size_t index = (uint16_t) (larger_index % (uint32_t) cbuffer->container.nb_elements);
+	//First, cache the output_index index;
+	size_t output_index = cbuffer->output_index;
 
-    //Get the element at the required position. A modulo is applied to ensure to hit a container's element;
-    return container_get_element(&cbuffer->container, index);
+	//As an addition is required, we will switch to the larger type to avoid a type overflow;
+	uint32_t larger_index = (uint32_t) output_index + (uint32_t) offset;
+
+	//Then determine the index of the element to read by a modulo;
+	size_t index = (uint16_t) (larger_index % (uint32_t) cbuffer->container.nb_elements);
+
+	//Get the element at the required position. A modulo is applied to ensure to hit a container's element;
+	return container_get_element(&cbuffer->container, index);
 
 }
 
@@ -155,56 +200,61 @@ void *cbuffer_read_output(cbuffer_t *cbuffer, size_t offset) {
  *  All elements pointers that have been queried are invalidated;
  */
 
-void cbuffer_resize(cbuffer_t *cbuffer, size_t new_size) {
+void cbuffer_resize(cbuffer_t *const cbuffer, const size_t new_size) {
 
-    //Dynamic resize is not supported for instance;
-    if (cbuffer->nb_spaces != cbuffer->container.nb_elements) {
+	//Dynamic resize is not supported for instance;
+	if (cbuffer->nb_elements) {
 
-        return;//TODO ERROR;
+		//Error;
+		kernel_error("circular_buffer.c : cbuffer_resize : resizing of non empty buffer is not supported;");
 
-    }
+		//Fail. Never reached;
+		return;
 
-    //Resize the container;
-    container_resize(&cbuffer->container, new_size);
+	}
 
-    //Reset its data;
-    cbuffer->nb_spaces = 0;
-    cbuffer->output_index = cbuffer->input_index = 0;
+	//Resize the container;
+	container_resize(&cbuffer->container, new_size);
 
-    /*
-     * First, we must determine if rearrangement will be necessary.
-     *  Elements are not stored from 0 to x, they can overlap the end of the container.
-     *
-     *  A rearrangement is required if the input index is strictly lower than the output index,
-     *      or if there are no spaces in the array;
-     */
+	//Reset its data;
+	cbuffer->nb_spaces = new_size;
+	cbuffer->nb_elements = 0;
+	cbuffer->output_index = cbuffer->input_index = 0;
 
-    /* IF A DYNAMIC RESIZE IS REQUIRED : THAT'S THE BEGINNING
-     *
+	/*
+	 * First, we must determine if rearrangement will be necessary.
+	 *  Elements are not stored from 0 to x, they can overlap the end of the container.
+	 *
+	 *  A rearrangement is required if the input index is strictly lower than the output index,
+	 *      or if there are no spaces in the array;
+	 */
 
-    //For instance, size reduction is not supported;
-    if (new_size <= cbuffer->container.nb_elements) {
-        return;//TODO ERROR;
-    }
+	/* IF A DYNAMIC RESIZE IS REQUIRED : THAT'S THE BEGINNING
+	 *
 
-    bool rearrangement = (cbuffer->input_index < cbuffer->output_index) || cbuffer->nb_spaces;
+	//For instance, size reduction is not supported;
+	if (new_size <= cbuffer->container.nb_elements) {
+		return;//TODO ERROR;
+	}
 
-    //Cache the old size of the container;
-    size_t old_size =  cbuffer->container.nb_elements;
+	bool rearrangement = (cbuffer->input_index < cbuffer->output_index) || cbuffer->nb_spaces;
 
-    //Cache the number of added elements;
-    uint8_t added_elements =
+	//Cache the old size of the container;
+	size_t old_size =  cbuffer->container.nb_elements;
 
-    //Increment the number of spaces of the number of added cases;
-    cbuffer->nb_spaces += new_size - cbuffer->container.nb_elements;
+	//Cache the number of added elements;
+	uint8_t added_elements =
 
-    //Then, resize the array;
-    container_resize(&cbuffer->container, new_size);
+	//Increment the number of spaces of the number of added cases;
+	cbuffer->nb_spaces += new_size - cbuffer->container.nb_elements;
 
-    //If rearrangement is required :
-    if (rearrangement) {
+	//Then, resize the array;
+	container_resize(&cbuffer->container, new_size);
 
-        */
+	//If rearrangement is required :
+	if (rearrangement) {
+
+		*/
 
 }
 

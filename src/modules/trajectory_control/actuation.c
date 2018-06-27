@@ -22,7 +22,7 @@
 
 #include "actuation.h"
 
-#include "trajectory.h"
+#include "tcontroller.h"
 
 
 //--------------------------------------------------- Private headers --------------------------------------------------
@@ -31,7 +31,54 @@
 void _actuation_stop(actuation_t *actuation);
 
 //Query a new movement; returns true if succeeded;
-bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory);
+bool actuation_query_movement(actuation_t *actuation);
+
+
+//--------------------------------------------------- Inline --------------------------------------------------
+
+/*
+ * actuation_pause : disables the interrupt if required;
+ */
+
+inline void actuation_pause(actuation_t *actuation) {
+
+	//If the actuation is started :
+	if (actuation->state == ACTUATION_STARTED) {
+
+		//Disable the interrupt;
+		timer_interrupt_disable(&actuation->timer->reload_interrupt);
+
+		//Update the state;
+		actuation->state = ACTUATION_PAUSED;
+
+	}
+
+	//If not, nothing to do;
+
+}
+
+
+/*
+ * actuation_resume : enables the interrupt; If in stopped state, errors;
+ */
+
+inline void actuation_resume(actuation_t *actuation) {
+
+	//If the actuation is stopped:
+	if (actuation->state == ACTUATION_STOPPED) {
+
+		//Error, cannot resume from paused state;
+		kernel_error("actuation.c : actuation_resume : the actuation layer is stopped;");
+
+	}
+
+	//Enable the interrupt;
+	timer_interrupt_enable(&actuation->timer->reload_interrupt);
+
+	//Update the state;
+	actuation->state = ACTUATION_STARTED;
+
+}
 
 
 //--------------------------------------------------- Initialisation --------------------------------------------------
@@ -40,13 +87,13 @@ bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory)
  * actuation_init : Initialises the timer pointer and enter in stopped state;
  */
 
-void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distance_target) {
+void actuation_init(actuation_t *actuation, timer_base_t *timer, tcontroller_t *tcontroller) {
 
 	//Initialise the timer pointer;
 	actuation->timer = timer;
 
-	//Initialise the distance target;
-	actuation->distance_target = distance_target;
+	//Initialise the trajectory controller;
+	actuation->tcontroller = tcontroller;
 
 	//Stop the actuation;
 	_actuation_stop(actuation);
@@ -63,7 +110,7 @@ void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distan
  * 	- handler will be called immediately;
  */
 
-void actuation_start(actuation_t *actuation, tcontroller_t *trajectory) {
+void actuation_start(actuation_t *actuation) {
 
 	//If the actuation is already started :
 	if (actuation->state != ACTUATION_STOPPED) {
@@ -73,11 +120,8 @@ void actuation_start(actuation_t *actuation, tcontroller_t *trajectory) {
 
 	}
 
-	//Initialise the trajectory instance;
-	actuation->trajectory = trajectory;
-
 	//Query a new movement. Will stop is null provided;
-	bool started = actuation_query_movement(actuation, trajectory);
+	bool started = actuation_query_movement(actuation);
 
 	//If query succeeded :
 	if (started) {
@@ -121,6 +165,10 @@ void actuation_stop(actuation_t *actuation) {
 
 void _actuation_stop(actuation_t *actuation) {
 
+	//If the layer is already stopped, nothing to do;
+	if (actuation->state == ACTUATION_STOPPED)
+		return;
+
 	//Cache the timer;
 	const timer_base_t *const timer = actuation->timer;
 
@@ -140,7 +188,7 @@ void _actuation_stop(actuation_t *actuation) {
 	actuation->state = ACTUATION_STOPPED;
 
 	//Reset the trajectory pointer;
-	actuation->trajectory = 0;
+	actuation->tcontroller = 0;
 
 	//Reset the movement steps;
 	actuation->mv_steps = 0;
@@ -154,10 +202,16 @@ void _actuation_stop(actuation_t *actuation) {
  * actuation_query_movement : queries a new movement, stop if it is null, initialises the environment if not;
  */
 
-bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory) {
+bool actuation_query_movement(actuation_t *actuation) {
+
+	//Cache the trajectory controller;
+	tcontroller_t *const tcontroller = actuation->tcontroller;
 
 	//Query a new movement;
-	elementary_movement_t *next_movement = trajectory_get_elementary_movement(trajectory);
+	movement_t *next_movement = tcontroller_get_movement(tcontroller);
+
+	//Cache the return state;
+	bool correct_mv_received;
 
 	//If the movement is null, the movement sequence is finished;
 	if (!next_movement) {
@@ -166,7 +220,7 @@ bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory)
 		_actuation_stop(actuation);
 
 		//Fail;
-		return false;
+		correct_mv_received =  false;
 
 	} else {
 		//If the movement is not null :
@@ -177,13 +231,22 @@ bool actuation_query_movement(actuation_t *actuation, tcontroller_t *trajectory)
 		//Update the timer's period;
 		timer_set_period(actuation->timer, period);
 
-		//Transmit the number of steps the movement will comprise to the trajectory manager;
-		trajectory_update_movement_steps(trajectory, actuation->mv_steps);
-
 		//Complete;
-		return true;
+		correct_mv_received = true;
 
 	}
+
+	//If we must re-iterate :
+	if (correct_mv_received) {
+
+		//Notify the controller that it can discard the current movement;
+		//At the same time, transmit the number of steps that will be made before next call;
+		tcontroller_discard_movement(tcontroller, actuation->mv_steps);
+
+	}
+
+	//Return true if we received a correct movement;
+	return correct_mv_received;
 
 }
 
@@ -217,19 +280,19 @@ void actuation_handler(actuation_t *const actuation) {
 	actuation->mv_steps--;
 
 	//Cache the trajectory pointer;
-	tcontroller_t *trajectory = actuation->trajectory;
+	tcontroller_t *trajectory = actuation->tcontroller;
 
 	//If the movement is finished :
 	if (!actuation->mv_steps) {
 
 		//Query a new movement. Will stop is null provided;
-		actuation_query_movement(actuation, trajectory);
+		actuation_query_movement(actuation);
 
 	} else {
 		//If the movement is not finished :
 
 		//Call for a sub_process;
-		trajectory_sub_process(trajectory);
+		tcontroller_step_process(trajectory);
 
 	}
 

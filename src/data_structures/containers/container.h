@@ -59,17 +59,17 @@ inline bool container_insertion_available(container_t *container) {
 }
 
 //Insert an element at the given index;
-void container_insert_element(container_t *container, size_t index, void *element_p);
+void container_insert_element(container_t *container, size_t index, const void *element_p);
 
 //Insert an element at the end of the array;
-void container_append_element(container_t *container, void *element_p);
+void container_append_element(container_t *container, const void *element_p);
 
 
 //Get the element at the given index;
-void *container_get_element(container_t *container, size_t index);
+void *container_get_element(const container_t *container, size_t index);
 
 //Set the element at the given index;
-void container_set_element(container_t *container, size_t index, void *element_p);
+void container_set_element(container_t *container, size_t index, const void *element_p);
 
 
 //Remove an element;

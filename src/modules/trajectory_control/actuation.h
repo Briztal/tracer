@@ -24,14 +24,14 @@
 
 #include "stdint.h"
 
-#include "trajectory.h"
+#include "tcontroller.h"
 
 #include <kernel/drivers/timer.h>
 
 /*
  * The actuation layer interfaces with actuators; Its goals are :
  * 	- To go to the required position in the required duration;
- * 	- To divide the required movement into sub-movements if necessary;
+ * 	- To divide the required movement into sub-trajectories if necessary;
  */
 
 /*
@@ -51,46 +51,16 @@ typedef enum {
 } actuation_state_t;
 
 
-//To describe boolean qualifications over an array of elements, we define the signature boolean type;
-typedef uint32_t sig_t;
-
-
-/*
- * A destination position is represented by a set of coordinates and a delay to reach;
- */
-typedef struct {
-
-	//The number of axis of the movement;
-	uint8_t size;
-
-	//The distances coordinates array;
-	uint16_t *distances;
-
-	//The directions signature; signature is negative.
-	sig_t sign_signature;
-
-	//The speed coordinates array;
-	//TODO ?
-
-	//The number of microseconds till position must be reached;
-	float time_to_dest;
-
-} elementary_movement_t;
-
-
 typedef struct actuation_t {
 
 	//The timer that will be used to time the movement;
 	timer_base_t *timer;
 
 	//The trajectory object we rely on;
-	tcontroller_t *trajectory;
+	tcontroller_t *tcontroller;
 
 	//The current state;
 	actuation_state_t state;
-
-	//The maximal distance target for one movement;
-	uint16_t distance_target;
 
 
 	/*
@@ -106,7 +76,7 @@ typedef struct actuation_t {
 	 */
 
 	//The function to call after the reception of a destination position;
-	float (*const process_movement)(struct actuation_t *, elementary_movement_t *);
+	float (*const process_movement)(struct actuation_t *, movement_t *);
 
 	//The actuation function, reserved to implementation;
 	void (*const sub_movement)(struct actuation_t *);
@@ -116,10 +86,10 @@ typedef struct actuation_t {
 
 
 //Initialise the actuation layer, enter in stopped state;
-void actuation_init(actuation_t *actuation, timer_base_t *timer, uint16_t distance_target);
+void actuation_init(actuation_t *actuation, timer_base_t *timer, tcontroller_t *tcontroller);
 
 //Start the actuation layer, handler will be called immediately;
-void actuation_start(actuation_t *actuation, tcontroller_t *);
+void actuation_start(actuation_t *actuation);
 
 //Abort the current movement; An offset may happen depending on the implementation;
 void actuation_stop(actuation_t *actuation);
@@ -127,51 +97,5 @@ void actuation_stop(actuation_t *actuation);
 //The actuation handler;
 void actuation_handler(actuation_t *actuation);
 
-
-//------------------------------------------------------- Inline -------------------------------------------------------
-
-/*
- * actuation_pause : disables the interrupt if required;
- */
-
-inline void actuation_pause(actuation_t *actuation) {
-
-	//If the actuation is started :
-	if (actuation->state == ACTUATION_STARTED) {
-
-		//Disable the interrupt;
-		timer_interrupt_disable(&actuation->timer->reload_interrupt);
-
-		//Update the state;
-		actuation->state = ACTUATION_PAUSED;
-
-	}
-
-	//If not, nothing to do;
-
-}
-
-
-/*
- * actuation_resume : enables the interrupt; If in stopped state, errors;
- */
-
-inline void actuation_resume(actuation_t *actuation) {
-
-	//If the actuation is stopped:
-	if (actuation->state == ACTUATION_STOPPED) {
-
-		//Error, cannot resume from paused state;
-		kernel_error("actuation.c : actuation_start : the actuation layer is not stopped;");
-
-	}
-
-	//Enable the interrupt;
-	timer_interrupt_enable(&actuation->timer->reload_interrupt);
-
-	//Update the state;
-	actuation->state = ACTUATION_STARTED;
-
-}
 
 #endif //TRACER_ACTUATION_H

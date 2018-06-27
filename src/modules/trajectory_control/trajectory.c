@@ -18,215 +18,328 @@
 
 */
 
-#include <kernel/kernel.h>
-#include <data_structures/containers/llist.h>
 #include "trajectory.h"
+#include "movement.h"
+#include "tcontroller.h"
 
-//--------------------------------------------------- Private headers --------------------------------------------------
+#include <kernel/kernel.h>
 
-//Wait till the state allows movement manipulation;
-void tcontroller_state_wait();
+#include <string.h>
 
-//Deactivate temporarily the actuation interrupt;
-inline void tcontroller_deactivate_actuation(const tcontroller_t *controller);
+//-------------------------------------------------- Private headers ---------------------------------------------------
 
-//Reactivate the actuation interrupt if necessary;
-inline void tcontroller_reactivate_actuation(const tcontroller_t *controller);
+//Determine increments;
+bool curve_determine_increments(const geometric_base_t *geometric_base, trajectory_increments_t *increments);
+
+//Extract the increment for a particular point;
+float curve_extract_increment(const geometric_base_t *geometric_base, float point, float increment);
+
+//Get the maximal distance between two positions;
+float get_max_dist(uint8_t dimension, const float *p0, const float *p1);
 
 
-//------------------------------------------------------- Inline -------------------------------------------------------
+//--------------------------------------------------- Curves ----------------------------------------------------
 
-//Deactivate temporarily the actuation interrupt;
-inline void tcontroller_deactivate_actuation(const tcontroller_t *const controller) {
+//Evaluate the curve in one point and translate the result in control coordinates;
+void curve_evaluate_convert(const geometric_base_t *const geometric_base, float index, float *dest) {
 
-	//If the actuation is started :
-	if (controller->state != TCONTROLLER_STOPPED) {
+	//Cache the curve pointer;
+	const curve_t *const curve = geometric_base->curve;
 
-		//Pause the actuation layer;
-		actuation_pause(controller->actuation);
+	//The temporary control position;
+	float temp[curve->dimension];
 
-	}
+	//Evaluate the curve and store the result in the temporary array;
+	curve_evaluate(curve, index, temp);
 
-}
-
-//Reactivate the actuation interrupt if necessary;
-inline void tcontroller_reactivate_actuation(const tcontroller_t *const controller) {
-
-	//If the actuation is started :
-	if (controller->state != TCONTROLLER_STOPPED) {
-
-		//Resume the actuation layer;
-		actuation_resume(controller->actuation);
-
-	}
+	//Translate the geometry;
+	geometry_convert(geometric_base->geometry, temp, dest);
 
 }
 
+//Evaluate the curve in one point and translate the result in control coordinates; Uses a provided temporary array;
+void curve_evaluate_convert_tmp_provided(const geometric_base_t *const geometric_base, float *const tmp, float index, float *dest) {
+
+	//Cache the curve pointer;
+	const curve_t *const curve = geometric_base->curve;
+
+	//Evaluate the curve and store the result in the temporary array;
+	curve_evaluate(curve, index, tmp);
+
+	//Translate the geometry;
+	geometry_convert(geometric_base->geometry, tmp, dest);
+
+}
+
+//---------------------------------------------------- Trajectories ----------------------------------------------------
 
 /*
- * This function will return after making sure that the movement queue can be safely manipulated.
- */
-
-void tcontroller_enter_queue_critical_section(const tcontroller_t *const controller) {
-
-	//Deactivate temporarily the actuation layer if necessary;
-	tcontroller_deactivate_actuation(controller);
-
-	//If the controller is finishing its trajectory :
-	if (controller->state == TCONTROLLER_FINISHING) {
-
-		//Reactivate the actuation layer;
-		tcontroller_reactivate_actuation(controller);
-
-		//Wait till finishing state has changed;
-		while (controller->state == TCONTROLLER_FINISHING);
-
-		//Deactivate temporarily the actuation layer;
-		tcontroller_deactivate_actuation(controller);
-
-	}
-
-}
-
-
-/*
- * This function will return after making sure that the movement queue can be safely manipulated.
- */
-
-inline void tcontroller_leave_queue_critical_section(const tcontroller_t *const controller) {
-
-	//Reactivate the actuation layer;
-	tcontroller_reactivate_actuation(controller);
-
-}
-
-
-//--------------------------------------------------- Initialisation ---------------------------------------------------
-
-/*
- * tcontroller_create : creates and initialises a trajectory controller;
+ * trajectory_init : initialises a trajectory from its primary data and the trajectory's requirements,
+ *	and add it to the trajectory list.
  *
- * 	Dimension checks are made in all components, a kernel error is raised if they don't match;
+ * 	If the trajectory is invalid, the trajectory is deleted;
  */
 
-tcontroller_t *tcontroller_create(uint8_t dimension, size_t elementary_buffer_size, geometry_t *geometry,
-								  actuation_t *actuation) {
+void trajectory_init(trajectory_t *const trajectory, const curve_t *const curve, bool affine_curve,
+					 actuation_t *const actuation) {
+
+	//Cache the dimension;
+	uint8_t dimension = curve->dimension;
+
+	//Cache the trajectory controller; Its access is critical, so we won't modify it or pass it;
+	const tcontroller_t *const controller = actuation->tcontroller;
+
+	//Declare a geometric base;
+	const geometric_base_t geometric_base = {
+		.dimension = dimension,
+		.geometry  = controller->geometry,
+		.curve = curve,
+		.dbounds = controller->distance_bounds,
+	};
+
+
+	//Initialise the increments struct;
+	trajectory_increments_t increments = {};
+
+	//Determine increments; Returns false in case of a micro trajectory;
+	bool b = curve_determine_increments(&geometric_base,  &increments);
+
+	//If the trajectory is a micro trajectory :
+	if (!b) {
+
+		//Delete the trajectory;
+		kernel_free(trajectory);
+
+	}
+
+	//If the geometry is irregular, no optimisation is allowed;
+	if (!geometric_base.geometry->regular) {
+		affine_curve = false;
+	}
+
 
 	//Create the initializer;
-	tcontroller_t init = {
+	trajectory_t init = {
 
-		//Copy the dimension;
-		.dimension = dimension,
+		//An empty linked element;
+		.link = EMPTY_LINKED_ELEMENT(),
 
-		//Initialise the linked list;
-		.movements = EMPTY_LINKED_LIST(255),
+		//The trajectory's curve;
+		.curve = *curve,
 
-		//Initialise the cbuffer. Will be resized to its max size right after:
-		.elementary_movements = EMPTY_CBUFFER(elementary_movement_t, elementary_buffer_size),
+		//Increments data;
+		.increments = increments,
 
-		//Save the geometry pointer;
-		.geometry = geometry,
-
-		//Save the actuation pointer;
-		.actuation = actuation,
+		.affine_curve = affine_curve,
 
 	};
 
-	//Resize the elementary buffer to its maximal size;
-	cbuffer_resize(&init.elementary_movements, elementary_buffer_size);
+	//Initialise the trajectory;
+	memcpy(trajectory, &init, sizeof(init));
 
-	//Allocate heap memory, initialise it and return its pointer;
-	return kernel_malloc_copy(sizeof(tcontroller_t), &init);
+	//If jerk monitoring is enabled :
+	if (controller->jerk_monitoring_enabled) {
 
-}
-
-
-//Delete a trajectory controller;
-void tcontroller_delete(tcontroller_t *tcontroller) {
-
-	//TODO STOP
-
-	//TODO DELETE REMAINING ITEMS;
-
-}
-
-
-//--------------------------------------------- Movement queue manipulation --------------------------------------------
-
-/*
- * tcontroller_enqueue :
- * 	- waits for the movement queue to be safely manipulable;
- * 	- enqueue a movement to the trajectory;
- */
-
-void tcontroller_enqueue(tcontroller_t *const controller, movement_t *const movement) {
-
-	//Enter in a queue critical section;
-	tcontroller_enter_queue_critical_section(controller);
-
-	//Add the movement at the end of the controller's list;
-	llist_insert_last(&controller->movements, (linked_element_t *) movement);
-
-	//Leave the queue critical section;
-	tcontroller_leave_queue_critical_section(controller);
-
-}
-
-/*
- * tcontroller_dequeue : removes movements from the end of the trajectory. Stops if all movements are removed;
- */
-
-void tcontroller_dequeue(tcontroller_t *controller, size_t nb_movements) {
-
-	//Enter in a queue critical section;
-	tcontroller_enter_queue_critical_section(controller);
-
-	//If we must remove more movements that the controller has :
-	if (nb_movements >= controller->movements.nb_elements) {
-
-		//Stop the trajectory controller, purge all movements and elementary movements;
-		tcontroller_stop(controller);
+		//Initialise the jerk data;
+		jerk_init(&trajectory->jerk_data, &geometric_base, increments.initial, affine_curve);
 
 	} else {
 
-		//For each time a movement must be removed
-		while (nb_movements--) {
+		//Initialise the jerk struct to 0; pointers will be null and delete will be safely callable;
+		memset(&trajectory->jerk_data, 0, sizeof(jerk_data_t));
+	}
 
-			//Cache and remove the last movement of the queue;
-			movement_t *movement = (movement_t *) llist_remove_first(&controller->movements);
 
-			//Delete the movement;
-			movement_delete(movement);
+	//Adding a trajectory requires the alteration of the trajectory controller, which is not safe.
+	//We will let the actuation clean up, and add the trajectory.
+	actuation_add_trajectory(actuation, trajectory);
 
+}
+
+
+/*
+ * trajectory_delete : deletes previously allocated data and frees the trajectory struct;
+ */
+
+void trajectory_delete(trajectory_t *const trajectory) {
+
+	//Call the implementation deletion;
+	(*(trajectory->deletion_function))(trajectory);
+
+	//Delete jerk data;
+	jerk_delete(&trajectory->jerk_data);
+
+	//Free the trajectory structure;
+	kernel_free(trajectory);
+
+}
+
+
+//----------------------------------------------------- Increments -----------------------------------------------------
+
+/*
+ * determine_increments : this function is the only public method of the class.
+ *
+ * It computes the increment for initial and final positions, for the given trajectory
+ *
+ * It handles the micro trajectory case.
+ */
+
+bool curve_determine_increments(const geometric_base_t *const geometric_base,
+								trajectory_increments_t *const increments) {
+
+	//Cache the curve;
+	const curve_t *const curve = geometric_base->curve;
+
+	//Cache indices
+	float initial_index = curve->initial_index, final_index = curve->final_index;
+
+	//Cache increments;
+	float initial_incr = 0, final_incr = 0;
+
+
+
+	//A flag determining if the trajectory is invalid;
+	bool invalid;
+
+	//If the index is ascending :
+	if (initial_index < final_index) {
+
+		//Determine the initial increment;
+		initial_incr = curve_extract_increment(geometric_base, initial_index, 1);
+		final_incr = curve_extract_increment(geometric_base, final_index, -1);
+
+		//If the two basic trajectorys overlap each other, the trajectory is a micro trajectory (invalid)
+		invalid = initial_index + initial_incr > final_index + final_incr;
+
+
+	} else {
+
+		//If the index is descending :
+		initial_incr = curve_extract_increment(geometric_base, initial_index, -1);
+		final_incr = curve_extract_increment(geometric_base, final_index, 1);
+
+		//If the two basic trajectorys overlap each other, the trajectory is a micro trajectory (invalid);
+		invalid = initial_index + initial_incr < final_index + final_incr;
+
+	}
+
+	//If the trajectory has been marked invalid :
+	if (invalid) {
+
+		//Fail;
+		return false;
+
+	}
+
+	//Save cached increments;
+	increments->initial = initial_incr;
+	increments->final = final_incr;
+
+	//Complete
+	return true;
+}
+
+
+/*
+ * extract_increment : this function receives
+ * 		- dimension : the trajectory's dimension;
+ * 		- distance_target : the targeted distance for increments;
+ *      - equation : a trajectory function
+ *      - point : a float, of the dimension of get_function's input.
+ *      - increment : a distance from point, of the same dimension than point
+ *      - distance_target : a distance in the trajectory_control coordinate system.
+ *
+ *  With these inputs, it extracts a value of increment that verifies the property below.
+ *
+ *  "The maximum step_distances on all trajectory_control axis between the images of point and point+increment through the
+ *      trajectory function is target_distance"
+ *
+ *  Literally, this function is called during the scheduling of a trajectory, when the increment variable
+ *      must be determined.
+ *
+ */
+
+float curve_extract_increment(const geometric_base_t *const geometric_base, const float point, float increment) {
+
+	//Cache the distance target;
+	const uint16_t distance_target = geometric_base->dbounds.target;
+
+	//Cache the dimension;
+	const uint8_t dimension = geometric_base->dimension;
+
+	//Arrays initialisation
+	float initial_positions[dimension], positions[dimension];
+
+	//Get initial positions
+	curve_evaluate_convert(geometric_base, point, initial_positions);
+
+	//Cache float version of distance_target
+	float ftarget = (float) distance_target;
+
+
+	//Loop to execute to correct the increment;
+	do {
+
+		//Get the candidate actuation position;
+		curve_evaluate_convert(geometric_base, point + increment, positions);
+
+		//Get the distance between the initial distance and the candidate position.
+		float distance = get_max_dist(dimension, initial_positions, positions);
+
+		//Catch the case where d becomes 0.
+		if (distance < 1) distance = 1;
+
+		//If the distance target is reached :
+		if ((uint16_t) distance == distance_target) {
+
+			//return the increment that gave the correct increment;
+			return increment;
+
+		}
+
+		//Update the increment
+		increment *= ftarget / distance;
+
+
+		//While the increment has not been reached;
+	} while (1);
+
+}
+
+
+/*
+ * get_max_dist : this function gets the maximal distance between the two provided positions, p0 and p1.
+ *
+ *  For each axis, it determines the real distance (float), and determines the absolute integer distance.
+ */
+
+float get_max_dist(uint8_t dimension, const float *p0, const float *p1) {
+
+	//Initialise_hardware the maimum distance
+	float max_dist = 0;
+
+	//For each axis
+	while (dimension--) {
+
+		//Get the algebraic distance
+		float distance = *(p1++) - *(p0++);
+
+		//obtain the absolute distance
+		if (distance < 0) {
+			distance = -distance;
+		}
+
+		//Update max_dist
+		if (distance > max_dist) {
+			max_dist = distance;
 		}
 
 	}
 
-	//Leave the queue critical section;
-	tcontroller_leave_queue_critical_section(controller);
+	//Return the maximum distance.
+	return max_dist;
 
 }
 
 
-//---------------------------------------------------- Start - Stop ----------------------------------------------------
-
-//Start moving;
-void tcontroller_start(tcontroller_t *controller);//TODO;
-
-//Stop moving. All undone movements / elementary movements will be deleted. Position is updated; Offset may appear;
-void tcontroller_stop(tcontroller_t *controller);//TODO;
-
-//TODO PAUSE PATCH:
-//void tcontroller_set_pause_point(tcontroller_t *controller, bool (*restart_flag)());
-
-
-//--------------------------------------- Functions called by the actuation layer --------------------------------------
-
-//Get a new sub_movement to execute;
-elementary_movement_t *trajectory_get_elementary_movement(tcontroller_t *);//TODO;
-
-//Update the number of steps which will compose the current elementary movement;
-void trajectory_update_movement_steps(tcontroller_t *, uint16_t mv_steps);//TODO;
-
-//Execute a step in the processing of the next elementary movement;
-void trajectory_sub_process(tcontroller_t *);//TODO;

@@ -20,9 +20,6 @@
 
 
 #include <config.h>
-#include <Config/stepper_control_config.h>
-
-#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 2)
 
 #include "KinematicsCore2.h"
 #include "K2Physics.h"
@@ -270,4 +267,3 @@ float KinematicsCore2::next_regulation_speed = 0;
 
 
 
-#endif
