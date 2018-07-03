@@ -24,7 +24,7 @@
 
 #include "stdint.h"
 
-#include "tcontroller.h"
+#include "modules/machine_control/OLDSHIT/tcontroller.h"
 
 #include <kernel/drivers/timer.h>
 

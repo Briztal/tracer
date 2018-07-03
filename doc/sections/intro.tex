@@ -1,0 +1,91 @@
+\newpage
+
+\section{Introduction}
+
+
+\subsection{Primary goals and definitions}
+
+Let a machine, whose behaviour we wish to control;\newline
+
+The machine is defined by a set of $n$ actuators, a control system of size $n$, a geometric model, and a kinematic
+model;\newline
+
+The control system is coordinate system that is easier to manipulate, or that has more physical meaning than the
+actuator's system.\\
+For example, a 6DOF arm's actuator system has no direct spatial meaning, and spacial trajectory are very difficult
+to express in it.\\
+Target positions and speeds will be expressed in this system;\newline
+
+The geometry is the function that will be used to convert control positions to actuators positions;
+
+
+\subsection{Notations}
+
+Throughout the rest of this document, we will use the following notations :\newline
+
+$E = {i\in \{0, n-1\}}$.\newline
+
+$i$ is the index of an actuator or of an axis of the control system, $E$.\newline
+
+$A_i$ is an actuator.
+\begin{itemize}
+    \item[-] $u_{i_A}$ is its unit;
+    \item[-] $D_{i_A}$, an interval included in $\mathbb{R}$ is its domain;
+    \item[-] $p_{i_A}$ is its position expressed in $u_{i_A}$;
+    \item[-] $v_{i_A}$ is its speed, expressed in $u_{i_A} \cdot s^{-1}$
+    \item[-] $a_{i_A}$ is its acceleration, expressed in $u_{i_A} \cdot s^{-2}$\newline
+\end{itemize}
+
+$C_i$ is an axis of the control system.
+\begin{itemize}
+    \item[-] $u_{i_C}$ is its position;
+    \item[-] $D_{i_C}$, an interval included in $\mathbb{R}$ is its domain;
+    \item[-] $p_{i_C}$ is its position expressed in $u_{i_C}$;
+    \item[-] $v_{i_C}$ is its speed, expressed in $u_{i_C} \cdot s^{-1}$
+    \item[-] $a_{i_C}$ is its acceleration, expressed in $u_{i_C} \cdot s^{-2}$\newline
+\end{itemize}
+
+$g :  \prod\limits_{i\in E} D_{i_C} \rightarrow \prod\limits_{i\in E} D_{i_A} $,
+$ (p_{i_C})_{i \in E}\rightarrow (p_{i_A})_{i \in E}$\newline
+
+is the geometry function, that translates control positions into actuators positions;
+
+
+\newpage
+
+\subsection{Machine state}
+
+The state of the machine at a given time is defined by the following set of variables
+
+\begin{itemize}
+    \item[-] $u_{i_C}$ its control positions;
+    \item[-] $v_{i_C}$ its control speeds;
+    \item[-] $u_{i_C}$ its actuation positions;
+    \item[-] $v_{i_C}$ its actuation speeds;
+\end{itemize}
+
+There is a direct relation between control and actuation positions, and control and actuation speeds, given by
+the geometry function, but not between actuation positions and speeds, or control positions and speeds;\newline
+
+To change the state of the machine, we execute a movement.\newline
+
+A movement is defined by :
+\begin{itemize}
+    \item[-] $d_i$ its actuation distances. Distances could also be expressed in the control system,
+    but it makes more sense to consider them in the actuation system, as actuators do the final
+    movement;
+    \item[-] $t$ its duration;
+\end{itemize}
+
+
+\subsection{Physical limitations}
+
+The machine is controlled by actuators, that can be positioned at any point of their domain, without restrictions.
+\newline
+
+However, precautions must be taken when attempting to move them. Each type of actuator has its own kind of speed
+limitations, often correlated with the geometry;\newline
+
+For a given actuator, part of a machine, variation of the speed must be carefully monitored.
+If speed constraints are not met, actuators may halt, or be damaged, which in both case, would compromise the
+machine's integrity;\newline

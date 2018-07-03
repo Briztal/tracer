@@ -228,7 +228,7 @@ task_state_t GCodeCommands::line(char *arguments) {
 //--------------------------------------------------------Extrusion-----------------------------------------------------
 
 /*
- * enable_steppers : enable or disable trajectory_control.
+ * enable_steppers : enable or disable machine_control.
  *
  *  It takes only one argument_t, -e followed by 0 (disable) or [not zero] enabled
  *
@@ -249,7 +249,7 @@ task_state_t GCodeCommands::enable_steppers(char *arguments) {
     //Extract the enable boolean
     bool enable = (bool) GET_ARG_VALUE('E');
 
-    //Schedule an enable / disable of trajectory_control.
+    //Schedule an enable / disable of machine_control.
     return MachineController::enable_steppers_scheduled_0(enable);
 
 }

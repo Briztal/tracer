@@ -87,11 +87,11 @@ bool IncrementComputer::determine_increments(movement_data *movement) {
  *      - get_position : a trajectory function
  *      - point : a float, of the dimension of get_function's input.
  *      - increment : a distance from point, of the same dimension than point
- *      - distance_target : a distance in the trajectory_control coordinate system.
+ *      - distance_target : a distance in the machine_control coordinate system.
  *
  *  With these inputs, it extracts a value of increment that verifies the property below.
  *
- *  "The maximum step_distances on all trajectory_control axis between the images of point and point+increment through the
+ *  "The maximum step_distances on all machine_control axis between the images of point and point+increment through the
  *      trajectory function is target_distance"
  *
  *  Literally, this function is called during the scheduling of a movement, when the increment variable
@@ -104,7 +104,7 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
     //Arrays initialisation
     float initial_positions[NB_STEPPERS], positions[NB_STEPPERS];
 
-    //Get the initial trajectory_control position
+    //Get the initial machine_control position
     StepperController::get_stepper_positions_for(get_position, point, initial_positions);
 
     //Get the candidate stepper_position
@@ -140,9 +140,9 @@ float IncrementComputer::extract_increment(void (*get_position)(float, float *),
 
 
 /*
- * get_max_dists : this function gets the step_distances between the two provided trajectory_control positions, p0 and p1.
+ * get_max_dists : this function gets the step_distances between the two provided machine_control positions, p0 and p1.
  *
- *  For each trajectory_control, it determines the real distance (float), and determines the absolute integer distance.
+ *  For each machine_control, it determines the real distance (float), and determines the absolute integer distance.
  *
  */
 
@@ -151,12 +151,12 @@ uint32_t IncrementComputer::get_max_dist(float *p0, float *p1) {
     //initialise_hardware the maimum distance
     uint32_t max_dist = 0;
 
-    //for each trajectory_control
-    for (uint8_t trajectory_control = 0; trajectory_control < NB_STEPPERS; trajectory_control++) {
+    //for each machine_control
+    for (uint8_t machine_control = 0; machine_control < NB_STEPPERS; machine_control++) {
 
 
         //get the algebric distance
-        int32_t dist = (int32_t) p1[trajectory_control] - (int32_t) p0[trajectory_control];
+        int32_t dist = (int32_t) p1[machine_control] - (int32_t) p0[machine_control];
 
         //obtain the absolute distance
         if (dist < 0) {

@@ -1,0 +1,84 @@
+\newpage
+
+\section{Control Model}
+
+
+\subsection{Position target : what we want to do}
+
+Controlling the behaviour of the machine, in the less restrictive meaning, means determining successive actuation
+distances, and time intervals between them.\newline
+
+Ideally, we would like to determine consecutive positions (in any of the two coordinate systems), then determine
+actuation distances, and determine time intervals so that speed of a group of axis (in any of the two coordinate
+systems) matches a target one;\newline
+
+
+\subsection{Physical limitations : what we can do}
+
+
+However, this is not so simple. Indeed, the fact of determining target distances for each actuator, at a given
+state, will by itself impose constraints on the time;\newline
+
+Suppose the machine in the state S. We wish to execute a movement, whose actuation distances have been computed.\newline
+
+Actuators are at a determined speed, and still have physical limitations. It is important to mention here that
+actuators are all moved simultaneously.\
+    Therefore, the time we choose for this movement will determine actuators speeds. But as we said previously,
+the variation of actuators speeds can't be set randomly without risking to damage actuators and the machine;\newline
+
+More formally, given a machine state S and a set of actuation distances $(d_i)_i$, each actuator will provide a
+duration interval $I_i = [t_{i_{\min}}, t_{i_{\max}}]$ that is acceptable for it;\newline
+
+Given this set of intervals, we must choose a duration $t$ that respects all time constraints, ie
+$d \in \bigcap \limits _{i \in E} I_i$\newline
+
+What now if $\bigcap \limits _{i \in E} I_i = \emptyset$ ?\newline
+
+This means that the movement we are trying to execute is simply non realisable. This is caused by two time
+intervals that do not intersect, ie two actuators, that have incompatible speed variations : there is no compatible
+duration for one to decelerate slowly enough, and for the other to accelerate slowly enough;
+\footnote{This sentence can lead to assume erroneously that speed limitations only reside in their derivative,
+which might be true in simple machines, but in more complex ones (robotic arms for ex), may not be always the
+case.}\newline
+
+There are two potential solutions to this problem.\newline
+
+The naive (but simple !) solution, is to select an arbitrary time, given an absolute criteria. We could for example
+select a time that would limit acceleration, but break deceleration rules. The two great advantages of this
+solution are to respect required movement distances, and to require few calculation; The disavantage is that it
+breaks actuations limitations\newline
+
+The second solution complements the first one by modifying movement distances to match actuators limitations.
+Now that we have determined our movement time, we will modify movement distance for actuators that see their
+limitations broken; This solution makes the assumption that the movement distance that matched speed limitations
+for a given time can actually be determined.\
+    If so, this method will give a movement that can be safely executed by all actuators in its duration.\newline
+
+For now, we have determined movement distances, and a time interval in which we can safely choose the movement
+duration. This interval can be of length 0, and then we have no choice on the duration;\newline
+
+
+\newpage
+
+\subsection{Kinematic constraints : what we choose to do}
+
+Now that we have a determined set of movement distances, and a variable duration, we can select the most relevant
+duration.\newline
+
+We could, for example, restrict again the duration interval, to values that match acceleration bounds on a control
+axis.
+It could also be possible to verify that a deceleration is required to satisfy eventual jerk bounds on a control
+axis.\newline
+
+More generally, the selection of the duration comes by consecutive restrictions of the duration interval by ordered
+optional constraints;
+These constraints are functions that take the current state of the machine and provide a duration bound.
+They are qualified optionnal because the final duration will necessarily be in the interval that satisfies actuators
+constraints;
+They are qualified ordered because a constraint will evaluated only if the interval is not of length 0;\newline
+
+There can be as many constraints as we want. They are evaluated in order until interval is of length 0, or until
+all have been evaluated;
+If all constraints have been evaluated and the duration interval is not of length 0, the upper duration is selected;
+\newline
+

@@ -25,9 +25,9 @@
  *
  *  This version is the most advanced, and offers the following features :
  *      - tracing of trajectories expressed in the high level coordinates. Any kind of trajectory is supported;
- *      - exact acceleration regulation in beginning and ending points, for each trajectory_control;
+ *      - exact acceleration regulation in beginning and ending points, for each machine_control;
  *      - real-time acceleration / deceleration regulation during movements;
- *      - exact jerk regulation for each trajectory_control;
+ *      - exact jerk regulation for each machine_control;
  *      - regulation_speed regulation by cartesian groups of the high level coordinates;
  *      - constant update of tools power, based on the current regulation_speed and their power density;
  *

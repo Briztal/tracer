@@ -34,7 +34,7 @@
 //-------------------------------------------------------Initialisation--------------------------------------------------
 
 /*
- * initialise_hardware : this function initialises pins for trajectory_control management
+ * initialise_hardware : this function initialises pins for machine_control management
  */
 void Steppers::initialise_hardware() {
 
@@ -59,11 +59,11 @@ void Steppers::initialise_data() {
 //---------------------------------------------------------Power--------------------------------------------------------
 
 /*
- * enable : this function enables a specific group of trajectory_control, and disables others.
+ * enable : this function enables a specific group of machine_control, and disables others.
  *
  *  The argument_t is a signature, where the i-th bit means :
- *      - 1 : enable the i-th trajectory_control
- *      - 0 : disable the i-th trajectory_control
+ *      - 1 : enable the i-th machine_control
+ *      - 0 : disable the i-th machine_control
  *
  */
 void Steppers::enable(sig_t signature) {
@@ -84,7 +84,7 @@ void Steppers::enable(sig_t signature) {
 
 
 /*
- * enable : this function enables all trajectory_control
+ * enable : this function enables all machine_control
  *
  */
 
@@ -104,7 +104,7 @@ void Steppers::enable() {
 
 
 /*
- * disable : this function enables all trajectory_control
+ * disable : this function enables all machine_control
  *
  */
 
@@ -126,11 +126,11 @@ void Steppers::disable() {
 
 
 /*
- * set_directions : this function sets direction for all trajectory_control.
+ * set_directions : this function sets direction for all machine_control.
  *
  *  The argument_t is a signature, where the i-th bit means :
- *      - 1 : negative direction for the i-th trajectory_control
- *      - 0 : positive_rotation direction for the i-th trajectory_control
+ *      - 1 : negative direction for the i-th machine_control
+ *      - 0 : positive_rotation direction for the i-th machine_control
  *
  */
 
@@ -181,11 +181,11 @@ void Steppers::set_directions(sig_t negative_signatures) {
 //----------------------------------------------------------Step--------------------------------------------------------
 
 /*
- * fastStep : this function steps_per_unit a specific group of trajectory_control.
+ * fastStep : this function steps_per_unit a specific group of machine_control.
  *
  * The argument_t is a signature, where the i-th bit means :
- *      - 1 : the i-th trajectory_control must step;
- *      - 0 : the i-th trajectory_control must not step.
+ *      - 1 : the i-th machine_control must step;
+ *      - 0 : the i-th machine_control must not step.
  */
 
 

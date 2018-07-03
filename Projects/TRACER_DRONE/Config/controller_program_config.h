@@ -56,7 +56,7 @@
  *
  * Those canals are :
  *  - asserv : the canal to monitor Interaction loops,
- *  - trajectory_control
+ *  - machine_control
  *
  *
  * -----------------------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@
  *
  * CREATE_ASSERV_LEAF(char c) : creates the asserv canal, with the name defined below
  *
- * CREATE_STEPPERS_LEAF(char c) : creates the trajectory_control canal, with the name defined below
+ * CREATE_STEPPERS_LEAF(char c) : creates the machine_control canal, with the name defined below
  *
  * //TODO EXAMPLES WITH SYSTEM CANALS
  *

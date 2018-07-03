@@ -53,7 +53,7 @@ void K1Physics::initialise_data() {
     current_movement_first_sub_movement_hl_distances = 0;
 
 
-    //The trajectory_control jerk offset;
+    //The machine_control jerk offset;
     jerk_distance_offset = 0;
 
     //The heuristic distance to the end point;
@@ -357,9 +357,9 @@ float K1Physics::_get_delay_numerator(uint8_t trajectory_control, float distance
     /*
      * FORMULA : D = 10^6 * distance / (steps_per_unit * sqrt(2 * acceleration)) with :
      *      - D : the step_period_us numerator;
-     *      - distance (steps_per_unit) : the distance on the trajectory_control;
-     *      - steps_per_unit (steps_per_unit/unit) : the steps_per_unit per unit of trajectory_control;
-     *      - acceleration (unit / s^2) : the acceleration on the trajectory_control.
+     *      - distance (steps_per_unit) : the distance on the machine_control;
+     *      - steps_per_unit (steps_per_unit/unit) : the steps_per_unit per unit of machine_control;
+     *      - acceleration (unit / s^2) : the acceleration on the machine_control.
      *
      */
 
@@ -551,7 +551,7 @@ void K1Physics::update_heuristic_jerk_distance() {
 
 void K1Physics::compute_jerk_offsets(float speed, k1_movement_data *previous_movement) {
 
-    //-----------maximum trajectory_control speeds------------
+    //-----------maximum machine_control speeds------------
 
     //Now that we know the maximum regulation_speed, we can determine the deceleration step_distances :
 
@@ -791,7 +791,7 @@ float m::last_movement_first_sub_movement_hl_distances = 0;
 float m::current_movement_first_sub_movement_hl_distances = 0;
 
 
-//The trajectory_control jerk offset;
+//The machine_control jerk offset;
 uint32_t m::jerk_distance_offset;
 
 //The heuristic distance to the end point;

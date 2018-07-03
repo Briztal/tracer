@@ -211,15 +211,15 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
 
     STEP_AND_WAIT;
 
-    //4us 4 trajectory_control, 13us 17 trajectory_control : 1.23us + 0.7 per trajectory_control
+    //4us 4 machine_control, 13us 17 machine_control : 1.23us + 0.7 per machine_control
     //Step 3 : Update the regulation_speed movementDistance with the new heuristic step_distances
     float time = K2Physics::get_sub_movement_time(sub_movement_data);
 
     STEP_AND_WAIT;
 
-    //5us 4 trajectory_control, 9us 17 trajectory_control : 3.76us + 0.3us per trajectory_control
+    //5us 4 machine_control, 9us 17 machine_control : 3.76us + 0.3us per machine_control
 
-    //Step 4 : Update the trajectory_control speeds
+    //Step 4 : Update the machine_control speeds
     K2Physics::update_speeds(sub_movement_data, time);
 
     //Update tools powers
@@ -237,7 +237,7 @@ float KinematicsCore2::compute_us_time_for_sub_movement(k2_sub_movement_data *su
 /*
  * send_position : this function sends the high level position to the controller.
  *
- *  It first inverts the current trajectory_control positions, to obtain the high level position.
+ *  It first inverts the current machine_control positions, to obtain the high level position.
  *
  *  Then, it sends it using the interface.
  *

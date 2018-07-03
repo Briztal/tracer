@@ -141,12 +141,12 @@ void trajectory_init(trajectory_t *const trajectory, const curve_t *const curve,
 	if (controller->jerk_monitoring_enabled) {
 
 		//Initialise the jerk data;
-		jerk_init(&trajectory->jerk_data, &geometric_base, increments.initial, affine_curve);
+		trajectory_jerk_init(&trajectory->jerk_data, &geometric_base, increments.initial, affine_curve);
 
 	} else {
 
 		//Initialise the jerk struct to 0; pointers will be null and delete will be safely callable;
-		memset(&trajectory->jerk_data, 0, sizeof(jerk_data_t));
+		memset(&trajectory->jerk_data, 0, sizeof(trajectory_jerk_t));
 	}
 
 
@@ -167,7 +167,7 @@ void trajectory_delete(trajectory_t *const trajectory) {
 	(*(trajectory->deletion_function))(trajectory);
 
 	//Delete jerk data;
-	jerk_delete(&trajectory->jerk_data);
+	trajectory_jerk_delete(&trajectory->jerk_data);
 
 	//Free the trajectory structure;
 	kernel_free(trajectory);
@@ -248,11 +248,11 @@ bool curve_determine_increments(const geometric_base_t *const geometric_base,
  *      - equation : a trajectory function
  *      - point : a float, of the dimension of get_function's input.
  *      - increment : a distance from point, of the same dimension than point
- *      - distance_target : a distance in the trajectory_control coordinate system.
+ *      - distance_target : a distance in the machine_control coordinate system.
  *
  *  With these inputs, it extracts a value of increment that verifies the property below.
  *
- *  "The maximum step_distances on all trajectory_control axis between the images of point and point+increment through the
+ *  "The maximum step_distances on all machine_control actuator between the images of point and point+increment through the
  *      trajectory function is target_distance"
  *
  *  Literally, this function is called during the scheduling of a trajectory, when the increment variable
@@ -311,7 +311,7 @@ float curve_extract_increment(const geometric_base_t *const geometric_base, cons
 /*
  * get_max_dist : this function gets the maximal distance between the two provided positions, p0 and p1.
  *
- *  For each axis, it determines the real distance (float), and determines the absolute integer distance.
+ *  For each actuator, it determines the real distance (float), and determines the absolute integer distance.
  */
 
 float get_max_dist(uint8_t dimension, const float *p0, const float *p1) {
@@ -319,7 +319,7 @@ float get_max_dist(uint8_t dimension, const float *p0, const float *p1) {
 	//Initialise_hardware the maimum distance
 	float max_dist = 0;
 
-	//For each axis
+	//For each actuator
 	while (dimension--) {
 
 		//Get the algebraic distance

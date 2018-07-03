@@ -1,10 +1,10 @@
 
 IMUKalmanFIlter : this class computes data from an Inertial Measurment Unit, composed of a 3D accelerometer,
 and a 3D Gyrometer;
-Each axis has its own kalman filter, as axis are supposedly independent.
+Each actuator has its own kalman filter, as actuator are supposedly independent.
 
 Each filter follows the following model :
-    '.' will be used to reference the axis we focus on, a  = x, y, or z;
+    '.' will be used to reference the actuator we focus on, a  = x, y, or z;
 
 
     Measurements :
@@ -12,8 +12,8 @@ Each filter follows the following model :
         M = (Sm., Am.),
 
         with :
-            - Sm. = measured angular speed on axis "."(rad/s);
-            - Am. = measured angular position on axis '.', (rad);
+            - Sm. = measured angular speed on actuator "."(rad/s);
+            - Am. = measured angular position on actuator '.', (rad);
 
 
     States :

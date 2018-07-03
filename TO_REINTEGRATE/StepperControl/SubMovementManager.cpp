@@ -183,7 +183,7 @@ void SubMovementManager::push_new_sub_movement() {
     }
 
 
-    //8us 4 trajectory_control, 11us 17 trajectory_control ; 7.07us + 0.23us per trajectory_control
+    //8us 4 machine_control, 11us 17 machine_control ; 7.07us + 0.23us per machine_control
     //get a new sub-movement;
     compute_new_sub_movement(sub_movement_data);
 
@@ -192,7 +192,7 @@ void SubMovementManager::push_new_sub_movement() {
 
     //As the computation occurred without errors, we must now verify the computed movement.
 
-    //5us 4 trajectory_control, 11us 17steppers : 3.15us + 0.46us per trajectory_control
+    //5us 4 machine_control, 11us 17steppers : 3.15us + 0.46us per machine_control
     //validate the sub-movement;
     execution_flag = confirm_sub_movement(sub_movement_data);
 
@@ -277,7 +277,7 @@ void SubMovementManager::compute_new_sub_movement(sub_movement_data_t *sub_movem
 bool SubMovementManager::confirm_sub_movement(sub_movement_data_t *sub_movement_data) {
 
 
-    //Get the trajectory_control step_distances, high level step_distances, and the maximal trajectory_control and distance
+    //Get the machine_control step_distances, high level step_distances, and the maximal machine_control and distance
     float max_distance = get_steppers_distances(current_steppers_positions, sub_movement_data);
 
     //Distance Validity_Verification : fail if an error is detected
@@ -335,9 +335,9 @@ bool SubMovementManager::distance_bounds_error(float max_distance) {
 
 
 /*
- * get_steppers_distances : this function determines the distance between a position and a targetVector, for all trajectory_control.
+ * get_steppers_distances : this function determines the distance between a position and a targetVector, for all machine_control.
  *
- * It also computes the direction signature, as step_distances are positive_rotation numbers, and saves the maximum trajectory_control
+ * It also computes the direction signature, as step_distances are positive_rotation numbers, and saves the maximum machine_control
  *      and the maximum distance.
  */
 
@@ -529,11 +529,11 @@ void SubMovementManager::update_jerk_position(const int32_t *const new_stepper_p
 /*
  * update_end_jerk_distances : this function updates step_distances to end point and jerk point.
  *
- *  It takes in data the absolute step_distances on each trajectory_control of the next sub_movement, and their negative signature.
+ *  It takes in data the absolute step_distances on each machine_control of the next sub_movement, and their negative signature.
  *
- *      Reminder : the i_th bit of direction_signature is 1 if the distance on the i_th trajectory_control is negative.
+ *      Reminder : the i_th bit of direction_signature is 1 if the distance on the i_th machine_control is negative.
  *
- *  The global distance is given by the maximum of all distance on each trajectory_control.
+ *  The global distance is given by the maximum of all distance on each machine_control.
  *
  */
 

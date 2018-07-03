@@ -18,11 +18,11 @@ void jerk_determine_traversal_distances(const geometric_base_t *geometric_base, 
 //----------------------------------------------------- Distances -----------------------------------------------------
 
 /*
- * jerk_init : Initialises the three fields of the provided jerk struct;
+ * trajectory_jerk_init : Initialises the three fields of the provided jerk struct;
  */
 
-void jerk_init(jerk_data_t *jerk_data, const geometric_base_t *const geometric_base, float initial_increment,
-			   bool affine_curve) {
+void trajectory_jerk_init(trajectory_jerk_t *jerk_data, const geometric_base_t *geometric_base, float initial_increment,
+						  bool affine_curve) {
 
 	//Deactivate the jerk point;
 	jerk_data->jerk_flags = 0;
@@ -35,7 +35,7 @@ void jerk_init(jerk_data_t *jerk_data, const geometric_base_t *const geometric_b
 	//Allocate trajectory distances;
 	uint32_t *trajectory_distances = kernel_malloc(len);
 
-	//If axis trajectories are all affine :
+	//If actuator trajectories are all affine :
 	if (affine_curve) {
 
 		//Compute distance between begin and end point;
@@ -61,12 +61,10 @@ void jerk_init(jerk_data_t *jerk_data, const geometric_base_t *const geometric_b
 	//Save jerk offsets;
 	jerk_data->jerk_offsets = jerk_offsets;
 
-
 }
 
-void jerk_blak
 
-void jerk_delete(jerk_data_t *jerk_data) {
+void trajectory_jerk_delete(trajectory_jerk_t *jerk_data) {
 
 	//Free the trajectory array;
 	kernel_free(jerk_data->trajectory_distances);
@@ -102,7 +100,7 @@ void jerk_determine_bounds_distances(const geometric_base_t *const geometric_bas
 	//Determine the final position;
 	curve_evaluate_convert_tmp_provided(geometric_base, tmp, curve->final_index, initial_position);
 
-	//For each axis :
+	//For each actuator :
 	for (uint8_t axis = dimension; axis--;) {
 
 		//Determine the float distance;
@@ -130,3 +128,6 @@ void jerk_determine_traversal_distances(const geometric_base_t *const geometric_
 					 "Curve distance computation must be implemented before;");
 
 }
+
+
+//---------------------------------------------------- Jerk monitor ----------------------------------------------------

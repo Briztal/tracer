@@ -46,7 +46,7 @@ class StepperController {
 
 public:
 
-    //Initialise the trajectory_control Actuators;
+    //Initialise the machine_control Actuators;
     static void initialise_hardware();
 
     //Initialise all modules;
@@ -91,10 +91,10 @@ private :
 
 public:
 
-    //The function to translate a high level position into trajectory_control positions;
+    //The function to translate a high level position into machine_control positions;
     static void translate(const float *const hl_coordinates, float *const steppers_coordinates);
 
-    //The function to get trajectory_control positions for a particular trajectory at a particular point;
+    //The function to get machine_control positions for a particular trajectory at a particular point;
     static void get_stepper_positions_for(void (*trajectory_function)(float, float*), float point, float *steppers_positions);
 
 

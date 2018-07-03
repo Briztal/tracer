@@ -84,10 +84,10 @@ void PI::echo(const string_t msg) {
 
 
 /*
- * send_position : this is a public shortcut allowing to send_packet trajectory_control position all aint32_t the code
+ * send_position : this is a public shortcut allowing to send_packet machine_control position all aint32_t the code
  *      (t must be a float *, of size [NB_AXIS])
  *
- * The command id is the following : 0 (system canal) - 5 (trajectory_control canal) - 0 (position canal);
+ * The command id is the following : 0 (system canal) - 5 (machine_control canal) - 0 (position canal);
  */
 void PI::send_position(float *t) {
     prepare_data_out("\0\5\1", 3);

@@ -71,7 +71,7 @@ void LinearMovement::prepare_motion(const float *destinations_t) { //GO TO
 /*
  * Parameter set function. It :
  * - extracts step_distances;
- * - sets trajectory_control directions
+ * - sets machine_control directions
  * - converts step_distances to absolute values
  * - set regulation_speed according to the movement (movement dimensions and greater axis)
  */
@@ -321,7 +321,7 @@ sig_t LinearMovement::process_position(uint8_t *step_distances) {//2n-2
 }
 
 /*
- * The Speed processing function : it sets the period of the trajectory_control interrupt
+ * The Speed processing function : it sets the period of the machine_control interrupt
  */
 void LinearMovement::process_speed() {
     set_stepper_int_period(K1RealTimeProcessor::delay0);

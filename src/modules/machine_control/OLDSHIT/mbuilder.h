@@ -10,6 +10,10 @@
 #include <stdint.h>
 
 #include <stddef.h>
+#include "movement.h"
+#include "modules/machine_control/geometry.h"
+#include "trajectory.h"
+#include "kinematics.h"
 
 
 /*
@@ -49,6 +53,30 @@ typedef struct {
  */
 
 typedef struct {
+
+	/*
+	 * ------------------ Setup ------------------
+	 */
+
+	//A copy of movement dimensions;
+	const uint8_t dimension;
+
+	//The trajectory's geometry;
+	const geometry_t *const geometry;
+
+	//Distance bounds data;
+	const dbounds_t distance_bounds;
+
+	//Kinematics data;
+	kinematics_t *kinematics;
+
+
+	/*
+	 * ------------------ Computation ------------------
+	 */
+
+	//The current movement;
+	trajectory_t *current_trajectory;
 
 	//The trajectory index data;
 	index_monitor_t index_monitor;

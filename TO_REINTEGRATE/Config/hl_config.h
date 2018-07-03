@@ -71,7 +71,7 @@
  *      the module name and the timer index.
  *
  *  Module names are :
- *      - trajectory_control for the trajectory_control module;
+ *      - machine_control for the machine_control module;
  *      - servo for the servo module;
  *      - taskprog for the task programmer module;
 

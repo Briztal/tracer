@@ -20,11 +20,6 @@
 
 #include <config.h>
 
-#include <Config/stepper_control_config.h>
-
-
-#if defined(ENABLE_STEPPER_CONTROL) && (CORE_VERSION == 2)
-
 #ifndef TRACER_REAL_TIME_PROCESS_H
 #define TRACER_REAL_TIME_PROCESS_H
 
@@ -102,12 +97,12 @@ private :
 
     /*
      * The array containing the deceleration constants : in the deceleration distance formula :
-     *      (((v * v) / (2 * EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]));
+     *      (((v * v) / (2 * EEPROMMap::accelerations[machine_control] * EEPROMMap::steps_per_unit[machine_control]));
      *
      *  the denominator is constant. This array wil contain the float value
-     *      1.0 / (2.0 * EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]));
+     *      1.0 / (2.0 * EEPROMMap::accelerations[machine_control] * EEPROMMap::steps_per_unit[machine_control]));
      *
-     *      for each trajectory_control.
+     *      for each machine_control.
      */
 
     static float *const deceleration_constants;
@@ -115,24 +110,24 @@ private :
 
     /*
      * The array containing the delta regulation_speed constants : in the deceleration distance formula :
-     *      max_delta_speed = EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control] * time;
+     *      max_delta_speed = EEPROMMap::accelerations[machine_control] * EEPROMMap::steps_per_unit[machine_control] * time;
      *
      *  the product of the two first terms is constant. This array wil contain the float value
-     *      EEPROMMap::accelerations[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]
+     *      EEPROMMap::accelerations[machine_control] * EEPROMMap::steps_per_unit[machine_control]
      *
-     *      for each trajectory_control.
+     *      for each machine_control.
      */
 
     static float *const delta_speed_constants;
 
     /*
      * The array containing the maximum regulation_speed constants : in the deceleration distance formula :
-     *      max_speed = EEPROMMap::speeds[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control] * time;
+     *      max_speed = EEPROMMap::speeds[machine_control] * EEPROMMap::steps_per_unit[machine_control] * time;
      *
      *  the product is constant. This array wil contain the float value
-     *      EEPROMMap::speeds[trajectory_control] * EEPROMMap::steps_per_unit[trajectory_control]
+     *      EEPROMMap::speeds[machine_control] * EEPROMMap::steps_per_unit[machine_control]
      *
-     *      for each trajectory_control.
+     *      for each machine_control.
      */
 
     static float *const max_speed_constants;
@@ -143,4 +138,3 @@ private :
 
 #endif //TRACER_REAL_TIME_PROCESS_H
 
-#endif

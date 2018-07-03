@@ -56,7 +56,6 @@ typedef enum {
 
 typedef struct {
 
-
 	/*
 	 * Components;
 	 */
@@ -64,20 +63,15 @@ typedef struct {
 	//The trajectory's dimension;
 	const uint8_t dimension;
 
+
 	//The trajectories lists;
 	linked_list_t trajectories;
-
-	//The distance bounds data;
-	dbounds_t distance_bounds;
 
 	//The movement builder;
 	mbuilder_t movement_builder;
 
 	//The movements buffer;
 	cbuffer_t movements;
-
-	//The trajectory's geometry;
-	const geometry_t *const geometry;
 
 
 	/*
@@ -98,8 +92,6 @@ typedef struct {
 	//The trajectory controller's state;
 	volatile tcontroller_state_t state;
 
-	//The current movement;
-	trajectory_t *current_movement;
 
 
 } tcontroller_t;
@@ -112,7 +104,7 @@ typedef struct {
 	 * Components;
 	 */
 
-	//The number of axis;
+	//The number of actuator;
 	const uint8_t dimension;
 
 	//The geometry pointer;

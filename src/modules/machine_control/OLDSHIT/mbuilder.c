@@ -200,7 +200,7 @@ uint16_t mbuilder_compute_distances(const uint8_t dimension, mbuilder_t *const b
 	//Cache the current bit of the signature;
 	sig_t signature_bit = 1;
 
-	//For each axis :
+	//For each actuator :
 	for (uint8_t axis_index = 0; axis_index < dimension; axis_index++) {
 
 		//Cache destination and current

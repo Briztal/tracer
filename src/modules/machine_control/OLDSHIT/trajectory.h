@@ -24,9 +24,9 @@
 
 #include "stdint.h"
 
-#include "actuation.h"
+#include "modules/machine_control/actuation.h"
 
-#include "geometry.h"
+#include "modules/machine_control/geometry.h"
 #include "jerk.h"
 
 #include <data_structures/containers/llist.h>
@@ -98,7 +98,6 @@ void curve_evaluate_convert_tmp_provided(const geometric_base_t *geometric_base,
 
 //----------------------------------------------------- Trajectory -----------------------------------------------------
 
-
 /*
  * Increments struct : contains initial and final increments;
  */
@@ -138,7 +137,7 @@ typedef struct trajectory_t {
 	trajectory_increments_t increments;
 
 	//Jerk data;
-	jerk_data_t jerk_data;
+	trajectory_jerk_t jerk_data;
 
 
 	//Deletion function;

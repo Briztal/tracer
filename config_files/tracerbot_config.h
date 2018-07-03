@@ -255,9 +255,9 @@ COORD_INTERFACE_VARIABLE(y_max_sum, 400)
  * The high level coordinate system is the system you will use to send explicit coordinates. They will be interpreted
  *  by the kernel, who will trace you movements.
  *
- *  High level coordinates are not meant to have a physical meaning (a particular trajectory_control orientation).
+ *  High level coordinates are not meant to have a physical meaning (a particular machine_control orientation).
  *
- *  you must also define the translation from high level coordinates to trajectory_control positions, in implementing
+ *  you must also define the translation from high level coordinates to machine_control positions, in implementing
  *      the translate and revert methods in the MachineAbstraction class.
  *
  */
@@ -367,11 +367,11 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 
 //-------------------------------------------------------Data types-----------------------------------------------------
 
-/* The signature type. The type size depends on the number of trajectory_control you want to control. Set :
- *  - uint8_t for at most 8 trajectory_control;
- *  - uint16_t for at most 16 trajectory_control;
- *  - uint32_t for at most 32 trajectory_control;
- *  - uint64_t for at most 64 trajectory_control; (not tested, tell me if it works !)
+/* The signature type. The type size depends on the number of machine_control you want to control. Set :
+ *  - uint8_t for at most 8 machine_control;
+ *  - uint16_t for at most 16 machine_control;
+ *  - uint32_t for at most 32 machine_control;
+ *  - uint64_t for at most 64 machine_control; (not tested, tell me if it works !)
  *
  */
 #define sig_t uint32_t

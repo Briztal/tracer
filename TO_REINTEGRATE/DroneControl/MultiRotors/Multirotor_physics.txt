@@ -2,7 +2,7 @@ This file describes the main equations that determine the behaviour of a flying 
 
 
 The drone will be assimilated to a set of motors, at determined coordinates and orientations, exerting a given traction
-    collinear to their direction axis;
+    collinear to their direction actuator;
 
 Every motor / helix will have the same characteristics;
 
@@ -15,11 +15,11 @@ A Motor Mi is only described by :
         - yi : the ordinate of the motor;
         - zi : the height of the motor;
         - n_i : the motor's rotation speed;
-        - phi_i : the polar angle of the motor's axis, with x axis as origin;
-        - theta_i : the azimuth of the motor's axis, with z axis as origin;
+        - phi_i : the polar angle of the motor's actuator, with x actuator as origin;
+        - theta_i : the azimuth of the motor's actuator, with z actuator as origin;
 
 
-        (The position is being expressed in cartesian coordinates, and the axis orientation is being expressed
+        (The position is being expressed in cartesian coordinates, and the actuator orientation is being expressed
         in spherical coordinates);
 
     its constant parameters (t_i, c_i, k_i, v_i, max_i)
