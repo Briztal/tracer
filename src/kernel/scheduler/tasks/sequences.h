@@ -64,7 +64,7 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
         , uint16_t activity_time);
 
 
-//--------------------- Tasks execution --------------------
+//--------------------- Tasks computation --------------------
 
 //Remove the current task of the given sequence;
 void sequences_remove_task(sequence_task_t *task);

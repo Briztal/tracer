@@ -41,10 +41,10 @@
 //The maximum depth of the tree. //TODO DETERMINE THE MAXIMUM DEPTH WITH AN ALGORITHM
 #define TERMINAL_MAX_DEPTH 5
 
-//The number of commands that can be received and stored before execution;
+//The number of commands that can be received and stored before computation;
 #define TERMINAL_MAX_PENDING_COMMANDS 10
 
-//Uncomment this line to be prompted about Terminal Tasks execution.
+//Uncomment this line to be prompted about Terminal Tasks computation.
 #define TERMINAL_EXECUTION_CONFIRMATION
 
 

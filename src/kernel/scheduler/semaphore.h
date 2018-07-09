@@ -21,7 +21,7 @@
 #define TRACER_SEMAPHORE_H
 
 
-#include <data_structures/containers/container.h>
+#include <data_structures/containers/vlarray.h>
 
 
 
@@ -49,22 +49,22 @@
 
 typedef struct {
 
-    //The allocation counter, scheduler_initialised to the maximum number of concurrent code execution;
+    //The allocation counter, scheduler_initialised to the maximum number of concurrent code computation;
     uint16_t allocation_counter;
 
     //The lock container. Contains pointers of all locked threads;
-    container_t locked_threads;
+    vlarray_t locked_threads;
 
 } semaphore_t;
 
 
-#define SEMAPHORE(nb_accesses) {.allocation_counter = nbaccesses, .locked_threads = EMPTY_CONTAINER(process_t *)}
+#define SEMAPHORE(nb_accesses) {.allocation_counter = nbaccesses, .locked_threads = EMPTY_VLARRAY(process_t *)}
 
 
-//The P function : requires the execution;
+//The P function : requires the computation;
 void sem_wait(semaphore_t *semaphore);
 
-//The V function : lets an execution happen;
+//The V function : lets an computation happen;
 void sem_post(semaphore_t *semaphore);
 
 //The deletion function. Unlocks all threads;

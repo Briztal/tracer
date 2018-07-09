@@ -19,7 +19,7 @@
 */
 
 #include "trajectory.h"
-#include "movement.h"
+#include "modules/machine_control/movement.h"
 #include "tcontroller.h"
 
 #include <kernel/kernel.h>

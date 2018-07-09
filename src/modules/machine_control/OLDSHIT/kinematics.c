@@ -4,7 +4,7 @@
 
 #include "kinematics.h"
 #include "mbuilder.h"
-#include "movement.h"
+#include "modules/machine_control/movement.h"
 
 
 inline void compute_acceleration_bounds(kinematics_t *kinematics, kinematics_acceleration_data_t *data) {

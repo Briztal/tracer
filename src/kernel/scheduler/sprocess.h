@@ -27,7 +27,7 @@
 #include "kernel/scheduler/tasks/stask.h"
 
 
-//The set of execution states;
+//The set of computation states;
 typedef enum {
 
     //Execution required;

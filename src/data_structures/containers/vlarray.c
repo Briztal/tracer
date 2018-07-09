@@ -1,5 +1,5 @@
 /*
-  container.c - Part of TRACER
+  vlarray.c - Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -22,23 +22,23 @@
 
 #include <kernel/kernel.h>
 
-#include "container.h"
+#include "vlarray.h"
 
 
 /*
- * container_move : moves data from one container to another;
+ * vlarray_move : moves data from one vlarray to another;
  */
 
-void container_move(container_t *dst, container_t *src) {
+void vlarray_move(vlarray_t *dst, vlarray_t *src) {
 
     //Cache dst;
-    const container_t tmp = *dst;
+    const vlarray_t tmp = *dst;
 
     //Copy src into dst;
-    memcpy(dst, src, sizeof(container_t));
+    memcpy(dst, src, sizeof(vlarray_t));
 
     //Copy the cached dst into src;
-    memcpy(src, &tmp, sizeof(container_t));
+    memcpy(src, &tmp, sizeof(vlarray_t));
 
 }
 
@@ -46,33 +46,33 @@ void container_move(container_t *dst, container_t *src) {
 
 /*
  *
- * container_insert_element : starts by reallocating the container array,
+ * vlarray_insert_element : starts by reallocating the vlarray array,
  *  then shifts all bytes to leave space for the new element;
  *
  *  Finally, it copies the referenced element;
  */
 
-void container_insert_element(container_t *const container, const size_t index, const void *element) {
+void vlarray_insert_element(vlarray_t *vlarray, size_t index, const void *element) {
 
     //If the index is invalid, fail;
-    if (index > container->nb_elements)
+    if (index > vlarray->length)
         //TODO ERROR
         return;
 
     //Resize the array;
-    container_resize(container, container->nb_elements + (size_t) 1);
+    vlarray_resize(vlarray, vlarray->length + (size_t) 1);
 
     //Cache the number of elements;
-    const size_t nb_elements = container->nb_elements;
+    const size_t nb_elements = vlarray->length;
 
     //Cache the size of an element;
-    const uint8_t element_size = container->element_size;
+    const uint8_t element_size = vlarray->element_size;
 
 
     //As we shift to the right, We must shift from the end to the initial;
 
     //Cache the destination;
-    uint8_t *dst_ptr = container->elements + (nb_elements - (uint8_t) 1);
+    uint8_t *dst_ptr = vlarray->elements + (nb_elements - (uint8_t) 1);
 
     //Cache the source, lower of one element;
     uint8_t *src_ptr = dst_ptr - element_size;
@@ -102,25 +102,25 @@ void container_insert_element(container_t *const container, const size_t index, 
 }
 
 /*
- * container_append_element : insert the element at the end of the array;
+ * vlarray_append_element : insert the element at the end of the array;
  */
 
-void container_append_element(container_t *const container, const void *element) {
+void vlarray_append_element(vlarray_t *vlarray, const void *element) {
 
     //Insert the element at the end of the array;
-    container_insert_element(container, container->nb_elements, element);
+    vlarray_insert_element(vlarray, vlarray->length, element);
 
 }
 
 
 /*
- * container_get_element : returns a pointer to the element at the given index;
+ * vlarray_get_element : returns a pointer to the element at the given index;
  */
 
-void *container_get_element(const container_t *const container, size_t index) {
+void *vlarray_get_element(const vlarray_t *vlarray, size_t index) {
 
     //If the index is invalid :
-    if (index >= container->nb_elements) {
+    if (index >= vlarray->length) {
 
         //Kernel panic;TODO KERNEL PANIC
         return 0;
@@ -128,19 +128,19 @@ void *container_get_element(const container_t *const container, size_t index) {
     }
 
     //Determine the adequate pointer to return;
-    return container->elements + (uint32_t) (index * (size_t) container->element_size);
+    return vlarray->elements + (uint32_t) (index * (size_t) vlarray->element_size);
 
 }
 
 
 /*
- * container_set_element : sets the element at the given index;
+ * vlarray_set_element : sets the element at the given index;
  */
 
-void container_set_element(container_t *const container, size_t index, const void *element) {
+void vlarray_set_element(vlarray_t *vlarray, size_t index, const void *element) {
 
     //If the index is invalid :
-    if (index >= container->nb_elements) {
+    if (index >= vlarray->length) {
 
         //Kernel panic;TODO KERNEL PANIC
         return;
@@ -148,11 +148,11 @@ void container_set_element(container_t *const container, size_t index, const voi
     }
 
     //Cache the src and dst pointer;
-    uint8_t *dst_ptr = container->elements + (uint32_t) (index * (size_t) container->element_size);
+    uint8_t *dst_ptr = vlarray->elements + (uint32_t) (index * (size_t) vlarray->element_size);
     uint8_t *src_ptr = element;
 
     //For each byte to copy;
-    for (uint8_t byte_count = container->element_size; byte_count--;) {
+    for (uint8_t byte_count = vlarray->element_size; byte_count--;) {
 
         //Copy the src byte at the dst address;
         *(dst_ptr++) = *(src_ptr++);
@@ -163,13 +163,13 @@ void container_set_element(container_t *const container, size_t index, const voi
 
 
 //Remove an element;
-void container_remove_element(container_t *const container, size_t index) {
+void vlarray_remove_element(vlarray_t *vlarray, size_t index) {
 
     //First, cache the current size of the array;
-    size_t current_size = container->nb_elements;
+    size_t current_size = vlarray->length;
 
     //If the index is invalid :
-    if (index >= container->nb_elements) {
+    if (index >= vlarray->length) {
 
         //Kernel panic;TODO KERNEL PANIC
         return;
@@ -182,14 +182,14 @@ void container_remove_element(container_t *const container, size_t index) {
      */
 
     //Cache the element size;
-    const uint8_t element_size = container->element_size;
+    const uint8_t element_size = vlarray->element_size;
 
     //Determine source and destination pointers : addresses of (resp) the element to delete and the next one;
-    uint8_t *dst_ptr = (uint8_t *) (container->elements + (index * (size_t) element_size));
+    uint8_t *dst_ptr = (uint8_t *) (vlarray->elements + (index * (size_t) element_size));
     uint8_t *src_ptr = dst_ptr + element_size;
 
     //Determine the number of bytes to shift;
-    uint32_t shift_counter = element_size * (container->nb_elements - index - (size_t) 1);
+    uint32_t shift_counter = element_size * (vlarray->length - index - (size_t) 1);
 
     //For each byte to shift :
     for (; shift_counter--;) {
@@ -200,59 +200,59 @@ void container_remove_element(container_t *const container, size_t index) {
     }
 
     //Now, we can decrease our size of 1;
-    container_resize(container, current_size - (size_t) 1);
+    vlarray_resize(vlarray, current_size - (size_t) 1);
 
 }
 
 
 /*
- * container_remove_last_element : removes the last element of the array;
+ * vlarray_remove_last_element : removes the last element of the array;
  */
 
-void container_remove_last_element(container_t *const container) {
+void vlarray_remove_last_element(vlarray_t *vlarray) {
 
     //Determine the last index, and call remove on it;
-    container_remove_element(container, container->nb_elements - (size_t) 1);
+    vlarray_remove_element(vlarray, vlarray->length - (size_t) 1);
 
 }
 
 
 /*
- * container_clear : resize to null pointer;
+ * vlarray_clear : resize to null pointer;
  */
 
-void container_clear(container_t *const container) {
+void vlarray_clear(vlarray_t *vlarray) {
 
     //Call resize with size-zero to delete all elements;
-    container_resize(container, 0);
+    vlarray_resize(vlarray, 0);
 
 }
 
 
 /*
- * container_resize : this function will resize the container to the required size;
+ * vlarray_resize : this function will resize the vlarray to the required size;
  *
  *  The size is expressed in number of elements;
  */
 
-void container_resize(container_t *const container, const size_t new_size) {
+void vlarray_resize(vlarray_t *vlarray, size_t new_length) {
 
-    //If the new size is superior to the max size :
-    if (new_size > container->max_nb_elements) {
+    //If the new length is superior to the max size :
+    if (new_length > vlarray->max_length) {
         return;//TODO ERROR
     }
 
     //Cache the element size;
-    const uint8_t element_size = container->element_size;
+    const uint8_t element_size = vlarray->element_size;
 
     //Determine the required size of the array;
-    uint32_t new_array_size = (uint32_t) new_size * (uint32_t) element_size;
+    uint32_t new_size = (uint32_t) new_length * (uint32_t) element_size;
 
     //Try to reallocate the array;
-    void *new_array = kernel_realloc(container->elements, new_array_size);
+    void *new_array = kernel_realloc(vlarray->elements, new_size);
 
     //If the size was not zero, and the resulting pointer is null (reallocation failure);
-    if (new_array_size && !new_array) {
+    if (new_size && !new_array) {
 
         //Kernel panic; TODO ERROR;
         return;
@@ -260,9 +260,9 @@ void container_resize(container_t *const container, const size_t new_size) {
     }
 
     //Update the array;
-    container->elements = new_array;
+    vlarray->elements = new_array;
 
     //Update the size;
-    container->nb_elements = new_size;
+    vlarray->length = new_length;
 
 }

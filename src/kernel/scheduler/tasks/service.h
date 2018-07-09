@@ -36,7 +36,7 @@ typedef struct {
     //The task itself;
     stask_t task;
 
-    //The time at which the next execution is supposed to happen;
+    //The time at which the next computation is supposed to happen;
     uint32_t next_exec_time;
 
     //The remaining number of times the service must be executed;

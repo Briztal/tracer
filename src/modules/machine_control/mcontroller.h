@@ -7,28 +7,92 @@
 
 #include <stdint.h>
 
+#include <stdbool.h>
+
+#include <data_structures/containers/llist.h>
+
 #include "machine.h"
 
+#include "movement.h"
+#include "distances_computer.h"
+#include "machine_states.h"
+
+
+
+
+//------------------------------------------- Movement builder -------------------------------------------
 
 /*
- * A machine state contains all data that describe the real time state of the machine;
- *
- * 	It comprises a mandatory part, that presents the actuation layer's current state, and a custom part,
- * 	that is left to the controller's implementation;
+ * Movements are computed step by step, and temporary data is stored in the movement builder.
  */
 
 typedef struct {
 
-	//Actuation positions. Actuators commanded on an integer base;
-	int32_t *actuation_positions;
+	//The movement that we currently compute; References the distances array and the duration;
+	movement_t *movement;
 
-	//Actuation speeds. Time is expressed in float, so are speeds;
-	float *actuation_speeds;
+	//The time interval array, containing the duration window for each actuator during the computation;
+	time_interval_t *interval_array;
 
-	//The controller's state; Can contain whatever the controller decides;
-	void *controller_state;
+	//The distance re-computation queue;
+	ts_queue recomputation_queue;
 
-} machine_state_t;
+	//The duration interval that satisfies all constraints;
+	time_interval_t duration_interval;
+
+	//After distances were provided, they might be modified to avoid breaking actuation limitations. This flag is
+	//set when they are modified;
+	bool distances_altered;
+
+	//The controller builder. Can contain whatever the controller decides;
+	void *controller_builder;
+
+} movement_builder_t;
+
+
+//------------------------------------------- Actuator physical limitation -------------------------------------------
+
+/*
+ * Actuators have physical limitations, that we must absolutely respect, otherwise, actuators or the machine could
+ * 	be damaged;
+ *
+ * 	This structure contains a function and an eventual instance, that will determine the duration limit interval;
+ */
+
+typedef struct {
+
+	//The instance to pass when the duration interval is computed;
+	void *instance;
+
+	//The function to compute the time interval;
+	void (*compute_duration_interval)(void *instance, time_interval_t interval);
+
+	//The function to compute the minimal distance to fit duration requirements;
+	void (*compute_minimal_distance)(void *instance, uint16_t *maximal_distance, float movement_duration);
+
+	//The adjustment flag. If set, distance can be adjusted to comply with the physical constraint;
+	bool distance_adjustable;
+
+	time_interval_t *time_interval;
+
+} actuation_speed_constraint_t;
+
+
+//------------------------------------------- Distance re-computation  -------------------------------------------
+
+/*
+ * When re-computing a distance, the constraint and the distance must be known;
+ */
+
+typedef struct {
+
+	//The pointer to the actuation constraint the distance must conform to;
+	actuation_speed_constraint_t *constraint;
+
+	//The location to store the final distance;
+	uint16_t *final_distance_p;
+
+};
 
 
 //------------------------------------------- Controller builder computation -------------------------------------------
@@ -83,13 +147,13 @@ typedef struct {
 	bool enabled;
 
 	//The function that will actually verify the constraint; Data will be stored in the provided interval;
-	void (*constraint_function)(const machine_state_t *current_state, const void *controller_builder, interval_t *duration_window);
+	void (*constraint_function)(const machine_state_t *current_state, const void *controller_builder,
+								time_interval_t *duration_window);
 
 } kinematic_constraint_t;
 
 
 //------------------------------------------------- Machine controller -------------------------------------------------
-
 
 /*
  * A machine controller contain instances and methods pointer used to compute positions and speed targets;
@@ -97,47 +161,29 @@ typedef struct {
 
 typedef struct {
 
+	//---------------------------- Machine constants ----------------------------
+
+	machine_constants_t machine_constants;
+
+
 	//---------------------------- Machine states ----------------------------
 
-	//The current machine state;
-	machine_state_t *machine_state;
-
-	//The next machine state;
-	machine_state_t *next_machine_state;
-
-	//The machine state identifier; set when next_machine_state == s0;
-	bool next_is_s0;
-
-	//The first machine state;
-	machine_state_t *const s0;
-
-	//The second machine state;
-	machine_state_t *const s1;
+	machine_states_t states;
 
 
-	//---------------------------- Geometry ----------------------------
+	//---------------------------- Movement builder ----------------------------
 
-	//The machine's geometry;
-	const geometry_t *const geometry;
+	movement_builder_t movement_builder;
 
 
-	//---------------------------- Position target computation ----------------------------
+	//---------------------------- Target distances computation ----------------------------
 
-	//The position target computer instance;
-	void *position_computer;
+	distances_computer_t distances_computer;
 
-	//Compute the position for the new machine state; the (const) current state and new machine state are provided;
-	void (*compute_position)(void *instance, const geometry_t *geometry,
-							 const machine_state_t *current_state, machine_state_t *new_state);
 
-	//Notify the position computer that the previously provided position has been accepted;
-	void (*accept_position)(void *instance);
+	//---------------------------- Actuation speed constraints ----------------------------
 
-	//Notify the position computer that the previously provided position has been rejected;
-	void (*reject_position)(void *instance);
-
-	//Delete the position computer. Required for cleanup;
-	void (*delete_position_computer)(void *instance);
+	actuation_speed_constraint_t *actuation_speed_constraints;
 
 
 	//---------------------------- Custom computations ----------------------------
@@ -146,7 +192,7 @@ typedef struct {
 	linked_list_t controller_computations;
 
 	//Next computation to execute;
-	controller_computation_t pending_computation;
+	controller_computation_t *pending_computation;
 
 
 	//---------------------------- kinematic constraints ----------------------------
@@ -155,7 +201,7 @@ typedef struct {
 	linked_list_t kinematic_constraints;
 
 	//Next computation to execute;
-	kinematic_constraint_t pending_constraints;
+	kinematic_constraint_t *pending_constraint;
 
 
 	//---------------------------- duration target computation ----------------------------
@@ -164,21 +210,17 @@ typedef struct {
 	void *duration_computer;
 
 	//Compute the target duration for the new movement; (const) current state and (const) movement builder are provided;
-	void (*compute_movement_duration)(void *instance, const machine_state_t *current_state, const mbuilder_t *movement_builder);
+	void (*compute_movement_duration)(void *instance, const machine_state_t *current_state,
+									  const movement_builder_t *movement_builder);
 
 	//Delete the speed computer. Required for cleanup;
 	void (*delete_duration_computer)(void *instance);
 
 
+	//TODO---------------------------- Movement queue ----------------------------
+
+
 } mcontroller_t;
-
-
-
-
-
-
-
-
 
 
 #endif //TRACER_MCONTROLLER_H

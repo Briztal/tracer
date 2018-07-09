@@ -187,7 +187,7 @@ void SubMovementManager::push_new_sub_movement() {
     //get a new sub-movement;
     compute_new_sub_movement(sub_movement_data);
 
-    //Declare a flag that will allow us to control good execution;
+    //Declare a flag that will allow us to control good computation;
     bool execution_flag;
 
     //As the computation occurred without errors, we must now verify the computed movement.

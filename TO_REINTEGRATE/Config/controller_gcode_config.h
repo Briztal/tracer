@@ -36,7 +36,7 @@
 //The maximal size of an argument
 #define GCODE_MAX_WORD_SIZE 20
 
-//The number of commands that can be received and stored before execution;
+//The number of commands that can be received and stored before computation;
 #define GCODE_MAX_PENDING_COMMANDS 10
 
 //The maximum size of a ByteTreeLanguage Command.

@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 #include <stddef.h>
-#include "movement.h"
+#include "modules/machine_control/movement.h"
 #include "modules/machine_control/geometry.h"
 #include "trajectory.h"
 #include "kinematics.h"

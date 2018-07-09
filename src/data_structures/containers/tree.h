@@ -23,7 +23,7 @@
 #define TRACER_TREE_H
 
 
-#include <data_structures/containers/container.h>
+#include <data_structures/containers/vlarray.h>
 
 /*
  * A tree in the strictest meaning contains a container of sub-trees;
@@ -31,11 +31,11 @@
 
 typedef struct {
 
-    container_t children;
+    vlarray_t children;
 
 } tree_t;
 
-#define EMPTY_TREE(max_nb_children) {EMPTY_CONTAINER(tree_t, max_nb_children)}
+#define EMPTY_TREE(max_nb_children) {EMPTY_VLARRAY(tree_t, max_nb_children)}
 
 
 
@@ -49,7 +49,7 @@ void tree_insert_child(tree_t *parent, size_t index, tree_t *child);
 inline size_t tree_nb_children(tree_t *parent) {
 
     //Return the nb of elements in the children container;
-    return parent->children.nb_elements;
+    return parent->children.length;
 
 }
 

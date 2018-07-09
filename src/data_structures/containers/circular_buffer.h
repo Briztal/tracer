@@ -21,7 +21,7 @@
 #ifndef TRACER_CIRCULAR_BUFFER_H
 #define TRACER_CIRCULAR_BUFFER_H
 
-#include "container.h"
+#include "vlarray.h"
 
 typedef struct {
 
@@ -38,7 +38,7 @@ typedef struct {
 	size_t nb_elements;
 
 	//The container data type;
-	container_t container;
+	vlarray_t container;
 
 } cbuffer_t;
 
@@ -46,7 +46,7 @@ typedef struct {
 //------------------------------------ Init - clear ------------------------------------
 
 //A macro to help us safely initialising our containers;
-#define EMPTY_CBUFFER(type, max_size) {.input_index = 0, .output_index = 0, .nb_spaces = 0, .container = EMPTY_CONTAINER(type, max_size)}
+#define EMPTY_CBUFFER(type, max_size) {.input_index = 0, .output_index = 0, .nb_spaces = 0, .container = EMPTY_VLARRAY(type, max_size)}
 
 //Discard all elements in the buffer. The container's size remains untouched;
 void cbuffer_discard_all(cbuffer_t *);

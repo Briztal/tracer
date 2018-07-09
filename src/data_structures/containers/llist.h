@@ -99,10 +99,10 @@ void llist_insert_first(linked_list_t *list, linked_element_t *element);
 void llist_insert_last(linked_list_t *list, linked_element_t *element);
 
 //Insert the new element after an element of the list;
-void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *element);
+void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *new_element);
 
 //Insert the new element before an element of the list;
-void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *element);
+void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *new_element);
 
 //Remove the first element of the list;
 linked_element_t *llist_remove_first(linked_list_t *list);
@@ -151,11 +151,11 @@ typedef struct {
 /*
 
 //Initialize;
-#define EMPTY_LINKED_RING(max_nb) {.current = 0, .nb_elements = 0, .max_nb_elements = (max_nb)}
+#define EMPTY_LINKED_RING(max_nb) {.current = 0, .length = 0, .max_length = (max_nb)}
 
 //Verify that an element can be inserted;
 inline bool lring_insertion_available(linked_ring_t *ring) {
-    return ring->nb_elements < ring->max_nb_elements;
+    return ring->length < ring->max_length;
 }
 
 //Insert an element before the current element of the ring (last position);

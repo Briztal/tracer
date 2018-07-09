@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "movement.h"
+#include "modules/machine_control/movement.h"
 #include "trajectory.h"
 
 

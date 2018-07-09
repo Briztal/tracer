@@ -35,7 +35,7 @@ void Language::schedule_command(Language *instance, language_function function, 
     data->function = function;
     data->arguments_p = new string(arguments_p);
 
-    //Schedule the execution of the command;
+    //Schedule the computation of the command;
     //TODO TaskScheduler::sequences_add_task(0, execute_command, (void *)data);
 
 }

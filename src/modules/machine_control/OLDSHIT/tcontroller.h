@@ -27,7 +27,7 @@
 #include <data_structures/containers/circular_buffer.h>
 
 
-#include "movement.h"
+#include "modules/machine_control/movement.h"
 
 #include "mbuilder.h"
 

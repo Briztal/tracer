@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <kernel/kernel.h>
 #include "circular_buffer.h"
-#include "container.h"
+#include "vlarray.h"
 
 
 /*
@@ -31,7 +31,7 @@
 void cbuffer_discard_all(cbuffer_t *const cbuffer) {
 
 	//Set the number of spaces at its maximum;
-	cbuffer->nb_spaces = cbuffer->container.nb_elements;
+	cbuffer->nb_spaces = cbuffer->container.length;
 
 	//Set the number of elements to 0;
 	cbuffer->nb_elements = 0;
@@ -52,7 +52,7 @@ void cbuffer_insert(cbuffer_t *const cbuffer, const void *const element_p) {
 	//Spaces will be verified during cbuffer_validate_input;
 
 	//Set the element at the correct position;
-	container_set_element(&cbuffer->container, cbuffer->input_index, element_p);
+	vlarray_set_element(&cbuffer->container, cbuffer->input_index, element_p);
 
 	//Validate the input position;
 	cbuffer_validate_input(cbuffer);
@@ -76,7 +76,7 @@ void cbuffer_validate_input(cbuffer_t *const cbuffer) {
 	}
 
 	//Increment safely;
-	cbuffer->input_index = (cbuffer->input_index + (size_t) 1) % cbuffer->container.nb_elements;
+	cbuffer->input_index = (cbuffer->input_index + (size_t) 1) % cbuffer->container.length;
 
 	//Increment the number of elements;
 	cbuffer->nb_elements++;
@@ -114,11 +114,11 @@ void *cbuffer_read_input(const cbuffer_t *const cbuffer, const size_t offset) {
 	size_t input_index = cbuffer->input_index;
 
 	//Then determine the index of the element to read;
-	size_t index = (input_index >= offset) ? input_index - offset : cbuffer->container.nb_elements -
+	size_t index = (input_index >= offset) ? input_index - offset : cbuffer->container.length -
 																	(offset - input_index);
 
 	//Get the element at the required position. A modulo is applied to ensure to hit a container's element;
-	return container_get_element(&cbuffer->container, index);
+	return vlarray_get_element(&cbuffer->container, index);
 
 }
 
@@ -143,7 +143,7 @@ void cbuffer_discard_output(cbuffer_t *const cbuffer) {
 	}
 
 	//Increment safely;
-	cbuffer->output_index = (cbuffer->output_index + (size_t) 1) % cbuffer->container.nb_elements;
+	cbuffer->output_index = (cbuffer->output_index + (size_t) 1) % cbuffer->container.length;
 
 	//Decrement the number of elements;
 	cbuffer->nb_elements--;
@@ -185,10 +185,10 @@ void *cbuffer_read_output(cbuffer_t *const cbuffer, const size_t offset) {
 	uint32_t larger_index = (uint32_t) output_index + (uint32_t) offset;
 
 	//Then determine the index of the element to read by a modulo;
-	size_t index = (uint16_t) (larger_index % (uint32_t) cbuffer->container.nb_elements);
+	size_t index = (uint16_t) (larger_index % (uint32_t) cbuffer->container.length);
 
 	//Get the element at the required position. A modulo is applied to ensure to hit a container's element;
-	return container_get_element(&cbuffer->container, index);
+	return vlarray_get_element(&cbuffer->container, index);
 
 }
 
@@ -214,7 +214,7 @@ void cbuffer_resize(cbuffer_t *const cbuffer, const size_t new_size) {
 	}
 
 	//Resize the container;
-	container_resize(&cbuffer->container, new_size);
+	vlarray_resize(&cbuffer->container, new_size);
 
 	//Reset its data;
 	cbuffer->nb_spaces = new_size;
@@ -233,23 +233,23 @@ void cbuffer_resize(cbuffer_t *const cbuffer, const size_t new_size) {
 	 *
 
 	//For instance, size reduction is not supported;
-	if (new_size <= cbuffer->container.nb_elements) {
+	if (new_size <= cbuffer->container.length) {
 		return;//TODO ERROR;
 	}
 
 	bool rearrangement = (cbuffer->input_index < cbuffer->output_index) || cbuffer->nb_spaces;
 
 	//Cache the old size of the container;
-	size_t old_size =  cbuffer->container.nb_elements;
+	size_t old_size =  cbuffer->container.length;
 
 	//Cache the number of added elements;
 	uint8_t added_elements =
 
 	//Increment the number of spaces of the number of added cases;
-	cbuffer->nb_spaces += new_size - cbuffer->container.nb_elements;
+	cbuffer->nb_spaces += new_size - cbuffer->container.length;
 
 	//Then, resize the array;
-	container_resize(&cbuffer->container, new_size);
+	vlarray_resize(&cbuffer->container, new_size);
 
 	//If rearrangement is required :
 	if (rearrangement) {

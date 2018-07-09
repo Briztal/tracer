@@ -22,34 +22,10 @@ typedef uint32_t sig_t;
 
 typedef struct {
 	//The distances coordinates array;
-	uint16_t *actuation_distances;
-
-	//The directions signature; signature is negative.
-	sig_t direction_signature;
+	int16_t *actuation_distances;
 
 	//The number of microseconds till position must be reached;
 	float time_to_dest;
 
 } movement_t;
 
-
-//--------------------------------------------------- Distance bounds --------------------------------------------------
-
-/*
- * In order to compute movements properly, we must define some distance bounds;
- */
-
-typedef struct {
-
-	//The distance target;
-	uint16_t target;
-
-	//The lower distance bound;
-	uint16_t min;
-
-	//The upper distance bound;
-	uint16_t max;
-
-} dbounds_t;
-
-#endif //TRACER_MOVEMENT_H

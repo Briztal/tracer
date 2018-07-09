@@ -59,7 +59,7 @@ tstring_t *tstring_from_tstring(tstring_t *src) {
     tstring_t *tstring = (tstring_t *)kernel_malloc_copy(sizeof(tstring_t), &init);
 
     //Move container data from src to the new tstring;
-    container_move((container_t *)tstring, (container_t *)src);
+	vlarray_move((vlarray_t *) tstring, (vlarray_t *) src);
 
     //Return moved tstring;
     return tstring;

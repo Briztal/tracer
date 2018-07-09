@@ -24,7 +24,7 @@ void staged_execution_update_stage(staged_execution_t *execution);
 //Reset a stage;
 void stage_reset(stage_t *stage) {
 
-	//Reset the execution counter to its maximal value;
+	//Reset the computation counter to its maximal value;
 	stage->remaining_executions = stage->max_executions;
 
 }
@@ -49,7 +49,7 @@ void staged_execution_initialise(staged_execution_t *const execution, const size
 	//Reset the array;
 	memset(stages, 0, size);
 
-	//Initialise the staged execution structure;
+	//Initialise the staged computation structure;
 	*execution = {
 
 		//Set the provided number of stages;
@@ -88,7 +88,7 @@ void staged_execution_delete(staged_execution_t *execution) {
 void staged_execution_set_stage(staged_execution_t *execution, size_t stage_index, void *instance,
 								stage_function_t function, uint8_t max_executions) {
 
-	//If the execution index is too high :
+	//If the computation index is too high :
 	if (execution->nb_stages <= stage_index) {
 
 		//Error, invalid index;
@@ -96,7 +96,7 @@ void staged_execution_set_stage(staged_execution_t *execution, size_t stage_inde
 
 	}
 
-	//If the execution can't happen :
+	//If the computation can't happen :
 	if (!max_executions) {
 
 		//Error, invalid index;
@@ -105,7 +105,7 @@ void staged_execution_set_stage(staged_execution_t *execution, size_t stage_inde
 
 	}
 
-	//If the execution is not reset :
+	//If the computation is not reset :
 	if (!staged_execution_is_reset(execution)) {
 
 		//Error, could corrupt data;
@@ -119,18 +119,18 @@ void staged_execution_set_stage(staged_execution_t *execution, size_t stage_inde
 	//Cache the stage pointer;
 	stage_t *stage = execution->stages + stage_index;
 
-	//Mark the stage un-initialised, to avoid unintentional async execution;
+	//Mark the stage un-initialised, to avoid unintentional async computation;
 	stage->initialised = false;
 
 	//Cache the stage's current max number of executions;
 	size_t old_max_nb_execs = stage->max_executions;
 
-	//Update the maximal number of execution steps;
+	//Update the maximal number of computation steps;
 	execution->nb_steps = execution->nb_steps - old_max_nb_execs + max_executions;
 
 	*stage = {
 
-		//Update the execution limit and reset the stage;
+		//Update the computation limit and reset the stage;
 		.max_executions = max_executions,
 		.remaining_executions = max_executions,
 
@@ -160,7 +160,7 @@ void staged_execution_set_stage(staged_execution_t *execution, size_t stage_inde
 
 void staged_executions_execute(staged_execution_t *execution) {
 
-	//Lock the execution;
+	//Lock the computation;
 	execution->lock = true;
 
 	//Cache the current stage index;
@@ -173,7 +173,7 @@ void staged_executions_execute(staged_execution_t *execution) {
 	if (stage->initialised) {
 
 		//Execute the stage once, passing the instance, and cache the return state
-		stage_state_t state = (*(stage->stage_function))(stage->instance);
+		cnode_state_t state = (*(stage->stage_function))(stage->instance);
 
 		switch (state) {
 
@@ -201,12 +201,12 @@ void staged_executions_execute(staged_execution_t *execution) {
 				//If no more executions are allowed, abort.
 
 			case STAGE_ABORT :
-				//If we must restart the execution from the first stage :
+				//If we must restart the computation from the first stage :
 
 				//Reset the current stage;
 				stage_reset(stage);
 
-				//Reset the execution;
+				//Reset the computation;
 				execution->current_stage = 0;
 
 				goto unlock;
@@ -227,10 +227,10 @@ void staged_executions_execute(staged_execution_t *execution) {
 	staged_execution_update_stage(execution);
 
 
-	//The function can't return before unlocking the execution;
+	//The function can't return before unlocking the computation;
 	unlock :
 
-	//Unlock the execution;
+	//Unlock the computation;
 	execution->lock = false;
 
 }
@@ -248,7 +248,7 @@ void staged_execution_update_stage(staged_execution_t *execution) {
 	//Cache and increment the current stage;
 	size_t current_stage = execution->current_stage + 1;
 
-	//If the execution is complete :
+	//If the computation is complete :
 	if (current_stage == execution->nb_stages) {
 
 		//Select the first stage;
@@ -263,9 +263,9 @@ void staged_execution_update_stage(staged_execution_t *execution) {
 
 
 /*
- * staged_execution_is_reset : returns true if the execution is reset;
+ * staged_execution_is_reset : returns true if the computation is reset;
  *
- * 	The execution is reset when the first stage hasn't been executed once yet;
+ * 	The computation is reset when the first stage hasn't been executed once yet;
  */
 
 bool staged_execution_is_reset(staged_execution_t *execution) {
@@ -279,12 +279,12 @@ bool staged_execution_is_reset(staged_execution_t *execution) {
 	//If the current index not zero, or the stage has already been executed once)
 	if (current_index || (current_stage->max_executions != current_stage->remaining_executions)) {
 
-		//The execution is started;
+		//The computation is started;
 		return false;
 
 	}
 
-	//If not, the execution is reset;
+	//If not, the computation is reset;
 	return false;
 
 }

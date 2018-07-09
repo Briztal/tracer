@@ -27,7 +27,7 @@
 void tree_append_child(tree_t *parent, tree_t *child) {
 
     //Append the child to the tree;
-    container_append_element(&parent->children, &child);
+    vlarray_append_element(&parent->children, &child);
 
 }
 
@@ -39,7 +39,7 @@ void tree_append_child(tree_t *parent, tree_t *child) {
 void tree_insert_child(tree_t *parent, size_t index, tree_t *child) {
 
     //Append the child to the tree;
-    container_insert_element(&parent->children, index, &child);
+	vlarray_insert_element(&parent->children, index, &child);
 
 }
 
@@ -51,7 +51,7 @@ void tree_insert_child(tree_t *parent, size_t index, tree_t *child) {
 tree_t *get_child(tree_t *parent, size_t index) {
 
     //Call the macro get to avoid a syntax mistake;
-    return CONTAINER_GET_TYPED(tree_t*, &parent->children, index);
+    return VLARRAY_GET_TYPED(tree_t*, &parent->children, index);
 
 }
 
@@ -69,13 +69,13 @@ void tree_DFS_pre_order(tree_t *root, void (*const traversal_function)(tree_t *)
     traversal_function(root);
 
     //Then, for each sub_tree, call the function;
-    for (size_t child_index = root->children.nb_elements; child_index--;) {
+    for (size_t child_index = root->children.length; child_index--;) {
 
         //Cache the child;
-        tree_t *child = CONTAINER_GET_TYPED(tree_t *, &root->children, child_index);
+        tree_t *child = VLARRAY_GET_TYPED(tree_t *, &root->children, child_index);
 
         //If the child has sub-nodes :
-        if (child->children.nb_elements) {
+        if (child->children.length) {
 
             //Recursive call on him;
             tree_DFS_pre_order(child, traversal_function);
@@ -94,13 +94,13 @@ void tree_DFS_pre_order(tree_t *root, void (*const traversal_function)(tree_t *)
 void tree_DFS_post_order(tree_t *root, void (*const traversal_function)(tree_t *)) {
 
     //First, for each sub_tree, call the function;
-    for (size_t child_index = root->children.nb_elements; child_index--;) {
+    for (size_t child_index = root->children.length; child_index--;) {
 
         //Cache the child;
-        tree_t *child = CONTAINER_GET_TYPED(tree_t *, &root->children, child_index);
+        tree_t *child = VLARRAY_GET_TYPED(tree_t *, &root->children, child_index);
 
         //If the child has sub-nodes :
-        if (child->children.nb_elements) {
+        if (child->children.length) {
 
             //Recursive call on him;
             tree_DFS_post_order(child, traversal_function);
@@ -133,7 +133,7 @@ void tree_delete(tree_t *parent, void (*const destructor)(tree_t *)) {
 void remove_child(tree_t *parent, const size_t index, void (*const destructor)(tree_t *)) {
 
     //First, delete the child tree of the memory;
-    tree_delete(CONTAINER_GET_TYPED(tree_t*, &parent->children, index), destructor);
+    tree_delete(VLARRAY_GET_TYPED(tree_t*, &parent->children, index), destructor);
 
 }
 

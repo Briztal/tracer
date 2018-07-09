@@ -36,11 +36,11 @@ void sem_delete(semaphore_t *semaphore) {
     //TODO EXCEPTION ?
 
     //First, for all locked sprocesses :
-    for (size_t unlock_index = semaphore->locked_threads.nb_elements; unlock_index--;) {
+    for (size_t unlock_index = semaphore->locked_threads.length; unlock_index--;) {
 
         //Get the sprocess to unlock;
         sprocess_t *sprocess = 
-				*(sprocess_t **)container_get_element(&semaphore->locked_threads, unlock_index);
+				*(sprocess_t **) vlarray_get_element(&semaphore->locked_threads, unlock_index);
 
         //Re-activate the sprocess;
         scheduler_activate_sprocess(sprocess);
@@ -59,7 +59,7 @@ void sem_delete(semaphore_t *semaphore) {
 
 
 /*
- * sem_wait : required the execution;
+ * sem_wait : required the computation;
  */
 
 void sem_wait(semaphore_t *semaphore) {
@@ -70,21 +70,21 @@ void sem_wait(semaphore_t *semaphore) {
     //If we are thread mode :
     if (!core_in_handler_mode()) {
 
-        //If no execution is allowed :
+        //If no computation is allowed :
         if (!semaphore->allocation_counter) {
 
             //Get our sprocess's index;
             stopped_process_id_t process = scheduler_stop_sprocess();
 
             //Add the sprocess pointer to the locked threads array;
-            container_append_element(&semaphore->locked_threads, &process);
+			vlarray_append_element(&semaphore->locked_threads, &process);
 
             //Trigger the context switch; Will be effective after the critical section exit;
             core_preempt_process();
 
         } else {
 
-            //If the execution is allowed, decrement the allocation counter;
+            //If the computation is allowed, decrement the allocation counter;
             semaphore->allocation_counter--;
 
         }
@@ -98,7 +98,7 @@ void sem_wait(semaphore_t *semaphore) {
 
 
 /*
- * sem_post : allows one more execution;
+ * sem_post : allows one more computation;
  */
 
 void sem_post(semaphore_t *semaphore) {
@@ -110,16 +110,16 @@ void sem_post(semaphore_t *semaphore) {
     if (!core_in_handler_mode()) {
 
         //If threads are to unlock :
-        if (semaphore->locked_threads.nb_elements) {
+        if (semaphore->locked_threads.length) {
 
             //Get the sprocess to unlock;
-            stopped_process_id_t process = *(sprocess_t **)container_get_element(&semaphore->locked_threads, 0);
+            stopped_process_id_t process = *(sprocess_t **) vlarray_get_element(&semaphore->locked_threads, 0);
 
             //Re-activate the sprocess;
             scheduler_activate_sprocess(process);
 
             //Remove the index of the array;
-            container_remove_element(&semaphore->locked_threads, 0);
+            vlarray_remove_element(&semaphore->locked_threads, 0);
 
             //Trigger the context switch;
             core_preempt_process();

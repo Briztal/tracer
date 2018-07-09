@@ -9,7 +9,7 @@
 #include <data_structures/containers/llist.h>
 
 /*
- * This library defines the staged execution structure;
+ * This library defines the staged computation structure;
  *
  * 	This structure eases things when you need to execute a process that comprises several stages, and
  * 	where each stage might need to be called a certain number of times;
@@ -26,17 +26,17 @@ typedef enum {
 	//The stage is complete, the next one can be executed;
 	STAGE_COMPLETE,
 
-	//The stage is aborted, the execution must restart from the beginning;
+	//The stage is aborted, the computation must restart from the beginning;
 	STAGE_ABORT,
 
-	//The stage's execution is not complete. Another execution is required;
+	//The stage's computation is not complete. Another computation is required;
 	STAGE_RE_EXECUTE
 
-} stage_state_t;
+} cnode_state_t;
 
 
 //A stage function takes an instance, and returns a stage stage;
-typedef stage_state_t (*stage_function_t )(void *instance);
+typedef cnode_state_t (*stage_function_t )(void *instance);
 
 
 /*
@@ -66,20 +66,20 @@ typedef struct {
 
 
 /*
- * The staged execution structure;
+ * The staged computation structure;
  *
- * 	A staged execution is composed of an array of stages, and of a current index;
+ * 	A staged computation is composed of an array of stages, and of a current index;
  */
 
 typedef struct {
 
-	//The execution lock, to prevent multiple executions;
+	//The computation lock, to prevent multiple executions;
 	volatile bool lock;
 
-	//The number of stages of the execution;
+	//The number of stages of the computation;
 	const size_t nb_stages;
 
-	//The number of steps of the execution;
+	//The number of steps of the computation;
 	size_t nb_steps;
 
 	//The current stage index;
@@ -110,7 +110,7 @@ void staged_execution_set_stage(staged_execution_t *execution, size_t stage_inde
 void staged_executions_execute(staged_execution_t *execution);
 
 
-//Is the staged execution reset ?
+//Is the staged computation reset ?
 bool staged_execution_is_reset(staged_execution_t *execution);
 
 

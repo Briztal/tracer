@@ -59,7 +59,7 @@ typedef struct {
     //The process's stack;
     core_stack_t *process_stack;
 
-    //The execution time granted to the process before its preemption;
+    //The computation time granted to the process before its preemption;
     uint16_t activity_time;
 
 } core_process_t;

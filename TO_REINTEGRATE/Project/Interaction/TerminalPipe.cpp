@@ -283,7 +283,7 @@ task_state_t TerminalPipe::eeprom() {
         if (!TaskScheduler::verify_schedulability(nb)) {\
             /*Lock the sequence 0*/\
             /*TDOO LOCK_SEQUENCE(0)\*/\
-            /*Schedule a re-execution*/\
+            /*Schedule a re-computation*/\
             return reprogram;\
         }\
     }\
