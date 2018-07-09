@@ -1,5 +1,5 @@
 /*
-  servo.h -  Part of TRACER
+  servo_module.h -  Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
