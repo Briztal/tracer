@@ -13,19 +13,36 @@
 
 
 /*
+ * The data hosts owns and grants access to data structures of a fixed (shared among them) size.
  *
+ * 	All data is contained in the host. Each piece of data can be in one of the three following states :
+ * 		- initialised : the data structure is filled and ready to be used; Data is not directly accessible;
+ * 		- uninitialised : the data structure has already been used, and its data can't be used; Data is not
+ * 			directly accessible;
+ * 		- shared : the data's ownership is shared with one and only one caller.
+ *
+ * 	A function can request access from an uninitialised or initialised piece of data. When it gets access to it,
+ * 	it passes in the shared state, and no one can access it;
+ *
+ * 	When the function has finished its job, it provides the data structure back, and tells the host its new state.
+ * 	Data can be accessed again by another part of the code;
+ */
+
+
+/*
+ * The dhost element contains all data related to a particular data structure;
  */
 
 typedef struct dhost_element_t {
 
 	//Has the element's ownership been transferred ?
-	bool ownership_transferred;
+	bool shared;
 
 	//The next element;
 	struct dhost_element_t *next;
 
 	//The pointer to arguments;
-	void *data;
+	void *const data;
 
 } dhost_element_t;
 
@@ -37,6 +54,9 @@ typedef struct dhost_element_t {
  */
 
 typedef struct {
+
+	//The number of elements in the queue;
+	size_t nb_elements;
 
 	//The first element of the queue; The next to be read;
 	dhost_element_t *first_element;
@@ -55,7 +75,10 @@ typedef struct {
 typedef struct {
 
 	//The size of data;
-	const size_t data_size;
+	const size_t elements_size;
+
+	//The number of elements that the host manages;
+	const size_t nb_elements;
 
 	//The pointer to our data array;
 	void *data;
@@ -72,11 +95,18 @@ typedef struct {
 } dhost_t;
 
 
+
+//----------------------------------------------------- Init - exit ----------------------------------------------------
+
+
 //Create a data host, with the owning [length] elements of [element_size] bytes; Concurrency not supported;
-void dhost_initialise(dhost_t *dhost, size_t nb_elements, size_t element_size);
+void dhost_initialise(dhost_t *dhost, size_t nb_elements, size_t element_data_size);
 
 //Delete a data host; Concurrency not supported;
-void dhost_delete(dhost_t dhost);
+void dhost_delete(dhost_t *dhost);
+
+
+//-------------------------------------------------------- Sync --------------------------------------------------------
 
 
 //Is there initialised data available ? Purely indicative, concurrency supported;
@@ -86,6 +116,8 @@ bool dhost_initialised_data_available(const dhost_t *dhost);
 bool dhost_all_data_uninitialised(const dhost_t *dhost);
 
 
+//--------------------------------------------------- Data provision ---------------------------------------------------
+
 //Get the ownership of an uninitialised element; Concurrency not supported;
 dhost_element_t *dhost_provide_uninitialised(const dhost_t *dhost);
 
@@ -93,12 +125,16 @@ dhost_element_t *dhost_provide_uninitialised(const dhost_t *dhost);
 dhost_element_t * dhost_provide_initialised(const dhost_t *dhost);
 
 
+//--------------------------------------------------- Data reception ---------------------------------------------------
+
 //Give back the ownership of element, and insert it in the uninitialised internal queue; Concurrency not supported;
-void dhost_receive_uninitialised(const dhost_t *dhost, const dhost_element_t *data);
+void dhost_receive_uninitialised(const dhost_t *dhost, dhost_element_t *element);
 
 //Give back the ownership of element, and insert it in the initialised internal queue; Concurrency not supported;
-void dhost_receive_initialised(const dhost_t *dhost, const dhost_element_t *data_ptr);
+void dhost_receive_initialised(const dhost_t *dhost, dhost_element_t *element);
 
+
+//----------------------------------------------- Element initialisation -----------------------------------------------
 
 //Own an element to initilise, copy data inside, and give it back to the host as an initialised element;
 void dhost_initialise_element(dhost_t *dhost, const void *data, size_t data_size);

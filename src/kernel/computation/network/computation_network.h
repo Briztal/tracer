@@ -5,6 +5,7 @@
 #ifndef TRACER_COMPUTATION_NETWORK_H
 #define TRACER_COMPUTATION_NETWORK_H
 
+#include <kernel/mutex/mutex.h>
 #include "data_structures/containers/llist.h"
 
 #include "kernel/computation/data_host.h"
