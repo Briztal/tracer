@@ -141,8 +141,8 @@ void dhost_initialise(dhost_t *dhost, const size_t nb_elements, const size_t ele
 
 void dhost_delete(dhost_t *const dhost) {
 
-	//If all data is not uninitialised :
-	if (!dhost_all_data_uninitialised(dhost)) {
+	//If there still is shared data :
+	if (dhost->uninitialised_elements.nb_elements + dhost->initialised_elements.nb_elements != dhost->nb_elements) {
 
 		//Error. All data must be processed before deletion;
 		kernel_error("data_host.c : dhost_delete : there still is data initialised or shared;");
