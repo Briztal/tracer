@@ -56,6 +56,148 @@ inline void cnetwork_unlock_list(const cnetwork_t *const network) {
 }
 
 
+//------------------------------------------------ Creation - deletion -------------------------------------------------
+
+/*
+ * cnetwork_create : creates a computation network structure in the heap, providing the number of nodes,
+ * 	and a mutex to protect the active nodes list;
+ */
+
+cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex) {
+
+	//Allocate some heap data to contain all nodes;
+	cnode_t *nodes = kernel_malloc(nb_nodes * sizeof(cnode_t));
+
+	//Initialise all nodes to 0; Initialisation flags will be cleared;
+	memset(nodes, 0, sizeof(cnode_t));
+
+	//Create the initializer for the computation network;
+	cnetwork_t init = {
+
+		//Save the number of nodes;
+		.nb_nodes = nb_nodes,
+
+		//Initialise the list mutex;
+		.list_mutex = mutex,
+
+		//Initialise the active linked list to an empty one;
+		.active_nodes = EMPTY_LINKED_LIST(nb_nodes),
+
+		//Transfer the ownership of the nodes array;
+		.nodes = nodes,
+
+	};
+
+	//Create and initialise the computation network;
+	return kernel_malloc_copy(sizeof(cnetwork_t), &init);
+
+}
+
+
+/*
+ * cnetwork_init_node : initialises a computation node, providing
+ * 	- a priority;
+ * 	- a mutex;
+ * 	- a max number of concurrent executions;
+ * 	- a number of output references;
+ * 	- an array containing them;
+ *
+ * 	The node must not be initialised ! If so, an error will be thrown;
+ */
+
+void cnetwork_init_node(const cnetwork_t *const cnetwork, const size_t node_index, const size_t priority,
+						const computation_function_t function,
+						const size_t arguments_size, const size_t nb_concurrent_execs,
+						const size_t nb_outputs, const size_t *const output_references_const) {
+
+	//Cache the node pointer;
+	cnode_t *const node = cnetwork->nodes + node_index;
+
+	//If the node is already initialised :
+	if (node->initialised) {
+
+		//Error. A node can't be initialised multiple times;
+		kernel_error("commputation_network : cnetwork_init_node : attempted to initialise a node twice;");
+
+	}
+
+	//Duplicate the output references array;
+	const size_t *const output_references = kernel_malloc_copy(nb_outputs * sizeof(size_t), output_references_const);
+
+
+	//Initialize the node;
+	*node = (cnode_t) {
+
+		//Mark the node initialised;
+		.initialised = true,
+
+		//Reset its link;
+		.link = EMPTY_LINKED_ELEMENT(),
+
+		//Set its priority
+		.priority = priority,
+
+		//Duplicate the list mutex and save it;
+		.data_mutex = mutex_duplicate(cnetwork->list_mutex),
+
+		//Don't initialise the node's host;
+
+		//The function, to call when the host has initialised data;
+		.function = function,
+
+		//Save the number of outputs
+		.nb_output_nodes = nb_outputs,
+
+		//Transfer the ownership of the output references array;
+		.output_references = output_references
+
+	};
+
+	//Initialise the data host;
+	dhost_initialise(&node->input_host, nb_concurrent_execs, arguments_size);
+
+}
+
+
+//Delete a computation network and all its dynamic data;
+void cnetwork_delete(cnetwork_t *cnetwork) {
+
+	//We must delete properly each node;
+
+	//Cache the node pointer;
+	cnode_t *node_p = cnetwork->nodes;
+
+	//For each node :
+	for (size_t node_index = cnetwork->nb_nodes; node_index--;) {
+
+		//If the node is initialised :
+		if (node_p->initialised) {
+
+			//Delete the mutex;
+			mutex_delete(node_p->data_mutex);
+
+			//Free the output references array;
+			kernel_free((void *) node_p->output_references);
+
+			//Deinit the input host;
+			dhost_delete(&node_p->input_host);
+
+		}
+
+		//update the node pointer;
+		node_p++;
+
+	}
+
+	//Free the nodes array;
+	kernel_free(cnetwork->nodes);
+
+	//Free the cnetwork array;
+	kernel_free(cnetwork);
+
+}
+
+
 //----------------------------------------------- Execution / activation -----------------------------------------------
 
 
@@ -120,22 +262,22 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 	bool node_complete = (*(node->function))(&activator, element->data);
 
 	//Lock the node for data return;
-	cnode_lock_data(node);                                              		//	Node locked;
+	cnode_lock_data(node);                                                    //	Node locked;
 
 	//If the node completed :
-	if (node_complete) {                                                		//	Node locked;
+	if (node_complete) {                                                        //	Node locked;
 
 		//Return data in uninitialised state;
-		dhost_receive_uninitialised(host, element);                  			//	Node locked;
+		dhost_receive_uninitialised(host, element);                            //	Node locked;
 
 
-	} else {                                                            		//	Node locked;
+	} else {                                                                    //	Node locked;
 
 		//Return data in uninitialised state;
-		dhost_receive_initialised(host, element);                    			//	Node locked;
+		dhost_receive_initialised(host, element);                                //	Node locked;
 
 
-	}                                                                   		//	Node locked;
+	}                                                                        //	Node locked;
 
 
 	/*
@@ -202,7 +344,7 @@ cnode_t *cnetwork_find_executable_node(const cnetwork_t *const cnetwork) {
 	const size_t priority = node->priority;
 
 	//While an executable node has not been found, and nodes can be evaluated :
-	while(true) {
+	while (true) {
 
 		//If the current node has not the highest priority :
 		if (node->priority != priority) {
@@ -241,10 +383,10 @@ void cnetwork_activate(const void *const activator, const size_t neighbor_id, co
 					   const size_t args_size) {
 
 	//Cache the cnetwork;
-	cnetwork_t *const cnetwork = ((node_activation_t *)activator)->cnetwork;
+	cnetwork_t *const cnetwork = ((node_activation_t *) activator)->cnetwork;
 
 	//Determine the required node's index;
-	size_t node_index = ((node_activation_t *)activator)->nodes_references[neighbor_id];
+	size_t node_index = ((node_activation_t *) activator)->nodes_references[neighbor_id];
 
 	//Cache the node;
 	cnode_t *node = cnetwork->nodes + node_index;
@@ -253,16 +395,16 @@ void cnetwork_activate(const void *const activator, const size_t neighbor_id, co
 	dhost_t *host = &node->input_host;
 
 	//Lock the node's data;
-	cnode_lock_data(node); 								 				//	Node locked;
+	cnode_lock_data(node);                                                //	Node locked;
 
 	//Determine if the node must be inserted in the list;
-	bool to_insert = dhost_all_data_uninitialised(host);				//	Node locked;
+	bool to_insert = dhost_all_data_uninitialised(host);                //	Node locked;
 
 	//Get an empty element, fill it and mark it initialised;
-	dhost_initialise_element(host, args, args_size);					//	Node locked;
+	dhost_initialise_element(host, args, args_size);                    //	Node locked;
 
 	//Unlock the node;
-	cnode_unlock_data(node);                                           	//	Node unlocked;
+	cnode_unlock_data(node);                                            //	Node unlocked;
 
 
 	/*
@@ -278,13 +420,13 @@ void cnetwork_activate(const void *const activator, const size_t neighbor_id, co
 	if (to_insert) {
 
 		//Lock the active nodes list;
-		cnetwork_lock_list(cnetwork);									//	List locked;
+		cnetwork_lock_list(cnetwork);                                    //	List locked;
 
 		//Insert the node in the list;
-		cnetwork_insert_node(cnetwork, node);							//	List locked;
+		cnetwork_insert_node(cnetwork, node);                            //	List locked;
 
 		//Unlock the list;
-		cnetwork_unlock_list(cnetwork);                     			//	List unlocked;
+		cnetwork_unlock_list(cnetwork);                                //	List unlocked;
 
 	}
 
@@ -326,10 +468,10 @@ void cnetwork_insert_node(cnetwork_t *const cnetwork, cnode_t *const new_node) {
 		}
 
 		//If the priority limit is not reached, update the current new_node;
-		current_node = (cnode_t *)current_node->link.next;
+		current_node = (cnode_t *) current_node->link.next;
 
 		//While the current node exists;
-	} while(current_node);
+	} while (current_node);
 
 
 	//If we traversed the whole list without reaching the limit, we must insert the new node at the list's end;

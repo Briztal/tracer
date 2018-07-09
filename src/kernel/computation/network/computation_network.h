@@ -15,6 +15,8 @@
 
 //-------------------------------------------------- Computation node --------------------------------------------------
 
+//A computation function takes a pointer to activation data, and some input args. It returns true if complete;
+typedef bool (*computation_function_t )(void *activation_data, void *input_data);
 
 
 /*
@@ -25,11 +27,14 @@
 
 typedef struct {
 
+	//A flag, set if the node is initialised;
+	bool initialised;
+
 	//Computation nodes are stored in linked lists;
 	linked_element_t link;
 
 	//The node's priority
-	size_t priority;
+	const size_t priority;
 
 	//Data mutex;
 	mutex_t *data_mutex;
@@ -38,7 +43,10 @@ typedef struct {
 	dhost_t input_host;
 
 	//The function, to call when the host has initialised data;
-	bool (*const function )(void *activation_data, void *input_data);//TODO process_model_t;
+	const computation_function_t function;
+
+	//The number of output nodes;
+	const size_t nb_output_nodes;
 
 	//The array of output nodes;
 	const size_t *const output_references;
@@ -62,9 +70,17 @@ typedef struct {
 } node_activation_t;
 
 
-//------------------------------------------------ Computation network -------------------------------------------------
+//------------------------------------------------- Computation network ------------------------------------------------
+
+/*
+ * A computation network is composed of an array containing a fixed number of nodes, a mutex, and a linked list
+ * 	of nodes;
+ */
 
 typedef struct cnetwork_t {
+
+	//The number of nodes in the network;
+	const size_t nb_nodes;
 
 	//The mutex to protect the active nodes linked list;
 	mutex_t *list_mutex;//TODO;
@@ -78,10 +94,29 @@ typedef struct cnetwork_t {
 } cnetwork_t;
 
 
+//------------------------------------------------ Creation - deletion -------------------------------------------------
+
+//Create a computation network, providing the number of nodes, and a mutex to protect the active nodes list;
+cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex);
+
+//Initialise a computation node, providing its priority, the size of its arguments, its max number of concurrent
+// executions,its number of output references, and array containing them;
+void cnetwork_init_node(const cnetwork_t *cnetwork, size_t node_index, size_t priority,
+						computation_function_t function,
+						size_t arguments_size, size_t nb_concurrent_execs,
+						size_t nb_outputs, const size_t *output_references_const);
+
+//Delete a computation network and all its dynamic data;
+void cnetwork_delete(cnetwork_t *cnetwork);
+
+
+//----------------------------------------------------- Execution ------------------------------------------------------
+
 //Execute an available node; Concurrency supported;
 bool cnetwork_execute(cnetwork_t *cnetwork);
 
 //Activate a node providing args; Concurrency supported;
 void cnetwork_activate(const void *activator, size_t neighbor_id, const void *args, size_t args_size);
+
 
 #endif //TRACER_COMPUTATION_NETWORK_H

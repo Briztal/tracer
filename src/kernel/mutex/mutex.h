@@ -14,7 +14,7 @@
  *
  */
 
-typedef struct {
+typedef struct mutex_t {
 
 	//The mutex instance;
 	void *mutex_instance;
@@ -24,6 +24,9 @@ typedef struct {
 
 	//The mutex's unlock function;
 	void (*const mutex_unlock)(void *mutex_instance);
+
+	//The mutex's duplication function;
+	struct mutex_t *(*const mutex_duplication)(void *mutex_instance);
 
 	//The mutex's destructor;
 	void (*const mutex_destructor)(void *mutex_instance);
@@ -43,8 +46,17 @@ inline void mutex_lock(mutex_t *mutex) {
 //Shortcut for unlock;
 inline void mutex_unlock(mutex_t *mutex) {
 
-	//Call the lock function passing instance;
+	//Call the unlock function passing instance;
 	(*(mutex->mutex_unlock))(mutex->mutex_instance);
+
+}
+
+
+//Shortcut for duplicator;
+inline mutex_t *mutex_duplicate(mutex_t *mutex) {
+
+	//Call the duplication passing instance;
+	return (*(mutex->mutex_duplication))(mutex->mutex_instance);
 
 }
 
@@ -52,7 +64,7 @@ inline void mutex_unlock(mutex_t *mutex) {
 //Shortcut for destructor;
 inline void mutex_delete(mutex_t *mutex) {
 
-	//Call the lock function passing instance;
+	//Call the destructor function passing instance;
 	(*(mutex->mutex_destructor))(mutex->mutex_instance);
 
 }
