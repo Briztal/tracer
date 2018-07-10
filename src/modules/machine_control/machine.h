@@ -27,6 +27,8 @@
 
 #include "geometry.h"
 
+#include "movement.h"
+
 
 //------------------------------------------- Machine constants -------------------------------------------
 
@@ -57,15 +59,52 @@ typedef struct {
 typedef struct {
 
 	//Actuation positions. Actuators commanded on an integer base;
-	int32_t *actuation_positions;
+	int32_t *const actuation_positions;
 
 	//Actuation speeds. Time is expressed in float, so are speeds;
-	float *actuation_speeds;
+	float *const actuation_speeds;
+
+	//Control positions. Expressed in float;
+	float *const control_positions;
 
 	//The controller's state; Can contain whatever the controller decides;
-	void *controller_state;
+	void *const controller_state;
 
 } machine_state_t;
+
+
+/*
+ * Sometimes, some members can't be edited. Following structs provides restricted access to some members;
+ */
+typedef struct {
+
+	int32_t *const actuation_positions;
+	const float *const actuation_speeds;
+	float *const control_positions;
+	const void *const controller_state;
+
+} machine_state_p_t;
+
+
+typedef struct {
+
+	const int32_t *const actuation_positions;
+	const float *const actuation_speeds;
+	const float *const control_positions;
+	void *const controller_state;
+
+} machine_state_l_t;
+
+
+typedef struct {
+
+	const int32_t *const actuation_positions;
+	const float *const actuation_speeds;
+	const float *const control_positions;
+	const void *const controller_state;
+
+} machine_state_const_t;
+
 
 
 //------------------------------------------- Time interval -------------------------------------------
@@ -85,14 +124,65 @@ typedef struct {
 	//The maximum doesn't always exist. This flag is set when it actually does;
 	bool max_exists;
 
-	//A useful flag that contains the value of "min == max";
-	bool singleton;
-
-	//A useful flag that contains the value of "min > max";
+	//A useful flag that contains the value of "min > max" if related, or simply tells that the interval is empty;
 	bool empty;
+
+	//A useful flag, to mention that the interval is invalid in the considered circumstances;
+	bool valid;
 
 } time_interval_t;
 
 
+
+//------------------------------------------- Movement builder -------------------------------------------
+
+/*
+ * Movements are computed step by step, and temporary data is stored in the movement builder.
+ */
+
+typedef struct {
+
+	//The movement that we currently compute; References the distances array and the duration;
+	movement_t *movement;
+
+	//The time interval array, containing the duration window for each actuator during the computation;
+	time_interval_t *interval_array;
+
+	//The duration interval that satisfies all constraints;
+	time_interval_t duration_interval;
+
+	//After distances were provided, they might be modified to avoid breaking actuation limitations. This flag is
+	//set when they are modified;
+	bool distances_altered;
+
+	//The controller builder. Can contain whatever the controller decides;
+	void *controller_builder;
+
+} movement_buinlder_t;
+
+
+/*
+ * Restricted access builder structs :
+ */
+
+
+//controller restricted struct
+typedef struct {
+	const movement_t *const movement;
+	const time_interval_t *const interval_array;
+	const time_interval_t duration_interval;
+	const bool distances_altered;
+	void *const controller_builder;
+} movement_builder_r_t;
+
+
+//Immutable struct
+typedef struct {
+	const movement_t *const movement;
+	const time_interval_t *const interval_array;
+	const time_interval_t duration_interval;
+	const bool distances_altered;
+	const void *const controller_builder;
+} movement_builder_const_t;
 
 #endif //TRACER_MACHINE_H

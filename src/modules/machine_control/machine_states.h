@@ -50,6 +50,7 @@ typedef struct {
 } machine_states_t;
 
 
+
 //Accept the current machine state; Switches pointers;
 inline void machine_states_accept(machine_states_t *states) {
 

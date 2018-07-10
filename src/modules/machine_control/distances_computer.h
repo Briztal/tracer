@@ -57,12 +57,6 @@ typedef struct {
 
 	);
 
-	//Notify the position computer that the previously provided position has been rejected;
-	void (*reset)(void *instance);
-
-	//Notify the position computer that the previously provided position has been accepted;
-	void (*accept)(void *instance);
-
 	//Delete the position computer. Required for cleanup;
 	void (*delete)(void *instance);
 
@@ -84,7 +78,6 @@ inline cnode_state_t distances_computer_compute(
 	return (*(computer->compute))(computer->instance, constants, current_state, new_custom_state, distances);
 
 }
-
 
 
 #endif //TRACER_POSITION_COMPUTER_H
