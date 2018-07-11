@@ -1,5 +1,5 @@
 /*
-  mcontroller.h Part of TRACER
+  machine_core.h Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,8 +18,8 @@
 
 */
 
-#ifndef TRACER_MCONTROLLER_H
-#define TRACER_MCONTROLLER_H
+#ifndef TRACER_MACHINE_CORE_H
+#define TRACER_MACHINE_CORE_H
 
 #include <stdint.h>
 
@@ -27,52 +27,57 @@
 
 #include <data_structures/containers/llist.h>
 
-#include "machine_controller.h"
-#include "machine_core.h"
+
+#include "machine.h"
+
 #include "machine_states.h"
 
-
+#include "machine_controller.h"
 
 
 //------------------------------------------------- Machine controller -------------------------------------------------
 
 /*
- * A machine controller contain instances and methods pointer used to compute positions and speed targets;
+ * A machine controller contains the following :
  */
 
 typedef struct {
 
 	//---------------------------- Machine constants ----------------------------
 
-	machine_constants_t machine_constants;
+	//The machine constant struct, owned, constant;
+	const machine_constants_t machine_constants;
 
 
 	//---------------------------- Machine states ----------------------------
 
+	//Machine states, owned, mutable;
 	machine_states_t states;
 
 
 	//---------------------------- Movement builder ----------------------------
 
-	movement_buinlder_t movement_builder;
+	//The movement builder, owned, mutable;
+	movement_builder_t movement_builder;
 
 
 	//---------------------------- Machine controller ----------------------------
 
-	//The machine's controller;
+	//The machine's controller, owned, mutable;
 	machine_controller_t controller;
 
 
 	//---------------------------- Actuation speed constraints ----------------------------
 
-	//The actuation physics array;
-	actuation_speed_constraint_t *actuation_speed_constraints;
+	//The actuation physics array, mutable;
+	actuator_physics_t *const actuation_speed_constraints;
 
 
-	//TODO---------------------------- Movement queue ----------------------------
+	//---------------------------- Movement queue ----------------------------
+	//TODO
 
 
 } machine_core_t;
 
 
-#endif //TRACER_MCONTROLLER_H
+#endif //TRACER_MACHINE_CORE_H

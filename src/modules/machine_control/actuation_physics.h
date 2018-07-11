@@ -1,6 +1,23 @@
-//
-// Created by root on 7/10/18.
-//
+/*
+  actuation_physics.h Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 
 #ifndef TRACER_ACTUATION_PHYSICS_H
 #define TRACER_ACTUATION_PHYSICS_H
@@ -18,8 +35,6 @@
  * 	TODO DOC ON TIME WINDOW CMPUTATION, IN CASE OF IMPOSSIBLE TIME (TURNAROUND), PROVIDE A TIME THAT WILL NOT CHANGE ABSOLUTE DISTANCE AFTER DISTANCE RECOMPUTATION;
  */
 
-
-
 //------------------------------------------------- Arguments structure ------------------------------------------------
 
 /*
@@ -29,7 +44,7 @@
 typedef struct {
 
 	//The actuator physics instance;
-	void *instance;
+	void *const instance;
 
 	//The machine's current state, constant;
 	const machine_state_const_t *const machine_state;
@@ -53,10 +68,10 @@ typedef struct {
 	void *const instance;
 
 	//The movement's duration, constant;
-	float movement_duration;
+	const float movement_duration;
 
 	//The pointer referencing the distance target. Must be updated with the calculated distance, mutable;
-	int16_t *distance_target;
+	int16_t *const distance_target;
 
 } actuator_distance_args_t;
 
@@ -77,10 +92,10 @@ typedef struct {
 	void *const instance;
 
 	//The function to compute the time interval;
-	void (*const compute_duration_interval)(actuator_duration_args_t *args);
+	void (*const compute_duration_interval)(const actuator_duration_args_t *args);
 
 	//The function to compute the minimal distance to fit duration requirements;
-	void (*const compute_minimal_distance)(actuator_distance_args_t *args);
+	void (*const compute_minimal_distance)(const actuator_distance_args_t *args);
 
 	//The adjustment flag. If set, distance can be adjusted to comply with the physical constraint;
 	const bool distance_adjustable;

@@ -33,7 +33,7 @@
 typedef struct {
 
 	//The current machine state;
-	const machine_state_t *current_state;
+	const machine_state_const_t *current_state;
 
 	//The machine state in computation;
 	machine_state_t *candidate_state;
@@ -50,22 +50,21 @@ typedef struct {
 } machine_states_t;
 
 
-
 //Accept the current machine state; Switches pointers;
-inline void machine_states_accept(machine_states_t *states) {
+inline void machine_states_accept(machine_states_t *const states) {
 
 	//If the candidate state is s0 :
 	if (states->candidate_is_t0) {
 
 		//Assign s0 to the current, and s1 to the candidate;
-		states->current_state = &(states->s0);
+		states->current_state = (const machine_state_const_t *) &(states->s0);
 		states->candidate_state = &(states->s1);
 
 	} else {
 		//If the candidate state is s1 :
 
 		//Assign s1 to the current, and s0 to the candidate;
-		states->current_state = &(states->s1);
+		states->current_state = (const machine_state_const_t *) &(states->s1);
 		states->candidate_state = &(states->s0);
 
 	}
@@ -74,13 +73,13 @@ inline void machine_states_accept(machine_states_t *states) {
 
 
 //Return the current state;
-inline const machine_state_t * machines_states_current_state(machine_states_t *states) {
+inline const machine_state_const_t *const machines_states_current_state(const machine_states_t *const states) {
 	return states->current_state;
 }
 
 
 //Return the candidate state;
-inline const machine_state_t * machines_states_candidate_state(machine_states_t *states) {
+inline const machine_state_t *const machines_states_candidate_state(const machine_states_t *const states) {
 	return states->candidate_state;
 }
 

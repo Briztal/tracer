@@ -29,6 +29,8 @@
 
 #include "movement.h"
 
+#include "actuation_physics.h"
+
 
 //------------------------------------------- Machine constants -------------------------------------------
 
@@ -158,7 +160,7 @@ typedef struct {
 	//The controller builder. Can contain whatever the controller decides;
 	void *controller_builder;
 
-} movement_buinlder_t;
+} movement_builder_t;
 
 
 /*

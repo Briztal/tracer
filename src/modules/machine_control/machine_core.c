@@ -1,5 +1,5 @@
 /*
-  mcontroller.c Part of TRACER
+  machine_core.c Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -20,11 +20,6 @@
 
 #include "machine_core.h"
 
-#include "kernel/computation/staged_execution.h"
-#include "movement.h"
-#include "machine.h"
-
-
 //---------------------------------------------------- Nodes headers ---------------------------------------------------
 
 
@@ -33,26 +28,13 @@
  *
  * 	Computes the new movement's distances, given the current state;
  *
- * 	This function is taken in charge by the machine controller, that will secure the eventual change of computer;
- *
- * 	The args structure wraps args that it wills transmit
+ * 	This function is taken in charge by the machine controller, no wrapping is required;
  */
-
-typedef struct {
-
-	//The movement controller's instance;
-	machine_controller_t *controller;
-
-	//Distances_computation_args, as defined by the movement controller;
-	distances_computation_args args;
-
-} mcore_distances_computation_args;
-
 
 //-----------------------------------------------
 
 /*
- * Duration intervals computation : Node 2, activated by 1, priority 2;
+ * Duration intervals computation : Node 2, activated by 0, priority 2;
  *
  * 	Computes the duration interval for one axis;
  *
@@ -81,7 +63,7 @@ typedef struct {
  * 	movements, it will be as secure as I can do;
  */
 
-void interval_merge(machine_core_t *mcontroller);
+void interval_merge(const machine_core_t *mcontroller);
 
 
 //-----------------------------------------------
@@ -98,7 +80,7 @@ void interval_merge(machine_core_t *mcontroller);
 //-----------------------------------------------
 
 /*
- * next_positions_computation : Node 5, activated by 3, priority 5;
+ * next_positions_computation : Node 5, activated by 0, priority 5;
  *
  * 	Will determine next actuation positions, given the current state, and the distances array.
  */
@@ -119,7 +101,7 @@ typedef struct {
 
 } next_position_computation_args;
 
-void next_position_computation(next_position_computation_args *args);
+void next_position_computation(const next_position_computation_args *args);
 
 
 //-----------------------------------------------
@@ -145,10 +127,10 @@ void next_position_computation(next_position_computation_args *args);
 typedef struct {
 
 	//The movement controller's instance;
-	machine_controller_t *controller;
+	machine_controller_t *const controller;
 
 	//builder_computation_args, as defined by the movement controller;
-	builder_computation_args args;
+	const builder_computation_args args;
 
 } mcore_builder_computation_args;
 
@@ -156,7 +138,7 @@ typedef struct {
 //-----------------------------------------------
 
 /*
- * duration_computation : Node 8, activated by TODO, priority TODO;
+ * duration_computation : Node 8, activated by 0, priority 8;
  *
  * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
  * 	the machine controller, that will call each window correction step in order;
@@ -165,10 +147,10 @@ typedef struct {
 typedef struct {
 
 	//The movement controller's instance;
-	machine_controller_t *controller;
+	machine_controller_t *const controller;
 
 	//duration_computation_args, as defined by the movement controller;
-	duration_computation_args args;
+	const duration_computation_args args;
 
 } mcore_duration_computation_args;
 
@@ -176,7 +158,7 @@ typedef struct {
 //-----------------------------------------------
 
 /*
- * Controller state computation : Node 9, activated by TODO, priority TODO;
+ * Controller state computation : Node 9, activated by 0, priority 9;
  *
  * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
  * 	the machine controller, that will call each one of them in order;
@@ -185,7 +167,7 @@ typedef struct {
 struct {
 
 	//The movement controller's instance;
-	machine_controller_t *controller;
+	const machine_controller_t *const controller;
 
 	//state_computation_args, as defined by the movement controller;
 	state_computation_args args;
@@ -213,13 +195,13 @@ void mcontroller_activate_corrections(uint8_t dimension, float time, const time_
  * 	choose a time, and activate distances corrections for relevant actuators;
  */
 
-void interval_merge(machine_core_t *mcontroller) {
+void interval_merge(const machine_core_t *const mcontroller) {
 
 	//Cache the dimension;
 	const uint8_t dimension = mcontroller->machine_constants.dimension;
 
 	//Cache the movement builder;
-	movement_buinlder_t *const builder = &mcontroller->movement_builder;
+	movement_builder_t *const builder = &mcontroller->movement_builder;
 
 	//Cache the interval array pointer;
 	const time_interval_t *const intervals = builder->interval_array;
@@ -408,7 +390,7 @@ void mcontroller_activate_corrections(const uint8_t dimension, const float time,
  * next_position_computation : fills array containing the next position, knowing the current one, and distances;
  */
 
-void next_position_computation(next_position_computation_args *args) {
+void next_position_computation(const next_position_computation_args *const args) {
 
 	//Cache arrays;
 	const int32_t *postions = args->positions;
@@ -425,43 +407,4 @@ void next_position_computation(next_position_computation_args *args) {
 
 }
 
-
-/*
- * mcontroller_compute_duration_interval : computes the duration interval for a single actuator;
- *
- * 	Entry :
- *
- * 	Requires the movement builder, and an actuator index;
- */
-
-void _mcontroller_compute_duration_interval(actuation_speed_constraint_t *constraint, time_interval_t *interval) {
-
-	//TODO
-
-
-}
-
-
-void mcontroller_merge_intervals(const time_interval_t *intervals, time_interval_t *const merges_interval) {
-
-	//TODO
-
-}
-
-
-void mcontroller_correct_interval(time_interval_t *const final_interval) {
-
-	//Set the final duration as the average of min and max;
-	float final_duration = (final_interval->min + final_interval->max) / (float) 2;
-
-	//Update the interval;
-	*final_interval = {
-		.min = final_duration,
-		.max = final_duration,
-		.max_exists = true,
-		.singleton = true,
-		.empty = true,
-	};
-
-}
 

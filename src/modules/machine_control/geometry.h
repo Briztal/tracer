@@ -23,52 +23,68 @@
 
 
 /*
- * 	The geometry is the relation between control coordinates and actuation coordinates.
+ * The geometry is the relation between control coordinates and actuation coordinates.
  *
- * 	Movement and speed regulation are based on the high level coordinate system;
- *
- * 	Speed limitation, speed planning or jerk limitation are based on low level coordinates;
+ *	It achieved conversion in both dimensions;
  */
+
+/*
+ * In order to convert control position into actuation position following arguments are required :
+ */
+
+typedef struct {
+
+	//The geometry instance, const;
+	const void *const instance;
+
+	//The control coordinates array, constant;
+	const float *const control_positions;
+
+	//The actuation coordinates array, mutable;
+	int32_t *const actuation_positions;
+
+} control_to_actuation_args;
+
+
+/*
+ * In order to convert actuation position into control position following arguments are required :
+ */
+
+typedef struct {
+
+	//The geometry instance, const;
+	const void *const instance;
+
+	//The actuation coordinates array, mutable;
+	const int32_t *actuation_positions;
+
+	//The control coordinates array, mutable;
+	float *const control_positions;
+
+} actuation_to_control_args;
+
 
 /*
  * Each geometry implementation will be composed of the basic geometry struct, that only comprises
  * 	a pointer to the conversion function;
  */
+
 typedef struct geometry_t{
+
+	//The geometry data instance;
+	void *instance;
 
 	//A flag, determining if the geometry is regular, ie it transforms lines into lines;
 	//If the geometry is not regular, extra computation will be required for distances determination;
 	bool regular;
 
-	//The pointer to the function used to convert control coordinates to actuation coordinates;
-	void (*conversion)(const struct geometry_t *geometry, const float *control_coords, float *actuation_coords);
+	//The pointer to the function used to convert control position to actuation position;
+	void (*const control_to_actuation)(control_to_actuation_args *args);
 
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
-	//TODO NOP ! MAKE AN INTERFACE LINKABLE TO PROCESS QUEUE;
+	//The pointer to the function used to convert actuation position to control position;
+	void (*const actuation_to_control)(control_to_actuation_args *args);
 
 } geometry_t;
 
-
-
-//To ease the redaction, a static function to directly execute the translation function;
-inline void geometry_convert(const geometry_t *const geometry, const float *const control_coords, float *actuation_coords) {
-
-	//Call the geometry conversion providing geometry data and the couple of coordinate sets:
-	(*(geometry->conversion))(geometry, control_coords, actuation_coords);
-
-}
 
 #endif //TRACER_GEOMETRY_H

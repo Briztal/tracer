@@ -1,6 +1,22 @@
-//
-// Created by root on 7/10/18.
-//
+/*
+  machine_controller.h Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #ifndef TRACER_MACHINE_CONTROLLER_H
 #define TRACER_MACHINE_CONTROLLER_H
@@ -27,6 +43,9 @@
 
 typedef struct {
 
+	//The distances computer's instance;
+	void *const instance;
+
 	//Machine constants (dimension + geometry). Read only;
 	const machine_constants_t *const machine;
 
@@ -37,7 +56,7 @@ typedef struct {
 	machine_state_p_t *const new_custom_state;
 
 	//The distances array to store computed distances. Write is required;
-	int16_t *distances;
+	int16_t *const distances;
 
 } distances_computation_args;
 
@@ -49,13 +68,13 @@ typedef struct {
 typedef struct {
 
 	//The position target computer instance;
-	void *instance;
+	void *const instance;
 
 	//Compute the position for the new machine state;
-	bool (*compute)(void *instance, distances_computation_args);
+	bool (*const compute)(const distances_computation_args *);
 
 	//Delete the position computer. Required for cleanup;
-	void (*delete)(void *instance);
+	void (*const delete)(void *instance);
 
 } distances_computer_t;
 
@@ -97,7 +116,7 @@ typedef struct {
 	bool enabled;
 
 	//The function that will actually do the computation;
-	void (*computation_function)(builder_computation_args *args);
+	void (*computation_function)(const builder_computation_args *args);
 
 } controller_builder_computation_t;
 
@@ -141,7 +160,7 @@ typedef struct {
 	bool enabled;
 
 	//The function that will actually verify the constraint; Data will be stored in the provided interval;
-	void (*constraint_function)(duration_computation_args *args);
+	void (*constraint_function)(const duration_computation_args *args);
 
 } kinematic_constraint_t;
 
@@ -166,15 +185,16 @@ typedef struct {
 typedef struct {
 
 	//The current state read only;
-	const machine_state_const_t *current_state;
+	const machine_state_const_t *const current_state;
 
 	//The movement builder, read only;
-	const movement_builder_const_t *const_builder;
+	const movement_builder_const_t *const const_builder;
 
 	//The state, with write authorised to the controller part;
-	const machine_state_l_t *new_state;
+	const machine_state_l_t *const new_state;
 
 } state_computation_args;
+
 
 typedef struct {
 
@@ -182,7 +202,7 @@ typedef struct {
 	bool enabled;
 
 	//The function that will actually do the computation;
-	void (*computation_function)(state_computation_args *args);
+	void (*computation_function)(const state_computation_args *args);
 
 } controller_state_computation_t;
 
@@ -199,33 +219,48 @@ typedef struct {
 
 typedef struct {
 
-	//The distance computer; Stored by pointer so that it can be modified;
-	distances_computer_t *distances_computer;
+	//The number of different distance computers;
+	const uint8_t nb_distances_computers;
+
+	//The current distance computer;
+	const uint8_t current_distance_computer;
+
+	//Distance computers array;
+	const distances_computer_t *const distances_computer;
+
+
+	//The number of controller builder computations;
+	const uint8_t nb_builder_computations;
 
 	//The array of controller builder computations;
-	controller_builder_computation_t *builder_computations;
+	const controller_builder_computation_t *const builder_computations;
 
-	//The array of controller builder computations;
-	kinematic_constraint_t *kinematic_constraints;
 
-	//The array of controller builder computations;
-	controller_state_computation_t *state_computations;
+	//The number of kinematic constraints;
+	const uint8_t nb_kinematic_constraints;
+
+	//The array of kinematic constraints;
+	const kinematic_constraint_t *const kinematic_constraints;
+
+
+	//The number of controller state computations;
+	const uint8_t nb_state_computations;
+
+	//The array of controller state computations;
+	const controller_state_computation_t *const state_computations;
+
 
 } machine_controller_t;
 
 
-//Compute distances;
-void mcontroller_compute_distances(machine_controller_t *controller, distances_computation_args *args);
-
 //Update the builder, by executing all builder computations;
-void mcontroller_update_builder(machine_controller_t *controller, builder_computation_args *args);
+void mcontroller_update_builder(const machine_controller_t *controller, const builder_computation_args *args);
 
 //Determine the current movement's duration, evaluating all constraints successively;
-void mcontroller_determine_duration(machine_controller_t *controller, duration_computation_args *args);
+void mcontroller_determine_duration(const machine_controller_t *controller, const duration_computation_args *args);
 
 //Compute the controller's part of the state;
-void mcontroller_compute_state(machine_controller_t *controller, state_computation_args *args);
-
+void mcontroller_compute_state(const machine_controller_t *controller, const state_computation_args *args);
 
 
 #endif //TRACER_MACHINE_CONTROLLER_H
