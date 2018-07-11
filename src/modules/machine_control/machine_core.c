@@ -18,7 +18,11 @@
 
 */
 
+#include <kernel/kernel.h>
+#include <data_structures/containers/circular_buffer.h>
 #include "machine_core.h"
+#include "machine_states.h"
+#include "movement_builder.h"
 
 //---------------------------------------------------- Nodes headers ---------------------------------------------------
 
@@ -189,6 +193,122 @@ void mcontroller_activate_corrections(uint8_t dimension, float time, const time_
 
 
 //--------------------------------------------------- Implementations --------------------------------------------------
+
+
+
+//Create a machine core from machine constants, a controller, and an array of actuator physics managers;
+machine_core_t *machine_core_create(const machine_constants_t *const machine_constants,
+									machine_controller_t *const controller,
+									const uint8_t nb_actuator_physics,
+									const actuator_physics_t *const actuators_physics_src,
+									const size_t movement_buffer_size) {
+
+	//Cache the dimension;
+	uint8_t dimension = machine_constants->dimension;
+
+	//If the number of actuator physics managers is different from the dimension :
+	if (dimension != nb_actuator_physics) {
+
+		//Error, there must be a physics manager for each actuator, and one actuator per axis;
+		kernel_error("machine_core.c : machine_core_create : the number of actuator physics controllers is "
+						 "not equal to the dimension.");
+
+	}
+
+	//Query two initialised controller states;
+	void *controller_state_0 = machine_controller_create_state(controller);
+	void *controller_state_1 = machine_controller_create_state(controller);
+
+	//Query one initialised controller builder;
+	void *controller_builder = machine_controller_create_builder(controller);
+
+	//Duplicate the actuators physics controllers array;
+	const actuator_physics_t *const actuators_physics =
+		kernel_malloc_copy(sizeof(actuator_physics_t) * nb_actuator_physics, actuators_physics_src);
+
+
+	//Create an initializer for the machine core;
+	machine_core_t core_init = {
+
+		//Copy the machine constants;
+		.machine_constants = *machine_constants,
+
+		//Do not initialise the states manager for instance, will be done right after;
+		.states = {},
+
+		//Do not initialise the movement builder for instance, will be done right after;
+		.movement_builder = {},
+
+		//Transfer the ownership of the machine controller;
+		.controller = controller,
+
+		//Transfer the ownership of the actuators physics controllers array;
+		.actuation_physics = actuators_physics,
+
+
+		//---------------------------- Movement buffer ----------------------------
+
+		//The movement buffer, owned, mutable;
+		.movement_buffer = EMPTY_CBUFFER(movement_t, movement_buffer_size),
+
+	};
+
+	//Allocate and initialise the machine core;
+	machine_core_t *const machine_core = kernel_malloc_copy(sizeof(machine_core_t), &core_init);
+
+	//Initialise the states manager;
+	machine_states_initialise(&machine_core->states, dimension, controller_state_0, controller_state_1);
+
+	//Initialise the movement builder;
+	movement_builder_initialise(&machine_core->movement_builder, dimension, controller_builder);
+
+	//Return the initialised machine core;
+	return machine_core;
+
+}
+
+
+/*
+ * machine_core_delete : deletes the provided machine core;
+ *
+ * 	Deletes controller states and builder, frees the actuation physics controller array,
+ * 	and calls deletion for the movement buffer, the controller,
+ * 	the states manager, and the movement builder;
+ *
+ * 	Finally, it frees the machine core structure itself;
+ */
+
+void machine_core_delete(machine_core_t *machine_core) {
+
+	//Cache the machine controller;
+	machine_controller_t *controller = machine_core->controller;
+
+	//Delete controller states;
+	machine_controller_delete_state(controller, machine_core->states.s0.controller_state);
+	machine_controller_delete_state(controller, machine_core->states.s1.controller_state);
+
+	//Delete controller builder;
+	machine_controller_delete_builder(controller, machine_core->movement_builder.controller_builder);
+
+	//Free the actuation physics controller array;
+	kernel_free((void *) machine_core->actuation_physics);
+
+	//Delete the movement buffer;
+	cbuffer_delete(&machine_core->movement_buffer);
+
+	//Delete the controller;
+	machine_controller_delete(machine_core->controller);
+
+	//Delete the states manager;
+	machine_states_delete(&machine_core->states);
+
+	//Delete the movement builder;
+	movement_builder_delete(&machine_core->movement_builder);
+
+}
+
+
+//------------------------------------------------ Nodes implementation ------------------------------------------------
 
 /*
  * interval_merge : this functions will regroup all duration intervals in a single one, and if required,
@@ -366,7 +486,8 @@ void mcontroller_choose_duration(time_interval_t *const final_interval, const fl
  * 	invalid ones, or for those that do not contain the new time;
  */
 
-void mcontroller_activate_corrections(const uint8_t dimension, const float time, const time_interval_t *const intervals) {
+void
+mcontroller_activate_corrections(const uint8_t dimension, const float time, const time_interval_t *const intervals) {
 
 	//For each actuator :
 	for (uint8_t actuator_index = 0; actuator_index < dimension; actuator_index++) {
@@ -401,7 +522,7 @@ void next_position_computation(const next_position_computation_args *const args)
 	for (uint8_t actuator_index = args->dimension; actuator_index--;) {
 
 		//Set the destination to the sum of the current position and converted distance; Update pointers btw;
-		*(dests++) = *(postions++) + (int32_t)*(distances++);
+		*(dests++) = *(postions++) + (int32_t) *(distances++);
 
 	}
 

@@ -29,6 +29,170 @@
 bool mcontroller_correct_duration_window(time_interval_t *final_interval, time_interval_t optional_interval);
 
 
+//---------------------------------------------- Initialisation - deletion ---------------------------------------------
+
+/*
+ * machine_controller_create : allocates and initialises a machine controller, with all provided data;
+ *
+ * 	Arrays are duplicated, so they don't need to be allocated in the heap;
+ */
+
+machine_controller_t *machine_controller_create(
+	uint8_t nb_distances_computers, const distances_computer_t *const distances_computer_c,
+	uint8_t nb_builder_computations, const controller_builder_computation_t *const builder_computations_c,
+	uint8_t nb_kinematic_constraints, const kinematic_constraint_t *const kinematic_constraints_c,
+	uint8_t nb_state_computations, const controller_state_computation_t *const state_computations_c,
+	void *(*const controller_builder_creator)(), void (*const controller_builder_deleter)(void *),
+	void *(*const controller_state_creator)(), void (*const controller_state_deleter)(void *)
+) {
+
+	//Duplicate the distance computers array;
+	const distances_computer_t *const distances_computer =
+		kernel_malloc_copy((size_t) nb_distances_computers * sizeof(distances_computer_t),
+						   distances_computer_c);
+
+
+	//Duplicate the distance computers array;
+	const controller_builder_computation_t *const builder_computations =
+		kernel_malloc_copy((size_t) nb_builder_computations * sizeof(controller_builder_computation_t),
+						   builder_computations_c);
+
+
+	//Duplicate the distance computers array;
+	const kinematic_constraint_t *const kinematic_constraints =
+		kernel_malloc_copy((size_t) nb_kinematic_constraints * sizeof(kinematic_constraint_t),
+						   kinematic_constraints_c);
+
+	//Duplicate the distance computers array;
+	const controller_state_computation_t *const state_computations =
+		kernel_malloc_copy((size_t) nb_state_computations * sizeof(controller_state_computation_t),
+						   state_computations_c);
+
+
+	//Create an initializer for the machine controller;
+	machine_controller_t init = {
+
+		//Save the builder creation function;
+		.controller_builder_creator = controller_builder_creator,
+
+		//Save the builder deleter function;
+		.controller_builder_deleter = controller_builder_deleter,
+
+		//Save the state creation function;
+		.controller_state_creator = controller_state_creator,
+
+		//Save the builder deleter function;
+		.controller_state_deleter = controller_state_deleter,
+
+
+		//Save the number of distances computers;
+		.nb_distances_computers = nb_distances_computers,
+
+		//Set the first distance computer active;
+		.current_distance_computer = 0,
+
+		//Transfer the ownership of the duplicated distance computers array;
+		.distances_computers = distances_computer,
+
+
+		//Save the number of builder computations;
+		.nb_builder_computations = nb_builder_computations,
+
+		//Transfer the ownership of the duplicated builder computations array;
+		.builder_computations = builder_computations,
+
+
+		//Save the number of kinematic constraints;
+		.nb_kinematic_constraints = nb_kinematic_constraints,
+
+		//Transfer the ownership of the duplicated kinematic constraints array;
+		.kinematic_constraints = kinematic_constraints,
+
+
+		//Save the number of controller state computations;
+		.nb_state_computations = nb_state_computations,
+
+		//Transfer the ownership of the duplicated state computations array;
+		.state_computations = state_computations,
+
+	};
+
+	//Allocate and initialise the machine controller;
+	machine_controller_t *controller = kernel_malloc_copy(sizeof(machine_controller_t), &init);
+
+	//Return the initialised controller;
+	return controller;
+
+}
+
+
+/*
+ * machine_controller_delete : deletes each distance computer, then frees the quadruplet of owned arrays,
+ * and free the controller structure;
+ */
+
+void machine_controller_delete(machine_controller_t *const machine_controller) {
+
+	//Cache the number of distances computer;
+	const uint8_t nb_distances_computers = machine_controller->nb_distances_computers;
+
+	//Cache the distances computers array;
+	const distances_computer_t *const distances_computers = machine_controller->distances_computers;
+
+	//For each distance computer :
+	for (uint8_t distance_computer_id = 0; distance_computer_id < nb_distances_computers; distance_computer_id++) {
+
+		//Cache the distance computer;
+		const distances_computer_t *const distances_computer = distances_computers + distance_computer_id;
+
+		//Delete the distance computer;
+		(*(distances_computer->delete))(distances_computer->instance);
+
+	}
+
+	//Free the distances computers array;
+	kernel_free((void *) machine_controller->distances_computers);
+
+	//Free the builder computations array;
+	kernel_free((void *) machine_controller->builder_computations);
+
+	//Free the kinematic constraints array;
+	kernel_free((void *) machine_controller->kinematic_constraints);
+
+	//Free the state computations array;
+	kernel_free((void *) machine_controller->state_computations);
+
+	//Free the controller structure;
+	kernel_free(machine_controller);
+
+}
+
+
+//-------------------------------------------------- Structs creation --------------------------------------------------
+
+//Wrapper for calling the state creation function;
+void *machine_controller_create_state(machine_controller_t *controller) {
+	return (*(controller->controller_state_creator))();
+}
+
+//Wrapper for calling the state deletion function;
+void machine_controller_delete_state(machine_controller_t *controller, void *state){
+	(*(controller->controller_state_deleter))(state);
+}
+
+
+//Wrapper for calling the builder creation function;
+void *machine_controller_create_builder(machine_controller_t *controller) {
+	return (*(controller->controller_builder_creator))();
+}
+
+//Wrapper for calling the builder deletion function;
+void machine_controller_delete_builder(machine_controller_t *controller, void *builder){
+	(*(controller->controller_builder_deleter))(builder);
+}
+
+
+
 //--------------------------------------------------- Implementation ---------------------------------------------------
 
 /*

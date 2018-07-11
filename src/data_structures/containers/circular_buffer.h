@@ -48,8 +48,12 @@ typedef struct {
 //A macro to help us safely initialising our containers;
 #define EMPTY_CBUFFER(type, max_size) {.input_index = 0, .output_index = 0, .nb_spaces = 0, .container = EMPTY_VLARRAY(type, max_size)}
 
+//Delete the cbuffer;
+void cbuffer_delete(cbuffer_t *);
+
 //Discard all elements in the buffer. The container's size remains untouched;
 void cbuffer_discard_all(cbuffer_t *);
+
 
 //----------------------------------- Input -----------------------------------
 

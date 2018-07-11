@@ -34,6 +34,8 @@
 
 #include "machine_controller.h"
 
+#include "movement_builder.h"
+
 
 //------------------------------------------------- Machine controller -------------------------------------------------
 
@@ -64,20 +66,32 @@ typedef struct {
 	//---------------------------- Machine controller ----------------------------
 
 	//The machine's controller, owned, mutable;
-	machine_controller_t controller;
+	machine_controller_t *const controller;
 
 
 	//---------------------------- Actuation speed constraints ----------------------------
 
 	//The actuation physics array, mutable;
-	actuator_physics_t *const actuation_speed_constraints;
+	const actuator_physics_t *const actuation_physics;
 
 
-	//---------------------------- Movement queue ----------------------------
-	//TODO
+	//---------------------------- Movement buffer ----------------------------
+
+	//The movement buffer, owned, mutable;
+	cbuffer_t movement_buffer;
 
 
 } machine_core_t;
+
+
+//Create a machine core from machine constants, a controller, and an array of actuator physics managers;
+machine_core_t *machine_core_create(const machine_constants_t *machine_constants,
+									machine_controller_t *controller, uint8_t nb_actuator_physics,
+									const actuator_physics_t *actuator_physics, size_t movement_buffer_size);
+
+//Delete a previously created machine controller;
+void machine_core_delete(machine_core_t *machine_core);
+
 
 
 #endif //TRACER_MACHINE_CORE_H

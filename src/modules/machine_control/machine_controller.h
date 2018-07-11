@@ -21,12 +21,13 @@
 #ifndef TRACER_MACHINE_CONTROLLER_H
 #define TRACER_MACHINE_CONTROLLER_H
 
-
 #include <stdbool.h>
-#include <modules/machine_control/OLDSHIT/mbuilder.h>
 
 #include "machine.h"
 
+#include "machine_states.h"
+
+#include "movement_builder.h"
 
 
 //---------------------------- Target distances computation ----------------------------
@@ -219,6 +220,23 @@ typedef struct {
 
 typedef struct {
 
+	//---------------------------------- Dynamic structs management function pointers ----------------------------------
+
+	//State creation function;
+	void *(*controller_state_creator)();
+
+	//State deletion function;
+	void (*controller_state_deleter)(void *);
+
+	//Builder creation function;
+	void *(*controller_builder_creator)();
+
+	//Builder deletion function;
+	void (*controller_builder_deleter)(void *);
+
+
+	//---------------------------------------------- Distance computation ----------------------------------------------
+
 	//The number of different distance computers;
 	const uint8_t nb_distances_computers;
 
@@ -226,8 +244,10 @@ typedef struct {
 	const uint8_t current_distance_computer;
 
 	//Distance computers array;
-	const distances_computer_t *const distances_computer;
+	const distances_computer_t *const distances_computers;
 
+
+	//----------------------------------------------- Builder computation ----------------------------------------------
 
 	//The number of controller builder computations;
 	const uint8_t nb_builder_computations;
@@ -236,12 +256,16 @@ typedef struct {
 	const controller_builder_computation_t *const builder_computations;
 
 
+	//---------------------------------------------- Kinematic constraints ---------------------------------------------
+
 	//The number of kinematic constraints;
 	const uint8_t nb_kinematic_constraints;
 
 	//The array of kinematic constraints;
 	const kinematic_constraint_t *const kinematic_constraints;
 
+
+	//------------------------------------------------ State computation -----------------------------------------------
 
 	//The number of controller state computations;
 	const uint8_t nb_state_computations;
@@ -251,6 +275,41 @@ typedef struct {
 
 
 } machine_controller_t;
+
+
+//---------------------------------------------- Initialisation - deletion ---------------------------------------------
+
+//Create and initialise a machine controller;
+machine_controller_t *machine_controller_create(
+	uint8_t nb_distances_computers, const distances_computer_t *distances_computer_c,
+	uint8_t nb_builder_computations, const controller_builder_computation_t *builder_computations_c,
+	uint8_t nb_kinematic_constraints, const kinematic_constraint_t *kinematic_constraints_c,
+	uint8_t nb_state_computations, const controller_state_computation_t *state_computations_c,
+	void *(*controller_builder_creator)(), void (*controller_builder_deleter)(void *),
+	void *(*controller_state_creator)(), void (*controller_state_deleter)(void *)
+);
+
+//Delete a machine controller;
+void machine_controller_delete(machine_controller_t *machine_controller);
+
+
+//-------------------------------------------------- Structs creation --------------------------------------------------
+
+//Create a controller state;
+void *machine_controller_create_state(machine_controller_t *controller);
+
+//Delete a controller state;
+void machine_controller_delete_state(machine_controller_t *controller, void *state);
+
+
+//Create a controller builder;
+void *machine_controller_create_builder(machine_controller_t *controller);
+
+//Delete a controller state;
+void machine_controller_delete_builder(machine_controller_t *controller, void *builder);
+
+
+//------------------------------------------------ Real time computation -----------------------------------------------
 
 
 //Update the builder, by executing all builder computations;

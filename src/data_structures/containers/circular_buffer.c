@@ -25,6 +25,16 @@
 
 
 /*
+ * Delete the cbuffer;
+ */
+
+void cbuffer_delete(cbuffer_t *cbuffer) {
+
+	vlarray_clear(&cbuffer->container);
+
+}
+
+/*
  * discard_all : discards all elements in the buffer, but doesn't change the container's size;
  */
 
