@@ -22,6 +22,7 @@
 #define TRACER_COMPUTATION_NETWORK_H
 
 #include <kernel/mutex/mutex.h>
+#include <data_structures/containers/instance.h>
 #include "data_structures/containers/llist.h"
 
 #include "data_host.h"
@@ -44,7 +45,7 @@ typedef bool (*computation_function_t )(void *activation_data, void *input_data)
 typedef struct {
 
 	//A flag, set if the node is initialised;
-	bool initialised;
+	const bool initialised;
 
 	//Computation nodes are stored in linked lists;
 	linked_element_t link;
@@ -53,12 +54,12 @@ typedef struct {
 	const size_t priority;
 
 	//Data mutex;
-	mutex_t *data_mutex;
+	mutex_t *const data_mutex;
 
 	//The node's data host;
 	dhost_t input_host;
 
-	//The function, to call when the host has initialised data;
+	//The function, to call when the host has initialised data available;
 	const computation_function_t function;
 
 	//The number of output nodes;
@@ -95,29 +96,61 @@ typedef struct {
 
 typedef struct cnetwork_t {
 
+	//--------------------- Constants ---------------------
+
 	//The number of nodes in the network;
 	const size_t nb_nodes;
 
+	//The number of uninitialised nodes;
+	size_t uninitialised_nodes;
+
+
+	//--------------------- Nodes ---------------------
+
 	//The mutex to protect the active nodes linked list;
-	mutex_t *list_mutex;//TODO;
+	mutex_t *const list_mutex;
 
 	//The active nodes list;
 	linked_list_t active_nodes;
 
 	//The array of nodes;
-	cnode_t *nodes;
+	cnode_t *const nodes;
+
+
+	//--------------------- Sync ---------------------
+
+	//The flag set when the network is dead;
+	volatile bool terminated;
+
+	//The number of concurrent executions
+	volatile bool re_initialisation_required;
+
+	//The flag that prevents double initialisation;
+	volatile bool init_exit_lock;
+
+
+	//--------------------- Init - Exit ---------------------
+
+	//The data to provide at initialisation;
+	void *init_data;
+
+	//The network initialisation function;
+	bool (*init)(void *data, const cnode_t *nodes);
 
 } cnetwork_t;
 
 
 //------------------------------------------------ Creation - deletion -------------------------------------------------
 
-//Create a computation network, providing the number of nodes, and a mutex to protect the active nodes list;
-cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex);
+//Create a computation network, providing the number of nodes, a mutex to protect the active nodes list,
+//The data instance, and the initialisation function;
+cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *instance,
+							bool (*init)(void *data, const cnode_t *nodes));
+
 
 //Initialise a computation node, providing its priority, the size of its arguments, its max number of concurrent
 // executions,its number of output references, and array containing them;
-void cnetwork_init_node(const cnetwork_t *cnetwork, size_t node_index, size_t priority,
+void cnetwork_init_node(cnetwork_t *cnetwork, size_t node_index, size_t priority,
 						computation_function_t function,
 						size_t arguments_size, size_t nb_concurrent_execs,
 						size_t nb_outputs, const size_t *output_references_const);
@@ -132,7 +165,10 @@ void cnetwork_delete(cnetwork_t *cnetwork);
 bool cnetwork_execute(cnetwork_t *cnetwork);
 
 //Activate a node providing args; Concurrency supported;
-void cnetwork_activate(const void *activator, size_t neighbor_id, const void *args, size_t args_size);
+void cnetwork_activate(cnetwork_t *cnetwork, cnode_t *node, const void *args, size_t args_size);
+
+//Activate a node providing args; Concurrency supported;
+void cnetwork_activate_neighbor(const void *activator, size_t neighbor_id, const void *args, size_t args_size);
 
 
 #endif //TRACER_COMPUTATION_NETWORK_H

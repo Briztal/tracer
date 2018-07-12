@@ -40,10 +40,10 @@ typedef enum {
     //The task is the loop executed by the scheduler when in inactive state;
             EMPTY_STASK,
 
-    //The task is persistent (event or synchronous) Must not be deleted after completion;
+    //The task is persistent (event or synchronous) Must not be terminated after completion;
             SERVICE_STASK,
 
-    //The task comes from a sequence; Must be deleted after completion;
+    //The task comes from a sequence; Must be terminated after completion;
             SEQUENCE_STASK,
 
 } stask_type_t;

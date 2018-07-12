@@ -261,7 +261,7 @@ void tcontroller_init(tcontroller_t *const tcontroller) {
 }
 
 
-//Stop moving. All undone trajectories / movements will be deleted. Position is updated; Offset may appear;
+//Stop moving. All undone trajectories / movements will be terminated. Position is updated; Offset may appear;
 void tcontroller_exit(tcontroller_t *const tcontroller) {
 
 	//Stop the actuation layer;

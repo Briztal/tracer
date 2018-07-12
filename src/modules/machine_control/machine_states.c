@@ -75,7 +75,7 @@ void machine_state_initialise(machine_state_t *const state, const uint8_t dimens
 
 /*
  * machine_state_delete : frees all arrays of the provided state.
- * 	The controller state part is supposed deleted;
+ * 	The controller state part is supposed terminated;
  */
 
 void machine_state_delete(machine_state_t *const state) {
@@ -85,7 +85,7 @@ void machine_state_delete(machine_state_t *const state) {
 	kernel_free(state->actuation_speeds);
 	kernel_free(state->control_positions);
 
-	//The controller state must have been deleted;
+	//The controller state must have been terminated;
 
 }
 

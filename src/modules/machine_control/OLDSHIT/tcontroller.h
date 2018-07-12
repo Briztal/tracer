@@ -159,7 +159,7 @@ void tcontroller_enqueue(tcontroller_t *tcontroller, trajectory_t *movement);
 //Start moving;
 void tcontroller_init(tcontroller_t *tcontroller);
 
-//Stop moving. All undone trajectories / elementary trajectories will be deleted. Position is updated; Offset may appear;
+//Stop moving. All undone trajectories / elementary trajectories will be terminated. Position is updated; Offset may appear;
 void tcontroller_exit(tcontroller_t *tcontroller);
 
 //TODO PAUSE PATCH:

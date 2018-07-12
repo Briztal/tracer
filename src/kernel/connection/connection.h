@@ -81,7 +81,7 @@ void connection_add_node(connection_t *connection, flux_t *flux, cnode_t *node);
 
 //------------------------------- Deletion -------------------------------
 
-//Marks a stream to be deleted. Will be deleted at next iteration of stream service;
+//Marks a stream to be terminated. Will be terminated at next iteration of stream service;
 void connection_close(flux_t  *);
 
 

@@ -160,7 +160,7 @@ void connection_add_node(connection_t *connection, flux_t *flux, cnode_t *node) 
 //------------------------------- Deletion -------------------------------
 
 /*
- * connection_close : marks a connection to be deleted. Called by anyone;
+ * connection_close : marks a connection to be terminated. Called by anyone;
  */
 
 void connection_close(flux_t *flux) {
@@ -185,7 +185,7 @@ void connection_close(flux_t *flux) {
 
     }
 
-    //Stream will be deleted by the stream service at appropriate time;
+    //Stream will be terminated by the stream service at appropriate time;
 
     //Leave the critical section;
     kernel_leave_critical_section();
@@ -260,7 +260,7 @@ void connection_process(connection_t *connection) {
     //While there is a cflux after the current node :
     while ((flux = node_get_next_flux(node))) {
 
-        //If the data cflux has to be deleted :
+        //If the data cflux has to be terminated :
         if (flux->state == (flux_state_t)CLOSED_FLUX) {
 
             //Delete the data cflux; It will be made empty, and will be removed during the service's next iteration;

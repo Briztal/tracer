@@ -180,6 +180,25 @@ struct {
 
 
 
+//-----------------------------------------------
+
+/*
+ * State validation : Node 9, activated by 0, priority 9;
+ *
+ * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
+ * 	the machine controller, that will call each one of them in order;
+ */
+
+struct {
+
+	//The movement controller's instance;
+	const machine_controller_t *const controller;
+
+	//state_computation_args, as defined by the movement controller;
+	state_computation_args args;
+
+} mcore_state_computation_args;
+
 //--------------------------------------------------- Private headers --------------------------------------------------
 
 //Regroup computed intervals in a single one;
@@ -195,8 +214,11 @@ void mcontroller_activate_corrections(uint8_t dimension, float time, const time_
 //--------------------------------------------------- Implementations --------------------------------------------------
 
 
+/*
+ * machine_core_create : creates a machine core from machine constants, a controller,
+ * and an array of actuator physics managers;
+ */
 
-//Create a machine core from machine constants, a controller, and an array of actuator physics managers;
 machine_core_t *machine_core_create(const machine_constants_t *const machine_constants,
 									machine_controller_t *const controller,
 									const uint8_t nb_actuator_physics,
@@ -431,6 +453,7 @@ time_interval_t mcontroller_regroup_intervals(const uint8_t dimension, const tim
 			}
 
 		}
+
 	}
 
 	//Update the validity flag to consider also bounds crossing;

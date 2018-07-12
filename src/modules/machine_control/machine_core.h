@@ -26,6 +26,7 @@
 #include <stdbool.h>
 
 #include <data_structures/containers/llist.h>
+#include <kernel/computation/network/computation_network.h>
 
 
 #include "machine.h"
@@ -81,6 +82,12 @@ typedef struct {
 	cbuffer_t movement_buffer;
 
 
+	//---------------------------- Movement computation ----------------------------
+
+	//The movement processor;
+	cnetwork_t *movement_computation;
+
+
 } machine_core_t;
 
 
@@ -88,6 +95,18 @@ typedef struct {
 machine_core_t *machine_core_create(const machine_constants_t *machine_constants,
 									machine_controller_t *controller, uint8_t nb_actuator_physics,
 									const actuator_physics_t *actuator_physics, size_t movement_buffer_size);
+
+//Execute some stages in the movement computation;
+void machine_core_compute_movements(machine_core_t *core, uint8_t nb_stages);
+
+//Get the number of available movements;
+size_t machine_core_available_movements(machine_core_t *core);
+
+//Read the movement to execute;
+movement_t *read_movement(machine_core_t *core);
+
+//Discard the first movement to execute;
+void discard_movement(machine_core_t *core);
 
 //Delete a previously created machine controller;
 void machine_core_delete(machine_core_t *machine_core);

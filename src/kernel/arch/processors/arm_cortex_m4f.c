@@ -183,7 +183,7 @@ void core_preemption() {
     __asm__ __volatile__ ("ISB");
 
 
-    //Save the current process_t's stack pointer, while the process_t hasn't been deleted;
+    //Save the current process_t's stack pointer, while the process_t hasn't been terminated;
     __asm__ __volatile__ ("mrs %0, psp" : "=r" (core_process->process_stack->stack_pointer):);
 
     //Execute an ISB;

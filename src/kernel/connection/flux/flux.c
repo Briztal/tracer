@@ -37,7 +37,7 @@ void flux_process(flux_t *flux) {
         kernel_enter_critical_section();
     }
 
-    //If the data cflux has to be deleted :
+    //If the data cflux has to be terminated :
     if (flux->state == (flux_state_t)CLOSED_FLUX) {
         goto end;
     }

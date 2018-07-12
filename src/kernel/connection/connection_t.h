@@ -62,7 +62,7 @@ typedef enum flux_state_t{
     //The flux is active, it can be executed;
             ACTIVE_FLUX,
 
-    //The stream has to be deleted, as soon as its mutex is released;
+    //The stream has to be terminated, as soon as its mutex is released;
             CLOSED_FLUX,
 
 } flux_state_t;

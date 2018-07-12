@@ -115,7 +115,7 @@ As you can guess, this problem cannot be solved without implementing some securi
     and have enough space to contain all tasks the function wants to enqueue.
     If not, the function locks all queues where it has to insert tasks, and fails.
 
-3 - if a function fails, it is not deleted of the scheduler. It will be re-executed later.
+3 - if a function fails, it is not terminated of the scheduler. It will be re-executed later.
 
 4 - after an evaluation of the task pool, the scheduler unlocks all queues.
 

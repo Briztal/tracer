@@ -78,8 +78,8 @@ void movement_builder_initialise(movement_builder_t *const builder, const uint8_
 /*
  * movement_builder_delete : deletes the interval array of the movement builder;
  *
- * 	The references movement is not owned, and so is not deleted, as for the controller builder, that must be
- * 	deleted by the controller;
+ * 	The references movement is not owned, and so is not terminated, as for the controller builder, that must be
+ * 	terminated by the controller;
  */
 
 void movement_builder_delete(movement_builder_t *builder) {

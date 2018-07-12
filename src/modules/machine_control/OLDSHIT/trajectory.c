@@ -77,7 +77,7 @@ void curve_evaluate_convert_tmp_provided(const geometric_base_t *const geometric
  * trajectory_init : initialises a trajectory from its primary data and the trajectory's requirements,
  *	and add it to the trajectory list.
  *
- * 	If the trajectory is invalid, the trajectory is deleted;
+ * 	If the trajectory is invalid, the trajectory is terminated;
  */
 
 void trajectory_init(trajectory_t *const trajectory, const curve_t *const curve, bool affine_curve,
