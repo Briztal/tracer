@@ -23,7 +23,7 @@
 #define TRACER_TREE_H
 
 
-#include <data_structures/containers/vlarray.h>
+#include <data_structures/containers/non_concurrent/vlarray.h>
 
 /*
  * A tree in the strictest meaning contains a container of sub-trees;

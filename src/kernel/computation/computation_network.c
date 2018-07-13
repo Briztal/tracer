@@ -19,11 +19,11 @@
 */
 
 
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 #include <kernel/kernel.h>
 #include <string.h>
 #include <kernel/connection/connection_t.h>
-#include <data_structures/containers/instance.h>
+#include <data_structures/containers/non_concurrent/instance.h>
 #include "computation_network.h"
 
 
@@ -263,7 +263,7 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 
 
 	//Cache the node's data host pointer;
-	dhost_t *host = &node->input_host;
+	dshost_t *host = &node->input_host;
 
 	//Node may have been modified between list unlock and node lock.
 	//Now that we own it, we must check if it can be executed;
@@ -510,7 +510,7 @@ void cnetwork_activate_neighbor(const void *const activator, const size_t neighb
 void cnetwork_activate(cnetwork_t *const cnetwork, cnode_t *node, const void *const args, const size_t args_size) {
 
 	//Cache the node's host;
-	dhost_t *host = &node->input_host;
+	dshost_t *host = &node->input_host;
 
 	//Lock the node's data;
 	cnode_lock_data(node);                                                //	Node locked;

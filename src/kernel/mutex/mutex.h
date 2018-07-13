@@ -42,7 +42,7 @@ typedef struct mutex_t {
 	void (*const mutex_unlock)(void *mutex_instance);
 
 	//The mutex's duplication function;
-	struct mutex_t *(*const mutex_duplication)(void *mutex_instance);
+	struct mutex_t *(*const mutex_duplication)(const void *mutex_instance);
 
 	//The mutex's destructor;
 	void (*const mutex_destructor)(void *mutex_instance);
@@ -69,7 +69,7 @@ inline void mutex_unlock(mutex_t *mutex) {
 
 
 //Shortcut for duplicator;
-inline mutex_t *mutex_duplicate(mutex_t *mutex) {
+inline mutex_t *mutex_duplicate(const mutex_t *const mutex) {
 
 	//Call the duplication passing instance;
 	return (*(mutex->mutex_duplication))(mutex->mutex_instance);

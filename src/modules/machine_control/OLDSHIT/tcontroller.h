@@ -22,9 +22,9 @@
 #ifndef TRACER_TCONTROLLER_H
 #define TRACER_TCONTROLLER_H
 
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 
-#include <data_structures/containers/circular_buffer.h>
+#include <data_structures/containers/non_concurrent/circular_buffer.h>
 
 
 #include "modules/machine_control/movement.h"

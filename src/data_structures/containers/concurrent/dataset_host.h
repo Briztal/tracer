@@ -21,15 +21,16 @@
 #ifndef TRACER_SYNCRONISED_QUEUE_H
 #define TRACER_SYNCRONISED_QUEUE_H
 
-#include "data_structures/containers/vlarray.h"
+#include "data_structures/containers/non_concurrent/vlarray.h"
 
 
 
 #include <stddef.h>
+#include <kernel/mutex/mutex.h>
 
 
 /*
- * The data hosts owns and grants access to data structures of a fixed (shared among them) size.
+ * The dataset hosts owns and grants access to data structures of a fixed (shared among them) size.
  *
  * 	All data is contained in the host. Each piece of data can be in one of the three following states :
  * 		- initialised : the data structure is filled and ready to be used; Data is not directly accessible;
@@ -46,25 +47,25 @@
 
 
 /*
- * The dhost element contains all data related to a particular data structure;
+ * The dshost element contains all data related to a particular data structure;
  */
 
-typedef struct dhost_element_t {
+typedef struct dshost_element_t {
 
 	//Has the element's ownership been transferred ?
 	bool shared;
 
 	//The next element;
-	struct dhost_element_t *next;
+	struct dshost_element_t *next;
 
 	//The pointer to arguments;
 	void *const data;
 
-} dhost_element_t;
+} dshost_element_t;
 
 
 /*
- * A dhost contains two internal queues;
+ * A dshost contains two internal queues;
  *
  * 	An internal queue contains two pointers, referencing first and last elements;
  */
@@ -75,12 +76,12 @@ typedef struct {
 	size_t nb_elements;
 
 	//The first element of the queue; The next to be read;
-	dhost_element_t *first_element;
+	dshost_element_t *first_element;
 
 	//The last element of the queue; A new element will be concatenated to it;
-	dhost_element_t *last_element;
+	dshost_element_t *last_element;
 
-} dhost_queue_t;
+} dshost_queue_t;
 
 
 /*
@@ -99,61 +100,67 @@ typedef struct {
 	//The pointer to our data array;
 	void *data;
 
+	//The mutex to protect accesses;
+	mutex_t *mutex;
+
 	//The pointer to our elements array;
-	dhost_element_t *elements;
+	dshost_element_t *elements;
 
 	//The initialised elements internal queue;
-	dhost_queue_t initialised_elements;
+	dshost_queue_t initialised_elements;
 
 	//The initialised elements internal queue;
-	dhost_queue_t uninitialised_elements;
+	dshost_queue_t uninitialised_elements;
 
-} dhost_t;
+} dshost_t;
 
 
 
 //----------------------------------------------------- Init - exit ----------------------------------------------------
 
+//Create a dataset host, with the owning [length] elements of [element_size] bytes; Concurrency not supported;
+void dshost_initialise(dshost_t *dshost, size_t nb_elements, size_t element_data_size, const mutex_t *mutex);
 
-//Create a data host, with the owning [length] elements of [element_size] bytes; Concurrency not supported;
-void dhost_initialise(dhost_t *dhost, size_t nb_elements, size_t element_data_size);
+//Flush the data set; Concurrency supported, but all data must be owned;
+void dhost_flush(dshost_t *dshost);
 
-//Delete a data host; Concurrency not supported;
-void dhost_delete(dhost_t *dhost);
+//Delete a dataset host; Concurrency not supported;
+void dshost_delete(dshost_t *dshost);
+
 
 
 //-------------------------------------------------------- Sync --------------------------------------------------------
 
 
-//Is there initialised data available ? Purely indicative, concurrency supported;
-bool dhost_initialised_data_available(const dhost_t *dhost);
+//Is there initialised data available ? Purely indicative, may change as soon as the function returns;
+bool dshost_initialised_data_available(const dshost_t *dshost);
 
-//Is all data in the uninitialised state? Purely indicative, concurrency supported;
-bool dhost_all_data_uninitialised(const dhost_t *dhost);
+//Is all data in the uninitialised state? Purely indicative, may change as soon as the function returns;
+bool dshost_all_data_uninitialised(const dshost_t *dshost);
 
 
 //--------------------------------------------------- Data provision ---------------------------------------------------
 
-//Get the ownership of an uninitialised element; Concurrency not supported;
-dhost_element_t *dhost_provide_uninitialised(const dhost_t *dhost);
+//Get the ownership of an uninitialised element; Concurrency supported;
+dshost_element_t *dshost_provide_uninitialised(const dshost_t *dshost);
 
-//Get the ownership of an available element; Concurrency not supported;
-dhost_element_t * dhost_provide_initialised(const dhost_t *dhost);
+//Get the ownership of an available element; Concurrency supported;
+dshost_element_t * dshost_provide_initialised(const dshost_t *dshost);
 
 
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 //Give back the ownership of element, and insert it in the uninitialised internal queue; Concurrency not supported;
-void dhost_receive_uninitialised(const dhost_t *dhost, dhost_element_t *element);
+void dshost_receive_uninitialised(const dshost_t *dshost, dshost_element_t *element);
 
 //Give back the ownership of element, and insert it in the initialised internal queue; Concurrency not supported;
-void dhost_receive_initialised(const dhost_t *dhost, dhost_element_t *element);
+void dshost_receive_initialised(const dshost_t *dshost, dshost_element_t *element);
 
 
 //----------------------------------------------- Element initialisation -----------------------------------------------
 
-//Own an element to initilise, copy data inside, and give it back to the host as an initialised element;
-void dhost_initialise_element(dhost_t *dhost, const void *data, size_t data_size);
+//Own an element to initialise, copy data inside, and give it back to the host as an initialised element;
+void dshost_initialise_element(dshost_t *dshost, const void *data, size_t data_size);
 
 
 #endif //TRACER_SYNCRONISED_QUEUE_H

@@ -1,0 +1,64 @@
+//
+// Created by root on 7/13/18.
+//
+
+#ifndef TRACER_COMPUTATION_FUNCTION_H
+#define TRACER_COMPUTATION_FUNCTION_H
+
+
+#include "computation_node.h"
+
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+//TODO THE DATA HOST IS NOT REQUIRED FOR THE COMPUTATION NODE, ONLY FOR THE PARALLEL COMPUTATION FUNCTION.
+
+/*
+ * An execution node is composed of the following elements :
+ */
+typedef struct single_node_t {
+
+	//A computation node;
+	cnode_t node;
+
+	//A function to execute, that can interact with other nodes; The node itself is passed, as args provided
+	//by the queue;
+	cnode_computation_state_t (*function)(struct single_node_t *node, void *args);
+
+} exec_node_t;
+
+
+/*
+ * The computation function of an execution node;
+ */
+bool exec_node_compute(single_node_t *exec_node) {
+
+	//First, own some data from the host;
+	dhost_element_t *element = dhost_provide_initialised(&exec_node->node.input_host);
+
+	//If no element was executed :
+	if (!element) {
+
+		//Complete here, nothing executed;
+		return false;
+
+	}
+
+	//Execute the function;
+	cnode_computation_state_t state = (*(exec_node->function))(exec_node, element->data);
+
+
+
+
+}
+
+#endif //TRACER_COMPUTATION_FUNCTION_H

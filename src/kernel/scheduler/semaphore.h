@@ -21,7 +21,7 @@
 #define TRACER_SEMAPHORE_H
 
 
-#include <data_structures/containers/vlarray.h>
+#include <data_structures/containers/non_concurrent/vlarray.h>
 
 
 

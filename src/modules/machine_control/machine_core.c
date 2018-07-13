@@ -19,7 +19,7 @@
 */
 
 #include <kernel/kernel.h>
-#include <data_structures/containers/circular_buffer.h>
+#include <data_structures/containers/non_concurrent/circular_buffer.h>
 #include "machine_core.h"
 #include "machine_states.h"
 #include "movement_builder.h"
@@ -278,11 +278,16 @@ machine_core_t *machine_core_create(const machine_constants_t *const machine_con
 	//Allocate and initialise the machine core;
 	machine_core_t *const machine_core = kernel_malloc_copy(sizeof(machine_core_t), &core_init);
 
+	//Resize the movement buffer to its maximal size;
+	cbuffer_resize(&machine_core->movement_buffer, movement_buffer_size);
+
 	//Initialise the states manager;
 	machine_states_initialise(&machine_core->states, dimension, controller_state_0, controller_state_1);
 
 	//Initialise the movement builder;
 	movement_builder_initialise(&machine_core->movement_builder, dimension, controller_builder);
+
+	//TODO INITIALISE THE COMPUTATION NETWORK;
 
 	//Return the initialised machine core;
 	return machine_core;
@@ -326,6 +331,71 @@ void machine_core_delete(machine_core_t *machine_core) {
 
 	//Delete the movement builder;
 	movement_builder_delete(&machine_core->movement_builder);
+
+}
+
+//Execute some stages in the movement computation;
+bool machine_core_compute_movements(machine_core_t *const core, uint8_t nb_stages) {
+
+	//If the queue is already full :
+	if (!((volatile size_t) core->movement_buffer.nb_spaces)) {
+
+		//No computation to do until the next movement discard;
+		return false;
+
+	}
+
+	//Execute the required number of computations;
+	while (nb_stages--) {
+		cnetwork_execute(core->movement_computation);
+	}
+
+
+	//If the queue is already full :
+	if (!((volatile size_t) core->movement_buffer.nb_spaces)) {
+
+		//No computation to do until the next movement discard;
+		return false;
+
+	}
+
+
+
+}
+
+
+/*
+ * machine_core_available_movements : returns the number of available movements in the buffer;
+ */
+
+size_t machine_core_available_movements(machine_core_t *core) {
+
+	//Return the number of available movements;
+	return core->movement_buffer.nb_elements;
+
+}
+
+
+/*
+ * read_movement : returns the pointer to the first available movement in the buffer;
+ */
+
+movement_t *read_movement(machine_core_t *core) {
+
+	//Get the output pointer;
+	return cbuffer_read_output(&core->movement_buffer, 0);
+
+}
+
+
+/*
+ * discard_movement : discards the first movement of the buffer;
+ */
+
+void discard_movement(machine_core_t *core) {
+
+	//Discard the output element;
+	cbuffer_discard_output(&core->movement_buffer);
 
 }
 

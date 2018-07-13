@@ -25,7 +25,7 @@
 
 #include <kernel/connection/connection.h>
 
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 
 
 //Process a data cflux;

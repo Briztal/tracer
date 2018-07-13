@@ -24,7 +24,7 @@
 
 
 #include <data_structures/string/string.h>
-#include "data_structures/containers/tree.h"
+#include "data_structures/containers/non_concurrent/tree.h"
 
 
 typedef struct {

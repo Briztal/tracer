@@ -25,8 +25,8 @@
 
 #include <stdbool.h>
 
-#include <data_structures/containers/llist.h>
-#include <kernel/computation/network/computation_network.h>
+#include <data_structures/containers/non_concurrent/llist.h>
+#include <kernel/computation/computation_network.h>
 
 
 #include "machine.h"

@@ -22,9 +22,9 @@
 
 #include <kernel/systick.h>
 
-#include <data_structures/containers/vlarray.h>
+#include <data_structures/containers/non_concurrent/vlarray.h>
 #include <kernel/kernel.h>
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 
 
 //TODO MAKE THE SCHEDULER LIBRARY

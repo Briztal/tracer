@@ -22,7 +22,7 @@
 
 #include <kernel/kernel.h>
 #include <kernel/drivers/timer.h>
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 #include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
 #include <kernel/drivers/port.h>
 

@@ -29,7 +29,7 @@
 #include <kernel/systick.h>
 
 #include <kernel/scheduler/scheduler.h>
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 
 #include <kernel/arch/processors/arm_cortex_m4f.h>
 #include <kernel/scheduler/tasks/sequences.h>

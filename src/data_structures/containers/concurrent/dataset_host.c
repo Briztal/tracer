@@ -18,7 +18,7 @@
 
 */
 
-#include "data_host.h"
+#include "dataset_host.h"
 
 #include <string.h>
 
@@ -27,11 +27,11 @@
 
 //--------------------------------------------------- Private headers --------------------------------------------------
 
-//Remove the first element of a dhost queue, and mark it shared; Concurrency not supported;
-dhost_element_t *dhost_queue_remove_first(dhost_queue_t *queue);
+//Remove the first element of a dshost queue, and mark it shared; Concurrency not supported;
+dshost_element_t *dshost_queue_remove_first(mutex_t *mutex, dshost_queue_t *queue);
 
 //Adds the provided element at the end of the provided queue; Concurrency not supported;
-void dhost_queue_insert_element(dhost_queue_t *queue, dhost_element_t *new_element);
+void dshost_queue_insert_element(mutex_t *mutex, dshost_queue_t *queue, dshost_element_t *new_element);
 
 
 //----------------------------------------------------- Init - exit ----------------------------------------------------
@@ -39,7 +39,7 @@ void dhost_queue_insert_element(dhost_queue_t *queue, dhost_element_t *new_eleme
 
 
 /*
- * dhost_initialise : Initialises the provided data host depending on different sizes;
+ * dshost_initialise : Initialises the provided data host depending on different sizes;
  *
  * 	- Allocates space for data;
  * 	- Allocates space for elements;
@@ -50,13 +50,14 @@ void dhost_queue_insert_element(dhost_queue_t *queue, dhost_element_t *new_eleme
  * 	Concurrency is not supported;
  */
 
-void dhost_initialise(dhost_t *dhost, const size_t nb_elements, const size_t element_data_size) {
+void dshost_initialise(dshost_t *dshost, const size_t nb_elements, const size_t element_data_size,
+					  const mutex_t *const mutex) {
 
 	//If the data host is not supposed to contain any element :
 	if (!nb_elements) {
 
 		//Error, the data host must contain data...
-		kernel_error("data_host.c : dhost_initialise : required to initialise a data host with 0 elments;");
+		kernel_error("data_host.c : dshost_initialise : required to initialise a data host with 0 elments;");
 
 	}
 
@@ -67,24 +68,24 @@ void dhost_initialise(dhost_t *dhost, const size_t nb_elements, const size_t ele
 	void *data_array = kernel_malloc(data_size);
 
 	//Allocate the elements array;
-	dhost_element_t *elements = kernel_malloc(nb_elements * sizeof(struct dhost_element_t));
+	dshost_element_t *elements = kernel_malloc(nb_elements * sizeof(struct dshost_element_t));
 
 	{
 		//Cache the pointer to data for the current element;
 		uint8_t *element_data = data_array;
 
 		//Initialize the pointer to the element to initialise;
-		dhost_element_t *current_element = elements;
+		dshost_element_t *current_element = elements;
 
 		//Initialize the previously initialised element;
-		dhost_element_t *previous_element = 0;
+		dshost_element_t *previous_element = 0;
 
 		//For each element to initialise :
 		for (size_t element_index = 0; element_index < nb_elements; element_index++) {
 
 
 			//Create an initializer for the element;
-			dhost_element_t init = {
+			dshost_element_t init = {
 				.shared = false,
 				.data = element_data,
 				.next = previous_element,
@@ -107,7 +108,7 @@ void dhost_initialise(dhost_t *dhost, const size_t nb_elements, const size_t ele
 	}
 
 	//Initialise the data host;
-	*dhost = {
+	*dshost = {
 
 		//Save the size of an element;
 		.elements_size = element_data_size,
@@ -117,6 +118,9 @@ void dhost_initialise(dhost_t *dhost, const size_t nb_elements, const size_t ele
 
 		//Data is stored in the data array;
 		.data = data_array,
+
+		//Duplicate the mutex and transfer its ownership;
+		.mutex = mutex_duplicate(mutex),
 
 		//Elements are stored in the elements array;
 		.elements = elements,
@@ -148,57 +152,73 @@ void dhost_initialise(dhost_t *dhost, const size_t nb_elements, const size_t ele
 
 
 /*
- * dhost_delete : deletes all dynamic data of the data host.
+ * dhost_flush : attempts to flush the data set; Concurrency supported, but all data must be owned;
+ *
+ */
+
+void dhost_flush(dshost_t *dshost) {
+
+	//Lock the struct;TODO WAIT UNTIL ALL DATA IS RETRIBUTED AND DELETE;
+	//TODO MAKE A FLAG THAT PREVENTS DATA PROVISION.
+
+	//If there still is shared data :
+	if (dshost->uninitialised_elements.nb_elements + dshost->initialised_elements.nb_elements != dshost->nb_elements) {
+
+		//Error. All data must be processed before deletion;
+		kernel_error("data_host.c : dshost_delete : there still is data initialised or shared;");
+
+	}
+
+
+
+}
+
+
+
+/*
+ * dshost_delete : deletes all dynamic data of the data host.
  *
  * 	dost structure is not fred, as it can compose another struct;
  *
  * 	Concurrency is not supported;
  */
 
-void dhost_delete(dhost_t *const dhost) {
+void dshost_delete(dshost_t *const dshost) {
 
-	//If there still is shared data :
-	if (dhost->uninitialised_elements.nb_elements + dhost->initialised_elements.nb_elements != dhost->nb_elements) {
-
-		//Error. All data must be processed before deletion;
-		kernel_error("data_host.c : dhost_delete : there still is data initialised or shared;");
-
-	}
 
 	//Data and elements are contained in arrays. Simply free them;
-	kernel_free(dhost->data);
-	kernel_free(dhost->elements);
+	kernel_free(dshost->data);
+	kernel_free(dshost->elements);
 
 }
 
 
 //-------------------------------------------------------- Sync --------------------------------------------------------
 
-
 /*
- * dhost_initialised_data_available : this function asserts is there is initialised data available;
+ * dshost_initialised_data_available : this function asserts is there is initialised data available;
  *
  * 	Purely indicative, concurrency supported;
  */
 
-bool dhost_initialised_data_available(const dhost_t *dhost) {
+bool dshost_initialised_data_available(const dshost_t *dshost) {
 
 	//There is initialised data available if elements are linked in the initialised elements list;
-	return (dhost->initialised_elements.nb_elements != 0);
+	return (dshost->initialised_elements.nb_elements != 0);
 
 }
 
 
 /*
- * dhost_all_data_uninitialised : this function asserts if all elements are linked in the uninitialised elements list;
+ * dshost_all_data_uninitialised : this function asserts if all elements are linked in the uninitialised elements list;
  *
  * 	Purely indicative, concurrency supported;
  */
 
-bool dhost_all_data_uninitialised(const dhost_t *dhost) {
+bool dshost_all_data_uninitialised(const dshost_t *dshost) {
 
 	//All data is uninitialised if all elements are linked in the uninitialised queue;
-	return (dhost->uninitialised_elements.nb_elements == dhost->nb_elements);
+	return (dshost->uninitialised_elements.nb_elements == dshost->nb_elements);
 
 }
 
@@ -206,49 +226,55 @@ bool dhost_all_data_uninitialised(const dhost_t *dhost) {
 //--------------------------------------------------- Data provision ---------------------------------------------------
 
 /*
- * dhost_provide_uninitialised : Attempts to remove the first element of the uninitialised queue;
+ * dshost_provide_uninitialised : Attempts to remove the first element of the uninitialised queue;
  *
  * 	If it exists, it marks it shared and returns its pointer;
  *
  * 	If not, it returns 0;
  */
 
-dhost_element_t *dhost_provide_uninitialised(const dhost_t *const dhost) {
+dshost_element_t *dshost_provide_uninitialised(const dshost_t *const dshost) {
 
 	//Remove and return the first element of the uninitialised queue;
-	return dhost_queue_remove_first(&dhost->uninitialised_elements);
+	return dshost_queue_remove_first(dshost->mutex, &dshost->uninitialised_elements);
 
 }
 
 
 /*
- * dhost_provide_initialised : Attempts to remove the first element of the initialised queue;
+ * dshost_provide_initialised : Attempts to remove the first element of the initialised queue;
  *
  * 	If it exists, it marks it shared and returns its pointer;
  *
  * 	If not, it returns 0;
  */
 
-dhost_element_t *dhost_provide_initialised(const dhost_t *const dhost) {
+dshost_element_t *dshost_provide_initialised(const dshost_t *const dshost) {
 
 	//Remove and return the first element of the initialised queue;
-	return dhost_queue_remove_first(&dhost->uninitialised_elements);
+	return dshost_queue_remove_first(dshost->mutex, &dshost->uninitialised_elements);
 
 }
 
 
 /*
- * dhost_queue_remove_first : Attempts to remove the first element of the provided queue;
+ * dshost_queue_remove_first : Attempts to remove the first element of the provided queue;
  *
  * 	If it exists, it marks it shared and returns its pointer;
  *
  * 	If not, it returns 0;
  */
 
-dhost_element_t *dhost_queue_remove_first(dhost_queue_t *const queue) {
+dshost_element_t *dshost_queue_remove_first(mutex_t *const mutex, dshost_queue_t *const queue) {
+
+	//Lock the access to the queue;
+	mutex_lock(mutex);
 
 	//If the queue is empty :
 	if (!queue->nb_elements) {
+
+		//Unlock access to the queue;
+		mutex_unlock(mutex);
 
 		//Return a null pointer. Must be caught after;
 		return 0;
@@ -258,10 +284,10 @@ dhost_element_t *dhost_queue_remove_first(dhost_queue_t *const queue) {
 	//If the queue is not empty :
 
 	//Cache the first element;
-	dhost_element_t *element = queue->first_element;
+	dshost_element_t *element = queue->first_element;
 
 	//Cache the element's successor;
-	dhost_element_t *next = element->next;
+	dshost_element_t *next = element->next;
 
 	//Reset the element's successor;
 	element->next = 0;
@@ -284,12 +310,15 @@ dhost_element_t *dhost_queue_remove_first(dhost_queue_t *const queue) {
 	if (element->shared) {
 
 		//Error, list not supposed to contain a shared element;
-		kernel_error("data_host.c : dhost_queue_remove_first : removed element is already shared;");
+		kernel_error("data_host.c : dshost_queue_remove_first : removed element is already shared;");
 
 	}
 
 	//Mark the element shared;
 	element->shared = true;
+
+	//Unlock access to the queue;
+	mutex_unlock(mutex);
 
 	//Return the removed element;
 	return element;
@@ -302,41 +331,45 @@ dhost_element_t *dhost_queue_remove_first(dhost_queue_t *const queue) {
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 /*
- * dhost_receive_uninitialised : if the provided element is shared, inserts it at the end of the provided list.
+ * dshost_receive_uninitialised : if the provided element is shared, inserts it at the end of the provided list.
  */
 
-void dhost_receive_uninitialised(const dhost_t *dhost, dhost_element_t *element) {
+void dshost_receive_uninitialised(const dshost_t *dshost, dshost_element_t *element) {
 
 	//Insert the provided element at the end of the uninitialised elements list;
-	dhost_queue_insert_element(&dhost->uninitialised_elements, element);
+	dshost_queue_insert_element(dshost->mutex, &dshost->uninitialised_elements, element);
 
 }
 
 
 /*
- * dhost_receive_uninitialised : if the provided element is shared, inserts it at the end of the provided list.
+ * dshost_receive_uninitialised : if the provided element is shared, inserts it at the end of the provided list.
  */
-void dhost_receive_initialised(const dhost_t *dhost, dhost_element_t *element) {
+void dshost_receive_initialised(const dshost_t *dshost, dshost_element_t *element) {
 
 	//Insert the provided element at the end of the initialised elements list;
-	dhost_queue_insert_element(&dhost->uninitialised_elements, element);
+	dshost_queue_insert_element(dshost->mutex, &dshost->uninitialised_elements, element);
 
 }
 
 
 /*
- * dhost_queue_insert_element : if the provided element is shared, inserts it at the end of the provided list.
+ * dshost_queue_insert_element : if the provided element is shared, inserts it at the end of the provided list.
  */
 
-void dhost_queue_insert_element(dhost_queue_t *const queue, dhost_element_t *const new_element) {
+void dshost_queue_insert_element(mutex_t *const mutex, dshost_queue_t *const queue, dshost_element_t *const new_element) {
 
 	//If the element is not shared, it can't be inserted :
 	if (!new_element->shared) {
 
 		//Error, element should have been shared previously;
-		kernel_error("data_host.c : dhost_queue_remove_first : provided element is not shared;");
+		kernel_error("data_host.c : dshost_queue_remove_first : provided element is not shared;");
 
 	}
+
+
+	//Lock access to the queue;
+	mutex_lock(mutex);
 
 	//Mark the element not shared;
 	new_element->shared = false;
@@ -361,7 +394,7 @@ void dhost_queue_insert_element(dhost_queue_t *const queue, dhost_element_t *con
 	//If the queue is not empty :
 
 	//Cache the queue's last element;
-	dhost_element_t *last = queue->last_element;
+	dshost_element_t *last = queue->last_element;
 
 	//Set the new element to be the successor of the last element;
 	last->next = new_element;
@@ -372,6 +405,9 @@ void dhost_queue_insert_element(dhost_queue_t *const queue, dhost_element_t *con
 	//Increment the number of elements in the queue;
 	queue->nb_elements++;
 
+	//UnLock access to the queue;
+	mutex_unlock(mutex);
+
 }
 
 
@@ -379,11 +415,10 @@ void dhost_queue_insert_element(dhost_queue_t *const queue, dhost_element_t *con
 //----------------------------------------------- Element initialisation -----------------------------------------------
 
 
-
-void dhost_initialise_element(dhost_t *const dhost, const void *const data, const size_t data_size) {
+void dshost_initialise_element(dshost_t *const dshost, const void *const data, const size_t data_size) {
 
 	//Require a space in the node's data;
-	dhost_element_t *element = dhost_provide_uninitialised(dhost);
+	dshost_element_t *element = dshost_provide_uninitialised(dshost);
 
 	//If no space is available :
 	if (!element) {
@@ -394,7 +429,7 @@ void dhost_initialise_element(dhost_t *const dhost, const void *const data, cons
 	}
 
 	//If sizes are not compatible :
-	if (data_size != dhost->elements_size) {
+	if (data_size != dshost->elements_size) {
 
 		//Kernel error, bad node linking;
 		kernel_error("cnetwork.c : cnetwork_activate : incompatible argument sizes;");
@@ -406,7 +441,7 @@ void dhost_initialise_element(dhost_t *const dhost, const void *const data, cons
 
 
 	//Provide data to the node's host;
-	dhost_receive_initialised(dhost, element);
+	dshost_receive_initialised(dshost, element);
 
 }
 

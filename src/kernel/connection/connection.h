@@ -64,7 +64,7 @@
 
 #include <kernel/scheduler/semaphore.h>
 
-#include <data_structures/containers/llist.h>
+#include <data_structures/containers/non_concurrent/llist.h>
 
 
 //------------------------------- Creation -------------------------------

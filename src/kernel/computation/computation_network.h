@@ -22,12 +22,12 @@
 #define TRACER_COMPUTATION_NETWORK_H
 
 #include <kernel/mutex/mutex.h>
-#include <data_structures/containers/instance.h>
-#include "data_structures/containers/llist.h"
 
-#include "data_host.h"
+#include <data_structures/containers/non_concurrent/instance.h>
 
-#include "computation_network.h"
+#include <data_structures/containers/non_concurrent/llist.h>
+
+#include "data_structures/containers/concurrent/dataset_host.h"
 
 
 //-------------------------------------------------- Computation node --------------------------------------------------
@@ -57,7 +57,7 @@ typedef struct {
 	mutex_t *const data_mutex;
 
 	//The node's data host;
-	dhost_t input_host;
+	dshost_t input_host;
 
 	//The function, to call when the host has initialised data available;
 	const computation_function_t function;
