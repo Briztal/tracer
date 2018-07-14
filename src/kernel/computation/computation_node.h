@@ -1,6 +1,22 @@
-//
-// Created by root on 7/13/18.
-//
+/*
+  computation_node.h Part of TRACER
+
+  Copyright (c) 2017 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #ifndef TRACER_COMPUTATION_NODE_H
 #define TRACER_COMPUTATION_NODE_H
@@ -48,35 +64,50 @@ typedef enum {
 
 } cnode_computation_state_t;
 
-
+/*
+ * The computation node structure is composed of :
+ */
 typedef struct cnode_t {
 
-	//Add some data to the data host;
-	void (*const accept_data)(struct cnode_t *node);
+	//A constant function pointer to provide data to the node;
+	//Will raise an error if the node's data storage is full. You must carefully dimension your computation scheme;
+	void (*const accept_data)(struct cnode_t *node, void *data, size_t size);
 
-	//Execute a computation if possible; Returns true if it did;
+	//A constant function pointer to execute a stage in the node's computation scheme;
+	// Fail-safe in itself, the stage that is executed can fail though;
+	// Returns a state that describes the computed stage;
 	cnode_computation_state_t (*const compute)(struct cnode_t *node);
 
-	//Is the node terminated ?
+	//A constant function pointer, asserting if the node is terminated.
+	// Purely indicative, fail-safe, concurrency supported, unreliable results;
 	bool (*const terminated)(struct cnode_t *node);
+
+	//The deletion function; As the node is a simple interface, a function must be included to correctly delete it;
+	// Concurrency not supported, will raise an error if the node is still in execution; Must be ran with precautions;
+	void (*const destructor)(struct cnode_t *node);
 
 } cnode_t;
 
 
 //Shortcut for data transmission
-inline void cnode_accept_data(cnode_t *node) {
-	(*(node->accept_data))(node);
+inline void cnode_accept_data(cnode_t *const node, void *const data, const size_t size) {
+	(*(node->accept_data))(node, data, size);
 }
 
 //Shortcut for computation execution
-inline bool cnode_compute(cnode_t *node) {
+inline bool cnode_compute(cnode_t *const node) {
 	return (*(node->compute))(node);
 
 }
 
 //Shortcut for termination verification;
-inline bool cnode_terminated(cnode_t *node) {
+inline bool cnode_terminated(cnode_t *const node) {
 	return (*(node->terminated))(node);
+}
+
+//Shortcut for deletion; Calls the destructor;
+inline void cnode_delete(cnode_t *const node) {
+	(*(node->destructor))(node);
 }
 
 #endif //TRACER_COMPUTATION_NODE_H

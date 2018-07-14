@@ -50,19 +50,19 @@ void dshost_queue_insert_element(mutex_t *mutex, dshost_queue_t *queue, dshost_e
  * 	Concurrency is not supported;
  */
 
-void dshost_initialise(dshost_t *dshost, const size_t nb_elements, const size_t element_data_size,
-					  const mutex_t *const mutex) {
+void dshost_initialise(dshost_t *dshost, const size_t data_element_size, const size_t nb_elements,
+					   const mutex_t *const mutex) {
 
 	//If the data host is not supposed to contain any element :
 	if (!nb_elements) {
 
 		//Error, the data host must contain data...
-		kernel_error("data_host.c : dshost_initialise : required to initialise a data host with 0 elments;");
+		kernel_error("dhost.c : dshost_initialise : required to initialise a data host with 0 elments;");
 
 	}
 
 	//Cache the size of the data array;
-	size_t data_size = nb_elements * element_data_size;
+	size_t data_size = nb_elements * data_element_size;
 
 	//Allocate the data array;
 	void *data_array = kernel_malloc(data_size);
@@ -95,7 +95,7 @@ void dshost_initialise(dshost_t *dshost, const size_t nb_elements, const size_t 
 			*current_element = init;
 
 			//Update the data pointer to point to the next piece of data;
-			element_data += element_data_size;
+			element_data += data_element_size;
 
 			//Update the previous element pointer to point to the current
 			previous_element = current_element;
@@ -111,7 +111,7 @@ void dshost_initialise(dshost_t *dshost, const size_t nb_elements, const size_t 
 	*dshost = {
 
 		//Save the size of an element;
-		.elements_size = element_data_size,
+		.elements_size = data_element_size,
 
 		//Save the number of elements managed by the host;
 		.nb_elements = nb_elements,
@@ -165,14 +165,12 @@ void dhost_flush(dshost_t *dshost) {
 	if (dshost->uninitialised_elements.nb_elements + dshost->initialised_elements.nb_elements != dshost->nb_elements) {
 
 		//Error. All data must be processed before deletion;
-		kernel_error("data_host.c : dshost_delete : there still is data initialised or shared;");
+		kernel_error("dhost.c : dshost_delete : there still is data initialised or shared;");
 
 	}
 
 
-
 }
-
 
 
 /*
@@ -196,12 +194,12 @@ void dshost_delete(dshost_t *const dshost) {
 //-------------------------------------------------------- Sync --------------------------------------------------------
 
 /*
- * dshost_initialised_data_available : this function asserts is there is initialised data available;
+ * dshost_initialised_element_available : this function asserts is there is initialised data available;
  *
  * 	Purely indicative, concurrency supported;
  */
 
-bool dshost_initialised_data_available(const dshost_t *dshost) {
+bool dshost_initialised_element_available(const dshost_t *dshost) {
 
 	//There is initialised data available if elements are linked in the initialised elements list;
 	return (dshost->initialised_elements.nb_elements != 0);
@@ -210,15 +208,48 @@ bool dshost_initialised_data_available(const dshost_t *dshost) {
 
 
 /*
- * dshost_all_data_uninitialised : this function asserts if all elements are linked in the uninitialised elements list;
+ * dshost_empty : this function asserts if all elements are linked in the uninitialised elements list;
  *
  * 	Purely indicative, concurrency supported;
  */
 
-bool dshost_all_data_uninitialised(const dshost_t *dshost) {
+bool dshost_empty(const dshost_t *dshost) {
 
 	//All data is uninitialised if all elements are linked in the uninitialised queue;
 	return (dshost->uninitialised_elements.nb_elements == dshost->nb_elements);
+
+}
+
+
+//----------------------------------------------- Element initialisation -----------------------------------------------
+
+void dshost_initialise_element(dshost_t *const dshost, const void *const data, const size_t data_size) {
+
+	//Require a space in the node's data;
+	dshost_element_t *element = dshost_provide_uninitialised(dshost);
+
+	//If no space is available :
+	if (!element) {
+
+		//Kernel error, network not correctly dimensioned;
+		kernel_error("cnetwork.c : cnetwork_activate : no space left on destination node;");
+
+	}
+
+	//If sizes are not compatible :
+	if (data_size != dshost->elements_size) {
+
+		//Kernel error, bad node linking;
+		kernel_error("cnetwork.c : cnetwork_activate : incompatible argument sizes;");
+
+	}
+
+	//Copy data from provided args to dest args;
+	memcpy(element->data, data, data_size);
+
+
+	//Provide initialised data to the node's host;
+	dshost_receive_element(dshost, element, true);
 
 }
 
@@ -310,7 +341,7 @@ dshost_element_t *dshost_queue_remove_first(mutex_t *const mutex, dshost_queue_t
 	if (element->shared) {
 
 		//Error, list not supposed to contain a shared element;
-		kernel_error("data_host.c : dshost_queue_remove_first : removed element is already shared;");
+		kernel_error("dhost.c : dshost_queue_remove_first : removed element is already shared;");
 
 	}
 
@@ -331,24 +362,16 @@ dshost_element_t *dshost_queue_remove_first(mutex_t *const mutex, dshost_queue_t
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 /*
- * dshost_receive_uninitialised : if the provided element is shared, inserts it at the end of the provided list.
+ * dshost_receive_uninitialised : attempts to insert the element at the end of the required list;
  */
 
-void dshost_receive_uninitialised(const dshost_t *dshost, dshost_element_t *element) {
+void dshost_receive_element(const dshost_t *dshost, dshost_element_t *element, bool initialised) {
 
-	//Insert the provided element at the end of the uninitialised elements list;
-	dshost_queue_insert_element(dshost->mutex, &dshost->uninitialised_elements, element);
+	//If the element is initialised, the concerned queue is the initialised one, if not, the uninitialised one;
+	dshost_queue_t *const queue = (initialised) ? &dshost->initialised_elements : &dshost->uninitialised_elements;
 
-}
-
-
-/*
- * dshost_receive_uninitialised : if the provided element is shared, inserts it at the end of the provided list.
- */
-void dshost_receive_initialised(const dshost_t *dshost, dshost_element_t *element) {
-
-	//Insert the provided element at the end of the initialised elements list;
-	dshost_queue_insert_element(dshost->mutex, &dshost->uninitialised_elements, element);
+	//Insert the provided element at the end of the concerned list;
+	dshost_queue_insert_element(dshost->mutex, queue, element);
 
 }
 
@@ -357,13 +380,14 @@ void dshost_receive_initialised(const dshost_t *dshost, dshost_element_t *elemen
  * dshost_queue_insert_element : if the provided element is shared, inserts it at the end of the provided list.
  */
 
-void dshost_queue_insert_element(mutex_t *const mutex, dshost_queue_t *const queue, dshost_element_t *const new_element) {
+void
+dshost_queue_insert_element(mutex_t *const mutex, dshost_queue_t *const queue, dshost_element_t *const new_element) {
 
 	//If the element is not shared, it can't be inserted :
 	if (!new_element->shared) {
 
 		//Error, element should have been shared previously;
-		kernel_error("data_host.c : dshost_queue_remove_first : provided element is not shared;");
+		kernel_error("dhost.c : dshost_queue_remove_first : provided element is not shared;");
 
 	}
 
@@ -410,39 +434,5 @@ void dshost_queue_insert_element(mutex_t *const mutex, dshost_queue_t *const que
 
 }
 
-
-
-//----------------------------------------------- Element initialisation -----------------------------------------------
-
-
-void dshost_initialise_element(dshost_t *const dshost, const void *const data, const size_t data_size) {
-
-	//Require a space in the node's data;
-	dshost_element_t *element = dshost_provide_uninitialised(dshost);
-
-	//If no space is available :
-	if (!element) {
-
-		//Kernel error, network not correctly dimensioned;
-		kernel_error("cnetwork.c : cnetwork_activate : no space left on destination node;");
-
-	}
-
-	//If sizes are not compatible :
-	if (data_size != dshost->elements_size) {
-
-		//Kernel error, bad node linking;
-		kernel_error("cnetwork.c : cnetwork_activate : incompatible argument sizes;");
-
-	}
-
-	//Copy data from provided args to dest args;
-	memcpy(element->data, data, data_size);
-
-
-	//Provide data to the node's host;
-	dshost_receive_initialised(dshost, element);
-
-}
 
 

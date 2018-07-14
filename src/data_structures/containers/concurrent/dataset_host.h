@@ -18,8 +18,8 @@
 
 */
 
-#ifndef TRACER_SYNCRONISED_QUEUE_H
-#define TRACER_SYNCRONISED_QUEUE_H
+#ifndef TRACER_DATA_SET_HOST_H
+#define TRACER_DATA_SET_HOST_H
 
 #include "data_structures/containers/non_concurrent/vlarray.h"
 
@@ -119,7 +119,7 @@ typedef struct {
 //----------------------------------------------------- Init - exit ----------------------------------------------------
 
 //Create a dataset host, with the owning [length] elements of [element_size] bytes; Concurrency not supported;
-void dshost_initialise(dshost_t *dshost, size_t nb_elements, size_t element_data_size, const mutex_t *mutex);
+void dshost_initialise(dshost_t *dshost, size_t data_element_size, size_t nb_elements, const mutex_t *mutex);
 
 //Flush the data set; Concurrency supported, but all data must be owned;
 void dhost_flush(dshost_t *dshost);
@@ -133,10 +133,18 @@ void dshost_delete(dshost_t *dshost);
 
 
 //Is there initialised data available ? Purely indicative, may change as soon as the function returns;
-bool dshost_initialised_data_available(const dshost_t *dshost);
+bool dshost_initialised_element_available(const dshost_t *dshost);
 
 //Is all data in the uninitialised state? Purely indicative, may change as soon as the function returns;
-bool dshost_all_data_uninitialised(const dshost_t *dshost);
+bool dshost_empty(const dshost_t *dshost);
+
+
+
+
+//----------------------------------------------- Element initialisation -----------------------------------------------
+
+//Own an element to initialise, copy data inside, and give it back to the host as an initialised element;
+void dshost_initialise_element(dshost_t *dshost, const void *data, size_t data_size);
 
 
 //--------------------------------------------------- Data provision ---------------------------------------------------
@@ -151,16 +159,8 @@ dshost_element_t * dshost_provide_initialised(const dshost_t *dshost);
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 //Give back the ownership of element, and insert it in the uninitialised internal queue; Concurrency not supported;
-void dshost_receive_uninitialised(const dshost_t *dshost, dshost_element_t *element);
-
-//Give back the ownership of element, and insert it in the initialised internal queue; Concurrency not supported;
-void dshost_receive_initialised(const dshost_t *dshost, dshost_element_t *element);
+void dshost_receive_element(const dshost_t *dshost, dshost_element_t *element, bool initialised);
 
 
-//----------------------------------------------- Element initialisation -----------------------------------------------
 
-//Own an element to initialise, copy data inside, and give it back to the host as an initialised element;
-void dshost_initialise_element(dshost_t *dshost, const void *data, size_t data_size);
-
-
-#endif //TRACER_SYNCRONISED_QUEUE_H
+#endif //TRACER_DATA_SET_HOST_H

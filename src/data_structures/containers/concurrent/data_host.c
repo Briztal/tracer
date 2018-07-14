@@ -18,7 +18,7 @@
 void dhost_initialise(dhost_t *const dhost, const size_t size, mutex_t *const mutex) {
 
 	//Allocate some space to store data;
-	void *data_storage = kernel_malloc(size);
+	void *const data_storage = kernel_malloc(size);
 
 	//Initialise the data structure;
 	dhost_t init = {
@@ -50,13 +50,13 @@ void dhost_initialise(dhost_t *const dhost, const size_t size, mutex_t *const mu
  * dhost_delete : deletes the data host structure; Concurency is not supported;
  */
 
-void dhost_delete(dhost_t *dhost) {
+void dhost_delete(dhost_t *const dhost) {
 
 	//If data is not owned :
 	if(!dhost->owned) {
 
 		//Error, data must be owned before deletion;
-		kernel_error("data_host : dhost_delete : data is not owned by the host, cannot delete safely;");
+		kernel_error("dhost : dhost_delete : data is not owned by the host, cannot delete safely;");
 	}
 
 	//Delete the data storage;
@@ -71,25 +71,17 @@ void dhost_delete(dhost_t *dhost) {
 //----------------------------------------------------- Init - exit ----------------------------------------------------
 
 /*
- * dhost_data_available : asserts if the data storage is initialised;
+ * dhost_data_available : asserts if the data storage owns its data and if it is not initialised;;
+ *
+ * 	Purely indicative, unreliable results, concurrence supported, fail-safe;
  */
 
-bool dhost_data_available(dhost_t *dhost) {
+bool dhost_empty(const dhost_t *const dhost) {
 
-	//Cache the mutex pointer;
-	mutex_t *mutex = dhost->mutex;
+	const bool owned = dhost->owned, initialsed = dhost->initialised;
 
-	//Lock access;
-	mutex_lock(mutex);
-
-	//The data storage is initialised if it is owned, initialised, and if provision is allowed;
-	bool initialised = dhost->owned && dhost->initialised;
-
-	//Unlock access;
-	mutex_unlock(mutex);
-
-	//Return the result of the computation;
-	return initialised;
+	//Assert if data is owned by the host, and not initialsed;
+	return initialsed || (!owned);
 
 }
 
@@ -97,23 +89,23 @@ bool dhost_data_available(dhost_t *dhost) {
 //----------------------------------------------- Element initialisation -----------------------------------------------
 
 /*
- * data_host_initialise_data : Initialises the data storage;
+ * dhost_initialise_data : Initialises the data storage;
  *
  * 	Error is raised if sizes don't match, or if the storage is not owned, or already initialised;
  */
 
-void data_host_initialise_data(dhost_t *const dhost, const void *const data, const size_t data_size) {
+void dhost_initialise_data(dhost_t *const dhost, const void *const data, const size_t data_size) {
 
 	//If sizes are incompatible :
 	if (data_size != dhost->data_size) {
 
 		//Fail, src and dest are not compatible;
-		kernel_error("data_host.c : data_host_initialise_data : incompatible sizes;");
+		kernel_error("dhost.c : dhost_initialise_data : incompatible sizes;");
 
 	}
 
 	//Cache the mutex;
-	mutex_t *mutex = dhost->mutex;
+	mutex_t *const mutex = dhost->mutex;
 
 	//Lock access;
 	mutex_lock(mutex);
@@ -122,7 +114,7 @@ void data_host_initialise_data(dhost_t *const dhost, const void *const data, con
 	if (!dhost->owned) {
 
 		//Error.
-		kernel_error("data_host.c : data_host_initialise_data : data not owned by the host;");
+		kernel_error("dhost.c : dhost_initialise_data : data not owned by the host;");
 
 	}
 
@@ -130,7 +122,7 @@ void data_host_initialise_data(dhost_t *const dhost, const void *const data, con
 	if (dhost->initialised) {
 
 		//Error.
-		kernel_error("data_host.c : data_host_initialise_data : data already initialised;");
+		kernel_error("dhost.c : dhost_initialise_data : data already initialised;");
 
 	}
 
@@ -152,15 +144,15 @@ void data_host_initialise_data(dhost_t *const dhost, const void *const data, con
 
 
 /*
- * data_host_provide_initialised : transmits the ownership of the data_storage to the caller, if it is initialised;
+ * dhost_provide_initialised : transmits the ownership of the data_storage to the caller, if it is initialised;
  *
  * 	If not, 0 is returned;
  */
 
-void *const data_host_provide_initialised(dhost_t *dhost) {
+void *const dhost_provide_initialised(dhost_t *const dhost) {
 
 	//Cache the mutex;
-	mutex_t *mutex = dhost->mutex;
+	mutex_t *const mutex = dhost->mutex;
 
 	//Lock access;
 	mutex_lock(mutex);
@@ -188,15 +180,15 @@ void *const data_host_provide_initialised(dhost_t *dhost) {
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 /*
- * data_host_receive_ownsership : get back the ownership of the data element;
+ * dhost_receive_ownership : get back the ownership of the data element;
  *
  * 	Error if the element is already owned;
  */
 
-void data_host_receive_ownsership(dhost_t *dhost, bool initialised) {
+void dhost_receive_ownership(dhost_t *const dhost, const bool initialised) {
 
 	//Cache the mutex;
-	mutex_t *mutex = dhost->mutex;
+	mutex_t *const mutex = dhost->mutex;
 
 	//Lock access;
 	mutex_lock(mutex);
@@ -205,7 +197,7 @@ void data_host_receive_ownsership(dhost_t *dhost, bool initialised) {
 	if (dhost->owned) {
 
 		//Error.
-		kernel_error("data_host.c : data_host_initialise_data : data already owned by the host;");
+		kernel_error("dhost.c : dhost_initialise_data : data already owned by the host;");
 
 	}
 
