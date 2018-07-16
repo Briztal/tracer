@@ -127,11 +127,13 @@ typedef struct {
     bool rx_enabled;
 
 
+	/*
     //The data cflux to receive from the UART; Must be constructed before;
     flux_t *rx_flux;
 
     //The data cflux to transmit to the UART; Must be constructed before;
     flux_t *tx_flux;
+    */
 
 
 } UART_config_t;
@@ -141,7 +143,7 @@ typedef struct {
  * An inline function obtain the default configuration;
  */
 
-inline void UART_default_config(UART_config_t *uart_config, flux_t *rx_flux, flux_t *tx_flux) {
+inline void UART_set_default_config(UART_config_t *uart_config) {
 
     //Set the default configuration;
     *uart_config = (UART_config_t) {
@@ -157,13 +159,15 @@ inline void UART_default_config(UART_config_t *uart_config, flux_t *rx_flux, flu
             .baudrate = 9600,
             .tx_enabled = true,
             .rx_enabled = true,
+        	/*
             .rx_flux = (rx_flux),
             .tx_flux = (tx_flux),
+            */
     };
 
 }
 
-
+/*
 typedef struct {
 
     //The driver part;
@@ -181,22 +185,16 @@ typedef struct {
     array_processor rx_processor;
 
 } UART_driver_t;
+ */
 
 
 /*
  * UART_DRIVER : definition of an UART driver;
  */
-
-#define UART_DRIVER(data_p, init_p, start_p, exit_p, txsize_p, rxsize_p, txproc_p, rxproc_p)\
-    {.driver = DRIVER(data_p, init_p, exit_p), .start = (start_p), .tx_size = (txsize_p), .rx_size = (rxsize_p), .tx_processor = (txproc_p), .rx_processor = (rxproc_p)}
-
-
 /*
- * KINETIS_UART_DRIVER_DECLARE : declares the required UART driver structure;
- */
-
-#define KINETIS_UART_DECLARE(id)\
-    extern UART_driver_t UART_##id;
+#define UART_DRIVER(data_p, init_p, start_p, exit_p, txsize_p, rxsize_p, txproc_p, rxproc_p)\
+    {.driver = DRIVER(data_p, init_p, exit_p), .start = (start_p), .tx_size = (txsize_p), .rx_size = (rxsize_p),}// .tx_processor = (txproc_p), .rx_processor = (rxproc_p)}
+*/
 
 
 #endif //TRACER_UARTDRIVER_H

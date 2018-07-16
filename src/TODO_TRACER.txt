@@ -1,6 +1,9 @@
 
 //----------------------------- Prioritary -----------------------------
 
+//TODO URGENT REBUILD THE VLARRAY LIBRARY AND INTEGRATE SIZE CHECK;
+
+
 /*
  *------------------------------------- Kernel tasks -------------------------------------
 

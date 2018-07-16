@@ -31,7 +31,7 @@
 typedef struct {
 
     //The size of an element in the array;
-    const uint8_t element_size;
+    const size_t element_size;
 
     //The current number of elements in the array;
     size_t length;

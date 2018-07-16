@@ -27,13 +27,23 @@
 
 #include <kernel/arch/arch.h>
 
+#include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
+
 
 int main() {
 
+    UART_config_t config;
+
+    UART_set_default_config(&config);
+
+    kinetis_UART_init(&UART_0, &config);
+
+    /*
     core_init();
 
     //Never reached;
     while (true);
+     */
 
 }
 

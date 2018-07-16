@@ -68,7 +68,7 @@ typedef struct {
 	//The array of output nodes;
 	const size_t *const output_references;
 
-} cnode_t;
+} cmp_node_t;
 
 
 /*
@@ -114,7 +114,7 @@ typedef struct cnetwork_t {
 	linked_list_t active_nodes;
 
 	//The array of nodes;
-	cnode_t *const nodes;
+	cmp_node_t *const nodes;
 
 
 	//--------------------- Sync ---------------------
@@ -135,7 +135,7 @@ typedef struct cnetwork_t {
 	void *init_data;
 
 	//The network initialisation function;
-	bool (*init)(void *data, const cnode_t *nodes);
+	bool (*init)(void *data, const cmp_node_t *nodes);
 
 } cnetwork_t;
 
@@ -145,7 +145,7 @@ typedef struct cnetwork_t {
 //Create a computation network, providing the number of nodes, a mutex to protect the active nodes list,
 //The data instance, and the initialisation function;
 cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *instance,
-							bool (*init)(void *data, const cnode_t *nodes));
+							bool (*init)(void *data, const cmp_node_t *nodes));
 
 
 //Initialise a computation node, providing its priority, the size of its arguments, its max number of concurrent
@@ -165,7 +165,7 @@ void cnetwork_delete(cnetwork_t *cnetwork);
 bool cnetwork_execute(cnetwork_t *cnetwork);
 
 //Activate a node providing args; Concurrency supported;
-void cnetwork_activate(cnetwork_t *cnetwork, cnode_t *node, const void *args, size_t args_size);
+void cnetwork_activate(cnetwork_t *cnetwork, cmp_node_t *node, const void *args, size_t args_size);
 
 //Activate a node providing args; Concurrency supported;
 void cnetwork_activate_neighbor(const void *activator, size_t neighbor_id, const void *args, size_t args_size);

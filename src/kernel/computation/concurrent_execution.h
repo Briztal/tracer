@@ -33,7 +33,7 @@ typedef cnode_computation_state_t (*cnc_node_function_t)(void *args);
 typedef struct concurrent_node_t {
 
 	//A computation node, first for pointer cast;
-	cnode_t node;
+	cmp_node_t node;
 
 	//A data set host, to contain multiple arguments;
 	dshost_t dshost;

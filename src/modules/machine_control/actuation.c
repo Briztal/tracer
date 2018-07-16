@@ -59,16 +59,16 @@ inline void actuation_pause(actuation_t *actuation) {
 
 
 /*
- * actuation_resume : enables the interrupt; If in stopped state, errors;
+ * actuation_resume : enables the interrupt; If in unregistered state, errors;
  */
 
 inline void actuation_resume(actuation_t *actuation) {
 
-	//If the actuation is stopped:
+	//If the actuation is unregistered:
 	if (actuation->state == ACTUATION_STOPPED) {
 
 		//Error, cannot resume from paused state;
-		kernel_error("actuation.c : actuation_resume : the actuation layer is stopped;");
+		kernel_error("actuation.c : actuation_resume : the actuation layer is unregistered;");
 
 	}
 
@@ -84,7 +84,7 @@ inline void actuation_resume(actuation_t *actuation) {
 //--------------------------------------------------- Initialisation --------------------------------------------------
 
 /*
- * actuation_init : Initialises the timer pointer and enter in stopped state;
+ * actuation_init : Initialises the timer pointer and enter in unregistered state;
  */
 
 void actuation_init(actuation_t *actuation, timer_base_t *timer, tcontroller_t *tcontroller) {
@@ -116,7 +116,7 @@ void actuation_start(actuation_t *actuation) {
 	if (actuation->state != ACTUATION_STOPPED) {
 
 		//Error, can't be started twice;
-		kernel_error("actuation.c : actuation_start : the actuation layer is not stopped;");
+		kernel_error("actuation.c : actuation_start : the actuation layer is not unregistered;");
 
 	}
 
@@ -160,12 +160,12 @@ void actuation_stop(actuation_t *actuation) {
 
 
 /*
- * _actuation_stop : resets the timer, resets dynamic data, enter in stopped state;
+ * _actuation_stop : resets the timer, resets dynamic data, enter in unregistered state;
  */
 
 void _actuation_stop(actuation_t *actuation) {
 
-	//If the layer is already stopped, nothing to do;
+	//If the layer is already unregistered, nothing to do;
 	if (actuation->state == ACTUATION_STOPPED)
 		return;
 
@@ -184,7 +184,7 @@ void _actuation_stop(actuation_t *actuation) {
 	//Stop the timer;
 	timer_stop_timer(timer);
 
-	//Mark the actuation stopped;
+	//Mark the actuation unregistered;
 	actuation->state = ACTUATION_STOPPED;
 
 	//Reset the trajectory pointer;
@@ -264,7 +264,7 @@ void actuation_handler(actuation_t *const actuation) {
 	 *	- the movement is finished;
 	 *	- no more movement are available (check at previous iteration);
 	 *
-	 *	The procedure can be stopped;
+	 *	The procedure can be unregistered;
 	 */
 	if (!actuation->mv_steps) {
 

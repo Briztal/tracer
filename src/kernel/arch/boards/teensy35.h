@@ -69,7 +69,7 @@ KINETIS_PIT_DECLARE(3);
  */
 
 //To define UART drivers we must include the UART driver header;
-#include <kernel/drivers/UART.h>
+#include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
 
 //The teensy35 supports 6 UARTS;
 KINETIS_UART_DECLARE(0);

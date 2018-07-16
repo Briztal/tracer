@@ -37,11 +37,11 @@ concurrent_node_create(const size_t data_element_size, const size_t nb_elements,
 		//Transmit functions;
 		.node = {
 
-			//CNode function take a cnode_t * in first argument, which composes a concurrent node. Cast is safe
-			.accept_data = (void (*const)(struct cnode_t *, void *, size_t)) &concurrent_node_accept_data,
-			.compute = (cnode_computation_state_t (*const)(struct cnode_t *)) &concurrent_node_compute,
-			.terminated = (bool (*const)(struct cnode_t *) const) &concurrent_node_terminated,
-			.destructor = (void (*const)(struct cnode_t *)) &concurrent_node_destructor
+			//CNode function take a cmp_node_t * in first argument, which composes a concurrent node. Cast is safe
+			.accept_data = (void (*const)(struct cmp_node_t *, void *, size_t)) &concurrent_node_accept_data,
+			.compute = (cnode_computation_state_t (*const)(struct cmp_node_t *)) &concurrent_node_compute,
+			.terminated = (bool (*const)(struct cmp_node_t *)) &concurrent_node_terminated,
+			.destructor = (void (*const)(struct cmp_node_t *)) &concurrent_node_destructor,
 		},
 
 		//Leave the data set host empty for instance;
@@ -86,8 +86,8 @@ bool exec_node_compute(concurrent_node_t *const exec_node) {
 	//Cache the data set host;
 	dshost_t *const dshost = &exec_node->dshost;
 
-	//First, own some data from the host;
-	dshost_element_t *const element = dshost_provide_initialised(dshost);
+	//First, own a initialised data element from the host;
+	dshost_element_t *const element = dshost_provide_element(dshost, true);
 
 	//If no element was executed :
 	if (!element) {
@@ -115,7 +115,7 @@ bool exec_node_compute(concurrent_node_t *const exec_node) {
 	if ((state == CNODE_COMPLETE) && dshost_empty(dshost)) {
 
 		//Change the state to terminated :
-		state = CNODE_TERMINATED;
+		state = cmp_node_tERMINATED;
 
 	}
 

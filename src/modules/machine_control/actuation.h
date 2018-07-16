@@ -35,7 +35,7 @@
  */
 
 /*
- * An actuation layer can be started or stopped, depending on if it has a movement to execute;
+ * An actuation layer can be started or unregistered, depending on if it has a movement to execute;
  */
 typedef enum {
 
@@ -45,7 +45,7 @@ typedef enum {
 	//Timer is started, interrupt is disabled;
 	ACTUATION_PAUSED,
 
-	//Timer is stopped, interrupt is disabled;
+	//Timer is unregistered, interrupt is disabled;
 	ACTUATION_STOPPED,
 
 } actuation_state_t;
@@ -85,7 +85,7 @@ typedef struct actuation_t {
 } actuation_t;
 
 
-//Initialise the actuation layer, enter in stopped state;
+//Initialise the actuation layer, enter in unregistered state;
 void actuation_init(actuation_t *actuation, timer_base_t *timer, tcontroller_t *tcontroller);
 
 //Start the actuation layer, handler will be called immediately;

@@ -139,8 +139,6 @@ bool dshost_initialised_element_available(const dshost_t *dshost);
 bool dshost_empty(const dshost_t *dshost);
 
 
-
-
 //----------------------------------------------- Element initialisation -----------------------------------------------
 
 //Own an element to initialise, copy data inside, and give it back to the host as an initialised element;
@@ -150,16 +148,13 @@ void dshost_initialise_element(dshost_t *dshost, const void *data, size_t data_s
 //--------------------------------------------------- Data provision ---------------------------------------------------
 
 //Get the ownership of an uninitialised element; Concurrency supported;
-dshost_element_t *dshost_provide_uninitialised(const dshost_t *dshost);
-
-//Get the ownership of an available element; Concurrency supported;
-dshost_element_t * dshost_provide_initialised(const dshost_t *dshost);
+dshost_element_t *dshost_provide_element(dshost_t *dshost, bool initialised);
 
 
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 //Give back the ownership of element, and insert it in the uninitialised internal queue; Concurrency not supported;
-void dshost_receive_element(const dshost_t *dshost, dshost_element_t *element, bool initialised);
+void dshost_receive_element(dshost_t *dshost, dshost_element_t *element, bool initialised);
 
 
 

@@ -59,25 +59,25 @@
 //-------------------------- Reception methods --------------------------
 
 //Set the watermark functions depending on the config;
-void set_watermark_policies(kinetis_UART_data_t *data, const UART_config_t *config);
+void set_watermark_policies(kinetis_UART_t *instance, const UART_config_t *config);
 
 //Initialise the hardware;
-void initialise_hardware(const kinetis_UART_data_t *);
+void initialise_hardware(const kinetis_UART_t *);
 
 //Configure the packet format;
-void configure_packet_format(const kinetis_UART_data_t *data, const UART_config_t *);
+void configure_packet_format(const kinetis_UART_t *data, const UART_config_t *);
 
 //Configure the sequences_initialised;
-void configure_modem(const kinetis_UART_data_t *data, const UART_config_t *);
+void configure_modem(const kinetis_UART_t *data, const UART_config_t *);
 
 //Configure the transmission layer;
-void configure_transmission_layer(const kinetis_UART_data_t *data, const UART_config_t *);
+void configure_transmission_layer(const kinetis_UART_t *data, const UART_config_t *);
 
 
 //-------------------------- Watermark policies --------------------------
 
 //Update the tx watermark;
-uint8_t update_tx_watermark(const kinetis_UART_data_t *data, uint8_t nb_transmissions);
+uint8_t update_tx_watermark(const kinetis_UART_t *data, uint8_t nb_transmissions);
 
 //The strict tx watermark policy;
 uint8_t tx_watermark_strict(uint8_t nb_elements);
@@ -87,7 +87,7 @@ uint8_t tx_watermark_half(uint8_t nb_elements);
 
 
 //Update the rx watermark;
-uint8_t update_rx_watermark(const kinetis_UART_data_t *data, uint8_t nb_readings);
+uint8_t update_rx_watermark(const kinetis_UART_t *data, uint8_t nb_readings);
 
 //The strict rx watermark policy;
 uint8_t rx_watermark_strict(uint8_t, uint8_t);
@@ -103,22 +103,18 @@ uint8_t rx_watermark_half(uint8_t, uint8_t);
  *  that are all called;
  */
 
-void kinetis_UART_init(void *const data_p, const driver_config_t *const config_p) {
-
-    //Cache pointers in the correct type;
-    kinetis_UART_data_t *const data = data_p;
-    const UART_config_t *const config = (const UART_config_t *) config_p;
+void kinetis_UART_init(kinetis_UART_t *const instance, const UART_config_t *const config) {
 
     //First, initialise the UART data-structure according to the config;
-    set_watermark_policies(data, config);
+    set_watermark_policies(instance, config);
 
     //Initialise the hardware in a safe sequences_initialised;
-    initialise_hardware(data);
+    initialise_hardware(instance);
 
     //Initialise different parts of the UART;
-    configure_packet_format(data, config);
-    configure_modem(data, config);
-    configure_transmission_layer(data, config);
+    configure_packet_format(instance, config);
+    configure_modem(instance, config);
+    configure_transmission_layer(instance, config);
 
 }
 
@@ -127,18 +123,18 @@ void kinetis_UART_init(void *const data_p, const driver_config_t *const config_p
  * set_watermark_policies : sets rx and tx watermark calculators, according to the configuration;
  */
 
-void set_watermark_policies(kinetis_UART_data_t *data, const UART_config_t *const config) {
+void set_watermark_policies(kinetis_UART_t *instance, const UART_config_t *const config) {
 
     switch (config->tx_water_policy) {
 
         //If the policy is half remaining :
         case HALF_REMAINING:
-            data->tx_water_function = tx_watermark_half;
+            instance->tx_water_function = tx_watermark_half;
             break;
 
             //If the policy is STRICT or another, use the strict policy;
         default:
-            data->tx_water_function = tx_watermark_strict;
+            instance->tx_water_function = tx_watermark_strict;
             break;
     }
 
@@ -146,12 +142,12 @@ void set_watermark_policies(kinetis_UART_data_t *data, const UART_config_t *cons
 
         //If the policy is half remaining :
         case HALF_REMAINING:
-            data->rx_water_function = rx_watermark_half;
+            instance->rx_water_function = rx_watermark_half;
             break;
 
             //If the policy is STRICT or another, use the strict policy;
         default:
-            data->rx_water_function = rx_watermark_strict;
+            instance->rx_water_function = rx_watermark_strict;
             break;
 
     }
@@ -188,7 +184,7 @@ uint8_t fifo_size_to_index(uint8_t size) {
  * initialise_hardware : initialises the data pointer and the frequency;w
  */
 
-void initialise_hardware(const kinetis_UART_data_t *const data) {
+void initialise_hardware(const kinetis_UART_t *const data) {
 
     //Before anything, let's cache the memory pointer;
     kinetis_UART_memory_t *registers = data->memory;
@@ -300,7 +296,7 @@ void initialise_hardware(const kinetis_UART_data_t *const data) {
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void configure_packet_format(const kinetis_UART_data_t *const data, const UART_config_t *const config) {
+void configure_packet_format(const kinetis_UART_t *const data, const UART_config_t *const config) {
 
     //TODO MSB FIRST
     //TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
@@ -386,7 +382,7 @@ void configure_packet_format(const kinetis_UART_data_t *const data, const UART_c
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void configure_modem(const kinetis_UART_data_t *const data, const UART_config_t *const config) {
+void configure_modem(const kinetis_UART_t *const data, const UART_config_t *const config) {
 
     kinetis_UART_memory_t *const registers = data->memory;
     /*
@@ -429,7 +425,7 @@ void configure_modem(const kinetis_UART_data_t *const data, const UART_config_t 
  *
  */
 
-void configure_transmission_layer(const kinetis_UART_data_t *const data, const UART_config_t *const config) {
+void configure_transmission_layer(const kinetis_UART_t *const data, const UART_config_t *const config) {
 
     //First, cache the data pointer to avoid permanent implicit double pointer access;
     kinetis_UART_memory_t *registers = data->memory;
@@ -507,19 +503,16 @@ void configure_transmission_layer(const kinetis_UART_data_t *const data, const U
  * kinetis_UART_start : enables the receiver and transmitter;
  */
 
-void kinetis_UART_start(const void *const data_p) {
-
-    //Cache pointer in the correct type;
-    const kinetis_UART_data_t *const data = data_p;
+void kinetis_UART_start(const kinetis_UART_t *const instance) {
 
     //Cache the data pointer to avoid permanent implicit double pointer access;
-    kinetis_UART_memory_t *registers = data->memory;
+    kinetis_UART_memory_t *registers = instance->memory;
 
     //Enable the status interrupt;
-    core_IC_enable(data->status_int_channel);
+    core_IC_enable(instance->status_int_channel);
 
     //Enable the error interrupt;
-    core_IC_enable(data->error_int_channel);
+    core_IC_enable(instance->error_int_channel);
 
     //Set bit RE of C2;
     SET(registers->C2, UART_C2_RE, 8);
@@ -534,13 +527,10 @@ void kinetis_UART_start(const void *const data_p) {
  * kinetis_UART_init : this function stops the UART and resets the hardware;
  */
 
-void kinetis_UART_exit(const void *const data_p) {
-
-    //Cache pointer in the correct type;
-    const kinetis_UART_data_t *const data = data_p;
+void kinetis_UART_exit(const kinetis_UART_t *const instance) {
 
     //Cache memory register;
-    kinetis_UART_memory_t *const registers = data->memory;
+    kinetis_UART_memory_t *const registers = instance->memory;
 
     /*
      * Stop the UART;
@@ -563,10 +553,10 @@ void kinetis_UART_exit(const void *const data_p) {
     registers->RWFIFO = 1;
 
     //Disable the status interrupt;
-    core_IC_disable(data->status_int_channel);
+    core_IC_disable(instance->status_int_channel);
 
     //Disable the status interrupt;
-    core_IC_disable(data->error_int_channel);
+    core_IC_disable(instance->error_int_channel);
     /*
      * Errors supported are :
      *  - framing errors (locking) - read and forget last element;
@@ -591,10 +581,7 @@ void kinetis_UART_exit(const void *const data_p) {
  * tx_available : this function will return true if a uint16_t can be transmitted to the UART;
  */
 
-size_t kinetis_UART_tx_available(const void *data_c) {
-
-    //Cache data in the correct type;
-    kinetis_UART_data_t *data = (kinetis_UART_data_t *) data_c;
+size_t kinetis_UART_tx_available(const kinetis_UART_t *data) {
 
     //Return the maximum number of element minus the current number of elements present in the tx buffer;
     return ((uint8_t) data->tx_size - (uint8_t) data->memory->TCFIFO);
@@ -612,7 +599,7 @@ size_t kinetis_UART_tx_available(const void *data_c) {
  *  - Determines the final watermark;
  */
 
-uint8_t update_tx_watermark(const kinetis_UART_data_t *const data, uint8_t nb_transmissions) {
+uint8_t update_tx_watermark(const kinetis_UART_t *const data, uint8_t nb_transmissions) {
 
     //To have a faster access, cache the register struct's pointer;
     kinetis_UART_memory_t *const registers = data->memory;
@@ -674,10 +661,7 @@ uint8_t tx_watermark_half(const uint8_t nb_elements) {
  *  If the uint16_t it copies is the last, it reads S1 to clear the interrupt flag;
  */
 
-void kinetis_UART_copy_to_tx(const void *const data_c, void *src_c, const size_t size) {
-
-    //Cache data in the correct type;
-    const kinetis_UART_data_t *const instance = data_c;
+void kinetis_UART_copy_to_tx(const kinetis_UART_t *const instance, void *src_c, const size_t size) {
 
     //Cache src in the correct type;
     const uint16_t *src = src_c;
@@ -730,10 +714,7 @@ void kinetis_UART_copy_to_tx(const void *const data_c, void *src_c, const size_t
  * kinetis_UART_rx_available : determine how many chars are available in the rx hardware buffer;
  */
 
-size_t kinetis_UART_rx_available(const void *const data_c) {
-
-    //Cache data in the correct type;
-    kinetis_UART_data_t *data = (kinetis_UART_data_t *) data_c;
+size_t kinetis_UART_rx_available(const kinetis_UART_t *const data) {
 
     //Cache the number of uint16_t in the rx buffer;
     return data->memory->RCFIFO;
@@ -752,7 +733,7 @@ size_t kinetis_UART_rx_available(const void *const data_c) {
  *  It also corrects and returns the number of readings so that there are no underflows;
  */
 
-uint8_t update_rx_watermark(const kinetis_UART_data_t *const data, uint8_t nb_readings) {
+uint8_t update_rx_watermark(const kinetis_UART_t *const data, uint8_t nb_readings) {
 
     //To have a faster access, cache the register struct's pointer;
     kinetis_UART_memory_t *const registers = data->memory;
@@ -812,10 +793,7 @@ uint8_t rx_watermark_half(const uint8_t nb_elements, const uint8_t max_size) {
  *  Before transferring the last uint16_t, it reads S1 to clear the interrupt flag;
  */
 
-void kinetis_UART_copy_from_rx(const void *const data_c, void *dest_c, size_t size) {
-
-    //Cache data in the correct type;
-    const kinetis_UART_data_t *const instance = data_c;
+void kinetis_UART_copy_from_rx(const kinetis_UART_t *const instance, void *dest_c, size_t size) {
 
     //Cache src in the correct type;
     uint16_t *dest = dest_c;
@@ -866,7 +844,7 @@ void kinetis_UART_copy_from_rx(const void *const data_c, void *dest_c, size_t si
  * interrupt : this function processes UART's interrupts : Rx, and Tx;
  */
 
-void kinetis_UART_status_interrupt(const kinetis_UART_data_t *data) {
+void kinetis_UART_status_interrupt(const kinetis_UART_t *data) {
 
     //First, cache the register pointer;
     kinetis_UART_memory_t *registers = data->memory;
@@ -937,7 +915,7 @@ void kinetis_UART_status_interrupt(const kinetis_UART_data_t *data) {
  *  It supports different errors, that are described in the code below.
  */
 
-void kinetis_UART_error_interrupt(const kinetis_UART_data_t *data) {
+void kinetis_UART_error_interrupt(const kinetis_UART_t *data) {
 
     /*
      * Errors supported are :

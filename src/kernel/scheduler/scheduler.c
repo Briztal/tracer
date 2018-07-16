@@ -37,10 +37,10 @@ void scheduler_delete_sprocesses();
 //Provide a new sprocess;
 void scheduler_select_new_sprocess(core_process_t *);
 
-//Transfer the sprocess from the pending list to the stopped list
+//Transfer the sprocess from the pending list to the unregistered list
 void scheduler_pending_to_stopped(sprocess_t *sprocess);
 
-//Transfer the sprocess from the stopped list to the pending list;
+//Transfer the sprocess from the unregistered list to the pending list;
 void scheduler_stopped_to_pending(sprocess_t *sprocess);
 
 //Transfer the sprocess from the pending list to the terminated list
@@ -65,7 +65,7 @@ void dumb_blink(void *);
 //The list of pending sprocesses;
 static linked_list_t *pending_sprocesses;
 
-//The list of stopped sprocesses;
+//The list of unregistered sprocesses;
 static linked_list_t *stopped_sprocesses;
 
 //The list of terminated sprocesses;
@@ -315,7 +315,7 @@ void scheduler_delete_sprocesses() {
 
 void scheduler_select_new_sprocess(core_process_t *core_process) {
 
-    //Update the current process's status (ex : if terminated, will be stopped);
+    //Update the current process's status (ex : if terminated, will be unregistered);
     scheduler_cleanup_sprocess(current_sprocess);
 
     //Get a new process_t to execute, update the current process;
@@ -361,9 +361,9 @@ void scheduler_cleanup_sprocess(sprocess_t *sprocess) {
             break;
 
         case SPROCESS_STOPPED:
-            //If the process is stopped :
+            //If the process is unregistered :
 
-            kernel_error("scheduler.c : scheduler_cleanup_sprocess : attempted to clean a stopped process;");
+            kernel_error("scheduler.c : scheduler_cleanup_sprocess : attempted to clean a unregistered process;");
 
             break;
 
@@ -533,7 +533,7 @@ void scheduler_activate_sprocess(stopped_process_id_t stopped_process) {
     //Cache the state;
     sprocess_state_t state = sprocess->state;
 
-    //Unlock the process_t if it is stopped;
+    //Unlock the process_t if it is unregistered;
     if (state == SPROCESS_STOPPED) {
 
         //Set the state to active;
@@ -550,7 +550,7 @@ void scheduler_activate_sprocess(stopped_process_id_t stopped_process) {
     } else {
 
         //If the state is invalid for a reactivation, error;
-        kernel_error("scheduler.c : scheduler_activate_sprocess : attempted to activate a non-stopped process;");
+        kernel_error("scheduler.c : scheduler_activate_sprocess : attempted to activate a non-unregistered process;");
 
     }
 
@@ -594,7 +594,7 @@ stopped_process_id_t scheduler_stop_sprocess() {
 
 
 /*
- * scheduler_stopped_to_pending : transfers a process from the stopped list to the pending list;
+ * scheduler_stopped_to_pending : transfers a process from the unregistered list to the pending list;
  */
 
 void scheduler_stopped_to_pending(sprocess_t *sprocess) {
@@ -602,13 +602,13 @@ void scheduler_stopped_to_pending(sprocess_t *sprocess) {
     //Access to lists is critical;
     kernel_enter_critical_section();
 
-    //Remove the sprocess from the stopped list;
+    //Remove the sprocess from the unregistered list;
     llist_remove_element(stopped_sprocesses, (linked_element_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
     scheduler_impl_insert_sprocess(pending_sprocesses, sprocess);
 
-    //For safety, set the sprocess state to stopped;
+    //For safety, set the sprocess state to unregistered;
     sprocess->state = SPROCESS_PENDING;
 
     //Leave the critical section;
@@ -618,7 +618,7 @@ void scheduler_stopped_to_pending(sprocess_t *sprocess) {
 
 
 /*
- * scheduler_pending_to_stopped : transfers a sprocess from the pending list to the stopped list;
+ * scheduler_pending_to_stopped : transfers a sprocess from the pending list to the unregistered list;
  */
 
 void scheduler_pending_to_stopped(sprocess_t *sprocess) {
@@ -626,13 +626,13 @@ void scheduler_pending_to_stopped(sprocess_t *sprocess) {
     //Access to lists is critical;
     kernel_enter_critical_section();
 
-    //Remove the sprocess from the stopped list;
+    //Remove the sprocess from the unregistered list;
     llist_remove_element(pending_sprocesses, (linked_element_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
     llist_insert_last(stopped_sprocesses, (linked_element_t *) sprocess);
 
-    //For safety, set the sprocess state to stopped;
+    //For safety, set the sprocess state to unregistered;
     sprocess->state = SPROCESS_STOPPED;
 
     //Leave the critical section;
@@ -653,7 +653,7 @@ void scheduler_pending_to_terminated(sprocess_t *sprocess) {
     //Reset the sprocess;
     sprocess_reset(sprocess);
 
-    //Remove the sprocess from the stopped list;
+    //Remove the sprocess from the unregistered list;
     llist_remove_element(pending_sprocesses, (linked_element_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;

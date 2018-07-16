@@ -35,59 +35,59 @@
  */
 
 typedef struct __attribute__ ((packed)) {
-    volatile uint8_t BDH;
-    volatile uint8_t BDL;
-    volatile uint8_t C1;
-    volatile uint8_t C2;
-    volatile uint8_t S1;
-    volatile uint8_t S2;
-    volatile uint8_t C3;
-    volatile uint8_t D;
-    volatile uint8_t MA1;
-    volatile uint8_t MA2;
-    volatile uint8_t C4;
-    volatile uint8_t C5;
-    volatile uint8_t ED;
-    volatile uint8_t MODEM;
-    volatile uint8_t IR;
-    volatile uint8_t unused1;
-    volatile uint8_t PFIFO;
-    volatile uint8_t CFIFO;
-    volatile uint8_t SFIFO;
-    volatile uint8_t TWFIFO;
-    volatile uint8_t TCFIFO;
-    volatile uint8_t RWFIFO;
-    volatile uint8_t RCFIFO;
-    volatile uint8_t unused2;
-    volatile uint8_t C7816;
-    volatile uint8_t IE7816;
-    volatile uint8_t IS7816;
-    union {
-        volatile uint8_t WP7816T0;
-        volatile uint8_t WP7816T1;
-    };
-    volatile uint8_t WN7816;
-    volatile uint8_t WF7816;
-    volatile uint8_t ET7816;
-    volatile uint8_t TL7816;
-    volatile uint8_t unused3;
-    volatile uint8_t C6;
-    volatile uint8_t PCTH;
-    volatile uint8_t PCTL;
-    volatile uint8_t B1T;
-    volatile uint8_t SDTH;
-    volatile uint8_t SDTL;
-    volatile uint8_t PRE;
-    volatile uint8_t TPL;
-    volatile uint8_t IE;
-    volatile uint8_t WB;
-    volatile uint8_t S3;
-    volatile uint8_t S4;
-    volatile uint8_t RPL;
-    volatile uint8_t RPREL;
-    volatile uint8_t CPW;
-    volatile uint8_t RIDT;
-    volatile uint8_t TIDT;
+	volatile uint8_t BDH;
+	volatile uint8_t BDL;
+	volatile uint8_t C1;
+	volatile uint8_t C2;
+	volatile uint8_t S1;
+	volatile uint8_t S2;
+	volatile uint8_t C3;
+	volatile uint8_t D;
+	volatile uint8_t MA1;
+	volatile uint8_t MA2;
+	volatile uint8_t C4;
+	volatile uint8_t C5;
+	volatile uint8_t ED;
+	volatile uint8_t MODEM;
+	volatile uint8_t IR;
+	volatile uint8_t unused1;
+	volatile uint8_t PFIFO;
+	volatile uint8_t CFIFO;
+	volatile uint8_t SFIFO;
+	volatile uint8_t TWFIFO;
+	volatile uint8_t TCFIFO;
+	volatile uint8_t RWFIFO;
+	volatile uint8_t RCFIFO;
+	volatile uint8_t unused2;
+	volatile uint8_t C7816;
+	volatile uint8_t IE7816;
+	volatile uint8_t IS7816;
+	union {
+		volatile uint8_t WP7816T0;
+		volatile uint8_t WP7816T1;
+	};
+	volatile uint8_t WN7816;
+	volatile uint8_t WF7816;
+	volatile uint8_t ET7816;
+	volatile uint8_t TL7816;
+	volatile uint8_t unused3;
+	volatile uint8_t C6;
+	volatile uint8_t PCTH;
+	volatile uint8_t PCTL;
+	volatile uint8_t B1T;
+	volatile uint8_t SDTH;
+	volatile uint8_t SDTL;
+	volatile uint8_t PRE;
+	volatile uint8_t TPL;
+	volatile uint8_t IE;
+	volatile uint8_t WB;
+	volatile uint8_t S3;
+	volatile uint8_t S4;
+	volatile uint8_t RPL;
+	volatile uint8_t RPREL;
+	volatile uint8_t CPW;
+	volatile uint8_t RIDT;
+	volatile uint8_t TIDT;
 
 } kinetis_UART_memory_t;
 
@@ -98,43 +98,45 @@ typedef struct __attribute__ ((packed)) {
 
 typedef struct __attribute__ ((packed)) {
 
-    //The memory struct;
-    kinetis_UART_memory_t *const memory;
+	//The memory struct;
+	kinetis_UART_memory_t *const memory;
 
-    //The clock frequency;
-    const uint32_t clockFrequency;
+	//The clock frequency;
+	const uint32_t clockFrequency;
 
-    //The status interrupt channel;
-    const uint8_t status_int_channel;
+	//The status interrupt channel;
+	const uint8_t status_int_channel;
 
-    //The error interrupt channel;
-    const uint8_t error_int_channel;
+	//The error interrupt channel;
+	const uint8_t error_int_channel;
 
-    //The status interrupt function;
-    void (*const status_interrupt_function)(void);
+	//The status interrupt function;
+	void (*const status_interrupt_function)(void);
 
-    //The error interrupt function;
-    void (*const error_interrupt_function)(void);
+	//The error interrupt function;
+	void (*const error_interrupt_function)(void);
 
-    //The maximum number of uint16_t in the rx hardware buffer;
-    const uint8_t rx_size;
+	//The maximum number of uint16_t in the rx hardware buffer;
+	const uint8_t rx_size;
 
-    //The maximum number of uint16_t in the tx hardware buffer;
-    const uint8_t tx_size;
+	//The maximum number of uint16_t in the tx hardware buffer;
+	const uint8_t tx_size;
 
-    //The rx_watermark update function;
-    uint8_t (*rx_water_function)(const uint8_t nb_elements, const uint8_t rx_max);
+	//The rx_watermark update function;
+	uint8_t (*rx_water_function)(const uint8_t nb_elements, const uint8_t rx_max);
 
-    //The rx_watermark update function;
-    uint8_t (*tx_water_function)(const uint8_t nb_elements);
+	//The rx_watermark update function;
+	uint8_t (*tx_water_function)(const uint8_t nb_elements);
 
-    //The data cflux to receive from the UART; Will interact with rx;
-    flux_t *rx_flux;
+	/*
+	//The data cflux to receive from the UART; Will interact with rx;
+	flux_t *rx_flux;
 
-    //The data cflux to transmit to the UART; Will interact with tx;
-    flux_t *tx_flux;
+	//The data cflux to transmit to the UART; Will interact with tx;
+	flux_t *tx_flux;
+	 */
 
-} kinetis_UART_data_t;
+} kinetis_UART_t;
 
 
 /*
@@ -176,13 +178,13 @@ typedef struct __attribute__ ((packed)) {
  */
 
 //Initialise the UART;
-void kinetis_UART_init(void *data, const driver_config_t *);
+void kinetis_UART_init(kinetis_UART_t *instance, const UART_config_t *);
 
 //Start the UART;
-void kinetis_UART_start(const void *data);
+void kinetis_UART_start(const kinetis_UART_t *instance);
 
 //De-initialise the UART;
-void kinetis_UART_exit(const void *data);
+void kinetis_UART_exit(const kinetis_UART_t *instance);
 
 
 
@@ -191,10 +193,10 @@ void kinetis_UART_exit(const void *data);
  */
 
 //Get the number of spaces in the tx hw buffer;
-size_t kinetis_UART_tx_available(const void *data);
+size_t kinetis_UART_tx_available(const kinetis_UART_t *instance);
 
 //Get the number of chars in the rx hw buffer;
-size_t kinetis_UART_rx_available(const void * data);
+size_t kinetis_UART_rx_available(const kinetis_UART_t *instance);
 
 
 
@@ -203,20 +205,20 @@ size_t kinetis_UART_rx_available(const void * data);
  */
 
 //Pass a certain amount of to tx;
-void kinetis_UART_copy_to_tx(const void *data, void *src, size_t size);
+void kinetis_UART_copy_to_tx(const kinetis_UART_t *instance, void *src, size_t size);
 
 //Get a certain amount of data from rx;
-void kinetis_UART_copy_from_rx(const void *data, void *dest, size_t size);
+void kinetis_UART_copy_from_rx(const kinetis_UART_t *instance, void *dest, size_t size);
 
 /*
  * Exception functions : public to allow the creation of the interrupt link;
  */
 
 //The interrupt function;
-void kinetis_UART_status_interrupt(const kinetis_UART_data_t *data);
+void kinetis_UART_status_interrupt(const kinetis_UART_t *instance);
 
 //The error function;
-void kinetis_UART_error_interrupt(const kinetis_UART_data_t *data);
+void kinetis_UART_error_interrupt(const kinetis_UART_t *instance);
 
 
 /*
@@ -225,33 +227,42 @@ void kinetis_UART_error_interrupt(const kinetis_UART_data_t *data);
 
 
 typedef enum {
-    size_1 = 1,
-    size_4 = 4,
-    size_8 = 8,
-    size_16 = 16,
-    size_32 = 32,
-    size_64 = 64,
-    size_128 = 128,
+	size_1 = 1,
+	size_4 = 4,
+	size_8 = 8,
+	size_16 = 16,
+	size_32 = 32,
+	size_64 = 64,
+	size_128 = 128,
 } kinetis_UART_fifo_size_t;
+
+
+/*
+ * KINETIS_UART_DRIVER_DECLARE : declares the required UART driver structure;
+ */
+
+
+#define KINETIS_UART_DECLARE(id)\
+    extern kinetis_UART_t UART_##id;
 
 
 /*
  * Then, we define the UART data structure, that will contain a memory map, and a set of hardware constants;
  */
 
-#define KINETIS_UART_DATA(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, status_int_f, error_int_f) {\
+#define KINETIS_UART(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, status_int_f, error_int_f) {\
     .memory = (kinetis_UART_memory_t *const )(mem_p),\
     .clockFrequency = (clock_f),\
     .rx_size = (rsize),\
-    .tx_size = (tsize), \
+    .tx_size = (tsize),\
     .status_int_channel = (status_int_id),\
     .error_int_channel = (error_int_id),\
     .status_interrupt_function = (status_int_f),\
     .error_interrupt_function = (error_int_f),\
     .rx_water_function = 0,\
     .tx_water_function = 0,\
-    .tx_flux = 0,\
-    .rx_flux = 0,\
+    /*.tx_flux = 0,\
+    .rx_flux = 0,\*/\
     }
 
 
@@ -260,8 +271,8 @@ typedef enum {
  */
 
 #define KINETIS_UART_FUNCTIONS(id)\
-    void UART_##id##_data##_status_int() {kinetis_UART_status_interrupt(&UART_##id##_data);}\
-    void UART_##id##_data##_error_int() {kinetis_UART_error_interrupt(&UART_##id##_data);}
+    void UART_##id##_status_int() {kinetis_UART_status_interrupt(&UART_##id);}\
+    void UART_##id##_error_int() {kinetis_UART_error_interrupt(&UART_##id);}
 
 
 /*
@@ -273,10 +284,9 @@ typedef enum {
  */
 
 #define KINETIS_UART_DEFINE(id, mem_p, clock_f, rsize, tsize, status_int_id, error_int_id)\
-    extern kinetis_UART_data_t UART_##id##_data;\
     KINETIS_UART_FUNCTIONS(id);\
-    kinetis_UART_data_t UART_##id##_data = KINETIS_UART_DATA(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, UART_##id##_data##_status_int, UART_##id##_data##_error_int);\
-    UART_driver_t UART_##id = UART_DRIVER((void *)&UART_##id##_data, kinetis_UART_init, kinetis_UART_start, kinetis_UART_exit, kinetis_UART_tx_available, kinetis_UART_rx_available, &kinetis_UART_copy_to_tx, &kinetis_UART_copy_from_rx);
+    kinetis_UART_t UART_##id = (kinetis_UART_t) KINETIS_UART(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, UART_##id##_status_int, UART_##id##_error_int);\
+    //UART_driver_t UART_##id = UART_DRIVER((void *)&UART_##id##_data, kinetis_UART_init, kinetis_UART_start, kinetis_UART_exit, kinetis_UART_tx_available, kinetis_UART_rx_available, &kinetis_UART_copy_to_tx, &kinetis_UART_copy_from_rx);
 
 
 #endif //TRACER_TEENSY35_UART_H

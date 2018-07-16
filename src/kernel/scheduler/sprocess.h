@@ -36,7 +36,7 @@ typedef enum {
     //Process stop required by a semaphore;
             SPROCESS_STOP_REQUIRED = 1,
 
-    //Thread stopped;
+    //Thread unregistered;
             SPROCESS_STOPPED = 2,
 
     //Execution done;

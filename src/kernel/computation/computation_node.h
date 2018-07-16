@@ -60,53 +60,53 @@ typedef enum {
 	CNODE_NOT_COMPUTED,
 
 	//All data has been computed;
-	CNODE_TERMINATED,
+	cmp_node_tERMINATED,
 
 } cnode_computation_state_t;
 
 /*
  * The computation node structure is composed of :
  */
-typedef struct cnode_t {
+typedef struct cmp_node_t {
 
 	//A constant function pointer to provide data to the node;
 	//Will raise an error if the node's data storage is full. You must carefully dimension your computation scheme;
-	void (*const accept_data)(struct cnode_t *node, void *data, size_t size);
+	void (*const accept_data)(struct cmp_node_t *node, void *data, size_t size);
 
 	//A constant function pointer to execute a stage in the node's computation scheme;
 	// Fail-safe in itself, the stage that is executed can fail though;
 	// Returns a state that describes the computed stage;
-	cnode_computation_state_t (*const compute)(struct cnode_t *node);
+	cnode_computation_state_t (*const compute)(struct cmp_node_t *node);
 
 	//A constant function pointer, asserting if the node is terminated.
 	// Purely indicative, fail-safe, concurrency supported, unreliable results;
-	bool (*const terminated)(struct cnode_t *node);
+	bool (*const terminated)(struct cmp_node_t *node);
 
 	//The deletion function; As the node is a simple interface, a function must be included to correctly delete it;
 	// Concurrency not supported, will raise an error if the node is still in execution; Must be ran with precautions;
-	void (*const destructor)(struct cnode_t *node);
+	void (*const destructor)(struct cmp_node_t *node);
 
-} cnode_t;
+} cmp_node_t;
 
 
 //Shortcut for data transmission
-inline void cnode_accept_data(cnode_t *const node, void *const data, const size_t size) {
+inline void cnode_accept_data(cmp_node_t *const node, void *const data, const size_t size) {
 	(*(node->accept_data))(node, data, size);
 }
 
 //Shortcut for computation execution
-inline bool cnode_compute(cnode_t *const node) {
+inline bool cnode_compute(cmp_node_t *const node) {
 	return (*(node->compute))(node);
 
 }
 
 //Shortcut for termination verification;
-inline bool cnode_terminated(cnode_t *const node) {
+inline bool cmp_node_terminated(cmp_node_t *const node) {
 	return (*(node->terminated))(node);
 }
 
 //Shortcut for deletion; Calls the destructor;
-inline void cnode_delete(cnode_t *const node) {
+inline void cnode_delete(cmp_node_t *const node) {
 	(*(node->destructor))(node);
 }
 

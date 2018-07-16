@@ -62,13 +62,13 @@ void dshost_initialise(dshost_t *dshost, const size_t data_element_size, const s
 	}
 
 	//Cache the size of the data array;
-	size_t data_size = nb_elements * data_element_size;
+	const size_t data_size = nb_elements * data_element_size;
 
 	//Allocate the data array;
-	void *data_array = kernel_malloc(data_size);
+	void *const data_array = kernel_malloc(data_size);
 
 	//Allocate the elements array;
-	dshost_element_t *elements = kernel_malloc(nb_elements * sizeof(struct dshost_element_t));
+	dshost_element_t *const elements = kernel_malloc(nb_elements * sizeof(struct dshost_element_t));
 
 	{
 		//Cache the pointer to data for the current element;
@@ -83,16 +83,15 @@ void dshost_initialise(dshost_t *dshost, const size_t data_element_size, const s
 		//For each element to initialise :
 		for (size_t element_index = 0; element_index < nb_elements; element_index++) {
 
-
 			//Create an initializer for the element;
-			dshost_element_t init = {
+			const dshost_element_t init = {
 				.shared = false,
 				.data = element_data,
 				.next = previous_element,
 			};
 
 			//Initialize the element;
-			*current_element = init;
+			memcpy(current_element, &init, sizeof(dshost_element_t));
 
 			//Update the data pointer to point to the next piece of data;
 			element_data += data_element_size;
@@ -108,7 +107,7 @@ void dshost_initialise(dshost_t *dshost, const size_t data_element_size, const s
 	}
 
 	//Initialise the data host;
-	*dshost = {
+	const dshost_t dshost_init = {
 
 		//Save the size of an element;
 		.elements_size = data_element_size,
@@ -147,6 +146,9 @@ void dshost_initialise(dshost_t *dshost, const size_t data_element_size, const s
 		},
 
 	};
+
+	//Initialise the data set host;
+	memcpy(dshost, &dshost_init, sizeof(dshost_t));
 
 }
 
@@ -223,10 +225,17 @@ bool dshost_empty(const dshost_t *dshost) {
 
 //----------------------------------------------- Element initialisation -----------------------------------------------
 
+/*
+ * dshost_initialise_element : required the ownership of an element, initialises it, and gives back the ownership of
+ * 	the element to the container;
+ *
+ * 	If no element is available, or sizes do not match, an exception is raised;
+ */
+
 void dshost_initialise_element(dshost_t *const dshost, const void *const data, const size_t data_size) {
 
 	//Require a space in the node's data;
-	dshost_element_t *element = dshost_provide_uninitialised(dshost);
+	dshost_element_t *element = dshost_provide_element(dshost, false);
 
 	//If no space is available :
 	if (!element) {
@@ -247,7 +256,6 @@ void dshost_initialise_element(dshost_t *const dshost, const void *const data, c
 	//Copy data from provided args to dest args;
 	memcpy(element->data, data, data_size);
 
-
 	//Provide initialised data to the node's host;
 	dshost_receive_element(dshost, element, true);
 
@@ -257,35 +265,23 @@ void dshost_initialise_element(dshost_t *const dshost, const void *const data, c
 //--------------------------------------------------- Data provision ---------------------------------------------------
 
 /*
- * dshost_provide_uninitialised : Attempts to remove the first element of the uninitialised queue;
+ * dshost_provide_element : Attempts to remove the first element of the required queue;
  *
  * 	If it exists, it marks it shared and returns its pointer;
  *
  * 	If not, it returns 0;
  */
 
-dshost_element_t *dshost_provide_uninitialised(const dshost_t *const dshost) {
+dshost_element_t *dshost_provide_element(dshost_t *const dshost, const bool initialised) {
 
-	//Remove and return the first element of the uninitialised queue;
-	return dshost_queue_remove_first(dshost->mutex, &dshost->uninitialised_elements);
+	//If the element is initialised, the concerned queue is the initialised one, if not, the uninitialised one;
+	dshost_queue_t *const queue = (initialised) ? &dshost->initialised_elements : &dshost->uninitialised_elements;
 
-}
-
-
-/*
- * dshost_provide_initialised : Attempts to remove the first element of the initialised queue;
- *
- * 	If it exists, it marks it shared and returns its pointer;
- *
- * 	If not, it returns 0;
- */
-
-dshost_element_t *dshost_provide_initialised(const dshost_t *const dshost) {
-
-	//Remove and return the first element of the initialised queue;
-	return dshost_queue_remove_first(dshost->mutex, &dshost->uninitialised_elements);
+	//Insert the provided element at the end of the concerned list;
+	return dshost_queue_remove_first(dshost->mutex, queue);
 
 }
+
 
 
 /*
@@ -357,15 +353,13 @@ dshost_element_t *dshost_queue_remove_first(mutex_t *const mutex, dshost_queue_t
 }
 
 
-
-
 //--------------------------------------------------- Data reception ---------------------------------------------------
 
 /*
  * dshost_receive_uninitialised : attempts to insert the element at the end of the required list;
  */
 
-void dshost_receive_element(const dshost_t *dshost, dshost_element_t *element, bool initialised) {
+void dshost_receive_element(dshost_t *const dshost, dshost_element_t *const element, const bool initialised) {
 
 	//If the element is initialised, the concerned queue is the initialised one, if not, the uninitialised one;
 	dshost_queue_t *const queue = (initialised) ? &dshost->initialised_elements : &dshost->uninitialised_elements;
@@ -405,7 +399,7 @@ dshost_queue_insert_element(mutex_t *const mutex, dshost_queue_t *const queue, d
 	if (!queue->nb_elements) {
 
 		//Lazy init;
-		*queue = {
+		*queue = (dshost_queue_t) {
 			.nb_elements = 1,
 			.first_element = new_element,
 			.last_element = new_element,

@@ -33,16 +33,16 @@
 void cnetwork_initialise(cnetwork_t *cnetwork);
 
 //Find an executable node; Purely indicative; Concurrency not supported;
-cnode_t *cnetwork_find_executable_node(const cnetwork_t *cnetwork);
+cmp_node_t *cnetwork_find_executable_node(const cnetwork_t *cnetwork);
 
 //Insert a node in the cnetwork's active nodes list; Concurrency not supported;
-void cnetwork_insert_node(cnetwork_t *cnetwork, cnode_t *new_node);
+void cnetwork_insert_node(cnetwork_t *cnetwork, cmp_node_t *new_node);
 
 
 //-------------------------------------------------- Mutual exclusion --------------------------------------------------
 
 //Shortcut for locking the node's data;
-inline void cnode_lock_data(const cnode_t *const node) {
+inline void cnode_lock_data(const cmp_node_t *const node) {
 
 	//Lock the node;
 	mutex_lock(node->data_mutex);
@@ -51,7 +51,7 @@ inline void cnode_lock_data(const cnode_t *const node) {
 
 
 //Shortcut for unlocking the node's data;
-inline void cnode_unlock_data(const cnode_t *const node) {
+inline void cnode_unlock_data(const cmp_node_t *const node) {
 
 	//Lock the node;
 	mutex_unlock(node->data_mutex);
@@ -83,14 +83,14 @@ inline void cnetwork_unlock_list(const cnetwork_t *const network) {
  * cnetwork_create : creates a computation network structure in the heap, providing the number of nodes,
  * 	and a mutex to protect the active nodes list;
  */
-
-cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex) {
+cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *instance,
+							bool (*init)(void *data, const cmp_node_t *nodes)) {
 
 	//Allocate some heap data to contain all nodes;
-	cnode_t *nodes = kernel_malloc(nb_nodes * sizeof(cnode_t));
+	cmp_node_t *nodes = kernel_malloc(nb_nodes * sizeof(cmp_node_t));
 
 	//Initialise all nodes to 0; Initialisation flags will be cleared;
-	memset(nodes, 0, sizeof(cnode_t));
+	memset(nodes, 0, sizeof(cmp_node_t));
 
 	//Create the initializer for the computation network;
 	cnetwork_t init = {
@@ -99,7 +99,7 @@ cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex) {
 		.nb_nodes = nb_nodes,
 
 		//Initialise the list mutex;
-		.list_mutex = mutex,
+		.list_mutex = mutex_src,
 
 		//Initialise the active linked list to an empty one;
 		.active_nodes = EMPTY_LINKED_LIST(nb_nodes),
@@ -132,7 +132,7 @@ void cnetwork_init_node(cnetwork_t *const cnetwork, const size_t node_index, con
 						const size_t nb_outputs, const size_t *const output_references_const) {
 
 	//Cache the node pointer;
-	cnode_t *const node = cnetwork->nodes + node_index;
+	cmp_node_t *const node = cnetwork->nodes + node_index;
 
 	//If the node is already initialised :
 	if (node->initialised) {
@@ -147,7 +147,7 @@ void cnetwork_init_node(cnetwork_t *const cnetwork, const size_t node_index, con
 
 
 	//Initialize the node;
-	*node = (cnode_t) {
+	*node = (cmp_node_t) {
 
 		//Mark the node initialised;
 		.initialised = true,
@@ -189,7 +189,7 @@ void cnetwork_delete(cnetwork_t *cnetwork) {
 	//We must delete properly each node;
 
 	//Cache the node pointer;
-	cnode_t *node_p = cnetwork->nodes;
+	cmp_node_t *node_p = cnetwork->nodes;
 
 	//For each node :
 	for (size_t node_index = cnetwork->nb_nodes; node_index--;) {
@@ -247,7 +247,7 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 	cnetwork_lock_list(cnetwork);                                        //	List locked;
 
 	//Find an executable node;
-	cnode_t *const node = cnetwork_find_executable_node(cnetwork);       //	List locked;
+	cmp_node_t *const node = cnetwork_find_executable_node(cnetwork);       //	List locked;
 
 	//Unlock the active nodes list;
 	cnetwork_unlock_list(cnetwork);                                      //	List unlocked;
@@ -435,7 +435,7 @@ void cnetwork_initialise(cnetwork_t *cnetwork) {
  * 	This function doesn't support concurrent access.
  */
 
-cnode_t *cnetwork_find_executable_node(const cnetwork_t *const cnetwork) {
+cmp_node_t *cnetwork_find_executable_node(const cnetwork_t *const cnetwork) {
 
 	//Cache the active list;
 	linked_list_t *active_nodes = &cnetwork->active_nodes;
@@ -446,7 +446,7 @@ cnode_t *cnetwork_find_executable_node(const cnetwork_t *const cnetwork) {
 	}
 
 	//Cache the first element;
-	cnode_t *node = (cnode_t *) active_nodes->first;
+	cmp_node_t *node = (cmp_node_t *) active_nodes->first;
 
 	//Cache its priority;
 	const size_t priority = node->priority;
@@ -471,7 +471,7 @@ cnode_t *cnetwork_find_executable_node(const cnetwork_t *const cnetwork) {
 		}
 
 		//update the current node;
-		node = (cnode_t *) node->link.next;
+		node = (cmp_node_t *) node->link.next;
 
 		//If the previous node was the last of the list :
 		if (!node) {
@@ -498,7 +498,7 @@ void cnetwork_activate_neighbor(const void *const activator, const size_t neighb
 	size_t node_index = ((node_activation_t *) activator)->nodes_references[neighbor_id];
 
 	//Cache the node;
-	cnode_t *const node = cnetwork->nodes + node_index;
+	cmp_node_t *const node = cnetwork->nodes + node_index;
 
 	//Activate the node;
 	cnetwork_activate(cnetwork, node, args, args_size);
@@ -507,7 +507,7 @@ void cnetwork_activate_neighbor(const void *const activator, const size_t neighb
 
 
 //Activate a node providing args;
-void cnetwork_activate(cnetwork_t *const cnetwork, cnode_t *node, const void *const args, const size_t args_size) {
+void cnetwork_activate(cnetwork_t *const cnetwork, cmp_node_t *node, const void *const args, const size_t args_size) {
 
 	//Cache the node's host;
 	dshost_t *host = &node->input_host;
@@ -560,7 +560,7 @@ void cnetwork_activate(cnetwork_t *const cnetwork, cnode_t *node, const void *co
  * 	This function does not support concurrency. Active list must be locked at run time;
  */
 
-void cnetwork_insert_node(cnetwork_t *const cnetwork, cnode_t *const new_node) {
+void cnetwork_insert_node(cnetwork_t *const cnetwork, cmp_node_t *const new_node) {
 
 	//Cache the provided new_node's priority;
 	const size_t priority = new_node->priority;
@@ -569,7 +569,7 @@ void cnetwork_insert_node(cnetwork_t *const cnetwork, cnode_t *const new_node) {
 	linked_list_t *active_list = &cnetwork->active_nodes;
 
 	//Cache the first new_node;
-	cnode_t *current_node = (cnode_t *) active_list->first;
+	cmp_node_t *current_node = (cmp_node_t *) active_list->first;
 
 	//Insertion loop :
 	do {
@@ -586,7 +586,7 @@ void cnetwork_insert_node(cnetwork_t *const cnetwork, cnode_t *const new_node) {
 		}
 
 		//If the priority limit is not reached, update the current new_node;
-		current_node = (cnode_t *) current_node->link.next;
+		current_node = (cmp_node_t *) current_node->link.next;
 
 		//While the current node exists;
 	} while (current_node);

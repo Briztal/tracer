@@ -39,10 +39,10 @@ single_node_t *single_node_create(const size_t data_storage_size, const snode_fu
 
 		//Save function pointers;
 		.node = {
-			.accept_data = &single_node_accept_data,
-			.compute = &single_node_compute,
-			.terminated = &single_node_terminated,
-			.destructor = &single_node_destructor,
+			.accept_data = (void (*)(struct cmp_node_t *, void *, size_t)) &single_node_accept_data,
+			.compute = (cnode_computation_state_t (*)(struct cmp_node_t *)) &single_node_compute,
+			.terminated = (bool (*)(struct cmp_node_t *)) &single_node_terminated,
+			.destructor = (void (*)(struct cmp_node_t *)) &single_node_destructor,
 		},
 
 		//Create an empty data host;
@@ -110,7 +110,7 @@ cnode_computation_state_t single_node_compute(single_node_t *const single_node) 
 	 * to TERMINATED because we only own one data argument;
 	 */
 	if (state == CNODE_COMPLETE)
-		state = CNODE_TERMINATED;
+		state = cmp_node_tERMINATED;
 
 	//Give back the ownership of the data to the host;
 	dhost_receive_ownership(dhost, still_initialised);

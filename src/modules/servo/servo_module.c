@@ -37,7 +37,7 @@ typedef struct {
     //The list of started channels;
     linked_list_t enabled_channels;
 
-    //The list of stopped channels;
+    //The list of unregistered channels;
     linked_list_t disabled_channels;
 
     //The currently active channel;
@@ -157,7 +157,7 @@ void servo_module_exit() {
     //De initialise the timer;
     timer_exit(controller->us_timer);
 
-    //Mark the controller de-initialised and stopped;
+    //Mark the controller de-initialised and unregistered;
     controller->initialised = controller->started = false;
 
 }
@@ -324,7 +324,7 @@ servo_channel_t *servo_module_add_channel(PORT_pin_t *initialised_pin, const flo
     //Create the servo channel in the kernel heap;
     servo_channel_t *channel = kernel_malloc_copy(sizeof(servo_channel_t), &init);
 
-    //Add the channel at the end of the stopped list;
+    //Add the channel at the end of the unregistered list;
     llist_insert_last(&controller->disabled_channels, (linked_element_t *) channel);
 
 	//Return the channel;
@@ -652,7 +652,7 @@ void servo_service_stop(servo_controller_t *const controller) {
     //Leave the critical section
     kernel_leave_critical_section();
 
-    //The routine will be stopped and cleaned at next interrupt;
+    //The routine will be unregistered and cleaned at next interrupt;
 
 }
 

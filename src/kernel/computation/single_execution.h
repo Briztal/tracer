@@ -30,6 +30,8 @@
  * argument data structure.
  */
 
+struct single_node_t;
+
 //Define the single computation function type;
 typedef cnode_computation_state_t (*snode_function_t)(struct single_node_t *node, void *args);
 
@@ -39,7 +41,7 @@ typedef cnode_computation_state_t (*snode_function_t)(struct single_node_t *node
 typedef struct single_node_t {
 
 	//Composed of a node, to cast pointers;
-	cnode_t node;
+	cmp_node_t node;
 	
 	//A data host, to store arguments for the single execution;
 	dhost_t dhost;
