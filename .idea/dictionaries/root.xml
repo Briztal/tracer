@@ -2,8 +2,12 @@
   <dictionary name="root">
     <words>
       <w>caracterise</w>
+      <w>deinitialize</w>
+      <w>deinitializes</w>
       <w>dereferenced</w>
+      <w>gpio</w>
       <w>prioritary</w>
+      <w>uninitialize</w>
     </words>
   </dictionary>
 </component>

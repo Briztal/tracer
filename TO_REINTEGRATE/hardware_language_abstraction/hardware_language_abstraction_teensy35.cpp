@@ -21,9 +21,9 @@
 #include "kinetis.h"
 
 /*
- * The Board Abstraction file.
+ * The Board Abstraction file_tree.
  *
- * This file is made for : teensy35
+ * This file_tree is made for : teensy35
  *
  * Here are defined all function related to the hardware (serial, I2C, step_period_us etc...)
  *

@@ -19,9 +19,9 @@
 */
 
 /*
- * The GCode Interface configuration file.
+ * The GCode Interface configuration file_tree.
  *
- * This file defines the behaviour of the parser. You can personalise the following parameters :
+ * This file_tree defines the behaviour of the parser. You can personalise the following parameters :
  *      - The commands (G101, M1 commands for example).
  *      - The Parameters you can pass (X, Y, Z, A, B, etc...)
  *      - The function a special command triggers (ex : in Reprap GCode, G1 triggers a linear enqueue_movement function)

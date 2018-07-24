@@ -43,12 +43,7 @@ void arch_count(size_t count);
 //We will use the kinetis PORT module;
 #include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
 
-//Declare A, B, C, D and E ports;
-KINETIS_PORT_DECLARE(A);
-KINETIS_PORT_DECLARE(B);
-KINETIS_PORT_DECLARE(C);
-KINETIS_PORT_DECLARE(D);
-KINETIS_PORT_DECLARE(E);
+extern struct kinetis_PORT_driver_t *PORT;
 
 
 /*
@@ -71,6 +66,7 @@ KINETIS_PIT_DECLARE(3);
 //To define UART drivers we must include the UART driver header;
 #include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
 
+/*
 //The teensy35 supports 6 UARTS;
 KINETIS_UART_DECLARE(0);
 KINETIS_UART_DECLARE(1);
@@ -78,5 +74,12 @@ KINETIS_UART_DECLARE(2);
 KINETIS_UART_DECLARE(3);
 KINETIS_UART_DECLARE(4);
 KINETIS_UART_DECLARE(5);
+ */
+
+
+//--------------------------------------- Hardware Init ---------------------------------------
+
+void teensy35_hardware_init();
+
 
 #endif

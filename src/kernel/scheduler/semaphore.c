@@ -126,7 +126,7 @@ void sem_post(semaphore_t *semaphore) {
 
         } else {
 
-            //If no threads are to unlock, increment the allocation counter;
+            //If no threads are to unlock, bloc_spacing the allocation counter;
             semaphore->allocation_counter++;
 
         }

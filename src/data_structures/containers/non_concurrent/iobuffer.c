@@ -14,6 +14,12 @@
 //Delete a created buffer;
 void iobuffer_delete(iobuffer_t *buffer);
 
+//Persist an occurred insertion transfer;
+void iobuffer_persist_insertion(iobuffer_t *iobuffer, size_t transfer_size);
+
+//Persist an occurred deletion transfer;
+void iobuffer_persist_deletion(iobuffer_t *iobuffer, size_t transfer_size);
+
 
 //----------------------------------------------------- Init - exit ----------------------------------------------------
 
@@ -21,7 +27,8 @@ void iobuffer_delete(iobuffer_t *buffer);
  * iobuffer_create : creates an IOBuffer from a couple of channels, and registers itself to active ones;
  */
 
-void iobuffer_create(size_t size, iobuffer_channel_t *input_channel, iobuffer_channel_t *output_channel) {
+void iobuffer_create(const size_t size, iochannel_t *const input_channel,
+					 iochannel_t *const output_channel) {
 
 	//If both channels are null, do nothing;
 	if ((!input_channel) || (!output_channel)) {
@@ -40,19 +47,16 @@ void iobuffer_create(size_t size, iobuffer_channel_t *input_channel, iobuffer_ch
 	}
 
 	//Allocate some space for the buffer;
-	void *buffer_min = kernel_malloc(size);
+	void *const buffer_min = kernel_malloc(size);
 
 	//Create an initializer;
-	iobuffer_t init = {
+	const iobuffer_t init = {
 
 		//Save the minimal address of the buffer;
 		.buffer_min = buffer_min,
 
 		//Determine and save the maximal address of the buffer;
 		.buffer_max = size + (uint8_t *) buffer_min,
-
-		//Save the size;
-		.buffer_size = size,
 
 		//Save the input channel;
 		.input_channel = input_channel,
@@ -63,21 +67,29 @@ void iobuffer_create(size_t size, iobuffer_channel_t *input_channel, iobuffer_ch
 	};
 
 	//Create and allocate data
-	iobuffer_t *iobuffer = kernel_malloc_copy(sizeof(iobuffer_t), &init);
-
-	//Register the IOBuffer to the input channel;
-	iobuffer_channel_register_buffer(input_channel, iobuffer);
-
-	//Register the IOBuffer to the input channel;
-	iobuffer_channel_register_buffer(output_channel, iobuffer);
+	iobuffer_t *const iobuffer = kernel_malloc_copy(sizeof(iobuffer_t), &init);
 
 
 	//Registration is a critical section, as a section could delete the buffer as it is not completely registered;
 	kernel_enter_critical_section();
 
-	//Activate both channels;
-	input_channel->unregistered = false;
-	output_channel->unregistered = false;
+	//Register the IOBuffer and the input channel;
+	iobuffer_channel_register_buffer(input_channel, iobuffer);
+
+	//Register the IOBuffer and the output channel;
+	iobuffer_channel_register_buffer(output_channel, iobuffer);
+
+	//Initialise the output transfer data;
+	output_channel->transfer_size = 0;
+	output_channel->data_address = buffer_min;
+
+	//Initialise the input transfer data;
+	output_channel->transfer_size = size;
+	output_channel->data_address = buffer_min;
+
+	//Enable both channels;
+	iochannel_update(iobuffer->input_channel);
+	iochannel_update(iobuffer->output_channel);
 
 	//Leave the critical section;
 	kernel_leave_critical_section();
@@ -89,7 +101,7 @@ void iobuffer_create(size_t size, iobuffer_channel_t *input_channel, iobuffer_ch
  * iobuffer_delete : deletes an existing buffer, after its two channels have unregistered themselves;
  */
 
-void iobuffer_delete(iobuffer_t *buffer) {
+void iobuffer_delete(iobuffer_t *const buffer) {
 
 	//Delete the buffer;
 	kernel_free(buffer->buffer_min);
@@ -107,7 +119,7 @@ void iobuffer_delete(iobuffer_t *buffer) {
  * 	of the iobuffer, and deletes the iobuffer;
  */
 
-void iobuffer_channel_delete(iobuffer_channel_t *channel) {
+void iobuffer_channel_delete(iochannel_t *const channel) {
 
 	//Channel deletion is critical, as two channels can't be unregistered at the same time;
 	kernel_enter_critical_section();
@@ -129,11 +141,9 @@ void iobuffer_channel_delete(iobuffer_channel_t *channel) {
 	//If the channel is registered to an iobuffer :
 	if (iobuffer) {
 
-
 		//Reset both channels; They will be marked unregistered;
-		iobuffer_channel_reset(iobuffer->input_channel);
-		iobuffer_channel_reset(iobuffer->output_channel);
-
+		iochannel_reset(iobuffer->input_channel);
+		iochannel_reset(iobuffer->output_channel);
 
 		//Mark both channels null;
 		iobuffer->input_channel = 0;
@@ -145,7 +155,7 @@ void iobuffer_channel_delete(iobuffer_channel_t *channel) {
 	}
 
 	//Delete the channel;
-	(*(channel->destructor))(channel);
+	iochannel_delete(channel);
 
 	//Leave the critical section;
 	kernel_leave_critical_section();
@@ -160,7 +170,7 @@ void iobuffer_channel_delete(iobuffer_channel_t *channel) {
  * whose size is stored in the channel pointer;
  */
 
-void iobuffer_persist_transfer(iobuffer_channel_t *channel) {
+void iobuffer_persist_transfer(iochannel_t *channel) {
 
 	//Channel persistence is critical, as two channels can't call it at the same time;
 	kernel_enter_critical_section();
@@ -194,28 +204,109 @@ void iobuffer_persist_transfer(iobuffer_channel_t *channel) {
 		} else {
 			//If the provided channel is the output one :
 
-			//Persist a removal and update the output channel's access;
-			iobuffer_persist_removal(iobuffer, transfer_size);
+			//Persist a deletion and update the output channel's access;
+			iobuffer_persist_deletion(iobuffer, transfer_size);
 
 		}
 
+		//Update both channels;
+		iochannel_update(iobuffer->input_channel);
+		iochannel_update(iobuffer->output_channel);
+
 	}
+
+
 
 	//Leave the critical section;
 	kernel_leave_critical_section();
 
 }
 
+
 /*
- * iobuffer_persist_insertion : mark that an insertion has been made,
+ * iobuffer_persist_insertion : mark that an insertion has been made, an update is required for both channels;
  */
 
-void iobuffer_persist_insertion(iobuffer_t *iobuffer, size_t transfert_size) {
+void iobuffer_persist_insertion(iobuffer_t *const iobuffer, const size_t transfer_size) {
 
-	//Cache both data pointers;
+	//Cache both channels pointers;
+	iochannel_t *const input_channel = iobuffer->input_channel;
+	iochannel_t *const output_channel = iobuffer->output_channel;
 
+	//Cache the insertion address;
+	uint8_t *input_address = input_channel->data_address;
+
+	//Cache the buffer's bounds;
+	void *buffer_max = iobuffer->buffer_max;
+
+	//Update the insertion address to integrate the new transfer;
+	input_address += transfer_size;
+
+	//If we reached the last address (cannot be dereferenced) :
+	if (input_address == iobuffer->buffer_max) {
+
+		//Go to the first case;
+		input_address = iobuffer->buffer_min;
+
+	}
+
+	//Save the new insertion address;
+	input_channel->data_address = input_address;
+
+	//Determine the new maximal insertion transfer size;
+	input_channel->transfer_size = buffer_max - (void *) input_address;
+
+	//Cache the output address;
+	void *output_address = output_channel->data_address;
+
+	//Determine the new maximal removal transfer size;
+	//If the input is after the output, the max size is their subtraction;
+	//If not, the max size is the number of addresses between input and limit;
+	output_channel->transfer_size =
+		((void *)input_address >= output_address) ? (void *)input_address - output_address : buffer_max - (void *) input_address;
 
 }
 
 
+/*
+ * iobuffer_persist_insertion : mark that a deletion has been made, an update is required for output channel only;
+ */
 
+void iobuffer_persist_deletion(iobuffer_t *const iobuffer, const size_t transfer_size) {
+
+	//Cache both channels pointers;
+	iochannel_t *const input_channel = iobuffer->input_channel;
+	iochannel_t *const output_channel = iobuffer->output_channel;
+
+	//Cache the insertion address;
+	uint8_t *output_address = output_channel->data_address;
+
+	//Cache the buffer's bounds;
+	void *buffer_max = iobuffer->buffer_max;
+
+	//Update the deletion address to integrate the new transfer;
+	output_address += transfer_size;
+
+	//If we reached the last address (cannot be dereferenced) :
+	if (output_address == iobuffer->buffer_max) {
+
+		//Go to the first case;
+		output_address = iobuffer->buffer_min;
+
+	}
+
+	//Save the new deletion address;
+	output_channel->data_address = output_address;
+
+	//Cache the insertion address;
+	const void *const input_address = output_channel->data_address;
+
+	//Determine the new maximal removal transfer size;
+	//If the input is after the output, the max size is their subtraction;
+	//If not, the max size is the number of addresses between input and limit;
+	output_channel->transfer_size =
+		(input_address >= (void *)output_address) ?
+		input_address - (void *)output_address :
+		buffer_max - (void *) input_address;
+
+}

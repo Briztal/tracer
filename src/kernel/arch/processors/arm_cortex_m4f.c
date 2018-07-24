@@ -189,7 +189,7 @@ void core_preemption() {
     //Execute an ISB;
     __asm__ __volatile__ ("ISB");
 
-	//Re-enable interrupts;
+	//Re-update interrupts;
 	__asm__ __volatile__("cpsie i");
 
 
@@ -221,7 +221,7 @@ void core_preemption() {
     //Execute an ISB;
     __asm__ __volatile__ ("ISB");
 
-	//Re-enable interrupts;
+	//Re-update interrupts;
 	__asm__ __volatile__("cpsie i");
 
 

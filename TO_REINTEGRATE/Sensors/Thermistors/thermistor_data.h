@@ -29,13 +29,13 @@
 */
 
 /*
- * This file contains all data related to thermistors.
+ * This file_tree contains all data related to thermistors.
  *
- * All data in this file is extracted from the file thermistor_data.h in Marlin, all credits go to authors ! :-)
+ * All data in this file_tree is extracted from the file_tree thermistor_data.h in Marlin, all credits go to authors ! :-)
  * *
  * It comprises lookup table for each thermistor that the code can deal with, and the table size for each one.
  *
- * You may use macros provided here to populate the thermistor section of you configuration file.
+ * You may use macros provided here to populate the thermistor section of you configuration file_tree.
  *
  * To do so, you may use the next names
  *

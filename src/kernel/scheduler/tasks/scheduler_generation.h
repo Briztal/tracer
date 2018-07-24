@@ -19,7 +19,7 @@
 */
 
 /*
- * This file contains macro used in generation of scheduler functions / structure for a precise function.
+ * This file_tree contains macro used in generation of scheduler functions / structure for a precise function.
  *
  * It eases your development the following way :
  *
@@ -36,7 +36,7 @@
  *          an instance of the struct, and schedule the unpacker (below);
  *      - An unpacker, that would unpack data, and parse the desired function, with extracted dynamic_args.
  *
- *  As this can be a very heavy and repetitive process_t, macros present in this file do the implementation job for you.
+ *  As this can be a very heavy and repetitive process_t, macros present in this file_tree do the implementation job for you.
  *
  *  The only thing you have to do is to call the macro GENERATE_SCHEDULERn with the data like below :
  *

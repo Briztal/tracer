@@ -21,9 +21,9 @@
 #include "hardware_language_abstraction_stm32_nucleo_l476rg.h"
 
 /*
- * The Board Abstraction file.
+ * The Board Abstraction file_tree.
  *
- * This file is made for : stm32 nucleo l476rg
+ * This file_tree is made for : stm32 nucleo l476rg
  *
  * Here are defined all function related to the hardware (serial, I2C, delay_us etc...)
  *

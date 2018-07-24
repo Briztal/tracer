@@ -52,7 +52,7 @@ typedef struct {
 	//The mask to manipulate only relevant bits;
 	const uint8_t bit_mask;
 
-	//The value to write to enable the register;
+	//The value to write to update the register;
 	const uint8_t enabled_value;
 
 	//The value to write to disable the register;
@@ -85,7 +85,7 @@ typedef struct {
 	//The mask to manipulate only relevant bits;
 	const uint8_t bit_mask;
 
-	//The value to write to enable the register;
+	//The value to write to update the register;
 	const uint8_t write_enable_value;
 
 	//The value to write to disable the register;

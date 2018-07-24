@@ -25,16 +25,18 @@
 #ifndef TRACER_KINETIS_UART_H
 #define TRACER_KINETIS_UART_H
 
-#include <kernel/drivers/UART.h>
+#include <kernel/drivers/uart.h>
 
 #include <kernel/connection/connection.h>
+
+#include <kernel/memory/memory_stream.h>
 
 /*
  * First, we define the UART memory map. As all data related to a specific UART are in a continuous memory zone,
  *  We can assimilate them as a struct, whose address is known in memory;
  */
 
-typedef struct __attribute__ ((packed)) {
+struct __attribute__ ((packed)) kinetis_UART_registers_t {
 	volatile uint8_t BDH;
 	volatile uint8_t BDL;
 	volatile uint8_t C1;
@@ -89,20 +91,22 @@ typedef struct __attribute__ ((packed)) {
 	volatile uint8_t RIDT;
 	volatile uint8_t TIDT;
 
-} kinetis_UART_memory_t;
+};
 
 
 /*
- * Then, we define the UART data structure, that will contain a memory map, and a set of hardware constants;
+ * A kinetis UART peripheral is defined by the following set of parameters;
+ *
+ * 	This set of data never changes for a given peripheral instance;
  */
 
-typedef struct __attribute__ ((packed)) {
+struct kinetis_UART_hw_t {
 
-	//The memory struct;
-	kinetis_UART_memory_t *const memory;
+	//The address of the peripheral register zone;
+	struct kinetis_UART_registers_t *const registers;
 
 	//The clock frequency;
-	const uint32_t clockFrequency;
+	const uint32_t clock_frequency;
 
 	//The status interrupt channel;
 	const uint8_t status_int_channel;
@@ -110,183 +114,89 @@ typedef struct __attribute__ ((packed)) {
 	//The error interrupt channel;
 	const uint8_t error_int_channel;
 
-	//The status interrupt function;
-	void (*const status_interrupt_function)(void);
+	//The size index corresponding to the rx buffer size;
+	const uint8_t rx_index;
 
-	//The error interrupt function;
-	void (*const error_interrupt_function)(void);
+	//The size index corresponding to the tx buffer size;
+	const uint8_t tx_index;
 
-	//The maximum number of uint16_t in the rx hardware buffer;
-	const uint8_t rx_size;
-
-	//The maximum number of uint16_t in the tx hardware buffer;
-	const uint8_t tx_size;
-
-	//The rx_watermark update function;
-	uint8_t (*rx_water_function)(const uint8_t nb_elements, const uint8_t rx_max);
-
-	//The rx_watermark update function;
-	uint8_t (*tx_water_function)(const uint8_t nb_elements);
-
-	/*
-	//The data cflux to receive from the UART; Will interact with rx;
-	flux_t *rx_flux;
-
-	//The data cflux to transmit to the UART; Will interact with tx;
-	flux_t *tx_flux;
-	 */
-
-} kinetis_UART_t;
+	//Interrupt link function;
+	void (*const status_link)();
+	void (*const error_link)();
+};
 
 
 /*
- * The kinetis UART integrates a hardware buffer for both rx and tx canals, whose sizes depend on the module;
- *
- *  It implements a watermark functionality in those buffers. When the amount of data in a buffer is greater
- *      (or lesser) or equal than the watermark, an interrupt is triggered;
- *
- *
- *  The different types of status (not error) interrupts are :
- *
- *   - TI : transmission interrupts, triggers when the amount of data in tx buffer is lesser or equal than
- *      the tx watermark; The attached interrupt must transfer as many data as possible from the transmission
- *      buffer to the hardware buffer;
- *      This interrupt is disabled when no more data is available in the transmission buffer (to avoid a
- *      perpetual unnecessary call; Each time an element is added in the transmission buffer, it is re-enabled;
- *
- *   - RI : reception interrupt, triggers when the amount of data in rx buffer is greater than the TX watermark;
- *      The attached interrupt must transfer as many data as possible from the hardware rx buffer to the reception
- *      buffer;
- *      This interrupt is disabled when there are no more spaces available in the reception buffer. Each time
- *      a space is fred in the reception buffer (call of read method), it is re-enabled;
- *
- *
- *  HALF DUPLEX INTEGRATION :
- *      - TODO DOC
- *      - WHEN TRANSMISSION REQUIRED (element added in txbuffer) : enable IDLE INTERRUPT.
- *      - AT IDLE INTERRUPT : CHECK THAT HALF DUPLEX MODE, SET TXDIR, TRANSMISSION OF ALL POSSIBLE ELEMENTS IN THE BUFFER
- *      - TODO CHECK THAT TXWATER INTERRUPT IS CALLED.
- *      - TRANSMISSION COMPLETE INTERRUPT : CHECK THAT HALF DUPLEX MODE : RESET TXDIR;
- *
+ * A kinetis UART memory stream is composed of the following elements :
  */
 
-//-------------------------- Configuration methods --------------------------
+struct kinetis_UART_stream_t {
+
+	//A stream memory, first for pointer cast;
+	struct stream_memory_t stream;
+
+	//The address of the hardware buffer size counter;
+	volatile uint8_t *const size_register;
+
+	//The FIFO size (used only in input for available spaces);
+	const uint8_t fifo_size;
+
+
+};
 
 
 /*
- * Init, start and exit functions : public to allow the UART driver creation;
+ * A kinetis UART driver is defined by the following set of parameters :
  */
+
+struct kinetis_UART_driver_t {
+
+	//The peripheral description;
+	struct kinetis_UART_hw_t peripheral_data;
+
+	//An initialisation flag;
+	bool initialised;
+
+	//An output stream memory zone;
+	struct stream_memory_t *output_stream;
+
+	//An input stream memory zone;
+	struct stream_memory_t *input_stream;
+
+
+};
+
+
+
+//------------------------------------------------- Creation - Deletion ------------------------------------------------
+
+//Create an instance of a kinetis UART driver from hardware specs;
+struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw_t *);
+
+//Delete an instance of a kinetis UART driver;
+void kinetis_UART_delete(struct kinetis_UART_driver_t *);
+
+
+//----------------------------------------------------- Init - Exit ----------------------------------------------------
 
 //Initialise the UART;
-void kinetis_UART_init(kinetis_UART_t *instance, const UART_config_t *);
-
-//Start the UART;
-void kinetis_UART_start(const kinetis_UART_t *instance);
+void kinetis_UART_init(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config);
 
 //De-initialise the UART;
-void kinetis_UART_exit(const kinetis_UART_t *instance);
+void kinetis_UART_exit(const struct kinetis_UART_driver_t *driver_data);
 
 
-
-/*
- * size functions : public to allow the UART driver creation;
- */
-
-//Get the number of spaces in the tx hw buffer;
-size_t kinetis_UART_tx_available(const kinetis_UART_t *instance);
-
-//Get the number of chars in the rx hw buffer;
-size_t kinetis_UART_rx_available(const kinetis_UART_t *instance);
-
-
-
-/*
- * cflux functions : public to allow the UART driver creation;
- */
-
-//Pass a certain amount of to tx;
-void kinetis_UART_copy_to_tx(const kinetis_UART_t *instance, void *src, size_t size);
-
-//Get a certain amount of data from rx;
-void kinetis_UART_copy_from_rx(const kinetis_UART_t *instance, void *dest, size_t size);
+//----------------------------------------------------- Interrupts -----------------------------------------------------
 
 /*
  * Exception functions : public to allow the creation of the interrupt link;
  */
 
 //The interrupt function;
-void kinetis_UART_status_interrupt(const kinetis_UART_t *instance);
+void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *instance);
 
 //The error function;
-void kinetis_UART_error_interrupt(const kinetis_UART_t *instance);
-
-
-/*
- * -------------------------------- Driver construction --------------------------------
- */
-
-
-typedef enum {
-	size_1 = 1,
-	size_4 = 4,
-	size_8 = 8,
-	size_16 = 16,
-	size_32 = 32,
-	size_64 = 64,
-	size_128 = 128,
-} kinetis_UART_fifo_size_t;
-
-
-/*
- * KINETIS_UART_DRIVER_DECLARE : declares the required UART driver structure;
- */
-
-
-#define KINETIS_UART_DECLARE(id)\
-    extern kinetis_UART_t UART_##id;
-
-
-/*
- * Then, we define the UART data structure, that will contain a memory map, and a set of hardware constants;
- */
-
-#define KINETIS_UART(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, status_int_f, error_int_f) {\
-    .memory = (kinetis_UART_memory_t *const )(mem_p),\
-    .clockFrequency = (clock_f),\
-    .rx_size = (rsize),\
-    .tx_size = (tsize),\
-    .status_int_channel = (status_int_id),\
-    .error_int_channel = (error_int_id),\
-    .status_interrupt_function = (status_int_f),\
-    .error_interrupt_function = (error_int_f),\
-    .rx_water_function = 0,\
-    .tx_water_function = 0,\
-    /*.tx_flux = 0,\
-    .rx_flux = 0,\*/\
-    }
-
-
-/*
- * KINETIS_UART_FUNCTIONS : declares and defines the couple of interrupt functions related to the required UART;
- */
-
-#define KINETIS_UART_FUNCTIONS(id)\
-    void UART_##id##_status_int() {kinetis_UART_status_interrupt(&UART_##id);}\
-    void UART_##id##_error_int() {kinetis_UART_error_interrupt(&UART_##id);}
-
-
-/*
- * KINETIS_UART_DEFINE :
- *  - Declares the UART data structure;
- *  - Declares and defines interrupt functions;
- *  - Defines the UART data structure;
- *  - Defines the UART driver struct;
- */
-
-#define KINETIS_UART_DEFINE(id, mem_p, clock_f, rsize, tsize, status_int_id, error_int_id)\
-    KINETIS_UART_FUNCTIONS(id);\
-    kinetis_UART_t UART_##id = (kinetis_UART_t) KINETIS_UART(mem_p, clock_f, rsize, tsize, status_int_id, error_int_id, UART_##id##_status_int, UART_##id##_error_int);\
-    //UART_driver_t UART_##id = UART_DRIVER((void *)&UART_##id##_data, kinetis_UART_init, kinetis_UART_start, kinetis_UART_exit, kinetis_UART_tx_available, kinetis_UART_rx_available, &kinetis_UART_copy_to_tx, &kinetis_UART_copy_from_rx);
+void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *instance);
 
 
 #endif //TRACER_TEENSY35_UART_H

@@ -21,268 +21,238 @@
 #ifndef TRACER_PORT_H
 #define TRACER_PORT_H
 
+#include "stdint.h"
+
+
+//---------------------------------------------------- IO descriptor ---------------------------------------------------
+
 /*
- * The port general header. THIS FILE MUST NOT BE INCLUDED IN YOUR CODE
- *
- *  This file contains enums and struct typedefs for general PORT modules.
- *
- *  It must only be included in the PORT implementation's header, to provide definitions for general functions,
- *  as it counts on previous definition of (for ex) the PORT_input_filter_data_t type, and provide definitions for
- *  inline functions;
- *
- *
- * The port module manages the pins behaviour.
- *
- *  It manages :
- *  - Interrupts and DMA modes for pins interrupts;
- *  - Pin multiplexing;
- *  - Hardware configuration for both data directions;
+ * To configure IOs correctly, we need the following set of information, provided by the board header;
  */
 
-#include "stdint.h"
+struct io_desc_t {
+
+	//The port identifier;
+	uint8_t port_index;
+
+	//The bit identifier;
+	uint8_t bit_index;
+
+	//The mux channel;
+	uint8_t mux_channel;
+
+};
+
+
+//---------------------------------------------------- GPIO data ---------------------------------------------------
+
+/*
+ * GPIOs are manipulated directly by register. When a GPIO operation is required, the register's address is queried,
+ * depending of the type of operation required;
+ *
+ * A GPIO operation register can have the following type :
+ */
+
+enum gpio_register_type_e {
+
+	//Complete port write;
+		GPIO_OUTPUT_DATA_REGISTER,
+
+	//Set a certain number of bits;
+		GPIO_OUTPUT_SET_REGISTER,
+
+	//Clear a certain number of bits;
+		GPIO_OUTPUT_CLEAR_REGISTER,
+
+	//Toggle a certain number of bits;
+		GPIO_OUTPUT_TOGGLE_REGISTER,
+
+	//Complete port read;
+		GPIO_INPUT_DATA_REGISTER,
+
+};
+
+//---------------------------------------------------- Port Driver ---------------------------------------------------
+
+
+/*
+ * The PORT driver has two objectives :
+ * 	- configuring pins to their required mode;
+ * 	- providing access to GPIO registers;
+ */
+
+struct port_driver_t {
+
+	//------------------- Pin config -------------------
+
+	//Get a pin's current configuration (useful to defaults mistakes);
+	void (*const get_pin_config)(const struct port_driver_t *, const struct io_desc_t *pin, void *config);
+
+	//Set a pin's configuration. Mux channel is updated automatically. Config might have been queried before;
+	void (*const configure_pin)(const struct port_driver_t *, const struct io_desc_t *pin, const void *config);
+
+
+
+	//------------------- Gpio -------------------
+
+	//The size of a gpio register;
+	const size_t gpio_register_size;
+
+
+	//Get the descriptor for a single IO pin : the register and the appropriate mask for the pin
+	bool (*const get_gpio_descriptor)(const struct port_driver_t *,
+								 enum gpio_register_type_e type, const struct io_desc_t *,
+								 volatile void **gpio_register, void *mask_p);
+
+
+	//------------------- Destructor -------------------
+
+	//The function that must be called to delete the port driver;
+	void (*const destructor)(struct port_driver_t *);
+
+};
+
+
+//Shortcut for pin config getter;
+inline void port_driver_get_pin_config(const struct port_driver_t *driver, const struct io_desc_t *pin, void *config) {
+	(*(driver->get_pin_config))(driver, pin, config);
+}
+
+
+//Shortcut for pin config setter;
+inline void port_driver_configure_pin(const struct port_driver_t *driver, const struct io_desc_t *pin, void *config) {
+	(*(driver->configure_pin))(driver, pin, config);
+}
+
+
+//Shortcut for gpio descriptor getter;
+inline void port_driver_get_gpio_descriptor(const struct port_driver_t *driver,
+									 enum gpio_register_type_e type, const struct io_desc_t *pin,
+									 volatile void **gpio_register, void *mask_p) {
+	(*(driver->get_gpio_descriptor))(driver, type, pin, gpio_register, mask_p);
+}
+
+//Shortcut for destruction
+inline void port_driver_delete(struct port_driver_t *driver) {
+	(*(driver->destructor))(driver);
+}
+
+
+//--------------------------------------------------- Port pin config --------------------------------------------------
+
+/*
+ * Below are listed common configuration options that port drivers are free to use in their configuration structures;
+ */
+
 
 /*
  * Types of interruptions;
  */
 
-typedef enum {
+enum PORT_interrupt_t {
 
-    //No interruption enabled;
-            PORT_NO_INTERRUPT,
+	//No interruption enabled;
+		PORT_NO_INTERRUPT,
 
-    //DMA request on rising edge;
-            PORT_DMA_RISING_EDGE,
+	//DMA request on rising edge;
+		PORT_DMA_RISING_EDGE,
 
-    //DMA request on falling edge;
-            PORT_DMA_FALLING_EDGE,
+	//DMA request on falling edge;
+		PORT_DMA_FALLING_EDGE,
 
-    //DMA request on rising or falling edge;
-            PORT_DMA_EDGE,
+	//DMA request on rising or falling edge;
+		PORT_DMA_EDGE,
 
-    //Interrupt request when logical 0;
-            PORT_INTERRUPT_0,
+	//Interrupt request when logical 0;
+		PORT_INTERRUPT_0,
 
-    //Interrupt request when logical 1;
-            PORT_INTERRUPT_1,
+	//Interrupt request when logical 1;
+		PORT_INTERRUPT_1,
 
-    //Interrupt request on rising edge;
-            PORT_INTERRUPT_RISING_EDGE,
+	//Interrupt request on rising edge;
+		PORT_INTERRUPT_RISING_EDGE,
 
-    //Interrupt request on falling edge;
-            PORT_INTERRUPT_FALLING_EDGE,
+	//Interrupt request on falling edge;
+		PORT_INTERRUPT_FALLING_EDGE,
 
-    //Interrupt request on rising or falling edge;
-            PORT_INTERRUPT_EDGE,
+	//Interrupt request on rising or falling edge;
+		PORT_INTERRUPT_EDGE,
 
-} PORT_interrupt_t;
+};
 
 
 /*
  * The hardware data direction;
  */
 
-typedef enum {
+enum PORT_pin_direction_t {
 
-    //Pin is used to collect data;
-            PORT_INPUT,
+	//Pin is used to collect data;
+		PORT_INPUT,
 
-    //Pin is used to provide data;
-            PORT_OUTPUT
+	//Pin is used to provide data;
+		PORT_OUTPUT
 
-} PORT_pin_direction_t;
+};
 
 
 /*
  * Different input hardware configurations;
  */
 
-typedef enum {
+enum PORT_input_mode_t {
 
-    //High impedance configuration;
-            PORT_HIGH_IMPEDANCE,
+	//High impedance configuration;
+		PORT_HIGH_IMPEDANCE,
 
-    //Pull-up configuration;
-            PORT_PULL_UP,
+	//Pull-up configuration;
+		PORT_PULL_UP,
 
-    //Pull-down configuration;
-            PORT_PULL_DOWN,
+	//Pull-down configuration;
+		PORT_PULL_DOWN,
 
-    //Hysteresis configuration;
-            PORT_HYSTERSIS,
+	//Hysteresis configuration;
+		PORT_HYSTERSIS,
 
 
-    //Repeater configuration;
-            PORT_REPEATER,
+	//Repeater configuration;
+		PORT_REPEATER,
 
-} PORT_input_mode_t;
+};
 
 
 /*
  * Different hardware output configurations;
  */
 
-typedef enum {
+enum PORT_output_mode_t {
 
-    //Open drain configuration;
-            PORT_OPEN_DRAIN,
+	//Open drain configuration;
+		PORT_OPEN_DRAIN,
 
-    //Push-pull configuration;
-            PORT_PUSH_PULL,
+	//Push-pull configuration;
+		PORT_PUSH_PULL,
 
-    //High current drive configuration;
-            PORT_HIGH_DRIVE,
+	//High current drive configuration;
+		PORT_HIGH_DRIVE,
 
-} PORT_output_mode_t;
+};
 
 
 /*
  * Different slew rates;
  */
 
-typedef enum {
+enum PORT_slew_rate_t {
 
-    //Low slew rate;
-            PORT_LOW_RATE,
+	//Low slew rate;
+		PORT_LOW_RATE,
 
-    //High slew rate;
-            PORT_HIGH_RATE,
+	//High slew rate;
+		PORT_HIGH_RATE,
 
 } PORT_slew_rate_t;
 
-
-/*
- * The complete configuration for a pin;
- */
-
-typedef struct {
-
-    /*
-     * Interruption;
-     */
-
-    //The type of interruption;
-    PORT_interrupt_t interrupt_type;
-
-    //The function to call in case of interrupt selected;
-    void (*interrupt_function)(void);
-
-    /*
-     * Hardware configuration;
-     */
-
-    //The enabled multiplexing channel;
-    uint8_t mux_channel;
-
-    //The data direction;
-    PORT_pin_direction_t direction;
-
-
-    /*
-     * Input hardware configuration
-     */
-
-    //The input mode;
-    PORT_input_mode_t input_mode;
-
-    //The input filter type;
-    PORT_input_filter_data_t input_filter;
-
-
-    /*
-     * Output hardware configuration
-     */
-
-    //The output mode;
-    PORT_output_mode_t output_mode;
-
-    //The slew rate;
-    PORT_slew_rate_t slew_rate;
-
-} PORT_pin_config_t;
-
-
-/*
- * To transmit data through GPIOs, the specialised registers must be known.
- *
- *  They will be transmitted through this struct;
- */
-
-typedef struct {
-
-    //The output data register. Used to update the entire port;
-    volatile void *data_register;
-
-    //The set register. Used to set bits in the port;
-    volatile void *set_register;
-
-    //The clear register. Used to clear bits in the port;
-    volatile void *clear_register;
-
-    //The toggle register. Used to toggle bits in the port;
-    volatile void *toggle_register;
-
-} GPIO_output_registers_t;
-
-
-/*
- * ---------------------------- Configuration ----------------------------
- */
-
-//Get a pin's current configuration (avoid defaults mistakes);
-void PORT_get_pin_config(PORT_pin_t *pin, PORT_pin_config_t *);
-
-//Set a pin's configuration. Config might have been queried before with the function behind;
-void PORT_set_pin_configuration(PORT_pin_t *pin, PORT_pin_config_t *);
-
-
-/*
- * ---------------------------- GPIO ----------------------------
- */
-
-/*
- * GPIO functions are critical functions, that must task the least time as possible.
- *
- *  To enable the hardware abstraction, without loss of efficiency, the control of a GPIO pin is done by the
- *  following :
- *  - Get hardware registers for the required GPIO pin;
- *  - Call a GPIO function, providing the register.
- *
- *  GPIO functions are inline, to enable full optimisation, and are trivial (register assignment) if GPIO functions
- *  (data set, bits set, bits clear, bits toggle) are supported by the hardware;
- *
- *  This method is a bit heavy to setup, but guarantees the best optimisation, regarding the hardware abstraction;
- */
-
-
-//Get a GPIO pin's hardware registers. This function is used for the setup, and is not made to be fast or optimised;
-void PORT_get_GPIO_output_registers(PORT_t *port, GPIO_output_registers_t *);
-
-/*
- * GPIO functions are time critical, and so are inline. If your hardware supports GPIO action, you may define
- * GPIO inline functions in your PORT driver's header, and include it in your arch's header.
- *
- * To ease inter-compatibility, please use function signatures as listed below.
- */
-
-// ---------------------------------- GPIO functions ----------------------------------
-
-//Get a GPIO pin's mask;
-inline GPIO_mask_t GPIO_get_mask(PORT_pin_t *pin);
-
-//The software setter : no software process to do, all is supported by the hardware;
-inline void GPIO_data(volatile void *hw, GPIO_mask_t value);
-
-
-//The software bitwise setter : no software process to do, all is supported by the hardware;
-inline void GPIO_set_bits(volatile void *hw, GPIO_mask_t value);
-
-
-//The software bitwise clearer : no software process to do, all is supported by the hardware;
-inline void GPIO_clear_bits(volatile void *hw, GPIO_mask_t value);
-
-
-//The software bitwise toggler : no software process to do, all is supported by the hardware;
-inline void GPIO_toggle_bits(volatile void * hw, GPIO_mask_t value);
 
 
 #endif //TRACER_PORT_H

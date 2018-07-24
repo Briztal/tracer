@@ -190,7 +190,7 @@ void vlarray_remove_element(vlarray_t *const vlarray, const size_t index) {
 	//For each byte to shift :
 	for (; shift_counter--;) {
 
-		//Copy the src byte in the destination position and increment both pointers;
+		//Copy the src byte in the destination position and bloc_spacing both pointers;
 		(*dst_ptr++) = (*src_ptr++);
 
 	}

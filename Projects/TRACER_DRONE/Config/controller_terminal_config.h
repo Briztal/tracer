@@ -20,9 +20,9 @@
 
 
 /*
- * The Terminal Interface configuration file.
+ * The Terminal Interface configuration file_tree.
  *
- * This file defines the behaviour and the size of the parser.
+ * This file_tree defines the behaviour and the size of the parser.
  *
  */
 

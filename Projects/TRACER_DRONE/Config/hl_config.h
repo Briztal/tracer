@@ -19,9 +19,9 @@
 */
 
 /*
- * hl_config : this file configures the hardware abstraction layer.
+ * hl_config : this file_tree configures the hardware abstraction layer.
  *
- *  In this file, you must :
+ *  In this file_tree, you must :
  *
  *      - Configure timer interrupts;
  *      - Set interrupt priorities;

@@ -385,7 +385,7 @@ inline void kernel_leave_critical_section() {
 
     }
 
-    //If we must enable interrupts again :
+    //If we must update interrupts again :
     if (!(--critical_section_counter)) {
 
         //Enable interrupts;

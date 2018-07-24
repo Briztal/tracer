@@ -19,7 +19,7 @@
 */
 
 /*
- * This file contains all data related to thermistors.
+ * This file_tree contains all data related to thermistors.
  *
  * I got this data from the reprap.org page dedicated to thermistors :
  *
@@ -27,7 +27,7 @@
  *
  * It comprises lookup table for each thermistor that the code can deal with, and the table size for each one.
  *
- * You may use macros provided here to populate the thermistor section of you configuration file.
+ * You may use macros provided here to populate the thermistor section of you configuration file_tree.
  *
  * To do so, you may use the next abbreviation table
  *

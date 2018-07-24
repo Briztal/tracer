@@ -146,7 +146,7 @@ KalmanFilter::~KalmanFilter() {
 //----------------------------------------------------- Computation ----------------------------------------------------
 
 /*
- * Compute : this function will execute all steps described in the doc file in the current folder;
+ * Compute : this function will execute all steps described in the doc file_tree in the current folder;
  */
 
 void KalmanFilter::compute(float *const measure) {

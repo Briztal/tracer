@@ -382,6 +382,7 @@ string_t *str_f(float f, uint8_t resolution) {
     //For instance, return the integer part;
     //TODO TSTRING;
     return int_string;
+
 }
 
 //--------------------------------------------- Memory copy utils ---------------------------------------------
@@ -414,47 +415,25 @@ void string_symmetric_copy(void *dst, const void *sym_str, size_t size) {
 }
 
 
-//-------------------------------------- C style functions --------------------------------------
+//-------------------------------------- C string lib complement --------------------------------------
 
 /*
- * length : this function determines the length of the string (without the \0 comprised);
+ * strcnt : counts the number of chars separating the first char of the separator 0;
  */
 
-uint8_t string_length(const char *in_buffer) {
+size_t strcnt(const char *str, const char s) {
 
-    uint8_t char_count = 0;
+	//Initialise the char counter;
+    size_t char_count = 0;
 
-    //While the current char is not null;
-    while (*(in_buffer++)) {
-
-        //Increment the size of the copied buffer.
-        char_count++;
-    }
-
-    //Return the number of characters before the end of the string
-    return char_count;
-
-}
-
-
-//TODO RE-COMMENT, THIS IS THE OLD FUNCTION
-
-/*
- * string_count_until_char : this function will return the number of chars to enumerate from the string's initial
- * before encountering the required char;
- */
-
-uint8_t string_count_until_char(const char *in_buffer, const char limit_char) {
-
-    uint8_t char_count = 0;
     //Initialise a cache for the current char
-    char c = *(in_buffer++);
+    char crt = *(str++);
 
     //While the current char is not null, or the limit char
-    while (c && (c != limit_char)) {
+    while (crt && (crt != s)) {
 
         //Update the current char
-        c = *(in_buffer++);
+        crt = *(str++);
 
         //Increment the size of the copied buffer.
         char_count++;
@@ -467,109 +446,84 @@ uint8_t string_count_until_char(const char *in_buffer, const char limit_char) {
 
 
 /*
- * string_lstrip : this function counts the number of time that 'verif_char' is present (consecutively) at the initial
- *  of in_buffer. For example, with in_buffer containing   '0' '0' '0' '0' '5' '2' '\0', the result of the command
- *      lstrip(in_buffer, '0') will be 4.
+ * strdiff : gets the location of the first char of str that is not equal to c;
  *
+ * 	If 0 is provided, returns str;
  */
 
-uint8_t string_lstrip(const char *in_buffer, const char verif_char) {
+char *strdiff(const char *str, const char c) {
 
-    //initialise_hardware a counter
-    uint8_t counter = 0;
+	//If c is null, return str;
+	if (!c)
+		return (char *) str;
 
-    //Initialise a cache var for the current char
-    char c = *(in_buffer++);
+	//While the current char equals c :
+	while (*(str) == c) {
 
-    //While the current char is not null, and is equal to 'verif_char'
-    while (c && (c == verif_char)) {
+		//Go to the next char;
+		str++;
 
-        //Increment the presence counter
-        counter++;
+	}
 
-        //Update the char
-        c = *(in_buffer++);
-
-    }
-
-    return counter;
+	//Return the number of characters before the limit char (or the end of the string
+	return (char *) str;
 
 }
 
 
 /*
- * count_words : this function determines the number of words in a char sequence.
+ * strcw : counts the number of words in the string, words being non-empty char sequences, separated by the separator
+ * char.
  */
 
-uint8_t string_count_words(const char *in_buffer) {
+size_t strcw(const char *str, const char s) {
 
     //Initialise a word counter.
-    uint8_t nb_words = 0;
+    size_t nb_words = 0;
 
-    //initialise_hardware a size for the current word.
-    uint8_t size;
+    //initialise_peripheral a size for the current word.
+    size_t size;
 
     do {
 
         //Remove unnecessary nb_spaces at the initial of the char sequence.
-        in_buffer += string_lstrip(in_buffer, ' ');
+        str = strdiff(str, s);
 
         //Get the size of the next word (will ne zero only if the sequence is finished).
-        size = string_count_until_char(in_buffer, ' ');
+        size = strcnt(str, s);
 
-        //increment the data pointer at the end of the word.
-        in_buffer += size;
+		//If we already are at the end of the word, the string is finished :
+		if (!size) {
+			break;
+		}
 
-        //Stop working if the size is zero (sequence finished)
-    } while (size);
+        //Go to the end of the word.
+        str += size;
+
+		//Increment the number of words
+		nb_words++;
+
+    } while (true);
 
     //Return the number of words.
     return nb_words;
 
 }
 
-
 /*
- * strcmp : compares the two provided strings, and return true if they are equal;
+ * strgw : receives a string and a separator, determines the address of the word's first char, and its size;
  */
 
-bool string_strcmp(const char *string0, const char *string1) {
+void strgw(const char *const str, const char s, const char **const word_p, size_t *const size) {
 
-    //Comparison loop;
-    while (true) {
+	//Remove separators at the beginning of the char sequence.
+	*word_p = strdiff(str, s);
 
-        //Cache the current char of string0 and increment string0;
-        char c = *(string0++);
-
-        //Compare with the current char of string1 and increment string1. If chars are different :
-        if (c != *(string1++)) {
-
-            //Found two different chars at the same index -> not equal;
-            return false;
-
-        }
-
-        //Now, we are shure that both chars are the same;
-
-        //If the current char is a null cleanup :
-        if (!c) {
-
-            //End of string found for both strings : both strings are the same;
-            return true;
-
-        }
-
-
-        //If not, re-iterate;
-    }
-
-    //End case, never happens as strings are null terminated;
-    return false;
+	//Determine and save the size of the next word;
+	//As separators have been removed, will be zero only if the string is over;
+	*size = strcnt(str, s);
 
 }
-
-
-
 
 
 //---------------------------------------- To string Privates ----------------------------------------

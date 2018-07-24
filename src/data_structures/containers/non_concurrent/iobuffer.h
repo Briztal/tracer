@@ -33,7 +33,6 @@
 
 struct iobuffer_t;
 
-
 /*
  * The base iobuffer channel type. Every channel will be composed of this struct; It is composed of the following
  * 	elements :
@@ -56,19 +55,27 @@ typedef struct {
 
 	//------------------------------------ Function pointers ------------------------------------
 
-	//A function pointer, disable the channel, constant;
-	void (*const disable)(struct iobuffer_channel_t *channel);
-
-	//A function pointer to enable the channel, after transfer fields have been updated;
-	void (*const enable)(struct iobuffer_channel_t *channel);
+	//A function pointer to update the channel, after transfer fields have been updated;
+	void (*const update)(struct iobuffer_channel_t *channel);
 
 	//A function pointer to reset the channel to a non-transferring state;
 	void (*const reset)(struct iobuffer_channel_t *channel);
 
 	//A function pointer to delete the channel, constant;
-	void (*destructor)(struct iobuffer_channel_t *channel);
+	void (*const destructor)(struct iobuffer_channel_t *channel);
 
-} iobuffer_channel_t;
+} iochannel_t;
+
+
+//Update shortcut;
+inline void iochannel_update(iochannel_t *const channel) {
+	(*(channel->update))(channel);
+}
+
+//Reset shortcut;
+inline void iochannel_reset(iochannel_t *const channel) {
+	(*(channel->reset))(channel);
+}
 
 
 /*
@@ -85,17 +92,14 @@ typedef struct iobuffer_t {
 	//The buffer's limit address, not allocated, constant;
 	void *const buffer_max;
 
-	//The buffer total size, constant;
-	const size_t buffer_size;
-
 
 	//------------------------- Access channels -------------------------
 
 	//Input channel; Stored by pointer for deletion;
-	iobuffer_channel_t *input_channel;
+	iochannel_t *input_channel;
 
 	//Output channel; Stored by pointer for deletion;
-	iobuffer_channel_t *output_channel;
+	iochannel_t *output_channel;
 
 
 } iobuffer_t;
@@ -104,19 +108,21 @@ typedef struct iobuffer_t {
 //----------------------------------------------------- Init - exit ----------------------------------------------------
 
 //Initialise the buffer with direct access on both sides;
-void iobuffer_create(size_t size, iobuffer_channel_t *input_channel, iobuffer_channel_t *output_channel);
+void iobuffer_create(size_t size, iochannel_t *input_channel, iochannel_t *output_channel);
 
 
-//-------------------------------------------------- Channel Deletion --------------------------------------------------
+//Register a channel to a buffer;
+void iobuffer_channel_register_buffer(iochannel_t *channel, iobuffer_t *iobuffer);
 
-//Un-register a channel;
-void iobuffer_unregister_channel(iobuffer_channel_t *channel);
+
+//Deletes the channel, eventually deletes the buffer and resets the buffer's other channel;
+void iobuffer_channel_delete(iochannel_t *channel);
 
 
 //------------------------------------------------ Transfer persistence ------------------------------------------------
 
 //Notify the IOBuffer that one of its channel has completed a transfer, whose size is sored in the channel pointer;
-void persist_transfer(iobuffer_channel_t *channel);
+void persist_transfer(iochannel_t *channel);
 
 
 

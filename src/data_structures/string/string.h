@@ -29,17 +29,18 @@
 
 typedef struct {
 
-    //The current length of the string;
-    const size_t length;
+	//The current length of the string;
+	const size_t length;
 
-    //The data of the string;
-    const char *const data;
+	//The data of the string;
+	const char *const data;
 
 } string_t;
 
 
 
 //-------------------------------------- String lifecycle; --------------------------------------
+
 
 
 //String deletion;
@@ -75,28 +76,26 @@ string_t *str_s64(int64_t);
 string_t *str_f(float, uint8_t resolution);
 
 
-
 //Copy the given array to the dst array in the symetric order;
 void string_symmetric_copy(void *dst, const void *src, size_t size);
 
 
 //-------------------------------------- various conversions ----------------------------------
 
-//Get the number of times that 'verif_char' is consecutively present, at the beginning of the char sequence.
-uint8_t string_lstrip(const char *in_buffer, char verif_char);
+//Get the location of the first char that is not equal to c from the end of the string.
+char *strdiff(const char *str, char c);
 
-//Get the length of a string;
-uint8_t string_length(const char *in_buffer);
+//Count the number of chars separating the string beginning and c (or the end);
+size_t strcnt(const char *str, char c);
 
-//Count thenumber of chars before the limit_char, or the end of the string;
-uint8_t string_count_until_char(const char *in_buffer, char limit_char);
+//Count the number of words in the string;
+size_t strcw(const char *str, char s);
+
+//Get the next word and its size;
+void strgw(const char *str, char s, const char **word_p, size_t *size);
 
 //Get the number of words in the string;
 uint8_t string_count_words(const char *in_buffer);
-
-//Compare the two strings, and return true if they are the same;
-bool string_strcmp(const char *string0, const char *string1);
-
 
 
 #endif //TRACER_BASICSTRING_H
