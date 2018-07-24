@@ -113,6 +113,8 @@ void arch_blink(uint16_t delay) {
 	//Cache the LED pin, on PORT C bit 5
 	struct io_desc_t pin = PTC5;
 
+
+
 	//Get the current configuration;
 	port_driver_get_pin_config(port, &pin, &config);
 
@@ -120,6 +122,7 @@ void arch_blink(uint16_t delay) {
 	config.mux_channel = 1;
 	config.direction = PORT_OUTPUT;
 	config.output_mode = PORT_HIGH_DRIVE;
+
 
 	//Update the configuration;
 	port_driver_configure_pin(port, &pin, &config);
@@ -130,9 +133,11 @@ void arch_blink(uint16_t delay) {
 	//Cache set mask and clear mask;
 	uint32_t set_mask, clr_mask;
 
+
 	//Get set register and mask;
 	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_SET_REGISTER, &pin, (volatile void **) &set_register, &set_mask);
 	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_CLEAR_REGISTER, &pin, (volatile void **) &clr_register, &clr_mask);
+
 
 	//Indefinately :
 	while (true) {
@@ -186,6 +191,7 @@ void arch_count(size_t count) {
 	uint32_t set_mask, clr_mask;
 
 	//Get set register and mask;
+
 	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_SET_REGISTER, &pin, (volatile void **) &set_register, &set_mask);
 	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_CLEAR_REGISTER, &pin, (volatile void **) &clr_register, &clr_mask);
 

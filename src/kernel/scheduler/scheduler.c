@@ -185,6 +185,8 @@ void scheduler_stop() {
 
 }
 
+/*
+
 uint16_t gf = 1;
 volatile bool init = false;
 
@@ -244,6 +246,8 @@ void dumb_blink(void *unused) {
     }
 
 }
+
+ */
 
 /*
  * scheduler_create_processes : initialises different linkes lists;

@@ -64,6 +64,9 @@ void core_init() {
     //Initialise and start the systick timer;
     core_systick_init();
 
+
+	kernel_halt(100);
+
     //Initialise the preemption interrupt;
     core_preemption_init();
 

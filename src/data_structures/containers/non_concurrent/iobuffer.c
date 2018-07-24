@@ -155,7 +155,7 @@ void iobuffer_channel_delete(iochannel_t *const channel) {
 	}
 
 	//Delete the channel;
-	iochannel_delete(channel);
+	(*(channel->destructor))(channel);
 
 	//Leave the critical section;
 	kernel_leave_critical_section();

@@ -242,7 +242,7 @@
 #define I2S0_RXD1		{PORT_E, 8, 2};
 #define UART5_TX		{PORT_E, 8, 3};
 //TODO##define I2S0_RX_FS		{PORT_E, 8, 4};
-#define FT%3_CH3		{PORT_E, 8, 6};
+#define FTM3_CH3		{PORT_E, 8, 6};
 
 
 //------------------ PORT E, pin 9

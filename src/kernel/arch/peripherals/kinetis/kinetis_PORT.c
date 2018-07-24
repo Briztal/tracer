@@ -173,12 +173,12 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			//Provide access to the pin config getter;
 			.get_pin_config =
-			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, void *) const)
+			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, void *))
 				&kinetis_PORT_get_pin_config,
 
 			//Provide access to the pin configuration setter;
 			.configure_pin =
-			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, const void *) const)
+			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, const void *))
 				&kinetis_PORT_configure_pin,
 
 
@@ -218,7 +218,7 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 	};
 
 	//Allocate, initialise, and return the gpio driver struct;
-	return kernel_malloc_copy(sizeof(struct gpio_driver_t), &init);
+	return kernel_malloc_copy(sizeof(struct kinetis_PORT_driver_t), &init);
 
 }
 
@@ -285,6 +285,9 @@ bool kinetis_PORT_get_gpio_descriptor(const struct kinetis_PORT_driver_t *driver
 
 	//Determine the mask; The GPIO peripheral eases our life;
 	*(uint32_t *) mask_p = (uint32_t) 1 << bit_index;
+
+	//Complete;
+	return true;
 
 }
 
@@ -377,8 +380,8 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const drive
 	uint8_t bit = pin->bit_index;
 
 	//Cache the concerned port and gpio peripherals memory addresses;
-	struct kinetis_PORT_memory_t *port = mem_desc_get_bloc(&driver->ports, port_id);
-	struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
+	volatile struct kinetis_PORT_memory_t *port = mem_desc_get_bloc(&driver->ports, port_id);
+	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
 	//Declare the configuration register to write; Set the flag bit to clear it by default;
 	uint32_t config_register = port->PCR[bit];
@@ -497,8 +500,8 @@ void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver
 	uint8_t bit = pin->bit_index;
 
 	//Cache the concerned port and gpio peripherals memory addresses;
-	struct kinetis_PORT_memory_t *port = mem_desc_get_bloc(&driver->ports, port_id);
-	struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
+	volatile struct kinetis_PORT_memory_t *port = mem_desc_get_bloc(&driver->ports, port_id);
+	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
 	//TODO ERRORS IN CASE OF BAD CONFIGURATION;
 

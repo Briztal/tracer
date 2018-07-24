@@ -38,7 +38,7 @@ struct iobuffer_t;
  * 	elements :
  */
 
-typedef struct {
+typedef struct iochannel_t {
 
 	//The buffer the channel relates to; Pointer is volatile, also serves of registeration state;
 	struct iobuffer_t *volatile buffer;
@@ -56,13 +56,13 @@ typedef struct {
 	//------------------------------------ Function pointers ------------------------------------
 
 	//A function pointer to update the channel, after transfer fields have been updated;
-	void (*const update)(struct iobuffer_channel_t *channel);
+	void (*const update)(struct iochannel_t *channel);
 
 	//A function pointer to reset the channel to a non-transferring state;
-	void (*const reset)(struct iobuffer_channel_t *channel);
+	void (*const reset)(struct iochannel_t *channel);
 
 	//A function pointer to delete the channel, constant;
-	void (*const destructor)(struct iobuffer_channel_t *channel);
+	void (*const destructor)(struct iochannel_t *channel);
 
 } iochannel_t;
 
@@ -76,6 +76,7 @@ inline void iochannel_update(iochannel_t *const channel) {
 inline void iochannel_reset(iochannel_t *const channel) {
 	(*(channel->reset))(channel);
 }
+
 
 
 /*

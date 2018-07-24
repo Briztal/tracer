@@ -156,26 +156,4 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *first_port_peri
 
 
 
-/*
- *
-	/*
-	 * Offsets to query gpio registers;
-
-
-//The data register offset (-1 for disable);
-const size_t data_register_offset;
-
-//The set register offset  (-1 for disable);
-const size_t set_register_offset;
-
-//The clear register offset  (-1 for disable);
-const size_t clear_register_offset;
-
-//The toggle register offset (-1 for disable);
-const size_t toggle_register_offset;
-
-
-*/
-
-
 #endif //TRACER_KINETIS_PORT_H

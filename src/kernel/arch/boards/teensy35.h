@@ -81,5 +81,65 @@ KINETIS_UART_DECLARE(5);
 
 void teensy35_hardware_init();
 
+/*
+//---------------------------------------- Debug -
+
+inline void teensy35_led_high() {
+
+	//Output
+	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
+
+	//ALT 1
+	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
+
+	//Set
+	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
+
+}
+
+inline void teensy35_led_low() {
+
+	//Output
+	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
+
+	//ALT 1
+	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
+
+	//Clear
+	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
+
+}
+
+
+inline void teensy35_delay(uint32_t ms_counter) {
+
+	while(ms_counter--) {
+		//Count to;
+		for (volatile uint32_t i = 15000; i--;);
+	}
+
+}
+
+inline void teensy35_led_blink(uint32_t ms_counter) {
+
+	while(true) {
+		teensy35_led_high();
+		teensy35_delay(ms_counter);
+		teensy35_led_low();
+		teensy35_delay(ms_counter);
+
+	}
+
+}
+
+
+inline void teensy35_led_halt() {
+
+	teensy35_led_high();
+
+	while (true);
+}
+
+*/
 
 #endif

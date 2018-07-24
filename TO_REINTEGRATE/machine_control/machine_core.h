@@ -26,7 +26,7 @@
 #include <stdbool.h>
 
 #include <data_structures/containers/non_concurrent/llist.h>
-#include "../../../TO_REINTEGRATE/computation_network.h"
+#include "../computation_network.h"
 
 
 #include "machine.h"

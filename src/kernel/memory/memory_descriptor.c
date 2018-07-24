@@ -2,7 +2,7 @@
 // Created by root on 7/24/18.
 //
 
-#include "memory_descriptor.h
+#include "memory_descriptor.h"
 
 
 
@@ -21,7 +21,7 @@ volatile void *mem_desc_get_bloc(const struct mem_desc_t *mem_desc, size_t bloc_
 	}
 
 	//Determine the address of the required peripheral, and add the offset to get the address of the specified register;
-	return mem_desc->start_address + (size_t) mem_desc->bloc_spacing * bloc_id;
+	return (volatile uint8_t *)mem_desc->start_address + (size_t) mem_desc->bloc_spacing * bloc_id;
 
 }
 
@@ -50,7 +50,7 @@ volatile void *mem_desc_get_bloc_member(const struct mem_desc_t *mem_desc, size_
 	}
 
 	//Determine the address of the required peripheral, and add the offset to get the address of the specified register;
-	return mem_desc->start_address + (size_t) mem_desc->bloc_spacing * bloc_id + offset_in_bloc;
+	return (volatile uint8_t *)mem_desc->start_address + (size_t) mem_desc->bloc_spacing * bloc_id + offset_in_bloc;
 
 }
 
