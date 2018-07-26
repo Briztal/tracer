@@ -5,85 +5,64 @@
 #include "memory_stream.h"
 
 #include <string.h>
+#include <kernel/arch/arch.h>
 
-//----------------------------------------------------- Init - Exit ----------------------------------------------------
 
-/*
- * stream_read : reads blocs from the stream memory; Returns the size of the read zone, zero if bad direction;
- */
+inline void stream_discard(struct stream_memory_t *const stream, const size_t nb_transferred_blocs) {
 
-size_t stream_read(struct stream_memory_t *const stream, const size_t nb_blocs, void *const dst,
-				   const size_t dst_size) {
+	//If the transfer has happened and the function is not null : 
+	if (nb_transferred_blocs && stream->discard_blocs) {
 
-	//If the stream is an input stream :
-	if (stream->input_stream) {
-
-		//Error, wrong direction. Do nothing;
-		return 0;
+		//Call the function;
+		(*(stream->discard_blocs))(stream, nb_transferred_blocs);
 
 	}
-
-	//TODO CHECK FOR DST OVERFLOW, DST_SIZE IS NOT USED
-
-	//Determine how many blocs are available;
-	size_t blocs_to_read = (*(stream->available_blocs))(stream);
-
-	//Major the number of blocs to read;
-	if (blocs_to_read > nb_blocs) {
-		blocs_to_read = nb_blocs;
-	}
-
-	//Cache size and spacings of blocs;
-	const size_t bloc_size = stream->bloc_size, bloc_spacing = stream->bloc_spacing;
-
-	//Save a copy of the number of blocs read;
-	const size_t read_blocs = blocs_to_read;
-
-	//Cache the reading address;
-	const volatile uint8_t *read_address = stream->start_address;
-
-	//Cache the writing address;
-	uint8_t *write_address = dst;
-
-	//For each bloc to read :
-	while(blocs_to_read--) {
-
-		//If we are about to read the last bloc :
-		if (!blocs_to_read) {
-
-			//Read the clear register;
-			*stream->clear_register;
-
-		}
-
-		//Copy contiguous regions;
-		memcpy(write_address, (const void *) read_address, bloc_size);
-
-		//Update the write address;
-		write_address += bloc_size;
-
-		//Update the read address;
-		read_address += bloc_spacing;
-
-	}
-
-	//Discard all read blocs;
-	(*(stream->discard_blocs))(stream, read_blocs);
-
-
-	//Determine the number copied bytes;
-	return read_blocs * bloc_size;
 
 }
 
 
+//---------------------------------------------------- Read - write ----------------------------------------------------
 
 /*
- * stream_read : copies blocs to the stream memory; Returns the size of the copied zone, zero if bad direction:
+ * transfer_blocs : setups the transfer and calls the stream transfer function;
  */
 
-size_t stream_write(struct stream_memory_t *const stream,  const size_t nb_blocs, const void *const src,
-					const size_t dst_size) {
+size_t stream_transfer(struct stream_memory_t *const stream, struct mem_desc_t *const mem) {
+
+	//Create the stream's block descriptor;
+	struct blocks_desc_t stream_descriptor;
+
+	//Get the stream's bloc descriptor;
+	(*(stream->get_bloc_descriptor))(stream, &stream_descriptor);
+
+	//Create the transfer's block descriptor;
+	struct blocks_desc_t descriptor;
+
+	//Merge the couple of bloc descriptors; Will assert if a transfer can happen;
+	bool transferable = block_desc_merge(&stream_descriptor, &mem->bloc_desc, &descriptor);
+
+	//If no transfer can happen, nothing to do;
+	if (!transferable) {
+		return 0;
+	}
+
+	//Transfer blocs, and return the size of the copy;
+	(*(stream->transfer_blocs))(stream, &mem->memory_map, &descriptor);
+
+	//Discard some blocks;
+	stream_discard(stream, descriptor.nb_blocks);
+
+	//Return the number of read blocks;
+	return descriptor.nb_blocks;
+
+}
+
+
+/*
+ * stream_read : executes the transfer if the stream is output;
+ */
+
+size_t stream_read(struct stream_memory_t *const stream, struct mem_desc_t *const dst) {
 
 	//If the stream is an input stream :
 	if (stream->input_stream) {
@@ -93,55 +72,28 @@ size_t stream_write(struct stream_memory_t *const stream,  const size_t nb_blocs
 
 	}
 
-	//TODO CHECK FOR DST OVERFLOW, DST_SIZE IS NOT USED
+	//Execute the transfer;
+	return stream_transfer(stream, dst);
+	
+}
 
-	//Determine how many blocs are available;
-	size_t blocs_to_read = (*(stream->available_blocs))(stream);
 
-	//Major the number of blocs to read;
-	if (blocs_to_read > nb_blocs) {
-		blocs_to_read = nb_blocs;
-	}
+/*
+ * stream_write : executes the transfer if the stream is input;
+ */
 
-	//Cache size and spacings of blocs;
-	const size_t bloc_size = stream->bloc_size, bloc_spacing = stream->bloc_spacing;
+size_t stream_write(struct stream_memory_t *const stream, struct mem_desc_t *const src) {
 
-	//Save a copy of the number of blocs read;
-	const size_t read_blocs = blocs_to_read;
+	//If the stream is an output stream :
+	if (!stream->input_stream) {
 
-	//Cache the reading address;
-	const uint8_t *read_address = src;
+		//Error, wrong direction. Do nothing;
+		return 0;
 
-	//Cache the writing address;
-	volatile uint8_t *write_address = stream->start_address;
-
-	//For each bloc to read :
-	while(blocs_to_read--) {
-
-		//If we are about to read the last bloc :
-		if (!blocs_to_read) {
-
-			//Read the clear register;
-			*stream->clear_register;
-
-		}
-		//Copy contiguous regions;
-		memcpy((void *) write_address, read_address, bloc_size);
-
-		//Update the write address;
-		write_address += bloc_spacing;
-
-		//Update the read address;
-		read_address += bloc_size;
 
 	}
 
-	//Discard all read blocs;
-	(*(stream->discard_blocs))(stream, read_blocs);
-
-
-	//Determine the number copied bytes;
-	return read_blocs * bloc_size;
-
+	//Execute the transfer;
+	return stream_transfer(stream, src);
 
 }

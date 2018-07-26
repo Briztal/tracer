@@ -66,6 +66,8 @@ KINETIS_PIT_DECLARE(3);
 //To define UART drivers we must include the UART driver header;
 #include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
 
+extern struct kinetis_UART_driver_t *UART0;
+
 /*
 //The teensy35 supports 6 UARTS;
 KINETIS_UART_DECLARE(0);
@@ -81,7 +83,7 @@ KINETIS_UART_DECLARE(5);
 
 void teensy35_hardware_init();
 
-/*
+
 //---------------------------------------- Debug -
 
 inline void teensy35_led_high() {
@@ -133,6 +135,33 @@ inline void teensy35_led_blink(uint32_t ms_counter) {
 }
 
 
+inline void teensy35_led_count(size_t count) {
+
+	//Indefinately :
+	while (true) {
+		for (size_t c = count; c--;) {
+
+			//Turn on the LED;
+			teensy35_led_high();
+
+			//Wait 10 ms;
+			teensy35_delay(250);
+
+			//Turn off the LED;
+			teensy35_led_low();
+
+			//Wait 10 ms;
+			teensy35_delay(250);
+
+		}
+
+		teensy35_delay(2000);
+
+	}
+
+}
+
+
 inline void teensy35_led_halt() {
 
 	teensy35_led_high();
@@ -140,6 +169,14 @@ inline void teensy35_led_halt() {
 	while (true);
 }
 
-*/
+inline void teensy35_cmp(size_t c) {
+
+	if (c) {
+		teensy35_led_blink(50);
+	} else {
+		teensy35_led_blink(1000);
+	}
+
+}
 
 #endif

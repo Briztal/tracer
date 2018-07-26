@@ -89,7 +89,7 @@ struct port_driver_t {
 	void (*const get_pin_config)(const struct port_driver_t *, const struct io_desc_t *pin, void *config);
 
 	//Set a pin's configuration. Mux channel is updated automatically. Config might have been queried before;
-	void (*const configure_pin)(const struct port_driver_t *, const struct io_desc_t *pin, const void *config);
+	void (*const configure_pin)(const struct port_driver_t *, const struct io_desc_t *pin, void *config);
 
 
 

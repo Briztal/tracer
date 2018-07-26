@@ -19,6 +19,7 @@
 */
 
 
+#include <kernel/kernel.h>
 #include "teensy35.h"
 
 
@@ -60,11 +61,24 @@ struct kinetis_PORT_driver_t *PORT;
  * --------------------------------------- UART ---------------------------------------
  */
 
-//Include the kinetis driver header;
-#include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
-
 //The teensy35 supports 6 UARTS;
 //KINETIS_UART_DEFINE(0, 0x4006A000, F_CPU, 8, 8, IRQ_UART0_STATUS, IRQ_UART0_ERROR)
+
+#define UART0_MEMORY 0x4006A000
+
+struct kinetis_UART_driver_t *UART0;
+
+void UART0_status_link() {
+	kinetis_UART_status_interrupt(UART0);
+}
+
+uint8_t ctr = 1;
+
+void UART0_error_link() {
+
+	kinetis_UART_error_interrupt(UART0);
+
+}
 
 
 /*
@@ -81,6 +95,19 @@ void teensy35_hardware_init() {
 
 	//Declare the PORT driver;
 	PORT = kinetis_PORT_create(PORT_A_MEMORY, GPIO_A_MEMORY, 5, 0x1000, 0x40);
+
+	//Declare the kinetis UART hardware config;
+	struct kinetis_UART_hw_t uart0_hw = {
+		.registers =  (struct kinetis_UART_registers_t *const) UART0_MEMORY,
+		.clock_frequency = F_CPU,
+		.status_int_channel = IRQ_UART0_STATUS,
+		.error_int_channel = IRQ_UART0_ERROR,
+		.status_link = &UART0_status_link,
+		.error_link = &UART0_error_link
+	};
+
+	//Create the UART;
+	UART0 = kinetis_UART_create(&uart0_hw);
 
 
 }
@@ -112,8 +139,6 @@ void arch_blink(uint16_t delay) {
 
 	//Cache the LED pin, on PORT C bit 5
 	struct io_desc_t pin = PTC5;
-
-
 
 	//Get the current configuration;
 	port_driver_get_pin_config(port, &pin, &config);

@@ -140,7 +140,7 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *driver, con
 
 //Set a pin's current configuration;
 void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *driver, const struct io_desc_t *pin,
-								const struct kinetis_pin_configuration_t *config);
+								struct kinetis_pin_configuration_t *config);
 
 
 //Determine IRQ bits from interrupt type;
@@ -178,7 +178,7 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			//Provide access to the pin configuration setter;
 			.configure_pin =
-			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, const void *))
+			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, void *))
 				&kinetis_PORT_configure_pin,
 
 
@@ -199,19 +199,33 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 		//Initialise the port memory zone;
 		.ports = {
-			.start_address = first_port_peripheral,
-			.bloc_spacing = port_memory_spacing,
-			.nb_blocs = nb_peripherals,
-			.bloc_size = sizeof(struct kinetis_PORT_memory_t)
+
+			.memory_map = {
+				.start_address = first_port_peripheral,
+				.block_spacing = port_memory_spacing,
+			},
+
+			.bloc_desc = {
+				.nb_blocks = nb_peripherals,
+				.block_size = sizeof(struct kinetis_PORT_memory_t),
+			}
+
 		},
 
 
 		//Initialise the gpios memory zone;
 		.gpios = {
-			.start_address = first_gpio_peripheral,
-			.bloc_spacing = gpio_memory_spacing,
-			.nb_blocs = nb_peripherals,
-			.bloc_size = sizeof(struct kinetis_GPIO_memory_t)
+
+			.memory_map = {
+				.start_address = first_gpio_peripheral,
+				.block_spacing = gpio_memory_spacing,
+			},
+
+			.bloc_desc = {
+				.nb_blocks = nb_peripherals,
+				.block_size = sizeof(struct kinetis_GPIO_memory_t)
+			}
+
 		},
 
 
@@ -493,7 +507,10 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const drive
 
 void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver,
 								const struct io_desc_t *const pin,
-								const struct kinetis_pin_configuration_t *const config) {
+								struct kinetis_pin_configuration_t *const config) {
+
+	//First, Update the mux channel;
+	config->mux_channel = pin->mux_channel;
 
 	//Cache the peripheral index and the bit index;
 	uint8_t port_id = pin->port_index;

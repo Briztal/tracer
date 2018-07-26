@@ -31,6 +31,8 @@
 
 #include <kernel/memory/memory_stream.h>
 
+//----------------------------------------------------- Memory Map -----------------------------------------------------
+
 /*
  * First, we define the UART memory map. As all data related to a specific UART are in a continuous memory zone,
  *  We can assimilate them as a struct, whose address is known in memory;
@@ -114,14 +116,9 @@ struct kinetis_UART_hw_t {
 	//The error interrupt channel;
 	const uint8_t error_int_channel;
 
-	//The size index corresponding to the rx buffer size;
-	const uint8_t rx_index;
-
-	//The size index corresponding to the tx buffer size;
-	const uint8_t tx_index;
-
 	//Interrupt link function;
 	void (*const status_link)();
+
 	void (*const error_link)();
 };
 
@@ -135,12 +132,17 @@ struct kinetis_UART_stream_t {
 	//A stream memory, first for pointer cast;
 	struct stream_memory_t stream;
 
-	//The address of the hardware buffer size counter;
-	volatile uint8_t *const size_register;
+	//The S1 register;
+	volatile uint8_t *const S1;
+
+	//The D register;
+	volatile uint8_t *const D;
+
+	//The FIFO counter;
+	volatile uint8_t *const CFIFO;
 
 	//The FIFO size (used only in input for available spaces);
 	const uint8_t fifo_size;
-
 
 };
 
@@ -158,14 +160,12 @@ struct kinetis_UART_driver_t {
 	bool initialised;
 
 	//An output stream memory zone;
-	struct stream_memory_t *output_stream;
+	struct kinetis_UART_stream_t *output_stream;
 
 	//An input stream memory zone;
-	struct stream_memory_t *input_stream;
-
+	struct kinetis_UART_stream_t *input_stream;
 
 };
-
 
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
@@ -177,13 +177,13 @@ struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw_t *);
 void kinetis_UART_delete(struct kinetis_UART_driver_t *);
 
 
-//----------------------------------------------------- Init - Exit ----------------------------------------------------
+//---------------------------------------------------- Start - Stop ----------------------------------------------------
 
 //Initialise the UART;
-void kinetis_UART_init(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config);
+void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config);
 
 //De-initialise the UART;
-void kinetis_UART_exit(const struct kinetis_UART_driver_t *driver_data);
+void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data);
 
 
 //----------------------------------------------------- Interrupts -----------------------------------------------------

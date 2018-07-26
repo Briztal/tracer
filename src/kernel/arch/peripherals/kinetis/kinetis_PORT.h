@@ -30,7 +30,7 @@
 
 #include <kernel/drivers/port.h>
 
-#include <kernel/memory/memory_descriptor.h>
+#include <kernel/memory/memory_transfer.h>
 
 
 //----------------------------------------------- Special configurations -----------------------------------------------

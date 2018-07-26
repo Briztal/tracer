@@ -42,6 +42,28 @@
 #define FTM1_QD_PHB 	{PORT_B, 13, 6};
 
 
+//------------------ PORT B, pin 16
+
+
+#define PTB16			{PORT_B, 16, 1};
+#define SPI1_OUT		{PORT_B, 16, 2};
+#define UART0_RX		{PORT_B, 16, 3};
+#define FTM_CLKIN0		{PORT_B, 16, 4};
+#define FB_AD17			{PORT_B, 16, 5};
+#define EWIM_IN			{PORT_B, 16, 6};
+
+
+//------------------ PORT B, pin 17
+
+#define PTB17			{PORT_B, 17, 1};
+#define SPI1_IN			{PORT_B, 17, 2};
+#define UART0_TX		{PORT_B, 17, 3};
+#define FTM_CLKIN1		{PORT_B, 17, 4};
+#define FB_AD16			{PORT_B, 17, 5};
+#define EWIM_OUT_b		{PORT_B, 17, 6};
+
+
+
 //------------------------------------------ PORT C ------------------------------------------
 
 //------------------ PORT C, pin 0
@@ -85,7 +107,7 @@
 #define PTC3			{PORT_C, 3, 1};
 #define LLWU_P7			{PORT_C, 3, 1};
 #define SPI0_PCS1		{PORT_C, 3, 2};
-#define UART1_RX		{PORT_C, 3, 3};
+//#define UART1_RX		{PORT_C, 3, 3};
 #define FTM0_CH2		{PORT_C, 3, 4};
 #define CLKOUT			{PORT_C, 3, 5};
 #define I2S0_BCLK		{PORT_C, 3, 6};
@@ -96,7 +118,7 @@
 #define PTC4			{PORT_C, 4, 1};
 #define LLWU_P8			{PORT_C, 4, 1};
 #define SPI0_PCS0		{PORT_C, 4, 2};
-#define UART1_TX		{PORT_C, 4, 3};
+//#define UART1_TX		{PORT_C, 4, 3};
 #define FTM0_CH3		{PORT_C, 4, 4};
 #define FB_AD11			{PORT_C, 4, 5};
 #define CMP1_OUT		{PORT_C, 4, 6};
@@ -156,7 +178,7 @@
 #define ADC1_SE4a		{PORT_E, 0, 0};
 #define PTE0			{PORT_E, 0, 1};
 #define SPI1_PCS1		{PORT_E, 0, 2};
-//TODO#define UART1_TX		{PORT_E, 0, 3};
+#define UART1_TX		{PORT_E, 0, 3};
 #define SDHC0_D1		{PORT_E, 0, 4};
 #define TRACE_CLKOUT	{PORT_E, 0, 5};
 #define I2C1_SDA		{PORT_E, 0, 6};
@@ -169,7 +191,7 @@
 #define PTE1			{PORT_E, 1, 1};
 #define LLWU_P0			{PORT_E, 1, 1};
 #define SPI1_SOUT		{PORT_E, 1, 2};
-//TODO#define UART1_RX		{PORT_E, 1, 3};
+#define UART1_RX		{PORT_E, 1, 3};
 #define SDHC0_D0		{PORT_E, 1, 4};
 #define TRACE_D3		{PORT_E, 1, 5};
 #define I2C1_SCL		{PORT_E, 1, 6};
