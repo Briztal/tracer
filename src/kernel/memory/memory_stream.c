@@ -8,6 +8,56 @@
 #include <kernel/arch/arch.h>
 
 
+//----------------------------------------------------- Destruction ----------------------------------------------------
+
+/*
+ * stream_delete : deletes the registered transfer if there is one, and delete the memory zone;
+ */
+
+void stream_delete(struct stream_memory_t *stream_memory) {
+
+	//Cache the transfer's reference;
+	struct stream_auto_transfer_t *transfer = stream_memory->transfer;
+
+	//If the transfer is not null :
+	if (transfer) {
+
+		//Wait until the transfer is finished and stop it;
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+		//TODO WHEN THE TRANSFER JOINS, DOES IT RESCHEDULE ITSELF ?
+
+		//Delete the transfer;
+		stream_auto_transfer_delete(stream_memory->transfer);
+
+	}
+
+	//Call the destructor;
+	(*(stream_memory->destructor))(stream_memory);
+
+}
+
+
 inline void stream_discard(struct stream_memory_t *const stream, const size_t nb_transferred_blocs) {
 
 	//If the transfer has happened and the function is not null : 

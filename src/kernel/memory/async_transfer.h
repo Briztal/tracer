@@ -12,22 +12,24 @@
 struct stream_transfer_t;
 
 
-//
-enum watermark_type_t {
+/*
+ * A stream trigger has one of the following types :
+ */
+enum stream_trigger_type {
 
 	//The watermark reach will call a transfer on its related memory stream;
-	TRANSFER_CALL,
+	STREAM_TRANSFER_TRIGGER,
 
 	//The watermark reach will trigger a DMA transfer;
-	DMA_TRANSFER
+	STREAM_DMA_TRANSFER
 
 };
 
 
-struct stream_watermark_t {
+struct stream_trigger {
 
 	//The type of the watermark;
-	enum watermark_type_t type;
+	enum stream_trigger_type type;
 
 	//The function to set the triggering size; Asserts if the triggering size is valid;
 	bool (*const set_watermark)(struct async_stream_t *, size_t triggering_size);
@@ -44,20 +46,6 @@ struct stream_watermark_t {
 };
 
 
-/*
- * The trigger stream is a stream that references an async transfer, that can be automatically triggered when a
- * 	determined amount of data is available for transfer;
- */
-
-struct watermark_stream_t {
-
-	//The stream base;
-	struct stream_memory_t stream;
-
-	//The registered stream_transfer;
-	struct stream_transfer_t *transfer;
-
-};
 
 
 /*
