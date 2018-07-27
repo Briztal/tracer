@@ -111,13 +111,13 @@ int main() {
 
 	while(true) {
 
-		size_t count = stream_read((struct stream_memory_t *) o_stream, &mem);
+		size_t count = stream_read((struct stream_t *) o_stream, &mem);
 
 		if (count) {
 
 			if (count > 32) count = 32;
 			mem.bloc_desc.nb_blocks = count << 1;
-			count = stream_write((struct stream_memory_t *) i_stream, &mem);
+			count = stream_write((struct stream_t *) i_stream, &mem);
 
 		}
 
@@ -127,7 +127,7 @@ int main() {
 		teensy35_delay(250);
 
 		/*
-		(*(stream->stream.get_bloc_descriptor))((struct stream_memory_t *) stream, &desc);
+		(*(stream->stream.get_bloc_descriptor))((struct stream_t *) stream, &desc);
 
 		if (desc.nb_blocks != 8) {
 			teensy35_led_blink(50);

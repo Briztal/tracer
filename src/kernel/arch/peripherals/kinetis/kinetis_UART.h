@@ -130,7 +130,7 @@ struct kinetis_UART_hw_t {
 struct kinetis_UART_stream_t {
 
 	//A stream memory, first for pointer cast;
-	struct stream_memory_t stream;
+	struct stream_t stream;
 
 	//The S1 register;
 	volatile uint8_t *const S1;

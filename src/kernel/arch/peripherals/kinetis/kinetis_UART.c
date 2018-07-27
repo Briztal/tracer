@@ -608,16 +608,16 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 
 			.input_stream = false,
 
-			.get_bloc_descriptor = (void (*const)(struct stream_memory_t *, struct blocks_desc_t *))
+			.get_bloc_descriptor = (void (*const)(struct stream_t *, struct blocks_desc_t *))
 				output_bytes_available,
 
-			.transfer_blocs =
-			(size_t (*const)(struct stream_memory_t *, const struct mem_map_t *, const struct blocks_desc_t *))
+			.transfer_blocks =
+			(size_t (*const)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
 				&kinetis_UART_read,
 
-			.discard_blocs = (void (*const)(struct stream_memory_t *, size_t)) 0,
+			.discard_blocks = (void (*const)(struct stream_t *, size_t)) 0,
 
-			.destructor = (void (*const)(struct stream_memory_t *)) UART_stream_delete,
+			.deleter = (void (*const)(struct stream_t *)) UART_stream_delete,
 
 		},
 
@@ -640,16 +640,16 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 
 			.input_stream = true,
 
-			.get_bloc_descriptor = (void (*const)(struct stream_memory_t *, struct blocks_desc_t *))
+			.get_bloc_descriptor = (void (*const)(struct stream_t *, struct blocks_desc_t *))
 				input_spaces_available,
 
-			.transfer_blocs =
-			(size_t (*const)(struct stream_memory_t *, const struct mem_map_t *, const struct blocks_desc_t *))
+			.transfer_blocks =
+			(size_t (*const)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
 				&kinetis_UART_write,
 
-			.discard_blocs = (void (*const)(struct stream_memory_t *, size_t)) 0,
+			.discard_blocks = (void (*const)(struct stream_t *, size_t)) 0,
 
-			.destructor = (void (*const)(struct stream_memory_t *)) UART_stream_delete,
+			.deleter = (void (*const)(struct stream_t *)) UART_stream_delete,
 
 		},
 
