@@ -1,5 +1,5 @@
 /*
-  UART.h Part of TRACER
+  uart.h Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -26,8 +26,6 @@
 #include "stdbool.h"
 
 #include "driver.h"
-
-#include "kernel/connection/connection.h"
 
 
 /*

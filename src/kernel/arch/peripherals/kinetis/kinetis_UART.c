@@ -18,16 +18,44 @@
 
 */
 
-#include <kernel/arch/arch.h>
-
 #include "kinetis_UART.h"
 
+#include <kernel/arch/arch.h>
+
 #include <kernel/kernel.h>
-#include <HardwareSerial.h>
+
 #include <string.h>
 
 
 //TODO RECEIVE OVERRUN
+
+
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+//TODO LICENSE
+
 
 
 /*

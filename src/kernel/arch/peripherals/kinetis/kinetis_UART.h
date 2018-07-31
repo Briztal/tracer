@@ -27,9 +27,8 @@
 
 #include <kernel/drivers/uart.h>
 
-#include <kernel/connection/connection.h>
-
 #include <kernel/memory/memory_stream.h>
+
 #include <kernel/memory/interrupt_pipe.h>
 
 //----------------------------------------------------- Memory Map -----------------------------------------------------
