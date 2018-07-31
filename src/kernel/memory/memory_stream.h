@@ -76,6 +76,9 @@ struct stream_t {
 
 	//The stream direction; Data can be written on an input stream, and read from an output stream, constant;
 	const bool input_stream;
+	
+	//The stream's block size, constant;
+	const size_t block_size;
 
 	//The transfer owned by the stream, constant;
 	struct stream_pipe_t *const owned_pipe;
@@ -86,8 +89,11 @@ struct stream_t {
 
 	//---------------- Stream lifecycle ----------------
 
-	//Get a bloc descriptor representing the current memory state, constant function pointer;
-	void (*const get_bloc_descriptor)(struct stream_t *stream, struct blocks_desc_t *desc);
+	//Get the stream's current memory map; Has a meaning only if the stream is not non-standard;
+	void (*const get_memory_map)(const struct stream_t *stream, struct mem_map_t *map);
+
+	//Get a block descriptor representing the current memory state, constant function pointer;
+	size_t (*const get_available_blocks)(const struct stream_t *stream);
 
 	//Transfer data between with another memory zone, given the provided descriptor, constant function pointer;
 	size_t (*const transfer_blocks)(struct stream_t *stream, const struct mem_map_t *mem,
@@ -203,11 +209,21 @@ struct stream_pipe_t {
 	//The client stream;
 	struct stream_t *client_stream;
 
-	//Accepts the provided client; Used for implementations to update transfer data according to the client's type;
-	void (*const accept_client)(struct stream_pipe_t *);
+	//The size of a transfer;
+	size_t transfer_size;
+
+	//Update the implementation's data according to new client and transfer size;
+	void (*const open)(struct stream_pipe_t *);
+
+	//Update the trigger's watermark according to the pipe's one;
+	void (*const update_watermark)(struct stream_pipe_t *, size_t t);
 
 	//Prepares the transfer, and enables the trigger;
 	void (*const prepare_transfer)(struct stream_pipe_t *);
+
+	//Enable and disable trigger
+	void (*const enable_trigger)(struct stream_pipe_t *);
+	void (*const disable_trigger)(struct stream_pipe_t *);
 
 	//Attempts to close the pipe. If not stoppable, returns false;
 	bool (*const close)(struct stream_pipe_t *);
@@ -220,7 +236,7 @@ struct stream_pipe_t {
 
 //Activate a stream pipe, given the owner stream and the client stream; Both streams will be opened by the pipe;
 //TODO FILENAMES + PIPE FILENAME
-void stream_pipe_open(struct stream_t *owner, struct stream_t *client);
+void stream_pipe_open(struct stream_t *owner, struct stream_t *client, size_t transfer_size);
 
 //Attempts to close a pipe. If possible, un-registers itself and close both owned streams;
 // If not possible, schedules its closing, will be done at the current transfer's confirmation;

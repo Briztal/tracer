@@ -30,6 +30,7 @@
 #include <kernel/connection/connection.h>
 
 #include <kernel/memory/memory_stream.h>
+#include <kernel/memory/interrupt_pipe.h>
 
 //----------------------------------------------------- Memory Map -----------------------------------------------------
 
@@ -124,6 +125,27 @@ struct kinetis_UART_hw_t {
 
 
 /*
+ * A kinetis UART interrupt pipe is composed of the following elements :
+ */
+
+struct kinetis_UART_interrupt_pipe_t {
+
+	//The interrupt pipe base;
+	struct interrupt_pipe_t pipe;
+
+	//The address of C2;
+	volatile uint8_t *const C2;
+
+	//The address of the watermark register;
+	volatile uint8_t *const WATER;
+
+	//The size of the related hardware FIFO;
+	const uint8_t fifo_size;
+
+};
+
+
+/*
  * A kinetis UART memory stream is composed of the following elements :
  */
 
@@ -193,7 +215,7 @@ void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data);
  */
 
 //The interrupt function;
-void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *instance);
+void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_data);
 
 //The error function;
 void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *instance);

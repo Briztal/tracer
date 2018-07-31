@@ -58,7 +58,7 @@ bool block_desc_merge(const struct blocks_desc_t *in0, const struct blocks_desc_
 //------------------------------------------------ Memory map transfers ------------------------------------------------
 
 //Transfer memory by chunks of one byte;
-void mmap_transfer_8(struct mem_map_t src, struct mem_map_t dst, struct blocks_desc_t blocks_desc);
+void mmap_transfer_8(struct mem_map_t src, struct mem_map_t dst, size_t blocks_size, size_t nb_blocks);
 
 //Transfer memory by chunks of 2 bytes;
 void mmap_transfer_16(struct mem_map_t src, struct mem_map_t dst, size_t block_size, size_t nb_blocks);

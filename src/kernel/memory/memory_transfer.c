@@ -3,6 +3,7 @@
 //
 
 #include <string.h>
+#include <kernel/kernel.h>
 
 #include "memory_transfer.h"
 
@@ -49,13 +50,13 @@ bool block_desc_merge(const struct blocks_desc_t *in0, const struct blocks_desc_
  * 	All data in both maps are used, reason why they are passed by value;
  */
 
-void mmap_transfer_8(struct mem_map_t src, struct mem_map_t dst, struct blocks_desc_t blocks_desc) {
+void mmap_transfer_8(struct mem_map_t src, struct mem_map_t dst, const size_t blocks_size, size_t nb_blocks) {
 
 	//For each block to read :
-	while(blocks_desc.nb_blocks--) {
+	while(nb_blocks--) {
 
 		//Copy contiguous regions;
-		memcpy((void *) dst.start_address, (const void *) src.start_address, blocks_desc.block_size);
+		memcpy((void *) dst.start_address, (const void *) src.start_address, blocks_size);
 
 		//Update the write address;
 		dst.start_address += dst.block_spacing;
@@ -78,6 +79,23 @@ void mmap_transfer_8(struct mem_map_t src, struct mem_map_t dst, struct blocks_d
  */
 
 void mmap_transfer_16(struct mem_map_t src, struct mem_map_t dst, size_t block_size, size_t nb_blocks) {
+
+	//Check size;
+	if (block_size & 1) {
+
+		//Error, incompatible number of blocs to transfer;
+		kernel_error("memory_transfer.c : mmap_transfer_16 : incompatible size;");
+
+	}
+
+	//If addresses are misaligned for a 2 byte transfer :
+	if (((size_t)src.start_address & 1) || ((size_t) dst.start_address & 1)) {
+
+		//Error, transfer will be misaligned;
+		kernel_error("memory_transfer.c : mmap_transfer_16 : misaligned pointer;");
+
+
+	}
 
 	//First, truncate the block size;
 	block_size >>= 1;
@@ -120,6 +138,23 @@ void mmap_transfer_16(struct mem_map_t src, struct mem_map_t dst, size_t block_s
  */
 
 void mmap_transfer_32(struct mem_map_t src, struct mem_map_t dst, size_t block_size, size_t nb_blocks) {
+
+	//Check size;
+	if (block_size & 3) {
+
+		//Error, incompatible number of blocs to transfer;
+		kernel_error("memory_transfer.c : mmap_transfer_32 : incompatible size;");
+
+	}
+
+	//If addresses are misaligned for a 2 byte transfer :
+	if (((size_t)src.start_address & 3) || ((size_t) dst.start_address & 3)) {
+
+		//Error, transfer will be misaligned;
+		kernel_error("memory_transfer.c : mmap_transfer_32 : misaligned pointer;");
+
+
+	}
 
 	//First, truncate the block size;
 	block_size >>= 2;
@@ -228,7 +263,7 @@ size_t mem_desc_transfer(const struct mem_desc_t *src, const struct mem_desc_t *
 	}
 
 	//Execute the transfer; For instance only 8 bytes transfer is supported;
-	mmap_transfer_8(src->memory_map, dst->memory_map, out_descriptor);
+	mmap_transfer_8(src->memory_map, dst->memory_map, out_descriptor.block_size, out_descriptor.nb_blocks);
 
 	//Determine the number copied bytes;
 	return out_descriptor.nb_blocks;

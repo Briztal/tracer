@@ -24,6 +24,7 @@
 
 #include <kernel/kernel.h>
 #include <HardwareSerial.h>
+#include <string.h>
 
 
 //TODO RECEIVE OVERRUN
@@ -62,69 +63,86 @@
 //-------------------------- Peripheral init --------------------------
 
 //Initialise the peripheral;
-void initialise_peripheral(const struct kinetis_UART_hw_t *peripheral_data);
+static void initialise_peripheral(const struct kinetis_UART_hw_t *peripheral_data);
 
 //Start the peripheral;
-void start_peripheral(const struct kinetis_UART_hw_t *driver_data);
+static void start_peripheral(const struct kinetis_UART_hw_t *driver_data);
 
 //Reset the peripheral in the stopped state;
-void stop_peripheral(const struct kinetis_UART_hw_t *driver_data);
+static void stop_peripheral(const struct kinetis_UART_hw_t *driver_data);
 
 
 //-------------------------- Peripheral config --------------------------
 
 //Configure the packet format;
-void configure_packet_format(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
+static void configure_packet_format(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
 
 //Configure the state;
-void configure_modem(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
+static void configure_modem(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
 
 //Configure the transmission layer;
-void configure_transmission_layer(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
+static void configure_transmission_layer(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
 
 
 
 //-------------------------- Stream functions --------------------------
 
+//Get the memory map;
+static void get_memory_map(const struct kinetis_UART_stream_t *stream, struct mem_map_t *map);
+
 //determine the number of spaces available in the input (tx) stream;
-void input_spaces_available(const struct kinetis_UART_stream_t *stream, struct blocks_desc_t *descriptor);
+static size_t input_spaces_available(const struct kinetis_UART_stream_t *stream);
 
 //determine the number of bytes available in the output (rx) stream;
-void output_bytes_available(const struct kinetis_UART_stream_t *stream, struct blocks_desc_t *descriptor);
+static size_t output_bytes_available(const struct kinetis_UART_stream_t *stream);
 
 
 //Read data from rx;
-void kinetis_UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
-					   const struct blocks_desc_t *descriptor);
+static void UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+					  const struct blocks_desc_t *descriptor);
 
 //Write data in tx;
-void kinetis_UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
-						const struct blocks_desc_t *descriptor);
+static void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+					   const struct blocks_desc_t *descriptor);
 
 //The UART stream doesn't store any dynamic data;
-void UART_stream_delete(struct kinetis_UART_stream_t *stream) {
+static void UART_stream_delete(struct kinetis_UART_stream_t *stream) {
 	kernel_free(stream);
 }
 
 
+//--------------------------------------------------- Pipe functions ---------------------------------------------------
+
+//Delete the interrupt pipe;
+static void kinetis_interrupt_pipe_destroy(const struct kinetis_UART_interrupt_pipe_t *data) {};
 
 
-//-------------------------- Watermark policies --------------------------
+//Enable the rx trigger;
+static void enable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
 
-//Update the tx watermark;
-uint8_t update_tx_watermark(const struct kinetis_UART_hw_t *data, uint8_t nb_transmissions);
+//Disable the rx trigger;
+static void disable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+
+//Enable the tx trigger;
+static void enable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+
+//Disable the rx trigger;
+static void disable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+
 
 //Update the rx watermark;
-uint8_t update_rx_watermark(const struct kinetis_UART_hw_t *data, uint8_t nb_readings);
+static void update_rx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_bytes);
+
+//Update the tx watermark;
+static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_spaces);
 
 
 
 //-------------------------------------------------- Hardware Settings -------------------------------------------------
 
-
 /*
  * initialise_peripheral : the initialisation function has to : 
- * 	- set all required perhpheral registers in a safe, stopped and initialised state;
+ * 	- set all required perhipheral registers in a safe, stopped and initialised state;
  * 	- disable related interrupts and DMA;
  * 	- update all required interrupt functions and setup DMA if necessary;
  */
@@ -367,13 +385,13 @@ uint8_t index_to_size(uint8_t index) {
 void sizes_from_PFIFO(const uint8_t pfifo, uint8_t *const rx_fifo_size, uint8_t *const tx_fifo_size) {
 
 	//Cache the 3 msb of PFIFO to get rxindex;
-	uint8_t index = pfifo & (uint8_t)7;
+	uint8_t index = pfifo & (uint8_t) 7;
 
 	//Determine and save the rx size;
 	*rx_fifo_size = index_to_size(index);
 
 	//Shift of 4 bits and cache the 3 msb to get txindex;
-	index = (pfifo >> 4) & (uint8_t)7;
+	index = (pfifo >> 4) & (uint8_t) 7;
 
 	//Determine and save the tx size;
 	*tx_fifo_size = index_to_size(index);
@@ -521,11 +539,11 @@ void configure_modem(const struct kinetis_UART_hw_t *const data, const struct UA
 void
 configure_transmission_layer(const struct kinetis_UART_hw_t *const data, const struct UART_config_t *const config) {
 
-	//First, cache the data pointer to avoid permanent implicit double pointer access;
+	//Cache the data pointer to avoid permanent implicit double pointer access;
 	struct kinetis_UART_registers_t *registers = data->registers;
 
 	/*
-	 * First, we will configure the transmission type : Full or Half duplex;
+	 * We will configure the transmission type : Full or Half duplex;
 	 */
 
 	if (config->transmission_type == FULL_DUPLEX) {
@@ -555,7 +573,7 @@ configure_transmission_layer(const struct kinetis_UART_hw_t *const data, const s
 	 *      BRFA (uint5_t) = Kb % 32;
 	 */
 
-	//First, determine Kb;
+	//Determine Kb;
 	uint32_t Kb = ((uint32_t) ((uint32_t) (data->clock_frequency << 1)) / config->baudrate);
 
 	//Set the 5 MSB of Kb in BDH;
@@ -589,9 +607,30 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	//Cache the register struct pointer;
 	struct kinetis_UART_registers_t *const registers = peripheral_data->registers;
 
-	//Cache the D register pointer;
+	//Cache all required registers pointer;
 	volatile uint8_t *const D_reg = &registers->D;
 	volatile uint8_t *const S1_reg = &registers->S1;
+	volatile uint8_t *const C2_reg = &registers->C2;
+	volatile uint8_t *const RXWATER_reg = &registers->RWFIFO;
+	volatile uint8_t *const TXWATER_reg = &registers->TWFIFO;
+	volatile uint8_t *const RCFIFO_reg = &registers->RCFIFO;
+	volatile uint8_t *const TCFIFO_reg = &registers->TCFIFO;
+
+
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
+
+	//Configure C5 so that RX full - TX empty flags generate interrupt; clear C5's TDMAS and RDMAS;
+	registers->C5 &= ~(UART_C5_TDMAS | UART_C5_RDMAS);
 
 	//Declare both FIFOs sizes;
 	uint8_t rx_fifo_size, tx_fifo_size;
@@ -600,24 +639,47 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	sizes_from_PFIFO(registers->PFIFO, &rx_fifo_size, &tx_fifo_size);
 
 
+	/*
+	 * Pipes and stream const-reference each other. We must use a trick to properly initialise both;
+	 */
+
+	//------------------ RX (OUTPUT) STREAM - PIPE INIT ------------------
+
+	//Pre-allocate memory for the pipe struct;
+	struct kinetis_UART_interrupt_pipe_t *UART_rx_pipe = kernel_malloc(sizeof(struct kinetis_UART_interrupt_pipe_t));
+
 	//Create the output (rx) stream;
-	struct kinetis_UART_stream_t output_init = {
+	struct kinetis_UART_stream_t output_stream_init = {
 
 		//Set the stream to always write to D, and read S1 before the end;
 		.stream = {
 
+			//Data query must read S1, but DMA is supported;
+			.type = STREAM_DMA_COMPLIANT_MEMORY,
+
+			//Output stream;
 			.input_stream = false,
 
-			.get_bloc_descriptor = (void (*const)(struct stream_t *, struct blocks_desc_t *))
-				output_bytes_available,
+			//Blocs are 1 byte long;
+			.block_size = 1,
 
-			.transfer_blocks =
-			(size_t (*const)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
-				&kinetis_UART_read,
+			//Transfer the ownership of the allocated (but not initialised) pipe;
+			.owned_pipe = (struct stream_pipe_t *const) UART_rx_pipe,
 
-			.discard_blocks = (void (*const)(struct stream_t *, size_t)) 0,
+			//No pipe registered;
+			.registered_pipe = 0,
 
-			.deleter = (void (*const)(struct stream_t *)) UART_stream_delete,
+			//Transfer access to uart streams functions;
+			.get_memory_map = (void (*)(const struct stream_t *, struct mem_map_t *)) &get_memory_map,
+
+			.get_available_blocks = (size_t (*)(const struct stream_t *)) output_bytes_available,
+
+			.transfer_blocks = (size_t (*)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
+				&UART_read,
+
+			.discard_blocks = (void (*)(struct stream_t *, size_t)) 0,
+
+			.deleter = (void (*)(struct stream_t *)) UART_stream_delete,
 
 		},
 
@@ -625,48 +687,156 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 		//Save registers;
 		.S1 = S1_reg,
 		.D = D_reg,
-		.CFIFO = &registers->RCFIFO,
+		.CFIFO = RCFIFO_reg,
 
 		//Save the rx fifo size;
 		.fifo_size = rx_fifo_size,
 
 	};
 
+	//Initialise the rx stream;
+	driver_data->output_stream = kernel_malloc_copy(sizeof(struct kinetis_UART_stream_t), &output_stream_init);
+
+	//Create the rx pipe initializer;
+	struct kinetis_UART_interrupt_pipe_t output_pipe_init = {
+
+		//Leave uninitialised for instance;
+		.pipe = {},
+
+		//Copy C2's address;
+		.C2 = C2_reg,
+
+		//Copy the address of RXWATER;
+		.WATER = RXWATER_reg,
+
+		//Save the rx fifo size;
+		.fifo_size = rx_fifo_size,
+
+	};
+
+	//Initialise pipe part of the initializer, providing the rx stream's reference;
+	interrupt_pipe_initialise(
+
+		//The pipe to init;
+		&output_pipe_init.pipe,
+
+		//The owner stream reference;
+		(struct stream_t *) driver_data->output_stream,
+
+		//The watermark updater;
+		(void (*)(struct interrupt_pipe_t *, size_t)) &update_rx_watermark,
+
+		//The trigger enabler;
+		(void (*)(struct interrupt_pipe_t *)) &enable_rx_trigger,
+
+		//The trigger disabler;
+		(void (*)(struct interrupt_pipe_t *)) &disable_rx_trigger,
+
+		//The destructor's reference;
+		(void (*)(struct interrupt_pipe_t *)) &kinetis_interrupt_pipe_destroy
+
+	);
+
+	//Initialise the rx pipe;
+	memcpy(UART_rx_pipe, &output_pipe_init, sizeof(struct kinetis_UART_interrupt_pipe_t));
+
+
+	//------------------ TX (OUTPUT) STREAM - PIPE INIT ------------------
+	//Pre-allocate memory for the pipe struct;
+	struct kinetis_UART_interrupt_pipe_t *UART_tx_pipe = kernel_malloc(sizeof(struct kinetis_UART_interrupt_pipe_t));
+
 	//Create the input (tx) stream;
-	struct kinetis_UART_stream_t input_init = {
+	struct kinetis_UART_stream_t input_stream_init = {
 
 		//Set the stream to always write to D, and read S1 before the end;
 		.stream = {
 
+			//Data query must read S1, but DMA is supported;
+			.type = STREAM_DMA_COMPLIANT_MEMORY,
+
+			//Input stream;
 			.input_stream = true,
 
-			.get_bloc_descriptor = (void (*const)(struct stream_t *, struct blocks_desc_t *))
-				input_spaces_available,
+			//Blocs are 1 byte long;
+			.block_size = 1,
+
+			//No pipe owned;
+			.owned_pipe = (struct stream_pipe_t *const) UART_tx_pipe,
+
+			//No pipe registered;
+			.registered_pipe = 0,
+
+
+			//Provide access to stream functions;
+			.get_memory_map = (void (*)(const struct stream_t *, struct mem_map_t *)) &get_memory_map,
+
+			.get_available_blocks = (size_t (*)(const struct stream_t *)) input_spaces_available,
 
 			.transfer_blocks =
-			(size_t (*const)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
-				&kinetis_UART_write,
+			(size_t (*)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
+				&UART_write,
 
-			.discard_blocks = (void (*const)(struct stream_t *, size_t)) 0,
+			.discard_blocks = (void (*)(struct stream_t *, size_t)) 0,
 
-			.deleter = (void (*const)(struct stream_t *)) UART_stream_delete,
+			.deleter = (void (*)(struct stream_t *)) UART_stream_delete,
 
 		},
 
 		//Save registers;
 		.S1 = S1_reg,
 		.D = D_reg,
-		.CFIFO = &registers->TCFIFO,
+		.CFIFO = TCFIFO_reg,
 
-		//Save the rx fifo size;
+		//Save the tx fifo size;
 		.fifo_size = tx_fifo_size,
 
 	};
 
-	//Initialise the input and output stream;
-	driver_data->input_stream = kernel_malloc_copy(sizeof(struct kinetis_UART_stream_t), &input_init);
-	driver_data->output_stream = kernel_malloc_copy(sizeof(struct kinetis_UART_stream_t), &output_init);
+	//Initialise the tx stream;
+	driver_data->input_stream = kernel_malloc_copy(sizeof(struct kinetis_UART_stream_t), &input_stream_init);
 
+	//Create the tx pipe;
+	struct kinetis_UART_interrupt_pipe_t input_pipe_init = {
+
+		//Leave uninitialised for instance;
+		.pipe = {},
+
+		//Copy C2's address;
+		.C2 = C2_reg,
+
+		//Copy the address of TXWATER;
+		.WATER = TXWATER_reg,
+
+		//Save the fifo size;
+		.fifo_size = tx_fifo_size,
+
+	};
+
+	//Initialise pipe part of the initializer, providing the tx stream's reference;
+	interrupt_pipe_initialise(
+
+		//The pipe to init;
+		&input_pipe_init.pipe,
+
+		//The owner stream reference;
+		(struct stream_t *) driver_data->input_stream,
+
+		//The watermark updater;
+		(void (*)(struct interrupt_pipe_t *, size_t)) &update_tx_watermark,
+
+		//The trigger enabler;
+		(void (*)(struct interrupt_pipe_t *)) &enable_tx_trigger,
+
+		//The trigger disabler;
+		(void (*)(struct interrupt_pipe_t *)) &disable_tx_trigger,
+
+		//The destructor's reference;
+		(void (*)(struct interrupt_pipe_t *)) &kinetis_interrupt_pipe_destroy
+
+	);
+
+	//Initialise the tx pipe;
+	memcpy(UART_tx_pipe, &input_pipe_init, sizeof(struct kinetis_UART_interrupt_pipe_t));
 
 	//Initialise the hardware in a safe state;
 	start_peripheral(peripheral_data);
@@ -683,34 +853,43 @@ void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data) {
 	//Cache the hardware struct;
 	const struct kinetis_UART_hw_t *peripheral_data = &driver_data->peripheral_data;
 
-	//TODO DELETE STREAMS.
+	//Delete both streams;
+	stream_delete((struct stream_t *) driver_data->input_stream);
+	stream_delete((struct stream_t *) driver_data->output_stream);
 
 	//Initialise the hardware in a safe state;
 	stop_peripheral(peripheral_data);
-
-
 }
 
 
 //---------------------------------------------------- Stream sizes ----------------------------------------------------
 
 /*
+ * get_memory_map : provides access to the D register;
+ */
+
+static void get_memory_map(const struct kinetis_UART_stream_t *const stream, struct mem_map_t *const map) {
+
+	//Create the initializer of memory map;
+	struct mem_map_t init = {
+		.block_spacing = 0,
+		.start_address = stream->D,
+	};
+
+	//Initialise the memory map;
+	memcpy(map, &init, sizeof(struct mem_map_t));
+
+}
+
+
+/*
  * input_spaces_available : determines the number of spaces available in the input (tx) stream;
  */
 
-void input_spaces_available(const struct kinetis_UART_stream_t *const stream, struct blocks_desc_t *const descriptor) {
+size_t input_spaces_available(const struct kinetis_UART_stream_t *const stream) {
 
-	//Update the descriptor;
-	*descriptor = (const struct blocks_desc_t) {
-
-		//Save the fifo size minus the current number of elements in the fifo;
-		.nb_blocks = stream->fifo_size - *(stream->CFIFO),
-
-		//All blocs are bytes;
-		.block_size = 1,
-
-	};
-
+	//Return the number of spaces available in the hardware fifo;
+	return stream->fifo_size - *(stream->CFIFO);
 }
 
 
@@ -718,18 +897,10 @@ void input_spaces_available(const struct kinetis_UART_stream_t *const stream, st
  * output_bytes_available : determines the number of bytes available in the output (rx) stream;
  */
 
-void output_bytes_available(const struct kinetis_UART_stream_t *const stream, struct blocks_desc_t *const descriptor) {
+size_t output_bytes_available(const struct kinetis_UART_stream_t *const stream) {
 
-	//Update the descriptor;
-	*descriptor = (const struct blocks_desc_t) {
-
-		//Cache the number of bytes in the fifo;
-		.nb_blocks = *(stream->CFIFO),
-
-		//All blocs are bytes;
-		.block_size = 1,
-
-	};
+	//Return the number of bytes available in the hardware fifo;
+	return *(stream->CFIFO);
 
 }
 
@@ -738,12 +909,12 @@ void output_bytes_available(const struct kinetis_UART_stream_t *const stream, st
 
 
 /*
- * kinetis_UART_read : this function copies the required amount of data from the hardware rx buffer to the provided
+ * UART_read : this function copies the required amount of data from the hardware rx buffer to the provided
  * 	memory zone;
  */
 
-void kinetis_UART_read(const struct kinetis_UART_stream_t *const stream, const struct mem_map_t *src_map,
-					   const struct blocks_desc_t *const descriptor) {
+void UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+			   const struct blocks_desc_t *descriptor) {
 
 	//Cache the stream's D register;
 	volatile uint8_t *volatile const D = stream->D;
@@ -764,7 +935,7 @@ void kinetis_UART_read(const struct kinetis_UART_stream_t *const stream, const s
 		if (!transfer_size) {
 
 			//Read S1;
-			*((volatile uint8_t *)(stream->S1));
+			volatile uint8_t s1 = *(stream->S1);
 
 		}
 
@@ -780,12 +951,12 @@ void kinetis_UART_read(const struct kinetis_UART_stream_t *const stream, const s
 
 
 /*
- * kinetis_UART_write : this function copies the required amount of data from the src memory zone to
+ * UART_write : this function copies the required amount of data from the src memory zone to
  *  the hardware tx buffer;
  */
 
-void kinetis_UART_write(const struct kinetis_UART_stream_t *const stream, const struct mem_map_t *const src_map,
-						const struct blocks_desc_t *descriptor) {
+void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+				const struct blocks_desc_t *descriptor) {
 
 	//Cache the stream's D register;
 	volatile uint8_t *volatile const D = stream->D;
@@ -806,7 +977,7 @@ void kinetis_UART_write(const struct kinetis_UART_stream_t *const stream, const 
 		if (!transfer_size) {
 
 			//Read S1;
-			*((volatile uint8_t *)(stream->S1));
+			volatile uint8_t s1 = *(stream->S1);
 
 		}
 
@@ -821,79 +992,98 @@ void kinetis_UART_write(const struct kinetis_UART_stream_t *const stream, const 
 }
 
 
+//--------------------------------------------------- Pipe functions ---------------------------------------------------
+
+//Enable the rx trigger;
+static void enable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+
+	//Set the RIE bit in C2;
+	*(pipe->C2) |= UART_C2_RIE;
+
+}
+
+//Disable the rx trigger;
+static void disable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+
+	//Set the RIE bit in C2;
+	*(pipe->C2) &= ~UART_C2_RIE;
+
+}
+
+//Enable the tx trigger;
+static void enable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+
+	//Set the RIE bit in C2;
+	*(pipe->C2) |= UART_C2_TIE;
+
+}
+
+//Disable the rx trigger;
+static void disable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+
+	//Set the RIE bit in C2;
+	*(pipe->C2) &= ~UART_C2_TIE;
+
+}
 
 
+//Update the rx watermark;
+static void update_rx_watermark(const struct kinetis_UART_interrupt_pipe_t *const pipe, const size_t nb_bytes) {
+
+	//The rx fifo watermark register determines the number of bytes that trigger an INT or DMA; Just update it;
+	*(pipe->WATER) = (uint8_t) nb_bytes;
+
+}
+
+
+//Update the tx watermark;
+static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *const pipe, const size_t nb_spaces) {
+
+	//The tx fifo watermark register determines the number of bytes that trigger an INT or DMA;
+	//To determine the number of bytes associated with the required number of spaces, subtract it to the fifo size;
+	*(pipe->WATER) = pipe->fifo_size - (uint8_t) nb_spaces;
+
+
+}
 //----------------------------------------------------- Exceptions -----------------------------------------------------
 
 /*
  * interrupt : this function processes UART's interrupts : Rx, and Tx;
  */
 
-void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *data) {
+void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_data) {
 
-	//First, cache the register pointer;
-	struct kinetis_UART_registers_t *registers = data->peripheral_data.registers;
+	//Cache the register pointer;
+	struct kinetis_UART_registers_t *registers = driver_data->peripheral_data.registers;
 
-	//The logical AND of C2 and S1;
-	uint8_t masked_flags = registers->C2 & registers->S1;
+	//Cache C2, S1, and C5;
+	uint8_t C2 = registers->C2, S1 = registers->S1, C5 = registers->C5;
 
 	//TODO IDLE LINE;
 
 	//TODO TRANSMISSION COMPLETE;
 
-	return;
+	//If the rx interrupt is enabled, if its flag is asserted, and interrupt request should be made :
+	if ((C2 & UART_C2_RIE) && (S1 & UART_S1_RDRF) &&  (!(C5 &UART_C5_RDMAS))) {
 
-	//TODO INTERRUPT STREAM TRANSFER EXECUTION;
+		//teensy35_led_count(3);
 
-	//First, if the rx interrupt is enabled, and if its flag is asserted :
-	if (masked_flags & UART_C2_RIE & UART_S1_RDRF) {
-
-		//Execute the reception cflux;
-		//flux_process(data->rx_flux);
-
-		//If the interrupt is still active, the cflux didn't succeed in transferring data;
-		if (registers->S1 & UART_S1_RDRF) {
-
-			/*
-			 * The flux had no data to proceed in spite of spaces in the transmission buffer;
-			 * There is no data available in the other side of the flux, and only an external call will provide some;
-			 * There is no reason to keep the interrupt active. We will disable the interrupt;
-			 *
-			 * We will keep the watermark like it is currently, if the interrupt is reactivated by mistake (lol)
-			 *  it could provide some data;
-			 */
-
-			//Clear RIE bit of uint8_t C2 to disable the reading interrupt;
-			CLEAR(registers->C2, UART_C2_RIE, 8);
-
-		}
+		//Execute the driver's output pipe's transfer;
+		interrupt_pipe_transfer((struct interrupt_pipe_t *) driver_data->output_stream->stream.owned_pipe);
 
 	}
 
-	//Then, is the tx interrupt is enabled, and if its flag is asserted :
-	if (masked_flags & UART_C2_TIE & UART_S1_TDRE) {
+	//If the tx interrupt is enabled, if its flag is asserted, and interrupt request should be made :
+	if ((C2 & UART_C2_TIE) && (S1 & UART_S1_TDRE) && (!(C5 &UART_C5_TDMAS))) {
 
-		//Execute the transmission cflux;
-		//flux_process(data->tx_flux);
+		//teensy35_led_count(4);
 
-		//If the interrupt is still active, the stream didn't succeed in transferring data;
-		if (registers->S1 & UART_S1_TDRE) {
-
-			/*
-			 * The flux had no data to proceed in spite of elements in the reception buffer;
-			 * There is no data available in the other side of the flux, and only an external call will provide some;
-			 * There is no reason to keep the interrupt active. We will disable the interrupt;
-			 *
-			 * We will keep the watermark like it is currently, if the interrupt is reactivated by mistake (lol)
-			 *  it could provide some data;
-			 */
-
-			//Clear RIE bit of uint8_t C2 to disable the reading interrupt;
-			CLEAR(registers->C2, UART_C2_TIE, 8);
-
-		}
+		//Execute the driver's input pipe's transfer;
+		interrupt_pipe_transfer((struct interrupt_pipe_t *) driver_data->input_stream->stream.owned_pipe);
 
 	}
+
+	//teensy35_led_count(6);
 
 }
 
@@ -938,7 +1128,7 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 	//If there was a receiver overrun or overflow :
 	if (registers->SFIFO & (UART_SFIFO_RXOF | UART_SFIFO_RXUF)) {
 
-		//First, read D to clear the flag;
+		//Read D to clear the flag;
 
 		//TODO VOLATILE CHECK
 		//Read S1 and Dto discard and clear flags;
@@ -971,7 +1161,7 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 	registers->SFIFO = UART_SFIFO_RXOF | UART_SFIFO_RXUF | UART_SFIFO_TXOF;
 
 	//If SFIFO flags are not cleared :
-	if (registers->SFIFO  & (UART_SFIFO_RXOF | UART_SFIFO_RXUF | UART_SFIFO_TXOF)){
+	if (registers->SFIFO & (UART_SFIFO_RXOF | UART_SFIFO_RXUF | UART_SFIFO_TXOF)) {
 		teensy35_led_count(2);
 	}
 
@@ -1074,7 +1264,7 @@ uint8_t update_rx_watermark(const struct kinetis_UART_hw_t *const data, uint8_t 
 /*
  *
 
-void kinetis_UART_write(const struct kinetis_UART_stream_t *const stream, struct mem_desc_t *src) {
+void UART_write(const struct kinetis_UART_stream_t *const stream, struct mem_desc_t *src) {
 
 	//Cache src in the correct type;
 	const uint16_t *src = src_c;

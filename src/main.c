@@ -93,6 +93,19 @@ int main() {
 	struct kinetis_UART_stream_t *i_stream = UART0->input_stream;
 	struct kinetis_UART_stream_t *o_stream = UART0->output_stream;
 
+	//Open a pipe between the couple of streams;
+	stream_pipe_open((struct stream_t *) o_stream, (struct stream_t *) i_stream, 1);
+
+	while(true) {
+
+
+		teensy35_led_high();
+		teensy35_delay(500);
+		teensy35_led_low();
+		teensy35_delay(250);
+
+	}
+
 	char st[32] = {48, 48, 48, 48, 48, 48, 48, 48, 48};
 	struct mem_desc_t mem = {
 		.memory_map = {
@@ -121,9 +134,9 @@ int main() {
 
 		}
 
-		teensy35_led_high();
+		//teensy35_led_high();
 		teensy35_delay(250);
-		teensy35_led_low();
+		//teensy35_led_low();
 		teensy35_delay(250);
 
 		/*

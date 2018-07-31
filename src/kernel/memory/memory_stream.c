@@ -4,8 +4,6 @@
 
 #include "memory_stream.h"
 
-#include <string.h>
-#include <kernel/arch/arch.h>
 #include <kernel/kernel.h>
 
 //--------------------------------------------------- Private headers --------------------------------------------------
@@ -86,11 +84,19 @@ inline void stream_discard(struct stream_t *const stream, const size_t nb_transf
 
 size_t stream_transfer(struct stream_t *const stream, struct mem_desc_t *const mem) {
 
-	//Create the stream's block descriptor;
-	struct blocks_desc_t stream_descriptor;
+	//If the stream has an opened pipe registered :
+	if (stream->registered_pipe) {
 
-	//Get the stream's bloc descriptor;
-	(*(stream->get_bloc_descriptor))(stream, &stream_descriptor);
+		//Error, can't read on a stream with a registered pipe;
+		kernel_error("memory_stream.c : stream_transfer : the stream has an opened pipe registered;");
+
+	}
+
+	//Create the stream's block descriptor;
+	struct blocks_desc_t stream_descriptor = {
+		.block_size = stream->block_size,
+		.nb_blocks = (*(stream->get_available_blocks))(stream),
+	};
 
 	//Create the transfer's block descriptor;
 	struct blocks_desc_t descriptor;
@@ -155,11 +161,12 @@ size_t stream_write(struct stream_t *const stream, struct mem_desc_t *const src)
 
 }
 
+
 //---------------------------------------------------- Stream Pipes ----------------------------------------------------
 
 //Activate a stream pipe, given the owner stream and the client stream; Both streams will be opened by the pipe;
 //TODO FILENAMES + PIPE FILENAME
-void stream_pipe_open(struct stream_t *const owner, struct stream_t *const client) {
+void stream_pipe_open(struct stream_t *const owner, struct stream_t *const client, size_t transfer_size) {
 
 	//If a null pointer was provided :
 	if (!owner) {
@@ -183,6 +190,16 @@ void stream_pipe_open(struct stream_t *const owner, struct stream_t *const clien
 
 	}
 
+	//If the transfer size is null :
+	if (!transfer_size) {
+
+		//Error, a bloc transfer has a non null size;
+		kernel_error("memory_stream.c : stream_pipe_open : null transfer size;");
+
+	}
+
+
+
 	//Cache the pipe the stream owns;
 	struct stream_pipe_t *pipe = owner->owned_pipe;
 
@@ -197,6 +214,7 @@ void stream_pipe_open(struct stream_t *const owner, struct stream_t *const clien
 
 	}
 
+
 	//If the pipe is not closed:
 	if (pipe->state != STREAM_PIPE_CLOSE) {
 
@@ -205,21 +223,43 @@ void stream_pipe_open(struct stream_t *const owner, struct stream_t *const clien
 
 	}
 
+	//If both streams block size don't match :
+	if (client->block_size != owner->block_size) {
+
+		//Error, streams must equal block sizes;
+		kernel_error("memory_stream.c : stream_pipe_open : streams have different block sizes;");
+
+	}
+
+	//If both streams have the same direction :
+	if (client->input_stream == owner->input_stream) {
+
+		//Error, streams must have opposite directions;
+		kernel_error("memory_stream.c : stream_pipe_open : streams have the same direction;");
+
+	}
+
+
 	//Register the pipe in both owner and client;
 	owner->registered_pipe = client->registered_pipe = pipe;
 
 	//Update the pipe's client;
 	pipe->client_stream = client;
 
-	//Update the pipe's data according to the new client;
-	(*(pipe->accept_client))(pipe);
+	//Update the pipe's data according to the new client and transfer size;
+	(*(pipe->open))(pipe);
+
+	//Set the watermark to the appropriate function;
+	(*(pipe->update_watermark))(pipe, transfer_size);
+
+	//Save the transfer size;
+	pipe->transfer_size = transfer_size;
 
 	//Update the pipe's state;
 	pipe->state = (volatile enum stream_pipe_state_t) STREAM_PIPE_OPEN;
 
 	//Start the transfer; When done, will call confirm;
 	stream_pipe_prepare_transfer(pipe);
-
 
 }
 
@@ -277,6 +317,9 @@ void stream_pipe_close(struct stream_pipe_t *const pipe) {
 
 void _stream_pipe_close(struct stream_pipe_t *const pipe) {
 
+	//Disable the trigger;
+	(*(pipe->disable_trigger))(pipe);
+
 	//Cache the pipe's owner and client;
 	struct stream_t *const owner = pipe->owner_stream, *const client = pipe->client_stream;
 
@@ -289,8 +332,6 @@ void _stream_pipe_close(struct stream_pipe_t *const pipe) {
 
 	//Update the pipe's state;
 	pipe->state = (volatile enum stream_pipe_state_t) STREAM_PIPE_CLOSE;
-
-
 
 }
 
@@ -319,8 +360,39 @@ void stream_pipe_prepare_transfer(struct stream_pipe_t *const pipe) {
 
 	}
 
-	//The pipe is open. We can prepare the transfer and enable the trigger;
-	(*(pipe->prepare_transfer))(pipe);
+	//Cache the client;
+	struct stream_t *client = pipe->client_stream;
+
+	//Get the current bloc descriptor;
+
+	//Mark the pipe STARTED;
+	pipe->state = (volatile enum stream_pipe_state_t) STREAM_PIPE_STARTED;
+
+	//Create an empty bloc descriptor, to get the current client's size;
+	//Determine the
+	// current bloc descriptor of the client channel; Will include the current size;
+	size_t nb_client_blocs = (*(client->get_available_blocks))(client);
+
+	//If the current available size is greater than the size of a transfer :
+	if (nb_client_blocs >= pipe->transfer_size) {
+
+		//The pipe is open. We can prepare the transfer;
+		(*(pipe->prepare_transfer))(pipe);
+
+		//Enable the trigger;
+		(*(pipe->enable_trigger))(pipe);
+
+	} else {
+
+		//If there is no room for a transfer for instance :
+
+		//Mark the pipe OPEN;
+		pipe->state = (volatile enum stream_pipe_state_t) STREAM_PIPE_OPEN;
+
+		//Disable the interrupt;
+		(*(pipe->disable_trigger))(pipe);
+
+	}
 
 }
 
@@ -338,6 +410,8 @@ void stream_pipe_confirm_transfer(struct stream_pipe_t *const pipe, const size_t
 		_stream_pipe_close(pipe);
 
 	}
+
+	//Disable the trigger;
 
 	//Cache the pipe's owner and client;
 	struct stream_t *const owner = pipe->owner_stream, *const client = pipe->client_stream;
