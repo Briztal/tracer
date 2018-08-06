@@ -384,7 +384,7 @@ void PI::schedule_task(task_state_t (*task)(void *), char *command, uint8_t size
 
 
 /*
- * read_data : this function reads data on the communication layer.
+ * read_data : this function reads data on the interaction layer.
  *
  *  If data is available, it reads it one char at time.
  *

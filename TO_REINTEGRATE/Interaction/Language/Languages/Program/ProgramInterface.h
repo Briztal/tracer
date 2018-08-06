@@ -57,7 +57,7 @@ public :
     //Initialise the command aliases
     static void initialise_aliases();
 
-    //read_data data on the communication layer
+    //read_data data on the interaction layer
     static void read_data();
 
     //Message emission

@@ -22,7 +22,6 @@
 #ifndef TRACER_TREE_H
 #define TRACER_TREE_H
 
-
 #include <data_structures/containers/non_concurrent/vlarray.h>
 
 /*

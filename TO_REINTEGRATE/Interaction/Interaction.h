@@ -42,7 +42,7 @@ namespace Interaction {
 
     //------------------------------------------------- Initialisation -------------------------------------------------
 
-    //Add a communication pipe;
+    //Add a interaction pipe;
     void add_communication_pipe(CommunicationPipe *pipe);
 
     //Initialise all interfaces hardware (data_link);
@@ -53,12 +53,12 @@ namespace Interaction {
 
     //------------------------------------------------- default pipe -------------------------------------------------
 
-    //Get the default communication pipe (the first of the array;
+    //Get the default interaction pipe (the first of the array;
     CommunicationPipe * get_default_pipe();
 
     //------------------------------------------------- Controls -------------------------------------------------
 
-    //Read all communication pipes;
+    //Read all interaction pipes;
     void read_communication_pipes();
 
 
@@ -73,10 +73,10 @@ namespace Interaction {
 
     //------------------------------------------ Communication pipe set -----------------------------------------
 
-    //Get a reference to the current communication pipe;
+    //Get a reference to the current interaction pipe;
     CommunicationPipe* getCommunicationPipe();
 
-    //Set the communication pipe to a given one;
+    //Set the interaction pipe to a given one;
     void setCommunicationPipe(CommunicationPipe &pipe);
 
 };

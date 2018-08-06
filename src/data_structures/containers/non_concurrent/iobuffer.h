@@ -10,11 +10,11 @@
  *
  * 	Its primary goal is to store data received from an undefined transmitter that erratically inserts data, for an
  * 	undefined receiver that erratically reads data. Its secondary goal is to prevent memory leak in a badly
- * 	dimensioned communication chain, by supporting data corruption;
+ * 	dimensioned interaction chain, by supporting data corruption;
  *
  * 	It is designed to be manipulable by DMA, and to support data overflow in its working principle :
  * 	when the buffer is full (data available = buffer_size), and the receiver tries to insert data, there will be a
- * 	data corruption at some point, because the communication chain is not dimensioned well.
+ * 	data corruption at some point, because the interaction chain is not dimensioned well.
  *
  * 	It is not the rwbuffer to maintain data integrity, so it will always accept data. Data can be read the insertion
  * 	address doesn't equal the discarding address byte available. There has been a data corruption, and a message
@@ -29,7 +29,6 @@
 #include <stddef.h>
 
 #include "instance.h"
-
 
 struct iobuffer_t;
 

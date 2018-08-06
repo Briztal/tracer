@@ -27,37 +27,6 @@
 #include <string.h>
 
 
-//TODO RECEIVE OVERRUN
-
-
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-//TODO LICENSE
-
-
-
 /*
  * SET : will set [data]'s bits that are set to 1 in [mask]. [data] is of size [size];
  */
@@ -449,24 +418,16 @@ void configure_packet_format(const struct kinetis_UART_hw_t *const data, const s
 	 */
 
 	//Check the number of bits :
-	switch (config->nb_data_bits) {
+	if (config->nb_data_bits != 8) {
 
-		case 8:
-			//8 data bits, bit M cleared;
-			CLEAR(registers->C1, UART_C1_M, 8);
-			break;
-
-		case 9:
-			//9 data bits, bit 4 set;
-			SET(registers->C1, UART_C1_M, 8);
-			break;
-
-		default:
-			//Other number, not suported, driver panic;
-			//TODO DRIVER PANIC;
-			break;
+		//Error, for instance only 8 bits are supported;
+		kernel_error("kinetis_UART.c : configure_packet_format : invalid number of data bits.");
 
 	}
+
+
+	//8 data bits, bit M cleared;
+	CLEAR(registers->C1, UART_C1_M, 8);
 
 	/*
 	 * Parity update and type : Parity (update and type) is defined by (resp) bits 1 and 0 of C1;

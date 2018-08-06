@@ -44,7 +44,7 @@ static uint32_t critical_section_counter = 0;
 typedef struct {
 
     //The linked element part;
-    linked_element_t link;
+    llist_t link;
 
     //The function part;
     void (*exit_function)(void);
@@ -97,7 +97,7 @@ void kernel_register_exit_function(void (*exit_function)(void)) {
     exit_function_t *data = kernel_malloc_copy(sizeof(exit_function_t), &init);
 
     //Append the exit function struct at the end of the exit list;
-    llist_insert_last(&exit_list, (linked_element_t *) data);
+    llist_insert_last(&exit_list, (llist_t *) data);
 
 }
 

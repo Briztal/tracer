@@ -27,20 +27,20 @@ namespace Interaction {
 
     //---------------------------------------- private fields ----------------------------------------
 
-    //The communication pipes array. Will contain at most 10 pipes;
+    //The interaction pipes array. Will contain at most 10 pipes;
     DynamicPointerBuffer<CommunicationPipe> pipes(10);
 
 
     //------------------------------------------ Log -----------------------------------------
 
-    //The communication log_protocol;
+    //The interaction log_protocol;
     static CommunicationPipe *log_pipe;
 
 }
 
 
 /*
- * add_communication_pipe : adds the given communication pipe to the array;
+ * add_communication_pipe : adds the given interaction pipe to the array;
  */
 
 void Interaction::add_communication_pipe(CommunicationPipe *pipe) {
@@ -71,7 +71,7 @@ void Interaction::initialise_hardware() {
 
     }
 
-    //At the end, the current communication pipe is the first one. It will be the default one;
+    //At the end, the current interaction pipe is the first one. It will be the default one;
 
     //Delay to avoid freeze after init //TODO REMOVE;
     delay_ms(200);
@@ -80,7 +80,7 @@ void Interaction::initialise_hardware() {
 
 
 /*
- * reset : this function initialises all communication pipes
+ * reset : this function initialises all interaction pipes
  */
 
 void Interaction::initialise_data() {
@@ -109,13 +109,13 @@ CommunicationPipe * Interaction::get_default_pipe() {
 //------------------------------------------------- Controls -------------------------------------------------
 
 /*
- * read_communication_pipes : this function read all communication pipes;
+ * read_communication_pipes : this function read all interaction pipes;
  */
 
 void Interaction::read_communication_pipes() {
 
 
-    //For each communication pipe :
+    //For each interaction pipe :
     for (uint8_t pipe_index = NB_PIPES; pipe_index --; ) {
 
         //Cache the pipe;
@@ -129,7 +129,7 @@ void Interaction::read_communication_pipes() {
 
     }
 
-    //At the end, the current communication pipe is the first one. It will be the default one;
+    //At the end, the current interaction pipe is the first one. It will be the default one;
 
 }
 
@@ -166,19 +166,19 @@ void Interaction::log(tstring &&message) {
 
 
 /*
- * getCommunicationPipe : returns the current communication pipe;
+ * getCommunicationPipe : returns the current interaction pipe;
  */
 
 CommunicationPipe* Interaction::getCommunicationPipe() {
 
-    //Return the current communication pipe;
+    //Return the current interaction pipe;
     return log_pipe;
 
 }
 
 
 /*
- * setCommunicationPipe : sets the provided communication pipe as the log pipe;
+ * setCommunicationPipe : sets the provided interaction pipe as the log pipe;
  */
 
 void Interaction::setCommunicationPipe(CommunicationPipe &pipe) {

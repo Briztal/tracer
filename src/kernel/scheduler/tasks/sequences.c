@@ -184,7 +184,7 @@ bool sequences_add_task(uint8_t sequence_id, void (*func)(void *), void *args, v
     kernel_enter_critical_section();
 
     //Add the task to the list;
-    llist_insert_last((linked_list_t *) sequence, (linked_element_t *) task);
+    llist_insert_last((linked_list_t *) sequence, (llist_t *) task);
 
     //Leave the critical section;
     kernel_leave_critical_section();

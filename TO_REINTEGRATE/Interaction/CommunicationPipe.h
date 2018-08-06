@@ -40,7 +40,7 @@ public:
     //Send a rvalue message over the pipe;
     void send(tstring &message, uint8_t type);
 
-    //Read a message comming in the communication interface;
+    //Read a message comming in the interaction interface;
     void readall();
 
 

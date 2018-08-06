@@ -284,7 +284,7 @@ void scheduler_create_sprocesses(size_t nb_processes) {
 
         sprocess->counter = ctr++;
 
-        llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
+        llist_insert_last(pending_sprocesses, (llist_t *) sprocess);
 
         //----------------------------------------------
 
@@ -294,7 +294,7 @@ void scheduler_create_sprocesses(size_t nb_processes) {
 
 
         //Add the process to the linked list;
-        llist_insert_last(terminated_sprocesses, (linked_element_t *) sprocess);
+        llist_insert_last(terminated_sprocesses, (llist_t *) sprocess);
 
     }
 
@@ -485,7 +485,7 @@ sprocess_t *scheduler_select_sprocess() {
         sprocess = (sprocess_t *) llist_remove_first(terminated_sprocesses);
 
         //Insert it in the pending processes list;
-        llist_insert_first(pending_sprocesses, (linked_element_t *) sprocess);
+        llist_insert_first(pending_sprocesses, (llist_t *) sprocess);
 
         //Assign the empty task to the sprocess;
         sprocess->task = &empty_task;
@@ -607,7 +607,7 @@ void scheduler_stopped_to_pending(sprocess_t *sprocess) {
     kernel_enter_critical_section();
 
     //Remove the sprocess from the unregistered list;
-    llist_remove_element(stopped_sprocesses, (linked_element_t *) sprocess);
+    llist_remove_element(stopped_sprocesses, (llist_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
     scheduler_impl_insert_sprocess(pending_sprocesses, sprocess);
@@ -631,10 +631,10 @@ void scheduler_pending_to_stopped(sprocess_t *sprocess) {
     kernel_enter_critical_section();
 
     //Remove the sprocess from the unregistered list;
-    llist_remove_element(pending_sprocesses, (linked_element_t *) sprocess);
+    llist_remove_element(pending_sprocesses, (llist_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
-    llist_insert_last(stopped_sprocesses, (linked_element_t *) sprocess);
+    llist_insert_last(stopped_sprocesses, (llist_t *) sprocess);
 
     //For safety, set the sprocess state to unregistered;
     sprocess->state = SPROCESS_STOPPED;
@@ -658,10 +658,10 @@ void scheduler_pending_to_terminated(sprocess_t *sprocess) {
     sprocess_reset(sprocess);
 
     //Remove the sprocess from the unregistered list;
-    llist_remove_element(pending_sprocesses, (linked_element_t *) sprocess);
+    llist_remove_element(pending_sprocesses, (llist_t *) sprocess);
 
     //Insert the sprocess in the pending list; Implementation call is made;
-    llist_insert_last(terminated_sprocesses, (linked_element_t *) sprocess);
+    llist_insert_last(terminated_sprocesses, (llist_t *) sprocess);
 
     //Leave the critical section;
     kernel_leave_critical_section();

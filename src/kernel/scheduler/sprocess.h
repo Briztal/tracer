@@ -55,7 +55,7 @@ typedef enum {
 typedef struct {
 
     //Composed of a linked element;
-    linked_element_t link;
+    llist_t link;
 
     //The process stack;
 	core_stack_t stack;

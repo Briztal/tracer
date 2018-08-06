@@ -661,7 +661,7 @@ void servo_service_stop(servo_controller_t *const controller) {
 
 
 /*
- * interrupt_routine : this function handles the communication with servos;
+ * interrupt_routine : this function handles the interaction with servos;
  */
 
 void servo_isr_handler() {
