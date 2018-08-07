@@ -1,0 +1,196 @@
+//
+// Created by root on 8/6/18.
+//
+
+#ifndef TRACER_NETF_H
+#define TRACER_NETF_H
+
+
+#include <stdbool.h>
+
+#include <stdint.h>
+
+#include <stddef.h>
+
+#include <data_structures/containers/concurrent/shared_fifo.h>
+
+
+
+//----------------------------------------------------- Data block -----------------------------------------------------
+
+/*
+ * To store messages of a variable length, we will use data blocks; They reference a memory zone, and can be linked;
+ */
+
+struct data_block {
+
+	//Link, mutable;
+	struct list_head head;
+
+	//The block's start address, constant, references a precise location;
+	void *const address;
+
+	//The block's current size, mutable
+	size_t size;
+
+	//The block's maximal size, constant;
+	const size_t max_size;
+
+};
+
+//Create a data block;
+struct data_block *data_block_create(size_t size);
+
+//Delete a data block;
+void data_block_delete(struct data_block *block);
+
+//Copy the content of @src into @dst. Error if dst is not big enough;
+void data_block_copy(const struct data_block *src, struct data_block *dst);
+
+/*
+ * ------------------------------------------- OSI layer 2 network interface -------------------------------------------
+ */
+
+/*
+ * A layer 2 peripheral receives delimited frames.
+ */
+
+struct netf2 {
+
+	//The protocol interface;
+	//TODO struct protocol_t protocol;
+
+	//The quadruplet of shared fifos, to transmit frame containers between hw_specs and sw irq
+	struct shared_fifo *const rx_empty, *const rx_nonempty, *const tx_empty, *const tx_nonempty;
+
+	//Enable hardware interrupts;
+	void (*const enable_rx_hw_irq)(struct netf2 *);
+	void (*const enable_tx_hw_irq)(struct netf2 *);
+
+	//The implementation destructor;
+	void (*const destructor)(struct netf2 *);
+
+};
+
+//----------------------------------------------------- Init - Exit ----------------------------------------------------
+
+//Initalise a layer 2 interface : create and fill fifos, assign function pointers;
+void netf2_init(
+	struct netf2 *iface,
+	size_t nb_frames,
+	size_t frame_size,
+	void (*enable_rx_hw_irq)(struct netf2 *),
+	void (*enable_tx_hw_irq)(struct netf2 *),
+	void (*destructor)(struct netf2 *)
+);
+
+
+//Destruct the interface : delete fifos and their content;
+void netf2_delete(struct netf2 *iface);
+
+
+//---------------------------------------------------- IRQ functions ---------------------------------------------------
+
+//Push @block in rx_nonempty list of @iface, transfer in both rx lists, pull-return a block from rx_empty (can be 0);
+struct data_block *netf2_get_new_rx_block(struct netf2 *iface, struct data_block *block);
+
+//Push @block in tx_empty list of @iface, transfer in both tx lists, pull-return a block from tx_nonempty (can be 0);
+struct data_block *netf2_get_new_tx_block(struct netf2 *iface, struct data_block *block);
+
+
+//------------------------------------------------------- Polling ------------------------------------------------------
+
+//Pulls a message, and if not null, copies its content in @block; Asserts if success;
+bool netf2_get_frame(struct netf2 *iface, struct data_block *frame);
+
+//Attempts to pull an empty block, copies @block into it, and asserts if success;
+bool netf2_send_frame(struct netf2 *iface, const struct data_block *block);
+
+
+/**
+ * netf2_message_available : asserts if messages can be polled from @iface;
+ *
+ * @param iface : the interface to examine;
+ */
+
+bool netf2_message_available(struct netf2 *iface) {
+
+	//Assert if rx_nonempty contains messages;
+	return shared_fifo_empty(iface->rx_nonempty);
+
+}
+
+/*
+ * ------------------------------------------- OSI layer 1 TODO NOP, LAYER 2 BASIC network interface -------------------------------------------
+ */
+
+/*
+ * A framer turns byte stream into framed messages, and framed messages into byte streams;
+ *
+ * 	Messages are stored in blocks, any attempt to use read or write when related blocks are not initialised will
+ * 	throw an error;
+ */
+
+struct data_framer {
+
+	//The maximal size of all frames;
+	const size_t max_frames_size;
+
+	//The block where we save the result of the decoding;
+	struct data_block *decoding_block;
+
+	//The block that contains frames to encode;
+	struct data_block *encoding_block;
+
+
+	//Write a byte in the framer. Will assert if the message is complete;
+	bool (*const decode)(struct data_framer *, uint8_t data);
+
+	//Read (and discard) a byte from the current message of the framer. Will assert if the message is complete;
+	bool (*const encode)(struct data_framer *, uint8_t *data);
+
+	//Delete the framer;
+	void (*deleter)(struct data_framer *);
+
+};
+
+
+/*
+ * A layer 1 peripheral required a framer to comply with the netf2 requirement;
+ */
+
+struct netf21 {
+
+	//The layer 2 interface we adapt;
+	struct netf2 iface;
+
+	//The framer we use;
+	struct data_framer *framer;
+
+};
+
+
+//----------------------------------------------------- Destructor -----------------------------------------------------
+
+//Destructor. Deletes the framer;
+void netf21_destruct(struct netf21 *iface);
+
+
+//--------------------------------------------------- Init functions ---------------------------------------------------
+
+//Initialise the decoding structure, assert if decoding can happen;
+bool netf21_init_decoding(struct netf21 *iface);
+
+//Initialise the encoding structure, assert if encoding can happen;
+bool netf21_init_encoding(struct netf21 *iface);
+
+
+//---------------------------------------------------- IRQ functions ---------------------------------------------------
+
+//Receive a decoded byte; Asserts if more bytes can be written. If not, the procedure must stop;
+bool netf_21_decode_byte(struct netf21 *iface, uint8_t data);
+
+//Get an encoded byte. Asserts if more bytes can be read. If not, the procedure must stop;
+bool netf_21_get_encoded_byte(struct netf21 *iface, uint8_t *data);
+
+#endif //TRACER_NETF_H

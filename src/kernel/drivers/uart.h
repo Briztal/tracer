@@ -21,6 +21,7 @@
 #ifndef TRACER_UARTDRIVER_H
 #define TRACER_UARTDRIVER_H
 
+#include <kernel/net/netf.h>
 #include "stdint.h"
 
 #include "stdbool.h"
@@ -66,6 +67,9 @@ typedef enum {
 
 struct UART_config_t {
 
+
+    //--------------------- L1 config ---------------------
+
     //The Number of data bits;
     uint8_t nb_data_bits;
 
@@ -86,6 +90,18 @@ struct UART_config_t {
 
     //The Baudrate;
     uint32_t baudrate;
+
+
+	//--------------------- L2 config ---------------------
+
+	//The framer. Ownership transferred;
+	struct data_framer framer;
+
+	//The maximal size of all frames;
+	size_t max_frame_size;
+
+	//The maximal number of frames stored by the interface;
+	size_t nb_frames;
 
 };
 

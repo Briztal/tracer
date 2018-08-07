@@ -261,7 +261,7 @@ void services_insert(service_t *service) {
         if (next_execution < element->next_exec_time) {
 
             //Insert the new service before the first greater element;
-            llist_insert_before(pending_services, (llist_t *) element, (llist_t *) service);
+            llist_insert_before(pending_services, (linked_element_t *) element, (linked_element_t *) service);
 
             //Go to the end of the function;
             goto inserted;
@@ -269,13 +269,13 @@ void services_insert(service_t *service) {
         }
 
         //Update the element;
-        element = (service_t *) ((llist_t *)element)->next;
+        element = (service_t *) ((linked_element_t *)element)->next;
 
     }
 
 
     //If we reached the end of the list : the element must be inserted at the end;
-    llist_insert_last(pending_services, (llist_t *) service);
+    llist_insert_last(pending_services, (linked_element_t *) service);
 
     inserted:
 

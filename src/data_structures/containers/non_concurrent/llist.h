@@ -49,24 +49,24 @@
 typedef struct linked_element_t {
 
     //The previous element;
-    struct list_head_t *prev;
+    struct linked_element_t *prev;
 
     //The next element;
-    struct list_head_t *next;
+    struct linked_element_t *next;
 
-} llist_t;
+} linked_element_t;
 
 //Initializer;
 #define EMPTY_LINKED_ELEMENT() {.prev = 0, .next = 0}
 
 //Concatenate two linked lists elements;
-void lelmt_concat(llist_t *prev, llist_t *next);
+void lelmt_concat(linked_element_t *prev, linked_element_t *next);
 
 //Inserts new after prev;
-void lelmt_insert_after(llist_t *src_prev, llist_t *new_element);
+void lelmt_insert_after(linked_element_t *src_prev, linked_element_t *new_element);
 
 //Inserts new before next;
-void lelmt_insert_before(llist_t *src_next, llist_t *new_element);
+void lelmt_insert_before(linked_element_t *src_next, linked_element_t *new_element);
 
 
 /*
@@ -80,10 +80,10 @@ void lelmt_insert_before(llist_t *src_next, llist_t *new_element);
 typedef struct {
 
     //The list's first element;
-    llist_t *first;
+    linked_element_t *first;
 
     //The list's last element;
-    llist_t *last;
+    linked_element_t *last;
 
     //The number of elements;
     size_t nb_elements;
@@ -103,32 +103,32 @@ inline bool llist_insertion_available(const linked_list_t *const list) {
 }
 
 //Insert the new element at the beginning of the list;
-void llist_insert_first(linked_list_t *list, llist_t *element);
+void llist_insert_first(linked_list_t *list, linked_element_t *element);
 
 //Insert the new element at the end of the list;
-void llist_insert_last(linked_list_t *list, llist_t *element);
+void llist_insert_last(linked_list_t *list, linked_element_t *element);
 
 //Insert the new element after an element of the list;
-void llist_insert_after(linked_list_t *list, llist_t *src, llist_t *new_element);
+void llist_insert_after(linked_list_t *list, linked_element_t *src, linked_element_t *new_element);
 
 //Insert the new element before an element of the list;
-void llist_insert_before(linked_list_t *list, llist_t *src, llist_t *new_element);
+void llist_insert_before(linked_list_t *list, linked_element_t *src, linked_element_t *new_element);
 
 //Remove the first element of the list;
-llist_t *llist_remove_first(linked_list_t *list);
+linked_element_t *llist_remove_first(linked_list_t *list);
 
 //Remove an element of the list;
-void llist_remove_element(linked_list_t *list, llist_t *element);
+void llist_remove_element(linked_list_t *list, linked_element_t *element);
 
 //Remove the last element of the list;
-llist_t *llist_remove_last(linked_list_t *list);
+linked_element_t *llist_remove_last(linked_list_t *list);
 
 
 //Debug helper;
 inline size_t count_chain(linked_list_t *list) {
 
     size_t count = 0;
-    llist_t *e = list->first;
+    linked_element_t *e = list->first;
 
     while(e) {
         count++;
@@ -149,7 +149,7 @@ inline size_t count_chain(linked_list_t *list) {
 typedef struct {
 
     //The list's first element;
-    llist_t *current;
+    linked_element_t *current;
 
     //The number of elements;
     size_t nb_elements;
@@ -169,10 +169,10 @@ inline bool lring_insertion_available(linked_ring_t *ring) {
 }
 
 //Insert an element before the current element of the ring (last position);
-void lring_insert_after(linked_ring_t *ring, llist_t *element);
+void lring_insert_after(linked_ring_t *ring, linked_element_t *element);
 
 //Insert an element after the current element of the ring (next position);
-void lring_insert_before(linked_ring_t *ring, llist_t *element);
+void lring_insert_before(linked_ring_t *ring, linked_element_t *element);
 
 //Focus on the next element;
 void lring_incr(linked_ring_t *ring);
@@ -184,16 +184,16 @@ void lring_decr(linked_ring_t *ring);
 /*
 
 //Executes process for all elements after the provided one:
-void llist_direct_process(llist_t *element, void (*process)(llist_t *));
+void llist_direct_process(linked_element_t *element, void (*process)(linked_element_t *));
 
 //Executes process for all elements in the chain starting with the first one;
-void llist_direct_process_full(llist_t *element, void (*process)(llist_t *));
+void llist_direct_process_full(linked_element_t *element, void (*process)(linked_element_t *));
 
 //Propagate spaces (trigger all streams in the opposite of data's direction order);
-void llist_reverse_process(llist_t *element, void (*process)(llist_t *));
+void llist_reverse_process(linked_element_t *element, void (*process)(linked_element_t *));
 
 //Propagate data through the entire stream chain;
-void llist_reverse_process_full(llist_t *element, void (*process)(llist_t *));
+void llist_reverse_process_full(linked_element_t *element, void (*process)(linked_element_t *));
 
 
  */

@@ -97,7 +97,7 @@ stask_t *scheduler_impl_get_task() {
 void scheduler_impl_insert_sprocess(linked_list_t *pending_sprocesses, sprocess_t *sprocess) {
 
     //Insert the process at the end of the list;
-    llist_insert_last(pending_sprocesses, (llist_t *) sprocess);
+    llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
 
 }
 
@@ -125,7 +125,7 @@ sprocess_t *scheduler_impl_get_sprocess(linked_list_t *pending_sprocesses) {
     sprocess_t *sprocess = (sprocess_t *) llist_remove_first(pending_sprocesses);
 
     //Insert the process at the end of the list(round robin);
-    llist_insert_last(pending_sprocesses, (llist_t *) sprocess);
+    llist_insert_last(pending_sprocesses, (linked_element_t *) sprocess);
 
     //Return the selected process;
     return sprocess;

@@ -60,7 +60,7 @@ typedef enum {
 typedef struct {
 
     //The linked element part;
-    llist_t linked_element;
+    linked_element_t linked_element;
 
     //The task's function;
     void (*const function)(void *args);

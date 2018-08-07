@@ -60,78 +60,84 @@
 //-------------------------- Peripheral init --------------------------
 
 //Initialise the peripheral;
-static void initialise_peripheral(const struct kinetis_UART_hw_t *peripheral_data);
+static void initialise_peripheral(const struct kinetis_UART_hw *peripheral_data);
 
 //Start the peripheral;
-static void start_peripheral(const struct kinetis_UART_hw_t *driver_data);
+static void start_peripheral(const struct kinetis_UART_hw *driver_data);
 
 //Reset the peripheral in the stopped state;
-static void stop_peripheral(const struct kinetis_UART_hw_t *driver_data);
+static void stop_peripheral(const struct kinetis_UART_hw *driver_data);
 
 
 //-------------------------- Peripheral config --------------------------
 
 //Configure the packet format;
-static void configure_packet_format(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
+static void configure_packet_format(const struct kinetis_UART_hw *hw_specs, const struct UART_config_t *);
 
 //Configure the state;
-static void configure_modem(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
+static void configure_modem(const struct kinetis_UART_hw *hw_specs, const struct UART_config_t *);
 
 //Configure the transmission layer;
-static void configure_transmission_layer(const struct kinetis_UART_hw_t *data, const struct UART_config_t *);
+static void configure_transmission_layer(const struct kinetis_UART_hw *hw_specs, const struct UART_config_t *);
 
 
 
-//-------------------------- Stream functions --------------------------
+//-------------------------- Stream functions TODO NOP --------------------------
+
+//TODO;
+void kinetis_UART_rx_read(const struct kinetis_UART_driver_t *driver);
+void kinetis_UART_tx_write(const struct kinetis_UART_driver_t *driver);
+
 
 //Get the memory map;
-static void get_memory_map(const struct kinetis_UART_stream_t *stream, struct mem_map_t *map);
+//static void get_memory_map(const struct kinetis_UART_stream_t *stream, struct mem_map_t *map);
 
 //determine the number of spaces available in the input (tx) stream;
-static size_t input_spaces_available(const struct kinetis_UART_stream_t *stream);
+//static size_t input_spaces_available(const struct kinetis_UART_stream_t *stream);
 
 //determine the number of bytes available in the output (rx) stream;
-static size_t output_bytes_available(const struct kinetis_UART_stream_t *stream);
+//static size_t output_bytes_available(const struct kinetis_UART_stream_t *stream);
 
 
 //Read data from rx;
-static void UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
-					  const struct blocks_desc_t *descriptor);
+//static void UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+					  //const struct blocks_desc_t *descriptor);
 
 //Write data in tx;
-static void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
-					   const struct blocks_desc_t *descriptor);
-
+//static void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+					   //const struct blocks_desc_t *descriptor);
+/*
 //The UART stream doesn't store any dynamic data;
 static void UART_stream_delete(struct kinetis_UART_stream_t *stream) {
 	kernel_free(stream);
-}
+}*/
 
 
 //--------------------------------------------------- Pipe functions ---------------------------------------------------
 
 //Delete the interrupt pipe;
-static void kinetis_interrupt_pipe_destroy(const struct kinetis_UART_interrupt_pipe_t *data) {};
+//static void kinetis_interrupt_pipe_destroy(const struct kinetis_UART_interrupt_pipe_t *data) {};
 
 
-//Enable the rx trigger;
-static void enable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
-
-//Disable the rx trigger;
-static void disable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
-
-//Enable the tx trigger;
-static void enable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+//Enable the rx interrupt;
+static void enable_rx_interrupt(struct kinetis_UART_net21 *iface);
 
 //Disable the rx trigger;
-static void disable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+//static void disable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+
+
+//Enable the tx interrupt;
+static void enable_tx_interrupt(struct kinetis_UART_net21 *iface);
+
+//Disable the rx interrupt;
+//static void disable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
 
 
 //Update the rx watermark;
-static void update_rx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_bytes);
+//static void update_rx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_bytes);
 
 //Update the tx watermark;
-static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_spaces);
+//static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_spaces);
 
 
 
@@ -144,7 +150,7 @@ static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe
  * 	- update all required interrupt functions and setup DMA if necessary;
  */
 
-void initialise_peripheral(const struct kinetis_UART_hw_t *const peripheral_data) {
+void initialise_peripheral(const struct kinetis_UART_hw *const peripheral_data) {
 
 	//Cache the memory pointer;
 	struct kinetis_UART_registers_t *const registers = peripheral_data->registers;
@@ -234,7 +240,7 @@ void initialise_peripheral(const struct kinetis_UART_hw_t *const peripheral_data
  * start_peripheral : starts the peripheral, resets fifos, enables interrupts;
  */
 
-void start_peripheral(const struct kinetis_UART_hw_t *driver_data) {
+void start_peripheral(const struct kinetis_UART_hw *driver_data) {
 
 	//Cache memory register;
 	struct kinetis_UART_registers_t *const registers = driver_data->registers;
@@ -279,7 +285,7 @@ void start_peripheral(const struct kinetis_UART_hw_t *driver_data) {
  * stop_peripheral : Stops the peripheral, resets fifos, disable interrupts;
  */
 
-void stop_peripheral(const struct kinetis_UART_hw_t *driver_data) {
+void stop_peripheral(const struct kinetis_UART_hw *driver_data) {
 
 	//Cache memory register;
 	struct kinetis_UART_registers_t *const registers = driver_data->registers;
@@ -310,24 +316,19 @@ void stop_peripheral(const struct kinetis_UART_hw_t *driver_data) {
  * kinetis_UART_create : creates an instance of a kinetis UART driver from hardware driver specs;
  */
 
-struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw_t *const peripheral_data) {
-
+struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw *const specs) {
 
 	//Initialise the peripheral;
-	initialise_peripheral(peripheral_data);
+	initialise_peripheral(specs);
 
 	//Create the driver struct initializer;
 	struct kinetis_UART_driver_t init = {
 
-		//Copy the peripheral data set;
-		.peripheral_data = *peripheral_data,
+		//Copy the hardware data set;
+		.hw_specs = *specs,
 
-		//Mark the driver not initialised;
-		.initialised = false,
-
-		//Streams are not created;
-		.input_stream = 0,
-		.output_stream = 0,
+		//The interface will be created at startup;
+		.iface = 0,
 
 	};
 
@@ -344,7 +345,7 @@ struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw_t *cons
 void kinetis_UART_delete(struct kinetis_UART_driver_t *driver_data) {
 
 	//Reset the peripheral;
-	stop_peripheral(&driver_data->peripheral_data);
+	stop_peripheral(&driver_data->hw_specs);
 
 	//Delete the driver data structure;
 	kernel_free(driver_data);
@@ -403,16 +404,16 @@ void sizes_from_PFIFO(const uint8_t pfifo, uint8_t *const rx_fifo_size, uint8_t 
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void configure_packet_format(const struct kinetis_UART_hw_t *const data, const struct UART_config_t *const config) {
+void configure_packet_format(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
 	//TODO MSB FIRST
 	//TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
 
-	//To avoid implicit double pointer access, we will cache data;
-	struct kinetis_UART_registers_t *const registers = data->registers;
+	//To avoid implicit double pointer access, we will cache hw_specs;
+	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
 
 	/*
-	 * Number of bits; This peripheral only supports 8 or 9 data bits;
+	 * Number of bits; This peripheral only supports 8 or 9 hw_specs bits;
 	 *
 	 * The number of bits is defined by bit 4 of C1;
 	 */
@@ -421,12 +422,12 @@ void configure_packet_format(const struct kinetis_UART_hw_t *const data, const s
 	if (config->nb_data_bits != 8) {
 
 		//Error, for instance only 8 bits are supported;
-		kernel_error("kinetis_UART.c : configure_packet_format : invalid number of data bits.");
+		kernel_error("kinetis_UART.c : configure_packet_format : invalid number of hw_specs bits.");
 
 	}
 
 
-	//8 data bits, bit M cleared;
+	//8 hw_specs bits, bit M cleared;
 	CLEAR(registers->C1, UART_C1_M, 8);
 
 	/*
@@ -459,7 +460,7 @@ void configure_packet_format(const struct kinetis_UART_hw_t *const data, const s
 
 		}
 
-		//Finally, if the parity is enabled and there are 9 data bits, the 10-th bit must be declared;
+		//Finally, if the parity is enabled and there are 9 hw_specs bits, the 10-th bit must be declared;
 		if (config->nb_data_bits == 9) {
 
 			//Set M10, bit 5 of C4;
@@ -481,9 +482,9 @@ void configure_packet_format(const struct kinetis_UART_hw_t *const data, const s
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void configure_modem(const struct kinetis_UART_hw_t *const data, const struct UART_config_t *const config) {
+void configure_modem(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
-	struct kinetis_UART_registers_t *const registers = data->registers;
+	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
 
 	/*
 	 * Rx_RTS_enable and Tx_Cts_enable are (resp) bits 3 and 0 of MODEM;
@@ -526,10 +527,10 @@ void configure_modem(const struct kinetis_UART_hw_t *const data, const struct UA
  */
 
 void
-configure_transmission_layer(const struct kinetis_UART_hw_t *const data, const struct UART_config_t *const config) {
+configure_transmission_layer(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
-	//Cache the data pointer to avoid permanent implicit double pointer access;
-	struct kinetis_UART_registers_t *registers = data->registers;
+	//Cache the hw_specs pointer to avoid permanent implicit double pointer access;
+	struct kinetis_UART_registers_t *registers = hw_specs->registers;
 
 	/*
 	 * We will configure the transmission type : Full or Half duplex;
@@ -563,7 +564,7 @@ configure_transmission_layer(const struct kinetis_UART_hw_t *const data, const s
 	 */
 
 	//Determine Kb;
-	uint32_t Kb = ((uint32_t) ((uint32_t) (data->clock_frequency << 1)) / config->baudrate);
+	uint32_t Kb = ((uint32_t) ((uint32_t) (hw_specs->clock_frequency << 1)) / config->baudrate);
 
 	//Set the 5 MSB of Kb in BDH;
 	registers->BDH = (uint8_t) ((Kb >> 13) & 0x1F);
@@ -583,40 +584,23 @@ configure_transmission_layer(const struct kinetis_UART_hw_t *const data, const s
  * kinetis_UART_start : configures the transmission stack, creates streams, and starts the UART;
  */
 
-void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config) {
+void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config,
+						struct data_framer *framer) {
 
 	//Cache the hardware struct;
-	struct kinetis_UART_hw_t *peripheral_data = &driver_data->peripheral_data;
+	const struct kinetis_UART_hw *hw_specs = &driver_data->hw_specs;
 
 	//Initialise different parts of the UART;
-	configure_packet_format(peripheral_data, config);
-	configure_modem(peripheral_data, config);
-	configure_transmission_layer(peripheral_data, config);
+	configure_packet_format(hw_specs, config);
+	configure_modem(hw_specs, config);
+	configure_transmission_layer(hw_specs, config);
 
 	//Cache the register struct pointer;
-	struct kinetis_UART_registers_t *const registers = peripheral_data->registers;
+	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
 
-	//Cache all required registers pointer;
-	volatile uint8_t *const D_reg = &registers->D;
-	volatile uint8_t *const S1_reg = &registers->S1;
+	//Cache pointer to C2
 	volatile uint8_t *const C2_reg = &registers->C2;
-	volatile uint8_t *const RXWATER_reg = &registers->RWFIFO;
-	volatile uint8_t *const TXWATER_reg = &registers->TWFIFO;
-	volatile uint8_t *const RCFIFO_reg = &registers->RCFIFO;
-	volatile uint8_t *const TCFIFO_reg = &registers->TCFIFO;
 
-
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
-	//TODO SET WATERMARK TO TRIGGER AN INTERRUPT;
 
 	//Configure C5 so that RX full - TX empty flags generate interrupt; clear C5's TDMAS and RDMAS;
 	registers->C5 &= ~(UART_C5_TDMAS | UART_C5_RDMAS);
@@ -627,208 +611,39 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	//Get both FIFOs sizes;
 	sizes_from_PFIFO(registers->PFIFO, &rx_fifo_size, &tx_fifo_size);
 
+	//
+	struct kinetis_UART_net21 interface_init = {
 
-	/*
-	 * Pipes and stream const-reference each other. We must use a trick to properly initialise both;
-	 */
+		//Initialise the l2 adapter
+		.iface = {
 
-	//------------------ RX (OUTPUT) STREAM - PIPE INIT ------------------
+			//The l2 interface will be initialised right after;
+			.iface = {},
 
-	//Pre-allocate memory for the pipe struct;
-	struct kinetis_UART_interrupt_pipe_t *UART_rx_pipe = kernel_malloc(sizeof(struct kinetis_UART_interrupt_pipe_t));
-
-	//Create the output (rx) stream;
-	struct kinetis_UART_stream_t output_stream_init = {
-
-		//Set the stream to always write to D, and read S1 before the end;
-		.stream = {
-
-			//Data query must read S1, but DMA is supported;
-			.type = STREAM_DMA_COMPLIANT_MEMORY,
-
-			//Output stream;
-			.input_stream = false,
-
-			//Blocs are 1 byte long;
-			.block_size = 1,
-
-			//Transfer the ownership of the allocated (but not initialised) pipe;
-			.owned_pipe = (struct stream_pipe_t *const) UART_rx_pipe,
-
-			//No pipe registered;
-			.registered_pipe = 0,
-
-			//Transfer access to uart streams functions;
-			.get_memory_map = (void (*)(const struct stream_t *, struct mem_map_t *)) &get_memory_map,
-
-			.get_available_blocks = (size_t (*)(const struct stream_t *)) output_bytes_available,
-
-			.transfer_blocks = (size_t (*)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
-				&UART_read,
-
-			.discard_blocks = (void (*)(struct stream_t *, size_t)) 0,
-
-			.deleter = (void (*)(struct stream_t *)) UART_stream_delete,
+			//Transfer the ownership of the framer;
+			.framer = framer,
 
 		},
 
-		//Save the register to read before the last byte copy;
-		//Save registers;
-		.S1 = S1_reg,
-		.D = D_reg,
-		.CFIFO = RCFIFO_reg,
-
-		//Save the rx fifo size;
-		.fifo_size = rx_fifo_size,
-
-	};
-
-	//Initialise the rx stream;
-	driver_data->output_stream = kernel_malloc_copy(sizeof(struct kinetis_UART_stream_t), &output_stream_init);
-
-	//Create the rx pipe initializer;
-	struct kinetis_UART_interrupt_pipe_t output_pipe_init = {
-
-		//Leave uninitialised for instance;
-		.pipe = {},
-
-		//Copy C2's address;
+		//Save the address of C2 for interrupt management;
 		.C2 = C2_reg,
 
-		//Copy the address of RXWATER;
-		.WATER = RXWATER_reg,
-
-		//Save the rx fifo size;
-		.fifo_size = rx_fifo_size,
-
 	};
 
-	//Initialise pipe part of the initializer, providing the rx stream's reference;
-	interrupt_pipe_initialise(
-
-		//The pipe to init;
-		&output_pipe_init.pipe,
-
-		//The owner stream reference;
-		(struct stream_t *) driver_data->output_stream,
-
-		//The watermark updater;
-		(void (*)(struct interrupt_pipe_t *, size_t)) &update_rx_watermark,
-
-		//The trigger enabler;
-		(void (*)(struct interrupt_pipe_t *)) &enable_rx_trigger,
-
-		//The trigger disabler;
-		(void (*)(struct interrupt_pipe_t *)) &disable_rx_trigger,
-
-		//The destructor's reference;
-		(void (*)(struct interrupt_pipe_t *)) &kinetis_interrupt_pipe_destroy
-
+	//Initialise the layer 2 interface;
+	netf2_init(
+		&interface_init.iface.iface,
+		config->nb_frames,
+		config->max_frame_size,
+		(void (*)(struct netf2 *)) enable_rx_interrupt,
+		(void (*)(struct netf2 *)) enable_tx_interrupt,
+		(void (*)(struct netf2 *)) netf21_destruct
 	);
 
-	//Initialise the rx pipe;
-	memcpy(UART_rx_pipe, &output_pipe_init, sizeof(struct kinetis_UART_interrupt_pipe_t));
 
-
-	//------------------ TX (OUTPUT) STREAM - PIPE INIT ------------------
-	//Pre-allocate memory for the pipe struct;
-	struct kinetis_UART_interrupt_pipe_t *UART_tx_pipe = kernel_malloc(sizeof(struct kinetis_UART_interrupt_pipe_t));
-
-	//Create the input (tx) stream;
-	struct kinetis_UART_stream_t input_stream_init = {
-
-		//Set the stream to always write to D, and read S1 before the end;
-		.stream = {
-
-			//Data query must read S1, but DMA is supported;
-			.type = STREAM_DMA_COMPLIANT_MEMORY,
-
-			//Input stream;
-			.input_stream = true,
-
-			//Blocs are 1 byte long;
-			.block_size = 1,
-
-			//No pipe owned;
-			.owned_pipe = (struct stream_pipe_t *const) UART_tx_pipe,
-
-			//No pipe registered;
-			.registered_pipe = 0,
-
-
-			//Provide access to stream functions;
-			.get_memory_map = (void (*)(const struct stream_t *, struct mem_map_t *)) &get_memory_map,
-
-			.get_available_blocks = (size_t (*)(const struct stream_t *)) input_spaces_available,
-
-			.transfer_blocks =
-			(size_t (*)(struct stream_t *, const struct mem_map_t *, const struct blocks_desc_t *))
-				&UART_write,
-
-			.discard_blocks = (void (*)(struct stream_t *, size_t)) 0,
-
-			.deleter = (void (*)(struct stream_t *)) UART_stream_delete,
-
-		},
-
-		//Save registers;
-		.S1 = S1_reg,
-		.D = D_reg,
-		.CFIFO = TCFIFO_reg,
-
-		//Save the tx fifo size;
-		.fifo_size = tx_fifo_size,
-
-	};
-
-	//Initialise the tx stream;
-	driver_data->input_stream = kernel_malloc_copy(sizeof(struct kinetis_UART_stream_t), &input_stream_init);
-
-	//Create the tx pipe;
-	struct kinetis_UART_interrupt_pipe_t input_pipe_init = {
-
-		//Leave uninitialised for instance;
-		.pipe = {},
-
-		//Copy C2's address;
-		.C2 = C2_reg,
-
-		//Copy the address of TXWATER;
-		.WATER = TXWATER_reg,
-
-		//Save the fifo size;
-		.fifo_size = tx_fifo_size,
-
-	};
-
-	//Initialise pipe part of the initializer, providing the tx stream's reference;
-	interrupt_pipe_initialise(
-
-		//The pipe to init;
-		&input_pipe_init.pipe,
-
-		//The owner stream reference;
-		(struct stream_t *) driver_data->input_stream,
-
-		//The watermark updater;
-		(void (*)(struct interrupt_pipe_t *, size_t)) &update_tx_watermark,
-
-		//The trigger enabler;
-		(void (*)(struct interrupt_pipe_t *)) &enable_tx_trigger,
-
-		//The trigger disabler;
-		(void (*)(struct interrupt_pipe_t *)) &disable_tx_trigger,
-
-		//The destructor's reference;
-		(void (*)(struct interrupt_pipe_t *)) &kinetis_interrupt_pipe_destroy
-
-	);
-
-	//Initialise the tx pipe;
-	memcpy(UART_tx_pipe, &input_pipe_init, sizeof(struct kinetis_UART_interrupt_pipe_t));
 
 	//Initialise the hardware in a safe state;
-	start_peripheral(peripheral_data);
+	start_peripheral(hw_specs);
 
 }
 
@@ -840,143 +655,13 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data) {
 
 	//Cache the hardware struct;
-	const struct kinetis_UART_hw_t *peripheral_data = &driver_data->peripheral_data;
+	const struct kinetis_UART_hw *hw_specs = &driver_data->hw_specs;
 
-	//Delete both streams;
-	stream_delete((struct stream_t *) driver_data->input_stream);
-	stream_delete((struct stream_t *) driver_data->output_stream);
+	//Delete the interface, calling the superclass destructor;
+	netf2_delete((struct netf2 *) driver_data->iface);
 
-	//Initialise the hardware in a safe state;
-	stop_peripheral(peripheral_data);
-}
-
-
-//---------------------------------------------------- Stream sizes ----------------------------------------------------
-
-/*
- * get_memory_map : provides access to the D register;
- */
-
-static void get_memory_map(const struct kinetis_UART_stream_t *const stream, struct mem_map_t *const map) {
-
-	//Create the initializer of memory map;
-	struct mem_map_t init = {
-		.block_spacing = 0,
-		.start_address = stream->D,
-	};
-
-	//Initialise the memory map;
-	memcpy(map, &init, sizeof(struct mem_map_t));
-
-}
-
-
-/*
- * input_spaces_available : determines the number of spaces available in the input (tx) stream;
- */
-
-size_t input_spaces_available(const struct kinetis_UART_stream_t *const stream) {
-
-	//Return the number of spaces available in the hardware fifo;
-	return stream->fifo_size - *(stream->CFIFO);
-}
-
-
-/*
- * output_bytes_available : determines the number of bytes available in the output (rx) stream;
- */
-
-size_t output_bytes_available(const struct kinetis_UART_stream_t *const stream) {
-
-	//Return the number of bytes available in the hardware fifo;
-	return *(stream->CFIFO);
-
-}
-
-
-//-------------------------------------------------- Stream transfers --------------------------------------------------
-
-
-/*
- * UART_read : this function copies the required amount of data from the hardware rx buffer to the provided
- * 	memory zone;
- */
-
-void UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
-			   const struct blocks_desc_t *descriptor) {
-
-	//Cache the stream's D register;
-	volatile uint8_t *volatile const D = stream->D;
-
-	//Cache the number of bytes to copy;
-	size_t transfer_size = descriptor->nb_blocks;
-
-	//Cache the memory start;
-	volatile uint8_t *volatile src = src_map->start_address;
-
-	//Cache the memory spacing;
-	size_t spacing = src_map->block_spacing;
-
-	//For each element to transfer to the hardware buffer :
-	while (transfer_size--) {
-
-		//If the current element is the last one that can be transferred, read S1 to clear the interrupt;
-		if (!transfer_size) {
-
-			//Read S1;
-			volatile uint8_t s1 = *(stream->S1);
-
-		}
-
-		//Copy D's content into src;
-		*src = *D;
-
-		//Update src;
-		src += spacing;
-
-	}
-
-}
-
-
-/*
- * UART_write : this function copies the required amount of data from the src memory zone to
- *  the hardware tx buffer;
- */
-
-void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
-				const struct blocks_desc_t *descriptor) {
-
-	//Cache the stream's D register;
-	volatile uint8_t *volatile const D = stream->D;
-
-	//Cache the number of bytes to copy;
-	size_t transfer_size = descriptor->nb_blocks;
-
-	//Cache the memory start;
-	volatile uint8_t *volatile src = src_map->start_address;
-
-	//Cache the memory spacing;
-	size_t spacing = src_map->block_spacing;
-
-	//For each element to transfer to the hardware buffer :
-	while (transfer_size--) {
-
-		//If the current element is the last one that can be transferred, read S1 to clear the interrupt;
-		if (!transfer_size) {
-
-			//Read S1;
-			volatile uint8_t s1 = *(stream->S1);
-
-		}
-
-		//Copy the byte in D;
-		*D = *src;
-
-		//Update src;
-		src += spacing;
-
-	}
+	//Reset the hardware in a safe state;
+	stop_peripheral(hw_specs);
 
 }
 
@@ -984,56 +669,50 @@ void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map
 //--------------------------------------------------- Pipe functions ---------------------------------------------------
 
 //Enable the rx trigger;
-static void enable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+static void enable_rx_interrupt(struct kinetis_UART_net21 *const iface) {
 
-	//Set the RIE bit in C2;
-	*(pipe->C2) |= UART_C2_RIE;
+	//Initialise the net21 interface decoding;
+	bool decoding_authorised = netf21_init_decoding(&iface->iface);
+
+	//If the decoding is not authorised :
+	if (!decoding_authorised) {
+
+		//Disable the rx interrupt : clear the RIE bit in C2;
+		*(iface->C2) &= ~UART_C2_RIE;
+
+	} else {
+
+		//Enable the rx interrupt : set the RIE bit in C2;
+		*(iface->C2) |= UART_C2_RIE;
+
+	}
+
 
 }
 
-//Disable the rx trigger;
-static void disable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
-
-	//Set the RIE bit in C2;
-	*(pipe->C2) &= ~UART_C2_RIE;
-
-}
 
 //Enable the tx trigger;
-static void enable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+static void enable_tx_interrupt(struct kinetis_UART_net21 *const iface) {
 
-	//Set the RIE bit in C2;
-	*(pipe->C2) |= UART_C2_TIE;
+	//Initialise the net21 interface encoding;
+	bool encoding_authorised = netf21_init_decoding(&iface->iface);
 
-}
+	//If the decoding is not authorised :
+	if (!encoding_authorised) {
 
-//Disable the rx trigger;
-static void disable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *const pipe) {
+		//Disable the tx interrupt : clear the TIE bit in C2;
+		*(iface->C2) &= ~UART_C2_TIE;
 
-	//Set the RIE bit in C2;
-	*(pipe->C2) &= ~UART_C2_TIE;
+	} else {
 
-}
+		//Enable the tx interrupt : set the TIE bit in C2;
+		*(iface->C2) |= UART_C2_TIE;
 
-
-//Update the rx watermark;
-static void update_rx_watermark(const struct kinetis_UART_interrupt_pipe_t *const pipe, const size_t nb_bytes) {
-
-	//The rx fifo watermark register determines the number of bytes that trigger an INT or DMA; Just update it;
-	*(pipe->WATER) = (uint8_t) nb_bytes;
+	}
 
 }
 
 
-//Update the tx watermark;
-static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *const pipe, const size_t nb_spaces) {
-
-	//The tx fifo watermark register determines the number of bytes that trigger an INT or DMA;
-	//To determine the number of bytes associated with the required number of spaces, subtract it to the fifo size;
-	*(pipe->WATER) = pipe->fifo_size - (uint8_t) nb_spaces;
-
-
-}
 //----------------------------------------------------- Exceptions -----------------------------------------------------
 
 /*
@@ -1043,7 +722,7 @@ static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *cons
 void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_data) {
 
 	//Cache the register pointer;
-	struct kinetis_UART_registers_t *registers = driver_data->peripheral_data.registers;
+	struct kinetis_UART_registers_t *registers = driver_data->hw_specs.registers;
 
 	//Cache C2, S1, and C5;
 	uint8_t C2 = registers->C2, S1 = registers->S1, C5 = registers->C5;
@@ -1057,8 +736,8 @@ void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_da
 
 		//teensy35_led_count(3);
 
-		//Execute the driver's output pipe's transfer;
-		interrupt_pipe_transfer((struct interrupt_pipe_t *) driver_data->output_stream->stream.owned_pipe);
+		//Read from rx;
+		kinetis_UART_rx_read(driver_data);
 
 	}
 
@@ -1067,8 +746,8 @@ void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_da
 
 		//teensy35_led_count(4);
 
-		//Execute the driver's input pipe's transfer;
-		interrupt_pipe_transfer((struct interrupt_pipe_t *) driver_data->input_stream->stream.owned_pipe);
+		//Read from tx;
+		kinetis_UART_tx_write(driver_data);
 
 	}
 
@@ -1095,7 +774,7 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 	 */
 
 	//Cache the peripheral data pointer;
-	const struct kinetis_UART_hw_t *const peripheral_data = &driver_data->peripheral_data;
+	const struct kinetis_UART_hw *const peripheral_data = &driver_data->hw_specs;
 
 	//Cache the register pointer;
 	struct kinetis_UART_registers_t *const registers = peripheral_data->registers;
@@ -1165,182 +844,97 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 
 }
 
-//-------------------------------------------------- watermarks --------------------------------------------------
-
-/*
- * update_tx_water :
- *
- *  - Enables the reception interrupt. If called by a connection, will allow automatic processing. If called by an
- *      interrupt, won't change anything;
- *  - Determines the safest number of transmissions to execute;
- *  - Determines the final number of elements in the transmission buffer;
- *  - Determines the final watermark;
- */
-
-/*
-uint8_t update_tx_watermark(const struct kinetis_UART_hw_t *const data, uint8_t nb_transmissions) {
-
-	//To have a faster access, cache the register struct's pointer;
-	struct kinetis_UART_registers_t *const registers = data->registers;
-
-	//Activate the reception interrupt;
-	SET(registers->C2, UART_C2_TIE, 8);
-
-	//Cache the number of elements in the hardware buffer;
-	const uint8_t hw_tx_nb_elements = registers->TCFIFO;
-
-	//Cache the number of spaces in the hardware buffer;
-	const uint8_t hw_tx_nb_spaces = data->tx_size - hw_tx_nb_elements;
-
-	//If we must transmit more characters that we can, major the size to transfer;
-	if (nb_transmissions > hw_tx_nb_spaces) nb_transmissions = hw_tx_nb_spaces;
-
-	//Determine the final number of uint16_t in the hw buffer;
-	const uint8_t final_nb = hw_tx_nb_elements + nb_transmissions;
-
-	//Call the watermark specific function;
-	registers->TWFIFO = data->tx_water_function(final_nb);
-
-	//Return the correct number of transmissions to execute;
-	return nb_transmissions;
-
-}
-*/
-
-//-------------------------- Reception methods --------------------------
 
 
-/*
- * update_tx_water :
- *  - Enabled the reception interrupt;
- *  - Determines the safest maximum number of readings to perform;
- *  - Determine the final number of elements in the hardware rx buffer;
- *  - Ca
- *
- * his function updates the rx watermark in prevision of a determined number of readings.
- *  It also corrects and returns the number of readings so that there are no underflows;
- */
-
-/*
-uint8_t update_rx_watermark(const struct kinetis_UART_hw_t *const data, uint8_t nb_readings) {
-
-	//To have a faster access, cache the register struct's pointer;
-	struct kinetis_UART_registers_t *const registers = data->registers;
-
-	//Activate the reception interrupt;
-	SET(registers->C2, UART_C2_RIE, 8);
-
-	//Cache the number of uint16_t in the rx hardware buffer;
-	const uint8_t hw_rx_nb = registers->RCFIFO;
-
-	//Major the transfer size by the number of uint16_t in the hardware buffer;
-	if (hw_rx_nb < nb_readings) nb_readings = hw_rx_nb;
-
-	//Determine the final number of uint16_t in the hw buffer;
-	const uint8_t final_nb = hw_rx_nb - nb_readings;
-
-	//Call the watermark specific function;
-	registers->RWFIFO = data->rx_water_function(final_nb, data->rx_size);
-
-	//Return the safest maxmimum number of readings to perform;
-	return nb_readings;
-
-}*/
+//-------------------------------------------------- Data transfer --------------------------------------------------
 
 
-//-------------------------------------------------- uint16_tansfer --------------------------------------------------
+void kinetis_UART_tx_write(const struct kinetis_UART_driver_t *const driver) {
 
-/*
- *
+	//Cache the net21 interface;
+	struct kinetis_UART_net21 *iface = driver->iface;
 
-void UART_write(const struct kinetis_UART_stream_t *const stream, struct mem_desc_t *src) {
+	//Cache the hardware specs struct;
+	const struct kinetis_UART_hw *hw_specs = &driver->hw_specs;
 
-	//Cache src in the correct type;
-	const uint16_t *src = src_c;
+	//Cache the tx fifo size;
+	uint8_t tx_fifo_size = iface->tx_fifo_size;
 
 	//As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-	struct kinetis_UART_registers_t *const registers = instance->memory;
+	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
 
-	//Update the watermark and determine the number of transmissions to execute;
-	uint8_t nb_transmissions = update_tx_watermark(instance, (uint8_t) size);
+	//While there are spaces in the tx buffer;
+	while (registers->TCFIFO != tx_fifo_size) {
 
-	//For each element to transfer to the hardware buffer :
-	while (nb_transmissions--) {
+		//Cache a space for the byte to write;
+		uint8_t data;
 
-		//If the current element is the last one that can be transferred, read S1 to clear the interrupt;
-		if (!nb_transmissions) {
+		//Initialise the byte to write and get a stop request;
+		bool data_available = netf_21_get_encoded_byte((struct netf21 *) iface, &data);
 
-			//TODO VOLATILE CHECK
-			//Read S1;
-			registers->S1;
+		//Read S1;
+		registers->S1;
 
-		}
+		//Now, copy the byte in D;
+		registers->D = data;
 
-		//Get an element from the buffer;
-		uint16_t element = *(src++);
+		//If no more data is available :
+		if (!data_available) {
 
-		//If we must send the 9-th bit (ie the 9-th bit is set, b100000000 = 256
-		if (element & (uint16_t) 256) {
+			//Disable the tx interrupt : clear the TIE bit in C2;
+			registers->C2 &= ~UART_C2_TIE;
 
-			//Set T8, bit 6 of C3;
-			SET(registers->C3, UART_C3_T8, 8);
-
-		} else {
-
-			//Set T8, bit 6 of C3;
-			CLEAR(registers->C3, UART_C3_T8, 8);
+			//Complete;
+			return;
 
 		}
-
-		//Now, copy the 8 first bits in D to complete the transmission;
-		registers->D = (uint8_t) element;
 
 	}
+
+	//All data has been read, the interrupt can remain set;
 
 }
 
 
-void kinetis_UART_copy_from_rx(const struct kinetis_UART_hw_t *const instance, void *dest_c, size_t size) {
+void kinetis_UART_rx_read(const struct kinetis_UART_driver_t *const driver) {
 
-	//Cache src in the correct type;
-	uint16_t *dest = dest_c;
+	//Cache the net21 interface;
+	struct kinetis_UART_net21 *iface = driver->iface;
 
-	//To have a faster access, cache the register struct's pointer;
-	struct kinetis_UART_registers_t *const registers = instance->memory;
+	//Cache the hardware specs struct;
+	const struct kinetis_UART_hw *hw_specs = &driver->hw_specs;
 
-	//Update the rw watermark according to the transfer size, and get the safe number of readings to do;
-	uint8_t nb_readings = update_rx_watermark(instance, (uint8_t) size);
+	//As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
+	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
 
-	//For each element to transfer from the hw buffer :
-	while (nb_readings--) {
+	//While there are bytes in the rx buffer;
+	while (registers->RCFIFO) {
 
-		//If this cycle is the last one, read S1 to clear the interrupt;
-		if (!nb_readings) {
+		//Cache a space for the byte to write;
+		uint8_t data;
 
-			//TODO VOLATILE CHECK
-			//Read S1;
-			registers->S1;
+		//Initialise the byte to write and get a stop request;
+		bool data_available = netf_21_get_encoded_byte((struct netf21 *) iface, &data);
+
+		//Read S1;
+		registers->S1;
+
+		//Now, copy the byte in D;
+		registers->D = data;
+
+		//If no more data is available :
+		if (!data_available) {
+
+			//Disable the rx interrupt : clear the TIE bit in C2;
+			registers->C2 &= ~UART_C2_RIE;
+
+			//Complete;
+			return;
 
 		}
-
-		//First, cache the return value;
-		uint16_t ret_value = 0;
-
-		//If the transmission mode is set to almost 9 bits and R8 is set :
-		if ((registers->C1 & UART_C1_M) && (registers->C3 & UART_C3_R8)) {
-
-			//Set the bit 8 of ret_value
-			SET_BIT(ret_value, 8, 16);
-
-		}
-
-		//Add D's value to the return value;
-		SET(ret_value, (uint16_t) (uint8_t) registers->D, 16);
-
-		//Return the received value;
-		*(dest++) = ret_value;
 
 	}
 
+	//All data has been read, the interrupt can remain set;
+
 }
- */

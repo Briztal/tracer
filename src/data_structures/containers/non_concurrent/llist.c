@@ -33,7 +33,7 @@
  * lelmt_concat : concatenates the couple of elements; If their predecessors / successors are allocated, error;
  */
 
-void lelmt_concat(llist_t *const prev, llist_t *const next) {
+void lelmt_concat(linked_element_t *const prev, linked_element_t *const next) {
 
     //First, if the first's output or the second's input is already allocated :
     if (prev->next || next->prev) {
@@ -56,10 +56,10 @@ void lelmt_concat(llist_t *const prev, llist_t *const next) {
  * lelmt_get_first : searches for the first element of the list;
  */
 
-llist_t *lelmt_get_first(llist_t *element) {
+linked_element_t *lelmt_get_first(linked_element_t *element) {
 
     //Cache the previous element;
-    llist_t *prev;
+    linked_element_t *prev;
 
     //Search the linked list for the first element;
     while ((prev = element->prev))
@@ -75,10 +75,10 @@ llist_t *lelmt_get_first(llist_t *element) {
  * lelmt_get_last : searches for the last element in the list;
  */
 
-llist_t *lelmt_get_last(llist_t *element) {
+linked_element_t *lelmt_get_last(linked_element_t *element) {
 
     //Cache the next element;
-    llist_t *next;
+    linked_element_t *next;
 
     //Search the linked list for the first stream in order of data propagation;
     while ((next = element->next))
@@ -94,13 +94,13 @@ llist_t *lelmt_get_last(llist_t *element) {
  * lelmt_insert_after : inserts the whole list where new belongs between prev and its eventual successor
  */
 
-void lelmt_insert_after(llist_t *const src_prev, llist_t *const new_element) {
+void lelmt_insert_after(linked_element_t *const src_prev, linked_element_t *const new_element) {
 
-    llist_t *new_first = lelmt_get_first(new_element);
-    llist_t *new_last = lelmt_get_last(new_element);
+    linked_element_t *new_first = lelmt_get_first(new_element);
+    linked_element_t *new_last = lelmt_get_last(new_element);
 
     //Cache the current successor of src_prev;
-    llist_t *src_next = src_prev->next;
+    linked_element_t *src_next = src_prev->next;
 
     //Concatenate src_prev and new_first;
     lelmt_concat(src_prev, new_first);
@@ -119,13 +119,13 @@ void lelmt_insert_after(llist_t *const src_prev, llist_t *const new_element) {
  * lelmt_insert_before : inserts the whole list where new belongs between next and its eventual predecessor;
  */
 
-void lelmt_insert_before(llist_t *const src_next, llist_t *const new_element) {
+void lelmt_insert_before(linked_element_t *const src_next, linked_element_t *const new_element) {
 
-    llist_t *new_first = lelmt_get_first(new_element);
-    llist_t *new_last = lelmt_get_last(new_element);
+    linked_element_t *new_first = lelmt_get_first(new_element);
+    linked_element_t *new_last = lelmt_get_last(new_element);
 
     //Cache the predecessor of src_next;
-    llist_t *src_prev = src_next->prev;
+    linked_element_t *src_prev = src_next->prev;
 
     //Concatenate src_next and new_last;
     lelmt_concat(src_next, new_last);
@@ -148,7 +148,7 @@ void lelmt_insert_before(llist_t *const src_next, llist_t *const new_element) {
  * llist_insert_first : inserts the new element at the initial of the list;
  */
 
-void llist_insert_first(linked_list_t *const list, llist_t *const element) {
+void llist_insert_first(linked_list_t *const list, linked_element_t *const element) {
 
     //If the element is null :
     if (!list || !element) {
@@ -174,7 +174,7 @@ void llist_insert_first(linked_list_t *const list, llist_t *const element) {
     } else {
 
         //The first element exists. Cache it;
-        llist_t *next = list->first;
+        linked_element_t *next = list->first;
 
         //Link both first and new element;
         next->prev = element;
@@ -194,7 +194,7 @@ void llist_insert_first(linked_list_t *const list, llist_t *const element) {
  * llist_insert_last : inserts the new element at the end of the list;
  */
 
-void llist_insert_last(linked_list_t *const list, llist_t *const element) {
+void llist_insert_last(linked_list_t *const list, linked_element_t *const element) {
 
     //If the element is null :
     if (!list || !element) {
@@ -220,7 +220,7 @@ void llist_insert_last(linked_list_t *const list, llist_t *const element) {
     } else {
 
         //The last element exists, cache it;
-        llist_t *prev = list->last;
+        linked_element_t *prev = list->last;
 
         //Link both previous and new element;
         prev->next = element;
@@ -237,7 +237,7 @@ void llist_insert_last(linked_list_t *const list, llist_t *const element) {
 }
 
 //Insert the new element after an element of the list;
-void llist_insert_after(linked_list_t *const list, llist_t *const src, llist_t *const new_element) {
+void llist_insert_after(linked_list_t *const list, linked_element_t *const src, linked_element_t *const new_element) {
 
     //If src is null, the list is supposedly empty;
     if (!src) {
@@ -281,7 +281,7 @@ void llist_insert_after(linked_list_t *const list, llist_t *const src, llist_t *
  * llist_insert_before : inserts the new element before an element of the list;
  */
 
-void llist_insert_before(linked_list_t *const list, llist_t *const src, llist_t *const new_element) {
+void llist_insert_before(linked_list_t *const list, linked_element_t *const src, linked_element_t *const new_element) {
 
     if (!list || !new_element ) {
 
@@ -335,7 +335,7 @@ void llist_insert_before(linked_list_t *const list, llist_t *const src, llist_t 
  * llist_remove_first : removes the first element of the list;
  */
 
-llist_t *llist_remove_first(linked_list_t *const list) {
+linked_element_t *llist_remove_first(linked_list_t *const list) {
 
     //If the lst is null :
     if (!list) {
@@ -354,10 +354,10 @@ llist_t *llist_remove_first(linked_list_t *const list) {
     } else {
 
         //Cache the first element;
-        llist_t *elmt = list->first;
+        linked_element_t *elmt = list->first;
 
         //Cache the next element;
-        llist_t *next = elmt->next;
+        linked_element_t *next = elmt->next;
 
         //Reset the first's neighbors;
         elmt->next = elmt->prev = 0;
@@ -389,7 +389,7 @@ llist_t *llist_remove_first(linked_list_t *const list) {
 }
 
 //Remove the last element of the list;
-llist_t *llist_remove_last(linked_list_t *const list) {
+linked_element_t *llist_remove_last(linked_list_t *const list) {
 
     //If the lst is null :
     if (!list) {
@@ -408,10 +408,10 @@ llist_t *llist_remove_last(linked_list_t *const list) {
     } else {
 
         //Cache the last element;
-        llist_t *elmt = list->last;
+        linked_element_t *elmt = list->last;
 
         //Cache the previous element;
-        llist_t *prev = elmt->prev;
+        linked_element_t *prev = elmt->prev;
 
         //Reset the last's neighbors;
         elmt->next = elmt->prev = 0;
@@ -446,7 +446,7 @@ llist_t *llist_remove_last(linked_list_t *const list) {
  * llist_remove_element : un-links an element of the list;
  */
 
-void llist_remove_element(linked_list_t *const list, llist_t *const element) {
+void llist_remove_element(linked_list_t *const list, linked_element_t *const element) {
 
     //If the element is null, error;
     if (!list || !element) {
@@ -455,7 +455,7 @@ void llist_remove_element(linked_list_t *const list, llist_t *const element) {
     }
 
     //Cache the element's successor;
-    llist_t *next = element->next;
+    linked_element_t *next = element->next;
 
     //If the successor is null, the element is the end of the list;
     if (!next) {
@@ -466,7 +466,7 @@ void llist_remove_element(linked_list_t *const list, llist_t *const element) {
     } else {
 
         //Cache the element's predecessor;
-        llist_t *prev = element->prev;
+        linked_element_t *prev = element->prev;
 
 
         //If the predecessor is null, the element is the list's first;
@@ -500,7 +500,7 @@ void llist_remove_element(linked_list_t *const list, llist_t *const element) {
  * lring_insert_after : insert an element after the current element of the ring;
  */
 
-void lring_insert_after(linked_ring_t *const ring, llist_t *const element) {
+void lring_insert_after(linked_ring_t *const ring, linked_element_t *const element) {
 
     //If the maximum size is reached :
     if (ring->nb_elements == ring->max_nb_elements)
@@ -518,7 +518,7 @@ void lring_insert_after(linked_ring_t *const ring, llist_t *const element) {
     } else {
 
         //Cache the current second element;
-        llist_t *first = ring->current, *second = first->next;
+        linked_element_t *first = ring->current, *second = first->next;
 
         //Link the element between the first and the second;
         first->next = second->prev = element;
@@ -530,7 +530,7 @@ void lring_insert_after(linked_ring_t *const ring, llist_t *const element) {
 }
 
 
-void lring_insert_before(linked_ring_t *const ring, llist_t *const element) {
+void lring_insert_before(linked_ring_t *const ring, linked_element_t *const element) {
 
     //If the maximum size is reached :
     if (ring->nb_elements == ring->max_nb_elements)
@@ -548,7 +548,7 @@ void lring_insert_before(linked_ring_t *const ring, llist_t *const element) {
     } else {
 
         //Cache first and second element;
-        llist_t *second = ring->current, *first = second->prev;
+        linked_element_t *second = ring->current, *first = second->prev;
 
         //Link the element between the first and the second;
         first->next = second->prev = element;
@@ -591,7 +591,7 @@ void lring_decr(linked_ring_t *const ring) {
  * llist_direct_process : This function executes process for all elements after the provided one:
  */
 
-void llist_direct_process(const llist_t *element, void (*const process)(const llist_t *)) {
+void llist_direct_process(const linked_element_t *element, void (*const process)(const linked_element_t *)) {
 
     //If process is a null pointer, nothing to do;
     if (!process)
@@ -615,10 +615,10 @@ void llist_direct_process(const llist_t *element, void (*const process)(const ll
  * llist_direct_process_full : Searches for the first element, and executes process for all elements after;
  */
 
-void llist_direct_process_full(llist_t *const element, void (*const process)(const llist_t *)) {
+void llist_direct_process_full(linked_element_t *const element, void (*const process)(const linked_element_t *)) {
 
     //Search for the first element;
-    llist_t *first = lelmt_get_first(element);
+    linked_element_t *first = lelmt_get_first(element);
 
     //Process from the first element;
     llist_direct_process(first, process);
@@ -630,7 +630,7 @@ void llist_direct_process_full(llist_t *const element, void (*const process)(con
  * llist_reverse_process : This function executes process for all elements before the provided one:
  */
 
-void llist_reverse_process(llist_t *element, void (*const process)(const llist_t *)) {
+void llist_reverse_process(linked_element_t *element, void (*const process)(const linked_element_t *)) {
 
     //If process is a null pointer, nothing to do;
     if (!process)
@@ -654,10 +654,10 @@ void llist_reverse_process(llist_t *element, void (*const process)(const llist_t
  * Searches for the last element, and executes process for all elements before;
  */
 
-void llist_reverse_process_full(llist_t *const element, void (*const process)(const llist_t *)) {
+void llist_reverse_process_full(linked_element_t *const element, void (*const process)(const linked_element_t *)) {
 
     //Get the last element;
-    llist_t *last = lelmt_get_last(element);
+    linked_element_t *last = lelmt_get_last(element);
 
     //Propagate data from this stream;
     llist_reverse_process(last, process);

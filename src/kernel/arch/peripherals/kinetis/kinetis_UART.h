@@ -30,6 +30,7 @@
 #include <kernel/memory/memory_stream.h>
 
 #include <kernel/memory/interrupt_pipe.h>
+#include <kernel/net/netf.h>
 
 //----------------------------------------------------- Memory Map -----------------------------------------------------
 
@@ -97,12 +98,12 @@ struct __attribute__ ((packed)) kinetis_UART_registers_t {
 
 
 /*
- * A kinetis UART peripheral is defined by the following set of parameters;
+ * Kinetis UART peripheral : contains hardware specs of the UART;
  *
  * 	This set of data never changes for a given peripheral instance;
  */
 
-struct kinetis_UART_hw_t {
+struct kinetis_UART_hw {
 
 	//The address of the peripheral register zone;
 	struct kinetis_UART_registers_t *const registers;
@@ -115,11 +116,44 @@ struct kinetis_UART_hw_t {
 
 	//The error interrupt channel;
 	const uint8_t error_int_channel;
-
+	
 	//Interrupt link function;
 	void (*const status_link)();
-
 	void (*const error_link)();
+	
+};
+
+
+/*
+ * The kinetis UART interface : complements the netf21 with interrupt config registers;
+ */
+
+struct kinetis_UART_net21 {
+
+	//The OSI layer 1-2 interface;
+	struct netf21 iface;
+
+	//The address of C2, for interrupt management;
+	volatile uint8_t *const C2;
+
+	//The size of the tx hardware fifo;
+	const uint8_t tx_fifo_size;
+
+};
+
+
+/*
+ * Kinetis UART driver : contains a hardware specs set and a reference to an interface;
+ */
+
+struct kinetis_UART_driver_t {
+
+	//Hardware specs;
+	const struct kinetis_UART_hw hw_specs;
+	
+	//The network interface attached. Null if not initialised;
+	struct kinetis_UART_net21 *iface;
+	
 };
 
 
@@ -127,10 +161,11 @@ struct kinetis_UART_hw_t {
  * A kinetis UART interrupt pipe is composed of the following elements :
  */
 
-struct kinetis_UART_interrupt_pipe_t {
+/*
+struct kinetis_UART_netf21 {
 
 	//The interrupt pipe base;
-	struct interrupt_pipe_t pipe;
+	struct netf21 pipe;
 
 	//The address of C2;
 	volatile uint8_t *const C2;
@@ -142,12 +177,14 @@ struct kinetis_UART_interrupt_pipe_t {
 	const uint8_t fifo_size;
 
 };
+*/
 
 
 /*
  * A kinetis UART memory stream is composed of the following elements :
  */
 
+/*
 struct kinetis_UART_stream_t {
 
 	//A stream memory, first for pointer cast;
@@ -166,33 +203,13 @@ struct kinetis_UART_stream_t {
 	const uint8_t fifo_size;
 
 };
-
-
-/*
- * A kinetis UART driver is defined by the following set of parameters :
  */
-
-struct kinetis_UART_driver_t {
-
-	//The peripheral description;
-	struct kinetis_UART_hw_t peripheral_data;
-
-	//An initialisation flag;
-	bool initialised;
-
-	//An output stream memory zone;
-	struct kinetis_UART_stream_t *output_stream;
-
-	//An input stream memory zone;
-	struct kinetis_UART_stream_t *input_stream;
-
-};
 
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 //Create an instance of a kinetis UART driver from hardware specs;
-struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw_t *);
+struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw *);
 
 //Delete an instance of a kinetis UART driver;
 void kinetis_UART_delete(struct kinetis_UART_driver_t *);
@@ -200,10 +217,11 @@ void kinetis_UART_delete(struct kinetis_UART_driver_t *);
 
 //---------------------------------------------------- Start - Stop ----------------------------------------------------
 
-//Initialise the UART;
-void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config);
+//Initialise the UART; The internal network interface is created;
+void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config,
+						struct data_framer *framer);
 
-//De-initialise the UART;
+//De-initialise the UART; The internal network interface is deleted;
 void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data);
 
 
