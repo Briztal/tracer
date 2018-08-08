@@ -193,6 +193,9 @@ bool ascii_framer_get_encoded_byte(struct ascii_framer *const framer, uint8_t *c
 			//If line feed not sent, send one;
 			*data = '\n';
 
+			//Mark line feed sent;
+			framer->EOF_lf_sent = true;
+
 			//EOF carriage return not sent, no block update for instance;
 			return false;
 
@@ -211,6 +214,7 @@ bool ascii_framer_get_encoded_byte(struct ascii_framer *const framer, uint8_t *c
 		}
 
 		//Never reached;
+
 	}
 
 	//Block still contains data to be sent;

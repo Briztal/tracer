@@ -97,11 +97,24 @@ int main() {
 
 	while(true) {
 
+		if (netf2_message_available(UART0->iface)) {
 
-		teensy35_led_high();
-		teensy35_delay(500);
-		teensy35_led_low();
-		teensy35_delay(250);
+			uint8_t t[100];
+
+			struct data_block block = {
+				.head = {},
+				.address = &t,
+				.max_size = 100,
+				.size = 0,
+			};
+
+			list_init((struct list_head *) &block.head);
+
+			netf2_get_frame(UART0->iface, &block);
+
+			netf2_send_frame(UART0->iface, &block);
+
+		}
 
 	}
 

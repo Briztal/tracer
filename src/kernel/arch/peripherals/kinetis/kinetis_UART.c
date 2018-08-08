@@ -63,7 +63,7 @@
 static void initialise_peripheral(const struct kinetis_UART_hw *peripheral_data);
 
 //Start the peripheral;
-static void start_peripheral(const struct kinetis_UART_hw *driver_data);
+static void start_peripheral(const struct kinetis_UART_hw *hw_specs);
 
 //Reset the peripheral in the stopped state;
 static void stop_peripheral(const struct kinetis_UART_hw *driver_data);
@@ -240,10 +240,10 @@ void initialise_peripheral(const struct kinetis_UART_hw *const peripheral_data) 
  * start_peripheral : starts the peripheral, resets fifos, enables interrupts;
  */
 
-void start_peripheral(const struct kinetis_UART_hw *driver_data) {
+void start_peripheral(const struct kinetis_UART_hw *hw_specs) {
 
 	//Cache memory register;
-	struct kinetis_UART_registers_t *const registers = driver_data->registers;
+	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
 
 	//Set the tx watermark to 0, and the rx to 1.
 	registers->TWFIFO = 0;
@@ -268,15 +268,17 @@ void start_peripheral(const struct kinetis_UART_hw *driver_data) {
 	//Enable receiver overflow, receiver underflow and transmitter overflow exceptions;
 	SET(registers->CFIFO, UART_CFIFO_RXOFE | UART_CFIFO_RXUFE | UART_CFIFO_TXOFE, 8);
 
+	//Disable interrupts;
+	CLEAR(registers->C2, UART_C2_TIE | UART_C2_RIE, 8);
 
 	//Enable Rx and TX
 	SET(registers->C2, UART_C2_RE | UART_C2_TE, 8);
 
 	//Enable the status interrupt;
-	core_IC_enable(driver_data->status_int_channel);
+	core_IC_enable(hw_specs->status_int_channel);
 
 	//Disable the status interrupt;
-	core_IC_enable(driver_data->error_int_channel);
+	core_IC_enable(hw_specs->error_int_channel);
 
 }
 
@@ -610,7 +612,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	//Get both FIFOs sizes;
 	sizes_from_PFIFO(registers->PFIFO, &rx_fifo_size, &tx_fifo_size);
 
-	//
+	//Initialise the iface struct;
 	struct kinetis_UART_net21 interface_init = {
 
 		//Initialise the l2 adapter
@@ -627,6 +629,8 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 		//Save the address of C2 for interrupt management;
 		.C2 = C2_reg,
 
+		.tx_fifo_size = tx_fifo_size,
+
 	};
 
 	//Initialise the layer 2 interface;
@@ -639,10 +643,15 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 		(void (*)(struct netf2 *)) netf21_destruct
 	);
 
-
+	//Allocate and initialise the interface;
+	driver_data->iface = kernel_malloc_copy(sizeof(struct kinetis_UART_net21), &interface_init);
 
 	//Initialise the hardware in a safe state;
 	start_peripheral(hw_specs);
+
+	//Attempt to enable both interrupts;
+	enable_rx_interrupt(driver_data->iface);
+	enable_tx_interrupt(driver_data->iface);
 
 }
 
@@ -694,13 +703,14 @@ static void enable_rx_interrupt(struct kinetis_UART_net21 *const iface) {
 static void enable_tx_interrupt(struct kinetis_UART_net21 *const iface) {
 
 	//Initialise the net21 interface encoding;
-	bool encoding_authorised = netf21_init_decoding(&iface->iface);
+	bool encoding_authorised = netf21_init_encoding(&iface->iface);//TODO ERROR HERE
 
 	//If the decoding is not authorised :
 	if (!encoding_authorised) {
 
 		//Disable the tx interrupt : clear the TIE bit in C2;
 		*(iface->C2) &= ~UART_C2_TIE;
+
 
 	} else {
 
@@ -733,7 +743,6 @@ void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_da
 	//If the rx interrupt is enabled, if its flag is asserted, and interrupt request should be made :
 	if ((C2 & UART_C2_RIE) && (S1 & UART_S1_RDRF) &&  (!(C5 &UART_C5_RDMAS))) {
 
-		//teensy35_led_count(3);
 
 		//Read from rx;
 		kinetis_UART_rx_read(driver_data);
@@ -909,20 +918,19 @@ void kinetis_UART_rx_read(const struct kinetis_UART_driver_t *const driver) {
 	//While there are bytes in the rx buffer;
 	while (registers->RCFIFO) {
 
-		//Cache a space for the byte to write;
-		uint8_t data;
-
-		//Initialise the byte to write and get a stop request;
-		bool data_available = netf_21_get_encoded_byte((struct netf21 *) iface, &data);
-
 		//Read S1;
 		registers->S1;
 
-		//Now, copy the byte in D;
-		registers->D = data;
+		//Get a received byte;
+		uint8_t data = registers->D;
+
+		//Initialise the byte to write and get a stop request;
+		bool space_available = netf_21_decode_byte((struct netf21 *) iface, data);
+
 
 		//If no more data is available :
-		if (!data_available) {
+		if (!space_available) {
+
 
 			//Disable the rx interrupt : clear the TIE bit in C2;
 			registers->C2 &= ~UART_C2_RIE;

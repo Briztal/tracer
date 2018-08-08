@@ -117,7 +117,7 @@ bool netf2_send_frame(struct netf2 *iface, const struct data_block *block);
 static inline bool netf2_message_available(struct netf2 *iface) {
 
 	//Assert if rx_nonempty contains messages;
-	return shared_fifo_empty(iface->rx_nonempty);
+	return !shared_fifo_empty(iface->rx_nonempty);
 
 }
 

@@ -13,7 +13,7 @@
  * @param element : the head of the list to push;
  */
 
-void shared_fifo_push(struct shared_fifo *fifo, struct list_head *head) {
+void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head) {
 
 	//Enter in a critical section;
 	kernel_enter_critical_section();
@@ -50,7 +50,7 @@ void shared_fifo_push(struct shared_fifo *fifo, struct list_head *head) {
  * @return the first element if fifo, or 0 if it is empty;
  */
 
-struct list_head *shared_fifo_pull(struct shared_fifo *fifo) {
+struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo) {
 
 	//Enter in a critical section;
 	kernel_enter_critical_section();

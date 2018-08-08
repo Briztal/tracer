@@ -246,6 +246,9 @@ bool netf2_get_frame(struct netf2 *iface, struct data_block *frame) {
 	//Push ne_frame in rx_empty;
 	shared_fifo_push(iface->rx_empty, (struct list_head *) ne_frame);
 
+	//Enable the rx interrupt;
+	(*(iface->enable_tx_hw_irq))(iface);
+
 	//Complete;
 	return true;
 
@@ -278,6 +281,9 @@ bool netf2_send_frame(struct netf2 *iface, const struct data_block *const frame)
 
 	//Push ne_frame in tx_nonempty;
 	shared_fifo_push(iface->tx_nonempty, (struct list_head *) e_frame);
+
+	//Enable the interrupt;
+	(*(iface->enable_tx_hw_irq))(iface);
 
 	//Complete;
 	return true;
@@ -360,8 +366,8 @@ bool netf21_init_encoding(struct netf21 *iface) {
 		return true;
 	}
 
-	//If null encoding block, attempt to get one from rx_empty;
-	struct data_block *block = (struct data_block *) shared_fifo_pull(iface->iface.rx_empty);
+	//If null encoding block, attempt to get one from tx_nonempty;
+	struct data_block *block = (struct data_block *) shared_fifo_pull(iface->iface.tx_nonempty);
 
 	//If the block is null, fail;
 	if (!block) {
@@ -404,6 +410,7 @@ bool netf_21_decode_byte(struct netf21 *iface, uint8_t data) {
 		return false;
 
 	}
+
 
 	//Transmit the byte to the framer;
 	bool frame_complete = (*(framer->decode))(framer, data);
@@ -459,8 +466,10 @@ bool netf_21_get_encoded_byte(struct netf21 *iface, uint8_t *data) {
 	if (frame_complete) {
 
 		//Send the block in the net2 for storage and get another; Cache it and assign it;
-		struct data_block *new_block =
-			framer->encoding_block = netf2_get_new_rx_block(&iface->iface, framer->encoding_block);
+		struct data_block *new_block = netf2_get_new_tx_block(&iface->iface, framer->encoding_block);
+
+		//Update the new block;
+		framer->encoding_block = new_block;
 
 		//Assert if the provided block exists;
 		return new_block != 0;
