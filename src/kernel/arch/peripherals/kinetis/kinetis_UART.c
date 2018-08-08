@@ -584,8 +584,7 @@ configure_transmission_layer(const struct kinetis_UART_hw *const hw_specs, const
  * kinetis_UART_start : configures the transmission stack, creates streams, and starts the UART;
  */
 
-void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config,
-						struct data_framer *framer) {
+void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config) {
 
 	//Cache the hardware struct;
 	const struct kinetis_UART_hw *hw_specs = &driver_data->hw_specs;
@@ -621,7 +620,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 			.iface = {},
 
 			//Transfer the ownership of the framer;
-			.framer = framer,
+			.framer = config->framer,
 
 		},
 

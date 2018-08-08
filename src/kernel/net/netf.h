@@ -13,6 +13,7 @@
 #include <stddef.h>
 
 #include <data_structures/containers/concurrent/shared_fifo.h>
+#include <kernel/net/framer/framer.h>
 
 
 
@@ -113,7 +114,7 @@ bool netf2_send_frame(struct netf2 *iface, const struct data_block *block);
  * @param iface : the interface to examine;
  */
 
-bool netf2_message_available(struct netf2 *iface) {
+static inline bool netf2_message_available(struct netf2 *iface) {
 
 	//Assert if rx_nonempty contains messages;
 	return shared_fifo_empty(iface->rx_nonempty);
@@ -123,37 +124,6 @@ bool netf2_message_available(struct netf2 *iface) {
 /*
  * ------------------------------------------- OSI layer 1 TODO NOP, LAYER 2 BASIC network interface -------------------------------------------
  */
-
-/*
- * A framer turns byte stream into framed messages, and framed messages into byte streams;
- *
- * 	Messages are stored in blocks, any attempt to use read or write when related blocks are not initialised will
- * 	throw an error;
- */
-
-struct data_framer {
-
-	//The maximal size of all frames;
-	const size_t max_frames_size;
-
-	//The block where we save the result of the decoding;
-	struct data_block *decoding_block;
-
-	//The block that contains frames to encode;
-	struct data_block *encoding_block;
-
-
-	//Write a byte in the framer. Will assert if the message is complete;
-	bool (*const decode)(struct data_framer *, uint8_t data);
-
-	//Read (and discard) a byte from the current message of the framer. Will assert if the message is complete;
-	bool (*const encode)(struct data_framer *, uint8_t *data);
-
-	//Delete the framer;
-	void (*deleter)(struct data_framer *);
-
-};
-
 
 /*
  * A layer 1 peripheral required a framer to comply with the netf2 requirement;

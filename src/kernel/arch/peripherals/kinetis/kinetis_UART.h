@@ -218,8 +218,7 @@ void kinetis_UART_delete(struct kinetis_UART_driver_t *);
 //---------------------------------------------------- Start - Stop ----------------------------------------------------
 
 //Initialise the UART; The internal network interface is created;
-void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config,
-						struct data_framer *framer);
+void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config);
 
 //De-initialise the UART; The internal network interface is deleted;
 void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data);

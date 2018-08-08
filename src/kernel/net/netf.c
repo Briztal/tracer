@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include <kernel/kernel.h>
-#include <modules/interaction/framer/framer.h>
 
 
 
@@ -159,7 +158,7 @@ void netf2_delete(struct netf2 *iface) {
 	struct data_block *block;
 
 	//Create a macro that will delete all block from the fifo and delete the fifo;
-#define CLEAR_FIFO(fifo) {while((block = shared_fifo_pull((fifo)))) {data_block_delete(block);} kernel_free(fifo);}
+#define CLEAR_FIFO(fifo) {while((block = (struct data_block *)shared_fifo_pull((fifo)))) {data_block_delete(block);} kernel_free(fifo);}
 
 	//Free all list and their content;
 	CLEAR_FIFO(iface->rx_empty);

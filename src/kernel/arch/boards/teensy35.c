@@ -97,7 +97,7 @@ void teensy35_hardware_init() {
 	PORT = kinetis_PORT_create(PORT_A_MEMORY, GPIO_A_MEMORY, 5, 0x1000, 0x40);
 
 	//Declare the kinetis UART hardware config;
-	struct kinetis_UART_hw_t uart0_hw = {
+	struct kinetis_UART_hw uart0_hw = {
 		.registers =  (struct kinetis_UART_registers_t *const) UART0_MEMORY,
 		.clock_frequency = F_CPU,
 		.status_int_channel = IRQ_UART0_STATUS,

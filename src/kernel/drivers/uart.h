@@ -95,7 +95,7 @@ struct UART_config_t {
 	//--------------------- L2 config ---------------------
 
 	//The framer. Ownership transferred;
-	struct data_framer framer;
+	struct data_framer *framer;
 
 	//The maximal size of all frames;
 	size_t max_frame_size;
@@ -106,7 +106,7 @@ struct UART_config_t {
 };
 
 
-#define UART_DEFAULT_CONFIG()  \
+#define UART_DEFAULT_CONFIG(_framer)  \
 		{\
             .nb_data_bits = 8,\
             .parity_bit_enabled = false,\
@@ -115,6 +115,9 @@ struct UART_config_t {
             .cts_enabled = false,\
             .transmission_type = FULL_DUPLEX,\
             .baudrate = 9600,\
+			.framer = (_framer),\
+			.max_frame_size = 100, \
+			.nb_frames = 5,\
     	}
 
 

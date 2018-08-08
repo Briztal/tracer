@@ -32,6 +32,8 @@
 #include <HardwareSerial.h>
 #include <kernel/arch/peripherals/kinetis/kinetis_mux.h>
 #include <core_pins.h>
+#include <kernel/net/framer/framer.h>
+#include <kernel/net/framer/ascii_framer.h>
 
 #define BAUD2DIV(baud)  (((F_CPU * 2) + ((baud) >> 1)) / (baud))
 
@@ -85,16 +87,13 @@ int main() {
 	//Update the configuration;
 	port_driver_configure_pin(port, &pin, &pin_configuration);
 
+	//Create the framer;
+	struct data_framer *framer = ascii_framer_create();
 
-	struct UART_config_t config = UART_DEFAULT_CONFIG();
+	//Create the config file, with the framer ownership transferred; TODO PASS THE FRAMER CREATOR, SAFER;
+	struct UART_config_t config = UART_DEFAULT_CONFIG(framer);
 
 	kinetis_UART_start(UART0, &config);
-
-	struct kinetis_UART_stream_t *i_stream = UART0->input_stream;
-	struct kinetis_UART_stream_t *o_stream = UART0->output_stream;
-
-	//Open a pipe between the couple of streams;
-	stream_pipe_open((struct stream_t *) o_stream, (struct stream_t *) i_stream, 1);
 
 	while(true) {
 
@@ -105,52 +104,6 @@ int main() {
 		teensy35_delay(250);
 
 	}
-
-	char st[32] = {48, 48, 48, 48, 48, 48, 48, 48, 48};
-	struct mem_desc_t mem = {
-		.memory_map = {
-			.start_address = &st,
-			.block_spacing = 1,
-		},
-
-		.bloc_desc = {
-			.block_size = 1,
-			.nb_blocks = 32,
-		}
-	};
-
-
-	struct blocks_desc_t desc;
-
-	while(true) {
-
-		size_t count = stream_read((struct stream_t *) o_stream, &mem);
-
-		if (count) {
-
-			if (count > 32) count = 32;
-			mem.bloc_desc.nb_blocks = count << 1;
-			count = stream_write((struct stream_t *) i_stream, &mem);
-
-		}
-
-		//teensy35_led_high();
-		teensy35_delay(250);
-		//teensy35_led_low();
-		teensy35_delay(250);
-
-		/*
-		(*(stream->stream.get_bloc_descriptor))((struct stream_t *) stream, &desc);
-
-		if (desc.nb_blocks != 8) {
-			teensy35_led_blink(50);
-		}
-		 */
-
-
-	}
-	teensy35_led_count(desc.nb_blocks + 1);
-
 
 
     core_init();
