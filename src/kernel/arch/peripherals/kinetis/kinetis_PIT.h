@@ -16,7 +16,7 @@
 /*
  * The kinetis Periodic Interrupt Timer memory struct; Maps the memory structure of a hardware PIT;
  */
-typedef struct __attribute__ ((packed)) {
+typedef struct __attribute__ ((packed)) kinetis_PIT_registers {
 
 	//The Load Value;
 	volatile uint32_t LDVAL;
@@ -30,13 +30,13 @@ typedef struct __attribute__ ((packed)) {
 	//Timer Flag;
 	volatile uint32_t TFLG;
 
-} kinetis_PIT_memory_t;
+};
 
 
 /*
  * The kinetis Periodic Interrupt Timer data struct; contains a memory zone pointer and a clock frequency;
  */
-typedef struct __attribute__ ((packed)) {
+struct kinetis_PIT_hw {
 
 	//The PIT's memory zone
 	kinetis_PIT_memory_t *const memory;
@@ -47,7 +47,7 @@ typedef struct __attribute__ ((packed)) {
 	//The PIT's frequency;
 	const uint32_t clock_frequency;
 
-} kinetis_PIT_data_t;
+} ;
 
 
 //------------------------------------------- PITs declarations - definitions ------------------------------------------

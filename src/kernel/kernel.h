@@ -30,21 +30,16 @@
 //------------------------------------------- Entry Point -------------------------------------------
 
 /*
- * init : this function is called once, by the core library only. It is the project's entry point.
- *
- *  It will call initialise_peripheral, and then call iterate indefinitely.
+ * init : this function is called once, by the core library only.
  */
 
 void kernel_init();
 
-//Raise an error, halt the code, log;
-void kernel_halt(uint16_t blink_delay);
+//Update the error function;
+void kernel_set_error_output(void (*error_log)(const char *));
 
 //Raise an error, halt the code, log;
-void kernel_count(size_t to_count);
-
-//Raise an error, halt the code, log;
-void kernel_error(const char *log_message);
+void kernel_error(const char *error_message);
 
 
 //------------------------------------------- Stack management -------------------------------------------

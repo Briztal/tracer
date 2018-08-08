@@ -64,7 +64,7 @@
  * The kinetis PORT specific memory data;
  */
 
-struct __attribute__ ((packed)) kinetis_PORT_memory_t {
+struct __attribute__ ((packed)) kinetis_PORT_registers {
 
 	//32 Pin Configuration Registers;
 	volatile uint32_t PCR[32];
@@ -207,7 +207,7 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			.bloc_desc = {
 				.nb_blocks = nb_peripherals,
-				.block_size = sizeof(struct kinetis_PORT_memory_t),
+				.block_size = sizeof(struct kinetis_PORT_registers),
 			}
 
 		},
@@ -394,7 +394,7 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const drive
 	uint8_t bit = pin->bit_index;
 
 	//Cache the concerned port and gpio peripherals memory addresses;
-	volatile struct kinetis_PORT_memory_t *port = mem_desc_get_bloc(&driver->ports, port_id);
+	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
 	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
 	//Declare the configuration register to write; Set the flag bit to clear it by default;
@@ -517,7 +517,7 @@ void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver
 	uint8_t bit = pin->bit_index;
 
 	//Cache the concerned port and gpio peripherals memory addresses;
-	volatile struct kinetis_PORT_memory_t *port = mem_desc_get_bloc(&driver->ports, port_id);
+	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
 	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
 	//TODO ERRORS IN CASE OF BAD CONFIGURATION;

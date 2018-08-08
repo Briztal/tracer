@@ -19,6 +19,7 @@
 */
 
 #include "kernel.h"
+#include "debug.h"
 
 #include <stdbool.h>
 
@@ -39,34 +40,14 @@
 //The critical section counter;
 static uint32_t critical_section_counter = 0;
 
+//The error message output. Null at init;
+static void (*error_message_function)(const char *) = 0;
 
-//As exit functions are registered by enabled modules, we need a linked struct to store function pointers;
-typedef struct {
-
-    //The linked element part;
-    linked_element_t link;
-
-    //The function part;
-    void (*exit_function)(void);
-
-} exit_function_t;
-
-//The exit functions list;
-linked_list_t exit_list = EMPTY_LINKED_LIST(255);
+//The first function to execute;
+extern void kernel_init_function(void *);
 
 
 //------------------------------------------- Entry Point -------------------------------------------
-
-
-
-/*
- * The first function called by the scheduler;
- */
-
-void first_function(void *args) {
-
-
-}
 
 
 /*
@@ -76,51 +57,16 @@ void first_function(void *args) {
 void kernel_init() {
 
     //Start the scheduler;
-    scheduler_start(&first_function);
+    scheduler_start(kernel_init_function);
 
 }
 
 
-/*
- * kernel_register_exit_function : adds the function to the list of exit functions;
- */
+//Update the error message output function;
+void kernel_set_error_output(void (*error_msg)(const char *)) {
 
-void kernel_register_exit_function(void (*exit_function)(void)) {
-
-    //Initialise the exit function struct;
-    exit_function_t init =  {
-            .link = EMPTY_LINKED_ELEMENT(),
-            .exit_function = exit_function,
-    };
-
-    //Allocate some heap data for the exit function struct;
-    exit_function_t *data = kernel_malloc_copy(sizeof(exit_function_t), &init);
-
-    //Append the exit function struct at the end of the exit list;
-    llist_insert_last(&exit_list, (linked_element_t *) data);
-
-}
-
-
-/*
- * kernel_exit : executes all exit functions, and delete them;
- */
-
-void kernel_exit() {
-
-    //For each exit functions :
-    for (size_t exit_counter = exit_list.nb_elements; exit_counter--;) {
-
-        //Remove and cache the first element of the list;
-        const exit_function_t *function = (exit_function_t *) llist_remove_first(&exit_list);
-
-        //Execute the function;
-        (*(function->exit_function))();
-
-        //Delete the exit function struct;
-        kernel_free((void *) function);
-
-    }
+	//Update the log function;
+	error_message_function = error_msg;
 
 }
 
@@ -131,7 +77,7 @@ void kernel_exit() {
  *  It will signal the error in various ways.
  */
 
-void kernel_error(const char *log_message) {
+void kernel_error(const char *error_message) {
 
     //Stop the scheduler;
     scheduler_stop();
@@ -146,52 +92,13 @@ void kernel_error(const char *log_message) {
 
     //TODO THREAD MODES;
 
-    //Handle the error;
-    arch_handle_error(log_message);
+	//Transmit the message;
+	(*error_message_function)(error_message);
+
+	//infinite SOS sequence on debug led;
+	debug_sos();
 
     while (true);
-
-}
-
-
-void kernel_halt(uint16_t delay) {
-
-    //Stop all started processes;
-    scheduler_stop();
-
-    //Enable all interrupts;
-    core_enable_interrupts();
-
-    //Reset the critical section counter;
-    critical_section_counter = 0;
-
-    //TODO RESET IDLE INTERRUPT HANDLERS
-
-    //TODO THREAD MODES;
-
-    //Handle the error;
-    arch_blink(delay);
-
-}
-
-
-void kernel_count(size_t count) {
-
-    //Stop all started processes;
-    scheduler_stop();
-
-    //Enable all interrupts;
-    core_enable_interrupts();
-
-    //Reset the critical section counter;
-    critical_section_counter = 0;
-
-    //TODO RESET IDLE INTERRUPT HANDLERS
-
-    //TODO THREAD MODES;
-
-    //Handle the error;
-    arch_count(count);
 
 }
 

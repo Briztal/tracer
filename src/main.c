@@ -34,25 +34,22 @@
 #include <core_pins.h>
 #include <kernel/net/framer/framer.h>
 #include <kernel/net/framer/ascii_framer.h>
-
-#define BAUD2DIV(baud)  (((F_CPU * 2) + ((baud) >> 1)) / (baud))
+#include <kernel/debug.h>
 
 int main() {
 
-	/*
-	serial_begin(BAUD2DIV(9600));
-	while(true) {
+    core_init();
 
-		serial_print("SUUS");
+    //Never reached;
+    while (true);
 
-		teensy35_delay(1000);
-	}
+}
 
-*/
+
+void kernel_init_function(void *args) {
 
 	//Initialise drivers;
 	teensy35_hardware_init();
-
 
 	struct port_driver_t *port = (struct port_driver_t *)PORT;
 
@@ -97,7 +94,7 @@ int main() {
 
 	while(true) {
 
-		if (netf2_message_available(UART0->iface)) {
+		if (netf2_message_available((struct netf2 *)UART0->iface)) {
 
 			uint8_t t[100];
 
@@ -110,22 +107,13 @@ int main() {
 
 			list_init((struct list_head *) &block.head);
 
-			netf2_get_frame(UART0->iface, &block);
+			netf2_get_frame((struct netf2 *)UART0->iface, &block);
 
-			netf2_send_frame(UART0->iface, &block);
+			netf2_send_frame((struct netf2 *)UART0->iface, &block);
 
 		}
 
 	}
 
-
-    core_init();
-
-    //Never reached;
-    while (true);
-
-
 }
-
-
 

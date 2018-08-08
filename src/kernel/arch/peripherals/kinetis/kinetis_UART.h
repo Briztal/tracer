@@ -39,7 +39,7 @@
  *  We can assimilate them as a struct, whose address is known in memory;
  */
 
-struct __attribute__ ((packed)) kinetis_UART_registers_t {
+struct __attribute__ ((packed)) kinetis_UART_registers {
 	volatile uint8_t BDH;
 	volatile uint8_t BDL;
 	volatile uint8_t C1;
@@ -153,7 +153,7 @@ struct kinetis_UART_driver_t {
 	
 	//The network interface attached. Null if not initialised;
 	struct kinetis_UART_net21 *iface;
-	
+
 };
 
 

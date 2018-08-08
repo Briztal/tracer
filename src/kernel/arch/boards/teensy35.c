@@ -18,8 +18,6 @@
 
 */
 
-
-#include <kernel/kernel.h>
 #include "teensy35.h"
 
 
@@ -72,12 +70,8 @@ void UART0_status_link() {
 	kinetis_UART_status_interrupt(UART0);
 }
 
-uint8_t ctr = 1;
-
 void UART0_error_link() {
-
 	kinetis_UART_error_interrupt(UART0);
-
 }
 
 
@@ -88,6 +82,7 @@ KINETIS_UART_DEFINE(3, 0x4006D000, F_BUS, 1, 1, IRQ_UART3_STATUS, IRQ_UART3_ERRO
 KINETIS_UART_DEFINE(4, 0x400EA000, F_BUS, 1, 1, IRQ_UART4_STATUS, IRQ_UART4_ERROR)
 KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERROR)
  */
+
 
 //---------------------------------------- Hardware Initialisation ---------------------------------------
 
@@ -109,140 +104,61 @@ void teensy35_hardware_init() {
 	//Create the UART;
 	UART0 = kinetis_UART_create(&uart0_hw);
 
+}
+
+
+//-------------------------------------------------------- Debug -------------------------------------------------------
+
+/**
+ * teensy35_led_high : hardware code for turning on the led;
+ */
+
+void teensy35_led_high() {
+
+	//Output
+	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
+
+	//ALT 1
+	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
+
+	//Set
+	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
 
 }
 
 
+/**
+ * teensy35_led_high : hardware code for turning off the led;
+ */
 
-// --------------------------------------- ERROR HANDLING ---------------------------------------
+void teensy35_led_low() {
 
-#include <kernel/systick.h>
+	//Output
+	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
 
-void arch_handle_error(const char *msg) {
+	//ALT 1
+	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
 
-	arch_blink(50);
+	//Clear
+	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
 
 }
 
-#include <kernel/arch/peripherals/kinetis/kinetis_mux.h>
 
-//Notify that an error occurred;
-void arch_blink(uint16_t delay) {
+/**
+ * teensy35_led_high : hardware code for waiting a certain number of milliseconds;
+ */
 
-	//We will only use the kinetis PORT driver as a general port driver. Cache it as it;
-	struct port_driver_t *port = (struct port_driver_t *)PORT;
+void teensy35_delay(uint32_t ms_counter) {
 
-	core_enable_interrupts();
-
-	//Cache a pin configuration for pin C5 (LED);
-	struct kinetis_pin_configuration_t config;
-
-	//Cache the LED pin, on PORT C bit 5
-	struct io_desc_t pin = PTC5;
-
-	//Get the current configuration;
-	port_driver_get_pin_config(port, &pin, &config);
-
-	//Update the configuration for led blink
-	config.mux_channel = 1;
-	config.direction = PORT_OUTPUT;
-	config.output_mode = PORT_HIGH_DRIVE;
-
-
-	//Update the configuration;
-	port_driver_configure_pin(port, &pin, &config);
-
-	//Cache gpio registers;
-	volatile uint32_t *set_register, *clr_register;
-
-	//Cache set mask and clear mask;
-	uint32_t set_mask, clr_mask;
-
-
-	//Get set register and mask;
-	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_SET_REGISTER, &pin, (volatile void **) &set_register, &set_mask);
-	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_CLEAR_REGISTER, &pin, (volatile void **) &clr_register, &clr_mask);
-
-
-	//Indefinately :
-	while (true) {
-
-		//Turn on the led;
-		*set_register = set_mask;
-
-		//Wait 10 ms;
-		systick_wait(delay);
-
-		//Turn off the LED;
-		*clr_register = clr_mask;
-
-		//Wait 10 ms;
-		systick_wait(delay);
-
+	while(ms_counter--) {
+		//Count to;
+		for (volatile uint32_t i = 15000; i--;);
 	}
 
 }
 
 
-//Notify that an error occurred;
-void arch_count(size_t count) {
-
-	//We will only use the kinetis PORT driver as a general port driver. Cache it as it;
-	struct port_driver_t *port = (struct port_driver_t *)PORT;
-
-	core_enable_interrupts();
-
-	//Cache a pin configuration for pin C5 (LED);
-	struct kinetis_pin_configuration_t config;
-
-	//Cache the LED pin, on PORT C bit 5
-	struct io_desc_t pin = PTC5;
-
-	//Get the current configuration;
-	port_driver_get_pin_config(port, &pin, &config);
-
-	//Update the configuration for led blink
-	config.mux_channel = 1;
-	config.direction = PORT_OUTPUT;
-	config.output_mode = PORT_HIGH_DRIVE;
-
-	//Update the configuration;
-	port_driver_configure_pin(port, &pin, &config);
-
-	//Cache gpio registers;
-	volatile uint32_t *set_register, *clr_register;
-
-	//Cache set mask and clear mask;
-	uint32_t set_mask, clr_mask;
-
-	//Get set register and mask;
-
-	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_SET_REGISTER, &pin, (volatile void **) &set_register, &set_mask);
-	port_driver_get_gpio_descriptor(port, GPIO_OUTPUT_CLEAR_REGISTER, &pin, (volatile void **) &clr_register, &clr_mask);
-
-	//Indefinately :
-	while (true) {
-		for (size_t c = count; c--;) {
-
-			//Turn on the LED;
-			*set_register = set_mask;
-
-			//Wait 10 ms;
-			systick_wait(250);
-
-			//Turn off the LED;
-			*clr_register = clr_mask;
-
-			//Wait 10 ms;
-			systick_wait(250);
-
-		}
-
-		systick_wait(2000);
-
-	}
-
-}
 
 
 

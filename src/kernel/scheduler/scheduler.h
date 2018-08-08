@@ -34,7 +34,7 @@ typedef void *stopped_process_id_t;
  */
 
 //Start the scheduler
-void scheduler_start(void (*init_function)(void *));
+void scheduler_start(void (*init)(void *));
 
 //Stop the scheduler;
 void scheduler_stop();

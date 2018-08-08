@@ -26,17 +26,6 @@
 
 
 /*
- * --------------------------------------- ERROR HANDLING ---------------------------------------
- */
-
-//Notify that an error occurred;
-void arch_handle_error(const char *);
-
-void arch_blink(uint16_t delay);
-
-void arch_count(size_t count);
-
-/*
  * --------------------------------------- PORT ---------------------------------------
  */
 
@@ -68,115 +57,24 @@ KINETIS_PIT_DECLARE(3);
 
 extern struct kinetis_UART_driver_t *UART0;
 
-/*
-//The teensy35 supports 6 UARTS;
-KINETIS_UART_DECLARE(0);
-KINETIS_UART_DECLARE(1);
-KINETIS_UART_DECLARE(2);
-KINETIS_UART_DECLARE(3);
-KINETIS_UART_DECLARE(4);
-KINETIS_UART_DECLARE(5);
- */
 
-
-//--------------------------------------- Hardware Init ---------------------------------------
+//---------------------------------------------------- Hardware Init ---------------------------------------------------
 
 void teensy35_hardware_init();
 
 
-//---------------------------------------- Debug -
+//-------------------------------------------------------- Debug -------------------------------------------------------
 
-inline void teensy35_led_high() {
+#define DEBUG_LINK(func) teensy35##_##func
 
-	//Output
-	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
+//Light the debug led high;
+void teensy35_led_high();
 
-	//ALT 1
-	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
+//Turn off the debug led;
+void teensy35_led_low();
 
-	//Set
-	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
+//Wait a certain number of milliseconds;
+void teensy35_delay(uint32_t ms_counter);
 
-}
-
-inline void teensy35_led_low() {
-
-	//Output
-	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
-
-	//ALT 1
-	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
-
-	//Clear
-	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
-
-}
-
-
-inline void teensy35_delay(uint32_t ms_counter) {
-
-	while(ms_counter--) {
-		//Count to;
-		for (volatile uint32_t i = 15000; i--;);
-	}
-
-}
-
-inline void teensy35_led_blink(uint32_t ms_counter) {
-
-	while(true) {
-		teensy35_led_high();
-		teensy35_delay(ms_counter);
-		teensy35_led_low();
-		teensy35_delay(ms_counter);
-
-	}
-
-}
-
-
-inline void teensy35_led_count(size_t count) {
-
-	//Indefinately :
-	while (true) {
-		for (size_t c = count; c--;) {
-
-			//Turn on the LED;
-			teensy35_led_high();
-
-			//Wait 10 ms;
-			teensy35_delay(250);
-
-			//Turn off the LED;
-			teensy35_led_low();
-
-			//Wait 10 ms;
-			teensy35_delay(250);
-
-		}
-
-		teensy35_delay(2000);
-
-	}
-
-}
-
-
-inline void teensy35_led_halt() {
-
-	teensy35_led_high();
-
-	while (true);
-}
-
-inline void teensy35_cmp(size_t c) {
-
-	if (c) {
-		teensy35_led_blink(50);
-	} else {
-		teensy35_led_blink(1000);
-	}
-
-}
 
 #endif

@@ -167,7 +167,7 @@ void netf2_delete(struct netf2 *iface) {
 	CLEAR_FIFO(iface->tx_nonempty);
 
 	//Undef the macro;
-#undef CLEAR_FIFO;
+#undef CLEAR_FIFO
 
 	//Free the interface;
 	kernel_free(iface);

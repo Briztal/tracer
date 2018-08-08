@@ -836,16 +836,6 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 	//Finally, clear RXOF and RXUF flags by writing a 1 to them
 	registers->SFIFO = UART_SFIFO_RXOF | UART_SFIFO_RXUF | UART_SFIFO_TXOF;
 
-	//If SFIFO flags are not cleared :
-	if (registers->SFIFO & (UART_SFIFO_RXOF | UART_SFIFO_RXUF | UART_SFIFO_TXOF)) {
-		teensy35_led_count(2);
-	}
-
-	//If the s1 flag is not cleared :
-	if (registers->S1 & UART_S1_OR) {
-		teensy35_led_count(4);
-
-	}
 
 	//Restore C2's previous state (will re-update rx or tx if necessary;
 	registers->C2 = C2;

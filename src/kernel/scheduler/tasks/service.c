@@ -67,7 +67,7 @@ void services_insert(service_t *service);
 
 /*
  * The service manager starts in the uninitialised sequences_initialised,
- * then becomes scheduler_initialised, and is finally started;
+ * then becomes initialised, and is finally started;
  */
 bool services_initialised = false;
 
@@ -83,10 +83,10 @@ linked_list_t *pending_services;
 
 void services_initialise(size_t max_nb_services) {
 
-    //If the service manager has already been scheduler_initialised :
+    //If the service manager has already been initialised :
     if (services_initialised) {
 
-        //Error, must not be scheduler_initialised twice;
+        //Error, must not be initialised twice;
         kernel_error("service.c : services_initialise : the service manager is already initialised;");
 
         //Never reached;
@@ -116,7 +116,7 @@ void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint3
                            uint16_t activit_time) {
 
 
-    //If the service manager has not been scheduler_initialised :
+    //If the service manager has not been initialised :
     if (!services_initialised) {
 
         //Error, service manager must be initialised before usage;
@@ -148,24 +148,14 @@ void service_add_temporary(void (*task_function)(void *), uint32_t offset, uint3
 void service_add_permanent(void (*task_function)(void *), uint32_t offset, uint32_t period,
                            uint16_t activity_time) {
 
-    //If the service manager has not been scheduler_initialised :
+    //If the service manager has not been initialised :
     if (!services_initialised) {
 
         //Error, service manager must be initialised before usage;
-        kernel_error("service.c : service_add_permanent : the service manager was not initialised;");
+        kernel_error("service.c : service_add_permanent : the service manager is not initialised;");
 
         //Never reached;
         return;
-
-    }
-
-    //If the service manager has not been scheduler_initialised :
-    if (!services_initialised) {
-
-        kernel_halt(30);
-
-        //Error, service manager must be initialised before usage;
-        return;//TODO ERROR
 
     }
 
@@ -234,7 +224,7 @@ void _service_add(void (*service_f)(void *), uint32_t offset, uint32_t period, u
 
 void services_insert(service_t *service) {
 
-    //If the service manager has not been scheduler_initialised :
+    //If the service manager has not been initialised :
     if (!services_initialised) {
 
         //Error, service manager must be initialised before usage;
@@ -293,7 +283,7 @@ void services_insert(service_t *service) {
 
 bool services_available_task() {
 
-    //If the service manager has not been scheduler_initialised :
+    //If the service manager has not been initialised :
     if (!services_initialised) {
 
         //Error, service manager must be initialised before usage;
@@ -367,7 +357,7 @@ stask_t *services_get_task() {
     //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
     //TODO ERREUR POTENTIELLE ICI !!!!!!!!!
 
-    //If the service manager has not been scheduler_initialised :
+    //If the service manager has not been initialised :
     if (!services_initialised) {
 
         //Error, service manager must be initialised before usage;
@@ -436,7 +426,7 @@ stask_t *services_get_task() {
 
 void services_reprogram(service_t *service) {
 
-    //If the service manager has not been scheduler_initialised :
+    //If the service manager has not been initialised :
     if (!services_initialised) {
 
         //Error, service manager must be initialised before usage;
