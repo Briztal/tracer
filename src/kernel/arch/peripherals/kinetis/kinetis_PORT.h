@@ -112,7 +112,6 @@ struct kinetis_pin_configuration_t {
 	//The length of the eventual digital filtering;
 	uint8_t filtering_length;
 
-
 };
 
 
@@ -125,7 +124,7 @@ struct kinetis_pin_configuration_t {
 struct kinetis_PORT_driver_t {
 
 	//The general PORT driver, for pointer cast;
-	struct port_driver_t port_driver;
+	struct port_driver port_driver;
 
 
 	/*

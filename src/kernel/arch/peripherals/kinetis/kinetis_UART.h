@@ -106,7 +106,7 @@ struct __attribute__ ((packed)) kinetis_UART_registers {
 struct kinetis_UART_hw {
 
 	//The address of the peripheral register zone;
-	struct kinetis_UART_registers_t *const registers;
+	struct kinetis_UART_registers *const registers;
 
 	//The clock frequency;
 	const uint32_t clock_frequency;

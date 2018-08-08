@@ -42,11 +42,8 @@ extern struct kinetis_PORT_driver_t *PORT;
 //To define PITs, we will use the kinetis PIT module;
 #include <kernel/arch/peripherals/kinetis/kinetis_PIT.h>
 
-//The teensy35 supports 4 PITs;
-KINETIS_PIT_DECLARE(0);
-KINETIS_PIT_DECLARE(1);
-KINETIS_PIT_DECLARE(2);
-KINETIS_PIT_DECLARE(3);
+extern struct kinetis_PIT_driver *PIT_0, *PIT_1, *PIT_2, *PIT_3;
+
 
 /*
  * --------------------------------------- UART ---------------------------------------

@@ -81,15 +81,15 @@ enum gpio_register_type_e {
  * 	- providing access to GPIO registers;
  */
 
-struct port_driver_t {
+struct port_driver {
 
 	//------------------- Pin config -------------------
 
 	//Get a pin's current configuration (useful to defaults mistakes);
-	void (*const get_pin_config)(const struct port_driver_t *, const struct io_desc_t *pin, void *config);
+	void (*const get_pin_config)(const struct port_driver *, const struct io_desc_t *pin, void *config);
 
 	//Set a pin's configuration. Mux channel is updated automatically. Config might have been queried before;
-	void (*const configure_pin)(const struct port_driver_t *, const struct io_desc_t *pin, void *config);
+	void (*const configure_pin)(const struct port_driver *, const struct io_desc_t *pin, void *config);
 
 
 
@@ -98,9 +98,8 @@ struct port_driver_t {
 	//The size of a gpio register;
 	const size_t gpio_register_size;
 
-
 	//Get the descriptor for a single IO pin : the register and the appropriate mask for the pin
-	bool (*const get_gpio_descriptor)(const struct port_driver_t *,
+	bool (*const get_gpio_descriptor)(const struct port_driver *,
 								 enum gpio_register_type_e type, const struct io_desc_t *,
 								 volatile void **gpio_register, void *mask_p);
 
@@ -108,32 +107,32 @@ struct port_driver_t {
 	//------------------- Destructor -------------------
 
 	//The function that must be called to delete the port driver;
-	void (*const destructor)(struct port_driver_t *);
+	void (*const destructor)(struct port_driver *);
 
 };
 
 
 //Shortcut for pin config getter;
-inline void port_driver_get_pin_config(const struct port_driver_t *driver, const struct io_desc_t *pin, void *config) {
+static inline void port_driver_get_pin_config(const struct port_driver *driver, const struct io_desc_t *pin, void *config) {
 	(*(driver->get_pin_config))(driver, pin, config);
 }
 
 
 //Shortcut for pin config setter;
-inline void port_driver_configure_pin(const struct port_driver_t *driver, const struct io_desc_t *pin, void *config) {
+static inline void port_driver_configure_pin(const struct port_driver *driver, const struct io_desc_t *pin, void *config) {
 	(*(driver->configure_pin))(driver, pin, config);
 }
 
 
 //Shortcut for gpio descriptor getter;
-inline void port_driver_get_gpio_descriptor(const struct port_driver_t *driver,
+static inline void port_driver_get_gpio_descriptor(const struct port_driver *driver,
 									 enum gpio_register_type_e type, const struct io_desc_t *pin,
 									 volatile void **gpio_register, void *mask_p) {
 	(*(driver->get_gpio_descriptor))(driver, type, pin, gpio_register, mask_p);
 }
 
 //Shortcut for destruction
-inline void port_driver_delete(struct port_driver_t *driver) {
+inline void port_driver_delete(struct port_driver *driver) {
 	(*(driver->destructor))(driver);
 }
 

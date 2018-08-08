@@ -25,130 +25,7 @@
 
 #include "stdbool.h"
 
-
-/*
- * This file defines the timer interaction structures;
- *
- *	A timer is composed of a counting unit, that can be set up.
- *  Although, it defines the abstraction between high level periods (ticking)
- *	and timer count registers values;
- *
- *	To this basic structure can be added several interrupts (overflow,
- *	output compare, etc...);
- */
-
-
-//------------------------------------- State Register -------------------------------------
-
-/*
- * A struct to contain a pointer to a register, and its bits to clear / set;
- */
-
-typedef struct {
-
-	//The register that contains/determines the controlled state;
-	volatile uint8_t *const state_register;
-
-	//The mask to manipulate only relevant bits;
-	const uint8_t bit_mask;
-
-	//The value to write to update the register;
-	const uint8_t enabled_value;
-
-	//The value to write to disable the register;
-	const uint8_t disabled_value;
-
-} state_register_t;
-
-//Enable the register;
-inline void state_register_enable(const state_register_t *data);
-
-//Disable the register;
-inline void state_register_disable(const state_register_t *data);
-
-//Is the register enabled ?
-inline bool state_register_is_enabled(const state_register_t *data);
-
-
-//------------------------------------- Special Register -------------------------------------
-
-/*
- * A struct to contain a pointer to a register where the value set is not correlated with the value that will be read.
- * 	Timer flags are special registers;
- */
-
-typedef struct {
-
-	//The register that contains/determines the controlled state;
-	volatile uint8_t *const state_register;
-
-	//The mask to manipulate only relevant bits;
-	const uint8_t bit_mask;
-
-	//The value to write to update the register;
-	const uint8_t write_enable_value;
-
-	//The value to write to disable the register;
-	const uint8_t write_disable_value;
-
-	//The value read when the register is enabled;
-	const uint8_t read_enabled_value;
-
-} special_register_t;
-
-
-//Enable the register;
-inline void special_register_enable(const special_register_t *data);
-
-//Disable the register;
-inline void special_register_disable(const special_register_t *data);
-
-//Is the register enabled ?
-inline bool special_register_is_enabled(const special_register_t *data);
-
-
-//------------------------------------- Timer interrupt -------------------------------------
-
-/*
- * A timer interrupt is represented by : 
- *  - the interrupt state register;
- *  - the interrupt flag register;
- *  - the interrupt period register;
- *  - the interrupt IRQ function; 
- */
-
-typedef struct {
-
-	//The interrupt period register;
-	volatile void *const period_register;
-
-	//The register that contains/determines the interrupt state;
-	state_register_t interrupt_state;
-
-	//The register that contains/clears the interrupt flag
-	special_register_t interrupt_flag;
-
-	//A pointer to the IRQ function pointer for fast update;
-	void (**hander_update)(void);
-
-} timer_interrupt_data_t;
-
-
-//Enable the timer interrupt;
-inline void timer_interrupt_enable(const timer_interrupt_data_t *timer_interrupt);
-
-//Disable the timer interrupt;
-inline void timer_interrupt_disable(const timer_interrupt_data_t *timer_interrupt);
-
-
-//Clear the timer interrupt flag;
-inline void timer_interrupt_flag_clear(const timer_interrupt_data_t *timer_interrupt);
-
-//Is the the timer interrupt flag set;
-inline bool timer_interrupt_flag(const timer_interrupt_data_t *timer_interrupt);
-
-//Update the handler.
-inline void timer_interrupt_set_handler(const timer_interrupt_data_t *timer_interrupt, void (*handler)(void));
+#include <kernel/debug.h>
 
 
 //------------------------------------- Base Timer -------------------------------------
@@ -158,45 +35,135 @@ inline void timer_interrupt_set_handler(const timer_interrupt_data_t *timer_inte
  * 	a value register, and a conversion factor;
  */
 
-typedef struct timer_base_t {
-
-	//The timer data structure, required for de-init;
-	void *data;
-
-	//The register that contains/determines the timer state;
-	state_register_t timer_state;
-
-	//The conversion factor, used to convert number of tics to a register value;
-	const float period_to_tics;
+struct timer_interface {
 
 	//The maximal period that can be set for this timer configuration;
 	const float maximal_period;
 
-	//The function to update a count register;
-	void (*period_register_update)(volatile void *register_p, float new_register_value);
+	//Start the timer;
+	void (*const start)(struct timer_interface *);
 
-	//The overflow interrupt
-	timer_interrupt_data_t reload_interrupt;
+	//Stop the timer;
+	void (*const stop)(struct timer_interface *);
 
-	//The function to de-init the timer;
-	void (*timer_exit)(const struct timer_base_t *);
+	//Is the timer started ?;
+	bool (*const started)(struct timer_interface *);
 
-} timer_base_t;
+
+	//Set the timer's count;
+	void (*const set_count)(struct timer_interface *, float period);
+
+	//Get the timer's count;
+	float (*const get_count)(struct timer_interface *);
+
+
+	//Set the reload interrupt value;
+	void (*const set_ovf_value)(struct timer_interface *, float period);
+
+	//Get the reload interrupt value;
+	float (*const get_ovf_value)(struct timer_interface *);
+
+
+	//Enable the reload interrupt;
+	void (*const enable_int)(struct timer_interface *);
+
+	//Enable the reload interrupt;
+	void (*const disable_int)(struct timer_interface *);
+
+	//Is the reload interrupt enabled ?
+	bool (*const int_enabled)(struct timer_interface *);
+
+	//Update the interrupt handler;
+	void (*const update_handler)(struct timer_interface *, void (*handler)());
+
+
+	//Is the interrupt flag enabled ?
+	bool (*const int_flag_set)(struct timer_interface *);
+
+	//Is the interrupt flag enabled ?
+	void (*const clr_int_flag)(struct timer_interface *);
+
+
+	//The function to destruct the timer instance;
+	void (*destructor)(const struct timer_interface *);
+
+};
 
 
 //Start the timer;
-inline void timer_start_timer(const timer_base_t *timer_data);
+static inline void timer_start(struct timer_interface *timer) { (*(timer->start))(timer); }
 
-//Stop the timer;
-inline void timer_stop_timer(const timer_base_t *timer_data);
+//Start the timer;
+static inline void timer_stop(struct timer_interface *timer) { (*(timer->start))(timer); }
 
-//Update the period register with the provided value;
-inline void timer_set_period(const timer_base_t *timer_data, float period);
+static inline bool timer_started(struct timer_interface *timer) { return (*(timer->started))(timer); }
 
-//De initialise the timer and delete the structure;
-inline void timer_exit(const timer_base_t *timer_struct);
+
+//Set the timer count value;
+static inline void timer_set_count(struct timer_interface *timer, float period) {
+
+	(*(timer->set_count))(timer, period);
+
+}
+
+//Set the timer count value;
+static inline float timer_get_count(struct timer_interface *timer, float period) {
+
+	return (*(timer->get_count))(timer);
+}
+
+
+//Set the timer reload value;
+static inline void timer_set_ovf_value(struct timer_interface *timer, float period) {
+
+
+	(*(timer->set_ovf_value))(timer, period);
+}
+
+//Set the timer count value;
+static inline float timer_get_ovf_value(struct timer_interface *timer, float period) {
+
+	return (*(timer->get_ovf_value))(timer);
+}
+
+
+
+
+//Enable the reload interrupt;
+static inline void timer_enable_int(struct timer_interface *timer) {
+	(*(timer->enable_int))(timer);
+}
+
+//Disable the reload interrupt;
+static inline void timer_disable_int(struct timer_interface *timer) {
+	(*(timer->disable_int))(timer);
+}
+
+//Disable the reload interrupt;
+static inline bool timer_int_enabled(struct timer_interface *timer) {
+	return (*(timer->int_enabled))(timer);
+}
+
+//Set the timer count value;
+static inline void timer_update_handler(struct timer_interface *timer, void (*handler)()) {
+
+	(*(timer->update_handler))(timer, handler);
+}
+
+
+//Enable the reload interrupt;
+static inline bool timer_int_flag_set(struct timer_interface *timer) {
+	return (*(timer->int_flag_set))(timer);
+}
+
+//Disable the reload interrupt;
+static inline void timer_clr_int_flag(struct timer_interface *timer) {
+	(*(timer->clr_int_flag))(timer);
+}
+
+//Delete the timer interface;
+static inline void timer_destruct(struct timer_interface *timer) { (*(timer->destructor))(timer); }
 
 
 #endif
 
-#include "timer.c"

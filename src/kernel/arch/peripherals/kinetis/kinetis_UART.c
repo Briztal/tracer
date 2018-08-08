@@ -153,7 +153,7 @@ static void enable_tx_interrupt(struct kinetis_UART_net21 *iface);
 void initialise_peripheral(const struct kinetis_UART_hw *const peripheral_data) {
 
 	//Cache the memory pointer;
-	struct kinetis_UART_registers_t *const registers = peripheral_data->registers;
+	struct kinetis_UART_registers *const registers = peripheral_data->registers;
 
 	//Turn on the UART0's clock;//TODO MAKE A SIM DRIVER;
 	SIM_SCGC4 |= SIM_SCGC4_UART0;
@@ -243,7 +243,7 @@ void initialise_peripheral(const struct kinetis_UART_hw *const peripheral_data) 
 void start_peripheral(const struct kinetis_UART_hw *hw_specs) {
 
 	//Cache memory register;
-	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
+	struct kinetis_UART_registers *const registers = hw_specs->registers;
 
 	//Set the tx watermark to 0, and the rx to 1.
 	registers->TWFIFO = 0;
@@ -290,7 +290,7 @@ void start_peripheral(const struct kinetis_UART_hw *hw_specs) {
 void stop_peripheral(const struct kinetis_UART_hw *driver_data) {
 
 	//Cache memory register;
-	struct kinetis_UART_registers_t *const registers = driver_data->registers;
+	struct kinetis_UART_registers *const registers = driver_data->registers;
 
 	//Disable the status interrupt;
 	core_IC_disable(driver_data->status_int_channel);
@@ -412,7 +412,7 @@ void configure_packet_format(const struct kinetis_UART_hw *const hw_specs, const
 	//TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
 
 	//To avoid implicit double pointer access, we will cache hw_specs;
-	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
+	struct kinetis_UART_registers *const registers = hw_specs->registers;
 
 	/*
 	 * Number of bits; This peripheral only supports 8 or 9 hw_specs bits;
@@ -486,7 +486,7 @@ void configure_packet_format(const struct kinetis_UART_hw *const hw_specs, const
 
 void configure_modem(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
-	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
+	struct kinetis_UART_registers *const registers = hw_specs->registers;
 
 	/*
 	 * Rx_RTS_enable and Tx_Cts_enable are (resp) bits 3 and 0 of MODEM;
@@ -532,7 +532,7 @@ void
 configure_transmission_layer(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
 	//Cache the hw_specs pointer to avoid permanent implicit double pointer access;
-	struct kinetis_UART_registers_t *registers = hw_specs->registers;
+	struct kinetis_UART_registers *registers = hw_specs->registers;
 
 	/*
 	 * We will configure the transmission type : Full or Half duplex;
@@ -597,7 +597,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	configure_transmission_layer(hw_specs, config);
 
 	//Cache the register struct pointer;
-	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
+	struct kinetis_UART_registers *const registers = hw_specs->registers;
 
 	//Cache pointer to C2
 	volatile uint8_t *const C2_reg = &registers->C2;
@@ -731,7 +731,7 @@ static void enable_tx_interrupt(struct kinetis_UART_net21 *const iface) {
 void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_data) {
 
 	//Cache the register pointer;
-	struct kinetis_UART_registers_t *registers = driver_data->hw_specs.registers;
+	struct kinetis_UART_registers *registers = driver_data->hw_specs.registers;
 
 	//Cache C2, S1, and C5;
 	uint8_t C2 = registers->C2, S1 = registers->S1, C5 = registers->C5;
@@ -785,7 +785,7 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 	const struct kinetis_UART_hw *const peripheral_data = &driver_data->hw_specs;
 
 	//Cache the register pointer;
-	struct kinetis_UART_registers_t *const registers = peripheral_data->registers;
+	struct kinetis_UART_registers *const registers = peripheral_data->registers;
 
 	//Unlock reception by checking the framing error flag. At the same time, check noise or parity;
 	if (registers->C2 & (UART_S1_FE | UART_S1_NF | UART_S1_PF)) {
@@ -859,7 +859,7 @@ void kinetis_UART_tx_write(const struct kinetis_UART_driver_t *const driver) {
 	uint8_t tx_fifo_size = iface->tx_fifo_size;
 
 	//As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
+	struct kinetis_UART_registers *const registers = hw_specs->registers;
 
 	//While there are spaces in the tx buffer;
 	while (registers->TCFIFO != tx_fifo_size) {
@@ -903,7 +903,7 @@ void kinetis_UART_rx_read(const struct kinetis_UART_driver_t *const driver) {
 	const struct kinetis_UART_hw *hw_specs = &driver->hw_specs;
 
 	//As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-	struct kinetis_UART_registers_t *const registers = hw_specs->registers;
+	struct kinetis_UART_registers *const registers = hw_specs->registers;
 
 	//While there are bytes in the rx buffer;
 	while (registers->RCFIFO) {

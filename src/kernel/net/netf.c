@@ -173,6 +173,7 @@ void netf2_delete(struct netf2 *iface) {
 	kernel_free(iface);
 
 }
+int suussuus;
 
 //---------------------------------------------------- IRQ functions ---------------------------------------------------
 

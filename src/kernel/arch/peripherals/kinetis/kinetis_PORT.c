@@ -173,12 +173,12 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			//Provide access to the pin config getter;
 			.get_pin_config =
-			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, void *))
+			(void (*const)(const struct port_driver *, const struct io_desc_t *, void *))
 				&kinetis_PORT_get_pin_config,
 
 			//Provide access to the pin configuration setter;
 			.configure_pin =
-			(void (*const)(const struct port_driver_t *, const struct io_desc_t *, void *))
+			(void (*const)(const struct port_driver *, const struct io_desc_t *, void *))
 				&kinetis_PORT_configure_pin,
 
 
@@ -188,12 +188,12 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			//Provide access to the descriptor provider;
 			.get_gpio_descriptor =
-			(bool (*const)(const struct port_driver_t *, enum gpio_register_type_e, const struct io_desc_t *,
+			(bool (*const)(const struct port_driver *, enum gpio_register_type_e, const struct io_desc_t *,
 						   volatile void **, void *))
 				&kinetis_PORT_get_gpio_descriptor,
 
 			//Provide access to the destructor;
-			.destructor =  (void (*const)(struct port_driver_t *)) &kinetis_PORT_destructor,
+			.destructor =  (void (*const)(struct port_driver *)) &kinetis_PORT_destructor,
 
 		},
 

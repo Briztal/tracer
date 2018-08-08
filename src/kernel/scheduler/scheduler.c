@@ -143,7 +143,6 @@ void scheduler_start(void (*init_function)(void *)) {
     sprocess_execute(current_sprocess);
 
 
-
     //While loop for safety. Will not happen, as previous call never returns;
     while (1);
 

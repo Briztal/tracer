@@ -150,7 +150,6 @@ void core_preemption_init() {
     //Set the third byte of SHPR3 (pendSV prio) to 240, lowest priority.
     *((uint8_t *)&SCB_SHPR3 + 2) = 240;
 
-   // NVIC_SET_PRIORITY(-2, 224);//TODO 240
 
 }
 
