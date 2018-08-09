@@ -21,7 +21,7 @@
 #ifndef TRACER_UARTDRIVER_H
 #define TRACER_UARTDRIVER_H
 
-#include <kernel/net/netf.h>
+#include <kernel/if/netf.h>
 #include "stdint.h"
 
 #include "stdbool.h"

@@ -37,8 +37,10 @@
 
 struct timer_interface {
 
+
 	//Update the base frequency;
-	void (*const set_base_frequency)(struct timer_interface_t *, uint32_t base_frequency;)
+	void (*const set_base_frequency)(struct timer_interface_t *, uint32_t base_frequency);
+
 
 	//Start the timer;
 	void (*const start)(struct timer_interface *);
@@ -87,8 +89,20 @@ struct timer_interface {
 	//The function to destruct the timer instance;
 	void (*deleter)(const struct timer_interface *);
 
+
 };
 
+//Initialise the timer. Disable timer, interrupt and flag, set the base frequency, and reset count and reload;
+void timer_init(struct timer_interface *timer, uint32_t base_frequency);
+
+//Stop the timer, stop the interrupt, reset counts, reset the handler to 0;
+void timer_reset(struct timer_interface *timer);
+
+
+//Set the base frequency of the timer;
+static inline void timer_set_base_frequency(struct timer_interface *timer, uint32_t base_frequency) {
+	(*(timer->set_base_frequency))(timer, base_frequency);
+}
 
 //Start the timer;
 static inline void timer_start(struct timer_interface *timer) { (*(timer->start))(timer); }
@@ -96,12 +110,12 @@ static inline void timer_start(struct timer_interface *timer) { (*(timer->start)
 //Start the timer;
 static inline void timer_stop(struct timer_interface *timer) { (*(timer->start))(timer); }
 
+//Is the timer started;
 static inline bool timer_started(struct timer_interface *timer) { return (*(timer->started))(timer); }
 
 
 //Set the timer count value;
 static inline void timer_set_count(struct timer_interface *timer, float period) {
-
 	(*(timer->set_count))(timer, period);
 
 }
@@ -162,7 +176,7 @@ static inline void timer_clr_int_flag(struct timer_interface *timer) {
 }
 
 //Delete the timer interface;
-static inline void timer_destruct(struct timer_interface *timer) { (*(timer->deleter))(timer); }
+static inline void timer_delete(struct timer_interface *timer) { (*(timer->deleter))(timer); }
 
 
 #endif

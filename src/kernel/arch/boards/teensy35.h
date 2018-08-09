@@ -30,7 +30,7 @@
  */
 
 //We will use the kinetis PORT module;
-#include <kernel/arch/peripherals/kinetis/kinetis_PORT.h>
+#include <kernel/arch/drivers/kinetis/kinetis_PORT.h>
 
 extern struct kinetis_PORT_driver_t *PORT;
 
@@ -40,9 +40,9 @@ extern struct kinetis_PORT_driver_t *PORT;
  */
 
 //To define PITs, we will use the kinetis PIT module;
-#include <kernel/arch/peripherals/kinetis/kinetis_PIT.h>
+#include <kernel/arch/drivers/kinetis/kinetis_PIT.h>
 
-extern struct kinetis_PIT_driver *PIT_0, *PIT_1, *PIT_2, *PIT_3;
+extern struct kinetis_PIT_driver *PIT;
 
 
 /*
@@ -50,7 +50,7 @@ extern struct kinetis_PIT_driver *PIT_0, *PIT_1, *PIT_2, *PIT_3;
  */
 
 //To define UART drivers we must include the UART driver header;
-#include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
+#include <kernel/arch/drivers/kinetis/kinetis_UART.h>
 
 extern struct kinetis_UART_driver_t *UART0;
 

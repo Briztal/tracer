@@ -3,7 +3,7 @@
 //
 
 
-#include <kernel/net/netf.h>
+#include <kernel/if/netf.h>
 #include <kernel/kernel.h>
 #include "framer.h"
 

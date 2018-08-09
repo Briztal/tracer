@@ -27,15 +27,15 @@
 
 #include <kernel/arch/arch.h>
 
-#include <kernel/arch/peripherals/kinetis/kinetis_UART.h>
-#include <kernel/kernel.h>
-#include <HardwareSerial.h>
-#include <kernel/arch/peripherals/kinetis/kinetis_mux.h>
-#include <core_pins.h>
-#include <kernel/net/framer/framer.h>
+#include <kernel/arch/drivers/kinetis/kinetis_UART.h>
+#include <kernel/arch/drivers/kinetis/kinetis_mux.h>
 #include <kernel/net/framer/ascii_framer.h>
 #include <kernel/debug.h>
 #include <data_structures/string/string.h>
+#include <kernel/if/timer.h>
+#include <kernel/arch/drivers/port.h>
+#include <kernel/arch/drivers/kinetis/kinetis_PORT.h>
+#include <kernel/arch/drivers/kinetis/kinetis_PIT.h>
 
 
 void kernel_init_function(void *args);
@@ -59,7 +59,7 @@ bool PIT_log_flag = true;
 
 void PIT_log() {
 
-	timer_clr_int_flag(PIT_0->iface);
+	timer_clr_int_flag(PIT->ifaces[0]);
 
 	bool flag = PIT_log_flag;
 
@@ -123,10 +123,6 @@ struct netf2 *uart_init() {
 }
 
 void PIT_test() {
-
-	struct kinetis_PIT_config config = {
-		.base_frequency = 1000, //1KHz
-	};
 
 	kinetis_PIT_start(PIT_0, &config);
 

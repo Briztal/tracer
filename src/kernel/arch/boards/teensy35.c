@@ -18,9 +18,7 @@
 
 */
 
-#include <kernel/debug.h>
 #include "teensy35.h"
-
 
 /*
  * --------------------------------------- PORT ---------------------------------------
@@ -49,8 +47,23 @@ struct kinetis_PORT_driver_t *PORT;
  * --------------------------------------- PIT ---------------------------------------
  */
 
-//Declare four PIT drivers;
-struct kinetis_PIT_driver *PIT_0, *PIT_1, *PIT_2, *PIT_3;
+//Declare the PIT driver;
+struct kinetis_PIT_driver *PIT;
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
+//TODO REFACTOR PARAMETERS
 
 #define PIT_0_REGISTERS (void *)0x40037100
 #define PIT_1_REGISTERS (void *)0x40037110
@@ -97,21 +110,8 @@ void teensy35_hardware_init() {
 	//Define the PORT driver;
 	PORT = kinetis_PORT_create(PORT_A_REGISTERS, GPIO_A_REGISTERS, 5, 0x1000, 0x40);
 
-
-
-	//Enable PIT clock gating;
-	SIM_SCGC6 |= SIM_SCGC6_PIT;
-
-	asm __volatile__ ("nop");
-
-	//Enable clocks for all PITs;
-	PIT_MCR = 0x00;
-
 	//Define PIT drivers;
-	PIT_0 = kinetis_PIT_create(PIT_0_REGISTERS, IRQ_PIT_CH0, F_BUS);
-	PIT_1 = kinetis_PIT_create(PIT_1_REGISTERS, IRQ_PIT_CH1, F_BUS);
-	PIT_2 = kinetis_PIT_create(PIT_2_REGISTERS, IRQ_PIT_CH2, F_BUS);
-	PIT_3 = kinetis_PIT_create(PIT_3_REGISTERS, IRQ_PIT_CH3, F_BUS);
+	PIT = kinetis_PIT_create(PIT_0_REGISTERS, IRQ_PIT_CH0, F_BUS);
 
 
 

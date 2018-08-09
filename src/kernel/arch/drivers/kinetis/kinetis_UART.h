@@ -25,12 +25,12 @@
 #ifndef TRACER_KINETIS_UART_H
 #define TRACER_KINETIS_UART_H
 
-#include <kernel/drivers/uart.h>
+#include <kernel/arch/drivers/uart.h>
 
 #include <kernel/memory/memory_stream.h>
 
 #include <kernel/memory/interrupt_pipe.h>
-#include <kernel/net/netf.h>
+#include <kernel/if/netf.h>
 
 //----------------------------------------------------- Memory Map -----------------------------------------------------
 

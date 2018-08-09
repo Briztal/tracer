@@ -48,7 +48,7 @@ struct kinetis_PIT_driver {
 	const struct kinetis_PIT_specs hw_specs;
 
 	//The timer interfaces array;
-	struct timer_interface **ifaces;
+	struct timer_interface **const ifaces;
 
 };
 

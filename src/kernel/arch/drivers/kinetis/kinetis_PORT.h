@@ -28,7 +28,7 @@
 
 #include <stddef.h>
 
-#include <kernel/drivers/port.h>
+#include <kernel/arch/drivers/port.h>
 
 #include <kernel/memory/memory_transfer.h>
 

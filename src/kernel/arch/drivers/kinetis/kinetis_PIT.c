@@ -7,7 +7,7 @@
 
 #include <kernel/kernel.h>
 
-#include <kernel/drivers/timer.h>
+#include <kernel/if/timer.h>
 
 #include <kernel/debug.h>
 
@@ -40,16 +40,14 @@ struct __attribute__ ((packed)) kinetis_PIT_registers {
 
 //--------------------------------------------------- Driver methods ---------------------------------------------------
 
-
 //Initialise the driver, providing the configuration;
-void kinetis_PIT_init(struct kinetis_PIT_driver *driver, struct kinetis_PIT_config *config);
+void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused);
 
 //De-initialise the driver. Timer interface will be deleted;
 void kinetis_PIT_exit(struct kinetis_PIT_driver *driver);
 
 //Delete a kinetis PIT driver;
 void kinetis_PIT_delete(struct kinetis_PIT_driver *driver);
-
 
 
 //--------------------------------------------------- Timer interface --------------------------------------------------
@@ -66,15 +64,20 @@ struct kinetis_PIT_timer_interface {
 	//The registers zone reference;
 	struct kinetis_PIT_registers *const registers;
 
-
-
 	//The ratio tics/period;
-	const float period_to_tics;
+	float period_to_tics;
+
+	//The maximal period;
+	float max_period;
+
+	//The clock frequency (Hz);
+	const uint32_t clock_frequency;
 
 	//The reload interrupt channel;
 	const uint8_t reload_int_channel;
 
 };
+
 
 //Delete the kinetis PIT timer interface;
 static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interface *iface);
@@ -100,81 +103,91 @@ static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interfac
 //TODO MAKE A HANDLER!!!!!!!!!!!
 //TODO MAKE A HANDLER!!!!!!!!!!!
 
-static void kinetis_PIT_set_base_frequency(uint32_t frequency) {
+
+static void kinetis_PIT_set_base_frequency(struct kinetis_PIT_timer_interface *iface, uint32_t frequency) {
 
 	//Determine the tics/period ratio;
-	float period_to_tics = ((float) driver->hw_specs->clock_frequency) / ((float) config->base_frequency);
+	float period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
 
 	//Determine the maximal period;
 	float max_period = ((float) (uint32_t) -1) / period_to_tics;
+
+	//Save both constants;
+	iface->period_to_tics = period_to_tics;
+	iface->max_period = max_period;
+
 }
 
 //Enable the timer;
-static void kinetis_PIT_enable(struct kinetis_PIT_timer_interface *data) {
+static void kinetis_PIT_enable(struct kinetis_PIT_timer_interface *iface) {
 	//Set bit 0 of TCTRL;
-	data->registers->TCTRL |= PIT_TCTRL_TEN;
+	iface->registers->TCTRL |= PIT_TCTRL_TEN;
 }
 
 //Disable the timer;
-static void kinetis_PIT_disable(struct kinetis_PIT_timer_interface *data) {
+static void kinetis_PIT_disable(struct kinetis_PIT_timer_interface *iface) {
 	//Clear bit 0 of TCTRL;
-	data->registers->TCTRL &= ~PIT_TCTRL_TEN;
+	iface->registers->TCTRL &= ~PIT_TCTRL_TEN;
 }
 
 //Is the timer enabled ?
-static bool kinetis_PIT_enabled(struct kinetis_PIT_timer_interface *data) {
+static bool kinetis_PIT_enabled(struct kinetis_PIT_timer_interface *iface) {
 	//Is bit 0 of TCTRL set ?
-	return (bool) (data->registers->TCTRL & PIT_TCTRL_TEN);
+	return (bool) (iface->registers->TCTRL & PIT_TCTRL_TEN);
 }
 
 
 //Update the reload value;
-static void kinetis_PIT_set_count(struct kinetis_PIT_timer_interface *data, float count) {
-	data->registers->CVAL = (uint32_t) (data->period_to_tics * count);
+static void kinetis_PIT_set_count(struct kinetis_PIT_timer_interface *iface, float period_count) {
+	if (period_count < iface->max_period) {
+		iface->registers->CVAL = (uint32_t) (iface->period_to_tics * period_count);
+	}
 }
 
 //Get the current value;
-static float kinetis_PIT_get_count(struct kinetis_PIT_timer_interface *data) {
-	return (((float) data->registers->CVAL) / data->period_to_tics);
+static float kinetis_PIT_get_count(struct kinetis_PIT_timer_interface *iface) {
+	return (((float) iface->registers->CVAL) / iface->period_to_tics);
 }
 
 
 //Update the reload value;
-static void kinetis_PIT_set_reload(struct kinetis_PIT_timer_interface *data, float count) {
-	data->registers->LDVAL = (uint32_t) (data->period_to_tics * count);
+static void kinetis_PIT_set_reload(struct kinetis_PIT_timer_interface *iface, float period_count) {
+	if (period_count < iface->max_period) {
+		iface->registers->LDVAL = (uint32_t) (iface->period_to_tics * period_count);
+	}
 }
 
 //Get the reload value;
-static float kinetis_PIT_get_reload(struct kinetis_PIT_timer_interface *data) {
-	return (((float) data->registers->LDVAL) / data->period_to_tics);
+static float kinetis_PIT_get_reload(struct kinetis_PIT_timer_interface *iface) {
+	return (((float) iface->registers->LDVAL) / iface->period_to_tics);
 }
 
 
 //Enable the interrupt;
-static void kinetis_PIT_enable_int(struct kinetis_PIT_timer_interface *data) {
+static void kinetis_PIT_enable_int(struct kinetis_PIT_timer_interface *iface) {
 	//Set bit 1 of TCTRL;
-	data->registers->TCTRL |= PIT_TCTRL_TIE;
+	iface->registers->TCTRL |= PIT_TCTRL_TIE;
 
 }
 
 //Disable the interrupt;
-static void kinetis_PIT_disable_int(struct kinetis_PIT_timer_interface *data) {
+static void kinetis_PIT_disable_int(struct kinetis_PIT_timer_interface *iface) {
 	//Clear bit 1 of TCTRL;
-	data->registers->TCTRL &= ~PIT_TCTRL_TIE;
+	iface->registers->TCTRL &= ~PIT_TCTRL_TIE;
 }
 
 //Is the interrupt enabled ?
-static bool kinetis_PIT_int_enabled(struct kinetis_PIT_timer_interface *data) {
+static bool kinetis_PIT_int_enabled(struct kinetis_PIT_timer_interface *iface) {
 	//Is bit 1 of TCTRL set ?
-	return (bool) (data->registers->TCTRL & PIT_TCTRL_TIE);
+	return (bool) (iface->registers->TCTRL & PIT_TCTRL_TIE);
 }
 
 
 //Update the handler;
-void kinetis_PIT_update_handler(struct kinetis_PIT_timer_interface *data, void (*handler)()) {
+void kinetis_PIT_update_handler(struct kinetis_PIT_timer_interface *iface, void (*handler)()) {
 
 	//Cache the interrupt channel;
-	uint8_t interrupt_channel = data->reload_int_channel;
+	uint8_t interrupt_channel = iface->reload_int_channel;
 
 	//If the handler is not null :
 	if (handler) {
@@ -201,16 +214,16 @@ void kinetis_PIT_update_handler(struct kinetis_PIT_timer_interface *data, void (
 
 
 //Is the flag set ?
-static bool kinetis_PIT_flag_set(struct kinetis_PIT_timer_interface *data) {
+static bool kinetis_PIT_flag_set(struct kinetis_PIT_timer_interface *iface) {
 	//Is bit 0 of TFLG set ?
-	return (bool) (data->registers->TFLG);
+	return (bool) (iface->registers->TFLG);
 }
 
 
 //Clear the interrupt flag;
-static void kinetis_PIT_clear_flag(struct kinetis_PIT_timer_interface *data) {
+static void kinetis_PIT_clear_flag(struct kinetis_PIT_timer_interface *iface) {
 	//Set bit 0 of TFLG;
-	data->registers->TFLG = 1;
+	iface->registers->TFLG = 1;
 }
 
 
@@ -227,11 +240,6 @@ static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interfac
 }
 
 
-
-
-
-
-
 //--------------------------------------------- Driver Creation - Deletion ---------------------------------------------
 
 /**
@@ -244,9 +252,14 @@ static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interfac
 
 struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 
+	//Enable PIT clock gating;
+	SIM_SCGC6 |= SIM_SCGC6_PIT;
+
+	//Enable clocks for all PITs;
+	PIT_MCR = 0x00;
+
 	//Cache the number of PITs;
 	uint8_t nb_PITs = specs->nb_PITs;
-
 
 	//Duplicate the interrupt channels array;
 	uint8_t *const int_channels = kernel_malloc_copy(nb_PITs * sizeof(uint8_t), specs->int_channels);
@@ -289,15 +302,27 @@ struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 
 }
 
+
 /**
  * kinetis_PIT_delete : calls exit, and delete the driver struct;
  *
  * @param driver : the driver to delete;
  */
+
 void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
+
+	//Disable PIT clock gating;
+	SIM_SCGC6 &= ~SIM_SCGC6_PIT;
+
+	//Disable clocks for all PITs;
+	PIT_MCR = 0x02;
+
 
 	//Eventually stop the driver;
 	kinetis_PIT_exit(driver);
+
+	//Free the interrupt channels array;
+	kernel_free((void *) driver->hw_specs.int_channels);
 
 	//free the driver:
 	kernel_free(driver);
@@ -307,19 +332,28 @@ void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
 
 //---------------------------------------------------- Start - Stop ----------------------------------------------------
 
-//Start the driver, providing the configuration;
-void kinetis_PIT_start(struct kinetis_PIT_driver *driver, void *unused) {
+/**
+ * kinetis_PIT_init :
+ * 	- initialises interfaces;
+ * 	- initialises the hardware;
+ * 	- registers interfaces;
+ *
+ * @param driver : the PIT driver;
+ * @param unused : used for config file, not necessary here;
+ */
+
+void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 
 	//If the driver is already started :
 	if (driver->ifaces) {
 
 		//Error, miss-use;
-		kernel_error("kinetis_PIT.c : kinetis_PIT_start : attempted to start the dirver twice");
+		kernel_error("kinetis_PIT.c : kinetis_PIT_start : attempted to start the driver twice");
 
 	}
 
 	//Create the timer interface initializer;
-	struct timer_interface timer_init = {
+	struct timer_interface iface_init = {
 
 		.start = (void (*)(struct timer_interface *)) &kinetis_PIT_enable,
 		.stop = (void (*)(struct timer_interface *)) &kinetis_PIT_disable,
@@ -367,11 +401,14 @@ void kinetis_PIT_start(struct kinetis_PIT_driver *driver, void *unused) {
 		//Determine the register area address;
 		volatile void *registers_area = first_registers_area + area_spacing * PIT_id;
 
+		//Cache the interrupt channel;
+		uint8_t int_channel = (specs->int_channels)[PIT_id];
+
 		//Create the PIT timer interface initializer;
-		struct kinetis_PIT_timer_interface iface_init = {
+		struct kinetis_PIT_timer_interface PIT_init = {
 
 			//Transmit function pointers;
-			.iface = timer_init,
+			.iface = iface_init,
 
 			//Transmit the reference of the registers zone;
 			.registers = registers_area,
@@ -387,35 +424,19 @@ void kinetis_PIT_start(struct kinetis_PIT_driver *driver, void *unused) {
 			kernel_malloc_copy(sizeof(struct kinetis_PIT_timer_interface), &iface_init);
 
 
-
 		/*
 		 * Initialise the PIT;
 		 */
 
-		//1KHz base frequency;
-		const uint32_t base_frequency = 1000;
+		//Initialise the timer to 1KHz;
+		timer_init((struct timer_interface *) iface, 1000);
 
-		//The period will be of one unit;
-		const float period = 1;
-
-		//Set the
-
-
-		//Reset the count;
-		kinetis_PIT_set_count(&iface_init, period);
-
-		//Reset the reload value to a high one;
-		kinetis_PIT_set_reload(&iface_init, period);
-
-		//Clear the interrupt flag;
-		kinetis_PIT_clear_flag(&iface_init);
 
 		//Set the interrupt priority;
-		core_IC_set_priority(channel, DRIVER_STARUS_INTERRUPT_PRIORITY);
+		core_IC_set_priority(int_channel, DRIVER_STARUS_INTERRUPT_PRIORITY);
 
 		//Set the default handler;
-		core_IC_set_default_handler(channel);
-
+		core_IC_set_default_handler(int_channel);
 
 
 		//Register the timer interface;
@@ -426,44 +447,31 @@ void kinetis_PIT_start(struct kinetis_PIT_driver *driver, void *unused) {
 }
 
 
-//Stop the driver. Timer interface will be deleted;
-void kinetis_PIT_stop(struct kinetis_PIT_driver *driver) {
+/**
+ * kinetis_PIT_exit :
+ * 	- resets the hardware;
+ * 	- deletes interfaces;
+ * 	- unregisters interfaces;
+ *
+ * @param driver : the driver to de-init;
+ */
 
-	//Cache the interface;
-	struct kinetis_PIT_timer_interface *iface = (struct kinetis_PIT_timer_interface *) driver->ifaces;
+void kinetis_PIT_exit(struct kinetis_PIT_driver *driver) {
 
-	if (driver->ifaces) {
+	//For each interface :
+	for (uint8_t PIT_id = 0; PIT_id--;) {
 
-		/*
-		 * Reset the timer;
-		 */
+		//Cache the interface;
+		struct timer_interface *iface =  (driver->ifaces)[PIT_id];
 
-		//Disable the interrupt;
-		kinetis_PIT_disable_int(iface);
-
-		//Stop the timer;
-		kinetis_PIT_disable(iface);
-
-		//Reset the handler and disable the interrupt;
-		kinetis_PIT_update_handler(iface, 0);
-
-
-		//Get the number of tics;
-		float period = iface->iface.maximal_period - 1;
-
-		//Reset the count;
-		kinetis_PIT_set_count(iface, period);
-
-		//Reset the reload value to a high one;
-		kinetis_PIT_set_reload(iface, period);
-
+		//Reset the handler;
+		timer_reset(iface);
 
 		//Destruct and delete the timer interface;
-		timer_destruct(driver->ifaces);
-		kernel_free(driver->ifaces);
+		timer_delete(iface);
 
-		//Deinit the driver;
-		driver->ifaces = 0;
+		//Reset the interface reference;
+		(driver->ifaces)[PIT_id] = 0;
 
 	}
 
