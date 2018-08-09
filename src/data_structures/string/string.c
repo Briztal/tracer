@@ -26,396 +26,7 @@
 #include <kernel/kernel.h>
 
 
-
-#define SIZE_LIMIT (uint16_t) 255
-
-
-//-------------------------------------- To string conversion --------------------------------------
-
-/*
- * Following functions set the given array as the string representation of basic number types;
- */
-
-void string_uint8_to_a(uint8_t i, char *data);
-
-void string_int8_to_a(int8_t i, char *data);
-
-void string_uint16_to_a(uint16_t i, char *data);
-
-void string_int16_to_a(int16_t i, char *data);
-
-void string_uint32_to_a(uint32_t i, char *data);
-
-void string_int32_to_a(int32_t i, char *data);
-
-void string_uint64_to_a(uint64_t i, char *data);
-
-void string_int64_to_a(int64_t i, char *data);
-
-
-size_t string_uint8_to_as(uint8_t i, char *data);
-
-size_t string_uint16_to_as(uint16_t i, char *data);
-
-size_t string_uint32_to_as(uint32_t i, char *data);
-
-size_t string_uint64_to_as(uint64_t i, char *data);
-
-
-
-/*
- * length_to_size : this function converts a string length (null termination and size of char non comprised) to a
- *  real array size;
- */
-
-inline size_t length_to_size(const size_t length) {
-
-    return  (length + 1) * sizeof(char);
-
-}
-
-
-//Create a string of the given length
-string_t *string_create(const size_t string_length, const char *const heap_data) {
-
-    //Create the string initializer;
-    string_t init = {
-            .length = string_length,
-            .data = heap_data,
-    };
-
-    //If the allocation completed, cache a casted copy of the pointer. Compiler optimised;
-    string_t *string = kernel_malloc_copy(sizeof(string_t), &init);
-
-    //Return the created string;
-    return string;
-
-}
-
-
-/*
- * string_create_from_symmetric : allocates heap space for the string, and copies symmetrically the source;
- *
- *  Calls string_create and returns the result;
- */
-
-string_t *string_create_from_symmetric(const size_t string_length, const char *const stack_src) {
-
-    //Cache the size of the zone to allocate zone;
-    size_t size = length_to_size(string_length);
-
-    //Create a memory space in the heap for data;
-    void *ptr = kernel_malloc(size);
-
-    //Symmetric copy from stack to heap; destination is null-terminated;
-    string_symmetric_copy(ptr, stack_src, string_length);
-
-    //Built the string and return the result;
-    return string_create(string_length, ptr);
-
-}
-
-
-/*
- * string_create_from_stack : allocates heap space for data, copies the source.
- *
- *  Calls string_create and returns the result;
- */
-string_t *string_create_from_stack(const size_t string_length, const char *const stack_src) {
-
-    //Cache the size of the zone to allocate zone;
-    size_t size = length_to_size(string_length);
-
-    //Create a memory space in the heap for data;
-    void *ptr = kernel_malloc(size);
-
-    //Copy from stack to heap; NO NULL TERMINATION;
-    memcpy(ptr, stack_src, string_length);
-
-    //Null terminate the string;
-    *((char *)ptr + string_length) = 0;
-
-    //Built the string and return the result;
-    return string_create(string_length, ptr);
-
-}
-
-/*
- * string_delete : a string deletion required two operations (data and struct deletion).
- *  This function implements both;
- */
-
-void string_delete(const string_t *const string) {
-
-    //Free the string's data;
-    kernel_free((void *) string->data);
-
-    //Free the string;
-    kernel_free((void *)string);
-
-}
-
-
-/*
- * String move : creates a new string, and moves src's data to it. Then, resets src to an empty string;
- */
-
-string_t *string_move(string_t *src) {
-
-    //First, create a copycat of src, phagocyting its data;
-    string_t *clone = string_create(src->length, src->data);
-
-    //Then, allocate data in the heap for an empty string;
-    char *ptr = kernel_malloc(length_to_size(0));
-
-    //Initialise the string to empty.
-    *ptr = 0;
-
-    //Create a stack initialiser;
-    string_t init =  {
-            .data = ptr,
-            .length = 0,
-    };
-
-    //Re-initialise src with new data;
-    memcpy(src, &init, sizeof(string_t));
-
-    //Return the new string;
-    return clone;
-
-}
-
-
-
-
-/*
- * string_resize : resizes a string to the given length;
- */
-
-/*
-void string_resize(string_t *string, size_t new_length) {
-    
-    //Cache the current length;
-    size_t current_length = string->length;
-    
-    //A string can't be truncated;
-    if (new_length < current_length) {
-        //TODO ERROR;
-        return;
-    }
-    
-    //If the new size if the same that the current, nothing to do;
-    if (new_length == current_length)
-        return;
-    
-    //Determine current and new sizes;
-    size_t current_size = length_to_size(current_length);
-    size_t new_size = length_to_size(new_length);
-    
-    //First, let's reallocate the string's array to the required size;
-    void *ptr = realloc(string->data, new_size);
-    
-    //If the allocation failed, error;
-    if (!ptr)
-        return;//TODO ERROR.
-    
-    //Cache the initial of the string's new part;
-    uint8_t *new_part = (uint8_t*) ptr + current_size;
-    
-    //Now, reset the new part of the string;
-    for (size_t counter = new_size - current_size; counter--;) {
-        
-        //Reset the current byte of the new part;
-        *(new_part++) = 0;
-        
-    }
-    
-    //Re-initialise the string;
-    *string = {
-            .data = ptr, 
-            .length = new_length,
-    };
-}
-
- */
-//---------------------------------------- Primitive types constructors ----------------------------------------
-
-
-
-//-------------------------------------- Assignment operators--------------------------------------
-
-#define uint_to_a(i, max_digits, nb_bits)\
-    /*Declare a temporary array;*/\
-    char t[max_digits];\
-    \
-    /*Convert the int to its string value in reverse order in t;*/\
-    uint8_t data_length = string_uint##nb_bits##_to_as(i, t);\
-    \
-    /*Create and return a string of the given length with uint data;*/\
-    return string_create_from_symmetric(data_length, t);\
-
-#define int_to_a(i, max_digits, nb_bits)\
-    \
-    /*First, determine the sign and take the absolute value of i*/\
-    bool negative;\
-    if ((negative = (i) < 0)) (i) = -(i);\
-    \
-    /*Declare a temporary array;*/\
-    char t[(max_digits) + 1];\
-    \
-    /*Convert the int to its string value in reverse order in t;*/\
-    uint8_t data_length = string_uint##nb_bits##_to_as((uint##nb_bits##_t)(i), t);\
-    \
-    /*Write the sign and increase the length;*/\
-    if (negative) {t[data_length++] = '-';}\
-    \
-    /*Create and return a string of the given length with int data;*/\
-    return string_create_from_symmetric(data_length, t);\
-
-
-#define integer_constructor(length, max_digits)\
-    string_t *str_u##length(uint##length##_t i) {\
-        uint_to_a(i, max_digits, length);\
-    }\
-    string_t *str_s##length(int##length##_t i) {\
-        int_to_a(i, max_digits, length);\
-    }
-
-
-/*
- * Implement all initializer, for all uints and ints of all sizes;
- */
-
-integer_constructor(8, 3);
-
-integer_constructor(16, 5);
-
-integer_constructor(32, 10);
-
-integer_constructor(64, 20);
-
-#undef uint_to_a
-
-
-
-/*
- * setTo : this function sets the string as the representation of the given float,
- *  with the given resolution, ie the given number of figures after comma.
- */
-
-string_t *str_f(float f, uint8_t resolution) {
-
-    //Before anything, let's determine the sign and take the absolute value;
-    bool negative;
-    float abs = ((negative = (f < 0))) ? -f : f;
-
-    //The first step will be to call a constructor for the integer part;
-    string_t *int_string;
-
-    //Declare the fractional part;
-    float frac;
-
-
-    /*
-     * First, we will determine the optimal function to call to convert the integer part;
-     *  bounds will depend on the sign;
-     *
-     * As float integer part can be signed, we will only call the signed int constructor;
-     *
-     * As signed numbers absolute bounds differ of 1 (ex : -128, 127), the negative bound will be treated of the next
-     *  greater type (except for the greatest type;
-     */
-
-    if (abs <= (float) ((uint8_t) -1 >> 1)) {
-        //1 byte integer part :
-        int_string = str_s8((int8_t) abs);
-        frac = f - (float) (int8_t) f;
-    } else if (abs < (float) ((uint16_t) -1 >> 1)) {
-        //2 bytes integer part :
-        int_string = str_s16((int16_t) abs);
-        frac = f - (float) (int16_t) f;
-    } else if (abs < (float) ((uint32_t) -1 >> 1)) {
-        //4 bytes integer part :
-        int_string = str_s32((int32_t) abs);
-        frac = f - (float) (int32_t) f;
-    } else if (abs < (float) ((uint64_t) -1 >> 1)) {
-        //4 bytes integer part :
-        int_string = str_s64((int64_t) abs);
-        frac = f - (float) (int64_t) f;
-    } else {
-
-        //Create and return a string containing ovf
-        int_string = string_create(3, "ovf");
-        return int_string;
-
-    }
-
-    //If the fractional part is negative, take its absolute value;
-    if (frac < 0)
-        frac = -frac;
-
-    //Create a temp array to contain the frac part. + 1 from the dot; no null termination required; cache a copy;
-    char frac_part[resolution + 1], *insertion_ptr = frac_part;
-
-    //Insert the dot;
-    *(insertion_ptr++) = '.';
-
-    //For each digit under the comma :
-    for (; resolution--;) {
-
-        //Multiply the fractional part by 10;
-        frac *= (float) 10;
-
-        //Get the digit;
-        char c = (char) ((uint8_t) frac + (uint8_t) 48);
-
-        frac -= (float) (uint8_t) frac;
-
-        //Insert the digit;
-        *(insertion_ptr++) = c;
-
-    }
-
-    //Create a string from the stack array;
-    //string_t *frac_string = string_create_from_stack(resolution + 1, frac_part);TODO
-
-    //For instance, return the integer part;
-    //TODO TSTRING;
-    return int_string;
-
-}
-
-//--------------------------------------------- Memory copy utils ---------------------------------------------
-
-
-/*
- * symmetric_copy : this function turns dst to the symmetric of sym_str;
- */
-
-void string_symmetric_copy(void *dst, const void *sym_str, size_t size) {
-
-    //Convert dst and src to a uint8_t pointer, as arithmetic on void * is illegal;
-    uint8_t *d = (uint8_t *) dst;
-    uint8_t *s = (uint8_t *) sym_str;
-
-    //Increment the dst pointer;
-    d += size - (uint8_t) 1;
-
-    //Nullify the end;
-    *(d + 1) = 0;
-
-    //For each char :
-    for (; size--;) {
-
-        //Symmetric copy from src to dst;
-        *(d--) = *(s++);
-
-    }
-
-}
-
-
-//-------------------------------------- C string lib complement --------------------------------------
+//----------------------------------------------- C string lib complement ----------------------------------------------
 
 /*
  * strcnt : counts the number of chars separating the first char of the separator 0;
@@ -424,23 +35,23 @@ void string_symmetric_copy(void *dst, const void *sym_str, size_t size) {
 size_t strcnt(const char *str, const char s) {
 
 	//Initialise the char counter;
-    size_t char_count = 0;
+	size_t char_count = 0;
 
-    //Initialise a cache for the current char
-    char crt = *(str++);
+	//Initialise a cache for the current char
+	char crt = *(str++);
 
-    //While the current char is not null, or the limit char
-    while (crt && (crt != s)) {
+	//While the current char is not null, or the limit char
+	while (crt && (crt != s)) {
 
-        //Update the current char
-        crt = *(str++);
+		//Update the current char
+		crt = *(str++);
 
-        //Increment the size of the copied buffer.
-        char_count++;
-    }
+		//Increment the size of the copied buffer.
+		char_count++;
+	}
 
-    //Return the number of characters before the limit char (or the end of the string
-    return char_count;
+	//Return the number of characters before the limit char (or the end of the string
+	return char_count;
 
 }
 
@@ -478,35 +89,35 @@ char *strdiff(const char *str, const char c) {
 
 size_t strcw(const char *str, const char s) {
 
-    //Initialise a word counter.
-    size_t nb_words = 0;
+	//Initialise a word counter.
+	size_t nb_words = 0;
 
-    //initialise_peripheral a size for the current word.
-    size_t size;
+	//initialise_peripheral a size for the current word.
+	size_t size;
 
-    do {
+	do {
 
-        //Remove unnecessary nb_spaces at the initial of the char sequence.
-        str = strdiff(str, s);
+		//Remove unnecessary nb_spaces at the initial of the char sequence.
+		str = strdiff(str, s);
 
-        //Get the size of the next word (will ne zero only if the sequence is finished).
-        size = strcnt(str, s);
+		//Get the size of the next word (will ne zero only if the sequence is finished).
+		size = strcnt(str, s);
 
 		//If we already are at the end of the word, the string is finished :
 		if (!size) {
 			break;
 		}
 
-        //Go to the end of the word.
-        str += size;
+		//Go to the end of the word.
+		str += size;
 
 		//Increment the number of words
 		nb_words++;
 
-    } while (true);
+	} while (true);
 
-    //Return the number of words.
-    return nb_words;
+	//Return the number of words.
+	return nb_words;
 
 }
 
@@ -526,71 +137,431 @@ void strgw(const char *const str, const char s, const char **const word_p, size_
 }
 
 
-//---------------------------------------- To string Privates ----------------------------------------
+//----------------------------------------------- String struct functions ----------------------------------------------
 
-#define uint_to_as(i, data)\
-    /*Initialise the size counter*/\
-    size_t data_length = 0;\
-    \
-    /*Set the current digit:*/\
-    do {\
-        /*Increment the size counter;*/\
-        data_length++;\
-        \
-        /*Set the current case of data to the current digit;*/\
-        *((data)++) = (char) ((uint8_t)((i) % (uint8_t) 10) + (uint8_t)48);\
-        \
-    } while ((i)/=10);\
-    /*While number is superior to zero;*/\
-    \
-    return data_length;
+/*
+ * length_to_size : this function converts a string length (null termination and size of char non comprised) to a
+ *  real array size;
+ */
+
+static inline size_t length_to_size(const size_t length) {
+
+	return (length + 1) * sizeof(char);
+
+}
+
+
+//Create a string of the given length
+string_t *string_create(const size_t string_length, const char *const heap_data) {
+
+	//Create the string initializer;
+	string_t init = {
+		.length = string_length,
+		.data = heap_data,
+	};
+
+	//If the allocation completed, cache a casted copy of the pointer. Compiler optimised;
+	string_t *string = kernel_malloc_copy(sizeof(string_t), &init);
+
+	//Return the created string;
+	return string;
+
+}
+
 
 
 /*
- * _uint8_to_as : this function will copy the 1 byte unsigned int in the array;
+ * string_delete : a string deletion required two operations (data and struct deletion).
+ *  This function implements both;
  */
 
-size_t string_uint8_to_as(uint8_t i, char *data) {
+void string_delete(const string_t *const string) {
 
-    //Copy digits of i in data;
-    uint_to_as(i, data);
+	//Free the string's data;
+	kernel_free((void *) string->data);
+
+	//Free the string;
+	kernel_free((void *) string);
 
 }
 
 
 /*
- * _uint16_to_as : this function will copy the 1 byte unsigned int in the array;
+ * String move : creates a new string, and moves src's data to it. Then, resets src to an empty string;
  */
 
-size_t string_uint16_to_as(uint16_t i, char *data) {
+string_t *string_move(string_t *src) {
 
-    //Copy digits of i in data;
-    uint_to_as(i, data);
+	//First, create a copycat of src, phagocyting its data;
+	string_t *clone = string_create(src->length, src->data);
+
+	//Then, allocate data in the heap for an empty string;
+	char *ptr = kernel_malloc(length_to_size(0));
+
+	//Initialise the string to empty.
+	*ptr = 0;
+
+	//Create a stack initialiser;
+	string_t init = {
+		.data = ptr,
+		.length = 0,
+	};
+
+	//Re-initialise src with new data;
+	memcpy(src, &init, sizeof(string_t));
+
+	//Return the new string;
+	return clone;
+
+}
+
+
+//---------------------------------------------- String symmetric parsing ----------------------------------------------
+
+/**
+ * uint_to_as : receives @u a pointer to an int of an unknow size, and uses the digit parser @to_digit to convert it
+ * 	to its string value, in @str;
+ *
+ * @param src : the pointer to the unsigned int;
+ * @param digit_converter : the funtion to get the current digit and update the integer; Returns '\0' when the
+ * conversion is finished;
+ * @param dst : the char array where to store the string;
+ * @param negative : if true, will insert '-' at the end of the string;
+ * @return the size of the computed string;
+ */
+
+static size_t string_parse_int(void *src, char (*digit_converter)(void *, bool *), char *dst, bool negative) {
+
+	//Initialise the size counter;
+	size_t data_length = 0;
+
+	//Cache the stop pointer;
+	bool stop = false;
+
+	//While there are digits to process :
+	do {
+
+		//Determine the current char;
+		char c = (*digit_converter)(src, &stop);
+
+		//Insert the char;
+		*(dst++) = c;
+
+		//Increment the size counter;
+		data_length++;
+
+	} while (!stop);
+
+	//Write the sign and increase the length;
+	if (negative) {
+		dst[data_length++] = '-';
+	}
+
+	//Return the data length;
+	return data_length;
+
+
+}
+
+
+//-------------------------------------------------- Digit Converters --------------------------------------------------
+
+//size converter;
+#define TO_U(size) uint##size##_t
+
+//Digit parser declarator;
+#define define_digit_converter(size)\
+static char u##size##_to_digit(void *p, bool *stop) {\
+\
+    /*Cache the int;*/\
+    TO_U(size) u = *(TO_U(size) *) p;\
+\
+    /*Cache the first char : modulate by 10 and add 48 to convert to char digits;*/\
+    char c = (uint8_t)((TO_U(size)) u % (TO_U(size)) 10) + (uint8_t) 48;\
+\
+    /*Divide u by 10;*/\
+    u /= 10;\
+\
+    /*If u is null now the conversion is done;*/\
+    *stop = !u;\
+\
+    /*Update the int;*/\
+    *(TO_U(size) *)p = u;\
+\
+    /*Return the char;*/\
+    return c;\
+\
+}
+
+define_digit_converter(8)
+define_digit_converter(16)
+define_digit_converter(32)
+define_digit_converter(64)
+
+
+//--------------------------------------------------- Symmetric copy ---------------------------------------------------
+
+/*
+ * symmetric_copy : this function turns dst to the symmetric of sym_str;
+ */
+
+void string_symmetric_copy(void *dst, const void *sym_str, size_t size) {
+
+	//Convert dst and src to a uint8_t pointer, as arithmetic on void * is illegal;
+	uint8_t *d = (uint8_t *) dst;
+	uint8_t *s = (uint8_t *) sym_str;
+
+	//Increment the dst pointer;
+	d += size - (uint8_t) 1;
+
+	//Nullify the end;
+	*(d + 1) = 0;
+
+	//For each char :
+	for (; size--;) {
+
+		//Symmetric copy from src to dst;
+		*(d--) = *(s++);
+
+	}
 
 }
 
 
 /*
- * _uint32_to_as : this function will copy the 1 byte unsigned int in the array;
+ * string_create_from_symmetric : allocates heap space for the string, and copies symmetrically the source;
+ *
+ *  Calls string_create and returns the result;
  */
 
-size_t string_uint32_to_as(uint32_t i, char *data) {
+static string_t *string_create_from_symmetric(const size_t string_length, const char *const stack_src) {
 
-    //Copy digits of i in data;
-    uint_to_as(i, data);
+	//Cache the size of the zone to allocate zone;
+	size_t size = length_to_size(string_length);
+
+	//Create a memory space in the heap for data;
+	void *ptr = kernel_malloc(size);
+
+	//Symmetric copy from stack to heap; destination is null-terminated;
+	string_symmetric_copy(ptr, stack_src, string_length);
+
+	//Built the string and return the result;
+	return string_create(string_length, ptr);
+
+}
+
+
+//--------------------------------------------- String numeric constructor ---------------------------------------------
+
+string_t *str_u8(uint8_t i) {
+
+	//Declare a temporary array;
+	char t[3];
+
+	//Parse the int with the u8 parser,
+	size_t data_length = string_parse_int(&i, &u8_to_digit, t, false);
+
+	//Create and return a string of the given length with uint data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+
+string_t *str_u16(uint16_t i) {
+
+	//Declare a temporary array;
+	char t[5];
+
+	//Parse the int with the u8 parser,
+	size_t data_length = string_parse_int(&i, &u16_to_digit, t, false);
+
+	//Create and return a string of the given length with uint data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+
+string_t *str_u32(uint32_t i) {
+
+	//Declare a temporary array;
+	char t[10];
+
+	//Parse the int with the u8 parser,
+	size_t data_length = string_parse_int(&i, &u32_to_digit, t, false);
+
+	//Create and return a string of the given length with uint data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+
+string_t *str_u64(uint64_t i) {
+
+	//Declare a temporary array;
+	char t[20];
+
+	//Parse the int with the u8 parser,
+	size_t data_length = string_parse_int(&i, &u64_to_digit, t, false);
+
+	//Create and return a string of the given length with uint data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+
+string_t *str_s8(int8_t i) {
+
+	//Determine the absolute value of i;
+	uint8_t abs = (i < 0) ? (uint8_t) -i : (uint8_t) i;
+
+	//Declare a temporary array;
+	char t[4];
+
+	//Convert the int to its string value in reverse order in t;
+	size_t data_length = string_parse_int(&abs, &u16_to_digit, t, i < 0);
+
+
+	//Create and return a string of the given length with int data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+
+string_t *str_s16(int16_t i) {
+
+	//Determine the absolute value of i;
+	uint16_t abs = (i < 0) ? (uint16_t) -i : (uint16_t) i;
+
+	//Declare a temporary array;
+	char t[6];
+
+	//Convert the int to its string value in reverse order in t;
+	size_t data_length = string_parse_int(&abs, &u16_to_digit, t, i < 0);
+
+
+	//Create and return a string of the given length with int data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+string_t *str_s32(int32_t i) {
+
+	//Determine the absolute value of i;
+	uint32_t abs = (i < 0) ? (uint32_t) -i : (uint32_t) i;
+
+	//Declare a temporary array;
+	char t[11];
+
+	//Convert the int to its string value in reverse order in t;
+	size_t data_length = string_parse_int(&abs, &u16_to_digit, t, i < 0);
+
+
+	//Create and return a string of the given length with int data;
+	return string_create_from_symmetric(data_length, t);
+
+}
+
+string_t *str_s64(int64_t i) {
+
+	//Determine the absolute value of i;
+	uint64_t abs = (i < 0) ? (uint64_t) -i : (uint64_t) i;
+
+	//Declare a temporary array;
+	char t[21];
+
+	//Convert the int to its string value in reverse order in t;
+	size_t data_length = string_parse_int(&abs, &u16_to_digit, t, i < 0);
+
+
+	//Create and return a string of the given length with int data;
+	return string_create_from_symmetric(data_length, t);
 
 }
 
 
 /*
- * _uint64_to_as : this function will copy the 1 byte unsigned int in the array;
+ * setTo : this function sets the string as the representation of the given float,
+ *  with the given resolution, ie the given number of figures after comma.
  */
 
-size_t string_uint64_to_as(uint64_t i, char *data) {
+string_t *str_f(float f, uint8_t resolution) {
 
-    //Copy digits of i in data;
-    uint_to_as(i, data);
+	//Before anything, let's determine the sign and take the absolute value;
+	bool negative;
+	float abs = ((negative = (f < 0))) ? -f : f;
+
+	//The first step will be to call a constructor for the integer part;
+	string_t *int_string;
+
+	//Declare the fractional part;
+	float frac;
+
+
+	/*
+	 * First, we will determine the optimal function to call to convert the integer part;
+	 *  bounds will depend on the sign;
+	 *
+	 * As float integer part can be signed, we will only call the signed int constructor;
+	 *
+	 * As signed numbers absolute bounds differ of 1 (ex : -128, 127), the negative bound will be treated of the next
+	 *  greater type (except for the greatest type;
+	 */
+
+	if (abs <= (float) ((uint8_t) -1 >> 1)) {
+		//1 byte integer part :
+		int_string = str_s8((int8_t) abs);
+		frac = f - (float) (int8_t) f;
+	} else if (abs < (float) ((uint16_t) -1 >> 1)) {
+		//2 bytes integer part :
+		int_string = str_s16((int16_t) abs);
+		frac = f - (float) (int16_t) f;
+	} else if (abs < (float) ((uint32_t) -1 >> 1)) {
+		//4 bytes integer part :
+		int_string = str_s32((int32_t) abs);
+		frac = f - (float) (int32_t) f;
+	} else if (abs < (float) ((uint64_t) -1 >> 1)) {
+		//4 bytes integer part :
+		int_string = str_s64((int64_t) abs);
+		frac = f - (float) (int64_t) f;
+	} else {
+
+		//Create and return a string containing ovf
+		int_string = string_create(3, "ovf");
+		return int_string;
+
+	}
+
+	//If the fractional part is negative, take its absolute value;
+	if (frac < 0)
+		frac = -frac;
+
+	//Create a temp array to contain the frac part. + 1 from the dot; no null termination required; cache a copy;
+	char frac_part[resolution + 1], *insertion_ptr = frac_part;
+
+	//Insert the dot;
+	*(insertion_ptr++) = '.';
+
+	//For each digit under the comma :
+	for (; resolution--;) {
+
+		//Multiply the fractional part by 10;
+		frac *= (float) 10;
+
+		//Get the digit;
+		char c = (char) ((uint8_t) frac + (uint8_t) 48);
+
+		frac -= (float) (uint8_t) frac;
+
+		//Insert the digit;
+		*(insertion_ptr++) = c;
+
+	}
+
+	//Create a string from the stack array;
+	//string_t *frac_string = string_create_from_stack(resolution + 1, frac_part);TODO
+
+	//For instance, return the integer part;
+	//TODO TSTRING;
+	return int_string;
 
 }
-
-#undef uint_to_as

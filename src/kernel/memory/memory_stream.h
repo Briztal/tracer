@@ -66,7 +66,7 @@ enum stream_memory_type_t {
 		STREAM_DMA_COMPATIBLE_MEMORY,
 
 	//Programmatic memory transfer can't be done with standard memory transfer functions, but a DMA operation is
-	// supported by the stream (case for some peripherals where reading a special register clears int flags);
+	// supported by the stream (case for some drivers where reading a special register clears int flags);
 		STREAM_DMA_COMPLIANT_MEMORY,
 
 	//Programmatic memory transfer can't be done with standard memory transfer functions, and DMA access is not

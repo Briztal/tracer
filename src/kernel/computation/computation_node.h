@@ -105,7 +105,7 @@ inline bool cmp_node_terminated(cmp_node_t *const node) {
 	return (*(node->terminated))(node);
 }
 
-//Shortcut for deletion; Calls the destructor;
+//Shortcut for deletion; Calls the deleter;
 inline void cnode_delete(cmp_node_t *const node) {
 	(*(node->destructor))(node);
 }

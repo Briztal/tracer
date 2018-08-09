@@ -192,7 +192,7 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 						   volatile void **, void *))
 				&kinetis_PORT_get_gpio_descriptor,
 
-			//Provide access to the destructor;
+			//Provide access to the deleter;
 			.destructor =  (void (*const)(struct port_driver *)) &kinetis_PORT_destructor,
 
 		},
@@ -393,7 +393,7 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const drive
 	uint8_t port_id = pin->port_index;
 	uint8_t bit = pin->bit_index;
 
-	//Cache the concerned port and gpio peripherals memory addresses;
+	//Cache the concerned port and gpio drivers memory addresses;
 	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
 	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
@@ -516,7 +516,7 @@ void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver
 	uint8_t port_id = pin->port_index;
 	uint8_t bit = pin->bit_index;
 
-	//Cache the concerned port and gpio peripherals memory addresses;
+	//Cache the concerned port and gpio drivers memory addresses;
 	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
 	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 

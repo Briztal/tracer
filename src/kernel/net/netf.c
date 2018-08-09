@@ -104,7 +104,7 @@ void netf2_init(
 		.list = 0,
 	};
 
-	//Create the iface initializer;
+	//Create the ifaces initializer;
 	struct netf2 iface_init = {
 
 		//Allocate and initialise all lists;
@@ -151,7 +151,7 @@ void netf2_init(
 //Destruct the interface : delete fifos and their content;TODO
 void netf2_delete(struct netf2 *iface) {
 
-	//Call the implementation's destructor;
+	//Call the implementation's deleter;
 	(*(iface->destructor))(iface);
 
 	//Create a data block pointer;

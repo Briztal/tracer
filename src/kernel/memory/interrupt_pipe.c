@@ -96,7 +96,7 @@ void interrupt_pipe_initialise(struct interrupt_pipe_t *pipe,
 		//Transfer inactive at init;
 		.transfer_active = false,
 
-		//Save the destructor;
+		//Save the deleter;
 		.destructor = destructor,
 
 	};
@@ -266,7 +266,7 @@ bool interrupt_pipe_close(struct interrupt_pipe_t *pipe) {
 //Delete the pipe's dynamic data; Called by owner stream only;
 void interrupt_pipe_destructor(struct interrupt_pipe_t *pipe) {
 
-	//No dynamic data owned, just call the implementation's destructor;
+	//No dynamic data owned, just call the implementation's deleter;
 	(*(pipe->destructor))(pipe);
 
 }

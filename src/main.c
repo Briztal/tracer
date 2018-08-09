@@ -35,6 +35,7 @@
 #include <kernel/net/framer/framer.h>
 #include <kernel/net/framer/ascii_framer.h>
 #include <kernel/debug.h>
+#include <data_structures/string/string.h>
 
 
 void kernel_init_function(void *args);
@@ -48,12 +49,12 @@ int main() {
 
 	//kernel_init_function(0);
 
-    //Never reached;
-    while (true);
+	//Never reached;
+	while (true);
 
 }
 
-bool PIT_log_flag = false;
+bool PIT_log_flag = true;
 
 
 void PIT_log() {
@@ -73,6 +74,53 @@ void PIT_log() {
 
 }
 
+
+struct netf2 *uart_init() {
+
+	struct port_driver *port = (struct port_driver *) PORT;
+
+	//Cache a pin configuration for pin C5 (LED);
+	struct kinetis_pin_configuration_t pin_configuration;
+
+	//Cache the UART TX pin;
+	struct io_desc_t pin = UART0_TX;
+
+	//Get the current configuration;
+	port_driver_get_pin_config(port, &pin, &pin_configuration);
+
+	//Update the configuration for UART
+	pin_configuration.direction = PORT_OUTPUT;
+	pin_configuration.output_mode = PORT_HIGH_DRIVE;
+	pin_configuration.slew_rate = PORT_HIGH_RATE;
+
+	//Update the configuration;
+	port_driver_configure_pin(port, &pin, &pin_configuration);
+
+	//Cache the UART RX pin;
+	pin = (struct io_desc_t) UART0_RX;
+
+	//Get the current configuration;
+	port_driver_get_pin_config(port, &pin, &pin_configuration);
+
+	//Update the configuration for UART
+	pin_configuration.direction = PORT_INPUT;
+	pin_configuration.input_mode = PORT_PULL_DOWN;
+	pin_configuration.input_filter = PORT_PASSIVE_FILTERING;
+
+	//Update the configuration;
+	port_driver_configure_pin(port, &pin, &pin_configuration);
+
+	//Create the framer;
+	struct data_framer *framer = ascii_framer_create();
+
+	//Create the config file, with the framer ownership transferred; TODO PASS THE FRAMER CREATOR, SAFER;
+	struct UART_config_t config = UART_DEFAULT_CONFIG(framer);
+
+	kinetis_UART_start(UART0, &config);
+
+	return (struct netf2 *) UART0->iface;
+
+}
 
 void PIT_test() {
 
@@ -101,7 +149,28 @@ void PIT_test() {
 
 	debug_delay(1);
 
-	while(true);
+	struct netf2 *iface = uart_init();
+
+	while (true) {
+
+		string_t *str = str_u32(timer_get_count(interface));
+
+		struct data_block block = {
+			.head = {},
+			.address = str->data,
+			.max_size = str->length,
+			.size = str->length,
+		};
+
+		list_init((struct list_head *) &block.head);
+
+		netf2_send_frame(iface, &block);
+
+		string_delete(str);
+
+		debug_delay(1);
+
+	}
 
 	//debug_led_cmp(timer_int_enabled(interface));
 
@@ -149,53 +218,41 @@ void PIT_test() {
 }
 
 
-void uart_test() {
+void uart_send_u() {
+
+	struct netf2 *iface = uart_init();
+
+	while (true) {
+
+		string_t *str = str_u32((uint32_t) 4135468579);
+
+		struct data_block block = {
+			.head = {},
+			.address = str->data,
+			.max_size = str->length,
+			.size = str->length,
+		};
+
+		list_init((struct list_head *) &block.head);
+
+		netf2_send_frame(iface, &block);
+
+		string_delete(str);
+
+		debug_delay(500);
+
+	}
+
+}
 
 
-	struct port_driver *port = (struct port_driver *)PORT;
+void uart_loopback() {
 
-	//Cache a pin configuration for pin C5 (LED);
-	struct kinetis_pin_configuration_t pin_configuration;
+	struct netf2 *iface = uart_init();
 
-	//Cache the UART TX pin;
-	struct io_desc_t pin = UART0_TX;
+	while (true) {
 
-	//Get the current configuration;
-	port_driver_get_pin_config(port, &pin, &pin_configuration);
-
-	//Update the configuration for UART
-	pin_configuration.direction = PORT_OUTPUT;
-	pin_configuration.output_mode = PORT_HIGH_DRIVE;
-	pin_configuration.slew_rate = PORT_HIGH_RATE;
-
-	//Update the configuration;
-	port_driver_configure_pin(port, &pin, &pin_configuration);
-
-	//Cache the UART RX pin;
-	pin = (struct io_desc_t) UART0_RX;
-
-	//Get the current configuration;
-	port_driver_get_pin_config(port, &pin, &pin_configuration);
-
-	//Update the configuration for UART
-	pin_configuration.direction = PORT_INPUT;
-	pin_configuration.input_mode = PORT_PULL_DOWN;
-	pin_configuration.input_filter = PORT_PASSIVE_FILTERING;
-
-	//Update the configuration;
-	port_driver_configure_pin(port, &pin, &pin_configuration);
-
-	//Create the framer;
-	struct data_framer *framer = ascii_framer_create();
-
-	//Create the config file, with the framer ownership transferred; TODO PASS THE FRAMER CREATOR, SAFER;
-	struct UART_config_t config = UART_DEFAULT_CONFIG(framer);
-
-	kinetis_UART_start(UART0, &config);
-
-	while(true) {
-
-		if (netf2_message_available((struct netf2 *)UART0->iface)) {
+		if (netf2_message_available(iface)) {
 
 			uint8_t t[100];
 
@@ -208,21 +265,21 @@ void uart_test() {
 
 			list_init((struct list_head *) &block.head);
 
-			netf2_get_frame((struct netf2 *)UART0->iface, &block);
+			netf2_get_frame(iface, &block);
 
-			netf2_send_frame((struct netf2 *)UART0->iface, &block);
+			netf2_send_frame(iface, &block);
 
 		}
 
 	}
-
 }
-
 
 void kernel_init_function(void *args) {
 
+	//uart_loopback();
+
 	PIT_test();
 
-	while(true);
+	while (true);
 
 }

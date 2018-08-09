@@ -37,8 +37,8 @@
 
 struct timer_interface {
 
-	//The maximal period that can be set for this timer configuration;
-	const float maximal_period;
+	//Update the base frequency;
+	void (*const set_base_frequency)(struct timer_interface_t *, uint32_t base_frequency;)
 
 	//Start the timer;
 	void (*const start)(struct timer_interface *);
@@ -85,7 +85,7 @@ struct timer_interface {
 
 
 	//The function to destruct the timer instance;
-	void (*destructor)(const struct timer_interface *);
+	void (*deleter)(const struct timer_interface *);
 
 };
 
@@ -107,7 +107,7 @@ static inline void timer_set_count(struct timer_interface *timer, float period) 
 }
 
 //Set the timer count value;
-static inline float timer_get_count(struct timer_interface *timer, float period) {
+static inline float timer_get_count(struct timer_interface *timer) {
 
 	return (*(timer->get_count))(timer);
 }
@@ -162,7 +162,7 @@ static inline void timer_clr_int_flag(struct timer_interface *timer) {
 }
 
 //Delete the timer interface;
-static inline void timer_destruct(struct timer_interface *timer) { (*(timer->destructor))(timer); }
+static inline void timer_destruct(struct timer_interface *timer) { (*(timer->deleter))(timer); }
 
 
 #endif

@@ -128,7 +128,7 @@ struct kinetis_PORT_driver_t {
 
 
 	/*
-	 * The kinetis PORT and GPIO are well designed. They are separate peripherals (their only interaction residing
+	 * The kinetis PORT and GPIO are well designed. They are separate drivers (their only interaction residing
 	 * 	in the signal direction, that the GPIO controls;
 	 *
 	 * 	Peripherals of the same type are mapped in constantly spaced consecutive regions of the RAM;
@@ -136,10 +136,10 @@ struct kinetis_PORT_driver_t {
 	 * 	Their locations are stored in memory descriptions, each peripheral zone being considered as a bloc;
 	 */
 
-	//The structure that references all consecutive port peripherals;
+	//The structure that references all consecutive port drivers;
 	const struct mem_desc_t gpios;
 
-	//The structure that references all consecutive gpio peripherals;
+	//The structure that references all consecutive gpio drivers;
 	const struct mem_desc_t ports;
 
 };

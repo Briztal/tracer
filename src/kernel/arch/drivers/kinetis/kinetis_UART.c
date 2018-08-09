@@ -612,7 +612,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	//Get both FIFOs sizes;
 	sizes_from_PFIFO(registers->PFIFO, &rx_fifo_size, &tx_fifo_size);
 
-	//Initialise the iface struct;
+	//Initialise the ifaces struct;
 	struct kinetis_UART_net21 interface_init = {
 
 		//Initialise the l2 adapter
@@ -665,7 +665,7 @@ void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data) {
 	//Cache the hardware struct;
 	const struct kinetis_UART_hw *hw_specs = &driver_data->hw_specs;
 
-	//Delete the interface, calling the superclass destructor;
+	//Delete the interface, calling the superclass deleter;
 	netf2_delete((struct netf2 *) driver_data->iface);
 
 	//Reset the hardware in a safe state;

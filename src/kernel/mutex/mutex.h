@@ -26,7 +26,7 @@
  * A mutex is composed of some data, and three function pointers :
  * 	- a lock function;
  * 	- an unlock function;
- * 	- a destructor function;
+ * 	- a deleter function;
  *
  */
 
@@ -44,7 +44,7 @@ typedef struct mutex_t {
 	//The mutex's duplication function;
 	struct mutex_t *(*const mutex_duplication)(const void *mutex_instance);
 
-	//The mutex's destructor;
+	//The mutex's deleter;
 	void (*const mutex_destructor)(void *mutex_instance);
 
 } mutex_t;
@@ -77,10 +77,10 @@ inline mutex_t *mutex_duplicate(const mutex_t *const mutex) {
 }
 
 
-//Shortcut for destructor;
+//Shortcut for deleter;
 inline void mutex_delete(mutex_t *mutex) {
 
-	//Call the destructor function passing instance;
+	//Call the deleter function passing instance;
 	(*(mutex->mutex_destructor))(mutex->mutex_instance);
 
 }

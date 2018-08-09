@@ -6,7 +6,7 @@
 #define TRACER_INSTANCE_H
 
 /*
- * A lot of structures contain dynamic data, that must never be owned without its destructor;
+ * A lot of structures contain dynamic data, that must never be owned without its deleter;
  */
 
 typedef struct {
@@ -14,7 +14,7 @@ typedef struct {
 	//The instance's data;
 	void *const data;
 
-	//The instance's destructor;
+	//The instance's deleter;
 	void (*const destructor)(void *data);
 
 } instance_t;
@@ -23,7 +23,7 @@ typedef struct {
 //Shortcut to delete an instance;
 inline void instance_delete(instance_t *const instance) {
 
-	//Call the destructor on data;
+	//Call the deleter on data;
 	(*(instance->destructor))(instance->data);
 
 }
