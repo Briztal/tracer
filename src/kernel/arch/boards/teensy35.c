@@ -20,6 +20,8 @@
 
 #include "teensy35.h"
 
+#include <kernel/debug.h>
+
 /*
  * --------------------------------------- PORT ---------------------------------------
  */
@@ -47,28 +49,16 @@ struct kinetis_PORT_driver_t *PORT;
  * --------------------------------------- PIT ---------------------------------------
  */
 
+/*
+ * The teensy35 comprises 4 pits;
+ */
+#define PIT_MCR_REG (void *)0x40037000
+#define PIT_REGISTERS (void *)0x40037100
+#define PIT_NB_TIMERS 4
+#define PIT_SPACING (size_t)0x10
+
 //Declare the PIT driver;
 struct kinetis_PIT_driver *PIT;
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-//TODO REFACTOR PARAMETERS
-
-#define PIT_0_REGISTERS (void *)0x40037100
-#define PIT_1_REGISTERS (void *)0x40037110
-#define PIT_2_REGISTERS (void *)0x40037120
-#define PIT_3_REGISTERS (void *)0x40037130
 
 
 /*
@@ -110,9 +100,21 @@ void teensy35_hardware_init() {
 	//Define the PORT driver;
 	PORT = kinetis_PORT_create(PORT_A_REGISTERS, GPIO_A_REGISTERS, 5, 0x1000, 0x40);
 
-	//Define PIT drivers;
-	PIT = kinetis_PIT_create(PIT_0_REGISTERS, IRQ_PIT_CH0, F_BUS);
+	//Create the int channels array;
+	uint8_t int_channels[4] = {IRQ_PIT_CH0, IRQ_PIT_CH1, IRQ_PIT_CH2, IRQ_PIT_CH3};
 
+	//Create the specs struct;
+	struct kinetis_PIT_specs PIT_specs = {
+		.MCR = PIT_MCR_REG,
+		.nb_PITs = PIT_NB_TIMERS,
+		.first_area = PIT_REGISTERS,
+		.spacing = PIT_SPACING,
+		.int_channels = int_channels,
+		.clock_frequency = F_BUS,
+	};
+
+	//Define PIT drivers;
+	PIT = (struct kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
 
 
 	//Declare the kinetis UART hardware config;

@@ -92,8 +92,12 @@ void kernel_error(const char *error_message) {
 
     //TODO THREAD MODES;
 
-	//Transmit the message;
-	(*error_message_function)(error_message);
+    if (error_message_function) {
+
+        //Transmit the message;
+        (*error_message_function)(error_message);
+
+    }
 
 	//infinite SOS sequence on debug led;
 	debug_sos();
@@ -187,7 +191,6 @@ void *kernel_malloc(size_t size) {
 
 }
 
-
 /*
  * kernel_malloc_copy : allocates a memory zone, and copies the correct amount of data from the initialiser to
  *  the allocated zone;
@@ -205,8 +208,11 @@ void *kernel_malloc_copy(const size_t size, const void *const initialiser) {
     kernel_leave_critical_section();
 
     //If the allocation failed, error;
-    if (!ptr)
+    if (!ptr) {
+
         kernel_error("kernel.c : kernel_malloc_copy : malloc failed");
+
+    }
 
     //Copy the initialiser data;
     memcpy(ptr, initialiser, size);

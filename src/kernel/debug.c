@@ -159,7 +159,7 @@ void morse_send_char(struct morse_char c) {
 	while (c.mask & (uint8_t) 1) {
 
 		//Send the morse bit;
-		morse_send_bit(c.code);
+		morse_send_bit(c.code & (uint8_t) 0x01);
 
 		//Shift code and mask;
 		c.code >>= 1;
@@ -201,9 +201,44 @@ void morse_send_word(struct morse_char *sequence, uint8_t length) {
  */
 
 #define MORSE_A {2, 3}
-#define MORSE_B {2, 16}
+#define MORSE_B {1, 15}
+#define MORSE_C {5, 15}
+#define MORSE_D {1, 7}
+#define MORSE_E {0, 1}
+#define MORSE_F {4, 15}
+#define MORSE_G {3, 7}
+#define MORSE_H {0, 15}
+#define MORSE_I {0, 3}
+#define MORSE_J {14, 15}
+#define MORSE_K {5, 7}
+#define MORSE_L {2, 15}
+#define MORSE_M {3, 3}
+#define MORSE_N {1, 3}
 #define MORSE_O {7, 7}
+#define MORSE_P {6, 15}
+#define MORSE_Q {11, 15}
+#define MORSE_R {2, 7}
 #define MORSE_S {0, 7}
+
+
+/**
+ * debug_sos : sends BREAK in morse over the debug led;
+ */
+
+void debug_break() {
+
+	//Turn off the led;
+	debug_led_low();
+
+	//Cache the SOS word;
+	struct morse_char sequence[5] = {MORSE_B, MORSE_R, MORSE_E, MORSE_A, MORSE_K};
+
+	while (1) {
+		morse_send_word(sequence, 5);
+
+	}
+
+}
 
 
 /**

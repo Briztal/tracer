@@ -22,9 +22,10 @@ struct kernel_driver {
 	 *
 	 * @param driver : the driver to initialise;
 	 * @param config : data required to initialise the driver properly;
+	 * @return true if the initialisation is a success;
 	 */
 
-	void (*const init)(struct kernel_driver *driver, void *config);
+	bool (*const init)(struct kernel_driver *driver, void *config);
 
 
 	/**
@@ -34,9 +35,10 @@ struct kernel_driver {
 	 * 	- reset the peripheral hardware;
 	 *
 	 * @param driver : the driver to de-initialise;
+	 * @return true is the de-initialisation is a success;
 	 */
 
-	void (*const exit)(struct kernel_driver *driver);
+	bool (*const exit)(struct kernel_driver *driver);
 
 
 	/**
@@ -65,8 +67,8 @@ static inline void driver_init(struct kernel_driver *driver, void *config) {
 		return;
 	}
 
-	//Initialise the driver;
-	(*(driver->init))(driver, config);
+	//Initialise the driver, set the init flag if success;
+	driver->initialised = (*(driver->init))(driver, config);
 
 }
 
@@ -78,9 +80,13 @@ static inline void driver_init(struct kernel_driver *driver, void *config) {
 
 static inline void driver_exit(struct kernel_driver *driver) {
 
-	if (driver->initialised) {
+	if (!driver->initialised) {
 		return;
 	}
+
+	//De-initialise the driver, reset the init flag if success;
+	driver->initialised = !(*(driver->exit))(driver);
+
 
 }
 

@@ -39,7 +39,7 @@ struct timer_interface {
 
 
 	//Update the base frequency;
-	void (*const set_base_frequency)(struct timer_interface_t *, uint32_t base_frequency);
+	void (*const set_base_frequency)(struct timer_interface *, uint32_t base_frequency);
 
 
 	//Start the timer;
@@ -108,7 +108,7 @@ static inline void timer_set_base_frequency(struct timer_interface *timer, uint3
 static inline void timer_start(struct timer_interface *timer) { (*(timer->start))(timer); }
 
 //Start the timer;
-static inline void timer_stop(struct timer_interface *timer) { (*(timer->start))(timer); }
+static inline void timer_stop(struct timer_interface *timer) { (*(timer->stop))(timer); }
 
 //Is the timer started;
 static inline bool timer_started(struct timer_interface *timer) { return (*(timer->started))(timer); }
@@ -130,12 +130,11 @@ static inline float timer_get_count(struct timer_interface *timer) {
 //Set the timer reload value;
 static inline void timer_set_ovf_value(struct timer_interface *timer, float period) {
 
-
 	(*(timer->set_ovf_value))(timer, period);
 }
 
 //Set the timer count value;
-static inline float timer_get_ovf_value(struct timer_interface *timer, float period) {
+static inline float timer_get_ovf_value(struct timer_interface *timer) {
 
 	return (*(timer->get_ovf_value))(timer);
 }

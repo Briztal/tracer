@@ -64,6 +64,9 @@ void debug_led_count(size_t count);
 //Blink at high frequency if c != 0, or at low frequency if c == 0;
 void debug_led_cmp(size_t c);
 
+//Execute an BREAK error sequence indefinitely;
+void debug_break();
+
 //Execute an SOS error sequence indefinitely;
 void debug_sos();
 

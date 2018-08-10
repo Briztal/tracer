@@ -10,6 +10,7 @@
 #include <kernel/if/timer.h>
 
 #include <kernel/debug.h>
+#include <string.h>
 
 
 //--------------------------------------------------- Driver structs ---------------------------------------------------
@@ -41,10 +42,10 @@ struct __attribute__ ((packed)) kinetis_PIT_registers {
 //--------------------------------------------------- Driver methods ---------------------------------------------------
 
 //Initialise the driver, providing the configuration;
-void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused);
+bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused);
 
 //De-initialise the driver. Timer interface will be deleted;
-void kinetis_PIT_exit(struct kinetis_PIT_driver *driver);
+bool kinetis_PIT_exit(struct kinetis_PIT_driver *driver);
 
 //Delete a kinetis PIT driver;
 void kinetis_PIT_delete(struct kinetis_PIT_driver *driver);
@@ -62,7 +63,13 @@ struct kinetis_PIT_timer_interface {
 	struct timer_interface iface;
 
 	//The registers zone reference;
-	struct kinetis_PIT_registers *const registers;
+	volatile struct kinetis_PIT_registers *const registers;
+
+	//The clock frequency (Hz);
+	const uint32_t clock_frequency;
+
+	//The reload interrupt channel;
+	const uint8_t reload_int_channel;
 
 	//The ratio tics/period;
 	float period_to_tics;
@@ -70,11 +77,6 @@ struct kinetis_PIT_timer_interface {
 	//The maximal period;
 	float max_period;
 
-	//The clock frequency (Hz);
-	const uint32_t clock_frequency;
-
-	//The reload interrupt channel;
-	const uint8_t reload_int_channel;
 
 };
 
@@ -151,14 +153,14 @@ static float kinetis_PIT_get_count(struct kinetis_PIT_timer_interface *iface) {
 
 
 //Update the reload value;
-static void kinetis_PIT_set_reload(struct kinetis_PIT_timer_interface *iface, float period_count) {
+static void kinetis_PIT_set_ovf(struct kinetis_PIT_timer_interface *iface, float period_count) {
 	if (period_count < iface->max_period) {
 		iface->registers->LDVAL = (uint32_t) (iface->period_to_tics * period_count);
 	}
 }
 
 //Get the reload value;
-static float kinetis_PIT_get_reload(struct kinetis_PIT_timer_interface *iface) {
+static float kinetis_PIT_get_ovf(struct kinetis_PIT_timer_interface *iface) {
 	return (((float) iface->registers->LDVAL) / iface->period_to_tics);
 }
 
@@ -255,9 +257,6 @@ struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 	//Enable PIT clock gating;
 	SIM_SCGC6 |= SIM_SCGC6_PIT;
 
-	//Enable clocks for all PITs;
-	PIT_MCR = 0x00;
-
 	//Cache the number of PITs;
 	uint8_t nb_PITs = specs->nb_PITs;
 
@@ -266,19 +265,19 @@ struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 
 
 	//Allocate and initialise the interfaces array;
-	struct timer_interface ** ifaces = kernel_malloc(sizeof(struct timer_interface *));
+	struct timer_interface ** ifaces = kernel_malloc(nb_PITs * sizeof(struct timer_interface *));
 
 	//Reset all pointers;
-	for (uint8_t PIT_id = nb_PITs; PIT_id--;) {ifaces[PIT_id] = 0;}
-
+	memset(ifaces, 0, nb_PITs * sizeof(struct timer_interface *));
 
 	//Create the driver initializer;
 	struct kinetis_PIT_driver driver_init = {
 
 		//Transmit driver functions;
 		.driver = {
-			.init = (void (*)(struct kernel_driver *, void *)) kinetis_PIT_init,
-			.exit = (void (*)(struct kernel_driver *)) kinetis_PIT_exit,
+			.initialised = false,
+			.init = (bool (*)(struct kernel_driver *, void *)) kinetis_PIT_init,
+			.exit = (bool (*)(struct kernel_driver *)) kinetis_PIT_exit,
 			.delete = (void (*)(struct kernel_driver *)) kinetis_PIT_delete,
 		},
 
@@ -296,6 +295,7 @@ struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 		.ifaces = ifaces,
 
 	};
+
 
 	//Allocate, initialise and return the driver;
 	return kernel_malloc_copy(sizeof(struct kinetis_PIT_driver), &driver_init);
@@ -315,8 +315,7 @@ void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
 	SIM_SCGC6 &= ~SIM_SCGC6_PIT;
 
 	//Disable clocks for all PITs;
-	PIT_MCR = 0x02;
-
+	*(driver->hw_specs.MCR) = 0x02;
 
 	//Eventually stop the driver;
 	kinetis_PIT_exit(driver);
@@ -342,18 +341,12 @@ void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
  * @param unused : used for config file, not necessary here;
  */
 
-void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
-
-	//If the driver is already started :
-	if (driver->ifaces) {
-
-		//Error, miss-use;
-		kernel_error("kinetis_PIT.c : kinetis_PIT_start : attempted to start the driver twice");
-
-	}
+bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 
 	//Create the timer interface initializer;
 	struct timer_interface iface_init = {
+
+		.set_base_frequency = (void (*)(struct timer_interface *, uint32_t)) &kinetis_PIT_set_base_frequency,
 
 		.start = (void (*)(struct timer_interface *)) &kinetis_PIT_enable,
 		.stop = (void (*)(struct timer_interface *)) &kinetis_PIT_disable,
@@ -362,8 +355,8 @@ void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 		.set_count = (void (*)(struct timer_interface *, float)) &kinetis_PIT_set_count,
 		.get_count = (float (*)(struct timer_interface *)) &kinetis_PIT_get_count,
 
-		.set_ovf_value = (void (*)(struct timer_interface *, float)) &kinetis_PIT_set_reload,
-		.get_ovf_value = (float (*)(struct timer_interface *)) &kinetis_PIT_get_reload,
+		.set_ovf_value = (void (*)(struct timer_interface *, float)) &kinetis_PIT_set_ovf,
+		.get_ovf_value = (float (*)(struct timer_interface *)) &kinetis_PIT_get_ovf,
 
 		.enable_int = (void (*)(struct timer_interface *)) &kinetis_PIT_enable_int,
 		.disable_int = (void (*)(struct timer_interface *)) &kinetis_PIT_disable_int,
@@ -380,16 +373,14 @@ void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 	//Cache the specs address;
 	const struct kinetis_PIT_specs *const specs = &driver->hw_specs;
 
-	//Initialise the clocking;
-	*(specs->MCR) = 0;
-
-
 	//Cache the first registers area address;
 	volatile uint8_t *const first_registers_area = specs->first_area;
 
 	//Cache the register area spacing;
 	const size_t area_spacing = specs->spacing;
 
+	//Enable Clocking for all timers;
+	*(specs->MCR) = 0x00;
 
 	/*
 	 * Initialise all timers;
@@ -416,21 +407,24 @@ void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 			//Copy the reload interrupt chanel;
 			.reload_int_channel = (specs->int_channels)[PIT_id],
 
+			//Save the clock frequency;
+			.clock_frequency = specs->clock_frequency,
+
 		};
 
 
 		//Allocate, initialise and cache the timer interface;
-		struct kinetis_PIT_timer_interface *iface =
-			kernel_malloc_copy(sizeof(struct kinetis_PIT_timer_interface), &iface_init);
+		struct timer_interface *iface =
+			kernel_malloc_copy(sizeof(struct kinetis_PIT_timer_interface), &PIT_init);
 
 
 		/*
 		 * Initialise the PIT;
 		 */
 
-		//Initialise the timer to 1KHz;
-		timer_init((struct timer_interface *) iface, 1000);
 
+		//Initialise the timer to 1KHz;
+		timer_init(iface, 1000);
 
 		//Set the interrupt priority;
 		core_IC_set_priority(int_channel, DRIVER_STARUS_INTERRUPT_PRIORITY);
@@ -440,9 +434,12 @@ void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 
 
 		//Register the timer interface;
-		driver->ifaces[PIT_id] = (struct timer_interface *) iface;
+		driver->ifaces[PIT_id] = iface;
 
 	}
+
+	//Complete, fail-safe;
+	return true;
 
 }
 
@@ -456,7 +453,11 @@ void kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
  * @param driver : the driver to de-init;
  */
 
-void kinetis_PIT_exit(struct kinetis_PIT_driver *driver) {
+bool kinetis_PIT_exit(struct kinetis_PIT_driver *driver) {
+
+
+	//Enable Clocking for all timers;
+	*(driver->hw_specs.MCR) = 0x02;
 
 	//For each interface :
 	for (uint8_t PIT_id = 0; PIT_id--;) {
@@ -474,5 +475,8 @@ void kinetis_PIT_exit(struct kinetis_PIT_driver *driver) {
 		(driver->ifaces)[PIT_id] = 0;
 
 	}
+
+	//Complete, fail-safe;
+	return true;
 
 }

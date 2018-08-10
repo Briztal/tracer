@@ -122,34 +122,45 @@ struct netf2 *uart_init() {
 
 }
 
+
+
 void PIT_test() {
 
-	kinetis_PIT_start(PIT_0, &config);
 
-	struct timer_interface *interface = PIT_0->iface;
+	uint32_t t;
+
+
+	driver_init((struct kernel_driver *) PIT, &t);
+
+	struct timer_interface *interface = PIT->ifaces[0];
+
+	struct kinetis_PIT_timer_interface *ifa = (struct kinetis_PIT_timer_interface *) interface;
+
+	//debug_led_cmp((size_t)ifa->registers != 0x40037100);
 
 	//Set the overflow value to 100ms;
 	timer_set_ovf_value(interface, 1000);
 
-	timer_set_count(interface, 1000);
-
 	//Update the handler;
 	timer_update_handler(interface, &PIT_log);
 
-	//Enable the interrupt and the timer;
-	timer_enable_int(interface);
-
-	debug_delay(1);
-
+	//Start the timer;
 	timer_start(interface);
 
-	debug_delay(1);
+	//Enable the interrupt
+	timer_enable_int(interface);
+
+	//timer_stop(interface);
+
 
 	struct netf2 *iface = uart_init();
 
+
 	while (true) {
 
+		//string_t *str = str_u32(timer_started(interface));
 		string_t *str = str_u32(timer_get_count(interface));
+		//string_t *str = str_u32(timer_get_ovf_value(interface));
 
 		struct data_block block = {
 			.head = {},
@@ -164,7 +175,7 @@ void PIT_test() {
 
 		string_delete(str);
 
-		debug_delay(1);
+		debug_delay(100);
 
 	}
 
@@ -185,27 +196,6 @@ void PIT_test() {
 	//TODO CODER L'ENVOI DE NOMBRES, RELEVER LES VALEURS NUMERIQUES EN TEMPS REEL
 	//TODO CODER L'ENVOI DE NOMBRES, RELEVER LES VALEURS NUMERIQUES EN TEMPS REEL
 	//TODO CODER L'ENVOI DE NOMBRES, RELEVER LES VALEURS NUMERIQUES EN TEMPS REEL
-
-
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
-	//TODO LE PIT MET DU TEMPS A FAIRE LE PREMIER INTERRUPT. VOIR POURQUOI
 
 	//TODO TESTER TOUTES LES FONCTIONS DE LA LIB TIMER;
 
