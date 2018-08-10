@@ -20,7 +20,7 @@
 
 
 
-#include "arm_cortex_m4f.h"
+#include "cm4f_startup.h"
 
 #include <kernel/systick.h>
 
@@ -234,7 +234,7 @@ void core_preemption() {
  * Notice :
  *
  *
- *  ARM Cortex M4 Stack Frame :
+ *  arm Cortex M4 Stack Frame :
  *
  *      ----------- <- Pre IRQ
  *      XPSR

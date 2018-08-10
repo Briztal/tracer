@@ -22,7 +22,7 @@
 #ifndef TRACER_ARCH_TEENSY35_H
 #define TRACER_ARCH_TEENSY35_H
 
-#include "kernel/arch/processors/arm_cortex_m4f.h"
+#include "kernel/arch/processors/ARM/cortex_m4f/cm4f_startup.h"
 
 
 /*

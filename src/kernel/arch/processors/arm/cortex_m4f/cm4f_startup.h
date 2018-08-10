@@ -298,7 +298,7 @@ inline void core_IC_clear_pending(const uint8_t int_channel) {
 
 
 /*
- * core_IC_set_priority : sets the priority of the required interrupt to the povided;
+ * core_IC_set_priority : sets the priority of the required interrupt to the provided;
  */
 
 inline void core_IC_set_priority(const uint8_t int_channel, uint8_t priority) {

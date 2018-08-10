@@ -32,7 +32,7 @@
 #include <kernel/scheduler/scheduler.h>
 #include <data_structures/containers/non_concurrent/llist.h>
 
-#include <kernel/arch/processors/arm_cortex_m4f.h>
+#include <kernel/arch/processors/ARM/cortex_m4f/cm4f_startup.h>
 #include <kernel/scheduler/tasks/sequences.h>
 #include <kernel/scheduler/tasks/service.h>
 
