@@ -1,7 +1,7 @@
 
 #ifdef channel
-channel(0)
-channel(1)
+//Channel 0 is the initial stack pointer;
+//Channel 1 is the program entry point, not reconfigurable;
 channel(2)
 channel(3)
 channel(4)
@@ -240,4 +240,20 @@ channel(236)
 channel(237)
 channel(238)
 channel(239)
+channel(240)
+channel(241)
+channel(242)
+channel(243)
+channel(244)
+channel(245)
+channel(246)
+channel(247)
+channel(248)
+channel(249)
+channel(250)
+channel(251)
+channel(252)
+channel(253)
+channel(254)
+channel(255)
 #endif

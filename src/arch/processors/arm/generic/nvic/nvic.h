@@ -6,7 +6,6 @@
 #define TRACER_NVIC_H
 
 #include <stdint.h>
-#include <kinetis.h>
 
 
 /*
@@ -58,34 +57,48 @@
  * This enum presents all system interrupts that can be parametrised;
  */
 
-enum nvic_system_interrupt {
+enum nvic_system_channel {
 
-	//The Non Maskable Interrupt;
-	NVIC_NMI,
+	//Channel 2 : The Non Maskable Interrupt;
+	NVIC_NMI = 2,
 
-	//The Hardware Fault Interrupt;
-	NVIC_HARD_FAULT,
+	//Channel 3 : The Hardware Fault Interrupt;
+	NVIC_HARD_FAULT = 3,
 
-	//The Memory Fault Interrupt;
-	NVIC_MEM_FAULT,
+	//Channel 4 : The Memory Fault Interrupt;
+	NVIC_MEM_FAULT = 4,
 
-	//The Bus Fault Interrupt;
-	NVIC_BUS_FAULT,
+	//Channel 5 : The Bus Fault Interrupt;
+	NVIC_BUS_FAULT = 5,
 
-	//The Usage Fault Interrupt;
-	NVIC_USAGE_FAULT,
+	//Channel 6 : The Usage Fault Interrupt;
+	NVIC_USAGE_FAULT = 6,
 
-	//The Supervisor Call Interrupt;
-	NVIC_SVC,
+	//Channel 11 : The Supervisor Call Interrupt;
+	NVIC_SVC = 11,
 
-	//The PensSV Interrupt;
-	NVIC_PENDSV,
+	//Channel 14 : The PensSV Interrupt;
+	NVIC_PENDSV = 14,
 
-	//The Systick Interrupt;
-	NVIC_SYSTICK
+	//Channel 15 : The Systick Interrupt;
+	NVIC_SYSTICK = 15,
 
 };
 
+//------------------------------------- Interrupts -------------------------------------
+
+/*
+ * Priority levels : these are the standard interrupt priorities for drivers;
+ *
+ * Cortex-M4: 0,16,32,48,64,80,96,112,128,144,160,176,192,208,224,240
+ */
+
+
+//The standard priority for status interrupt;
+#define DRIVER_STARUS_INTERRUPT_PRIORITY 32
+
+//The standard priority for error interrupt;
+#define DRIVER_ERROR_INTERRUPT_PRIORITY 16
 
 //--------------------------------------------- Global interrupts settings ---------------------------------------------
 
@@ -95,7 +108,7 @@ enum nvic_system_interrupt {
  */
 
 static inline void nvic_enable_interrupts() {
-	__asm__ __volatile__("cpsie i");
+	__asm__ volatile("cpsie i":::"memory");
 }
 
 
@@ -104,14 +117,14 @@ static inline void nvic_enable_interrupts() {
  */
 
 static inline void nvic_disable_interrupts() {
-	__asm__ __volatile__("cpsid i");
+	__asm__ volatile("cpsid i":::"memory");
 }
 
 
 //-------------------------------------------------- Interrupts enable -------------------------------------------------
 
 //Enable a system interrupt;
-void nvic_enable_system_interrupt(enum nvic_system_interrupt channel);
+void nvic_enable_system_interrupt(enum nvic_system_channel channel);
 
 
 /**
@@ -127,7 +140,7 @@ static inline void nvic_enable_interrupt(uint8_t channel) {
 //-------------------------------------------------- Interrupts disable ------------------------------------------------
 
 //Disable a system interrupt;
-void nvic_disable_system_interrupt(enum nvic_system_interrupt channel);
+void nvic_disable_system_interrupt(enum nvic_system_channel channel);
 
 
 /**
@@ -143,7 +156,7 @@ static inline void nvic_disable_interrupt(uint8_t channel){
 //------------------------------------------------ Set interrupt pending -----------------------------------------------
 
 //Set a system interrupt pending;
-void nvic_set_system_interrupt_pending(enum nvic_system_interrupt channel);
+void nvic_set_system_interrupt_pending(enum nvic_system_channel channel);
 
 
 /**
@@ -159,7 +172,7 @@ static inline void nvic_set_interrupt_pending(uint8_t channel) {
 //----------------------------------------------- Clear interrupt pending ----------------------------------------------
 
 //Clear a system interrupt's pending state;
-void nvic_clear_system_interrupt_pending(enum nvic_system_interrupt channel);
+void nvic_clear_system_interrupt_pending(enum nvic_system_channel channel);
 
 
 /**
@@ -177,7 +190,7 @@ static inline void nvic_clear_interrupt_pending(uint8_t channel) {
 //------------------------------------------ System interrupts priority update -----------------------------------------
 
 //Update the nmi handler;
-void nvic_set_system_interrupt_priority(enum nvic_system_interrupt channel, uint8_t priority);
+void nvic_set_system_interrupt_priority(enum nvic_system_channel channel, uint8_t priority);
 
 
 /**
@@ -195,7 +208,7 @@ static inline void nvic_set_interrupt_priority(uint8_t channel, uint8_t priority
 //--------------------------------------------------- Handler update ---------------------------------------------------
 
 //Update a system interrupt handler;
-void nvic_set_system_interrupt_handler(enum nvic_system_interrupt channel, void (*handler)());
+void nvic_set_system_interrupt_handler(enum nvic_system_channel channel, void (*handler)());
 
 //Update a non-system interrupt handler;
 void nvic_set_interrupt_handler(uint8_t channel, void (*handler)());
@@ -210,7 +223,7 @@ void nvic_set_interrupt_handler(uint8_t channel, void (*handler)());
  * @param channel : the interrupt channel to update;
  */
 
-static inline void nvic_reset_system_interrupt_handler(enum nvic_system_interrupt channel) {
+static inline void nvic_reset_system_interrupt_handler(enum nvic_system_channel channel) {
 	nvic_set_system_interrupt_handler(channel, 0);
 }
 
