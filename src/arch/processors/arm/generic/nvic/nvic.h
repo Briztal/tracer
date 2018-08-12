@@ -6,6 +6,7 @@
 #define TRACER_NVIC_H
 
 #include <stdint.h>
+#include <arch/processors/arm/arm_vx/arm_v7.h>
 
 
 /*
@@ -124,7 +125,7 @@ static inline void nvic_disable_interrupts() {
 //-------------------------------------------------- Interrupts enable -------------------------------------------------
 
 //Enable a system interrupt;
-void nvic_enable_system_interrupt(enum nvic_system_channel channel);
+void nvic_enable_system_exception(enum nvic_system_channel channel);
 
 
 /**
@@ -133,14 +134,14 @@ void nvic_enable_system_interrupt(enum nvic_system_channel channel);
  */
 
 static inline void nvic_enable_interrupt(uint8_t channel) {
-	NVIC_ENABLE_IRQ(channel);
+	armv7_nvic_enable_interrupt(channel);
 }
 
 
 //-------------------------------------------------- Interrupts disable ------------------------------------------------
 
 //Disable a system interrupt;
-void nvic_disable_system_interrupt(enum nvic_system_channel channel);
+void nvic_disable_system_exception(enum nvic_system_channel channel);
 
 
 /**
@@ -149,14 +150,14 @@ void nvic_disable_system_interrupt(enum nvic_system_channel channel);
  */
 
 static inline void nvic_disable_interrupt(uint8_t channel){
-	NVIC_DISABLE_IRQ(channel);
+	armv7_nvic_disable_interrupt(channel);
 }
 
 
 //------------------------------------------------ Set interrupt pending -----------------------------------------------
 
 //Set a system interrupt pending;
-void nvic_set_system_interrupt_pending(enum nvic_system_channel channel);
+void nvic_set_system_exception_pending(enum nvic_system_channel channel);
 
 
 /**
@@ -165,14 +166,14 @@ void nvic_set_system_interrupt_pending(enum nvic_system_channel channel);
  */
 
 static inline void nvic_set_interrupt_pending(uint8_t channel) {
-	NVIC_SET_PENDING(channel);
+	armv7_nvic_set_interrupt_pending(channel);
 }
 
 
 //----------------------------------------------- Clear interrupt pending ----------------------------------------------
 
 //Clear a system interrupt's pending state;
-void nvic_clear_system_interrupt_pending(enum nvic_system_channel channel);
+void nvic_clear_system_exception_pending(enum nvic_system_channel channel);
 
 
 /**
@@ -181,7 +182,7 @@ void nvic_clear_system_interrupt_pending(enum nvic_system_channel channel);
  */
 
 static inline void nvic_clear_interrupt_pending(uint8_t channel) {
-	NVIC_CLEAR_PENDING(channel);
+	armv7_nvic_clear_interrupt_pending(channel);
 }
 
 
@@ -189,8 +190,34 @@ static inline void nvic_clear_interrupt_pending(uint8_t channel) {
 
 //------------------------------------------ System interrupts priority update -----------------------------------------
 
-//Update the nmi handler;
-void nvic_set_system_interrupt_priority(enum nvic_system_channel channel, uint8_t priority);
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+//Update the nmi handler;//TODO CORRECT COOMMENTS
+
+
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+//Update the nmi handler;//TODO SYSTEM INTERRUPT -> EXCEPTION
+void nvic_set_system_exception_priority(enum nvic_system_channel channel, uint8_t priority);
 
 
 /**
@@ -201,30 +228,48 @@ void nvic_set_system_interrupt_priority(enum nvic_system_channel channel, uint8_
  */
 
 static inline void nvic_set_interrupt_priority(uint8_t channel, uint8_t priority) {
-	NVIC_SET_PRIORITY(channel, priority);
+	armv7_nvic_set_priority(channel, priority);
+}
+
+
+//------------------------------------------ System interrupts priority query -----------------------------------------
+
+//Get a system exception priotity;
+void nvic_get_system_exception_priority(enum nvic_system_channel channel, uint8_t priority);
+
+
+/**
+ * nvic_get_interrupt_priority : applies the provided priority to the required non-system interupt channel;
+ *
+ * @param channel : the channel to apply the priority;
+ * @param priority : the priority to apply
+ */
+
+static inline uint8_t nvic_get_interrupt_priority(uint8_t channel, uint8_t priority) {
+	return armv7_nvic_get_priority(channel);
 }
 
 
 //--------------------------------------------------- Handler update ---------------------------------------------------
 
 //Update a system interrupt handler;
-void nvic_set_system_interrupt_handler(enum nvic_system_channel channel, void (*handler)());
+void nvic_set_system_exception_handler(enum nvic_system_channel channel, void (*handler)());
 
 //Update a non-system interrupt handler;
 void nvic_set_interrupt_handler(uint8_t channel, void (*handler)());
 
 
-//---------------------------------------------------- Handler rest ----------------------------------------------------
+//---------------------------------------------------- Handler reset ----------------------------------------------------
 
 /**
- * nvic_reset_system_interrupt_handler : resets the handler of the required system interrupt to 0, isr will return
+ * nvic_reset_system_exception_handler : resets the handler of the required system interrupt to 0, isr will return
  * 	immediately;
  *
  * @param channel : the interrupt channel to update;
  */
 
-static inline void nvic_reset_system_interrupt_handler(enum nvic_system_channel channel) {
-	nvic_set_system_interrupt_handler(channel, 0);
+static inline void nvic_reset_system_exception_handler(enum nvic_system_channel channel) {
+	nvic_set_system_exception_handler(channel, 0);
 }
 
 
@@ -236,6 +281,8 @@ static inline void nvic_reset_system_interrupt_handler(enum nvic_system_channel 
 static inline void nvic_reset_interrupt_handler(uint8_t channel) {
 	nvic_set_interrupt_handler(channel, 0);
 }
+
+
 
 
 #endif //TRACER_NVIC_H

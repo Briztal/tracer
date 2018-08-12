@@ -23,8 +23,21 @@
 
 #define ARMV7_ICTR ((volatile uint32_t *) 0xE000E004)
 
-//TODO PAGE B3-32
+#define ARMV7_ICTR_INTLINESNUM_MASK ((uint32_t) 0x0F)
 
+
+/**
+ * armv7_get_nb_interrupts : manipulates ICTR to determine the number of interrupts supported by the microcontroller;
+ *
+ * 	@return the maximal number of interrupt channels of the microcontroller;
+ */
+
+static inline uint16_t armv7_get_nb_interrupts() {
+
+	//Cache the 4 LSB of ICTR and multiply by 32, by shifting left 5 times;
+	return (uint16_t) ((uint16_t)(*ARMV7_ICTR) & (uint16_t) ARMV7_ICTR_INTLINESNUM_MASK) << 5;
+
+}
 
 
 //----------------- ACTLR - RW : Auxiliary Control Register -----------------
@@ -567,7 +580,7 @@ static inline bool armv7_mem_fault_active() {
 
 #define ARMV7_STIR ((volatile uint32_t *) 0xE000EF00)
 
-#define ARMV7_STIR_INTID ((uint32_t)0x1FF);
+#define ARMV7_STIR_INTID ((uint32_t)0x1FF)
 
 
 /**
@@ -580,7 +593,13 @@ static inline bool armv7_mem_fault_active() {
 
 static inline void armv7_software_trigger_interrupt(uint16_t interrupt_number) {
 
-	*ARMV7_STIR = (uint32_t)interrupt_number & ARMV7_STIR_INTID;
+	//If the required interrutp number is greater than the id mask, do nothing;
+	if (interrupt_number > ARMV7_STIR_INTID) {
+		return;
+	}
+
+	//Trigger the required software interrupt;
+	*ARMV7_STIR = (uint32_t)interrupt_number;
 
 }
 
@@ -615,6 +634,177 @@ static inline void armv7_software_trigger_interrupt(uint16_t interrupt_number) {
  * ------------------------------------------------------ Systick ------------------------------------------------------
  */
 
+
+//----------------- CSR - RW : Systick Control and Status Register -----------------
+
+#define ARMV7_SYST_CSR ((volatile uint32_t *) 0xE000E010)
+
+#define ARMV7_SYST_CSR_COUNTFLAG ((uint32_t) (1 << 16))
+#define ARMV7_SYST_CSR_CLKSOURCE ((uint32_t) (1 << 2))
+#define ARMV7_SYST_CSR_TICKINT ((uint32_t) (1 << 1))
+#define ARMV7_SYST_CSR_ENABLE ((uint32_t) (1 << 0))
+
+
+//----------------- RVR - RW : Systick Reload Value Register -----------------
+
+#define ARMV7_SYST_RVR ((volatile uint32_t *) 0xE000E014)
+
+#define ARMV7_SYST_RVR_MAX ((uint32_t ) 0x00FFFFFF)
+
+
+//----------------- CVR - RW : Systick Current Value Register -----------------
+
+#define ARMV7_SYST_CVR 	((volatile uint32_t *) 0xE000E018)
+
+
+//----------------- CVR - RO : Systick Calibration Register -----------------
+
+#define ARMV7_SYST_CALIB ((volatile uint32_t *) 0xE000E01C)
+
+
+#define ARMV7_SYST_CALIB_NOREF ((uint32_t) (1 << 31))
+#define ARMV7_SYST_CALIB_SKEW  ((uint32_t) (1 << 30))
+#define ARMV7_SYST_CALIB_TENMS_MASK ((uint32_t) 0x00FFFFFF)
+
+
 //TODO;
+
+
+/*
+ * ------------------------------------------------------ NVIC ------------------------------------------------------
+ */
+
+//----------------- ISER - RW : Interrupt Set Enable Registers. 16 4-byte long registers -----------------
+
+#define ARMV7_NVIC_ISER ((volatile uint32_t *) 0xE000E100)
+
+
+/*
+ * armv7_nvic_enable_interrupt : enables the required interrupt channel;
+ */
+
+static inline void armv7_nvic_enable_interrupt(uint16_t interrupt_channel) {
+
+	//Cache the address of the related ISER register by dividing the interrupt channel by 32;
+	volatile uint32_t *ISER_register = ARMV7_NVIC_ISER + (interrupt_channel >> 5);
+
+	//Determine the bit mask using the remain of the interrupt channel by 32
+	*ISER_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
+
+}
+
+
+//----------------- ICER - RW : Interrupt Clear Enable Registers. 16 4-byte long registers -----------------
+
+#define ARMV7_NVIC_ICER ((volatile uint32_t *) 0xE000E180)
+
+
+/*
+ * armv7_nvic_disable_interrupt : disables the required interrupt channel;
+ */
+
+static inline void armv7_nvic_disable_interrupt(uint16_t interrupt_channel) {
+
+	//Cache the address of the related ICER register by dividing the interrupt channel by 32;
+	volatile uint32_t *ICER_register = ARMV7_NVIC_ICER + (interrupt_channel >> 5);
+
+	//Determine the bit mask using the remain of the interrupt channel by 32
+	*ICER_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
+
+}
+
+
+//----------------- ISPR - RW : Interrupt Set Pending Registers. 16 4-byte long registers -----------------
+
+#define ARMV7_NVIC_ISPR ((volatile uint32_t *) 0xE000E200)
+
+
+/*
+ * armv7_nvic_set_interrupt_pending : disables the required interrupt channel;
+ */
+
+static inline void armv7_nvic_set_interrupt_pending(uint16_t interrupt_channel) {
+
+	//Cache the address of the related ISPR register by dividing the interrupt channel by 32;
+	volatile uint32_t *ISPR_register = ARMV7_NVIC_ISPR + (interrupt_channel >> 5);
+
+	//Determine the bit mask using the remain of the interrupt channel by 32
+	*ISPR_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
+
+}
+
+
+//----------------- ISPR - RW : Interrupt Clear Pending Registers. 16 4-byte long registers -----------------
+
+#define ARMV7_NVIC_ICPR ((volatile uint32_t *) 0xE000E280)
+
+
+/*
+ * armv7_nvic_clear_interrupt_pending : disables the required interrupt channel;
+ */
+
+static inline void armv7_nvic_clear_interrupt_pending(uint16_t interrupt_channel) {
+
+	//Cache the address of the related ICPR register by dividing the interrupt channel by 32;
+	volatile uint32_t *ICPR_register = ARMV7_NVIC_ICPR + (interrupt_channel >> 5);
+
+	//Determine the bit mask using the remain of the interrupt channel by 32
+	*ICPR_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
+
+}
+
+//----------------- ISPR - RW : Interrupt Active Bit Registers. 16 4-byte long registers -----------------
+
+#define ARMV7_NVIC_IABR ((volatile uint32_t *) 0xE000E300)
+
+
+/*
+ * armv7_nvic_is_interrupt_enabled : asserts if the provided interrupt channel is enabled;
+ */
+
+static inline bool armv7_nvic_is_interrupt_enabled(uint16_t interrupt_channel) {
+
+	//Cache the address of the related ICPR register by dividing the interrupt channel by 32;
+	volatile uint32_t *IABR_register = ARMV7_NVIC_IABR + (interrupt_channel >> 5);
+
+	//Determine the bit mask using the remain of the interrupt channel by 32, assert if bit is set;
+	return (bool) (*IABR_register & ((uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F)));
+
+}
+
+
+//----------------- IPR - RW : Interrupt Priority Registers. 16 4-byte long registers -----------------
+
+#define ARMV7_NVIC_IPR ((volatile uint32_t *) 0xE000E400)
+
+/**
+ * armv7_set_priority : updates the required interrupt channel priority;
+ *
+ * @param interrupt_channel : the channel to update the priority of;
+ * @param priority : the new priority;
+ */
+
+static inline void armv7_nvic_set_priority(uint16_t interrupt_channel, uint8_t priority) {
+
+	//Determine the address of the byte to update, and save the priority in it;
+	*((uint8_t *)ARMV7_NVIC_IPR + interrupt_channel) = priority;
+
+}
+
+
+/**
+ * armv7_get_priority : determines the priority of  the required interrupt channel;
+ *
+ * @param interrupt_channel : the channel to get the priority of;
+ */
+
+static inline uint8_t armv7_nvic_get_priority(uint16_t interrupt_channel) {
+
+	//Determine the address of the byte to update, and save the priority in it;
+	return *((uint8_t *)ARMV7_NVIC_IPR + interrupt_channel);
+
+}
+
+
 
 #endif //TRACER_ARM_V7_H
