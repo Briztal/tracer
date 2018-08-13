@@ -131,7 +131,7 @@ static inline void armv7_clr_pendsv_pending() {
 
 
 /**
- * armv7_set_pendsv_pending : sets systick IRQ pending;
+ * armv7_set_systick_pending : sets systick IRQ pending;
  */
 
 static inline void armv7_set_systick_pending() {
@@ -140,7 +140,7 @@ static inline void armv7_set_systick_pending() {
 
 
 /**
- * armv7_set_pendsv_pending : returns true if systick IRQ is pending;
+ * armv7_is_systick_pending : returns true if systick IRQ is pending;
  */
 
 static inline bool armv7_is_systick_pending() {
@@ -149,7 +149,7 @@ static inline bool armv7_is_systick_pending() {
 
 
 /**
- * armv7_clr_pendsv_pending : sets systick IRQ not pending;
+ * armv7_clr_systick_pending : sets systick IRQ not pending;
  */
 
 static inline void armv7_clr_systick_pending() {
@@ -236,7 +236,7 @@ bool arm_v7_relocate_vector_table(bool in_ram, uint32_t offset);
  * @param priority : the priority to give;
  */
 
-static inline void armv7_set_memmanage_priority(uint8_t priority) {
+static inline void armv7_set_mem_fault_priority(uint8_t priority) {
 	*((uint8_t *) ARMV7_SHPR1) = priority;
 }
 
@@ -351,7 +351,7 @@ static inline void armv7_enable_usage_fault() {
  * armv7_usage_fault_enabled : Asserts if the usage fault exception is enabled;
  */
 
-static inline bool armv7_usage_fault_enabled() {
+static inline bool armv7_is_usage_fault_enabled() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTENA);
 }
 
@@ -378,7 +378,7 @@ static inline void armv7_enable_bus_fault() {
  * armv7_bus_fault_enabled : Asserts if the usage fault exception is enabled;
  */
 
-static inline bool armv7_bus_fault_enabled() {
+static inline bool armv7_is_bus_fault_enabled() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTENA);
 }
 
@@ -406,7 +406,7 @@ static inline void armv7_enable_mem_fault() {
  * armv7_mem_fault_enabled : Asserts if the usage fault exception is enabled;
  */
 
-static inline bool armv7_mem_fault_enabled() {
+static inline bool armv7_is_mem_fault_enabled() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTENA);
 }
 
@@ -425,7 +425,7 @@ static inline void armv7_disable_mem_fault() {
  * @return true if the svc exception is pending;
  */
 
-static inline bool armv7_svc_pending() {
+static inline bool armv7_is_svc_pending() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_SVCALLPENDED);
 }
 
@@ -435,7 +435,7 @@ static inline bool armv7_svc_pending() {
  * @return true if the bus fault exception is pending;
  */
 
-static inline bool armv7_bus_fault_pending() {
+static inline bool armv7_is_bus_fault_pending() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTPENDED);
 }
 
@@ -445,7 +445,7 @@ static inline bool armv7_bus_fault_pending() {
  * @return true if the mem fault exception is pending;
  */
 
-static inline bool armv7_mem_fault_pending() {
+static inline bool armv7_is_mem_fault_pending() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTPENDED);
 }
 
@@ -455,7 +455,7 @@ static inline bool armv7_mem_fault_pending() {
  * @return true if the usage fault exception is pending;
  */
 
-static inline bool armv7_usage_fault_pending() {
+static inline bool armv7_is_usage_fault_pending() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTPENDED);
 }
 
@@ -465,7 +465,7 @@ static inline bool armv7_usage_fault_pending() {
  * @return true if the systick exception is active;
  */
 
-static inline bool armv7_systick_active() {
+static inline bool armv7_is_systick_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_SYSTICKACT);
 }
 
@@ -475,7 +475,7 @@ static inline bool armv7_systick_active() {
  * @return true if the PendSV exception is active;
  */
 
-static inline bool armv7_pendsv_active() {
+static inline bool armv7_is_pendsv_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_PENDSVACT);
 }
 
@@ -485,7 +485,7 @@ static inline bool armv7_pendsv_active() {
  * @return true if the monitor is active;
  */
 
-static inline bool armv7_monitor_active() {
+static inline bool armv7_is_monitor_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MONITORACT);
 }
 
@@ -495,7 +495,7 @@ static inline bool armv7_monitor_active() {
  * @return true if the svc exception is active;
  */
 
-static inline bool armv7_svc_active() {
+static inline bool armv7_is_svc_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_SVCALLACT);
 }
 
@@ -505,7 +505,7 @@ static inline bool armv7_svc_active() {
  * @return true if the usage fault exception is active;
  */
 
-static inline bool armv7_usage_fault_active() {
+static inline bool armv7_is_usage_fault_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTACT);
 }
 
@@ -515,7 +515,7 @@ static inline bool armv7_usage_fault_active() {
  * @return true if the bus fault exception is active;
  */
 
-static inline bool armv7_bus_fault_active() {
+static inline bool armv7_is_bus_fault_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTACT);
 }
 
@@ -525,7 +525,7 @@ static inline bool armv7_bus_fault_active() {
  * @return true if the mem fault exception is active;
  */
 
-static inline bool armv7_mem_fault_active() {
+static inline bool armv7_is_mem_fault_active() {
 	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTACT);
 }
 

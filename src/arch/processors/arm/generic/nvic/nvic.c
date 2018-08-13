@@ -17,26 +17,308 @@
 //All un-handled interrupts will trigger this empty function;
 static void nop_function() {};
 
-//-------------------------------------------- System Interrupts Management --------------------------------------------
+//-------------------------------------------- SysendSV exceptiontem Interrupts Management --------------------------------------------
 
 //Enable a system interrupt;
-void nvic_enable_system_interrupt(enum nvic_system_channel channel);
+void nvic_enable_system_interrupt(enum nvic_system_exception exception) {
+
+	//Evaluate the exception type :
+	switch (exception) {
+
+		//Channel 2 : The Non Maskable Interrupt;
+		case NVIC_NMI :
+			//The NMI is always enabled;
+			break;
+
+			//Channel 3 : The Hardware Fault Interrupt;
+		case NVIC_HARD_FAULT:
+			//The HardFault exception is always enabled;
+			break;
+
+			//Channel 4 : The Memory Fault Interrupt;
+		case NVIC_MEM_FAULT :
+			armv7_enable_mem_fault();
+			break;
+
+			//Channel 5 : The Bus Fault Interrupt;
+		case NVIC_BUS_FAULT :
+			armv7_enable_bus_fault();
+			break;
+
+			//Channel 6 : The Usage Fault Interrupt;
+		case NVIC_USAGE_FAULT :
+			armv7_enable_usage_fault();
+			break;
+
+			//Channel 11 : The Supervisor Call Interrupt;
+		case NVIC_SVC :
+			//Always enabled;
+			break;
+
+			//Channel 14 : The PensSV Interrupt;
+		case NVIC_PENDSV :
+			//Always enabled;
+			break;
+
+			//Channel 15 : The Systick Interrupt;
+		case NVIC_SYSTICK :
+			//TODO USE SYSTICK LIBRARY;
+			break;
+
+	}
+
+}
 
 
 //Disable a system interrupt;
-void nvic_disable_system_interrupt(enum nvic_system_channel channel);
+void nvic_disable_system_interrupt(enum nvic_system_exception exception) {
+
+	//Evaluate the exception type :
+	switch (exception) {
+
+		//Channel 2 : The Non Maskable Interrupt;
+		case NVIC_NMI :
+			//The NMI can't be disabled;
+			break;
+
+			//Channel 3 : The Hardware Fault Interrupt;
+		case NVIC_HARD_FAULT:
+			//The Hard Fault exception can't be disabled;
+			break;
+
+			//Channel 4 : The Memory Fault Interrupt;
+		case NVIC_MEM_FAULT :
+			armv7_disable_mem_fault();
+			break;
+
+			//Channel 5 : The Bus Fault Interrupt;
+		case NVIC_BUS_FAULT :
+			armv7_disable_bus_fault();
+			break;
+
+			//Channel 6 : The Usage Fault Interrupt;
+		case NVIC_USAGE_FAULT :
+			armv7_disable_usage_fault();
+			break;
+
+			//Channel 11 : The Supervisor Call Interrupt;
+		case NVIC_SVC :
+			//Always enabled;
+			break;
+
+			//Channel 14 : The PensSV Interrupt;
+		case NVIC_PENDSV :
+			//Always enabled;
+			break;
+
+			//Channel 15 : The Systick Interrupt;
+		case NVIC_SYSTICK :
+			//TODO USE SYSTICK LIBRARY;
+			break;
+
+	}
+
+}
 
 
 //Set a system interrupt pending;
-void nvic_set_system_interrupt_pending(enum nvic_system_channel channel);
+void nvic_set_system_interrupt_pending(enum nvic_system_exception exception) {
+
+	int i;
+	//Evaluate the exception type :
+	switch (exception) {
+
+		//Channel 2 : The Non Maskable Interrupt;
+		case NVIC_NMI :
+			armv7_trigger_nmi();
+			break;
+
+			//Channel 3 : The Hardware Fault Interrupt;
+		case NVIC_HARD_FAULT:
+			//Can't be triggered;
+			break;
+
+			//Channel 4 : The Memory Fault Interrupt;
+		case NVIC_MEM_FAULT :
+			//Can't be triggered;
+			break;
+
+			//Channel 5 : The Bus Fault Interrupt;
+		case NVIC_BUS_FAULT :
+			//Can't be triggered;
+			break;
+
+			//Channel 6 : The Usage Fault Interrupt;
+		case NVIC_USAGE_FAULT :
+			//Can't be triggered;
+			break;
+
+			//Channel 11 : The Supervisor Call Interrupt;
+		case NVIC_SVC :
+			i = 5;//Will be removed, the compiler cringes when there is no statement...
+			asm __volatile__ ("svc");
+			break;
+
+			//Channel 14 : The PensSV Interrupt;
+		case NVIC_PENDSV :
+			armv7_set_pendsv_pending();
+			break;
+
+			//Channel 15 : The Systick Interrupt;
+		case NVIC_SYSTICK :
+			armv7_set_systick_pending();
+			break;
+
+	}
+
+}
 
 
 //Clear a system interrupt's pending state;
-void nvic_clear_system_interrupt_pending(enum nvic_system_channel channel);
+void nvic_clear_system_interrupt_pending(enum nvic_system_exception exception) {
+
+	//Evaluate the exception type :
+	switch (exception) {
+
+		//Channel 2 : The Non Maskable Interrupt;
+		case NVIC_NMI :
+			//Non maskable;
+			break;
+
+			//Channel 3 : The Hardware Fault Interrupt;
+		case NVIC_HARD_FAULT:
+			//Can't be cleared;
+			break;
+
+			//Channel 4 : The Memory Fault Interrupt;
+		case NVIC_MEM_FAULT :
+			//Can't be cleared;
+			break;
+
+			//Channel 5 : The Bus Fault Interrupt;
+		case NVIC_BUS_FAULT :
+			//Can't be cleared;
+			break;
+
+			//Channel 6 : The Usage Fault Interrupt;
+		case NVIC_USAGE_FAULT :
+			//Can't be cleared;
+			break;
+
+			//Channel 11 : The Supervisor Call Interrupt;
+		case NVIC_SVC :
+			//Can't be cleared;
+			break;
+
+			//Channel 14 : The PensSV Interrupt;
+		case NVIC_PENDSV :
+			armv7_clr_pendsv_pending();
+			break;
+
+			//Channel 15 : The Systick Interrupt;
+		case NVIC_SYSTICK :
+			armv7_clr_systick_pending();
+			break;
+
+	}
+
+}
+
+//Is a system interrupt in the pending state;
+bool nvic_is_system_exception_pending(enum nvic_system_exception exception) {
+
+	//Evaluate the exception type :
+	switch (exception) {
+
+		//Channel 2 : The Non Maskable Interrupt;
+		case NVIC_NMI :
+			//Non maskable;
+			break;
+
+			//Channel 3 : The Hardware Fault Interrupt;
+		case NVIC_HARD_FAULT:
+			//Non maskable;
+			break;
+
+			//Channel 4 : The Memory Fault Interrupt;
+		case NVIC_MEM_FAULT :
+			return armv7_is_mem_fault_pending();
+
+			//Channel 5 : The Bus Fault Interrupt;
+		case NVIC_BUS_FAULT :
+			return armv7_is_bus_fault_pending();
+
+			//Channel 6 : The Usage Fault Interrupt;
+		case NVIC_USAGE_FAULT :
+			return armv7_is_usage_fault_pending();
+
+			//Channel 11 : The Supervisor Call Interrupt;
+		case NVIC_SVC :
+			return armv7_is_svc_pending();
+
+			//Channel 14 : The PensSV Interrupt;
+		case NVIC_PENDSV :
+			return armv7_is_pendsv_pending();
+
+			//Channel 15 : The Systick Interrupt;
+		case NVIC_SYSTICK :
+			return armv7_is_systick_pending();
+
+	}
+
+}
+
 
 
 //Update the nmi handler;
-void nvic_set_system_interrupt_priority(enum nvic_system_channel channel, uint8_t priority);
+void nvic_set_system_interrupt_priority(enum nvic_system_exception exception, uint8_t priority) {
+
+	//Evaluate the exception type :
+	switch (exception) {
+
+		//Channel 2 : The Non Maskable Interrupt;
+		case NVIC_NMI :
+			//Non maskable;
+			break;
+
+			//Channel 3 : The Hardware Fault Interrupt;
+		case NVIC_HARD_FAULT:
+			//Fixed Priority;
+			break;
+
+			//Channel 4 : The Memory Fault Interrupt;
+		case NVIC_MEM_FAULT :
+			armv7_set_mem_fault_priority(priority);
+			break;
+
+			//Channel 5 : The Bus Fault Interrupt;
+		case NVIC_BUS_FAULT :
+			armv7_set_bus_fault_priority(priority);
+			break;
+
+			//Channel 6 : The Usage Fault Interrupt;
+		case NVIC_USAGE_FAULT :
+			armv7_set_usage_fault_priority(priority);
+			break;
+
+			//Channel 11 : The Supervisor Call Interrupt;
+		case NVIC_SVC :
+			armv7_set_svcall_priority(priority);
+			break;
+
+			//Channel 14 : The PendSV Interrupt;
+		case NVIC_PENDSV :
+			armv7_set_pendsv_priority(priority);
+			break;
+
+			//Channel 15 : The Systick Interrupt;
+		case NVIC_SYSTICK :
+			armv7_set_systick_priority(priority);
+			break;
+
+	}
+
+}
 
 
 
@@ -134,7 +416,7 @@ static void update_handler(const uint8_t channel, void (*const handler)()) {
  * @param handler : the function to handler the IRQ;
  */
 
-void nvic_set_system_interrupt_handler(const enum nvic_system_channel system_channel, void (*const handler)()) {
+void nvic_set_system_interrupt_handler(const enum nvic_system_exception system_channel, void (*const handler)()) {
 
 	//Use the value of the enum to update the handler;
 	update_handler(system_channel, handler);
