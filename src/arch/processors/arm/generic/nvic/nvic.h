@@ -6,7 +6,7 @@
 #define TRACER_NVIC_H
 
 #include <stdint.h>
-#include <arch/processors/arm/arm_vx/arm_v7.h>
+#include <arch/processors/arm/arm_vx/arm_v7m.h>
 
 
 /*
@@ -134,7 +134,7 @@ void nvic_enable_system_exception(enum nvic_system_exception channel);
  */
 
 static inline void nvic_enable_interrupt(uint8_t channel) {
-	armv7_nvic_enable_interrupt(channel);
+	armv7m_nvic_enable_interrupt(channel);
 }
 
 
@@ -150,7 +150,7 @@ void nvic_disable_system_exception(enum nvic_system_exception channel);
  */
 
 static inline void nvic_disable_interrupt(uint8_t channel){
-	armv7_nvic_disable_interrupt(channel);
+	armv7m_nvic_disable_interrupt(channel);
 }
 
 
@@ -166,7 +166,7 @@ void nvic_set_system_exception_pending(enum nvic_system_exception channel);
  */
 
 static inline void nvic_set_interrupt_pending(uint8_t channel) {
-	armv7_nvic_set_interrupt_pending(channel);
+	armv7m_nvic_set_interrupt_pending(channel);
 }
 
 
@@ -182,7 +182,7 @@ void nvic_clear_system_exception_pending(enum nvic_system_exception channel);
  */
 
 static inline void nvic_clear_interrupt_pending(uint8_t channel) {
-	armv7_nvic_clear_interrupt_pending(channel);
+	armv7m_nvic_clear_interrupt_pending(channel);
 }
 
 
@@ -198,7 +198,7 @@ bool nvic_is_system_exception_pending(enum nvic_system_exception channel);
  */
 
 static inline void nvic_is_interrupt_pending(uint8_t channel) {
-	armv7_nvic_clear_interrupt_pending(channel);
+	armv7m_nvic_clear_interrupt_pending(channel);
 }
 
 
@@ -228,7 +228,7 @@ void nvic_set_system_exception_priority(enum nvic_system_exception channel, uint
  */
 
 static inline void nvic_set_interrupt_priority(uint8_t channel, uint8_t priority) {
-	armv7_nvic_set_priority(channel, priority);
+	armv7m_nvic_set_priority(channel, priority);
 }
 
 
@@ -246,7 +246,7 @@ void nvic_get_system_exception_priority(enum nvic_system_exception channel, uint
  */
 
 static inline uint8_t nvic_get_interrupt_priority(uint8_t channel, uint8_t priority) {
-	return armv7_nvic_get_priority(channel);
+	return armv7m_nvic_get_priority(channel);
 }
 
 
