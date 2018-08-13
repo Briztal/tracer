@@ -51,4 +51,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} TO_REINTEGRATE/OLDSHIT/jerk.h TO_REINTEGRATE/OLDSHIT/distance_bounds.h)
+add_executable(${PROJECT_NAME} ${SRC_LIST} Makefile mk64fx512.ld)

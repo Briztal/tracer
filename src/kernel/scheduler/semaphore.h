@@ -39,7 +39,7 @@
  *
  *  A semaphore call from an interrupt will be detected, and ignored.
  *
- *  As a consequence, interrupts have full control on drivers, and can use them without any restrictions, but it
+ *  As a consequence, interrupts have full control on chip, and can use them without any restrictions, but it
  *  can also cause damage, as it can shortcut potentially ordered procedures.
  *
  *  You must take that in consideration when writing your ISRs. Use it carefully;

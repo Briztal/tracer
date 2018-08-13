@@ -4,9 +4,6 @@
 
 #include "nvic.h"
 
-#include <stdbool.h>
-
-
 //-------------------------------------------------- System interrupts -------------------------------------------------
 
 /*
@@ -124,7 +121,6 @@ void nvic_disable_system_interrupt(enum nvic_system_exception exception) {
 //Set a system interrupt pending;
 void nvic_set_system_interrupt_pending(enum nvic_system_exception exception) {
 
-	int i;
 	//Evaluate the exception type :
 	switch (exception) {
 
@@ -155,8 +151,8 @@ void nvic_set_system_interrupt_pending(enum nvic_system_exception exception) {
 
 			//Channel 11 : The Supervisor Call Interrupt;
 		case NVIC_SVC :
-			i = 5;//Will be removed, the compiler cringes when there is no statement...
-			asm __volatile__ ("svc");
+			//i = 5;//Will be removed, the compiler cringes when there is no statement...
+			//asm __volatile__ ("svc");
 			break;
 
 			//Channel 14 : The PensSV Interrupt;
@@ -233,12 +229,12 @@ bool nvic_is_system_exception_pending(enum nvic_system_exception exception) {
 		//Channel 2 : The Non Maskable Interrupt;
 		case NVIC_NMI :
 			//Non maskable;
-			break;
+			return false;
 
 			//Channel 3 : The Hardware Fault Interrupt;
 		case NVIC_HARD_FAULT:
 			//Non maskable;
-			break;
+			return false;
 
 			//Channel 4 : The Memory Fault Interrupt;
 		case NVIC_MEM_FAULT :
@@ -266,8 +262,9 @@ bool nvic_is_system_exception_pending(enum nvic_system_exception exception) {
 
 	}
 
+	//Default, return false;
+	return false;
 }
-
 
 
 //Update the nmi handler;
@@ -449,19 +446,15 @@ void nvic_set_interrupt_handler(const uint8_t non_system_channel, void (*const h
 
 //---------------------------------------------------- Startup data ----------------------------------------------------
 
+
 /*
  * The following section regroups data that is required to start the processor properly. Namely :
  * 	- The initial stack pointer, provided by the linker;
  * 	- The first function to execute, defined in another piece of code;
  */
 
-//The initial stack pointer;
-extern uint32_t *initial_stack_pointer;
-
-//The code's entry point;
 extern void __entry_point();
-
-
+extern uint32_t *_end_stack;
 
 /*
  * Generate an ISR for each interrupt channel; Done using XMacro;
@@ -471,7 +464,7 @@ extern void __entry_point();
 #define channel(i) static void isr_##i() {isr_generic_flash_handler(i);}
 
 //Define all isrs;
-#include "channel_list.h"
+#include "nvic_channel_list.h"
 
 #undef channel
 
@@ -481,11 +474,12 @@ extern void __entry_point();
  * 	as it, at the link section .vector. This section can be found in the link script, and is located at address 0;
  */
 
-__attribute__ ((section(".vectors"), used))
-static void (*const flash_vector_table[256])(void) = {
+
+/* 16 standard Cortex-M vectors - these are present in every MCU */
+void *flash_vector_table[256] __attribute__ ((section(".vectors"))) = {
 
 	//0 : Initial SP Value;
-	(void (*)(void)) ((unsigned long) &initial_stack_pointer),
+	&_end_stack,
 
 	//1 : Reset : call the program's entry point;
 	&__entry_point,
@@ -497,7 +491,7 @@ static void (*const flash_vector_table[256])(void) = {
 #define channel(i) &isr_##i,
 
 //Redirect all isrs to the empty one;
-#include "channel_list.h"
+#include "nvic_channel_list.h"
 
 #undef channel
 

@@ -18,7 +18,7 @@
 
 */
 /*
- * By default, all drivers are supported;
+ * By default, all chip are supported;
  */
 
 //#define DISABLE_UART0

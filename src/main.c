@@ -41,7 +41,7 @@ void kernel_init_function(void *args);
 
 int main() {
 
-	//Initialise drivers;
+	//Initialise chip;
 	teensy35_hardware_init();
 
 	core_init();

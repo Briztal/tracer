@@ -393,7 +393,7 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const drive
 	uint8_t port_id = pin->port_index;
 	uint8_t bit = pin->bit_index;
 
-	//Cache the concerned port and gpio drivers memory addresses;
+	//Cache the concerned port and gpio chip memory addresses;
 	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
 	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
@@ -516,7 +516,7 @@ void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver
 	uint8_t port_id = pin->port_index;
 	uint8_t bit = pin->bit_index;
 
-	//Cache the concerned port and gpio drivers memory addresses;
+	//Cache the concerned port and gpio chip memory addresses;
 	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
 	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 

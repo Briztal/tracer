@@ -37,6 +37,7 @@ MEMORY
 
 SECTIONS
 {
+    . = 0;
 	.text : {
 		. = 0;
 		KEEP(*(.vectors))

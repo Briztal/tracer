@@ -30,7 +30,7 @@
 /*
  * This library contains led based debug functions.
  *
- * 	They only use arch functions, and can be used anywhere in the code, without restrictions on the kernel state;
+ * 	They only use hardware functions, and can be used anywhere in the code, without restrictions on the kernel state;
  */
 
 
@@ -49,7 +49,7 @@
 
 
 /*
- * Debug utilities using only arch links;
+ * Debug utilities using only hardware links;
  */
 
 //Light the debug led and stop;

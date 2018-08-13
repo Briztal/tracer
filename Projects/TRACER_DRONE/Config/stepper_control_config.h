@@ -173,8 +173,8 @@ CARTESIAN_GROUP(7,      8,      -1,     -1,     1000     )
 /*
  * The version of the Stepper Interaction Kinematics Kernel you want to use. You have 3 versions available :
  *  - 0 : a basic algorithm for less-than-32 bit processor, for cartesian-by-group machines. Only lines available.
- *  - 1 : a better algorithm for 32 bits processors with FPU;
- *  - 2 : a more advanced algorithm for 32 bits processors with FPU. Recommended for complex machines;
+ *  - 1 : a better algorithm for 32 bits arch with FPU;
+ *  - 2 : a more advanced algorithm for 32 bits arch with FPU. Recommended for complex machines;
  */
 
 //The version of KinematicsCore

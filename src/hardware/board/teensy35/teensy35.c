@@ -21,6 +21,7 @@
 #include "teensy35.h"
 
 #include <kernel/debug.h>
+#include <kinetis.h>
 
 /*
  * --------------------------------------- PORT ---------------------------------------
@@ -113,7 +114,7 @@ void teensy35_hardware_init() {
 		.clock_frequency = F_BUS,
 	};
 
-	//Define PIT drivers;
+	//Define PIT chip;
 	PIT = (struct kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
 
 

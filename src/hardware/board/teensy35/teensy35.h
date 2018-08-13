@@ -49,7 +49,7 @@ extern struct kinetis_PIT_driver *PIT;
  * --------------------------------------- UART ---------------------------------------
  */
 
-//To define UART drivers we must include the UART driver header;
+//To define UART chip we must include the UART driver header;
 #include <kernel/arch/drivers/kinetis/kinetis_UART.h>
 
 extern struct kinetis_UART_driver_t *UART0;
@@ -63,6 +63,7 @@ void teensy35_hardware_init();
 //-------------------------------------------------------- Debug -------------------------------------------------------
 
 #define DEBUG_LINK(func) teensy35##_##func
+
 
 //Light the debug led high;
 void teensy35_led_high();

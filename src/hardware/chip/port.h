@@ -140,7 +140,7 @@ inline void port_driver_delete(struct port_driver *driver) {
 //--------------------------------------------------- Port pin config --------------------------------------------------
 
 /*
- * Below are listed common configuration options that port drivers are free to use in their configuration structures;
+ * Below are listed common configuration options that port chip are free to use in their configuration structures;
  */
 
 

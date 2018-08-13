@@ -6,7 +6,8 @@
 #define TRACER_NVIC_H
 
 #include <stdint.h>
-#include <arch/processors/arm/arm_vx/arm_v7m.h>
+
+#include "arm_v7m.h"
 
 
 /*
@@ -33,7 +34,7 @@
 
 
 /*
- * This library contains startup code and interrupt management function for ARM chips built with the
+ * This library contains startup code and interrupt management function for ARM chip built with the
  * 	Nested Vector Interrupt Controller module;
  *
  * 	The role of the NVIC is to manage interrupt function handlers, and, as a consequence, to define the code's entry
@@ -89,7 +90,7 @@ enum nvic_system_exception {
 //------------------------------------- Interrupts -------------------------------------
 
 /*
- * Priority levels : these are the standard interrupt priorities for drivers;
+ * Priority levels : these are the standard interrupt priorities for chip;
  *
  * Cortex-M4: 0,16,32,48,64,80,96,112,128,144,160,176,192,208,224,240
  */
