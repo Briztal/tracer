@@ -1,5 +1,5 @@
 /*
-  teensy35.c Part of TRACER
+  mk64fx512.c Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,10 +18,7 @@
 
 */
 
-#include "teensy35.h"
-
-#include <kernel/debug.h>
-#include <kinetis.h>
+#include "mk64fx512.h"
 
 /*
  * --------------------------------------- PORT ---------------------------------------
@@ -51,7 +48,7 @@ struct kinetis_PORT_driver_t *PORT;
  */
 
 /*
- * The teensy35 comprises 4 pits;
+ * The mk64fx512 comprises 4 pits;
  */
 #define PIT_MCR_REG (void *)0x40037000
 #define PIT_REGISTERS (void *)0x40037100
@@ -66,7 +63,7 @@ struct kinetis_PIT_driver *PIT;
  * --------------------------------------- UART ---------------------------------------
  */
 
-//The teensy35 supports 6 UARTS;
+//The mk64fx512 supports 6 UARTS;
 //KINETIS_UART_DEFINE(0, 0x4006A000, F_CPU, 8, 8, IRQ_UART0_STATUS, IRQ_UART0_ERROR)
 
 #define UART0_REGISTERS 0x4006A000
@@ -93,7 +90,7 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
 
 //---------------------------------------- Hardware Initialisation ---------------------------------------
 
-void teensy35_hardware_init() {
+void mk64fx512_hardware_init() {
 
 	//Enable PORT clock gating;
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
@@ -140,10 +137,10 @@ void teensy35_hardware_init() {
 //-------------------------------------------------------- Debug -------------------------------------------------------
 
 /**
- * teensy35_led_high : hardware code for turning on the led;
+ * mk64fx512_led_high : hardware code for turning on the led;
  */
 
-void teensy35_led_high() {
+void mk64fx512_led_high() {
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
@@ -158,10 +155,10 @@ void teensy35_led_high() {
 
 
 /**
- * teensy35_led_high : hardware code for turning off the led;
+ * mk64fx512_led_high : hardware code for turning off the led;
  */
 
-void teensy35_led_low() {
+void mk64fx512_led_low() {
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
@@ -176,10 +173,10 @@ void teensy35_led_low() {
 
 
 /**
- * teensy35_led_high : hardware code for waiting a certain number of milliseconds;
+ * mk64fx512_led_high : hardware code for waiting a certain number of milliseconds;
  */
 
-void teensy35_delay(uint32_t ms_counter) {
+void mk64fx512_delay(uint32_t ms_counter) {
 
 	while(ms_counter--) {
 		//Count to;

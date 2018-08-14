@@ -4,6 +4,7 @@ MEMORY
 	RAM  (rwx) : ORIGIN = 0x1FFF0000, LENGTH = 192K
 }
 
+
 SECTIONS {
 
     . = 0;
@@ -15,7 +16,7 @@ SECTIONS {
 
 
     /*
-     * Flash must be configurated carefully; The flash driver will contain a flashconfig section that will be inserted
+     * Flash must be configurated carefully; The flash driver will contain a flash config section that will be inserted
      *  here.
      */
 
