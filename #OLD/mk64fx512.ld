@@ -31,13 +31,12 @@
 MEMORY
 {
 	FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 512K
-	RAM  (rwx) : ORIGIN = 0x1FFF0000, LENGTH = 192K
+	RAM  (rwx) : ORIGIN = 0x1FFF0000, LENGTH = 262136
 }
 
 
 SECTIONS
 {
-    . = 0;
 	.text : {
 		. = 0;
 		KEEP(*(.vectors))
@@ -84,11 +83,11 @@ SECTIONS
 
 	.data : AT (_etext) {
 		. = ALIGN(4);
-		_sdata = .; 
+		_sdata = .;
 		*(.fastrun*)
 		*(.data*)
 		. = ALIGN(4);
-		_edata = .; 
+		_edata = .;
 	} > RAM
 
 	.noinit (NOLOAD) : {
@@ -109,7 +108,3 @@ SECTIONS
 
 	_estack = ORIGIN(RAM) + LENGTH(RAM);
 }
-
-
-
-

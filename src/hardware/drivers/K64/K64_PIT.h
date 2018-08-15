@@ -16,7 +16,7 @@
 #include <kernel/arch/drivers/driver.h>
 
 
-struct kinetis_PIT_specs {
+struct K64_PIT_specs {
 
 	//The address of the PIT Module Control Register;
 	volatile uint32_t *const MCR;
@@ -39,13 +39,13 @@ struct kinetis_PIT_specs {
 };
 
 
-struct kinetis_PIT_driver {
+struct K64_PIT_driver {
 
 	//The kernel driver base, referencing init and exit;
 	struct kernel_driver driver;
 
 	//The hardware specs set;
-	const struct kinetis_PIT_specs hw_specs;
+	const struct K64_PIT_specs hw_specs;
 
 	//The timer interfaces array;
 	struct timer_interface **const ifaces;
@@ -54,14 +54,14 @@ struct kinetis_PIT_driver {
 
 
 /**
- * kinetis_PIT_create : creates a driver to interact with the kinetis PIT timer;
+ * K64_PIT_create : creates a driver to interact with the K64 PIT timer;
  *
  * @param specs : the set of hardware specifications;
  *
  * @return the initialised driver;
  */
 
-struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs);
+struct kernel_driver *K64_PIT_create(struct K64_PIT_specs *specs);
 
 
 #endif //TRACER_KINETIS_PIT_H

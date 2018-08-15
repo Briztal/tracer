@@ -11,6 +11,7 @@
 
 struct kernel_driver {
 
+
 	//Initialised : set at the beginning of init, reset at the beginning of exit;
 	bool initialised;
 

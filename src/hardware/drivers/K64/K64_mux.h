@@ -18,7 +18,7 @@
 
 
 /*
- * the teensy35's IO MUX configs; This is a transcription of kinetis K64's datasheet;
+ * the teensy35's IO MUX configs; This is a transcription of K64 datasheet;
  */
 
 

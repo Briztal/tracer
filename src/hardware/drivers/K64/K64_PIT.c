@@ -3,7 +3,7 @@
 //
 
 
-#include "kinetis_PIT.h"
+#include "K64_PIT.h"
 
 #include <kernel/kernel.h>
 
@@ -16,10 +16,10 @@
 //--------------------------------------------------- Driver structs ---------------------------------------------------
 
 /*
- * The kinetis Periodic Interrupt Timer memory struct; Maps the memory structure of a hardware PIT;
+ * The K64 Periodic Interrupt Timer memory struct; Maps the memory structure of a hardware PIT;
  */
 
-struct __attribute__ ((packed)) kinetis_PIT_registers {
+struct __attribute__ ((packed)) K64_PIT_registers {
 
 	//The Load Value;
 	volatile uint32_t LDVAL;
@@ -42,28 +42,28 @@ struct __attribute__ ((packed)) kinetis_PIT_registers {
 //--------------------------------------------------- Driver methods ---------------------------------------------------
 
 //Initialise the driver, providing the configuration;
-bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused);
+bool K64_PIT_init(struct K64_PIT_driver *driver, void *unused);
 
 //De-initialise the driver. Timer interface will be deleted;
-bool kinetis_PIT_exit(struct kinetis_PIT_driver *driver);
+bool K64_PIT_exit(struct K64_PIT_driver *driver);
 
-//Delete a kinetis PIT driver;
-void kinetis_PIT_delete(struct kinetis_PIT_driver *driver);
+//Delete a K64 PIT driver;
+void K64_PIT_delete(struct K64_PIT_driver *driver);
 
 
 //--------------------------------------------------- Timer interface --------------------------------------------------
 
 /*
- * The kinetis PIT timer interface is composed of a timer interface and registers for timer manipulation;
+ * The K64 PIT timer interface is composed of a timer interface and registers for timer manipulation;
  */
 
-struct kinetis_PIT_timer_interface {
+struct K64_PIT_timer_interface {
 
 	//The timer interface;
 	struct timer_interface iface;
 
 	//The registers zone reference;
-	volatile struct kinetis_PIT_registers *const registers;
+	volatile struct K64_PIT_registers *const registers;
 
 	//The clock frequency (Hz);
 	const uint32_t clock_frequency;
@@ -81,8 +81,8 @@ struct kinetis_PIT_timer_interface {
 };
 
 
-//Delete the kinetis PIT timer interface;
-static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interface *iface);
+//Delete the K64 PIT timer interface;
+static void K64_PIT_timer_interface_delete(struct K64_PIT_timer_interface *iface);
 
 
 //------------------------------------------- PITs timer interface functions -------------------------------------------
@@ -106,7 +106,7 @@ static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interfac
 //TODO MAKE A HANDLER!!!!!!!!!!!
 
 
-static void kinetis_PIT_set_base_frequency(struct kinetis_PIT_timer_interface *iface, uint32_t frequency) {
+static void K64_PIT_set_base_frequency(struct K64_PIT_timer_interface *iface, uint32_t frequency) {
 
 	//Determine the tics/period ratio;
 	float period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
@@ -121,72 +121,72 @@ static void kinetis_PIT_set_base_frequency(struct kinetis_PIT_timer_interface *i
 }
 
 //Enable the timer;
-static void kinetis_PIT_enable(struct kinetis_PIT_timer_interface *iface) {
+static void K64_PIT_enable(struct K64_PIT_timer_interface *iface) {
 	//Set bit 0 of TCTRL;
 	iface->registers->TCTRL |= PIT_TCTRL_TEN;
 }
 
 //Disable the timer;
-static void kinetis_PIT_disable(struct kinetis_PIT_timer_interface *iface) {
+static void K64_PIT_disable(struct K64_PIT_timer_interface *iface) {
 	//Clear bit 0 of TCTRL;
 	iface->registers->TCTRL &= ~PIT_TCTRL_TEN;
 }
 
 //Is the timer enabled ?
-static bool kinetis_PIT_enabled(struct kinetis_PIT_timer_interface *iface) {
+static bool K64_PIT_enabled(struct K64_PIT_timer_interface *iface) {
 	//Is bit 0 of TCTRL set ?
 	return (bool) (iface->registers->TCTRL & PIT_TCTRL_TEN);
 }
 
 
 //Update the reload value;
-static void kinetis_PIT_set_count(struct kinetis_PIT_timer_interface *iface, float period_count) {
+static void K64_PIT_set_count(struct K64_PIT_timer_interface *iface, float period_count) {
 	if (period_count < iface->max_period) {
 		iface->registers->CVAL = (uint32_t) (iface->period_to_tics * period_count);
 	}
 }
 
 //Get the current value;
-static float kinetis_PIT_get_count(struct kinetis_PIT_timer_interface *iface) {
+static float K64_PIT_get_count(struct K64_PIT_timer_interface *iface) {
 	return (((float) iface->registers->CVAL) / iface->period_to_tics);
 }
 
 
 //Update the reload value;
-static void kinetis_PIT_set_ovf(struct kinetis_PIT_timer_interface *iface, float period_count) {
+static void K64_PIT_set_ovf(struct K64_PIT_timer_interface *iface, float period_count) {
 	if (period_count < iface->max_period) {
 		iface->registers->LDVAL = (uint32_t) (iface->period_to_tics * period_count);
 	}
 }
 
 //Get the reload value;
-static float kinetis_PIT_get_ovf(struct kinetis_PIT_timer_interface *iface) {
+static float K64_PIT_get_ovf(struct K64_PIT_timer_interface *iface) {
 	return (((float) iface->registers->LDVAL) / iface->period_to_tics);
 }
 
 
 //Enable the interrupt;
-static void kinetis_PIT_enable_int(struct kinetis_PIT_timer_interface *iface) {
+static void K64_PIT_enable_int(struct K64_PIT_timer_interface *iface) {
 	//Set bit 1 of TCTRL;
 	iface->registers->TCTRL |= PIT_TCTRL_TIE;
 
 }
 
 //Disable the interrupt;
-static void kinetis_PIT_disable_int(struct kinetis_PIT_timer_interface *iface) {
+static void K64_PIT_disable_int(struct K64_PIT_timer_interface *iface) {
 	//Clear bit 1 of TCTRL;
 	iface->registers->TCTRL &= ~PIT_TCTRL_TIE;
 }
 
 //Is the interrupt enabled ?
-static bool kinetis_PIT_int_enabled(struct kinetis_PIT_timer_interface *iface) {
+static bool K64_PIT_int_enabled(struct K64_PIT_timer_interface *iface) {
 	//Is bit 1 of TCTRL set ?
 	return (bool) (iface->registers->TCTRL & PIT_TCTRL_TIE);
 }
 
 
 //Update the handler;
-void kinetis_PIT_update_handler(struct kinetis_PIT_timer_interface *iface, void (*handler)()) {
+void K64_PIT_update_handler(struct K64_PIT_timer_interface *iface, void (*handler)()) {
 
 	//Cache the interrupt channel;
 	uint8_t interrupt_channel = iface->reload_int_channel;
@@ -216,28 +216,28 @@ void kinetis_PIT_update_handler(struct kinetis_PIT_timer_interface *iface, void 
 
 
 //Is the flag set ?
-static bool kinetis_PIT_flag_set(struct kinetis_PIT_timer_interface *iface) {
+static bool K64_PIT_flag_set(struct K64_PIT_timer_interface *iface) {
 	//Is bit 0 of TFLG set ?
 	return (bool) (iface->registers->TFLG);
 }
 
 
 //Clear the interrupt flag;
-static void kinetis_PIT_clear_flag(struct kinetis_PIT_timer_interface *iface) {
+static void K64_PIT_clear_flag(struct K64_PIT_timer_interface *iface) {
 	//Set bit 0 of TFLG;
 	iface->registers->TFLG = 1;
 }
 
 
 /**
- * kinetis_PIT_timer_interface_delete : deletes the struct.
+ * K64_PIT_timer_interface_delete : deletes the struct.
  *
  * The timer interface doesn't store any dynamic data, Only the struct must be deleted;
  *
  * @param iface : the timer interface to destruct;
  */
 
-static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interface *iface) {
+static void K64_PIT_timer_interface_delete(struct K64_PIT_timer_interface *iface) {
 	kernel_free(iface);
 }
 
@@ -245,14 +245,14 @@ static void kinetis_PIT_timer_interface_delete(struct kinetis_PIT_timer_interfac
 //--------------------------------------------- Driver Creation - Deletion ---------------------------------------------
 
 /**
- * kinetis_PIT_create : creates a driver to interact with the kinetis PIT timer;
+ * K64_PIT_create : creates a driver to interact with the K64 PIT timer;
  *
  * @param specs : the set of hardware specifications;
  *
  * @return the initialised driver;
  */
 
-struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
+struct kernel_driver *K64_PIT_create(struct K64_PIT_specs *specs) {
 
 	//Enable PIT clock gating;
 	SIM_SCGC6 |= SIM_SCGC6_PIT;
@@ -271,14 +271,14 @@ struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 	memset(ifaces, 0, nb_PITs * sizeof(struct timer_interface *));
 
 	//Create the driver initializer;
-	struct kinetis_PIT_driver driver_init = {
+	struct K64_PIT_driver driver_init = {
 
 		//Transmit driver functions;
 		.driver = {
 			.initialised = false,
-			.init = (bool (*)(struct kernel_driver *, void *)) kinetis_PIT_init,
-			.exit = (bool (*)(struct kernel_driver *)) kinetis_PIT_exit,
-			.delete = (void (*)(struct kernel_driver *)) kinetis_PIT_delete,
+			.init = (bool (*)(struct kernel_driver *, void *)) K64_PIT_init,
+			.exit = (bool (*)(struct kernel_driver *)) K64_PIT_exit,
+			.delete = (void (*)(struct kernel_driver *)) K64_PIT_delete,
 		},
 
 		//Transmit the ownership of the specs struct;
@@ -298,18 +298,18 @@ struct kernel_driver *kinetis_PIT_create(struct kinetis_PIT_specs *specs) {
 
 
 	//Allocate, initialise and return the driver;
-	return kernel_malloc_copy(sizeof(struct kinetis_PIT_driver), &driver_init);
+	return kernel_malloc_copy(sizeof(struct K64_PIT_driver), &driver_init);
 
 }
 
 
 /**
- * kinetis_PIT_delete : calls exit, and delete the driver struct;
+ * K64_PIT_delete : calls exit, and delete the driver struct;
  *
  * @param driver : the driver to delete;
  */
 
-void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
+void K64_PIT_delete(struct K64_PIT_driver *const driver) {
 
 	//Disable PIT clock gating;
 	SIM_SCGC6 &= ~SIM_SCGC6_PIT;
@@ -318,7 +318,7 @@ void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
 	*(driver->hw_specs.MCR) = 0x02;
 
 	//Eventually stop the driver;
-	kinetis_PIT_exit(driver);
+	K64_PIT_exit(driver);
 
 	//Free the interrupt channels array;
 	kernel_free((void *) driver->hw_specs.int_channels);
@@ -332,7 +332,7 @@ void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
 //---------------------------------------------------- Start - Stop ----------------------------------------------------
 
 /**
- * kinetis_PIT_init :
+ * K64_PIT_init :
  * 	- initialises interfaces;
  * 	- initialises the hardware;
  * 	- registers interfaces;
@@ -341,37 +341,37 @@ void kinetis_PIT_delete(struct kinetis_PIT_driver *const driver) {
  * @param unused : used for config file, not necessary here;
  */
 
-bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
+bool K64_PIT_init(struct K64_PIT_driver *driver, void *unused) {
 
 	//Create the timer interface initializer;
 	struct timer_interface iface_init = {
 
-		.set_base_frequency = (void (*)(struct timer_interface *, uint32_t)) &kinetis_PIT_set_base_frequency,
+		.set_base_frequency = (void (*)(struct timer_interface *, uint32_t)) &K64_PIT_set_base_frequency,
 
-		.start = (void (*)(struct timer_interface *)) &kinetis_PIT_enable,
-		.stop = (void (*)(struct timer_interface *)) &kinetis_PIT_disable,
-		.started = (bool (*)(struct timer_interface *)) &kinetis_PIT_enabled,
+		.start = (void (*)(struct timer_interface *)) &K64_PIT_enable,
+		.stop = (void (*)(struct timer_interface *)) &K64_PIT_disable,
+		.started = (bool (*)(struct timer_interface *)) &K64_PIT_enabled,
 
-		.set_count = (void (*)(struct timer_interface *, float)) &kinetis_PIT_set_count,
-		.get_count = (float (*)(struct timer_interface *)) &kinetis_PIT_get_count,
+		.set_count = (void (*)(struct timer_interface *, float)) &K64_PIT_set_count,
+		.get_count = (float (*)(struct timer_interface *)) &K64_PIT_get_count,
 
-		.set_ovf_value = (void (*)(struct timer_interface *, float)) &kinetis_PIT_set_ovf,
-		.get_ovf_value = (float (*)(struct timer_interface *)) &kinetis_PIT_get_ovf,
+		.set_ovf_value = (void (*)(struct timer_interface *, float)) &K64_PIT_set_ovf,
+		.get_ovf_value = (float (*)(struct timer_interface *)) &K64_PIT_get_ovf,
 
-		.enable_int = (void (*)(struct timer_interface *)) &kinetis_PIT_enable_int,
-		.disable_int = (void (*)(struct timer_interface *)) &kinetis_PIT_disable_int,
-		.int_enabled = (bool (*)(struct timer_interface *)) &kinetis_PIT_int_enabled,
-		.update_handler = (void (*)(struct timer_interface *, void (*)())) &kinetis_PIT_update_handler,
+		.enable_int = (void (*)(struct timer_interface *)) &K64_PIT_enable_int,
+		.disable_int = (void (*)(struct timer_interface *)) &K64_PIT_disable_int,
+		.int_enabled = (bool (*)(struct timer_interface *)) &K64_PIT_int_enabled,
+		.update_handler = (void (*)(struct timer_interface *, void (*)())) &K64_PIT_update_handler,
 
-		.int_flag_set = (bool (*)(struct timer_interface *)) &kinetis_PIT_flag_set,
-		.clr_int_flag = (void (*)(struct timer_interface *)) &kinetis_PIT_clear_flag,
+		.int_flag_set = (bool (*)(struct timer_interface *)) &K64_PIT_flag_set,
+		.clr_int_flag = (void (*)(struct timer_interface *)) &K64_PIT_clear_flag,
 
-		.deleter = (void (*)(const struct timer_interface *)) kinetis_PIT_timer_interface_delete,
+		.deleter = (void (*)(const struct timer_interface *)) K64_PIT_timer_interface_delete,
 
 	};
 
 	//Cache the specs address;
-	const struct kinetis_PIT_specs *const specs = &driver->hw_specs;
+	const struct K64_PIT_specs *const specs = &driver->hw_specs;
 
 	//Cache the first registers area address;
 	volatile uint8_t *const first_registers_area = specs->first_area;
@@ -396,7 +396,7 @@ bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 		uint8_t int_channel = (specs->int_channels)[PIT_id];
 
 		//Create the PIT timer interface initializer;
-		struct kinetis_PIT_timer_interface PIT_init = {
+		struct K64_PIT_timer_interface PIT_init = {
 
 			//Transmit function pointers;
 			.iface = iface_init,
@@ -415,7 +415,7 @@ bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 
 		//Allocate, initialise and cache the timer interface;
 		struct timer_interface *iface =
-			kernel_malloc_copy(sizeof(struct kinetis_PIT_timer_interface), &PIT_init);
+			kernel_malloc_copy(sizeof(struct K64_PIT_timer_interface), &PIT_init);
 
 
 		/*
@@ -445,7 +445,7 @@ bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
 
 
 /**
- * kinetis_PIT_exit :
+ * K64_PIT_exit :
  * 	- resets the hardware;
  * 	- deletes interfaces;
  * 	- unregisters interfaces;
@@ -453,7 +453,7 @@ bool kinetis_PIT_init(struct kinetis_PIT_driver *driver, void *unused) {
  * @param driver : the driver to de-init;
  */
 
-bool kinetis_PIT_exit(struct kinetis_PIT_driver *driver) {
+bool K64_PIT_exit(struct K64_PIT_driver *driver) {
 
 
 	//Enable Clocking for all timers;

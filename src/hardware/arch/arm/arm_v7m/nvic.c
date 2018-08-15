@@ -478,8 +478,8 @@ extern uint32_t *_end_stack;
 /* 16 standard Cortex-M vectors - these are present in every MCU */
 void *flash_vector_table[256] __attribute__ ((section(".vectors"))) = {
 
-	//0 : Initial SP Value;
-	&_end_stack,
+	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
+	(void (*)(void))((unsigned long)&_end_stack),
 
 	//1 : Reset : call the program's entry point;
 	&__entry_point,

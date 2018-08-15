@@ -1,7 +1,7 @@
 /*
-  kinetis_PORT.c Part of TRACER
+  K64_PORT.c Part of TRACER
 
-  Copyright (c) 2017 Raphaël Outhier, Paul Stoffergen, for its kinetis macros;
+  Copyright (c) 2017 Raphaël Outhier, Paul Stoffergen, for its K64 macros;
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 */
 
-#include "kinetis_PORT.h"
+#include "K64_PORT.h"
 
 #include <kernel/kernel.h>
 
@@ -61,10 +61,10 @@
 //-------------------------------------------------- Memory structures --------------------------------------------------
 
 /*
- * The kinetis PORT specific memory data;
+ * The K64 PORT specific memory data;
  */
 
-struct __attribute__ ((packed)) kinetis_PORT_registers {
+struct __attribute__ ((packed)) K64_PORT_registers {
 
 	//32 Pin Configuration Registers;
 	volatile uint32_t PCR[32];
@@ -100,7 +100,7 @@ struct __attribute__ ((packed)) kinetis_PORT_registers {
  * The GPIO specific memory data;
  */
 
-struct __attribute__ ((packed)) kinetis_GPIO_memory_t {
+struct __attribute__ ((packed)) K64_GPIO_memory_t {
 
 	//Port Data Output Register;
 	volatile uint32_t PDOR;
@@ -126,21 +126,21 @@ struct __attribute__ ((packed)) kinetis_GPIO_memory_t {
 //--------------------------------------------------- Private Headers --------------------------------------------------
 
 //Get the descriptor for a single IO pin : the register and the appropriate mask for the pin
-bool kinetis_PORT_get_gpio_descriptor(const struct kinetis_PORT_driver_t *, enum gpio_register_type_e type,
+bool K64_PORT_get_gpio_descriptor(const struct K64_PORT_driver_t *, enum gpio_register_type_e type,
 									  const struct io_desc_t *,
 									  volatile void **gpio_register, void *mask_p);
 
-//Delete a kinetis PORT driver;
-void kinetis_PORT_destructor(struct kinetis_PORT_driver_t *driver_data);
+//Delete a K64 PORT driver;
+void K64_PORT_destructor(struct K64_PORT_driver_t *driver_data);
 
 
 //Get a pin's current configuration;
-void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *driver, const struct io_desc_t *pin,
-								 struct kinetis_pin_configuration_t *config);
+void K64_PORT_get_pin_config(const struct K64_PORT_driver_t *driver, const struct io_desc_t *pin,
+								 struct K64_pin_configuration_t *config);
 
 //Set a pin's current configuration;
-void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *driver, const struct io_desc_t *pin,
-								struct kinetis_pin_configuration_t *config);
+void K64_PORT_configure_pin(const struct K64_PORT_driver_t *driver, const struct io_desc_t *pin,
+								struct K64_pin_configuration_t *config);
 
 
 //Determine IRQ bits from interrupt type;
@@ -154,32 +154,32 @@ enum PORT_interrupt_t IRQ_bits_to_type(uint8_t bits);
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 /*
- * kinetis_GPIO_create : creates a kinetis port driver. Initialises function pointers and gpio registers sizes,
+ * K64_GPIO_create : creates a K64 port driver. Initialises function pointers and gpio registers sizes,
  * 	and initialises memory zones;
  */
 
-struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_port_peripheral,
+struct K64_PORT_driver_t *K64_PORT_create(volatile void *const first_port_peripheral,
 												  volatile void *const first_gpio_peripheral,
 												  const uint8_t nb_peripherals,
 												  const size_t port_memory_spacing, const size_t gpio_memory_spacing) {
 
 	//Create the initializer;
-	const struct kinetis_PORT_driver_t init = {
+	const struct K64_PORT_driver_t init = {
 
 		.port_driver = {
 
-			//Function pointers will only cast port driver pointer in the kinetis port driver pointer in function args,
-			// legit because kinetis_PORT_driver is composed by port_driver;
+			//Function pointers will only cast port driver pointer in the K64 port driver pointer in function args,
+			// legit because K64_PORT_driver is composed by port_driver;
 
 			//Provide access to the pin config getter;
 			.get_pin_config =
 			(void (*const)(const struct port_driver *, const struct io_desc_t *, void *))
-				&kinetis_PORT_get_pin_config,
+				&K64_PORT_get_pin_config,
 
 			//Provide access to the pin configuration setter;
 			.configure_pin =
 			(void (*const)(const struct port_driver *, const struct io_desc_t *, void *))
-				&kinetis_PORT_configure_pin,
+				&K64_PORT_configure_pin,
 
 
 			//gpio registers are 32 bits long;
@@ -190,10 +190,10 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 			.get_gpio_descriptor =
 			(bool (*const)(const struct port_driver *, enum gpio_register_type_e, const struct io_desc_t *,
 						   volatile void **, void *))
-				&kinetis_PORT_get_gpio_descriptor,
+				&K64_PORT_get_gpio_descriptor,
 
 			//Provide access to the deleter;
-			.destructor =  (void (*const)(struct port_driver *)) &kinetis_PORT_destructor,
+			.destructor =  (void (*const)(struct port_driver *)) &K64_PORT_destructor,
 
 		},
 
@@ -207,7 +207,7 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			.bloc_desc = {
 				.nb_blocks = nb_peripherals,
-				.block_size = sizeof(struct kinetis_PORT_registers),
+				.block_size = sizeof(struct K64_PORT_registers),
 			}
 
 		},
@@ -223,7 +223,7 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 
 			.bloc_desc = {
 				.nb_blocks = nb_peripherals,
-				.block_size = sizeof(struct kinetis_GPIO_memory_t)
+				.block_size = sizeof(struct K64_GPIO_memory_t)
 			}
 
 		},
@@ -232,18 +232,18 @@ struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *const first_por
 	};
 
 	//Allocate, initialise, and return the gpio driver struct;
-	return kernel_malloc_copy(sizeof(struct kinetis_PORT_driver_t), &init);
+	return kernel_malloc_copy(sizeof(struct K64_PORT_driver_t), &init);
 
 }
 
 
 /*
- * kinetis_GPIO_destructor : deletes the kinetis GPIO driver struct;
+ * K64_GPIO_destructor : deletes the K64 GPIO driver struct;
  */
 
-void kinetis_PORT_destructor(struct kinetis_PORT_driver_t *const driver_data) {
+void K64_PORT_destructor(struct K64_PORT_driver_t *const driver_data) {
 
-	//The kinetis GPIO driver doesn't own any dynamic data, we can just free the structure;
+	//The K64 GPIO driver doesn't own any dynamic data, we can just free the structure;
 	return kernel_free(driver_data);
 
 }
@@ -254,11 +254,11 @@ void kinetis_PORT_destructor(struct kinetis_PORT_driver_t *const driver_data) {
 
 
 /*
- * kinetis_PORT_get_gpio_descriptor : Get the descriptor for a single IO pin
+ * K64_PORT_get_gpio_descriptor : Get the descriptor for a single IO pin
  * 	(updates the register and the appropriate mask for the pin);
  */
 
-bool kinetis_PORT_get_gpio_descriptor(const struct kinetis_PORT_driver_t *driver, const enum gpio_register_type_e type,
+bool K64_PORT_get_gpio_descriptor(const struct K64_PORT_driver_t *driver, const enum gpio_register_type_e type,
 									  const struct io_desc_t *io_desc,
 									  volatile void **const gpio_register, void *const mask_p) {
 
@@ -278,16 +278,16 @@ bool kinetis_PORT_get_gpio_descriptor(const struct kinetis_PORT_driver_t *driver
 	//Switch the type of register required;
 	switch (type) {
 		case GPIO_OUTPUT_DATA_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct kinetis_GPIO_memory_t, PDOR));
+			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PDOR));
 			break;
 		case GPIO_OUTPUT_SET_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct kinetis_GPIO_memory_t, PSOR));
+			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PSOR));
 			break;
 		case GPIO_OUTPUT_CLEAR_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct kinetis_GPIO_memory_t, PCOR));
+			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PCOR));
 			break;
 		case GPIO_OUTPUT_TOGGLE_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct kinetis_GPIO_memory_t, PTOR));
+			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PTOR));
 			break;
 		default:
 			//If no correct register type was provided, fail;
@@ -315,7 +315,7 @@ bool kinetis_PORT_get_gpio_descriptor(const struct kinetis_PORT_driver_t *driver
 uint8_t type_to_IRQ_bits(const enum PORT_interrupt_t type) {
 
 	/*
-	 * Direct from the kinetis datasheet;
+	 * Direct from the K64 datasheet;
 	 */
 
 	switch (type) {
@@ -351,7 +351,7 @@ uint8_t type_to_IRQ_bits(const enum PORT_interrupt_t type) {
 enum PORT_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
 
 	/*
-	 * Direct from the kinetis datasheet;
+	 * Direct from the K64 datasheet;
 	 */
 
 	switch (bits) {
@@ -385,17 +385,17 @@ enum PORT_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
  * PORT_get_pin_config : retrieves a pin's current configuration (avoid defaults mistakes);
  */
 
-void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const driver,
+void K64_PORT_get_pin_config(const struct K64_PORT_driver_t *const driver,
 								 const struct io_desc_t *const pin,
-								 struct kinetis_pin_configuration_t *const config) {
+								 struct K64_pin_configuration_t *const config) {
 
 	//Cache the peripheral index and the bit index;
 	uint8_t port_id = pin->port_index;
 	uint8_t bit = pin->bit_index;
 
 	//Cache the concerned port and gpio chip memory addresses;
-	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
-	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
+	volatile struct K64_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
+	volatile struct K64_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
 	//Declare the configuration register to write; Set the flag bit to clear it by default;
 	uint32_t config_register = port->PCR[bit];
@@ -505,9 +505,9 @@ void kinetis_PORT_get_pin_config(const struct kinetis_PORT_driver_t *const drive
  *  An invalid configuration generates an error;
  */
 
-void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver,
+void K64_PORT_configure_pin(const struct K64_PORT_driver_t *const driver,
 								const struct io_desc_t *const pin,
-								struct kinetis_pin_configuration_t *const config) {
+								struct K64_pin_configuration_t *const config) {
 
 	//First, Update the mux channel;
 	config->mux_channel = pin->mux_channel;
@@ -517,8 +517,8 @@ void kinetis_PORT_configure_pin(const struct kinetis_PORT_driver_t *const driver
 	uint8_t bit = pin->bit_index;
 
 	//Cache the concerned port and gpio chip memory addresses;
-	volatile struct kinetis_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
-	volatile struct kinetis_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
+	volatile struct K64_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
+	volatile struct K64_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
 
 	//TODO ERRORS IN CASE OF BAD CONFIGURATION;
 

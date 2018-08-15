@@ -1,5 +1,5 @@
 /*
-  kinetis_UART.h Part of TRACER
+  K64_UART.h Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -39,7 +39,7 @@
  *  We can assimilate them as a struct, whose address is known in memory;
  */
 
-struct __attribute__ ((packed)) kinetis_UART_registers {
+struct __attribute__ ((packed)) K64_UART_registers {
 	volatile uint8_t BDH;
 	volatile uint8_t BDL;
 	volatile uint8_t C1;
@@ -103,10 +103,10 @@ struct __attribute__ ((packed)) kinetis_UART_registers {
  * 	This set of data never changes for a given peripheral instance;
  */
 
-struct kinetis_UART_hw {
+struct K64_UART_hw {
 
 	//The address of the peripheral register zone;
-	struct kinetis_UART_registers *const registers;
+	struct K64_UART_registers *const registers;
 
 	//The clock frequency;
 	const uint32_t clock_frequency;
@@ -125,10 +125,10 @@ struct kinetis_UART_hw {
 
 
 /*
- * The kinetis UART interface : complements the netf21 with interrupt config registers;
+ * The K64 UART interface : complements the netf21 with interrupt config registers;
  */
 
-struct kinetis_UART_net21 {
+struct K64_UART_net21 {
 
 	//The OSI layer 1-2 interface;
 	struct netf21 iface;
@@ -146,23 +146,23 @@ struct kinetis_UART_net21 {
  * Kinetis UART driver : contains a hardware specs set and a reference to an interface;
  */
 
-struct kinetis_UART_driver_t {
+struct K64_UART_driver_t {
 
 	//Hardware specs;
-	const struct kinetis_UART_hw hw_specs;
+	const struct K64_UART_hw hw_specs;
 	
 	//The network interface attached. Null if not initialised;
-	struct kinetis_UART_net21 *iface;
+	struct K64_UART_net21 *iface;
 
 };
 
 
 /*
- * A kinetis UART interrupt pipe is composed of the following elements :
+ * A K64 UART interrupt pipe is composed of the following elements :
  */
 
 /*
-struct kinetis_UART_netf21 {
+struct K64_UART_netf21 {
 
 	//The interrupt pipe base;
 	struct netf21 pipe;
@@ -181,11 +181,11 @@ struct kinetis_UART_netf21 {
 
 
 /*
- * A kinetis UART memory stream is composed of the following elements :
+ * A K64 UART memory stream is composed of the following elements :
  */
 
 /*
-struct kinetis_UART_stream_t {
+struct K64_UART_stream_t {
 
 	//A stream memory, first for pointer cast;
 	struct stream_t stream;
@@ -208,20 +208,20 @@ struct kinetis_UART_stream_t {
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
-//Create an instance of a kinetis UART driver from hardware specs;
-struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw *);
+//Create an instance of a K64 UART driver from hardware specs;
+struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *);
 
-//Delete an instance of a kinetis UART driver;
-void kinetis_UART_delete(struct kinetis_UART_driver_t *);
+//Delete an instance of a K64 UART driver;
+void K64_UART_delete(struct K64_UART_driver_t *);
 
 
 //---------------------------------------------------- Start - Stop ----------------------------------------------------
 
 //Initialise the UART; The internal network interface is created;
-void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config);
+void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_config_t *config);
 
 //De-initialise the UART; The internal network interface is deleted;
-void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data);
+void K64_UART_stop(const struct K64_UART_driver_t *driver_data);
 
 
 //----------------------------------------------------- Interrupts -----------------------------------------------------
@@ -231,10 +231,10 @@ void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data);
  */
 
 //The interrupt function;
-void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_data);
+void K64_UART_status_interrupt(const struct K64_UART_driver_t *driver_data);
 
 //The error function;
-void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *instance);
+void K64_UART_error_interrupt(const struct K64_UART_driver_t *instance);
 
 
 #endif //TRACER_TEENSY35_UART_H

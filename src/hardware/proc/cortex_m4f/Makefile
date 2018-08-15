@@ -4,10 +4,10 @@
 include src/hardware/arch/arm/arm_v7m/Makefile
 
 
-CPUARCH = cortex-m4
+CPUARCH := cortex-m4
 
 #Compiler options for C;
-CFLAGS += -mthumb -MMD -I. -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+CFLAGS += -mthumb -MMD -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 # linker options
 LDFLAGS +=  --specs=nano.specs -mcpu=cortex-m4 -mthumb

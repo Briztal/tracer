@@ -18,8 +18,16 @@
 
 */
 
+
+#include "kinetis.h"
+
 #include "mk64fx512.h"
 
+#include <hardware/startup.h>
+
+#define KINETISK
+#define __MK64FX512__
+#define F_CPU 120000000
 /*
  * --------------------------------------- PORT ---------------------------------------
  */
@@ -68,6 +76,7 @@ struct kinetis_PIT_driver *PIT;
 
 #define UART0_REGISTERS 0x4006A000
 
+/*
 struct kinetis_UART_driver_t *UART0;
 
 void UART0_status_link() {
@@ -77,6 +86,7 @@ void UART0_status_link() {
 void UART0_error_link() {
 	kinetis_UART_error_interrupt(UART0);
 }
+ */
 
 
 /*
@@ -87,10 +97,38 @@ KINETIS_UART_DEFINE(4, 0x400EA000, F_BUS, 1, 1, IRQ_UART4_STATUS, IRQ_UART4_ERRO
 KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERROR)
  */
 
+void __entry_point(void) {
+
+	/*
+	 * First, disable the watchdog;
+	 */
+
+	WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
+	WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
+	WDOG_STCTRLH = WDOG_STCTRLH_ALLOWUPDATE;
+
+	/*
+	 * Then, initialise global variables;
+	 */
+
+	startup_initialise_globals();
+
+	while (1) {
+		mk64fx512_led_high();
+		mk64fx512_delay(500);
+		mk64fx512_led_low();
+		mk64fx512_delay(100);
+	}
+
+
+
+}
 
 //---------------------------------------- Hardware Initialisation ---------------------------------------
 
 void mk64fx512_hardware_init() {
+
+	/*
 
 	//Enable PORT clock gating;
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
@@ -115,7 +153,7 @@ void mk64fx512_hardware_init() {
 	PIT = (struct kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
 
 
-	//Declare the kinetis UART hardware config;
+	//Declare the K64 UART hardware config;
 	struct kinetis_UART_hw uart0_hw = {
 		.registers =  (struct kinetis_UART_registers *const) UART0_REGISTERS,
 		.clock_frequency = F_CPU,
@@ -131,6 +169,8 @@ void mk64fx512_hardware_init() {
 	//Create the UART;
 	UART0 = kinetis_UART_create(&uart0_hw);
 
+	 */
+
 }
 
 
@@ -141,6 +181,8 @@ void mk64fx512_hardware_init() {
  */
 
 void mk64fx512_led_high() {
+	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
+
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
@@ -178,7 +220,7 @@ void mk64fx512_led_low() {
 
 void mk64fx512_delay(uint32_t ms_counter) {
 
-	while(ms_counter--) {
+	while (ms_counter--) {
 		//Count to;
 		for (volatile uint32_t i = 15000; i--;);
 	}

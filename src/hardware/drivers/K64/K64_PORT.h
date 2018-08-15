@@ -1,5 +1,5 @@
 /*
-  kinetis_PORT.h Part of TRACER
+  K64_PORT.h Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -39,7 +39,7 @@
  * Different types of hardware filtering;
  */
 
-enum kinetis_PORT_input_filter_t{
+enum K64_PORT_input_filter_t{
 
     //No filtering enabled;
             PORT_NO_FILTERING,
@@ -59,7 +59,7 @@ enum kinetis_PORT_input_filter_t{
  * The basic configuration structure for a pin;
  */
 
-struct kinetis_pin_configuration_t {
+struct K64_pin_configuration_t {
 
 	/*
 	 * Interruption;
@@ -107,7 +107,7 @@ struct kinetis_pin_configuration_t {
 	 */
 
 	//The type of input filtering;
-	enum kinetis_PORT_input_filter_t input_filter;
+	enum K64_PORT_input_filter_t input_filter;
 
 	//The length of the eventual digital filtering;
 	uint8_t filtering_length;
@@ -118,17 +118,17 @@ struct kinetis_pin_configuration_t {
 //--------------------------------------------- Kinetis PORT driver struct ---------------------------------------------
 
 /*
- * The kinetis PORT driver is composed of the following set of elements :
+ * The K64 PORT driver is composed of the following set of elements :
  */
 
-struct kinetis_PORT_driver_t {
+struct K64_PORT_driver_t {
 
 	//The general PORT driver, for pointer cast;
 	struct port_driver port_driver;
 
 
 	/*
-	 * The kinetis PORT and GPIO are well designed. They are separate chip (their only interaction residing
+	 * The K64 PORT and GPIO are well designed. They are separate chip (their only interaction residing
 	 * 	in the signal direction, that the GPIO controls;
 	 *
 	 * 	Peripherals of the same type are mapped in constantly spaced consecutive regions of the RAM;
@@ -147,8 +147,8 @@ struct kinetis_PORT_driver_t {
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
-//Create a kinetis PORT driver;
-struct kinetis_PORT_driver_t *kinetis_PORT_create(volatile void *first_port_peripheral,
+//Create a K64 PORT driver;
+struct K64_PORT_driver_t *K64_PORT_create(volatile void *first_port_peripheral,
 												  volatile void *first_gpio_peripheral,
 												  uint8_t nb_peripherals,
 												  size_t port_memory_spacing, size_t gpio_memory_spacing);

@@ -22,13 +22,14 @@
 #ifndef TRACER_MK64FX512_H
 #define TRACER_MK64FX512_H
 
+#include <stdint.h>
 
 /*
  * --------------------------------------- PORT ---------------------------------------
  */
 
-//We will use the kinetis PORT module;
-#include <hardware/drivers/kinetis/kinetis_PORT.h>
+//We will use the K64 PORT module;
+//#include <hardware/drivers/kinetis/kinetis_PORT.h>
 
 extern struct kinetis_PORT_driver_t *PORT;
 
@@ -38,7 +39,7 @@ extern struct kinetis_PORT_driver_t *PORT;
  */
 
 //To define PITs, we will use the kinetis PIT module;
-#include <kernel/arch/drivers/kinetis/kinetis_PIT.h>
+//#include <kernel/arch/drivers/kinetis/kinetis_PIT.h>
 
 extern struct kinetis_PIT_driver *PIT;
 
@@ -48,7 +49,7 @@ extern struct kinetis_PIT_driver *PIT;
  */
 
 //To define UART chip we must include the UART driver header;
-#include <kernel/arch/drivers/kinetis/kinetis_UART.h>
+//#include <kernel/arch/drivers/kinetis/kinetis_UART.h>
 
 extern struct kinetis_UART_driver_t *UART0;
 

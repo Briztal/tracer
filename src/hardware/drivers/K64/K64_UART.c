@@ -1,5 +1,5 @@
 /*
-  kinetis_UART.c Part of TRACER
+  K64_UART.c Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,9 +18,8 @@
 
 */
 
-#include "kinetis_UART.h"
+#include "K64_UART.h"
 
-#include <kernel/arch/arch.h>
 
 #include <kernel/kernel.h>
 
@@ -60,55 +59,55 @@
 //-------------------------- Peripheral init --------------------------
 
 //Initialise the peripheral;
-static void initialise_peripheral(const struct kinetis_UART_hw *peripheral_data);
+static void initialise_peripheral(const struct K64_UART_hw *peripheral_data);
 
 //Start the peripheral;
-static void start_peripheral(const struct kinetis_UART_hw *hw_specs);
+static void start_peripheral(const struct K64_UART_hw *hw_specs);
 
 //Reset the peripheral in the stopped state;
-static void stop_peripheral(const struct kinetis_UART_hw *driver_data);
+static void stop_peripheral(const struct K64_UART_hw *driver_data);
 
 
 //-------------------------- Peripheral config --------------------------
 
 //Configure the packet format;
-static void configure_packet_format(const struct kinetis_UART_hw *hw_specs, const struct UART_config_t *);
+static void configure_packet_format(const struct K64_UART_hw *hw_specs, const struct UART_config_t *);
 
 //Configure the state;
-static void configure_modem(const struct kinetis_UART_hw *hw_specs, const struct UART_config_t *);
+static void configure_modem(const struct K64_UART_hw *hw_specs, const struct UART_config_t *);
 
 //Configure the transmission layer;
-static void configure_transmission_layer(const struct kinetis_UART_hw *hw_specs, const struct UART_config_t *);
+static void configure_transmission_layer(const struct K64_UART_hw *hw_specs, const struct UART_config_t *);
 
 
 
 //-------------------------- Stream functions TODO NOP --------------------------
 
 //TODO;
-void kinetis_UART_rx_read(const struct kinetis_UART_driver_t *driver);
-void kinetis_UART_tx_write(const struct kinetis_UART_driver_t *driver);
+void K64_UART_rx_read(const struct K64_UART_driver_t *driver);
+void K64_UART_tx_write(const struct K64_UART_driver_t *driver);
 
 
 //Get the memory map;
-//static void get_memory_map(const struct kinetis_UART_stream_t *stream, struct mem_map_t *map);
+//static void get_memory_map(const struct K64_UART_stream_t *stream, struct mem_map_t *map);
 
 //determine the number of spaces available in the input (tx) stream;
-//static size_t input_spaces_available(const struct kinetis_UART_stream_t *stream);
+//static size_t input_spaces_available(const struct K64_UART_stream_t *stream);
 
 //determine the number of bytes available in the output (rx) stream;
-//static size_t output_bytes_available(const struct kinetis_UART_stream_t *stream);
+//static size_t output_bytes_available(const struct K64_UART_stream_t *stream);
 
 
 //Read data from rx;
-//static void UART_read(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+//static void UART_read(const struct K64_UART_stream_t *stream, const struct mem_map_t *src_map,
 					  //const struct blocks_desc_t *descriptor);
 
 //Write data in tx;
-//static void UART_write(const struct kinetis_UART_stream_t *stream, const struct mem_map_t *src_map,
+//static void UART_write(const struct K64_UART_stream_t *stream, const struct mem_map_t *src_map,
 					   //const struct blocks_desc_t *descriptor);
 /*
 //The UART stream doesn't store any dynamic data;
-static void UART_stream_delete(struct kinetis_UART_stream_t *stream) {
+static void UART_stream_delete(struct K64_UART_stream_t *stream) {
 	kernel_free(stream);
 }*/
 
@@ -116,28 +115,28 @@ static void UART_stream_delete(struct kinetis_UART_stream_t *stream) {
 //--------------------------------------------------- Pipe functions ---------------------------------------------------
 
 //Delete the interrupt pipe;
-//static void kinetis_interrupt_pipe_destroy(const struct kinetis_UART_interrupt_pipe_t *data) {};
+//static void K64_interrupt_pipe_destroy(const struct K64_UART_interrupt_pipe_t *data) {};
 
 
 //Enable the rx interrupt;
-static void enable_rx_interrupt(struct kinetis_UART_net21 *iface);
+static void enable_rx_interrupt(struct K64_UART_net21 *iface);
 
 //Disable the rx trigger;
-//static void disable_rx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+//static void disable_rx_trigger(const struct K64_UART_interrupt_pipe_t *pipe);
 
 
 //Enable the tx interrupt;
-static void enable_tx_interrupt(struct kinetis_UART_net21 *iface);
+static void enable_tx_interrupt(struct K64_UART_net21 *iface);
 
 //Disable the rx interrupt;
-//static void disable_tx_trigger(const struct kinetis_UART_interrupt_pipe_t *pipe);
+//static void disable_tx_trigger(const struct K64_UART_interrupt_pipe_t *pipe);
 
 
 //Update the rx watermark;
-//static void update_rx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_bytes);
+//static void update_rx_watermark(const struct K64_UART_interrupt_pipe_t *pipe, size_t nb_bytes);
 
 //Update the tx watermark;
-//static void update_tx_watermark(const struct kinetis_UART_interrupt_pipe_t *pipe, size_t nb_spaces);
+//static void update_tx_watermark(const struct K64_UART_interrupt_pipe_t *pipe, size_t nb_spaces);
 
 
 
@@ -150,10 +149,10 @@ static void enable_tx_interrupt(struct kinetis_UART_net21 *iface);
  * 	- update all required interrupt functions and setup DMA if necessary;
  */
 
-void initialise_peripheral(const struct kinetis_UART_hw *const peripheral_data) {
+void initialise_peripheral(const struct K64_UART_hw *const peripheral_data) {
 
 	//Cache the memory pointer;
-	struct kinetis_UART_registers *const registers = peripheral_data->registers;
+	struct K64_UART_registers *const registers = peripheral_data->registers;
 
 	//Turn on the UART0's clock;//TODO MAKE A SIM DRIVER;
 	SIM_SCGC4 |= SIM_SCGC4_UART0;
@@ -240,10 +239,10 @@ void initialise_peripheral(const struct kinetis_UART_hw *const peripheral_data) 
  * start_peripheral : starts the peripheral, resets fifos, enables interrupts;
  */
 
-void start_peripheral(const struct kinetis_UART_hw *hw_specs) {
+void start_peripheral(const struct K64_UART_hw *hw_specs) {
 
 	//Cache memory register;
-	struct kinetis_UART_registers *const registers = hw_specs->registers;
+	struct K64_UART_registers *const registers = hw_specs->registers;
 
 	//Set the tx watermark to 0, and the rx to 1.
 	registers->TWFIFO = 0;
@@ -287,10 +286,10 @@ void start_peripheral(const struct kinetis_UART_hw *hw_specs) {
  * stop_peripheral : Stops the peripheral, resets fifos, disable interrupts;
  */
 
-void stop_peripheral(const struct kinetis_UART_hw *driver_data) {
+void stop_peripheral(const struct K64_UART_hw *driver_data) {
 
 	//Cache memory register;
-	struct kinetis_UART_registers *const registers = driver_data->registers;
+	struct K64_UART_registers *const registers = driver_data->registers;
 
 	//Disable the status interrupt;
 	core_IC_disable(driver_data->status_int_channel);
@@ -315,16 +314,16 @@ void stop_peripheral(const struct kinetis_UART_hw *driver_data) {
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 /*
- * kinetis_UART_create : creates an instance of a kinetis UART driver from hardware driver specs;
+ * K64_UART_create : creates an instance of a K64 UART driver from hardware driver specs;
  */
 
-struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw *const specs) {
+struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *const specs) {
 
 	//Initialise the peripheral;
 	initialise_peripheral(specs);
 
 	//Create the driver struct initializer;
-	struct kinetis_UART_driver_t init = {
+	struct K64_UART_driver_t init = {
 
 		//Copy the hardware data set;
 		.hw_specs = *specs,
@@ -335,16 +334,16 @@ struct kinetis_UART_driver_t *kinetis_UART_create(struct kinetis_UART_hw *const 
 	};
 
 	//Allocate, initialise and return the driver data structure;
-	return kernel_malloc_copy(sizeof(struct kinetis_UART_driver_t), &init);
+	return kernel_malloc_copy(sizeof(struct K64_UART_driver_t), &init);
 
 }
 
 
 /*
- * kinetis_UART_delete : deinitializes the peripheral and deletes the peripheral data structure;
+ * K64_UART_delete : deinitializes the peripheral and deletes the peripheral data structure;
  */
 
-void kinetis_UART_delete(struct kinetis_UART_driver_t *driver_data) {
+void K64_UART_delete(struct K64_UART_driver_t *driver_data) {
 
 	//Reset the peripheral;
 	stop_peripheral(&driver_data->hw_specs);
@@ -406,13 +405,13 @@ void sizes_from_PFIFO(const uint8_t pfifo, uint8_t *const rx_fifo_size, uint8_t 
  *  - The parity type (Even or Odd) if it is enabled;
  */
 
-void configure_packet_format(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
+void configure_packet_format(const struct K64_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
 	//TODO MSB FIRST
 	//TODO STOP BITS 1 OR 2 FIRST BYTE OF BAUDRATE REGISTER
 
 	//To avoid implicit double pointer access, we will cache hw_specs;
-	struct kinetis_UART_registers *const registers = hw_specs->registers;
+	struct K64_UART_registers *const registers = hw_specs->registers;
 
 	/*
 	 * Number of bits; This peripheral only supports 8 or 9 hw_specs bits;
@@ -424,7 +423,7 @@ void configure_packet_format(const struct kinetis_UART_hw *const hw_specs, const
 	if (config->nb_data_bits != 8) {
 
 		//Error, for instance only 8 bits are supported;
-		kernel_error("kinetis_UART.c : configure_packet_format : invalid number of hw_specs bits.");
+		kernel_error("K64_UART.c : configure_packet_format : invalid number of hw_specs bits.");
 
 	}
 
@@ -484,9 +483,9 @@ void configure_packet_format(const struct kinetis_UART_hw *const hw_specs, const
  * configure_modem : enables or disables CTS or RTS support;
  */
 
-void configure_modem(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
+void configure_modem(const struct K64_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
-	struct kinetis_UART_registers *const registers = hw_specs->registers;
+	struct K64_UART_registers *const registers = hw_specs->registers;
 
 	/*
 	 * Rx_RTS_enable and Tx_Cts_enable are (resp) bits 3 and 0 of MODEM;
@@ -529,10 +528,10 @@ void configure_modem(const struct kinetis_UART_hw *const hw_specs, const struct 
  */
 
 void
-configure_transmission_layer(const struct kinetis_UART_hw *const hw_specs, const struct UART_config_t *const config) {
+configure_transmission_layer(const struct K64_UART_hw *const hw_specs, const struct UART_config_t *const config) {
 
 	//Cache the hw_specs pointer to avoid permanent implicit double pointer access;
-	struct kinetis_UART_registers *registers = hw_specs->registers;
+	struct K64_UART_registers *registers = hw_specs->registers;
 
 	/*
 	 * We will configure the transmission type : Full or Half duplex;
@@ -583,13 +582,13 @@ configure_transmission_layer(const struct kinetis_UART_hw *const hw_specs, const
 //----------------------------------------------------- Init - exit ----------------------------------------------------
 
 /*
- * kinetis_UART_start : configures the transmission stack, creates streams, and starts the UART;
+ * K64_UART_start : configures the transmission stack, creates streams, and starts the UART;
  */
 
-void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct UART_config_t *config) {
+void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_config_t *config) {
 
 	//Cache the hardware struct;
-	const struct kinetis_UART_hw *hw_specs = &driver_data->hw_specs;
+	const struct K64_UART_hw *hw_specs = &driver_data->hw_specs;
 
 	//Initialise different parts of the UART;
 	configure_packet_format(hw_specs, config);
@@ -597,7 +596,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	configure_transmission_layer(hw_specs, config);
 
 	//Cache the register struct pointer;
-	struct kinetis_UART_registers *const registers = hw_specs->registers;
+	struct K64_UART_registers *const registers = hw_specs->registers;
 
 	//Cache pointer to C2
 	volatile uint8_t *const C2_reg = &registers->C2;
@@ -613,7 +612,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	sizes_from_PFIFO(registers->PFIFO, &rx_fifo_size, &tx_fifo_size);
 
 	//Initialise the ifaces struct;
-	struct kinetis_UART_net21 interface_init = {
+	struct K64_UART_net21 interface_init = {
 
 		//Initialise the l2 adapter
 		.iface = {
@@ -644,7 +643,7 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 	);
 
 	//Allocate and initialise the interface;
-	driver_data->iface = kernel_malloc_copy(sizeof(struct kinetis_UART_net21), &interface_init);
+	driver_data->iface = kernel_malloc_copy(sizeof(struct K64_UART_net21), &interface_init);
 
 	//Initialise the hardware in a safe state;
 	start_peripheral(hw_specs);
@@ -657,13 +656,13 @@ void kinetis_UART_start(struct kinetis_UART_driver_t *driver_data, const struct 
 
 
 /*
- * kinetis_UART_start : this function stops the UART and resets the hardware;
+ * K64_UART_start : this function stops the UART and resets the hardware;
  */
 
-void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data) {
+void K64_UART_stop(const struct K64_UART_driver_t *driver_data) {
 
 	//Cache the hardware struct;
-	const struct kinetis_UART_hw *hw_specs = &driver_data->hw_specs;
+	const struct K64_UART_hw *hw_specs = &driver_data->hw_specs;
 
 	//Delete the interface, calling the superclass deleter;
 	netf2_delete((struct netf2 *) driver_data->iface);
@@ -677,7 +676,7 @@ void kinetis_UART_stop(const struct kinetis_UART_driver_t *driver_data) {
 //--------------------------------------------------- Pipe functions ---------------------------------------------------
 
 //Enable the rx trigger;
-static void enable_rx_interrupt(struct kinetis_UART_net21 *const iface) {
+static void enable_rx_interrupt(struct K64_UART_net21 *const iface) {
 
 	//Initialise the net21 interface decoding;
 	bool decoding_authorised = netf21_init_decoding(&iface->iface);
@@ -700,7 +699,7 @@ static void enable_rx_interrupt(struct kinetis_UART_net21 *const iface) {
 
 
 //Enable the tx trigger;
-static void enable_tx_interrupt(struct kinetis_UART_net21 *const iface) {
+static void enable_tx_interrupt(struct K64_UART_net21 *const iface) {
 
 	//Initialise the net21 interface encoding;
 	bool encoding_authorised = netf21_init_encoding(&iface->iface);//TODO ERROR HERE
@@ -728,10 +727,10 @@ static void enable_tx_interrupt(struct kinetis_UART_net21 *const iface) {
  * interrupt : this function processes UART's interrupts : Rx, and Tx;
  */
 
-void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_data) {
+void K64_UART_status_interrupt(const struct K64_UART_driver_t *driver_data) {
 
 	//Cache the register pointer;
-	struct kinetis_UART_registers *registers = driver_data->hw_specs.registers;
+	struct K64_UART_registers *registers = driver_data->hw_specs.registers;
 
 	//Cache C2, S1, and C5;
 	uint8_t C2 = registers->C2, S1 = registers->S1, C5 = registers->C5;
@@ -745,7 +744,7 @@ void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_da
 
 
 		//Read from rx;
-		kinetis_UART_rx_read(driver_data);
+		K64_UART_rx_read(driver_data);
 
 	}
 
@@ -755,7 +754,7 @@ void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_da
 		//teensy35_led_count(4);
 
 		//Read from tx;
-		kinetis_UART_tx_write(driver_data);
+		K64_UART_tx_write(driver_data);
 
 	}
 
@@ -770,7 +769,7 @@ void kinetis_UART_status_interrupt(const struct kinetis_UART_driver_t *driver_da
  *  It supports different errors, that are described in the code below.
  */
 
-void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_data) {
+void K64_UART_error_interrupt(const struct K64_UART_driver_t *driver_data) {
 
 	/*
 	 * Errors supported are :
@@ -782,10 +781,10 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 	 */
 
 	//Cache the peripheral data pointer;
-	const struct kinetis_UART_hw *const peripheral_data = &driver_data->hw_specs;
+	const struct K64_UART_hw *const peripheral_data = &driver_data->hw_specs;
 
 	//Cache the register pointer;
-	struct kinetis_UART_registers *const registers = peripheral_data->registers;
+	struct K64_UART_registers *const registers = peripheral_data->registers;
 
 	//Unlock reception by checking the framing error flag. At the same time, check noise or parity;
 	if (registers->C2 & (UART_S1_FE | UART_S1_NF | UART_S1_PF)) {
@@ -847,19 +846,19 @@ void kinetis_UART_error_interrupt(const struct kinetis_UART_driver_t *driver_dat
 //-------------------------------------------------- Data transfer --------------------------------------------------
 
 
-void kinetis_UART_tx_write(const struct kinetis_UART_driver_t *const driver) {
+void K64_UART_tx_write(const struct K64_UART_driver_t *const driver) {
 
 	//Cache the net21 interface;
-	struct kinetis_UART_net21 *iface = driver->iface;
+	struct K64_UART_net21 *iface = driver->iface;
 
 	//Cache the hardware specs struct;
-	const struct kinetis_UART_hw *hw_specs = &driver->hw_specs;
+	const struct K64_UART_hw *hw_specs = &driver->hw_specs;
 
 	//Cache the tx fifo size;
 	uint8_t tx_fifo_size = iface->tx_fifo_size;
 
 	//As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-	struct kinetis_UART_registers *const registers = hw_specs->registers;
+	struct K64_UART_registers *const registers = hw_specs->registers;
 
 	//While there are spaces in the tx buffer;
 	while (registers->TCFIFO != tx_fifo_size) {
@@ -894,16 +893,16 @@ void kinetis_UART_tx_write(const struct kinetis_UART_driver_t *const driver) {
 }
 
 
-void kinetis_UART_rx_read(const struct kinetis_UART_driver_t *const driver) {
+void K64_UART_rx_read(const struct K64_UART_driver_t *const driver) {
 
 	//Cache the net21 interface;
-	struct kinetis_UART_net21 *iface = driver->iface;
+	struct K64_UART_net21 *iface = driver->iface;
 
 	//Cache the hardware specs struct;
-	const struct kinetis_UART_hw *hw_specs = &driver->hw_specs;
+	const struct K64_UART_hw *hw_specs = &driver->hw_specs;
 
 	//As checking the packet mode takes more processing time than just send the 9-th bit, we won't check it.
-	struct kinetis_UART_registers *const registers = hw_specs->registers;
+	struct K64_UART_registers *const registers = hw_specs->registers;
 
 	//While there are bytes in the rx buffer;
 	while (registers->RCFIFO) {
