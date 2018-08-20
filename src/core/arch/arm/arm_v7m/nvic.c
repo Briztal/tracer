@@ -4,6 +4,8 @@
 
 #include "nvic.h"
 
+
+
 //-------------------------------------------------- System interrupts -------------------------------------------------
 
 /*
@@ -17,7 +19,7 @@ static void nop_function() {};
 //-------------------------------------------- SysendSV exceptiontem Interrupts Management --------------------------------------------
 
 //Enable a system interrupt;
-void nvic_enable_system_interrupt(enum nvic_system_exception exception) {
+void ic_enable_system_interrupt(enum ic_system_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -68,7 +70,7 @@ void nvic_enable_system_interrupt(enum nvic_system_exception exception) {
 
 
 //Disable a system interrupt;
-void nvic_disable_system_interrupt(enum nvic_system_exception exception) {
+void ic_disable_system_interrupt(enum ic_system_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -119,7 +121,7 @@ void nvic_disable_system_interrupt(enum nvic_system_exception exception) {
 
 
 //Set a system interrupt pending;
-void nvic_set_system_interrupt_pending(enum nvic_system_exception exception) {
+void ic_set_system_interrupt_pending(enum ic_system_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -171,7 +173,7 @@ void nvic_set_system_interrupt_pending(enum nvic_system_exception exception) {
 
 
 //Clear a system interrupt's pending state;
-void nvic_clear_system_interrupt_pending(enum nvic_system_exception exception) {
+void ic_clear_system_interrupt_pending(enum ic_system_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -221,7 +223,7 @@ void nvic_clear_system_interrupt_pending(enum nvic_system_exception exception) {
 }
 
 //Is a system interrupt in the pending state;
-bool nvic_is_system_exception_pending(enum nvic_system_exception exception) {
+bool ic_is_system_exception_pending(enum ic_system_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -268,7 +270,7 @@ bool nvic_is_system_exception_pending(enum nvic_system_exception exception) {
 
 
 //Update the nmi handler;
-void nvic_set_system_interrupt_priority(enum nvic_system_exception exception, uint8_t priority) {
+void ic_set_system_interrupt_priority(enum ic_system_exception exception, uint8_t priority) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -346,7 +348,7 @@ static bool vector_table_in_ram = false;
  * 	When relocating the vector table in RAM, the handlers array will be filled with nop_function references;
  */
 
-static void (*irq_handlers[256])(void) = {0};
+void (*irq_handlers[256])(void) = {0};
 
 
 /*
@@ -355,27 +357,6 @@ static void (*irq_handlers[256])(void) = {0};
  * A supplementary mechanism is required in order to update the handler for a particular interrupt channel.
  */
 
-/**
- * isr_generic_handler : in order to support handler update, all functions of the in-flash vector table will
- * 	lead to this function, that selects the appropriate function to execute, and executes it if it exists.
- *
- * @param i : the interrupt channel. 0 to 240;
- */
-
-static void isr_generic_flash_handler(uint8_t i) {
-
-	//Cache the isr handler;
-	void (*handler)(void) = irq_handlers[i];
-
-	//If the handler is not null :
-	if (handler) {
-
-		//Execute the handler;
-		(*handler)();
-
-	}
-
-}
 
 
 //------------------------------------------------- Handlers Management ------------------------------------------------
@@ -406,14 +387,14 @@ static void update_handler(const uint8_t channel, void (*const handler)()) {
 
 
 /**
- * nvic_set_system_interrupt_handler : updates a system interrupt handler.
+ * ic_set_system_interrupt_handler : updates a system interrupt handler.
  * 	For safety, those channels are accessed indirectly, via the system channel enum;
  *
  * @param system_channel : the system channel to update;
  * @param handler : the function to handler the IRQ;
  */
 
-void nvic_set_system_interrupt_handler(const enum nvic_system_exception system_channel, void (*const handler)()) {
+void ic_set_system_interrupt_handler(const enum ic_system_exception system_channel, void (*const handler)()) {
 
 	//Use the value of the enum to update the handler;
 	update_handler(system_channel, handler);
@@ -422,14 +403,14 @@ void nvic_set_system_interrupt_handler(const enum nvic_system_exception system_c
 
 
 /**
- * nvic_set_interrupt_handler : updates the required non-system interrupt handler;
+ * ic_set_interrupt_handler : updates the required non-system interrupt handler;
  *
  * @param non_system_channel : the channel to update. must be inferior to 240;
  *
  * @param handler : the handler. Can be null if interrupt must be disabled;
  */
 
-void nvic_set_interrupt_handler(const uint8_t non_system_channel, void (*const handler)()) {
+void ic_set_interrupt_handler(const uint8_t non_system_channel, void (*const handler)()) {
 
 	//If the channel is invalid :
 	if (non_system_channel >= 240) {
@@ -443,59 +424,3 @@ void nvic_set_interrupt_handler(const uint8_t non_system_channel, void (*const h
 	update_handler(non_system_channel + (uint8_t) 16, handler);
 
 }
-
-//---------------------------------------------------- Startup data ----------------------------------------------------
-
-
-/*
- * The following section regroups data that is required to start the processor properly. Namely :
- * 	- The initial stack pointer, provided by the linker;
- * 	- The first function to execute, defined in another piece of code;
- */
-
-extern void __entry_point();
-extern uint32_t *_end_stack;
-
-/*
- * Generate an ISR for each interrupt channel; Done using XMacro;
- */
-
-//The handler link : a function that calls the handler link with a specific value;
-#define channel(i) static void isr_##i() {isr_generic_flash_handler(i);}
-
-//Define all isrs;
-#include "nvic_channel_list.h"
-
-#undef channel
-
-
-/*
- * In order to start the processor properly, we define here the vector table, that is hard-copied in the firmware
- * 	as it, at the link section .vector. This section can be found in the link script, and is located at address 0;
- */
-
-
-/* 16 standard Cortex-M vectors - these are present in every MCU */
-void *flash_vector_table[256] __attribute__ ((section(".vectors"))) = {
-
-	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
-	(void (*)(void))((unsigned long)&_end_stack),
-
-	//1 : Reset : call the program's entry point;
-	&__entry_point,
-
-
-	//2->255 : empty handler (240 times, 240 = 3 * 8 * 10);
-
-	//In order to avoid writing 254 times the function name, we will use macros that will write it for us;
-#define channel(i) &isr_##i,
-
-//Redirect all isrs to the empty one;
-#include "nvic_channel_list.h"
-
-#undef channel
-
-	//Adding another "&empty_isr" will cause a compiler warning "excess array initializer. Try it, it is funny !
-
-};
-

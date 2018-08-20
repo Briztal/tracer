@@ -60,24 +60,16 @@ void kernel_stack_free(core_stack_t *);
 //------------------------------------------- Heap management -------------------------------------------
 
 //The malloc function to use across the code;
-void *kernel_malloc(size_t size);
+void *syscall_malloc(size_t size);
 
 //A shortcut to allocate and copy from a memory zone;
-void *kernel_malloc_copy(size_t size, const void *initialiser);
+void *syscall_malloc_copy(size_t size, const void *initialiser);
 
 //The realloc function to use across the code;
-void *kernel_realloc(void *, size_t size);
+void *syscall_realloc(void *, size_t size);
 
 //The free function to use across the code;
-void kernel_free(void *);
-
-//------------------------------------------- Critical sections -------------------------------------------
-
-//Enter a critical section;
-void kernel_enter_critical_section();
-
-//Leave a critical section;
-void kernel_leave_critical_section();
+void syscall_free(void *);
 
 
 #endif //TRACER_KERNEL_H

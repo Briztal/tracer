@@ -18,8 +18,6 @@
 
 */
 
-#include "syscall.h"
-#include "core/debug.h"
 
 #include <stdbool.h>
 
@@ -27,18 +25,10 @@
 
 #include <string.h>
 
-#include <kernel/systick.h>
-
 #include <kernel/scheduler/scheduler.h>
-#include <data_structures/containers/non_concurrent/llist.h>
 
-#include <kernel/arch/processors/ARM/cortex_m4f/cm4f_startup.h>
-#include <kernel/scheduler/tasks/sequences.h>
-#include <kernel/scheduler/tasks/service.h>
+#include <driver/ic.h>
 
-
-//The critical section counter;
-static uint32_t critical_section_counter = 0;
 
 //The error message output. Null at init;
 static void (*error_message_function)(const char *) = 0;
@@ -48,7 +38,6 @@ extern void kernel_init_function(void *);
 
 
 //------------------------------------------- Entry Point -------------------------------------------
-
 
 /*
  * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
@@ -82,11 +71,8 @@ void kernel_error(const char *error_message) {
     //Stop the scheduler;
     scheduler_stop();
 
-    //Enable all interrupts;
-    core_enable_interrupts();
-
-    //Reset the critical section counter;
-    critical_section_counter = 0;
+    //Exit all critical sections;
+    ic_force_critical_section_exit();
 
     //TODO RESET IDLE INTERRUPT HANDLERS
 
@@ -267,44 +253,3 @@ void kernel_free(void *data) {
 }
 
 
-/*
- * kernel_enter_critical_section : called whenever any part of the code must execute a critical section;
- */
-
-inline void kernel_enter_critical_section() {
-
-    //Disable interrupts;
-    core_disable_interrupts();
-
-    //Increment the section counter;
-    critical_section_counter++;
-
-}
-
-
-/*
- * kernel_leave_critical_section : called whenever any part of the code leaves a critical section;
- */
-
-inline void kernel_leave_critical_section() {
-
-    //To safely detect any code error, disable interrupts;
-    core_disable_interrupts();
-
-    //If there was a code error (more leave called than enter);
-    if (!critical_section_counter) {
-
-        //TODO EXCEPTION;
-
-    }
-
-    //If we must update interrupts again :
-    if (!(--critical_section_counter)) {
-
-        //Enable interrupts;
-        core_enable_interrupts();
-
-    }
-
-
-}
