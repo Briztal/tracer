@@ -65,7 +65,7 @@ public:
      * You have 3 return codes you can use :
      *  - 0 : not enough space in the task pool. Task will be reprogrammed automatically.
      *  - 1 : argument_t error. A message with the correct syntax will be displayed.
-     *  - 2 and upper. : correct computation.
+     *  - 2 and upper. : correct comput.
      */\
     static task_state_t name(uint8_t arguments_index);\
     /*

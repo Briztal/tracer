@@ -23,7 +23,7 @@
 #include <kernel/systick.h>
 
 #include <data_structures/containers/non_concurrent/vlarray.h>
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 #include <data_structures/containers/non_concurrent/llist.h>
 
 
@@ -235,7 +235,7 @@ void services_insert(service_t *service) {
 
     }
 
-    //Cache the next computation time;
+    //Cache the next comput time;
     uint32_t next_execution = service->next_exec_time;
 
     //The access to the list is critical;//TODO CRITICAL PATCH;
@@ -314,7 +314,7 @@ bool services_available_task() {
     //Cache the timeline;
     uint32_t millis = systick_milliseconds();
 
-    //Services are stored by increasing computation time;
+    //Services are stored by increasing comput time;
 
 
     //The access to the list is critical;//TODO CRITICAL PATCH;
@@ -388,7 +388,7 @@ stask_t *services_get_task() {
     //Cache the timeline;
     uint32_t millis = systick_milliseconds();
 
-    //Services are stored by increasing computation time;
+    //Services are stored by increasing comput time;
 
 
     //The access to the list is critical;//TODO CRITICAL PATCH;
@@ -450,16 +450,16 @@ void services_reprogram(service_t *service) {
         //Cache the timeline;
         uint32_t millis = systick_milliseconds();
 
-        //Cache the previous computation time, and the period;
+        //Cache the previous comput time, and the period;
         uint32_t period = service->period, next_exec = service->next_exec_time + period;
 
 
         //TODO CONDITION. SET A VARIABLE TO DETERMINE STRICTNESS;
 
-        //If the computation is not strict, determine the next time the service must be executed;
+        //If the comput is not strict, determine the next time the service must be executed;
         while(next_exec < millis) next_exec += period;
 
-        //Update the next computation time;
+        //Update the next comput time;
         service->next_exec_time = next_exec;
 
         //Re-insert the service in the pending services queue;

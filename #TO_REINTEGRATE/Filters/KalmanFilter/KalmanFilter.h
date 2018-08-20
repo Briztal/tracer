@@ -96,16 +96,16 @@ private:
     //The intermediary square matrix, of size stateSize;;
     Matrix state_square_temp;// = new Matrix(stateSize, stateSize);
 
-    //The matrix in the KG computation; size measureSize x stateSize;
+    //The matrix in the KG comput; size measureSize x stateSize;
     Matrix KG;// = new Matrix(measureSize, stateSize);
 
-    //The first temporary matrix in the KG computation; size measureSize x stateSize;
+    //The first temporary matrix in the KG comput; size measureSize x stateSize;
     Matrix KG_temp;// = new Matrix(measureSize, stateSize);
 
-    //The S Matrix in the KG computation; square of size measureSize;
+    //The S Matrix in the KG comput; square of size measureSize;
     Matrix KG_temp_S;// = new Matrix(Q);
 
-    //The inverse of S Matrix in the KG computation; square of size measureSize;
+    //The inverse of S Matrix in the KG comput; square of size measureSize;
     Matrix KG_temp_Si;// = new Matrix(Q);
 
 

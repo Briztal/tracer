@@ -41,17 +41,17 @@ public:
 
 private :
 
-    //offsets, slopes, and max_axis used during increment computation
+    //offsets, slopes, and max_axis used during increment comput
     static float *pre_process_offsets;
     static float *pre_process_slopes;
     static uint8_t pre_process_max_axis;
 
 
-    //step_distances computation;
+    //step_distances comput;
     static bool get_distances(float *position, const float *destination, float *distances, uint8_t *maximum_axis,
                               float *maximum_distance);
 
-    //slopes pre-computation;
+    //slopes pre-comput;
     static void get_slopes(float *slopes, const float *const distances, uint8_t max_axis, float max_distance);
 
     //position provider for increment computing;
@@ -68,7 +68,7 @@ private :
 
 private :
 
-    //offsets, slopes, and max_axis used during real-time postion computation
+    //offsets, slopes, and max_axis used during real-time postion comput
     static float *real_time_offsets;
     static float *real_time_slopes;
     static uint8_t real_time_max_axis;

@@ -207,16 +207,16 @@ void mcontroller_update_builder(const machine_controller_t *const controller, co
 	//Cache the number of computations;
 	const uint8_t nb_computations = controller->nb_builder_computations;
 
-	//For each computation to realise :
+	//For each comput to realise :
 	for (uint8_t computation_index = 0; computation_index < nb_computations; computation_index++) {
 
-		//Cache the computation pointer;
+		//Cache the comput pointer;
 		const controller_builder_computation_t *const computation = computations + computation_index;
 
-		//If the computation is enabled :
+		//If the comput is enabled :
 		if (computation->enabled) {
 
-			//Execute the computation;
+			//Execute the comput;
 			(*(computation->computation_function))(args);
 
 		}
@@ -255,7 +255,7 @@ void mcontroller_determine_duration(const machine_controller_t *const controller
 	//Create a time interval that we will give to kinematic constraints; They will initialise it;
 	time_interval_t constraint_interval = {};
 
-	//Create a new duration computation struct that we pass to kinematic constraints functions;
+	//Create a new duration comput struct that we pass to kinematic constraints functions;
 	const duration_computation_args functions_args = {
 
 		//Cache provided state and builder;
@@ -274,7 +274,7 @@ void mcontroller_determine_duration(const machine_controller_t *const controller
 	//Cache the number of constraints;
 	const uint8_t nb_constraints = controller->nb_kinematic_constraints;
 
-	//For each computation to realise :
+	//For each comput to realise :
 	for (uint8_t constraint_index = 0; constraint_index < nb_constraints; constraint_index++) {
 
 		//Cache the constraint;
@@ -394,7 +394,7 @@ bool mcontroller_correct_duration_window(time_interval_t *const final_interval,
 
 
 /*
- * mcontroller_compute_state : computes the controller's part of the state, by executing each enabled computation;
+ * mcontroller_compute_state : computes the controller's part of the state, by executing each enabled comput;
  */
 
 void mcontroller_compute_state(const machine_controller_t *const controller, const state_computation_args *const args) {
@@ -405,16 +405,16 @@ void mcontroller_compute_state(const machine_controller_t *const controller, con
 	//Cache the number of computations;
 	const uint8_t nb_computations = controller->nb_state_computations;
 
-	//For each computation to realise :
+	//For each comput to realise :
 	for (uint8_t computation_index = 0; computation_index < nb_computations; computation_index++) {
 
-		//Cache the computation pointer;
+		//Cache the comput pointer;
 		const controller_state_computation_t *const computation = computations + computation_index;
 
-		//If the computation is enabled :
+		//If the comput is enabled :
 		if (computation->enabled) {
 
-			//Execute the computation;
+			//Execute the comput;
 			(*(computation->computation_function))(args);
 
 		}

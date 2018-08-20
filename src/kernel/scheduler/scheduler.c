@@ -22,7 +22,7 @@
 
 #include <kernel/systick.h>
 
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 
 #include <kernel/scheduler/tasks/service.h>
 
@@ -77,7 +77,7 @@ static bool scheduler_initialised = false;
 //The flag for inactive state;
 static bool scheduler_inactive = false;
 
-//The current sprocess in computation;
+//The current sprocess in comput;
 static sprocess_t *current_sprocess;
 
 
@@ -353,7 +353,7 @@ void scheduler_cleanup_sprocess(sprocess_t *sprocess) {
 
     switch (sprocess->state) {
 
-        //If the sprocess is in computation :
+        //If the sprocess is in comput :
         case SPROCESS_PENDING:
             //Nothing to do, the process can be re-executed later;
             break;

@@ -22,7 +22,7 @@
 
 #include "scheduler.h"
 
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 
 
 /*
@@ -59,7 +59,7 @@ void sem_delete(semaphore_t *semaphore) {
 
 
 /*
- * sem_wait : required the computation;
+ * sem_wait : required the comput;
  */
 
 void sem_wait(semaphore_t *semaphore) {
@@ -70,7 +70,7 @@ void sem_wait(semaphore_t *semaphore) {
     //If we are thread mode :
     if (!core_in_handler_mode()) {
 
-        //If no computation is allowed :
+        //If no comput is allowed :
         if (!semaphore->allocation_counter) {
 
             //Get our sprocess's index;
@@ -84,7 +84,7 @@ void sem_wait(semaphore_t *semaphore) {
 
         } else {
 
-            //If the computation is allowed, decrement the allocation counter;
+            //If the comput is allowed, decrement the allocation counter;
             semaphore->allocation_counter--;
 
         }
@@ -98,7 +98,7 @@ void sem_wait(semaphore_t *semaphore) {
 
 
 /*
- * sem_post : allows one more computation;
+ * sem_post : allows one more comput;
  */
 
 void sem_post(semaphore_t *semaphore) {

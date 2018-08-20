@@ -75,7 +75,7 @@ typedef struct geometry_t{
 	void *instance;
 
 	//A flag, determining if the geometry is regular, ie it transforms lines into lines;
-	//If the geometry is not regular, extra computation will be required for distances determination;
+	//If the geometry is not regular, extra comput will be required for distances determination;
 	bool regular;
 
 	//The pointer to the function used to convert control position to actuation position;

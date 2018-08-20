@@ -32,12 +32,12 @@
 
 //-------------------------------------------------- Computation node --------------------------------------------------
 
-//A computation function takes a pointer to activation data, and some input args. It returns true if complete;
+//A comput function takes a pointer to activation data, and some input args. It returns true if complete;
 typedef bool (*computation_function_t )(void *activation_data, void *input_data);
 
 
 /*
- * A computation node comprises :
+ * A comput node comprises :
  * 	- A data host, that hosts the function's input data;
  * 	- A function, that can be called when the data host has initialised data;
  */
@@ -90,7 +90,7 @@ typedef struct {
 //------------------------------------------------- Computation network ------------------------------------------------
 
 /*
- * A computation network is composed of an array containing a fixed number of nodes, a mutex, and a linked list
+ * A comput network is composed of an array containing a fixed number of nodes, a mutex, and a linked list
  * 	of nodes;
  */
 
@@ -142,20 +142,20 @@ typedef struct cnetwork_t {
 
 //------------------------------------------------ Creation - deletion -------------------------------------------------
 
-//Create a computation network, providing the number of nodes, a mutex to protect the active nodes list,
+//Create a comput network, providing the number of nodes, a mutex to protect the active nodes list,
 //The data instance, and the initialisation function;
 cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *instance,
 							bool (*init)(void *data, const cmp_node_t *nodes));
 
 
-//Initialise a computation node, providing its priority, the size of its arguments, its max number of concurrent
+//Initialise a comput node, providing its priority, the size of its arguments, its max number of concurrent
 // executions,its number of output references, and array containing them;
 void cnetwork_init_node(cnetwork_t *cnetwork, size_t node_index, size_t priority,
 						computation_function_t function,
 						size_t arguments_size, size_t nb_concurrent_execs,
 						size_t nb_outputs, const size_t *output_references_const);
 
-//Delete a computation network and all its dynamic data;
+//Delete a comput network and all its dynamic data;
 void cnetwork_delete(cnetwork_t *cnetwork);
 
 

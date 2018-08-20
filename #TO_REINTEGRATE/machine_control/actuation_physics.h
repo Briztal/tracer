@@ -38,7 +38,7 @@
 //------------------------------------------------- Arguments structure ------------------------------------------------
 
 /*
- * The duration interval computation function requires the following arguments :
+ * The duration interval comput function requires the following arguments :
  */
 
 typedef struct {
@@ -59,7 +59,7 @@ typedef struct {
 
 
 /*
- * The distance computation function requires the following arguments :
+ * The distance comput function requires the following arguments :
  */
 
 typedef struct {

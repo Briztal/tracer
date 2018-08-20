@@ -49,7 +49,7 @@
 
 typedef struct {
 
-    //The allocation counter, scheduler_initialised to the maximum number of concurrent code computation;
+    //The allocation counter, scheduler_initialised to the maximum number of concurrent code comput;
     uint16_t allocation_counter;
 
     //The lock container. Contains pointers of all locked threads;
@@ -61,10 +61,10 @@ typedef struct {
 #define SEMAPHORE(nb_accesses) {.allocation_counter = nbaccesses, .locked_threads = EMPTY_VLARRAY(process_t *)}
 
 
-//The P function : requires the computation;
+//The P function : requires the comput;
 void sem_wait(semaphore_t *semaphore);
 
-//The V function : lets an computation happen;
+//The V function : lets an comput happen;
 void sem_post(semaphore_t *semaphore);
 
 //The deletion function. Unlocks all threads;

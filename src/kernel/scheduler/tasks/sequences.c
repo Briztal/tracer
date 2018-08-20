@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 
 
 //-------------------------------------------- Const variable init --------------------------------------------

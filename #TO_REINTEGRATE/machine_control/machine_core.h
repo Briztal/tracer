@@ -82,7 +82,7 @@ typedef struct {
 	cbuffer_t movement_buffer;
 
 
-	//---------------------------- Movement computation ----------------------------
+	//---------------------------- Movement comput ----------------------------
 
 	//The movement processor;
 	cnetwork_t *movement_computation;
@@ -96,7 +96,7 @@ machine_core_t *machine_core_create(const machine_constants_t *machine_constants
 									machine_controller_t *controller, uint8_t nb_actuator_physics,
 									const actuator_physics_t *actuator_physics, size_t movement_buffer_size);
 
-//Execute some stages in the movement computation;
+//Execute some stages in the movement comput;
 void machine_core_compute_movements(machine_core_t *core, uint8_t nb_stages);
 
 //Get the number of available movements;

@@ -20,7 +20,7 @@
 
 #include "memory_stream.h"
 
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 
 //--------------------------------------------------- Private headers --------------------------------------------------
 

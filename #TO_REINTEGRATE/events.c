@@ -35,7 +35,7 @@
  *      - Modify the sequences_initialised variable in the event structure, to share its sequences_initialised : IDLE, PENDING, CLOSED
  *
  *      - The task recuperation function must check that the event is deletable after caching the task;
- *          if it is deletable, it will delete all its tasks, except the last one that is currently in computation;
+ *          if it is deletable, it will delete all its tasks, except the last one that is currently in comput;
  *
  *      - A function that will search by name for an event to delete, and then check for its sequences_initialised.
  *          If it is idle, delete it, and if it is pending, mark it as deletable;
@@ -170,7 +170,7 @@ event_t *event_search(linked_list_t list, const char *name) {
 }
 
 
-//---------------------------------------- Event trigger and computation ----------------------------------------
+//---------------------------------------- Event trigger and comput ----------------------------------------
 
 /*
  * triggerEvent : this function will search for an event matching the given name and trigger it if found;

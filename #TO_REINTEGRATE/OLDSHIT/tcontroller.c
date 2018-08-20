@@ -421,7 +421,7 @@ void tcontroller_step_process(tcontroller_t *trajectory) {
 	STEP_AND_WAIT
 
 
-	//-------------------Sub-trajectories pre-computation-------------------
+	//-------------------Sub-trajectories pre-comput-------------------
 
 	//Process a first movement for the one we made;
 	SubMovementManager::push_new_sub_movement();

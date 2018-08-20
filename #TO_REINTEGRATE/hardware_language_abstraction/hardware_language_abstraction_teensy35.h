@@ -26,11 +26,11 @@
  *
  * This file_tree is made for : teensy35.
  *
- * Here are defined all function related to the hardware (serial, I2C, step_period_us etc...), and toolchain
+ * Here are defined all function related to the core (serial, I2C, step_period_us etc...), and toolchain
  *
  * Those will depend on the processor and the toolchain you use
  *
- * If you must implement functions over the base hardware functions, use a function.
+ * If you must implement functions over the base core functions, use a function.
  *
  * If you only must alias a function, use a macro, it's faster.
  */

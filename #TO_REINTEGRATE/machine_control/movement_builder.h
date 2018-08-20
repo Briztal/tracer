@@ -37,7 +37,7 @@ typedef struct {
 	//The movement that we currently compute; References the distances array and the duration;
 	movement_t *movement;
 
-	//The time interval array, containing the duration window for each actuator during the computation;
+	//The time interval array, containing the duration window for each actuator during the comput;
 	time_interval_t *const interval_array;
 
 	//The duration interval that satisfies all constraints;

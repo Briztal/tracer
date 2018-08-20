@@ -228,7 +228,7 @@ float RotationMatrix3D::getRotationData(Vector3D &vector) {
     float m00 = data_array[0], m11 = data_array[4], m22 = data_array[8];
 
     /*
-     * Angle computation :
+     * Angle comput :
      *
      * We will use the following formula : 1 + 2 * cos(angle) = tr(M) <=> angle = acos((tr(M) - 1) / 2);
      *

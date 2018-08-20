@@ -8,46 +8,65 @@ NAME := build/$(PROJECT_NAME)
 #All sources will be built in ./build.
 BUILDDIR := build
 
-#include paths for libraries
-COMPIL_INC := -Isrc
-COMPIL_INC += -Isrc/data_structures
-COMPIL_INC += -Isrc/hardware
-COMPIL_INC += -Isrc/kernel
-
 #initialise compilation and linking flags;
 CFLAGS := -Wall -Os -g
 
 LDFLAGS := -Wl,--gc-sections -Os
 
-#--------------------------------------------------- Pre core config ---------------------------------------------------
+#TODO NO GENERAL COMPIL INCLUDE;
+
+#include paths for libraries
+COMPIL_INC := -Isrc
+COMPIL_INC += -Isrc/data_structures
+
+
+#----------------------------------------- Init before including core makefile -----------------------------------------
+
+#Initialise the core include list to the core folder;
+CORE_INC := -Isrc/core
+
+#Initialise the core source files set to the only debug file;
+CORE_SRCS := src/core/debug.c
+
+#Initialise the driver source files set;
+DRIVER_SRCS :=
 
 #The memory map link script will be set by one of core makefiles;
 LDSCRIPT_MMAP_DIR :=
-
-#Initialise hardware source files to contain only startup code;
-CORE_SOURCES :=
 
 
 #----------------------------------------------------- Core config -----------------------------------------------------
 
 #include the teensy35 makefile that will initialise the toolchain environment and define basic rules;
-include src/hardware/board/teensy35/Makefile
+include src/core/board/teensy35/Makefile
 
 
 #------------------------------------------------ Post core link config ------------------------------------------------
 
 #Now that the core makefile has updated link files, add appropriate options to the link flags;
-LDFLAGS += -Tsrc/hardware/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
+LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
+
+
+#---------------------------------------------------- kernel config ----------------------------------------------------
+
+KERNEL_PUB_SRC := src/kernel/syscall.c
+
+KERNEL_PRIV_SRC :=
+KERNEL_PRIV_INC := -Isrc/kernel
+
+
+include src/kernel/Makefile
 
 
 #------------------------------------------------ Core library ------------------------------------------------
 
-
 #Build the objects set from sources and reroute to build dir;
-CORE_OBJS := $(foreach src, $(CORE_SOURCES:.c=.o), $(BUILDDIR)/$(src))
+CORE_OBJS := $(foreach src, $(CORE_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
 #The core library depends on all core objects provided by the core board makefile and its subs;
 core : $(CORE_OBJS)
+
+
 
 
 #------------------------------------------------------ Make rules -----------------------------------------------------

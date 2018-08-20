@@ -54,7 +54,7 @@ private :
     //Analyse the command index, and schedule the associated command.
     bool analyseCommand(const char *command_id, const char *arguments);
 
-    //Finalise the computation of a command;
+    //Finalise the comput of a command;
     //void confirm_command_execution(const controller_data_t *data);
 
 

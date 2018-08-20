@@ -33,7 +33,7 @@ typedef struct {
 
 
 /*
- * Stop distance computation can involve the current speed, or the current speed variation, depending on the method
+ * Stop distance comput can involve the current speed, or the current speed variation, depending on the method
  * 	used;
  */
 typedef struct {

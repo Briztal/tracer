@@ -22,7 +22,7 @@
 
 #include <malloc.h>
 #include <string.h>
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 
 
 //---------------------- Public Functions ----------------------

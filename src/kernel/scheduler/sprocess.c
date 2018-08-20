@@ -24,7 +24,7 @@
 
 #include <kernel/systick.h>
 
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 #include <kernel/scheduler/tasks/stask.h>
 
 

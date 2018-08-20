@@ -98,7 +98,7 @@ float Thermistors::get_temperature_##name() {\
  *      - the current index on the table
  *
  *  The last parameter exists for optimisation purpose. As we don't want to iterate over the whole table each time
- *      a temperature computation is required, we here take advantage of the short variation of the temperature
+ *      a temperature comput is required, we here take advantage of the short variation of the temperature
  *      between two computations :
  *          if the current temperature value is between 5 and 6 in the lookup table, the newt measure is likely to be
  *          between 4 and 7.

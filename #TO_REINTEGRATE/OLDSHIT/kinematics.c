@@ -116,7 +116,7 @@ void kinematics_compute_movement_data(kinematics_t *const kinematics, const mbui
 		//Cache the actuation distance;
 		float actuation_distance = actuation_distances[acc_data.actuator];
 
-		//Acceleration and deceleration computation;
+		//Acceleration and deceleration comput;
 		compute_acceleration_bounds(kinematics, &acc_data);
 
 
@@ -208,7 +208,7 @@ void kinematics_compute_movement_data(kinematics_t *const kinematics, const mbui
 
 
 /*
- * kinematics_update_jerk_distances : Updates distances to jerk point after a movement's computation;
+ * kinematics_update_jerk_distances : Updates distances to jerk point after a movement's comput;
  */
 
 void kinematics_update_jerk_distances(kinematics_t *kinematics, uint8_t dimension, const movement_t *movement) {
@@ -298,13 +298,13 @@ void kinematics_update_actuators_speeds(kinematics_t *const kinematics, const mb
 		} else {
 			//If the direct calculation method must be used for this actuator :
 
-			//As this method is a direct computation (and is always used for this axis), no computation is required;
+			//As this method is a direct comput (and is always used for this axis), no comput is required;
 			if (kinematics->deceleration_required) {
 
 				//Mark the axis inactivity;
 				stop_distances[data.actuator] = -1;
 
-				//No computation is required;
+				//No comput is required;
 				continue;
 
 			}

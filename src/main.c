@@ -19,7 +19,7 @@
 */
 
 
-#include "kernel/kernel.h"
+#include "kernel/syscall.h"
 #include "setjmp.h"
 
 
@@ -29,9 +29,9 @@
 #include <kernel/arch/drivers/kinetis/kinetis_UART.h>
 #include <kernel/arch/drivers/kinetis/kinetis_mux.h>
 #include <kernel/net/framer/ascii_framer.h>
-#include <kernel/debug.h>
+#include <core/debug.h>
 #include <data_structures/string/string.h>
-#include <kernel/if/timer.h>
+#include <core/driver/timer.h>
 #include <kernel/arch/drivers/port.h>
 #include <kernel/arch/drivers/kinetis/kinetis_PORT.h>
 #include <kernel/arch/drivers/kinetis/kinetis_PIT.h>

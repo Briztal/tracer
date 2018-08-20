@@ -115,7 +115,7 @@ uint8_t LinearMovement::setup_movement_data(const float *destinations_t, uint32_
 
             enable_stepper_interrupt()
 
-            //Millimeter relative step_distances computation
+            //Millimeter relative step_distances comput
             float relative_distances_mm = distsmm[axis] = (float) distance / steps_per_unit;
             sq_dist_sum += relative_distances_mm * relative_distances_mm;
             

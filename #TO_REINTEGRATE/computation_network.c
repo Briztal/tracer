@@ -80,7 +80,7 @@ inline void cnetwork_unlock_list(const cnetwork_t *const network) {
 //------------------------------------------------ Creation - deletion -------------------------------------------------
 
 /*
- * cnetwork_create : creates a computation network structure in the heap, providing the number of nodes,
+ * cnetwork_create : creates a comput network structure in the heap, providing the number of nodes,
  * 	and a mutex to protect the active nodes list;
  */
 cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *instance,
@@ -92,7 +92,7 @@ cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *ins
 	//Initialise all nodes to 0; Initialisation flags will be cleared;
 	memset(nodes, 0, sizeof(cmp_node_t));
 
-	//Create the initializer for the computation network;
+	//Create the initializer for the comput network;
 	cnetwork_t init = {
 
 		//Save the number of nodes;
@@ -109,14 +109,14 @@ cnetwork_t *cnetwork_create(size_t nb_nodes, mutex_t *mutex_src, instance_t *ins
 
 	};
 
-	//Create and initialise the computation network;
+	//Create and initialise the comput network;
 	return kernel_malloc_copy(sizeof(cnetwork_t), &init);
 
 }
 
 
 /*
- * cnetwork_init_node : initialises a computation node, providing
+ * cnetwork_init_node : initialises a comput node, providing
  * 	- a priority;
  * 	- a mutex;
  * 	- a max number of concurrent executions;
@@ -183,7 +183,7 @@ void cnetwork_init_node(cnetwork_t *const cnetwork, const size_t node_index, con
 }
 
 
-//Delete a computation network and all its dynamic data;
+//Delete a comput network and all its dynamic data;
 void cnetwork_delete(cnetwork_t *cnetwork) {
 
 	//We must delete properly each node;
@@ -230,12 +230,12 @@ void cnetwork_delete(cnetwork_t *cnetwork) {
 /*
  * cnetwork_execute : attempts to execute an available node;
  *
- * 	When it returns false, the computation is over and all data has been destroyed;
+ * 	When it returns false, the comput is over and all data has been destroyed;
  */
 
 bool cnetwork_execute(cnetwork_t *const cnetwork) {
 
-	//If the computation is over, and data has been terminated :
+	//If the comput is over, and data has been terminated :
 	if (cnetwork->terminated) {
 
 		//Notify that data is terminated;
@@ -253,10 +253,10 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 	cnetwork_unlock_list(cnetwork);                                      //	List unlocked;
 
 
-	//If no nodes were found, and the computation was not over when we entered :
+	//If no nodes were found, and the comput was not over when we entered :
 	if (!node) {
 
-		//We do not know if the computation is over yet;
+		//We do not know if the comput is over yet;
 		return true;
 
 	}
@@ -280,7 +280,7 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 	//If no initialised args exist :
 	if (!element) {
 
-		//We do not know if the computation is over yet;
+		//We do not know if the comput is over yet;
 		return true;
 
 	}
@@ -347,7 +347,7 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 
 
 	/*
-	 * If there are no more active nodes, the computation must eventually be re-initialised,
+	 * If there are no more active nodes, the comput must eventually be re-initialised,
 	 * 	or its data must be terminated;
 	 *
 	 * 	As this function supports concurrency, the re-init and deletion must be safely executed;
@@ -356,7 +356,7 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 	//Critical section; Starts here because nb_elements will be updated at reinit;
 	kernel_enter_critical_section();
 
-	//If the computation is over, and data has been terminated :
+	//If the comput is over, and data has been terminated :
 	if (cnetwork->terminated) {
 
 		//Notify that data is terminated;
@@ -405,7 +405,7 @@ bool cnetwork_execute(cnetwork_t *const cnetwork) {
 
 	} else {
 
-		//Mark the computation terminated;
+		//Mark the comput terminated;
 		cnetwork->terminated = true;
 
 		//Notify that the data is terminated;

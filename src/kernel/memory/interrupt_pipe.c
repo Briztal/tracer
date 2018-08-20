@@ -19,7 +19,7 @@
 */
 
 
-#include <kernel/kernel.h>
+#include <kernel/syscall.h>
 #include <string.h>
 #include "interrupt_pipe.h"
 

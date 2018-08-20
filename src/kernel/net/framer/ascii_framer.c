@@ -3,8 +3,8 @@
 //
 
 
-#include <kernel/if/netf.h>
-#include <kernel/kernel.h>
+#include <kernel/net/netf.h>
+#include <kernel/syscall.h>
 #include "framer.h"
 
 /*

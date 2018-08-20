@@ -38,7 +38,7 @@
 //-----------------------------------------------
 
 /*
- * Duration intervals computation : Node 2, activated by 0, priority 2;
+ * Duration intervals comput : Node 2, activated by 0, priority 2;
  *
  * 	Computes the duration interval for one axis;
  *
@@ -55,7 +55,7 @@
  *
  * 	If authorised, will activate the distance correction node for all required actuators;
  *
- * 	Will activate the next position computation;
+ * 	Will activate the next position comput;
  *
  * 	If authorised, will activate the geometry inversion, to keep control positions relevant;
  *
@@ -124,7 +124,7 @@ void next_position_computation(const next_position_computation_args *args);
 /*
  * controller_builder_computation : Node 7, activated by 0, priority 7;
  *
- * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
+ * 	As comput steps are ordered, and so, do not support parallel execution, this function is delegated to
  * 	the machine controller, that will call each one of them in order;
  */
 
@@ -144,7 +144,7 @@ typedef struct {
 /*
  * duration_computation : Node 8, activated by 0, priority 8;
  *
- * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
+ * 	As comput steps are ordered, and so, do not support parallel execution, this function is delegated to
  * 	the machine controller, that will call each window correction step in order;
  */
 
@@ -162,9 +162,9 @@ typedef struct {
 //-----------------------------------------------
 
 /*
- * Controller state computation : Node 9, activated by 0, priority 9;
+ * Controller state comput : Node 9, activated by 0, priority 9;
  *
- * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
+ * 	As comput steps are ordered, and so, do not support parallel execution, this function is delegated to
  * 	the machine controller, that will call each one of them in order;
  */
 
@@ -185,7 +185,7 @@ struct {
 /*
  * State validation : Node 9, activated by 0, priority 9;
  *
- * 	As computation steps are ordered, and so, do not support parallel execution, this function is delegated to
+ * 	As comput steps are ordered, and so, do not support parallel execution, this function is delegated to
  * 	the machine controller, that will call each one of them in order;
  */
 
@@ -334,13 +334,13 @@ void machine_core_delete(machine_core_t *machine_core) {
 
 }
 
-//Execute some stages in the movement computation;
+//Execute some stages in the movement comput;
 bool machine_core_compute_movements(machine_core_t *const core, uint8_t nb_stages) {
 
 	//If the queue is already full :
 	if (!((volatile size_t) core->movement_buffer.nb_spaces)) {
 
-		//No computation to do until the next movement discard;
+		//No comput to do until the next movement discard;
 		return false;
 
 	}
@@ -354,7 +354,7 @@ bool machine_core_compute_movements(machine_core_t *const core, uint8_t nb_stage
 	//If the queue is already full :
 	if (!((volatile size_t) core->movement_buffer.nb_spaces)) {
 
-		//No computation to do until the next movement discard;
+		//No comput to do until the next movement discard;
 		return false;
 
 	}
@@ -475,7 +475,7 @@ time_interval_t mcontroller_regroup_intervals(const uint8_t dimension, const tim
 		//Propagate the invalidity;
 		final_interval.valid = final_interval.valid && interval->valid;
 
-		//If the interval is empty, it is not taken into account in the bounds computation;
+		//If the interval is empty, it is not taken into account in the bounds comput;
 
 		//If the actuator's duration interval is not empty :
 		if (!interval->empty) {

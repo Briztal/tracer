@@ -241,7 +241,7 @@ void KalmanFilter::predict(float *prediction, Matrix &prediction_P) {
 
 
     /*
-     * Covariance matrix computation;
+     * Covariance matrix comput;
      *
      * P+ = A * P * At + Q (matrix)
      */

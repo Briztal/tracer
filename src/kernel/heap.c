@@ -1,0 +1,778 @@
+
+
+#include <stdbool.h>
+
+#include <stdint.h>
+
+#include <string.h>
+
+#include "heap.h"
+
+#include <struct/containers/non_concurrent/list.h>
+
+
+/**
+ * correct_alignment_size : Will return the size value that is a direct multiple of the primitive type size, size_t;
+ *
+ * 	The resulting size will maintain the most strict alignment when added or subtracted to aligned addresses;
+ *
+ * @param size : the size to correct;
+ * @return the closest superior multiple of alignment of size;
+ */
+
+static inline size_t __correct_alignment_size(size_t size) {
+
+	//If size is not a multiple of sizeof(size_t) (that is a power of 2);
+	if (size & ~(sizeof(size_t) - 1)) {
+
+		//Add sizeof(size_t) to be superior to @size, and truncate to the closest inferior multiple of sizeof(size_t);
+		return ((size + sizeof(size_t)) & ~(sizeof(size_t) - 1));
+
+	} else {
+
+		//If size if a multiple of sizeof(size_t), no modifications to do;
+		return size;
+
+	}
+
+}
+
+
+//For speed purposes, the following macro updates the variable. No call required, easier to optimise;
+#define correct_alignment_size(size) {\
+        if ((size) & ~(sizeof(size_t) - 1)) {\
+            (size) =  (((size) + sizeof(size_t)) & ~(sizeof(size_t) - 1));\
+        }\
+    }
+
+
+//In the same way, we must correct addresses so that they meet alignment requirements;
+//For speed purposes, the following macro updates the address. No call required, easier to optimise;
+#define correct_address_alignment(address) {\
+        if (((size_t)(address)) & ~(sizeof(size_t) - 1)) {\
+            (address) =  (void *)(((size_t)(address) + sizeof(size_t)) & ~(sizeof(size_t) - 1));\
+        }\
+    }
+
+//-------------------------------------------- Available list manipulation ---------------------------------------------
+
+/**
+ * heap_insert_available_block : sub-call to the insertion function;
+ */
+
+static inline void heap_insert_available_block(struct heap_head *heap, struct heap_block *block) {
+
+	//Cache the first block on the list;
+	struct heap_block **const first_block = &heap->first_available_block;
+
+	//If the heap's available list is empty :
+	if (!(*first_block)) {
+
+		//Just save the first block;
+		*first_block = block;
+
+	} else {
+
+		//If the list is not empty :
+
+		//Call the insertion function;
+		(*(heap->insertion_f))(first_block, block);
+	}
+
+}
+
+/**
+ * heap_remove_available_block : sub-call to the insertion function;
+ */
+
+static void heap_remove_available_block(struct heap_head *heap, struct heap_block *block) {
+
+	//If the block is the first element of the available blocks list :
+	if (heap->first_available_block == block) {
+
+		//Cache @block's successor;
+		struct heap_block *next = block->available_head.next;
+
+		//If @block is the only element of the list :
+		if (block == next) {
+
+			//Mark the list empty;
+			heap->first_available_block = 0;
+
+		} else {
+			//If @block has a successor :
+
+			//Mark the successor as the first available block;
+			heap->first_available_block = next;
+
+		}
+
+	}
+
+	//Remove @block from its list;
+	elist_remove(struct heap_block, available_head, block);
+
+}
+
+
+
+//----------------------------------------------------- Heap block -----------------------------------------------------
+
+/*
+ * As there is space for a flag in the heap block header, we will use it as an indicator for double free of free to
+ * 	unallocated; This will not work all times but will offer a usefull safeguard;
+ */
+
+#define HEAP_ALLOCATED_STATUS   ((uint32_t)0xDEADBEEF)
+#define HEAP_FREE_STATUS        ((uint32_t)0xFEEBDAED)
+
+
+/*
+ * A heap block is a header contains all data required to describe properly a memory block;
+ */
+
+struct heap_block {
+
+	//Blocks are linked contiguously;
+	struct list_head head;
+
+	//Available blocks are linked non-contiguously, and possibly sorted;
+	struct list_head available_head;
+
+	//The status of the memory;
+	uint32_t status;
+
+	//The size of the memory block
+	size_t data_size;
+
+};
+
+
+//The offset required to convert a heap block pointer to the pointer to the data it references;
+#define HEAP_BLOCK_OFFSET sizeof(struct heap_block);
+
+
+
+//------------------------------------------------- Block sanity check -------------------------------------------------
+
+/**
+ * heap_check_free_block : checks if the block is FREE, returns if so. If not, calls the error function;
+ *
+ * @param block : the block to check, supposedly in the FREE status;
+ */
+
+static void heap_check_free_block(const struct heap_head *const heap, const struct heap_block *const block) {
+
+	//Cache the block's status;
+	uint32_t status = block->status;
+
+	/*
+	 * Verify that the block is valid. A valid memory block will always be in status FREE;
+	 * 	Though, an invalid memory block may be in status FREE; This method is an indicator, it will not
+	 * 	necessarily detect all memory leaks;
+	 */
+
+	//If the block's status is not FREE, a memory leak has occurred :
+	if (status != HEAP_FREE_STATUS) {
+
+		//If the block's status is allocated, log and quit;
+		if (status == HEAP_ALLOCATED_STATUS) {
+
+			//Log and quit;
+			heap_error(heap, "heap.c : heap_malloc : Error, the memory is marked allocated, a memory leak "
+				"has occurred;");
+
+		} else {
+
+			//Log and quit;
+			heap_error(heap, "heap.c : heap_malloc : Error, the status of the heap block is invalid, "
+				"a memory leak has occurred.");
+
+		}
+
+	}
+}
+
+
+/**
+ * heap_check_allocated_block : checks if the block is ALLOCATED, returns if so. If not, calls the error function;
+ *
+ * @param block : the block to check, supposedly in the ALLOCATED status;
+ */
+
+static void heap_check_allocated_block(const struct heap_head *const heap, const struct heap_block *const block) {
+
+	//Cache the block status;
+	uint32_t status = block->status;
+
+	/*
+	 * Verify that the block is valid. A valid memory block will always be in status HEAP_ALLOCATED;
+	 * 	Though, an invalid memory block may be in status HEAP_ALLOCATED; This method is an indicator, it will not
+	 * 	necessarily detect all double/invalid free call;
+	 */
+
+	if (status != HEAP_ALLOCATED_STATUS) {
+
+		//If the block is in FREE status, a double free may have been called;
+		if (status == HEAP_FREE_STATUS) {
+
+			//Log and quit;
+			heap_error(heap, "heap.c : heap_free : Error, the heap block is marked free. A double free may have been"
+				" attempted, or a free call on invalid data and a status collision, or a memory leak.");
+
+		} else {
+
+			//Log and quit;
+			heap_error(heap, "heap.c : heap_free : Error, the heap block has an invalid status. A memory leak may have"
+				" occurred, or heap_free has just been called with invalid data");
+
+		}
+
+	}
+
+}
+
+
+/**
+ * heap_check_allocated_block : checks if the block is ALLOCATED, returns if so. If not, calls the error function;
+ *
+ * @param block : the block to check, supposedly in the ALLOCATED status;
+ */
+
+static void heap_check_block(const struct heap_head *const heap, const struct heap_block *const block) {
+
+	//Cache the block status;
+	uint32_t status = block->status;
+
+	/*
+	 * Verify that the block has a valid status;
+	 */
+
+	if ((status != HEAP_ALLOCATED_STATUS) && (status != HEAP_FREE_STATUS)) {
+
+		//Log and quit;
+		heap_error(heap, "heap.c : heap_free : Error, the heap block has an invalid status. A memory leak may has "
+			"occurred;");
+
+	}
+
+}
+
+
+//------------------------------------------------------ Creation ------------------------------------------------------
+
+/**
+ * heap_create : initialises a heap container in the provided memory block;
+ * 	If the block is too small, it will return 0;
+ *
+ * @param start_address : the lowest bound of the block;
+ * @param size : the block size;
+ * @return : 0 if init failed, the address of the heap head if it succeeded;
+ */
+
+struct heap_head *heap_create(void *start_address, size_t size,
+							  void (*insertion_f)(struct heap_head *, struct heap_block *)) {
+
+	//Correct the size to meet alignment requirements;
+	correct_alignment_size(size);
+
+	//If the block is too small to contain a heap head :
+	if (size < sizeof(struct heap_head)) {
+
+		//Fail, not enough space;
+		return 0;
+
+	}
+
+	//Correct, the start address to meet alignment requirements;
+	correct_address_alignment(start_address);
+
+	//Set the heap head at the beginning of the block;
+	struct heap_head *heap = start_address;
+
+	//Update @start_address to reflect the address right after the heap;
+	start_address = (uint8_t *) start_address + sizeof(struct heap_head);
+
+	//Update @size size to reflect the remaining space after the heap head;
+	size -= sizeof(struct heap_head);
+
+	//If the block is too small to contain a heap head :
+	if (size < sizeof(struct heap_block)) {
+
+		//Fail, not enough space;
+		return 0;
+
+	}
+
+	//Set the first heap block right after the heap head;
+	struct heap_block *first_block = start_address;
+
+	//Update @size size to reflect the available space of the first block;
+	size -= sizeof(struct heap_head);
+
+	//Create the first block initializer;
+	struct heap_block first_block_init = {
+
+		//The block is the first in the heap for instance, no linking;
+		.head = {
+			.next = first_block,
+			.prev = first_block,
+		},
+
+		//The block is the first available in the heap;
+		.available_head = {
+			.next = first_block,
+			.prev = first_block,
+		},
+
+		//The space is free, set in the heap fred status;
+		.status = HEAP_FREE_STATUS,
+
+		//All remaining space belongs to the block;
+		.data_size = size,
+
+	};
+
+	//Initialise the first block;
+	memcpy(first_block, &first_block_init, sizeof(struct heap_block));
+
+	//Create the initializer for the heap head;
+	struct heap_head head_init = {
+		.first_block = first_block,
+		.first_available_block = first_block,
+		.insertion_f = insertion_f,
+	};
+
+	//Initialise the heap head;
+	memcpy(heap, &head_init, sizeof(struct heap_head));
+
+	//Return the initialised heap head reference;
+	return heap;
+
+}
+
+
+//--------------------------------------------------- Split - Merge ----------------------------------------------------
+
+/**
+ * heap_split_block : splits the required block into two blocks, the first containing @data_size bytes, and the other
+ * 	containing the rest;
+ *
+ * @param head : the heap where @block belongs;
+ * @param block : the block to split;
+ * @param data_size : the required size of the data zone of the first block after splitting;
+ */
+
+static void heap_split_block(struct heap_head *head, struct heap_block *block, size_t data_size) {
+
+	//If the block can't contain @data_size bytes, and another non-empty block :
+	if (block->data_size <= data_size + sizeof(struct heap_block)) {
+
+		//Nothing to do, the block can't be split;
+		return;
+
+	}
+
+	//Determine the total size of the current block;
+	size_t block_size = sizeof(struct heap_block) + data_size;
+
+	//The new block will be located after the current block, block head and data comprised;
+	struct heap_block *new_block = block + block_size;
+
+	//Create the new block's initializer;
+	struct heap_block new_block_init = {
+
+		//Link the block to itself;
+		.head = {
+			.prev = new_block,
+			.next = new_block,
+
+		},
+
+		//Link the block to itself;
+		.available_head = {
+			.prev = new_block,
+			.next = new_block,
+		},
+
+		//The space is free, set in the heap fred status;
+		.status = HEAP_FREE_STATUS,
+
+		//The new block's data is located after its header, that is after the first block's data;
+		//All sizes and pointers are properly aligned, no correction required;
+		.data_size = block->data_size - block_size - sizeof(struct heap_block),
+
+	};
+
+	//Initialise the new block;
+	memcpy(new_block, &new_block_init, sizeof(struct heap_block));
+
+	//Insert the new block after the provided one;
+	list_add((struct list_head *) block, (struct list_head *) new_block);
+
+	//Insert the new block in the available list;
+	heap_insert_available_block(head, new_block);
+
+}
+
+
+/**
+ * heap_merge_blocks : merges the provided block and its successor, only if both are free, and if the provided block
+ * 	is not the last of the memory zone;
+ *
+ * @param block : the block from which to get the successor;
+ */
+
+static bool heap_merge_blocks(struct heap_head *heap, struct heap_block *block) {
+
+	//Check the block.
+	heap_check_block(heap, block);
+
+	//If the block is free :
+	if (block->status != HEAP_FREE_STATUS) {
+
+		//No merge to do, no data has been modified;
+		return false;
+
+	}
+
+	//Cache the block's direct successor;
+	struct heap_block *next = block->head.next;
+
+	//Check the successor;
+	heap_check_block(heap, block);
+
+	//If the successor is free :
+	if (next->status != HEAP_FREE_STATUS) {
+
+		//No merge to do, no data has been modified;
+		return false;
+
+	}
+
+	//If the successor is the first block on the list (linking goes in increasing addresses) :
+	if (next <= block) {
+
+		//No merge to do, can only merge contiguous blocks; no data has been modified;
+		return false;
+
+	}
+
+	//Remove both blocks from their available lists;
+	heap_remove_available_block(heap, block);
+	heap_remove_available_block(heap, next);
+
+	//Remove the successor from the blocks list; @block's head will be updated;
+	list_remove((struct list_head *) next);
+
+	//Update @block 's data length, to contain @next;
+	block->data_size += sizeof(struct heap_block) + next->data_size;
+
+	//Data has been modified, @block must be re-inserted manually in the available list;
+	return true;
+
+
+}
+
+
+//---------------------------------------------------- Manipulation ----------------------------------------------------
+
+/**
+ * Allocate memory block;
+ *
+ * Allocates a block of size bytes of memory, returning a pointer to the beginning of the block.
+ *
+ * The content of the newly allocated block of memory is not initialized, remaining with indeterminate values.
+ *
+ * If size is zero, a null pointer is provided;
+ *
+ * @param heap : the heap memory zone where to allocate the block;
+ * @param size : the required size of the memory block;
+ *
+ * @return a pointer to the required memory block, or 0 if error/null size;
+ */
+
+void *heap_malloc(struct heap_head *heap, size_t size) {
+
+	//If a null size was provided :
+	if (!size) {
+
+		//Return a null pointer;
+		return 0;
+
+	}
+
+	//First, correct the size, so that it maintains alignment during pointer arithmetic;
+	correct_alignment_size(size);
+
+	//Cache the first available block;
+	struct heap_block *const first_block = heap->first_available_block;
+
+	//If there is no available block :
+	if (!first_block) {
+
+		//Fail, no space left;
+		heap_error(heap, "heap.c : heap_malloc : no space left on heap");
+
+		//Never reached;
+		return 0;
+
+	}
+
+	//Create a temp for the first block;
+	struct heap_block *block = first_block;
+
+	//For each block in the list :
+	do {
+
+
+		//TODO ERROR MESSAGE
+		//TODO DISABLE CHECKING
+		heap_check_free_block(heap, block);
+
+		//Cache the block data size;
+		const size_t block_data_size = block->data_size;
+
+		//If the block can contain @size bytes :
+		if (block_data_size >= size) {
+
+			//We can split the block in two blocks, the first being of the required size;
+			heap_split_block(heap, block, size);
+
+			//Set to allocated;
+			block->status = HEAP_ALLOCATED_STATUS;
+
+
+
+			//Remove the block from the available list;
+			elist_remove(struct heap_block, available_head, block);
+
+			//Return the lowest address of the block's data zone;
+			return (void *) ((uint8_t *) block + sizeof(struct heap_block));
+
+		}
+
+		//Re-iterate for the next available block;
+		block = block->available_head.next;
+
+	} while (block != first_block);
+
+
+	//If we reached the end of the block, error;
+	heap_error(heap, "heap.c : heap_malloc : no memory block can contain the required size;");
+
+	//Never reached;
+	return 0;
+
+}
+
+
+/**
+ * Deallocate memory block;
+ *
+ * A block of memory previously allocated by a call to malloc is deallocated, making it available again for further
+ * 	allocations.
+ *
+ * If @ptr does not point to a block of memory allocated with the above functions, it causes undefined behavior.
+ * 	The function will attempt to catch such behaviour and to throw an error, but it is not guaranteed;
+ *
+ * If @ptr is a null pointer, the function does nothing.
+ *
+ * Notice that this function does not change the value of @ptr itself, hence it still points to the same (now invalid)
+ * location;
+ *
+ * @param heap : the heap memory zone that contains @ptr;
+ * @param ptr : the data pointer that identifies a heap block to free;
+ */
+
+void heap_free(struct heap_head *heap, void *ptr) {
+
+	//If a null pointer was provided :
+	if (!ptr) {
+
+		//Nothing to do;
+		return;
+
+	}
+
+	//Determine the address of the related heap block;
+	struct heap_block *block = (struct heap_block *) ((uint8_t *) ptr - sizeof(struct heap_block));
+
+	//TODO ERROR MESSAGE
+	//TODO DISABLE CHECKING
+	heap_check_allocated_block(heap, block);
+
+	//Mark the memory block available;
+	block->status = HEAP_FREE_STATUS;
+
+	//Merge @block and its successor;
+	heap_merge_blocks(heap, block);
+
+	//Cache the block's predecessor;
+	struct heap_block *prev = block->head.prev;
+
+	//Merge block and its predecessor;
+	bool prev_to_reinsert = heap_merge_blocks(heap, prev);
+
+	//If the previous block must be re-inserted :
+	if (prev_to_reinsert) {
+
+		//Re-insert the previous block in the list;
+		heap_insert_available_block(heap, prev);
+
+	} else {
+		//If the fred block must be reinserted;
+
+		//Insert the fred block in the list;
+		heap_insert_available_block(heap, block);
+
+	}
+
+}
+
+
+/**
+ * Reallocate memory block;
+ *
+ * Changes the size of the memory block pointed to by @ptr.
+ *
+ * The function may move the memory block to a new location (whose address is returned by the function).
+ *
+ * The content of the memory block is preserved up to the lesser of the new and old sizes, even if the block is moved
+ * to a new location. If the new size is larger, the value of the newly allocated portion is indeterminate.
+ *
+ * In case that @ptr is a null pointer, the function behaves like malloc, assigning a new block of @size bytes and
+ * returning a pointer to its beginning.
+ *
+ * @param heap : the heap memory zone that covers @data;
+ * @param ptr : the data pointer that identifies a heap block to free;
+ * @param size : the new required size;
+ *
+ * @return : a pointer to the new position;
+ */
+
+void *heap_realloc(struct heap_head *heap, void *ptr, size_t size) {
+
+	//If a null pointer was provided :
+	if (!ptr) {
+
+		//Allocate some data;
+		return heap_malloc(heap, size);
+
+	}
+
+	//If the size is null :
+	if (!size) {
+
+		//Return a null pointer;
+		return 0;
+
+	}
+
+	//Determine the address of the related heap block;
+	struct heap_block *block = (struct heap_block *) ((uint8_t *) ptr - sizeof(struct heap_block));
+
+	//TODO ERROR MESSAGE
+	//TODO DISABLE CHECKING
+	heap_check_allocated_block(heap, block);
+
+	//Cache the block data size;
+	size_t block_data_size = block->data_size;
+
+	//If both sizes are equal :
+	if (size == block_data_size) {
+
+		//Nothing to do;
+		return ptr;
+
+	} else if (size < block_data_size) {
+		//If the block must be reduced :
+
+		//We can split the block in two blocks, the first being of the required size;
+		heap_split_block(heap, block, size);
+
+		//If the block can't be split, nothing to do;
+		return ptr;
+
+	} else {
+		//If the block must be enlarged :
+
+		//Allocate another block somewhere else in the heap with the correct size;
+		void *new_ptr = heap_malloc(heap, size);
+
+		//Copy the previous data block at the beginning of the new one;
+		memcpy(new_ptr, ptr, block_data_size);
+
+		//Free the old block;
+		heap_free(heap, ptr);
+
+		//Return the new pointer;
+		return new_ptr;
+
+	}
+
+}
+
+
+//----------------------------------------------------- Insertion ------------------------------------------------------
+
+//The available blocks list is a fifo;
+void heap_fifo_insertion(struct heap_block **first_block, struct heap_block *new_block) {
+
+	//Cache the first block;
+	struct heap_block *f = *first_block;
+
+	//Add the new block before the first block;
+	elist_add(struct heap_block, available_head, new_block, f);
+
+	//Set the new block to be the first block;
+	*first_block = new_block;
+
+}
+
+//The available fifo is sorted, on a data size base;
+void heap_size_sort_insertion(struct heap_block **first_block_p, struct heap_block *new_block) {
+
+
+	//Cache the first block;
+	struct heap_block *const first_block = *first_block_p;
+	struct heap_block *block = first_block;
+
+	//A flag set if new_block must be the new first block of the list;
+	bool first = true;
+
+	//For each block of the list
+	do {
+
+		//If the block's size is greater than the new block's size, stop here;
+		if (block->data_size > new_block->data_size) {
+			break;
+		}
+
+		//@new_block has not the lowest size of the list, @first_block will stay in place in @first_block_p
+		first = false;
+
+		//Cache the next block;
+		block = block->available_head.next;
+
+
+	} while (block != first_block);
+
+	//Bloc is the first greater than new_block;
+
+	//Add the new block before @block;
+	elist_add(struct heap_block, available_head, new_block, block);
+
+	//If new_block has the lowest size of the list :
+	if (first) {
+
+		//Set the new block to be the first block of the list;
+		*first_block_p = new_block;
+
+	}
+
+
+}
+
+
+

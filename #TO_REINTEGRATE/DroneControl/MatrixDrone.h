@@ -79,7 +79,7 @@ protected:
 
 protected:
 
-    //The power matrix, used for computation and so shared with sub-classes;
+    //The power matrix, used for comput and so shared with sub-classes;
     Matrix systemMatrix;
 
 

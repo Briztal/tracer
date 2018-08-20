@@ -30,12 +30,12 @@
 #include "movement_builder.h"
 
 
-//---------------------------- Target distances computation ----------------------------
+//---------------------------- Target distances comput ----------------------------
 
 /*
  * The machine is controlled by providing algebraic distances, that actuators must move of;
  *
- * 	This computation can be realised in many ways, and can eventually be changed during the machine's life cycle;
+ * 	This comput can be realised in many ways, and can eventually be changed during the machine's life cycle;
  */
 
 /*
@@ -85,7 +85,7 @@ typedef struct {
 /*
  * Extra computations may be required, depending on the controller's complexity level.
  *
- * 	A controller computation is a function that takes current and new states (consts), makes calculations, and
+ * 	A controller comput is a function that takes current and new states (consts), makes calculations, and
  * 	saves them in the controller part of the movement builder;
  *
  * 	The controller part of the movement builder is not defined, and completely depends on the implementation;
@@ -94,7 +94,7 @@ typedef struct {
  */
 
 /*
- * All computation functions take the following three arguments :
+ * All comput functions take the following three arguments :
  */
 
 typedef struct {
@@ -116,7 +116,7 @@ typedef struct {
 	//The status flag. Computation will be executed only if flag is set;
 	bool enabled;
 
-	//The function that will actually do the computation;
+	//The function that will actually do the comput;
 	void (*computation_function)(const builder_computation_args *args);
 
 } controller_builder_computation_t;
@@ -171,7 +171,7 @@ typedef struct {
 /*
  * Extra state fields may be required, depending on the controller's complexity level.
  *
- * 	A controller state computation is a function that takes current and new states (consts), makes calculations, and
+ * 	A controller state comput is a function that takes current and new states (consts), makes calculations, and
  * 	saves them in the controller part of the movement builder;
  *
  * 	The controller part of the movement builder is not defined, and completely depends on the implementation;
@@ -202,7 +202,7 @@ typedef struct {
 	//The status flag. Computation will be executed only if flag is set;
 	bool enabled;
 
-	//The function that will actually do the computation;
+	//The function that will actually do the comput;
 	void (*computation_function)(const state_computation_args *args);
 
 } controller_state_computation_t;
@@ -235,7 +235,7 @@ typedef struct {
 	void (*controller_builder_deleter)(void *);
 
 
-	//---------------------------------------------- Distance computation ----------------------------------------------
+	//---------------------------------------------- Distance comput ----------------------------------------------
 
 	//The number of different distance computers;
 	const uint8_t nb_distances_computers;
@@ -247,7 +247,7 @@ typedef struct {
 	const distances_computer_t *const distances_computers;
 
 
-	//----------------------------------------------- Builder computation ----------------------------------------------
+	//----------------------------------------------- Builder comput ----------------------------------------------
 
 	//The number of controller builder computations;
 	const uint8_t nb_builder_computations;
@@ -265,7 +265,7 @@ typedef struct {
 	const kinematic_constraint_t *const kinematic_constraints;
 
 
-	//------------------------------------------------ State computation -----------------------------------------------
+	//------------------------------------------------ State comput -----------------------------------------------
 
 	//The number of controller state computations;
 	const uint8_t nb_state_computations;
@@ -309,7 +309,7 @@ void *machine_controller_create_builder(machine_controller_t *controller);
 void machine_controller_delete_builder(machine_controller_t *controller, void *builder);
 
 
-//------------------------------------------------ Real time computation -----------------------------------------------
+//------------------------------------------------ Real time comput -----------------------------------------------
 
 
 //Update the builder, by executing all builder computations;

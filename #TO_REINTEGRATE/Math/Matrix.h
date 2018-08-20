@@ -141,7 +141,7 @@ public:
 
 private:
 
-    //Compute a particular minor; not public, because optimised for cofactor computation;
+    //Compute a particular minor; not public, because optimised for cofactor comput;
     float getMinor(bool *const columns_flags, uint8_t line, uint8_t disabled_line, const uint8_t size) const;
 
 

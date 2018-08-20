@@ -98,7 +98,7 @@ void machine_state_delete(machine_state_t *state);
 
 /*
  * A machine comprises two states, the current, that is read only, and the candidate one that is currently
- * in computation, and can be modified;
+ * in comput, and can be modified;
  *
  * 	When the candidate state is accepted, it becomes the current state;
  */
@@ -108,7 +108,7 @@ typedef struct {
 	//The current machine state;
 	const machine_state_const_t *current_state;
 
-	//The machine state in computation;
+	//The machine state in comput;
 	machine_state_t *candidate_state;
 
 	//The machine state identifier; set when "*candidate_state == s0";

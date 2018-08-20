@@ -125,7 +125,7 @@ void jerk_determine_traversal_distances(const geometric_base_t *const geometric_
 
 	//Not supported for instance;
 	kernel_error("trajectory.c : curve_determine_distances : complex movements are not supported for instance. "
-					 "Curve distance computation must be implemented before;");
+					 "Curve distance comput must be implemented before;");
 
 }
 

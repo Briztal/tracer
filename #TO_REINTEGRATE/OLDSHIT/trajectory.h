@@ -130,7 +130,7 @@ typedef struct trajectory_t {
 	//Trajectory curve;
 	const curve_t curve;
 
-	//A flag to determine if the distance computation can be optimised;
+	//A flag to determine if the distance comput can be optimised;
 	bool affine_curve;
 
 	//Increments;
