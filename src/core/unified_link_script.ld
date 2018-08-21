@@ -9,16 +9,17 @@ INCLUDE memory_map.ld
  *  - _start_data   :   the start of the region where to copy rodata, in RAM;
  *  - _start_bss    :   the start of the bss region, to initialise with zeros;
  *  - _end_bss      :   the end of the bss region, to initialise with zeros;
- *  - _start_stack  :   the lowest address of the stack;
- *  - _end_stack    :   the highest address of the stack;
+ *  - _ram_lowest   :   the lowest bound of the ram's available zone;
+ *  - _ram_highest  :   the highest bound of the ram's available zone;
  */
+
+/*TODO : */
+
 
 SECTIONS {
 
     . = 0;
-
-    .vectors :
-    {
+    .vectors : {
         KEEP(*(.vectors))
     } > FLASH
 
@@ -29,47 +30,48 @@ SECTIONS {
      */
 
     . = 0x400;
-    .flashconfig :
-    {
+    .flashconfig : {
         KEEP(*(.flashconfig*))
     } > FLASH
 
 
+    /*The text section contains the program itself;*/
     . = ALIGN(4);
-
-    .text :
-    {
-
+    .text : {
         *(.text*)
-
-        . = ALIGN(4);
-
-        _start_rodata = .;
-        *(.rodata*)
-        _end_rodata = .;
-
     } > FLASH
 
 
+    /*The rodata section contains globals init values;*/
     . = ALIGN(4);
+    .rodata : {
+        _start_rodata = .;
+        *(.rodata*)
+        _end_rodata = .;
+    } > FLASH
 
+
+    /*The bss section contains globals that must be initialised to 0 at init*/
+    . = ALIGN(4);
     .data :
     {
         _start_data = .;
         *(.data*)
     } > RAM
 
-    .bss :
-    {
+
+    /*The bss section contains globals that must be initialised to 0 at init*/
+    . = ALIGN(4);
+    .bss : {
         _start_bss = .;
         *(.bss*)
         _end_bss = .;
     } > RAM
 
-    . = ALIGN(4);
 
-    _start_stack = .;
+    /*The lowest accessible RAM address;*/
+    _ram_lowest = .;
 
-
-    PROVIDE(_end_stack = ORIGIN(RAM) + LENGTH(RAM));
+    /*The highest accessible RAM address;*/
+    PROVIDE(_ram_highest = ORIGIN(RAM) + LENGTH(RAM));
 }

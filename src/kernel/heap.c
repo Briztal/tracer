@@ -11,6 +11,8 @@
 #include <struct/containers/non_concurrent/list.h>
 
 
+#define alignment_size (alignment_size)
+
 /**
  * correct_alignment_size : Will return the size value that is a direct multiple of the primitive type size, size_t;
  *
@@ -22,15 +24,15 @@
 
 static inline size_t __correct_alignment_size(size_t size) {
 
-	//If size is not a multiple of sizeof(size_t) (that is a power of 2);
-	if (size & ~(sizeof(size_t) - 1)) {
+	//If size is not a multiple of alignment_size(that is a power of 2);
+	if (size & ~(alignment_size - 1)) {
 
-		//Add sizeof(size_t) to be superior to @size, and truncate to the closest inferior multiple of sizeof(size_t);
-		return ((size + sizeof(size_t)) & ~(sizeof(size_t) - 1));
+		//Add alignment_wordto be superior to @size, and truncate to the closest inferior multiple of alignment_size;
+		return ((size + alignment_size) & ~(alignment_size - 1));
 
 	} else {
 
-		//If size if a multiple of sizeof(size_t), no modifications to do;
+		//If size if a multiple of alignment_size, no modifications to do;
 		return size;
 
 	}
@@ -40,17 +42,16 @@ static inline size_t __correct_alignment_size(size_t size) {
 
 //For speed purposes, the following macro updates the variable. No call required, easier to optimise;
 #define correct_alignment_size(size) {\
-        if ((size) & ~(sizeof(size_t) - 1)) {\
-            (size) =  (((size) + sizeof(size_t)) & ~(sizeof(size_t) - 1));\
+        if ((size) & ~(alignment_size- 1)) {\
+            (size) =  (((size) + alignment_size) & ~(alignment_size- 1));\
         }\
     }
 
 
-//In the same way, we must correct addresses so that they meet alignment requirements;
-//For speed purposes, the following macro updates the address. No call required, easier to optimise;
-#define correct_address_alignment(address) {\
-        if (((size_t)(address)) & ~(sizeof(size_t) - 1)) {\
-            (address) =  (void *)(((size_t)(address) + sizeof(size_t)) & ~(sizeof(size_t) - 1));\
+#define correct_address_size_alignment(address, size) {\
+        (size) = (size) & ~(alignment_size- 1); \
+        if (((size_t)(address)) & ~(alignment_size- 1)) {\
+            (address) =  (void *)(((size_t)(address) + alignment_size) & ~(alignment_size- 1));\
         }\
     }
 
@@ -265,6 +266,9 @@ static void heap_check_block(const struct heap_head *const heap, const struct he
  * heap_create : initialises a heap container in the provided memory block;
  * 	If the block is too small, it will return 0;
  *
+ * 	If the address or the size are not alignable, the size will be decreased, and the address increased, in order to
+ * 		meet alignment requirements, while still fitting in the provided memory block;
+ *
  * @param start_address : the lowest bound of the block;
  * @param size : the block size;
  * @return : 0 if init failed, the address of the heap head if it succeeded;
@@ -273,8 +277,20 @@ static void heap_check_block(const struct heap_head *const heap, const struct he
 struct heap_head *heap_create(void *start_address, size_t size,
 							  void (*insertion_f)(struct heap_head *, struct heap_block *)) {
 
-	//Correct the size to meet alignment requirements;
-	correct_alignment_size(size);
+
+	//If the size is not alignable, decrease it to meet alignment requirement;
+	size = size & ~(alignment_size - 1);
+
+	//If the start address is not aligned properly : 
+	if (((size_t) start_address) & ~(alignment_size - 1)) {
+
+		//Increase the start address to meet alignment requirements;
+		start_address = (void *) (((size_t) start_address + alignment_size) & ~(alignment_size - 1));
+
+		//Decrease the size of one alignment word;
+		size -= alignment_size;
+
+	}
 
 	//If the block is too small to contain a heap head :
 	if (size < sizeof(struct heap_head)) {
@@ -283,9 +299,6 @@ struct heap_head *heap_create(void *start_address, size_t size,
 		return 0;
 
 	}
-
-	//Correct, the start address to meet alignment requirements;
-	correct_address_alignment(start_address);
 
 	//Set the heap head at the beginning of the block;
 	struct heap_head *heap = start_address;
@@ -486,6 +499,9 @@ static bool heap_merge_blocks(struct heap_head *heap, struct heap_block *block) 
  *
  * If size is zero, a null pointer is provided;
  *
+ * If the required size can't be aligned (not a multiple of @alignment_word) the size will be increased in order to
+ * 	provide an alignable block, that still can contain the required size;
+ *
  * @param heap : the heap memory zone where to allocate the block;
  * @param size : the required size of the memory block;
  *
@@ -563,6 +579,73 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 
 	//Never reached;
 	return 0;
+
+}
+
+
+/**
+ * heap_calloc : Allocate and zero-initialize block;
+ *
+ * Allocates a block of memory of @size bytes, and initializes it to zero.
+ *
+ * The effective result is the allocation of a zero-initialized memory block of @size bytes.
+ *
+ * If @size is zero, 0 will be returned;
+ *
+ * @param heap : the heap where to allocate the memory block;
+ * @param size : the required size of the memory block;
+ * @return the lowest data address of the allocated block;
+ */
+
+void *heap_calloc(struct heap_head *heap, size_t size) {
+
+	//If the size is null, return 0;
+	if (!size) {
+		return 0;
+	}
+
+	//Allocate a block of the required size;
+	void *ptr = heap_malloc(heap, size);
+
+	//Set all bytes to 0;
+	memset(ptr, 0, size);
+
+	//Return the null-initialised block;
+	return ptr;
+
+}
+
+
+/**
+ * heap_ialloc : Allocate and initialize block;
+ *
+ * Allocates a block of memory of @size bytes, and copies @init, supposedly of @size bytes too,  in it;
+ *
+ * The effective result is the allocation of an initialized memory block of @size bytes.
+ *
+ * If @size is zero, 0 will be returned;
+ *
+ * @param heap : the heap where to allocate the memory block;
+ * @param size : the required size of the memory block;
+ * @param initializer : the initializer of the memory block;
+ * @return the lowest data address of the allocated block;
+ */
+
+void *heap_ialloc(struct heap_head *heap, size_t size, void *initializer) {
+
+	//If the size is null, return 0;
+	if (!size) {
+		return 0;
+	}
+
+	//Allocate a block of the required size;
+	void *ptr = heap_malloc(heap, size);
+
+	//Initialise the block;
+	memcpy(ptr, initializer, size);
+
+	//Return the null-initialised block;
+	return ptr;
 
 }
 

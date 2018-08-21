@@ -97,7 +97,7 @@ inline void core_preempt_process();
  */
 static inline size_t core_correct_size(size_t size) {
 
-	//Set the two first bytes to zero to obtain a multiple of 8;
+	//Set the three first bits to zero to obtain a multiple of 8;
 	return size & ~(size_t)7;
 
 }

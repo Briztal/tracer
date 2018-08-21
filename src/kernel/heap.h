@@ -7,7 +7,9 @@
 //Predeclare the heap block structure; Struct definition can be found in heap.c;
 struct heap_block;
 
+
 typedef void (*heap_insertion_f)(struct heap_block **first_block, struct heap_block *new_block);
+
 
 /*
  * A heap head contains data describing the whole memory region covered by the heap;
@@ -32,14 +34,28 @@ struct heap_head {
 struct heap_head *heap_create(
 	void *start_address,
 	size_t size,
-	void (*insertion_f)(struct heap_head *, struct heap_block *)
+	heap_insertion_f insertion_f
 );
+
+
+//TODO TEST HEAP START ALIGNMENT
+//TODO TEST HEAP ALIGNMENT PROPAGATION
+//TODO TEST HEAP INSERTION ALGORITHMS
+//TODO TEST HEAP MEMORY REFILL
+//TODO TEST HEAP OVF FAIL;
+
 
 
 //---------------------------------------------------- Manipulation ----------------------------------------------------
 
 //Allocate some data in the heap;
 void *heap_malloc(struct heap_head *heap, size_t size);
+
+//Allocate some data in the heap, and initialises all bytes to 0;
+void *heap_calloc(struct heap_head *heap, size_t size);
+
+//Allocate some data in the heap, and copy the initializer in the allocated memory region;
+void *heap_ialloc(struct heap_head *heap, size_t size, void *initializer);
 
 //Free some data in the heap;
 void heap_free(struct heap_head *heap, void *ptr);

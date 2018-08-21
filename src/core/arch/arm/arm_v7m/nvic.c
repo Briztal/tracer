@@ -222,6 +222,7 @@ void ic_clear_system_interrupt_pending(enum ic_system_exception exception) {
 
 }
 
+
 //Is a system interrupt in the pending state;
 bool ic_is_system_exception_pending(enum ic_system_exception exception) {
 

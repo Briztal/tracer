@@ -27,13 +27,7 @@
 
 #include <kernel/arch/arch.h>
 
-//------------------------------------------- Entry Point -------------------------------------------
 
-/*
- * init : this function is called once, by the core library only.
- */
-
-void kernel_init();
 
 //Update the error function;
 void kernel_set_error_output(void (*error_log)(const char *));

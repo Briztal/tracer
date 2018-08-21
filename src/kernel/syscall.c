@@ -21,8 +21,6 @@
 
 #include <stdbool.h>
 
-#include <malloc.h>
-
 #include <string.h>
 
 #include <kernel/scheduler/scheduler.h>
@@ -33,22 +31,8 @@
 //The error message output. Null at init;
 static void (*error_message_function)(const char *) = 0;
 
-//The first function to execute;
-extern void kernel_init_function(void *);
-
 
 //------------------------------------------- Entry Point -------------------------------------------
-
-/*
- * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
- */
-
-void kernel_init() {
-
-    //Start the scheduler;
-    scheduler_start(kernel_init_function);
-
-}
 
 
 //Update the error message output function;
@@ -94,69 +78,16 @@ void kernel_error(const char *error_message) {
 
 
 /*
- * -------------------------------------------- Stack management ---------------------------------------------
- */
-
-/*
- * kernel_stack_alloc : this function allocates a stack, and then initialises stack pointers;
- *
- *  Finally, it sets the thread's sequences_initialised as Terminated;
- */
-
-void kernel_stack_alloc(core_stack_t *stack, size_t stack_size,
-                        void (*function)(), void (*exit_loop)(), void *arg) {
-
-    //Truncate the size to get a size matchng with the primitive type;
-    stack_size = core_correct_size(stack_size);
-
-    //Then, allocate a memory zone of the required size;
-    void *sp = kernel_malloc(stack_size);
-
-    //Set the stack's begin;
-    stack->stack_begin = core_get_stack_begin(sp, stack_size);
-
-    //Set the stack's end;
-    stack->stack_end = core_get_stack_end(sp, stack_size);
-
-    //Reset the stack;
-    kernel_stack_reset(stack, function, exit_loop, arg);
-
-}
-
-
-/*
- * kernel_reset_stack : resets the process_t to its initial stack pointer,
- * 	and initialises the context to its initial;
- */
-
-void kernel_stack_reset(core_stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg) {
-
-    //Initialise the stack;
-    core_init_stack(stack, init_f, exit_f, arg);
-
-}
-
-
-/*
- * kernel_stack_free : frees the stack;
- */
-
-void kernel_stack_free(core_stack_t *stack) {
-
-    //Free the stack;
-    kernel_free(stack);
-
-}
-
-
-/*
  * -------------------------------------------- Heap management ---------------------------------------------
  */
+
+//TODO TMALLOC SYSCALL;
 
 /*
  * kernel_malloc : the malloc to use across the code; It is thread safe, and checks for exceptions;
  */
 
+/*
 void *kernel_malloc(size_t size) {
 
     //Enter a critical section;
@@ -176,11 +107,14 @@ void *kernel_malloc(size_t size) {
     return ptr;
 
 }
+ */
 
 /*
  * kernel_malloc_copy : allocates a memory zone, and copies the correct amount of data from the initialiser to
  *  the allocated zone;
  */
+
+/*
 
 void *kernel_malloc_copy(const size_t size, const void *const initialiser) {
 
@@ -206,14 +140,15 @@ void *kernel_malloc_copy(const size_t size, const void *const initialiser) {
     //Return the allocated data;
     return ptr;
 
-
 }
+ */
 
 
 /*
  * kernel_realloc : the realloc to use across the code; It is thread safe, and checks for exceptions;
  */
 
+/*
 void *kernel_realloc(void *data, size_t size) {
 
     //Enter a critical section;
@@ -232,13 +167,14 @@ void *kernel_realloc(void *data, size_t size) {
     //Return the reallocated data;
     return ptr;
 
-
 }
-
+*/
 
 /*
  * kernel_free : the free to use across the code; It is thread safe, and checks for exceptions;
  */
+
+/*
 
 void kernel_free(void *data) {
 
@@ -251,5 +187,7 @@ void kernel_free(void *data) {
     kernel_leave_critical_section();
 
 }
+
+ */
 
 
