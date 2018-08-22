@@ -2,9 +2,8 @@
 // Created by root on 8/22/18.
 //
 
-#include <stdbool.h>
-#include <core/debug/debug.h>
-#include "swuart.h"
+
+#include <core/debug.h>
 
 
 /**

@@ -37,13 +37,16 @@
 
 
 //Light the debug led high;
-void debug_led_high();
+extern void debug_led_high();
 
 //Turn off the debug led;
-void debug_led_low();
+extern void debug_led_low();
 
 //Wait a certain number of milliseconds;
-void debug_delay_ms(uint32_t ms);
+extern void debug_delay_ms(uint32_t ms);
+
+//Wait a certain number of milliseconds;
+extern void debug_delay_us(uint32_t us);
 
 //Light the debug led and stop;
 void debug_led_halt();

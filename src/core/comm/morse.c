@@ -3,7 +3,7 @@
 //
 
 
-#include "core/debug/debug.h"
+#include "core/debug.h"
 
 #include <stdbool.h>
 

@@ -67,8 +67,6 @@ CORE_OBJS := $(foreach src, $(CORE_SRCS:.c=.o), $(BUILDDIR)/$(src))
 core : $(CORE_OBJS)
 
 
-
-
 #------------------------------------------------------ Make rules -----------------------------------------------------
 
 # The base compilation rule : takes a path that targets the build directory, truncates the source part,

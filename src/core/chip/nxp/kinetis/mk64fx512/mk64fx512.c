@@ -23,11 +23,84 @@
 
 #include "mk64fx512.h"
 
-#include <hardware/startup.h>
+#include <core/startup.h>
 
 #define KINETISK
 #define __MK64FX512__
 #define F_CPU 120000000
+
+
+
+//------------------------------------------------------- Debug --------------------------------------------------------
+
+/**
+ * debug_led_high : hardware code for turning on the led;
+ */
+
+void debug_led_high() {
+
+	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
+
+	//Output
+	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
+
+	//ALT 1
+	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
+
+	//Set
+	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
+
+}
+
+
+/**
+ * debug_led_low : hardware code for turning off the led;
+ */
+
+void debug_led_low() {
+
+	//Output
+	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
+
+	//ALT 1
+	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
+
+	//Clear
+	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
+
+}
+
+
+/**
+ * debug_delay : hardware code for waiting a certain number of milliseconds;
+ */
+
+void debug_delay_ms(uint32_t ms_counter) {
+
+	while (ms_counter--) {
+		//Count to;
+		for (volatile uint32_t i = 15000; i--;);
+	}
+
+}
+
+
+
+
+/**
+ * debug_delay : hardware code for waiting a certain number of milliseconds;
+ */
+
+void debug_delay_us(uint32_t us_counter) {
+
+	while (us_counter--) {
+		//Count to;
+		for (volatile uint32_t i = 15; i--;);
+	}
+
+}
+
+
 /*
  * --------------------------------------- PORT ---------------------------------------
  */
@@ -109,17 +182,19 @@ void __entry_point(void) {
 
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
 
+
 	/*
 	 * Then, initialise global variables;
 	 */
 
-	startup_initialise_globals();
+	//startup_initialise_globals();
+	debug_delay_ms(10);
 
 	while (1) {
-		mk64fx512_led_high();
-		mk64fx512_delay(500);
-		mk64fx512_led_low();
-		mk64fx512_delay(100);
+		debug_led_high();
+		debug_delay_ms(50);
+		debug_led_low();
+		debug_delay_ms(50);
 	}
 
 
@@ -174,7 +249,4 @@ void mk64fx512_hardware_init() {
 	 */
 
 }
-
-
-
 

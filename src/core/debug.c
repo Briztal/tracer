@@ -21,48 +21,6 @@
 #include "debug.h"
 
 #include <stdbool.h>
-#include <core/comm/swuart.h>
-
-#include CHIP_HEADER
-
-
-/**
- * debug_led_high : shortcut to the chip lib for chip_led_high;
- */
-
-void debug_led_high() {
-
-	chip_led_high();
-
-}
-
-
-/**
- * debug_led_low : shortcut to the chip lib for chip_led_low;
- */
-
-void debug_led_low() {
-	chip_led_low();
-
-}
-
-
-/**
- * debug_delay : shortcut to the chip lib for chip_delay;
- */
-
-void debug_delay_ms(uint32_t ms) {
-	chip_delay_ms(ms);
-}
-
-
-/**
- * debug_delay : shortcut to the chip lib for chip_delay;
- */
-
-void debug_delay_us(uint32_t ms) {
-	chip_delay_us(ms);
-}
 
 
 /**

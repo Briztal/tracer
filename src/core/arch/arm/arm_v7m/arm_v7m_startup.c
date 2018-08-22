@@ -14,7 +14,7 @@
  */
 
 extern void __entry_point();
-extern uint32_t *_end_stack;
+extern uint32_t *_ram_highest;
 extern void (*irq_handlers[])(void);
 
 
@@ -65,7 +65,7 @@ static void isr_generic_flash_handler(uint8_t i) {
 void *vtable[256] __attribute__ ((section(".vectors"))) = {
 
 	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
-	(void (*)(void))((unsigned long)&_end_stack),
+	(void (*)(void))((unsigned long)&_ram_highest - 10),
 
 	//1 : Reset : call the program's entry point;
 	&__entry_point,

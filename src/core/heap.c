@@ -9,7 +9,7 @@
 #include "heap.h"
 
 #include <struct/containers/non_concurrent/list.h>
-#include <core/debug/debug.h>
+#include <core/debug.h>
 
 
 #define alignment_size (alignment_size)

@@ -3,7 +3,7 @@ include src/core/proc/cortex_m4f/Makefile
 
 
 #Add compilation flags related to the chip;
-CFLAGS += -D__MK64FX512__ -DF_CPU=120000000 -DCHIP_HEADER=<mk64fx512.h>
+CFLAGS += -D__MK64FX512__ -DF_CPU=120000000
 
 #define the current dir here;
 MK64_DIR :=  src/core/chip/nxp/kinetis/mk64fx512
