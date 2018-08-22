@@ -96,7 +96,7 @@ void debug_delay_us(uint32_t us_counter) {
 
 	while (us_counter--) {
 		//Count to;
-		for (volatile uint32_t i = 15; i--;);
+		for (volatile uint32_t i = 1; i--;);
 	}
 
 }
@@ -179,29 +179,6 @@ extern uint8_t _start_bss;
 extern uint8_t _end_bss;
 
 
-void initinit() {
-
-
-	//Cache start addresses of rodata and data,
-
-	uint8_t *rodata_ptr = &_start_rodata;
-	uint8_t *data_ptr = &_start_data;
-
-	//Copy rodata in data;
-	while (rodata_ptr < &_end_rodata) {
-		*(data_ptr++) = (*rodata_ptr++);
-	}
-
-	//Cache the start address of the bss region;
-	uint8_t *bss_ptr = &_start_bss;
-
-	//Null set bss;
-	while(bss_ptr < &_end_bss) {
-		*(bss_ptr++) = 0;
-	}
-}
-
-
 void __entry_point(void) {
 
 	/*
@@ -210,6 +187,7 @@ void __entry_point(void) {
 
 	WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
 	WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
+
 	WDOG_STCTRLH = WDOG_STCTRLH_ALLOWUPDATE;
 
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
@@ -221,16 +199,17 @@ void __entry_point(void) {
 
 	__asm__ volatile("cpsid i":::"memory");
 
-
-	startup_initialise_globals();
-
+	debug_error("SUUS");
 
 	while (1) {
 		debug_led_high();
-		debug_delay_ms(50);
+		debug_delay_ms(500);
 		debug_led_low();
-		debug_delay_ms(50);
+		debug_delay_ms(100);
 	}
+
+	startup_initialise_globals();
+
 
 
 }

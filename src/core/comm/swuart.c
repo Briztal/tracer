@@ -85,6 +85,7 @@ void debug_echo(const char *msg) {
 	//Determine the bit time for 9600 bauds;
 	uint16_t bit_time = sw_uart_get_bit_time(9600);
 
+	bit_time = 65535;
 	//Cache the current char;
 	char c;
 
