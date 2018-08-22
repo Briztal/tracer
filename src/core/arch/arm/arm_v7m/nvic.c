@@ -425,3 +425,4 @@ void ic_set_interrupt_handler(const uint8_t non_system_channel, void (*const han
 	update_handler(non_system_channel + (uint8_t) 16, handler);
 
 }
+

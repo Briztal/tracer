@@ -27,6 +27,7 @@ CORE_INC := -Isrc/core
 
 #Initialise the core source files set to the only debug file;
 CORE_SRCS := src/core/debug.c
+CORE_SRCS := src/core/startup.c
 
 #Initialise the driver source files set;
 DRIVER_SRCS :=
@@ -49,7 +50,7 @@ LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 #---------------------------------------------------- kernel config ----------------------------------------------------
 
-KERNEL_PUB_SRC := src/kernel/syscallmekr .c
+KERNEL_PUB_SRC := src/kernel/syscall.c
 
 KERNEL_PRIV_SRC :=
 KERNEL_PRIV_INC := -Isrc/kernel

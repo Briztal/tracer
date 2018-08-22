@@ -187,7 +187,8 @@ void __entry_point(void) {
 	 * Then, initialise global variables;
 	 */
 
-	//startup_initialise_globals();
+	startup_initialise_globals();
+
 	debug_delay_ms(10);
 
 	while (1) {

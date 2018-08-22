@@ -14,7 +14,7 @@
  */
 
 extern void __entry_point();
-extern uint32_t *_ram_highest;
+extern uint32_t _ram_highest;
 extern void (*irq_handlers[])(void);
 
 
