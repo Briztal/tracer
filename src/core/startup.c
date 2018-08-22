@@ -3,6 +3,7 @@
 //
 
 #include "startup.h"
+#include "debug.h"
 
 extern uint8_t _start_rodata;
 extern uint8_t _end_rodata;
@@ -29,4 +30,5 @@ void startup_initialise_globals() {
 	while(bss_ptr < &_end_bss) {
 		*(bss_ptr++) = 0;
 	}
+
 }

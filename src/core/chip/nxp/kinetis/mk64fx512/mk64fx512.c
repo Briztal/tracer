@@ -24,6 +24,7 @@
 #include "mk64fx512.h"
 
 #include <core/startup.h>
+#include <core/debug.h>
 
 #define KINETISK
 #define __MK64FX512__
@@ -79,7 +80,7 @@ void debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
 		//Count to;
-		for (volatile uint32_t i = 15000; i--;);
+		for (volatile uint32_t i = 350; i--;);
 	}
 
 }
@@ -170,6 +171,37 @@ KINETIS_UART_DEFINE(4, 0x400EA000, F_BUS, 1, 1, IRQ_UART4_STATUS, IRQ_UART4_ERRO
 KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERROR)
  */
 
+
+extern uint8_t _start_rodata;
+extern uint8_t _end_rodata;
+extern uint8_t _start_data;
+extern uint8_t _start_bss;
+extern uint8_t _end_bss;
+
+
+void initinit() {
+
+
+	//Cache start addresses of rodata and data,
+
+	uint8_t *rodata_ptr = &_start_rodata;
+	uint8_t *data_ptr = &_start_data;
+
+	//Copy rodata in data;
+	while (rodata_ptr < &_end_rodata) {
+		*(data_ptr++) = (*rodata_ptr++);
+	}
+
+	//Cache the start address of the bss region;
+	uint8_t *bss_ptr = &_start_bss;
+
+	//Null set bss;
+	while(bss_ptr < &_end_bss) {
+		*(bss_ptr++) = 0;
+	}
+}
+
+
 void __entry_point(void) {
 
 	/*
@@ -187,9 +219,11 @@ void __entry_point(void) {
 	 * Then, initialise global variables;
 	 */
 
+	__asm__ volatile("cpsid i":::"memory");
+
+
 	startup_initialise_globals();
 
-	debug_delay_ms(10);
 
 	while (1) {
 		debug_led_high();
@@ -197,7 +231,6 @@ void __entry_point(void) {
 		debug_led_low();
 		debug_delay_ms(50);
 	}
-
 
 
 }

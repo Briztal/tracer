@@ -69,6 +69,8 @@ SECTIONS {
     } > RAM
 
 
+    . = ALIGN(4);
+
     /*The lowest accessible RAM address;*/
     _ram_lowest = .;
 

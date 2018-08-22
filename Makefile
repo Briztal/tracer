@@ -11,7 +11,7 @@ BUILDDIR := build
 #initialise compilation and linking flags;
 CFLAGS := -Wall -Os -g
 
-LDFLAGS := -Wl,--gc-sections -Os
+LDFLAGS := -Wall -Wl,--gc-sections -Os
 
 #TODO NO GENERAL COMPIL INCLUDE;
 
@@ -26,8 +26,9 @@ COMPIL_INC += -Isrc/data_structures
 CORE_INC := -Isrc/core
 
 #Initialise the core source files set to the only debug file;
-CORE_SRCS := src/core/debug.c
-CORE_SRCS := src/core/startup.c
+CORE_SRCS += src/core/debug.c
+CORE_SRCS += src/core/comm/swuart.c
+CORE_SRCS += src/core/startup.c
 
 #Initialise the driver source files set;
 DRIVER_SRCS :=
