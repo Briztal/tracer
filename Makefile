@@ -49,7 +49,7 @@ LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 #---------------------------------------------------- kernel config ----------------------------------------------------
 
-KERNEL_PUB_SRC := src/kernel/syscall.c
+KERNEL_PUB_SRC := src/kernel/syscallmekr .c
 
 KERNEL_PRIV_SRC :=
 KERNEL_PRIV_INC := -Isrc/kernel

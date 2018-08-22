@@ -25,7 +25,7 @@
 
 #include "stdbool.h"
 
-#include <core/debug.h>
+#include <core/debug/debug.h>
 
 
 //------------------------------------- Base Timer -------------------------------------

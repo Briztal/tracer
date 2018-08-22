@@ -60,6 +60,39 @@ void __program_start() {
 }
 
 
+/*
+ * kernel_panic : this function is called when a fatal error is detected in the kernel;
+ */
+
+void kernel_panic(const char *error_message) {
+
+	//Stop the scheduler;
+	//scheduler_stop();
+
+	//Exit all critical sections;
+	//ic_force_critical_section_exit();
+
+	//TODO RESET IDLE INTERRUPT HANDLERS
+
+	//TODO THREAD MODES;
+
+	/*
+	if (error_message_function) {
+
+		//Transmit the message;
+		(*error_message_function)(error_message);
+
+	}
+	 */
+
+	//infinite SOS sequence on debug led;
+	debug_sos();
+
+	while (1);
+
+}
+
+
 
 //----------------------------------------------------- Kernel Heap ----------------------------------------------------
 

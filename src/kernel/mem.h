@@ -5,33 +5,13 @@
 #ifndef TRACER_MEMORY_H
 #define TRACER_MEMORY_H
 
-
 #include <stdint.h>
 
 #include <stddef.h>
 
 #include <core/stack.h>
 
-#include "heap.h"
-
-/*
- * The memory manager manages the available RAM memory.
- *
- * 	It uses variables defined in the unified linker script to manage the whole available RAM block;
- */
-
-
-//------------------------------------------------------- RAM mgt ------------------------------------------------------
-
-
-//Initialise memory management values. Will invalidate all previously reserved memory;
-void ram_init();
-
-//Reserve some memory in RAM;
-void *ram_alloc(size_t);
-
-//Release some reserved memory;
-void ram_free(void *);
+#include "core/heap.h"
 
 
 //---------------------------------------------------- Progmem ---------------------------------------------------

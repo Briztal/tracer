@@ -9,6 +9,7 @@
 #include "heap.h"
 
 #include <struct/containers/non_concurrent/list.h>
+#include <core/debug/debug.h>
 
 
 #define alignment_size (alignment_size)
@@ -180,14 +181,12 @@ static void heap_check_free_block(const struct heap_head *const heap, const stru
 		if (status == HEAP_ALLOCATED_STATUS) {
 
 			//Log and quit;
-			heap_error(heap, "heap.c : heap_malloc : Error, the memory is marked allocated, a memory leak "
-				"has occurred;");
+			debug_error("heap.c : heap_malloc : block is marked allocated, memory leak;");
 
 		} else {
 
 			//Log and quit;
-			heap_error(heap, "heap.c : heap_malloc : Error, the status of the heap block is invalid, "
-				"a memory leak has occurred.");
+			debug_error("heap.c : heap_malloc : block status invalid, memory leak occurred.");
 
 		}
 
@@ -218,14 +217,13 @@ static void heap_check_allocated_block(const struct heap_head *const heap, const
 		if (status == HEAP_FREE_STATUS) {
 
 			//Log and quit;
-			heap_error(heap, "heap.c : heap_free : Error, the heap block is marked free. A double free may have been"
-				" attempted, or a free call on invalid data and a status collision, or a memory leak.");
+			debug_error("heap.c : heap_free : block marked free; double free - invalid free and status collision"
+				" - memory leak.");
 
 		} else {
 
 			//Log and quit;
-			heap_error(heap, "heap.c : heap_free : Error, the heap block has an invalid status. A memory leak may have"
-				" occurred, or heap_free has just been called with invalid data");
+			debug_error("heap.c : heap_free : block status invalid. memory leak - invalid free");
 
 		}
 
@@ -252,8 +250,7 @@ static void heap_check_block(const struct heap_head *const heap, const struct he
 	if ((status != HEAP_ALLOCATED_STATUS) && (status != HEAP_FREE_STATUS)) {
 
 		//Log and quit;
-		heap_error(heap, "heap.c : heap_free : Error, the heap block has an invalid status. A memory leak may has "
-			"occurred;");
+		debug_error("heap.c : heap_free : block status invalid. memory leak;");
 
 	}
 
@@ -274,8 +271,7 @@ static void heap_check_block(const struct heap_head *const heap, const struct he
  * @return : 0 if init failed, the address of the heap head if it succeeded;
  */
 
-struct heap_head *heap_create(void *start_address, size_t size,
-							  void (*insertion_f)(struct heap_head *, struct heap_block *)) {
+struct heap_head *heap_create(void *start_address, size_t size, heap_insertion_f  insertion_f) {
 
 
 	//If the size is not alignable, decrease it to meet alignment requirement;
@@ -528,7 +524,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 	if (!first_block) {
 
 		//Fail, no space left;
-		heap_error(heap, "heap.c : heap_malloc : no space left on heap");
+		debug_error("heap.c : heap_malloc : no space left");
 
 		//Never reached;
 		return 0;
@@ -575,7 +571,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 
 
 	//If we reached the end of the block, error;
-	heap_error(heap, "heap.c : heap_malloc : no memory block can contain the required size;");
+	debug_error("heap.c : heap_malloc : no memory block large enough;");
 
 	//Never reached;
 	return 0;

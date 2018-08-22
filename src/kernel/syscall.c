@@ -28,9 +28,6 @@
 #include <driver/ic.h>
 
 
-//The error message output. Null at init;
-static void (*error_message_function)(const char *) = 0;
-
 
 //------------------------------------------- Entry Point -------------------------------------------
 
@@ -43,38 +40,6 @@ void kernel_set_error_output(void (*error_msg)(const char *)) {
 
 }
 
-
-/*
- * kernel_error : this function is called when an error is encountered in the code;
- *
- *  It will signal the error in various ways.
- */
-
-void kernel_error(const char *error_message) {
-
-    //Stop the scheduler;
-    scheduler_stop();
-
-    //Exit all critical sections;
-    ic_force_critical_section_exit();
-
-    //TODO RESET IDLE INTERRUPT HANDLERS
-
-    //TODO THREAD MODES;
-
-    if (error_message_function) {
-
-        //Transmit the message;
-        (*error_message_function)(error_message);
-
-    }
-
-	//infinite SOS sequence on debug led;
-	debug_sos();
-
-    while (true);
-
-}
 
 
 /*

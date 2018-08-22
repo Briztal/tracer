@@ -9,7 +9,7 @@
 
 #include <driver/timer.h>
 
-#include <core/debug.h>
+#include <core/debug/debug.h>
 #include <string.h>
 
 

@@ -1,6 +1,6 @@
 
 #The armv7m uses the general ARM acrhitecture build;
-include src/hardware/arch/arm/Makefile
+include src/core/arch/arm/Makefile
 
 ARCH_DIR :=  src/hardware/arch/arm/arm_v7m
 

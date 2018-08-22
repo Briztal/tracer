@@ -43,7 +43,7 @@ void debug_led_high();
 void debug_led_low();
 
 //Wait a certain number of milliseconds;
-void debug_delay();
+void debug_delay_ms(uint32_t ms);
 
 //Light the debug led and stop;
 void debug_led_halt();
@@ -63,6 +63,11 @@ void debug_break();
 //Execute an SOS error sequence indefinitely;
 void debug_sos();
 
+//Convert a string in morse symbols and send it;
+void debug_echo(const char *log);
+
+//Halt and send a message;
+void debug_error(const char *msg);
 
 
 #endif //TRACER_DEBUG_H

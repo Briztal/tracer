@@ -102,11 +102,27 @@ static inline void chip_led_low() {
  * chip_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-static inline void chip_delay(uint32_t ms_counter) {
+static inline void chip_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
 		//Count to;
 		for (volatile uint32_t i = 15000; i--;);
+	}
+
+}
+
+
+
+
+/**
+ * chip_delay : hardware code for waiting a certain number of milliseconds;
+ */
+
+static inline void chip_delay_us(uint32_t us_counter) {
+
+	while (us_counter--) {
+		//Count to;
+		for (volatile uint32_t i = 15; i--;);
 	}
 
 }

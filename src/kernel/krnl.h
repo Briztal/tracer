@@ -23,9 +23,10 @@ void *kialloc(size_t, void *);
 void kfree(void *);
 
 
-//---------------------------------------------------- Kernel errors ---------------------------------------------------
+//---------------------------------------------------- Kernel panic ---------------------------------------------------
 
-//TODO
+//The kernel panic function;
+void kernel_panic(const char *msg);
 
 
 
