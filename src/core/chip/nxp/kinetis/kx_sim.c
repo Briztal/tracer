@@ -6,15 +6,6 @@
 
 #include <stdint.h>
 
-/**
- * The System Interaction Module is always located at the same address;
- */
-
-#define SIM_SOPT1 		((uint32_t *)0x40047000)
-#define SIM_SOPT1CFG 	((uint32_t *)0x40047004)
-#define SIM_SOPT2 		((uint32_t *)0x40047000)
-#define SIM_SOPT4 		((uint32_t *)0x40047000)
-
 
 struct __attribute__((packed)) k64_sim_registers_l {
 
