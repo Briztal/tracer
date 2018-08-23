@@ -68,13 +68,13 @@ void mcg_configure_irc(const struct mcg_irc_config *config);
 enum mcg_osc_connection {
 
 	//Single crystal/resonator, no external resistor or capacitor;
-	OSC_CONNECTION_1,
+		OSC_CONNECTION_1,
 
 	//Crystal/resonator and resistor in parallel;
-	OSC_CONNECTION_2,
+		OSC_CONNECTION_2,
 
 	//Crystal/resonator, resistor and a couple of capacitor;
-	OSC_CONNECTION_3,
+		OSC_CONNECTION_3,
 
 };
 
@@ -99,13 +99,6 @@ enum mcg_osc_connection {
 
 struct mcg_osc_config {
 
-	//The frequency of the oscillator; If zero, external clock reference will be selected;
-	uint32_t osc_frequency;
-
-	/*
-	 * All Following options will only be evaluated if the triplet (frequency, power_mode, connection_id) is valid;
-	 */
-
 	//Set to enable the osc output; can be oscillator or external reference clock;
 	bool output_enabled;
 
@@ -115,8 +108,17 @@ struct mcg_osc_config {
 	//Should a loss of clock generate a reset ?
 	bool loss_of_clock_generates_reset;
 
+	//Set if the internal oscillator is selected for output. Clear if external clock;
+	bool oscillator_selected;
+
+	//The frequency of the oscillator; If zero, external clock reference will be selected;
+	uint32_t osc_frequency;
+
 	/*
-	 * All Following options will only be evaluated if the frequency is not null;
+	 * All Following options will only be evaluated if the internal oscillator is selected;
+	 * and if the triplet (frequency, power_mode, connection_id) is valid;
+	 *
+	 * If not, a core error will be issued;
 	 */
 
 	//The required power mode, low_power of high_gain if not;
@@ -138,10 +140,14 @@ struct mcg_osc_config {
 	//Add 16pF capacitor to the oscillator load;
 	bool capacitor_16pf_enabled;
 
+
 };
 
 //Configure the oscillator;
 void mcg_configure_osc(const struct mcg_osc_config *config);
+
+//Clear the osc loss of lock status;TODO
+void mcg_clear_osc_loss_of_lock_flag();
 
 
 /*
@@ -152,6 +158,9 @@ void mcg_configure_osc(const struct mcg_osc_config *config);
 
 //TODO CONFIGURATION OF LOSS OF CLOCK FOR RTC OSC;
 
+
+//Clear the RTC OSC loss of lock status;TODO
+void mcg_clear_rtcosc_loss_of_lock_flag();
 
 /*
  * -------------------------------------------------------- PLL --------------------------------------------------------
@@ -178,11 +187,11 @@ void mcg_configure_osc(const struct mcg_osc_config *config);
 
 struct mcg_pll_config {
 
-	//Shall an interrupt be triggered when a loss of lock is detected ?
-	bool loss_of_lock_interrupt;
-
 	//Enable MGCPLLCLK;
 	bool enable_mcg_pllclk;
+
+	//Shall an interrupt be triggered when a loss of lock is detected ?
+	bool loss_of_lock_interrupt;
 
 	//Enable during stop mode;
 	bool enable_during_stop_mode;
@@ -190,13 +199,12 @@ struct mcg_pll_config {
 	//The external reference divide factor, between 1 and 24;
 	uint8_t external_divide_factor;
 
-	//The PLL output multiply factor;
+	//The PLL output multiply factor, between 24 and 55;
 	uint8_t output_multiplication_factor;
-
 
 };
 
-//Configure the PLL;
+//Configure the PLL; OSC Must have been configured before.
 void mcg_configure_pll(const struct mcg_pll_config *config);
 
 //Clear the pll loss of lock status;
@@ -217,6 +225,9 @@ void mcg_clear_pll_loss_of_lock_flag();
  * 	Some transitions are not guaranteed to work, and it is preferable to go back in the safe mode, for example TODO
  * 	before entering any other mode;
  */
+
+//TODO ENABLE MCG CLOCKS
+//TODO GET MCG FREQUENCIES
 
 
 /**
