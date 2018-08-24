@@ -104,6 +104,47 @@ void debug_led_cmp(size_t c) {
 
 }
 
+//Display bits of a byte, blink fast for 1, blink slow for 0;
+void debug_led_dump(const uint8_t c) {
+
+	while(1) {
+
+		//Cache c;
+		uint8_t cc = c;
+
+		//For each bit :
+		for (uint8_t i = 8; i--;) {
+
+			//If the bit is 1 :
+			if (cc & (uint8_t) 1) {
+				debug_led_high();
+				debug_delay_ms(100);
+				debug_led_low();
+			} else {
+
+				for (uint8_t bi = 5; bi--;) {
+
+					debug_led_high();
+					debug_delay_ms(10);
+					debug_led_low();
+					debug_delay_ms(10);
+
+				}
+			}
+
+			debug_delay_ms(50);
+			cc >>=1;
+
+		}
+
+		debug_delay_ms(100);
+
+	}
+
+}
+
+
+
 /**
  * debug_break : sends BREAK in morse over the debug led;
  */

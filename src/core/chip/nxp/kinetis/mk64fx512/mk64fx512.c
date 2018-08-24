@@ -19,16 +19,15 @@
 */
 
 
-#include "kinetis.h"
+//#include "kinetis.h"
 
 #include "mk64fx512.h"
 
 #include <core/startup.h>
 #include <core/debug.h>
-
-#define KINETISK
-#define __MK64FX512__
-#define F_CPU 120000000
+#include <core/chip/nxp/kinetis/kx_wdog.h>
+#include <core/chip/nxp/kinetis/kx_mcg.h>
+#include <core/chip/nxp/kinetis/kx_sim.h>
 
 
 
@@ -39,8 +38,6 @@
  */
 
 void debug_led_high() {
-
-	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
@@ -80,7 +77,7 @@ void debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
 		//Count to;
-		for (volatile uint32_t i = 350; i--;);
+		for (volatile uint32_t i = 15000; i--;);
 	}
 
 }
@@ -172,11 +169,28 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
  */
 
 
-extern uint8_t _start_rodata;
-extern uint8_t _end_rodata;
-extern uint8_t _start_data;
-extern uint8_t _start_bss;
-extern uint8_t _end_bss;
+
+// Flash Security Setting. On Teensy 3.2, you can lock the MK20 chip to prevent
+// anyone from reading your code.  You CAN still reprogram your Teensy while
+// security is set, but the bootloader will be unable to respond to auto-reboot
+// requests from Arduino. Pressing the program button will cause a full chip
+// erase to gain access, because the bootloader chip is locked out.  Normally,
+// erase occurs when uploading begins, so if you press the Program button
+// accidentally, simply power cycling will run your program again.  When
+// security is locked, any Program button press causes immediate full erase.
+// Special care must be used with the Program button, because it must be made
+// accessible to initiate reprogramming, but it must not be accidentally
+// pressed when Teensy Loader is not being used to reprogram.  To set lock the
+// security change this to 0xDC.  Teensy 3.0 and 3.1 do not support security lock.
+#define FSEC 0xDE
+
+// Flash Options
+#define FOPT 0xF9
+__attribute__ ((section(".flashconfig"), used))
+const uint8_t flashconfigbytes[16] = {
+	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+	0xFF, 0xFF, 0xFF, 0xFF, FSEC, FOPT, 0xFF, 0xFF
+};
 
 
 void __entry_point(void) {
@@ -185,13 +199,98 @@ void __entry_point(void) {
 	 * First, disable the watchdog;
 	 */
 
-	WDOG_UNLOCK = WDOG_UNLOCK_SEQ1;
-	WDOG_UNLOCK = WDOG_UNLOCK_SEQ2;
+	//Disable the watchdog;
+	k64_wdog_disable();
 
-	WDOG_STCTRLH = WDOG_STCTRLH_ALLOWUPDATE;
+	//Enable gating for all ports;
+	sim_enable_PORTA_clock_gating();
+	sim_enable_PORTB_clock_gating();
+	sim_enable_PORTC_clock_gating();
+	sim_enable_PORTD_clock_gating();
+	sim_enable_PORTE_clock_gating();
 
-	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
+	startup_initialise_globals();
 
+	//Create the OSC initialisation struct;
+	struct mcg_osc_config osc_conf = {
+
+		//Enable output;
+		.output_enabled = true,
+
+		//Stay enabled in stop mode;
+		.stay_enabled_in_stop_mode = true,
+
+		//No interrupt for loss of clock;
+		.loss_of_clock_generates_reset = false,
+
+		//Internal oscillator selected;
+		.oscillator_selected = true,
+
+		//16M freq;
+		.osc_frequency = 16000000,
+
+		//Low power;
+		.low_power_mode = true,
+
+		//Connection 1;
+		.connection_id = OSC_CONNECTION_1,
+
+		//Enable 2 and 8pf for teensy;
+		.capacitor_2pf_enabled = true,
+		.capacitor_4pf_enabled = false,
+		.capacitor_8pf_enabled = true,
+		.capacitor_16pf_enabled = false,
+
+	};
+
+	//Configure the oscillator;
+	mcg_configure_osc(&osc_conf);
+
+
+	struct mcg_pll_config pll_conf = {
+
+		//Enable external clock;
+		.enable_mcg_pllclk = true,
+
+		//No interrupt for loss of clock;
+		.loss_of_lock_generates_interrupt = false,
+
+		//No reset at loss of clock;
+		.loss_of_lock_generates_reset = false,
+
+		//Enable during stop mode;
+		.enable_during_stop_mode = true,
+
+		//OSC output is 16MHz, 16/4 = 4MHz;
+		.external_divide_factor = 4,
+
+		//Expected output frequency : 120MHz = 4MHz * 30;
+		.output_multiplication_factor = 30,
+
+	};
+
+	//Configure the PLL;
+	mcg_configure_pll(&pll_conf);
+
+	//TODO CONGIGURE IRC;
+
+	//Engage the PLL on external ref;
+	mcg_enter_PEE();
+
+
+	while (1) {
+		debug_led_high();
+		debug_delay_ms(100);
+		debug_led_low();
+		debug_delay_ms(50);
+	}
+
+
+	//TODO PLL ENGAGED;
+
+	//TODO DEBUG INIT;
+
+	//TODO CORE BUS FLEX FLASH CLOCK DIVIDER;
 
 	/*
 	 * Then, initialise global variables;

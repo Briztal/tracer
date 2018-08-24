@@ -36,6 +36,7 @@
  */
 
 
+
 //Light the debug led high;
 extern void debug_led_high();
 
@@ -59,6 +60,9 @@ void debug_led_count(size_t count);
 
 //Blink at high frequency if c != 0, or at low frequency if c == 0;
 void debug_led_cmp(size_t c);
+
+//Display bits of a byte, blink fast for 1, blink slow for 0;
+void debug_led_dump(uint8_t c);
 
 //Execute an BREAK error sequence indefinitely;
 void debug_break();

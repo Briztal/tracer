@@ -162,9 +162,62 @@ void mcg_clear_osc_loss_of_lock_flag();
 //Clear the RTC OSC loss of lock status;TODO
 void mcg_clear_rtcosc_loss_of_lock_flag();
 
+
+/*
+ * -------------------------------------------------------- FLL --------------------------------------------------------
+ */
+
+/**
+ * The Frequency Lock Loop is a hardware component that receives and locks an input frequency between
+ * 	31250 and 39062.5 Hz, to generate an output signal whose frequency is proportional to the input frequency;
+ *
+ * 	The output frequency range can be selected between four ranges (expressed in MHz), low (20-25), mid (40-50),
+ * 	mid-high (60-75), and high (80-100);
+ *
+ * 	The input signal can also be selected, between the OSC external ref and the RTC slow clock;
+ *
+ * 	If the OSC external reference is selected, its frequency may not be in the required range. To support this case,
+ * 	a frequency divider is included, to ensure that the input frequency is in the correct range.
+ *
+ * 	This divisor must be determined properly after the oscillator is selected;
+ *
+ * 	The configuration of the FLL comprises two steps :
+ * 	- The hardware config, made when the FLL is not engaged; multiplication factor is selected, and clock divisor is
+ * 		computed;
+ * 	- The selection, made when the FLL is engaged by the MCG. The source is selected, and the actual output frequency
+ * 		computed;
+ */
+
+
+/**
+ * The mcg fll configuration enum allows to select the output frequency range of the FLL;
+ *
+ * 	The input signal selection is realised by the MCG;
+ */
+
+enum mcg_fll_frequency_range {
+
+	//Between 20 and 25 MHz
+		FLL_RANGE_20_25_MHz,
+
+	//Between 40 and 50 MHz
+		FLL_RANGE_40_50_MHz,
+
+	//Between 60 and 75 MHz
+		FLL_RANGE_60_75_MHz,
+
+	//Between 80 and 100 MHz
+		FLL_RANGE_50_100_MHz,
+
+};
+
+//Configure the FLL; OSC must have been configured first;
+void mgc_configure_fll(enum mcg_fll_frequency_range freq_range);
+
 /*
  * -------------------------------------------------------- PLL --------------------------------------------------------
  */
+
 
 /**
  * The mcg pll configuration structure contains all information required to configure the PLL completely.
@@ -191,7 +244,11 @@ struct mcg_pll_config {
 	bool enable_mcg_pllclk;
 
 	//Shall an interrupt be triggered when a loss of lock is detected ?
-	bool loss_of_lock_interrupt;
+	bool loss_of_lock_generates_interrupt;
+
+	//Shall a reset be triggered when a loss of lock is detected ?
+	//Used only if loss_of_lock_generates_interrupt is set;
+	bool loss_of_lock_generates_reset;
 
 	//Enable during stop mode;
 	bool enable_during_stop_mode;
@@ -231,7 +288,7 @@ void mcg_clear_pll_loss_of_lock_flag();
 
 
 /**
- * PLL Engaged External (PEE) :
+ * PLL Engaged External (PEE) : required OSC and PLL to be initialised;
  *
  * 	In PEE mode, the MCGOUTCLK is derived from the output of PLL which is controlled by a external
  * 	reference clock.
@@ -245,4 +302,16 @@ void mcg_clear_pll_loss_of_lock_flag();
 
 void mcg_enter_PEE();
 
+
+/*
+ * ------------------------------------------- MCG Autotune -------------------------------------------
+ */
+
+/**
+ *
+ * Init : in a determined MCG state.
+ *
+ * TODO PROVIDE INTERRUPT CONFIGURATION AT MCG INIT;
+ *
+ */
 #endif //TRACER_KX_MGC_H

@@ -2,55 +2,72 @@
 // Created by root on 8/23/18.
 //
 
-#include "kx_mgc.h"
+#include "kx_mcg.h"
 
 #include <stdint.h>
+#include <core/debug.h>
 
-#define MCG_C1            ((volatile uint8_t *)0x40064000)
-#define C1_CLKS            ((uint8_t)0xC0)
-#define C1_CLKS_FPLL    ((uint8_t)0xC0)
-#define C1_CLKS_INT    ((uint8_t)0xD0)
-#define C1_CLKS_EXT    ((uint8_t)0xE0)
+#define MCG_C1          ((volatile uint8_t *)0x40064000)
+#define C1_CLKS         ((uint8_t)0xC0)
+#define C1_CLKS_INT     ((uint8_t)0xD0)
+#define C1_CLKS_EXT        ((uint8_t)0xE0)
+#define C1_IREFS        ((uint8_t) (1<<2))
+#define C1_IRCLKEN        ((uint8_t) (1<<1))
+#define C1_IREFSTEN        ((uint8_t) (1<<0))
 
 
-#define MCG_C2         	((volatile uint8_t *)0x40064001)
+#define MCG_C2            ((volatile uint8_t *)0x40064001)
 #define C2_IRCS         ((uint8_t) (1<<0))
 #define C2_LP           ((uint8_t) (1<<1))
-#define C2_EREFS       	((uint8_t) (1<<2))
-#define C2_HGO         	((uint8_t) (1<<3))
+#define C2_EREFS        ((uint8_t) (1<<2))
+#define C2_HGO            ((uint8_t) (1<<3))
 #define C2_RANGE        ((uint8_t) ((1<<4) | (1<<5)))
 #define C2_FCFTRIM      ((uint8_t) (1<<6))
-#define C2_LOCRE0     	((uint8_t) (1<<7))
-
+#define C2_LOCRE0        ((uint8_t) (1<<7))
 
 
 #define MCG_C3            ((volatile uint8_t *)0x40064002)
 #define MCG_C4            ((volatile uint8_t *)0x40064003)
+
+
+//C5 : the PLL first config register;
 #define MCG_C5            ((volatile uint8_t *)0x40064004)
+#define C5_PLLSTEN0        ((uint8_t) (1<<5))
+#define C5_PLLCLKEN0        ((uint8_t) (1<<6))
 
 
-#define MCG_C6            ((volatile uint8_t *)0x40064005)
-#define C6_PLLS        ((uint8_t) (1<<6))
+#define MCG_C6          ((volatile uint8_t *)0x40064005)
+#define C6_CME0            ((uint8_t) (1<<5))
+#define C6_PLLS            ((uint8_t) (1<<6))
+#define C6_LOLIE0       ((uint8_t) (1<<7))
 
 //The MCG status register, RO;
-#define MCG_S          	((volatile uint8_t *)0x40064006)
-#define S_IRCST        	((uint8_t) (1<<0))
-#define S_OSCINIT0       ((uint8_t) (1<<1))
-#define S_IREFST       	((uint8_t) (1<<4))
-#define S_PLLST       	((uint8_t) (1<<5))
-#define S_LOCK0       	((uint8_t) (1<<6))
-#define S_LOLS0       	((uint8_t) (1<<7))
+#define MCG_S            ((volatile uint8_t *)0x40064006)
+#define S_IRCST            ((uint8_t) (1<<0))
+#define S_OSCINIT0      ((uint8_t) (1<<1))
+#define S_IREFST        ((uint8_t) (1<<4))
+#define S_PLLST        ((uint8_t) (1<<5))
+#define S_LOCK0        ((uint8_t) (1<<6))
+#define S_LOLS0        ((uint8_t) (1<<7))
 
 
-
-#define MCG_SC        	((volatile uint8_t *)0x40064008)
+#define MCG_SC            ((volatile uint8_t *)0x40064008)
 #define SC_FCRDIV       ((uint8_t) 0x0E)
 
 #define MCG_ATCVH        ((volatile uint8_t *)0x4006400A)
 #define MCG_ATCVL        ((volatile uint8_t *)0x4006400B)
 
 #define MCG_C7            ((volatile uint8_t *)0x4006400C)
-#define MCG_C8            ((volatile uint8_t *)0x4006400D)
+
+
+//C8 : Enhanced monitoring register;
+#define MCG_C8                ((volatile uint8_t *)0x4006400D)
+#define C8_LOCS1            ((uint8_t) (1<<0))
+#define C8_CME1        ((uint8_t) (1<<5))
+#define C8_LOLRE        ((uint8_t) (1<<6))
+#define C8_LOCRE1        ((uint8_t) (1<<7))
+
+
 
 
 
@@ -160,12 +177,12 @@ static uint8_t osc_get_frequency_mode(const uint32_t frequency) {
 		return (uint8_t) -1;
 
 	//From 3MHz to 8MHz is mode 1;
-	if (frequency < 3000000)
-		return (uint8_t) -1;
+	if (frequency < 8000000)
+		return (uint8_t) 1;
 
 	//From 8MHz to 32MHz is mode 2;
-	if (frequency < 3000000)
-		return (uint8_t) -1;
+	if (frequency < 32000000)
+		return (uint8_t) 2;
 
 	//Beyond 32MHz is not supported;
 	return (uint8_t) -1;
@@ -185,8 +202,11 @@ static uint8_t osc_get_frequency_mode(const uint32_t frequency) {
 static bool osc_combination_valid(const uint8_t fmode, const bool low_power, const enum mcg_osc_connection cid) {
 
 	//If the frequency is invalid, fail;
-	if (fmode == (uint8_t) -1)
+	if (fmode == (uint8_t) -1) {
+
 		return false;
+
+	}
 
 	if (fmode == 0) {
 
@@ -226,8 +246,9 @@ static bool osc_combination_valid(const uint8_t fmode, const bool low_power, con
  * 	- external clock selected;
  * 	- low power;
  * 	- low frequency;
+ * 	- actual frequency to 0;
  *
- * 	Failsafe;
+ * 	Fail-safe;
  */
 
 static void stop_OSC() {
@@ -237,6 +258,9 @@ static void stop_OSC() {
 
 	//Reset C2 OSC bits. External clock selected, low power, low freq;
 	*MCG_C2 &= ~(C2_EREFS | C2_HGO | C2_RANGE);
+
+	//Reset the frequency;
+	osc_frequency = 0;
 
 };
 
@@ -289,6 +313,7 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
 	//Cache C2 and reset OSC bits. External clock selected, low power, low freq;
 	uint8_t C2 = *MCG_C2 & ~(C2_EREFS | C2_HGO | C2_RANGE);
 
+
 	//If reset must be triggered on OSC0 loss of clock, set the appropriate bit;
 	if (config->loss_of_clock_generates_reset) C2 |= C2_LOCRE0;
 
@@ -306,25 +331,28 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
 		 * A check is required to verity that the power / frequency / connection is valid;
 		 */
 
+
 		//If the test fails :
-		 if (!osc_combination_valid(fmode, low_power, config->connection_id)) {
+		if (!osc_combination_valid(fmode, low_power, config->connection_id)) {
 
-			 //Stop the osc;
-			 stop_OSC();
+			//Stop the osc;
+			stop_OSC();
 
-			 //TODO ERROR;
+			//TODO ERROR;
+			while (1);
 
-			 //Stop here;
-			 return;
+			//Stop here;
+			return;
 
-		 }
+		}
+
 
 		//Set EREFS to select the internal oscillator;
 		//Save the last two bits of the frequency range;
-		C2 |= ((fmode << 4) & ~C2_RANGE) | C2_EREFS;
+		C2 |= ((fmode << 4) & C2_RANGE) | C2_EREFS;
 
 		//If in high power mode, set HGO bit;
-		if (!low_power) {C2 |= C2_HGO;}
+		if (!low_power) { C2 |= C2_HGO; }
 
 
 		//If capacitors must be added, set their bit;
@@ -341,12 +369,13 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
 	 * 	Don't touch CR, all capacitors will be disabled;
 	 */
 
-	//Write CR and C2's values;;
-	*OSC_CR = CR;
+	//Write CR and C2's values;
 	*MCG_C2 = C2;
 
+	*OSC_CR = CR;
+
 	//Wait till OSC has completed its initialisation cycles;
-	while (!(*MCG_S &~ S_OSCINIT0));
+	while (!(*MCG_S & S_OSCINIT0));
 
 	//Update the frequency;
 	osc_frequency = frequency;
@@ -358,70 +387,256 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
  * -------------------------------------------------------- PLL --------------------------------------------------------
  */
 
+//the current frequency of the PLL, 0 at init, as PLL is disabled at startup;
+static uint32_t pll_frequency = 0;
+
+
 /**
- * The mcg pll configuration structure contains all information required to configure the PLL completely.
+ * mcg_configure_pll : initialises the PLL;
  *
- * 	It has a loss of lock detection capability, that can generate an interrupt request;
+ * 	Before attempting anything, it verifies that the OSC is configured, and that conversion factors are valid.
  *
- * 	It can be routed to MGCOUT, or to MGCPLLCLK exit;
+ * 	Then, it verifies that the input frequency is between 2MHz and 4MHz, and if so, determines the output frequency;
  *
- * 	It can be enabled or disabled during stop mode;
+ * 	Any error during the previous section issues a core error;
  *
- * 	It has frequency alteration capabilities :
- * 	- the external clock freqyency is divided by a factor D between 1 and 24, so that the PLL input frequency is
- * 		between 2MHz and 4MHz;
- * 	- the PLL's VCO output frequency is divided by a factor M between 24 and 55, so that the PLL output
- * 		frequency is M times the PLL input frequency;
+ * 	After that, it resets the PLL registers, to disable any clock output / interrupt trigger during configuration;
  *
- * 	During the PLL configuration, a check will be made to determine if the PLL input frequency is between
- * 	2MHz and 4Mhz. If it is not, a core error will be issued;
+ * 	It then updates C5 and C6, and waits for the lock to be acquired, and clears Loss of lock flag;
+ *
+ * 	If required, it then enables the loss of lock interrupt;
+ *
+ * @param config : the configuration struct;
  */
 
-struct mcg_pll_config {
-
-	//Enable MGCPLLCLK;
-	bool enable_mcg_pllclk;
-
-	//Shall an interrupt be triggered when a loss of lock is detected ?
-	bool loss_of_lock_interrupt;
-
-	//Enable during stop mode;
-	bool enable_during_stop_mode;
-
-	//The external reference divide factor, between 1 and 24;
-	uint8_t external_divide_factor;
-
-	//The PLL output multiply factor, between 24 and 55;
-	uint8_t output_multiplication_factor;
-
-};
-
-//Configure the PLL;
 void mcg_configure_pll(const struct mcg_pll_config *config) {
 
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
-	//TODO CHECK THAT OSC IS CONFUGURED
+	//Cache the osc frequency;
+	uint32_t osc_f = osc_frequency;
 
-	//
+	//The PLL depends on the OSC external reference. If the OSC is not configured :
+	if (osc_f == 0) {
+
+		//TODO ERROR OSC NOT INITIALISED;
+		while (1);
+
+		//Never reached
+		return;
+
+	}
+
+	//Cache the divider;
+	uint8_t divider = config->external_divide_factor;
+
+	//If PRDIV0 is invalid :
+	if ((divider == 0) || (divider > 25)) {
+
+		//TODO ERROR Invalid external divider;
+		while (1);
+
+		//Never reached
+		return;
+	}
+
+	//Determine the frequency after the input divider;
+	uint32_t input_f = osc_f / divider;
+
+	//If the frequency below 2MHz or beyond 4MHz :
+	if ((input_f < 2000000) || (input_f > 4000000)) {
+
+		//TODO ERROR input frequency;
+		while (1);
+
+		//Never reached
+		return;
+
+	}
+
+	//Cache the output multiplication factor;
+	uint8_t output_factor = config->output_multiplication_factor;
+
+	//If the output factor is below 24 or beyond 55 :
+	if ((output_factor < 24) || (output_factor > 55)) {
+
+		//TODO ERROR invalid output factor;
+		while (1);
+
+		//Never reached
+		return;
+
+	}
+
+
+
+	/*
+	 * Reset the PLL so that setup do not cause interrupts or parasites hardware;
+	 */
+
+	//Disable loss of lock interrupt, select FLL, disable clock monitor;
+	*MCG_C6 &= ~(C6_LOLIE0 | C6_PLLS | C6_CME0);
+
+	//Disable PLLCLKEN0 and disable in stop mode;
+	*MCG_C5 &= ~(C5_PLLCLKEN0 | C5_PLLSTEN0);
+
+
+	/*
+	 * C5 calculation;
+	 */
+
+	//Determine PRDIV0 and save it in the new C5 value;
+	uint8_t C5 = (uint8_t) (divider - (uint8_t) 1);
+
+	//Determine the output frequency;
+	pll_frequency = input_f * output_factor;
+
+	//If the PLL clock output must be enabled, set the appropriate bit;
+	if (config->enable_mcg_pllclk) C5 |= C5_PLLCLKEN0;
+
+	//If the PLL clock output must stay enabled during stop mode, set the appropriate bit;
+	if (config->enable_during_stop_mode) C5 |= C5_PLLSTEN0;
+
+	//Write C5;
+	*MCG_C5 = C5;
+
+
+	/*
+	 * C6 calculation;
+	 */
+
+	//Determine VDIV0 and initialise C6.
+	//subtract 24 and save only 5 lsb (unnecessary with previous check, but safer...);
+	//External clock monitor disabled, FLL Selected;
+	*MCG_C6 = ((uint8_t) (output_factor - (uint8_t) 24)) & (uint8_t) 0x1F;
+
+	//Wait till PLL is locked;
+	while (!(*MCG_S & S_LOCK0));
+
+	//Clear loss of lock status;
+	mcg_clear_pll_loss_of_lock_flag();
+
+	//If the loss of lock must generate an interrupt :
+	if (config->loss_of_lock_generates_interrupt) {
+
+		//Enable the interrupt request in C6;
+		*MCG_C6 |= C6_LOLIE0;
+
+		//If a reset request must be generated :
+		if (config->loss_of_lock_generates_reset) {
+
+			//Enable the reset request in C8;
+			*MCG_C8 |= C8_LOLRE;
+
+		}
+
+	}
 
 }
 
-//Clear the pll loss of lock status;
-void mcg_clear_pll_loss_of_lock_flag();
+
+/**
+ * mcg_clear_pll_loss_of_lock_flag : clears the loss of lock flag in the status register;
+ */
+
+void mcg_clear_pll_loss_of_lock_flag() {
+
+	//Write 1 to LOLS0 (W1C);
+	*MCG_S |= S_LOLS0;
+
+}
+
+
+
+/*
+ * ------------------------------------------- MCG operation modes selection -------------------------------------------
+ */
+
+//The current MGCOUT frequency; At startup, the FLL, clocked by the slow internal frequency, is selected;
+static uint32_t mcg_out_frequency = IRC_SLOW_FREQ;
+
+/**
+ * PLL Engaged External (PEE) : required OSC and PLL to be initialised;
+ *
+ * 	PLL Engaged External (PEE) mode is entered when all the following conditions occur:
+ *
+ * 	00 is written to C1[CLKS].
+ * 	0 is written to C1[IREFS].
+ * 	1 is written to C6[PLLS].
+ *
+ * 	In PEE mode, the MCGOUTCLK is derived from the output of PLL which is controlled by a external
+ * 	reference clock.
+ *
+ * 	The PLL clock frequency locks to a multiplication factor, as specified by its corresponding VDIV,
+ * 	times the selected PLL reference frequency, as specified by its corresponding PRDIV.
+ *
+ * 	The PLL's programmable reference divider must be configured to produce a valid PLL reference clock.
+ * 	The FLL is disabled in a low-power state.
+ */
+
+void mcg_enter_PEE() {
+
+	//First, cache the PLL frequency;
+	uint32_t freq = pll_frequency;
+
+	//If the PLL is not initialised :
+	if (freq == 0) {
+
+		//TODO ERROR invalid output factor;
+		while (1);
+
+		//Never reached
+		return;
+
+	}
+
+	//TODO FREQUENCY RANGE CHECK;
+
+	//Cache C1;
+	uint8_t C1 = *MCG_C1;
+
+	//Clear CLKS bits;
+	C1 &= ~C1_CLKS;
+
+	//Clear IREFS;
+	C1 &= ~C1_IREFS;
+
+	//debug_led_low();
+	//debug_delay_ms(100);
+
+	//debug_led_high();
+
+	debug_led_dump(*MCG_C5);
+
+	//Select PLL;
+	*MCG_C6 |= C6_PLLS;
+
+	debug_led_high();
+
+
+
+	while(1);
+
+	while(!(*MCG_S & S_PLLST));
+
+
+
+	debug_delay_ms(100);
+
+	debug_led_dump(*MCG_S);
+
+
+	//Update the frequency;
+	mcg_out_frequency = freq;
+
+	//Update C1;
+	*MCG_C1 = C1;
+
+
+	while (1) {
+		debug_led_high();
+		debug_delay_ms(100);
+		debug_led_low();
+		debug_delay_ms(50);
+	}
+
+
+}
