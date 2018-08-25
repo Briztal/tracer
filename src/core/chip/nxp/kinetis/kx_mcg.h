@@ -17,10 +17,6 @@
  * -------------------------------------------------------- IRC --------------------------------------------------------
  */
 
-//The Internal Reference Clock provided two clocks, the fast IRC at 4MHz and the slow IRC at 32kHz
-#define IRC_FAST_FREQ ((uint32_t) 4000000)
-#define IRC_SLOW_FREQ ((uint32_t) 32000)
-
 
 enum mcg_fast_irc_divider {
 	IRC_DIV_1 = 0,
@@ -191,7 +187,7 @@ void mcg_clear_rtcosc_loss_of_lock_flag();
 
 //Configure the PLL input. If the extenal ref is selected, the OSC must have been initialised;
 //The fll input is actually changed;
-void mcg_configure_fll_input(bool external_ref, uint8_t eref_divider_id);
+//void mcg_configure_fll_input(bool external_ref, uint8_t eref_divider_id);
 
 
 /**
@@ -217,7 +213,7 @@ enum mcg_fll_frequency_range {
 };
 
 //Configure the FLL output frequency; OSC must have been configured first;
-void mgc_configure_fll_output(enum mcg_fll_frequency_range f_range, bool exact_32768_ref);
+//void mgc_configure_fll_output(enum mcg_fll_frequency_range f_range, bool exact_32768_ref);
 
 /*
  * -------------------------------------------------------- PLL --------------------------------------------------------

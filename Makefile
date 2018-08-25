@@ -87,10 +87,6 @@ elf: core
 	@$(CC) $(LDFLAGS) -o $(NAME).elf $(CORE_OBJS) $(LINK_LIBS)
 
 
-hex: elf
-	@echo "[HEX]\ttracer.hex"
-	@$(SIZE) $(NAME).elf
-	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).elf $(NAME).hex
 
 
 #The general build target will simply build the elf file, but not the flashable format. No objcopy;

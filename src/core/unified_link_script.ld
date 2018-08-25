@@ -4,11 +4,11 @@ INCLUDE memory_map.ld
 
 /*
  * The linking script will provide the following constants :
- *  - _start_rodata :   the start of the rodata region in FLASH. .rodata must be copied in RAM at init at @_start_data.
- *  - _end_rodata   :   the end of the rodata region in flasg;
- *  - _start_data   :   the start of the region where to copy rodata, in RAM;
- *  - _start_bss    :   the start of the bss region, to initialise with zeros;
- *  - _end_bss      :   the end of the bss region, to initialise with zeros;
+ *  - _data_lma     :   the load address of the data region, in FLASG
+ *  - _data_vma     :   the lowest address of the data region in RAM;
+ *  - _end_data     :   the highest address of the data region in RAM;
+ *  - _bss_vma      :   the lowest address of the bss region in RAM;
+ *  - _end_bss      :   the highest address of the bss region in RAM;
  *  - _ram_lowest   :   the lowest bound of the ram's available zone;
  *  - _ram_highest  :   the highest bound of the ram's available zone;
  */
@@ -19,6 +19,8 @@ INCLUDE memory_map.ld
 SECTIONS {
 
     . = 0;
+
+
     .vectors : {
         KEEP(*(.vectors))
     } > FLASH
@@ -31,39 +33,48 @@ SECTIONS {
 
     . = 0x400;
     .flashconfig : {
-        KEEP(*(.flashconfig*))
+        KEEP(*(.flashconfig))
     } > FLASH
 
 
     /*The text section contains the program itself;*/
-    . = ALIGN(4);
     .text : {
-        *(.text*)
+        . = ALIGN(4);
+        *(.text)
     } > FLASH
 
 
-    /*The rodata section contains globals init values;*/
-    . = ALIGN(4);
+    /*The rodata section contains constant data (const, strings, ...);*/
     .rodata : {
-        _start_rodata = .;
+        . = ALIGN(4);
         *(.rodata*)
-        _end_rodata = .;
     } > FLASH
 
 
-    /*The bss section contains globals that must be initialised to 0 at init*/
-    . = ALIGN(4);
-    .data :
-    {
-        _start_data = .;
+    /*The libc init section. Junk crap LOL;*/
+    .cinit : {
+        . = ALIGN(4);
+        *(.init*)
+        *(.fini*)
+    } > FLASH
+
+    /*The lma of the data section, after all previous sections;*/
+    _data_lma = .;
+
+
+    /*The data section contains globals that we must initialise. Its LMA will be at _data_lma;*/
+    .data : AT (_data_lma) {
+        . = ALIGN(4);
+        _data_vma = .;
         *(.data*)
+        _end_data = .;
     } > RAM
 
 
     /*The bss section contains globals that must be initialised to 0 at init*/
-    . = ALIGN(4);
     .bss : {
-        _start_bss = .;
+        . = ALIGN(4);
+        _bss_vma = .;
         *(.bss*)
         _end_bss = .;
     } > RAM

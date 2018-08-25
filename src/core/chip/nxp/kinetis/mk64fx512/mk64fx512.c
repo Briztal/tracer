@@ -73,7 +73,6 @@ void debug_led_low() {
  * debug_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-
 void debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
@@ -194,6 +193,9 @@ const uint8_t flashconfigbytes[16] = {
 };
 
 
+uint8_t f = 2;
+
+
 void __entry_point(void) {
 
 	/*
@@ -211,6 +213,8 @@ void __entry_point(void) {
 	sim_enable_PORTE_clock_gating();
 
 	startup_initialise_globals();
+
+	debug_led_count(f);
 
 	//Create the OSC initialisation struct;
 	struct mcg_osc_config osc_conf = {
@@ -247,18 +251,18 @@ void __entry_point(void) {
 	//Configure the oscillator;
 	mcg_configure_osc(&osc_conf);
 
+/*
 
 	struct mcg_pll_config pll_conf = {
 
 		//Enable external clock;
-		.enable_mcg_pllclk = true,
+		.enable_mcg_pllclk = false,
 
 		//No interrupt for loss of clock;
 		.loss_of_lock_generates_interrupt = false,
 
 		//No reset at loss of clock;
 		.loss_of_lock_generates_reset = false,
-
 
 		//Enable during stop mode;
 		.enable_during_stop_mode = true,
@@ -274,6 +278,11 @@ void __entry_point(void) {
 	//Configure the PLL;
 	mcg_configure_pll(&pll_conf);
 
+	//TODO CONGIGURE IRC;
+
+	//Engage the PLL on external ref;
+	mcg_enter_PEE();
+
 
 	while (1) {
 		debug_led_high();
@@ -288,6 +297,7 @@ void __entry_point(void) {
 	//TODO DEBUG INIT;
 
 	//TODO CORE BUS FLEX FLASH CLOCK DIVIDER;
+
 
 	/*
 	 * Then, initialise global variables;
@@ -358,4 +368,3 @@ void mk64fx512_hardware_init() {
 	 */
 
 }
-

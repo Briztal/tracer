@@ -14,11 +14,16 @@ CFLAGS += -DUSB_SERIAL -DLAYOUT_US_ENGLISH
 TOOLSPATH := $(abspath $(CURDIR)/$(T35_DIR)/tool-teensy)
 
 
-post_compile: hex
-	@$(abspath $(TOOLSPATH))/teensy_post_compile -file="$(basename $(NAME).hex)" -path=$(CURDIR) -tools="$(abspath $(TOOLSPATH))"
+hex: elf
+	@echo "[HEX]\tracer.hex"
+	@$(SIZE) -A -t -x $(NAME).elf
+	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).elf $(NAME).hex
+
+upload: hex
+	@$(abspath $(TOOLSPATH))/teensy_loader_cli -mmcu=mk64fx512 -w -v "$(abspath build/tracer.hex)"
+	#@$(abspath $(TOOLSPATH))/teensy_post_compile -file="$(basename $(NAME).hex)" -path=$(CURDIR) -v -tools="$(abspath $(TOOLSPATH))"
 
 reboot:
 	@-$(abspath $(TOOLSPATH))/teensy_reboot
 
-upload: post_compile reboot
 

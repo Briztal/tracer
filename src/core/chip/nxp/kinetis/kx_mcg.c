@@ -84,6 +84,12 @@
  * -------------------------------------------------------- IRC --------------------------------------------------------
  */
 
+
+//The Internal Reference Clock provided two clocks, the fast IRC at 4MHz and the slow IRC at 32kHz
+#define IRC_FAST_FREQ ((uint32_t) 4000000)
+#define IRC_SLOW_FREQ ((uint32_t) 32000)
+
+
 //The current frequency of the IRC clock. At init, the slow clock is selected;
 static uint32_t irc_frequency = IRC_SLOW_FREQ;
 
@@ -431,7 +437,7 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
 
 
 //The FLL input freq; At init, in FEI mode;
-static uint32_t mcg_fll_input_frequency = IRC_SLOW_FREQ;
+static uint32_t mcg_fll_input_frequency = 0;//IRC_SLOW_FREQ;
 
 //The FLL output frequency; At init, at FEI mode with precise ref, fll factor = 640;
 #define FLL_OUTPUT_INIT (IRC_SLOW_FREQ * 640)
@@ -815,7 +821,7 @@ void mcg_clear_pll_loss_of_lock_flag() {
  */
 
 //The current MGCOUT frequency; At startup, the FLL, clocked by the slow internal frequency, is selected;
-static uint32_t mcg_out_frequency = FLL_OUTPUT_INIT;
+static uint32_t mcg_out_frequency = 0;//FLL_OUTPUT_INIT;
 
 /**
  * PLL Engaged External (PEE) : required OSC and PLL to be initialised;

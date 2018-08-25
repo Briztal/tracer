@@ -8,10 +8,10 @@
 #include <stdint.h>
 #include "debug.h"
 
-extern uint8_t _start_rodata;
-extern uint8_t _end_rodata;
-extern uint8_t _start_data;
-extern uint8_t _start_bss;
+const extern uint8_t _data_lma;
+extern uint8_t _data_vma;
+extern uint8_t _end_data;
+extern uint8_t _bss_vma;
 extern uint8_t _end_bss;
 
 
@@ -19,23 +19,21 @@ static inline void startup_initialise_globals() {
 
 
 	//Cache start addresses of rodata and data,
-	uint8_t *rodata_ptr = &_start_rodata;
-	uint8_t *data_ptr = &_start_data;
+	const uint8_t *data_src = &_data_lma;
+	uint8_t *data_dst = &_data_vma;
 
 	//Copy rodata in data;
-	while (rodata_ptr < &_end_rodata) {
-		*(data_ptr++) = (*rodata_ptr++);
+	while (data_dst < &_end_data) {
+		*(data_dst++) = (*data_src++);
 	}
 
 	//Cache the start address of the bss region;
-	uint8_t *bss_ptr = &_start_bss;
+	uint8_t *bss_ptr = &_bss_vma;
 
 	//Null set bss;
 	while(bss_ptr < &_end_bss) {
 		*(bss_ptr++) = 0;
 	}
-
-
 
 }
 
