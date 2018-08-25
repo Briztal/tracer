@@ -73,6 +73,7 @@ void debug_led_low() {
  * debug_delay : hardware code for waiting a certain number of milliseconds;
  */
 
+
 void debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
@@ -258,6 +259,7 @@ void __entry_point(void) {
 		//No reset at loss of clock;
 		.loss_of_lock_generates_reset = false,
 
+
 		//Enable during stop mode;
 		.enable_during_stop_mode = true,
 
@@ -271,11 +273,6 @@ void __entry_point(void) {
 
 	//Configure the PLL;
 	mcg_configure_pll(&pll_conf);
-
-	//TODO CONGIGURE IRC;
-
-	//Engage the PLL on external ref;
-	mcg_enter_PEE();
 
 
 	while (1) {

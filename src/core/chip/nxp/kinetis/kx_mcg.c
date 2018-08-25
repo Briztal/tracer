@@ -9,6 +9,7 @@
 
 #define MCG_C1          ((volatile uint8_t *)0x40064000)
 #define C1_CLKS         ((uint8_t)0xC0)
+#define C1_FRDIV         ((uint8_t) ((1<<3)|(1<<4)|(1<<5)))
 #define C1_CLKS_INT     ((uint8_t)0xD0)
 #define C1_CLKS_EXT        ((uint8_t)0xE0)
 #define C1_IREFS        ((uint8_t) (1<<2))
@@ -27,7 +28,14 @@
 
 
 #define MCG_C3            ((volatile uint8_t *)0x40064002)
+
+
+//C4 : FLL and Ftrim;
 #define MCG_C4            ((volatile uint8_t *)0x40064003)
+#define C4_SCFTRIM        ((uint8_t) (1<<0))
+#define C4_FCTRIM        ((uint8_t)((1<<1) | (1<<2)| (1<<3)| (1<<4)))
+#define C4_DRST_DRS        ((uint8_t)((1<<5)| (1<<6)))
+#define C4_DMX32        ((uint8_t) (1<<7))
 
 
 //C5 : the PLL first config register;
@@ -58,6 +66,7 @@
 #define MCG_ATCVL        ((volatile uint8_t *)0x4006400B)
 
 #define MCG_C7            ((volatile uint8_t *)0x4006400C)
+#define C7_OSCSEL            ((uint8_t) 3)
 
 
 //C8 : Enhanced monitoring register;
@@ -384,6 +393,261 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
 
 
 /*
+ * -------------------------------------------------------- FLL --------------------------------------------------------
+ */
+
+/**
+ * The Frequency Lock Loop is a hardware component that receives and locks an input frequency between
+ * 	31250 and 39062.5 Hz, to generate an output signal whose frequency is proportional to the input frequency;
+ *
+ * 	The output frequency range can be selected between four ranges (expressed in MHz), low (20-25), mid (40-50),
+ * 	mid-high (60-75), and high (80-100);
+ *
+ * 	The input signal can also be selected, between the OSC external ref and the RTC slow clock;
+ *
+ * 	If the OSC external reference is selected, its frequency may not be in the required range. To support this case,
+ * 	a frequency divider is included, to ensure that the input frequency is in the correct range.
+ *
+ * 	This divisor must be determined properly after the oscillator is selected;
+ *
+ * 	The configuration of the FLL comprises two steps :
+ * 	- The hardware config, made when the FLL is not engaged; multiplication factor is selected, and clock divisor is
+ * 		computed;
+ * 	- The selection, made when the FLL is engaged by the MCG. The source is selected, and the actual output frequency
+ * 		computed;
+ */
+
+
+//The FLL input frequency bounds;
+#define FLL_INPUT_MIN 31250
+#define FLL_INPUT_MAX 39062
+
+//The fll reference input frequency;
+#define FLL_INPUT_REF 32786
+
+//The tolerance around the fll frequency;
+#define FLL_INPUT_REF_TOLERANCE 2
+
+
+
+//The FLL input freq; At init, in FEI mode;
+static uint32_t mcg_fll_input_frequency = IRC_SLOW_FREQ;
+
+//The FLL output frequency; At init, at FEI mode with precise ref, fll factor = 640;
+#define FLL_OUTPUT_INIT (IRC_SLOW_FREQ * 640)
+static uint32_t mcg_fll_output_frequency = FLL_OUTPUT_INIT;
+
+
+/**
+ * mcg_configure_fll_input : configures the input source of the FLL and determines the consequent input frequency;
+ *
+ * 	If the external reference is selected in input, a check will be made on if the oscillator is enabled, and
+ * 	if the provided divider id determines an input frequency inside the PLL working window;
+ *
+ * 	If the slow internal reference is selected, @eref_divider_id is not used;
+ *
+ * @param external_ref : set if the external reference sould be used as input;
+ * @param eref_divider_id : FRDIV in case of external ref selection;
+ */
+
+void mcg_configure_fll_input(const bool external_ref, const uint8_t eref_divider_id) {
+
+
+	//Cache C1;
+	uint8_t C1 = *MCG_C1;
+
+	//clear FRDIV bts;
+	C1 &= ~C1_FRDIV;
+
+
+	//Cache the input frequency;
+	uint32_t input_f;
+
+	//If the external reference is selected :
+	if (external_ref) {
+
+		//Clear IREFS;
+		C1 &= ~C1_IREFS;
+
+		//Cache the osc frequency;
+		input_f = osc_frequency;
+
+		//The PLL depends on the OSC external reference. If the OSC is not configured :
+		if (input_f == 0) {
+
+			//TODO ERROR OSC NOT INITIALISED;
+			while (1);
+
+			//Never reached
+			return;
+
+		}
+
+		//Cache the divider index;
+		const uint8_t divider_id = eref_divider_id;
+
+		//If the divider is invalid :
+		if (divider_id > 7) {
+
+			//TODO ERROR Invalid divider;
+			while (1);
+
+			//Never reached
+			return;
+
+		}
+
+		//Copy FRDIV in C1;
+		C1 |= (divider_id << 3);
+
+
+		/*
+		 * Determine the frequency;
+		 */
+
+		//If range is 0 (low frequency), or if the slow oscillator is selected :
+		if (((*MCG_C7 & C7_OSCSEL) == 2) || (((*MCG_C2 & C2_RANGE) >> 4) == 0)) {
+
+			//The frequency division factor starts at 1;
+			input_f >>= divider_id;
+
+		} else {
+
+			//The frequency division starts at 32 (= 2^5, shift 5 times more);
+			input_f >>= (divider_id + 5);
+
+		}
+
+
+	} else {
+
+		//If internal slow reference is selected :
+
+		//Set IREFS;
+		C1 |= C1_IREFS;
+
+		//Update the input frequency;
+		input_f = IRC_SLOW_FREQ;
+	}
+
+	//If the input frequency is not in the required bounds :
+	if ((input_f < FLL_INPUT_MIN)  || (input_f > FLL_INPUT_MAX)) {
+
+		//TODO ERROR PLL CANT WORK
+		while (1);
+
+		//Never reached
+		return;
+
+	}
+
+	//Update C1;
+	*MCG_C1 = C1;
+
+	//Save the input frequency;
+	mcg_fll_input_frequency = input_f;
+
+}
+
+
+/**
+ * mgc_configure_fll_output : configures the FLL output to be in the required range. If the input frequency is known
+ * 	to be the exact reference frequency (in a tolerance range), the FLL factor can be modified so that a precise output
+ * 	frequency is generated;
+ *
+ * 	If the FLL output is not initialised, or if a too large error is observated when @exact_32786_ref is set, a core
+ * 	error is issued;
+ *
+ * @param f_range : the required output range;
+ * @param exact_32768_ref : must the FLL factor be adjusted for a standard output frequency ?
+ */
+
+void mgc_configure_fll_output(const enum mcg_fll_frequency_range f_range, const bool exact_32768_ref) {
+
+	//Cache the input frequenct;
+	const uint32_t input_f = mcg_fll_input_frequency;
+
+	//If the FLL was not properly initialised :
+	if (!input_f) {
+
+		//TODO ERROR FLL NOT INITIALISED;
+		while (1);
+
+		//Never reached
+		return;
+
+	}
+
+	//Cache C4, and clear DMX32 and DCO Range;
+	uint8_t C4 = *MCG_C4 & ~(C4_DMX32 | C4_DRST_DRS);
+
+	//If the exact frequency must be selected :
+	if (exact_32768_ref) {
+
+		//If the input frequency is not in the tolerance bounds :
+		if ((input_f < FLL_INPUT_REF - FLL_INPUT_REF_TOLERANCE) ||
+			(input_f > FLL_INPUT_REF + FLL_INPUT_REF_TOLERANCE)) {
+
+			//TODO ERROR FLL MISCONFIGURATION;
+			while (1);
+
+			//Never reached
+			return;
+
+
+		}
+
+		//If the input frequency is appropriate :
+
+		//Set the DMX32 flag;
+		C4 |= C4_DMX32;
+
+	}
+
+	//Save DCO range Select;
+	C4 |= (f_range & 3) << 5;
+
+	/*
+	 * Determine the output frequency;
+	 */
+
+	//Declare the FLL factor;
+	uint32_t fll_factor = 0;
+
+	switch (f_range) {
+
+		case FLL_RANGE_20_25_ref24_MHz:
+			fll_factor = (exact_32768_ref) ? 732 : 640;
+			break;
+		case FLL_RANGE_40_50_ref48_MHz:
+			fll_factor = (exact_32768_ref) ? 1464 : 1280;
+			break;
+		case FLL_RANGE_60_75_ref72_MHz:
+			fll_factor = (exact_32768_ref) ? 2197 : 1920;
+			break;
+		case FLL_RANGE_80_100_ref96_MHz:
+			fll_factor = (exact_32768_ref) ? 2929 : 2560;
+			break;
+		default:
+			//TODO ERROR FLL BAD PARAMETER;
+			while (1);
+
+			//Never reached
+			return;
+
+	}
+
+	//Write C4;
+	*MCG_C4 = C4;
+
+	//Determine and save the output frequency;
+	mcg_fll_output_frequency = input_f * fll_factor;
+
+}
+
+
+
+/*
  * -------------------------------------------------------- PLL --------------------------------------------------------
  */
 
@@ -551,7 +815,7 @@ void mcg_clear_pll_loss_of_lock_flag() {
  */
 
 //The current MGCOUT frequency; At startup, the FLL, clocked by the slow internal frequency, is selected;
-static uint32_t mcg_out_frequency = IRC_SLOW_FREQ;
+static uint32_t mcg_out_frequency = FLL_OUTPUT_INIT;
 
 /**
  * PLL Engaged External (PEE) : required OSC and PLL to be initialised;
@@ -612,11 +876,9 @@ void mcg_enter_PEE() {
 	debug_led_high();
 
 
+	while (1);
 
-	while(1);
-
-	while(!(*MCG_S & S_PLLST));
-
+	while (!(*MCG_S & S_PLLST));
 
 
 	debug_delay_ms(100);

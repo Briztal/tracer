@@ -12,6 +12,7 @@
 
 
 
+
 /*
  * -------------------------------------------------------- IRC --------------------------------------------------------
  */
@@ -188,6 +189,10 @@ void mcg_clear_rtcosc_loss_of_lock_flag();
  * 		computed;
  */
 
+//Configure the PLL input. If the extenal ref is selected, the OSC must have been initialised;
+//The fll input is actually changed;
+void mcg_configure_fll_input(bool external_ref, uint8_t eref_divider_id);
+
 
 /**
  * The mcg fll configuration enum allows to select the output frequency range of the FLL;
@@ -197,22 +202,22 @@ void mcg_clear_rtcosc_loss_of_lock_flag();
 
 enum mcg_fll_frequency_range {
 
-	//Between 20 and 25 MHz
-		FLL_RANGE_20_25_MHz,
+	//Between 20 and 25 MHz, with 246MHz when the ref clock is selected;
+		FLL_RANGE_20_25_ref24_MHz = 0,
 
-	//Between 40 and 50 MHz
-		FLL_RANGE_40_50_MHz,
+	//Between 40 and 50 MHz, with 48MHz when the ref clock is selected;
+		FLL_RANGE_40_50_ref48_MHz = 1,
 
-	//Between 60 and 75 MHz
-		FLL_RANGE_60_75_MHz,
+	//Between 60 and 75 MHz, with 72MHz when the ref clock is selected;
+		FLL_RANGE_60_75_ref72_MHz = 2,
 
-	//Between 80 and 100 MHz
-		FLL_RANGE_50_100_MHz,
+	//Between 80 and 100 MHz, with 96MHz when the ref clock is selected;
+		FLL_RANGE_80_100_ref96_MHz = 3,
 
 };
 
-//Configure the FLL; OSC must have been configured first;
-void mgc_configure_fll(enum mcg_fll_frequency_range freq_range);
+//Configure the FLL output frequency; OSC must have been configured first;
+void mgc_configure_fll_output(enum mcg_fll_frequency_range f_range, bool exact_32768_ref);
 
 /*
  * -------------------------------------------------------- PLL --------------------------------------------------------
