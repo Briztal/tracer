@@ -45,6 +45,7 @@ void debug_led_high() {
 	//ALT 1
 	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
 
+
 	//Set
 	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
 
@@ -77,7 +78,8 @@ void debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
 		//Count to;
-		for (volatile uint32_t i = 15000; i--;);
+		//for (volatile uint32_t i = 15000; i--;);
+		for (volatile uint32_t i = 3600; i--;);
 	}
 
 }
@@ -193,9 +195,6 @@ const uint8_t flashconfigbytes[16] = {
 };
 
 
-uint8_t f = 2;
-
-
 void __entry_point(void) {
 
 	/*
@@ -214,25 +213,10 @@ void __entry_point(void) {
 
 	startup_initialise_globals();
 
-	debug_led_count(f);
-
-	//Create the OSC initialisation struct;
-	struct mcg_osc_config osc_conf = {
-
-		//Enable output;
-		.output_enabled = true,
-
-		//Stay enabled in stop mode;
-		.stay_enabled_in_stop_mode = true,
-
-		//No interrupt for loss of clock;
-		.loss_of_clock_generates_reset = false,
-
-		//Internal oscillator selected;
-		.oscillator_selected = true,
+	struct mcg_osc0_init osc_init = {
 
 		//16M freq;
-		.osc_frequency = 16000000,
+		.osc0_frequency = 16000000,
 
 		//Low power;
 		.low_power_mode = true,
@@ -248,9 +232,33 @@ void __entry_point(void) {
 
 	};
 
+	mcg_initialise_osc0(&osc_init);
+
+	//Create the OSC initialisation struct;
+	struct mcg_osc_config osc_conf = {
+
+		//Enable output;
+		.output_enabled = true,
+
+		//External clock not selected;
+		.external_clock_selected = false,
+
+		//OSC0 selected;
+		.osc0_selected = true,
+
+		//Stay enabled in stop mode;
+		.stay_enabled_in_stop_mode = true,
+
+		//No interrupt for loss of clock;
+		.loss_of_clock_generates_reset = false,
+
+	};
+
 	//Configure the oscillator;
 	mcg_configure_osc(&osc_conf);
 
+
+	debug_led_count(2);
 /*
 
 	struct mcg_pll_config pll_conf = {

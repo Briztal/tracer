@@ -9,9 +9,21 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
-
-
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
+//TODO EXTERNAL CLOCKS (PLLOUT FLLOUT EREFOUT)
 
 /*
  * -------------------------------------------------------- IRC --------------------------------------------------------
@@ -76,47 +88,15 @@ enum mcg_osc_connection {
 };
 
 
-/**
- * The mcg osc configuration structure.
- *
- * 	The OSC can be enabled or disabled, and maintained active or not in stop mode;
- *
- * 	Internal capacitors can be added to adjust filtering properties.
- *
- * 	The frequency of the filtering bloc between XTAL and EXTAL must be provided.
- *
- * 	The power mode (high gain or low power) must also be provided;
- *
- * 	As there are different connections, listed in the enum behind, the type of connection must be provided;
- *
- * 	The initialisation function will do some check to verify that the required parameter combination
- * 	is possible, as the connection type restricts the couple (frequency range, power mode);
- * 	TODO.
+/*
+ * The OSC module must be initialised. This operation should be executed at startup before any config is done;
+ * 	Parameters provided in this struct will not be changed by config;
  */
 
-struct mcg_osc_config {
+struct mcg_osc0_init {
 
-	//Set to enable the osc output; can be oscillator or external reference clock;
-	bool output_enabled;
-
-	//Set to maintain enabled in stop mode;
-	bool stay_enabled_in_stop_mode;
-
-	//Should a loss of clock generate a reset ?
-	bool loss_of_clock_generates_reset;
-
-	//Set if the internal oscillator is selected for output. Clear if external clock;
-	bool oscillator_selected;
-
-	//The frequency of the oscillator; If zero, external clock reference will be selected;
-	uint32_t osc_frequency;
-
-	/*
-	 * All Following options will only be evaluated if the internal oscillator is selected;
-	 * and if the triplet (frequency, power_mode, connection_id) is valid;
-	 *
-	 * If not, a core error will be issued;
-	 */
+	//The frequency of the oscillator 0;
+	uint32_t osc0_frequency;
 
 	//The required power mode, low_power of high_gain if not;
 	bool low_power_mode;
@@ -137,8 +117,35 @@ struct mcg_osc_config {
 	//Add 16pF capacitor to the oscillator load;
 	bool capacitor_16pf_enabled;
 
+};
+
+//Initialise the OSC module; Must be done before any config attempt;
+void mcg_initialise_osc0(const struct mcg_osc0_init *init);
+
+
+/*
+ * The OSC module must be configured, to determine the status, and which clock is selected;
+ */
+
+struct mcg_osc_config {
+
+	//Set to enable the osc output; can be oscillator or external reference clock;
+	bool output_enabled;
+
+	//Set to maintain enabled in stop mode;
+	bool stay_enabled_in_stop_mode;
+
+	//Should a loss of clock generate a reset ?
+	bool loss_of_clock_generates_reset;
+
+	//Set if the external clock; is selected for output. Clear if the internal oscillator is selected for output;
+	bool external_clock_selected;
+
+	//Used if the external clock is not selected. Set if OSC0 is selected;
+	bool osc0_selected;
 
 };
+
 
 //Configure the oscillator;
 void mcg_configure_osc(const struct mcg_osc_config *config);
@@ -213,7 +220,38 @@ enum mcg_fll_frequency_range {
 };
 
 //Configure the FLL output frequency; OSC must have been configured first;
-//void mgc_configure_fll_output(enum mcg_fll_frequency_range f_range, bool exact_32768_ref);
+//void mcg_configure_fll_output(enum mcg_fll_frequency_range f_range, bool exact_32768_ref);
+
+struct fll_input_config {
+
+	//Set this flag if the OSC external ref must be selected as input;
+	bool external_ref;
+
+	//If the external ref is selected, contains the divider index;
+	uint8_t eref_divider_id;
+
+};
+
+//TODO STATIC IN SOURCE;
+//TODO DOC;
+void mcg_configure_fll_input(struct fll_input_config config);
+
+
+struct fll_output_config {
+
+	//The desired output frequency range;
+	enum mcg_fll_frequency_range f_range;
+
+	//Set this flag to mention that the input signal has a frequency of 32768 Hertz;
+	//FLL Factor will be adjusted to provide a standard output frequency; See mcg_fll_frequency_range;
+	bool exact_32768_ref;
+
+};
+
+//TODO STATIC IN SOURCE;
+//TODO DOC;
+void mcg_configure_fll_output(struct fll_output_config config);
+
 
 /*
  * -------------------------------------------------------- PLL --------------------------------------------------------
@@ -239,10 +277,10 @@ enum mcg_fll_frequency_range {
  * 	2MHz and 4Mhz. If it is not, a core error will be issued;
  */
 
+
+
 struct mcg_pll_config {
 
-	//Enable MGCPLLCLK;
-	bool enable_mcg_pllclk;
 
 	//Shall an interrupt be triggered when a loss of lock is detected ?
 	bool loss_of_lock_generates_interrupt;
@@ -253,7 +291,6 @@ struct mcg_pll_config {
 
 	//Enable during stop mode;
 	bool enable_during_stop_mode;
-
 	//The external reference divide factor, between 1 and 24;
 	uint8_t external_divide_factor;
 
@@ -287,9 +324,126 @@ void mcg_clear_pll_loss_of_lock_flag();
 //TODO ENABLE MCG CLOCKS
 //TODO GET MCG FREQUENCIES
 
+//----------------------------------------------------------------------------------------------------------------------
 
 /**
- * PLL Engaged External (PEE) : required OSC and PLL to be initialised;
+ * FLL Engaged Internal (FEI) :
+ *
+ * 	This mode can be entered from FBI;
+ *
+ * 	In FEI mode, MCGOUTCLK is derived from the FLL clock (DCOCLK) that is controlled by the 32
+ * 	kHz Internal Reference Clock (IRC). The FLL loop will lock the DCO frequency to the FLL factor, as
+ * 	selected by C4[DRST_DRS] and C4[DMX32] bits, times the internal reference frequency. See the
+ * 	C4[DMX32] bit description for more details. In FEI mode, the PLL is disabled in a low-power state
+ * 	unless C5[PLLCLKEN] is set .
+ */
+
+/**
+ * Entering in FEI mode will select the IRC slow signal as input, and update the output frequency range;
+ *
+ * 	The IRC slow frequency is not at 32786 Hertz, the only field required is the frequency range;
+ */
+
+void mcg_enter_FEI(enum mcg_fll_frequency_range range);
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**
+ * FLL Engaged External (FEE) :
+ *
+ * 	This mode can be entered from FBE;
+ *
+ *  In FEE mode, MCGOUTCLK is derived from the FLL clock (DCOCLK) that is controlled by the
+ *  external reference clock.
+ *
+ *  The FLL loop will lock the DCO frequency to the FLL factor, as selected by C4[DRST_DRS] and C4[DMX32] bits,
+ *  times the external reference frequency, as specified by C1[FRDIV] and C2[RANGE].
+ *
+ *  See the C4[DMX32] bit description for more details. In FEE mode, the PLL is disabled in a low-power state
+ *  unless C5[PLLCLKEN] is set.
+ */
+
+
+/**
+ * Entering in FEE mode will select the OSC external reference signal as input, and update the output frequency range;
+ *
+ * 	The IRC slow frequency is not at 32786 Hertz, the only field required is the frequency range;
+ */
+
+struct FEE_config {
+
+	//The identifier of the external divider;
+	uint8_t eref_id;
+
+	//The desired output frequency range;
+	enum mcg_fll_frequency_range f_range;
+
+	//Set this flag to mention that the input signal has a frequency of 32768 Hertz;
+	//FLL Factor will be adjusted to provide a standard output frequency; See mcg_fll_frequency_range;
+	bool exact_32768_ref;
+
+};
+
+//Enter in FEE mode.
+void mcg_enter_FEE(struct FEE_config config);
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**
+ * FLL Bypassed Internal (FBI) :
+ *
+ * This mode can be entered from FBE, FEI or BLPI;
+ *
+ * In FBI mode, the MCGOUTCLK is derived either from the slow (32 kHz IRC) or fast (4 MHz IRC) internal reference
+ * clock, as selected by the C2[IRCS] bit. The FLL is operational but its output is not used.
+ *
+ * This mode is useful to allow the FLL to acquire its target frequency while the MCGOUTCLK is driven from the
+ * C2[IRCS] selected internal reference clock.
+ *
+ * The FLL clock (DCOCLK) is controlled by the slow internal reference clock, and the DCO clock frequency locks to
+ * a multiplication factor, as selected by C4[DRST_DRS] and C4[DMX32] bits, times the internal reference frequency.
+ *
+ * See the C4[DMX32] bit description for more details.
+ *
+ * In FBI mode, the PLL is disabled in a low-power state unless C5[PLLCLKEN] is set .
+ */
+
+//Enter in FBI mode. The clock selected is determined by the current IRC configuration;
+void mcg_enter_FBI();
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**
+ * FLL Bypassed External (FBE) :
+ *
+ * This mode can be entered from FBI, FEE, PBE or BLPE;
+ *
+ * In FBE mode, the MCGOUTCLK is derived from the OSCSEL external reference clock.
+ *
+ * The FLL is operational but its output is not used. This mode is useful to allow the FLL to acquire its target
+ * frequency while the MCGOUTCLK is driven from the external reference clock.
+ *
+ * The FLL clock (DCOCLK) is controlled by the external reference clock, and the DCO clock frequency locks to a
+ * multiplication factor, as selected by C4[DRST_DRS] and C4[DMX32] bits, times the divided external reference
+ * frequency. See the C4[DMX32] bit description for more details.
+ *
+ * In FBI mode, the PLL is disabled in a low-power state unless C5[PLLCLKEN] is set .
+ */
+
+//Enter in FBE mode. The OSC external ref is selected;
+void mcg_enter_FBE();
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**
+ * PLL Engaged External (PEE) : //TODO INIT PLL AT CALL TIME;
+ *
+ * 	This mode can be entered from PBE mode;
  *
  * 	In PEE mode, the MCGOUTCLK is derived from the output of PLL which is controlled by a external
  * 	reference clock.
@@ -301,7 +455,58 @@ void mcg_clear_pll_loss_of_lock_flag();
  * 	The FLL is disabled in a low-power state.
  */
 
-void mcg_enter_PEE();
+void mcg_enter_PEE(struct mcg_pll_config *config);
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/**
+ * PLL Bypassed External (PBE) : //TODO INIT PLL AT CALL TIME;
+ *
+ * 	This mode can be entered from FBE and BLPE mode;
+ *
+ * 	In PBE mode, MCGOUTCLK is derived from the OSCSEL external reference clock; the PLL is operational,
+ * 	but its output clock is not used.
+ *
+ * 	This mode is useful to allow the PLL to acquire its target frequency while MCGOUTCLK is driven from the external
+ * 	reference clock.
+ *
+ * 	The PLL clock frequency locks to a multiplication factor, as specified by its [VDIV], times the PLL reference
+ * 	frequency, as specified by its [PRDIV].
+ *
+ * 	In preparation for transition to PEE, the PLL's programmable reference divider must be configured to produce a
+ * 	valid PLL reference clock. The FLL is disabled in a low-power state.
+ */
+
+void mcg_enter_PBE();
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/*
+ * Bypass Low Power Internal (BLPI) :
+ *
+ * 	This mode can be entered from FBI;
+ *
+ *  In BLPI mode, MCGOUTCLK is derived from the internal reference clock. The FLL is disabled and PLL is disabled
+ *  even if C5[PLLCLKEN] is set to 1.
+ */
+
+void mcg_enter_BLPI();
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/*
+ * Bypass Low Power External (BLPE) :
+ *
+ * 	This mode can be entered from PBE or FBE;
+ *
+ *  In BLPE mode, MCGOUTCLK is derived from the OSCSEL external reference clock. The FLL is disabled and PLL is
+ *  disabled even if the C5[PLLCLKEN] is set to 1.
+ */
+
+void mcg_enter_BLPE();
+
 
 
 /*
