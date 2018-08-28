@@ -20,6 +20,9 @@
 
 #include "debug.h"
 
+#include "core.h"
+
+
 #include <stdbool.h>
 
 
@@ -29,24 +32,25 @@
 
 void debug_led_halt() {
 
-	debug_led_high();
+	core_led_high();
 
 	while (1);
 }
 
 
 /**
- * debug_led_blink : blinks the debug led, waiting @ms_counter milliseconds between each toggle;
+ * debug_led_blink : blinks the debug led infinitely, waiting @ms_counter milliseconds between each toggle;
+ *
  * @param ms_counter : the number of milliseconds between each toggle of the debug led;
  */
 
 void debug_led_blink(uint32_t ms_counter) {
 
 	while (1) {
-		debug_led_high();
-		debug_delay_ms(ms_counter);
-		debug_led_low();
-		debug_delay_ms(ms_counter);
+		core_led_high();
+		core_delay_ms(ms_counter);
+		core_led_low();
+		core_delay_ms(ms_counter);
 
 	}
 
@@ -69,20 +73,20 @@ void debug_led_count(size_t count) {
 		for (size_t c = count; c--;) {
 
 			//Turn on the LED;
-			debug_led_high();
+			core_led_high();
 
 			//Wait 10 ms;
-			debug_delay_ms(250);
+			core_delay_ms(250);
 
 			//Turn off the LED;
-			debug_led_low();
+			core_led_low();
 
 			//Wait 10 ms;
-			debug_delay_ms(250);
+			core_delay_ms(250);
 
 		}
 
-		debug_delay_ms(2000);
+		core_delay_ms(2000);
 
 	}
 
@@ -90,7 +94,8 @@ void debug_led_count(size_t count) {
 
 
 /**
- * debug_led_cmp : blink waiting 50ms if c is not null, of 1s if c is null;
+ * debug_led_cmp : blink waiting 50ms if c is not null, of 1s if c is null, infinitely;
+ *
  * @param c : the value to adjust the blink delay on;
  */
 
@@ -104,7 +109,13 @@ void debug_led_cmp(size_t c) {
 
 }
 
-//Display bits of a byte, blink fast for 1, blink slow for 0;
+
+/**
+ * debug_led_dump : displays bits of a byte infinitely, blink fast for 1, blink slow for 0;
+ *
+ * @param c : the byte to dump;
+ */
+
 void debug_led_dump(const uint8_t c) {
 
 	while(1) {
@@ -117,27 +128,27 @@ void debug_led_dump(const uint8_t c) {
 
 			//If the bit is 1 :
 			if (cc & (uint8_t) 1) {
-				debug_led_high();
-				debug_delay_ms(100);
-				debug_led_low();
+				core_led_high();
+				core_delay_ms(100);
+				core_led_low();
 			} else {
 
 				for (uint8_t bi = 5; bi--;) {
 
-					debug_led_high();
-					debug_delay_ms(10);
-					debug_led_low();
-					debug_delay_ms(10);
+					core_led_high();
+					core_delay_ms(10);
+					core_led_low();
+					core_delay_ms(10);
 
 				}
 			}
 
-			debug_delay_ms(50);
+			core_delay_ms(50);
 			cc >>=1;
 
 		}
 
-		debug_delay_ms(100);
+		core_delay_ms(100);
 
 	}
 
@@ -145,61 +156,6 @@ void debug_led_dump(const uint8_t c) {
 
 
 
-/**
- * debug_break : sends BREAK in morse over the debug led;
- */
-
-void debug_break() {
-
-	while(true) {
-
-		//Send BREAK;
-		debug_echo("break");
-
-		//Wait for one second;
-		debug_delay_ms(1000);
-
-	}
-
-}
 
 
-
-/**
- * debug_sos : sends SOS in morse over the debug led;
- */
-
-void debug_sos() {
-
-
-	while(true) {
-
-		//Send BREAK;
-		debug_echo("sos");
-
-		//Wait for one second;
-		debug_delay_ms(1000);
-
-	}
-
-}
-
-
-/**
- * debug_sos : sends SOS in morse over the debug led;
- */
-
-void debug_error(const char *msg) {
-
-	while(true) {
-
-		//Send BREAK;
-		debug_echo(msg);
-
-		//Wait for one second;
-		debug_delay_ms(1000);
-
-	}
-
-}
 

@@ -28,23 +28,23 @@
 #include <core/chip/nxp/kinetis/kx_wdog.h>
 #include <core/chip/nxp/kinetis/kx_mcg.h>
 #include <core/chip/nxp/kinetis/kx_sim.h>
+#include <core/core.h>
 
 
 
 //------------------------------------------------------- Debug --------------------------------------------------------
 
 /**
- * debug_led_high : hardware code for turning on the led;
+ * core_led_high : hardware code for turning on the led;
  */
 
-void debug_led_high() {
+void core_led_high() {
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
 
 	//ALT 1
 	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
-
 
 	//Set
 	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
@@ -53,10 +53,10 @@ void debug_led_high() {
 
 
 /**
- * debug_led_low : hardware code for turning off the led;
+ * core_led_low : hardware code for turning off the led;
  */
 
-void debug_led_low() {
+void core_led_low() {
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
@@ -71,15 +71,15 @@ void debug_led_low() {
 
 
 /**
- * debug_delay : hardware code for waiting a certain number of milliseconds;
+ * core_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-void debug_delay_ms(uint32_t ms_counter) {
+void core_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
 		//Count to;
 		//for (volatile uint32_t i = 15000; i--;);
-		for (volatile uint32_t i = 3600; i--;);
+		for (volatile uint32_t i = 3000; i--;);
 	}
 
 }
@@ -88,14 +88,14 @@ void debug_delay_ms(uint32_t ms_counter) {
 
 
 /**
- * debug_delay : hardware code for waiting a certain number of milliseconds;
+ * core_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-void debug_delay_us(uint32_t us_counter) {
+void core_delay_us(uint32_t us_counter) {
 
 	while (us_counter--) {
 		//Count to;
-		for (volatile uint32_t i = 1; i--;);
+		for (volatile uint32_t i = 2; i--;);
 	}
 
 }
@@ -257,6 +257,9 @@ void __entry_point(void) {
 	//Configure the oscillator;
 	mcg_configure_osc(&osc_conf);
 
+	core_error("SUUS MA BITE GROS CHIBRE!!!!!!");
+
+	debug_led_blink(10000);
 
 	debug_led_count(2);
 /*
@@ -293,10 +296,10 @@ void __entry_point(void) {
 
 
 	while (1) {
-		debug_led_high();
-		debug_delay_ms(100);
-		debug_led_low();
-		debug_delay_ms(50);
+		core_led_high();
+		core_delay_ms(100);
+		core_led_low();
+		core_delay_ms(50);
 	}
 
 
@@ -313,13 +316,13 @@ void __entry_point(void) {
 
 	__asm__ volatile("cpsid i":::"memory");
 
-	debug_error("SUUS");
+	core_error("SUUS");
 
 	while (1) {
-		debug_led_high();
-		debug_delay_ms(500);
-		debug_led_low();
-		debug_delay_ms(100);
+		core_led_high();
+		core_delay_ms(500);
+		core_led_low();
+		core_delay_ms(100);
 	}
 
 	startup_initialise_globals();
@@ -343,8 +346,8 @@ void mk64fx512_hardware_init() {
 	//Create the int channels array;
 	uint8_t int_channels[4] = {IRQ_PIT_CH0, IRQ_PIT_CH1, IRQ_PIT_CH2, IRQ_PIT_CH3};
 
-	//Create the specs struct;
-	struct kinetis_PIT_specs PIT_specs = {
+	//Create the specs types;
+	types kinetis_PIT_specs PIT_specs = {
 		.MCR = PIT_MCR_REG,
 		.nb_PITs = PIT_NB_TIMERS,
 		.first_area = PIT_REGISTERS,
@@ -354,12 +357,12 @@ void mk64fx512_hardware_init() {
 	};
 
 	//Define PIT chip;
-	PIT = (struct kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
+	PIT = (types kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
 
 
 	//Declare the K64 UART hardware config;
-	struct kinetis_UART_hw uart0_hw = {
-		.registers =  (struct kinetis_UART_registers *const) UART0_REGISTERS,
+	types kinetis_UART_hw uart0_hw = {
+		.registers =  (types kinetis_UART_registers *const) UART0_REGISTERS,
 		.clock_frequency = F_CPU,
 		.status_int_channel = IRQ_UART0_STATUS,
 		.error_int_channel = IRQ_UART0_ERROR,

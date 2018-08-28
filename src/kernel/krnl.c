@@ -6,6 +6,10 @@
 
 #include "mem.h"
 
+#include <core/ram.h>
+#include <core/core.h>
+
+
 #define KERNEL_RAM_SIZE 2048
 #define KERNEL_STACK_SIZE 512
 
@@ -86,7 +90,7 @@ void kernel_panic(const char *error_message) {
 	 */
 
 	//infinite SOS sequence on debug led;
-	debug_sos();
+	core_error(error_message);
 
 	while (1);
 

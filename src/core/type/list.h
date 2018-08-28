@@ -102,7 +102,7 @@ static inline void list_remove(struct list_head *l) {
  *
  * One of their fields is an list_head (extended list head);
  *
- * To operate properly, operation functions also take the offset of this field in the struct;
+ * To operate properly, operation functions also take the offset of this field in the types;
  */
 
 

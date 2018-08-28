@@ -9,9 +9,9 @@
 
 #include <stddef.h>
 
-#include <core/stack.h>
+#include <core/type/stack.h>
 
-#include "core/heap.h"
+#include "core/type/heap.h"
 
 
 //---------------------------------------------------- Progmem ---------------------------------------------------

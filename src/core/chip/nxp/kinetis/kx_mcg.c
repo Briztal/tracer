@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <core/debug.h>
+#include <core/core.h>
 
 #define MCG_C1          ((volatile uint8_t *)0x40064000)
 #define C1_CLKS         ((uint8_t)0xC0)
@@ -437,8 +438,8 @@ void mcg_configure_osc(const struct mcg_osc_config *const config) {
 	//If the required frequency is null (module not initialised or not working) :
 	if (!frequency) {
 
-		//TODO ERROR OSC NOT INITIALISED;
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_osc : null frequency, OSC not initialised for the required mode;");
 
 		//Never reached
 		return;
@@ -565,11 +566,11 @@ void mcg_configure_fll_input(struct fll_input_config config) {
 		//Cache the osc frequency;
 		input_f = mcg_osc_frequency;
 
-		//The PLL depends on the OSC external reference. If the OSC is not configured :
+		//The FLL depends on the OSC external reference. If the OSC is not configured :
 		if (input_f == 0) {
 
-			//TODO ERROR OSC NOT INITIALISED;
-			while (1);
+			//Throw a core error;
+			core_error("kx_mc.c : mcg_configure_fll_input : null frequency, OSC not initialised for the required mode;");
 
 			//Never reached
 			return;
@@ -582,8 +583,8 @@ void mcg_configure_fll_input(struct fll_input_config config) {
 		//If the divider is invalid :
 		if (divider_id > 7) {
 
-			//TODO ERROR Invalid divider;
-			while (1);
+			//Throw a core error;
+			core_error("kx_mc.c : mcg_configure_fll_input : invalid divider;");
 
 			//Never reached
 			return;
@@ -626,8 +627,8 @@ void mcg_configure_fll_input(struct fll_input_config config) {
 	//If the input frequency is not in the required bounds :
 	if ((input_f < FLL_INPUT_MIN) || (input_f > FLL_INPUT_MAX)) {
 
-		//TODO ERROR PLL CANT WORK
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_fll_input : invalid input frequency;");
 
 		//Never reached
 		return;
@@ -649,7 +650,7 @@ void mcg_configure_fll_input(struct fll_input_config config) {
  * 	frequency is generated;
  *
  * 	If the FLL output is not initialised, or if a too large error is observated when @exact_32786_ref is set, a core
- * 	error is issued;
+ * 	error is thrown;
  *
  * @param f_range : the required output range;
  * @param exact_32768_ref : must the FLL factor be adjusted for a standard output frequency ?
@@ -663,8 +664,8 @@ void mcg_configure_fll_output(struct fll_output_config config) {
 	//If the FLL was not properly initialised :
 	if (!input_f) {
 
-		//TODO ERROR FLL NOT INITIALISED;
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_fll_output : FLL input not initialised;");
 
 		//Never reached
 		return;
@@ -681,8 +682,8 @@ void mcg_configure_fll_output(struct fll_output_config config) {
 		if ((input_f < FLL_INPUT_REF - FLL_INPUT_REF_TOLERANCE) ||
 			(input_f > FLL_INPUT_REF + FLL_INPUT_REF_TOLERANCE)) {
 
-			//TODO ERROR FLL MISCONFIGURATION;
-			while (1);
+			//Throw a core error;
+			core_error("kx_mc.c : mcg_configure_fll_output : input not clocked at reference frequency;");
 
 			//Never reached
 			return;
@@ -722,8 +723,9 @@ void mcg_configure_fll_output(struct fll_output_config config) {
 			fll_factor = (config.exact_32768_ref) ? 2929 : 2560;
 			break;
 		default:
-			//TODO ERROR FLL BAD PARAMETER;
-			while (1);
+
+			//Throw a core error;
+			core_error("kx_mc.c : mcg_configure_fll_output : invalid output range;");
 
 			//Never reached
 			return;
@@ -755,7 +757,7 @@ static uint32_t mcg_pll_frequency = 0;
  *
  * 	Then, it verifies that the input frequency is between 2MHz and 4MHz, and if so, determines the output frequency;
  *
- * 	Any error during the previous section issues a core error;
+ * 	Any error during the previous section throws a core error;
  *
  * 	After that, it resets the PLL registers, to disable any clock output / interrupt trigger during configuration;
  *
@@ -774,8 +776,8 @@ void mcg_configure_pll(const struct mcg_pll_config *config) {
 	//The PLL depends on the OSC external reference. If the OSC is not configured :
 	if (osc_f == 0) {
 
-		//TODO ERROR OSC NOT INITIALISED;
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_pll : OSC not configured;");
 
 		//Never reached
 		return;
@@ -788,11 +790,12 @@ void mcg_configure_pll(const struct mcg_pll_config *config) {
 	//If PRDIV0 is invalid :
 	if ((divider == 0) || (divider > 25)) {
 
-		//TODO ERROR Invalid external divider;
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_pll : invalid external divide factor;");
 
 		//Never reached
 		return;
+
 	}
 
 	//Determine the frequency after the input divider;
@@ -801,8 +804,8 @@ void mcg_configure_pll(const struct mcg_pll_config *config) {
 	//If the frequency below 2MHz or beyond 4MHz :
 	if ((input_f < 2000000) || (input_f > 4000000)) {
 
-		//TODO ERROR input frequency;
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_pll : invalid input frequency;");
 
 		//Never reached
 		return;
@@ -815,8 +818,8 @@ void mcg_configure_pll(const struct mcg_pll_config *config) {
 	//If the output factor is below 24 or beyond 55 :
 	if ((output_factor < 24) || (output_factor > 55)) {
 
-		//TODO ERROR invalid output factor;
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_configure_pll : invalid output multiplication factor;");
 
 		//Never reached
 		return;
@@ -913,7 +916,7 @@ static uint32_t mcg_out_frequency = FLL_OUTPUT_INIT;
  * The frequency selection function (defined by a macro) will update the mcg_out_frequency to the required one if
  * 	the frequency is not null.
  *
- * 	If it is, a core error will be issued;
+ * 	If it is, a core error will be thrown;
  */
 
 void mcg_out_select_frequency(uint32_t frequency) {
@@ -921,8 +924,8 @@ void mcg_out_select_frequency(uint32_t frequency) {
 	//If the frequency is null :
 	if (!frequency) {
 
-		//TODO ERROR module not initialised
-		while (1);
+		//Throw a core error;
+		core_error("kx_mc.c : mcg_out_select_frequency : null frequency;");
 
 		//Never reached
 		return;

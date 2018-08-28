@@ -80,7 +80,7 @@
 
 
 
- struct declaration : this text will declare the data of the structure, according to provided types and variables.
+ types declaration : this text will declare the data of the structure, according to provided types and variables.
 
     we need to convert (type_0, var_0, ..., type_n, var_n) to :
 
@@ -88,7 +88,7 @@
 
 
 
- struct fill : this text effectively inserts text to a container struct, using a pointer to the struct named "data".
+ types fill : this text effectively inserts text to a container types, using a pointer to the types named "data".
 
     we need to convert (type_0, var_0, ..., type_n, var_n) to :
 
@@ -96,7 +96,7 @@
 
 
 
- struct extraction : this text provides arguments to the scheduled function, extracting it of the struct
+ types extraction : this text provides arguments to the scheduled function, extracting it of the types
 
     we need to convert (type_0, var_0, ..., type_n, var_n) to :
 
@@ -208,9 +208,9 @@
  *
  *  - generate the structure
  *
- *  - generate the packer (will put data to the struct)
+ *  - generate the packer (will put data to the types)
  *
- *  - generate the unpacker (will extract data from the struct and call the function with it)
+ *  - generate the unpacker (will extract data from the types and call the function with it)
  *
  */
 

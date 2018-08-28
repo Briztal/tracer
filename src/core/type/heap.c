@@ -7,12 +7,13 @@
 #include <string.h>
 
 #include "heap.h"
+#include "core/core.h"
 
-#include <struct/containers/non_concurrent/list.h>
+#include <core/type/list.h>
 #include <core/debug.h>
 
 
-#define alignment_size (alignment_size)
+#define alignment_size (sizeof(size_t))
 
 /**
  * correct_alignment_size : Will return the size value that is a direct multiple of the primitive type size, size_t;
@@ -55,6 +56,45 @@ static inline size_t __correct_alignment_size(size_t size) {
             (address) =  (void *)(((size_t)(address) + alignment_size) & ~(alignment_size- 1));\
         }\
     }
+
+
+//----------------------------------------------------- Heap block -----------------------------------------------------
+
+/*
+ * As there is space for a flag in the heap block header, we will use it as an indicator for double free of free to
+ * 	unallocated; This will not work all times but will offer a usefull safeguard;
+ */
+
+#define HEAP_ALLOCATED_STATUS   ((uint32_t)0xDEADBEEF)
+#define HEAP_FREE_STATUS        ((uint32_t)0xFEEBDAED)
+
+
+/*
+ * A heap block is a header contains all data required to describe properly a memory block;
+ */
+
+struct heap_block {
+
+	//Blocks are linked contiguously;
+	struct list_head head;
+
+	//Available blocks are linked non-contiguously, and possibly sorted;
+	struct list_head available_head;
+
+	//The status of the memory;
+	uint32_t status;
+
+	//The size of the memory block
+	size_t data_size;
+
+};
+
+
+//The offset required to convert a heap block pointer to the pointer to the data it references;
+#define HEAP_BLOCK_OFFSET sizeof(struct heap_block);
+
+
+
 
 //-------------------------------------------- Available list manipulation ---------------------------------------------
 
@@ -118,43 +158,6 @@ static void heap_remove_available_block(struct heap_head *heap, struct heap_bloc
 
 
 
-//----------------------------------------------------- Heap block -----------------------------------------------------
-
-/*
- * As there is space for a flag in the heap block header, we will use it as an indicator for double free of free to
- * 	unallocated; This will not work all times but will offer a usefull safeguard;
- */
-
-#define HEAP_ALLOCATED_STATUS   ((uint32_t)0xDEADBEEF)
-#define HEAP_FREE_STATUS        ((uint32_t)0xFEEBDAED)
-
-
-/*
- * A heap block is a header contains all data required to describe properly a memory block;
- */
-
-struct heap_block {
-
-	//Blocks are linked contiguously;
-	struct list_head head;
-
-	//Available blocks are linked non-contiguously, and possibly sorted;
-	struct list_head available_head;
-
-	//The status of the memory;
-	uint32_t status;
-
-	//The size of the memory block
-	size_t data_size;
-
-};
-
-
-//The offset required to convert a heap block pointer to the pointer to the data it references;
-#define HEAP_BLOCK_OFFSET sizeof(struct heap_block);
-
-
-
 //------------------------------------------------- Block sanity check -------------------------------------------------
 
 /**
@@ -181,12 +184,12 @@ static void heap_check_free_block(const struct heap_head *const heap, const stru
 		if (status == HEAP_ALLOCATED_STATUS) {
 
 			//Log and quit;
-			debug_error("heap.c : heap_malloc : block is marked allocated, memory leak;");
+			core_error("heap.c : heap_malloc : block is marked allocated, memory leak;");
 
 		} else {
 
 			//Log and quit;
-			debug_error("heap.c : heap_malloc : block status invalid, memory leak occurred.");
+			core_error("heap.c : heap_malloc : block status invalid, memory leak occurred.");
 
 		}
 
@@ -217,13 +220,13 @@ static void heap_check_allocated_block(const struct heap_head *const heap, const
 		if (status == HEAP_FREE_STATUS) {
 
 			//Log and quit;
-			debug_error("heap.c : heap_free : block marked free; double free - invalid free and status collision"
-				" - memory leak.");
+			core_error("heap.c : heap_free : block marked free; double free - invalid free and status collision"
+						   " - memory leak.");
 
 		} else {
 
 			//Log and quit;
-			debug_error("heap.c : heap_free : block status invalid. memory leak - invalid free");
+			core_error("heap.c : heap_free : block status invalid. memory leak - invalid free");
 
 		}
 
@@ -250,7 +253,7 @@ static void heap_check_block(const struct heap_head *const heap, const struct he
 	if ((status != HEAP_ALLOCATED_STATUS) && (status != HEAP_FREE_STATUS)) {
 
 		//Log and quit;
-		debug_error("heap.c : heap_free : block status invalid. memory leak;");
+		core_error("heap.c : heap_free : block status invalid. memory leak;");
 
 	}
 
@@ -524,7 +527,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 	if (!first_block) {
 
 		//Fail, no space left;
-		debug_error("heap.c : heap_malloc : no space left");
+		core_error("heap.c : heap_malloc : no space left");
 
 		//Never reached;
 		return 0;
@@ -571,7 +574,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 
 
 	//If we reached the end of the block, error;
-	debug_error("heap.c : heap_malloc : no memory block large enough;");
+	core_error("heap.c : heap_malloc : no memory block large enough;");
 
 	//Never reached;
 	return 0;

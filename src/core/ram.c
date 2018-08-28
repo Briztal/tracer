@@ -5,7 +5,8 @@
 
 #include "ram.h"
 
-#include "heap.h"
+#include "core/type/heap.h"
+#include "core.h"
 
 #include <core/debug.h>
 
@@ -55,7 +56,7 @@ void *ram_alloc(size_t size) {
 	if (!heap) {
 
 		//Core panic;
-		debug_error("ram.c : ram_alloc : ram heap not initialised;");
+		core_error("ram.c : ram_alloc : ram heap not initialised;");
 		return 0;
 
 	}
@@ -80,7 +81,7 @@ void ram_free(void *ptr) {
 	//If the heap hasn't been initialised :
 	if (!heap) {
 
-		debug_error("ram.c : ram_free : ram heap not initialised;");
+		core_error("ram.c : ram_free : ram heap not initialised;");
 		return;
 
 	}

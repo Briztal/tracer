@@ -162,10 +162,10 @@ struct K64_UART_driver_t {
  */
 
 /*
-struct K64_UART_netf21 {
+types K64_UART_netf21 {
 
 	//The interrupt pipe base;
-	struct netf21 pipe;
+	types netf21 pipe;
 
 	//The address of C2;
 	volatile uint8_t *const C2;
@@ -185,10 +185,10 @@ struct K64_UART_netf21 {
  */
 
 /*
-struct K64_UART_stream_t {
+types K64_UART_stream_t {
 
 	//A stream memory, first for pointer cast;
-	struct stream_t stream;
+	types stream_t stream;
 
 	//The S1 register;
 	volatile uint8_t *const S1;

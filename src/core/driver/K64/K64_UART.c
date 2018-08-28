@@ -89,7 +89,7 @@ void K64_UART_tx_write(const struct K64_UART_driver_t *driver);
 
 
 //Get the memory map;
-//static void get_memory_map(const struct K64_UART_stream_t *stream, struct mem_map_t *map);
+//static void get_memory_map(const types K64_UART_stream_t *stream, types mem_map_t *map);
 
 //determine the number of spaces available in the input (tx) stream;
 //static size_t input_spaces_available(const struct K64_UART_stream_t *stream);
@@ -99,11 +99,11 @@ void K64_UART_tx_write(const struct K64_UART_driver_t *driver);
 
 
 //Read data from rx;
-//static void UART_read(const struct K64_UART_stream_t *stream, const struct mem_map_t *src_map,
+//static void UART_read(const types K64_UART_stream_t *stream, const types mem_map_t *src_map,
 					  //const struct blocks_desc_t *descriptor);
 
 //Write data in tx;
-//static void UART_write(const struct K64_UART_stream_t *stream, const struct mem_map_t *src_map,
+//static void UART_write(const types K64_UART_stream_t *stream, const types mem_map_t *src_map,
 					   //const struct blocks_desc_t *descriptor);
 /*
 //The UART stream doesn't store any dynamic data;

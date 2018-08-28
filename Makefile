@@ -1,72 +1,90 @@
 
 #---------------------------------------------------- Initialisation ---------------------------------------------------
 
-PROJECT_NAME := tracer
-
-NAME := build/$(PROJECT_NAME)
+#--------------------------- General Init ---------------------------
 
 #All sources will be built in ./build.
-BUILDDIR := build
+BUILDDIR = build
 
-#initialise compilation and linking flags;
+#Project name;
+PROJECT_NAME := tracer
+
+#Elf - hex names;
+NAME := $(BUILDDIR)/$(PROJECT_NAME)
+
+
+#Initialise compilation and linking flags;
 CFLAGS := -Wall -Os -g
-
 LDFLAGS := -Wall -Wl,--gc-sections -Os
 
-#TODO NO GENERAL COMPIL INCLUDE;
 
-#include paths for libraries
-COMPIL_INC := -Isrc
-COMPIL_INC += -Isrc/data_structures
+#----------------------------------------------------- Core Module -----------------------------------------------------
 
+#The core include path;
+CORE_INC :=
 
-#----------------------------------------- Init before including core makefile -----------------------------------------
+#The core lib sources, with system drivers and nonstandard drivers;
+CORE_SRCS :=
 
-#Initialise the core include list to the core folder;
-CORE_INC := -Isrc/core
-
-#Initialise the core source files set to the only debug file;
-CORE_SRCS += src/core/debug.c
-CORE_SRCS += src/core/comm/swuart.c
-CORE_SRCS += src/core/startup.c
-
-#Initialise the driver source files set;
+#The standard drivers lib sources;
 DRIVER_SRCS :=
 
-#The memory map link script will be set by one of core makefiles;
+#The link script include directories;;
 LDSCRIPT_MMAP_DIR :=
 
 
-#----------------------------------------------------- Core config -----------------------------------------------------
+#Include the core makefile, to build the core library appropriately;
+include src/core/Makefile
 
-#include the teensy35 makefile that will initialise the toolchain environment and define basic rules;
-include src/core/board/teensy35/Makefile
-
-
-#------------------------------------------------ Post core link config ------------------------------------------------
 
 #Now that the core makefile has updated link files, add appropriate options to the link flags;
 LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
-
-#---------------------------------------------------- kernel config ----------------------------------------------------
-
-KERNEL_PUB_SRC := src/kernel/syscall.c
-
-KERNEL_PRIV_SRC :=
-KERNEL_PRIV_INC := -Isrc/kernel
-
-
-include src/kernel/Makefile
-
-
-#------------------------------------------------ Core library ------------------------------------------------
-
 #Build the objects set from sources and reroute to build dir;
 CORE_OBJS := $(foreach src, $(CORE_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
-#The core library depends on all core objects provided by the core board makefile and its subs;
+
+#The general core object build rule : depends on the related source file, located in the src directory;
+#	It changes the directory to the build dir;
+
+$(BUILDDIR)/core/%.o: src/core/%.c
+	@echo "[CC]\t$@"
+	@mkdir -p "$(dir $@)"
+	@$(CC) $(CFLAGS) $(CORE_INC) -o $@ -c $<
+
+
+#The core library depends on all core objects mentionned by the core makefile and its subs;
 core : $(CORE_OBJS)
+
+
+#---------------------------------------------------- Kernel Module ----------------------------------------------------
+
+#The kernel include path;
+KERNEL_INC :=
+
+#The kernel lib sources, with system drivers and nonstandard drivers;
+KERNEL_SRCS :=
+
+
+#Include the kernel makefile, to build the kernel library appropriately;
+include src/kernel/Makefile
+
+
+#Build the objects set from sources and reroute to build dir;
+KERNEL_OBJS := $(foreach src, $(KERNEL_SRCS:.c=.o), $(BUILDDIR)/$(src))
+
+
+#The general kernel object build rule : depends on the related source file, located in the src directory;
+#	It changes the directory to the build dir;
+
+$(BUILDDIR)/kernel/%.o: src/kernel/%.c
+	@echo "[CC]\t$@"
+	@mkdir -p "$(dir $@)"
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -o $@ -c $<
+
+
+#The kernel library depends on all kernel objects mentionned by the kernel makefile and its subs;
+kernel : $(KERNEL_OBJS)
 
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
@@ -75,22 +93,16 @@ core : $(CORE_OBJS)
 #	creates a directory to contain the object file and builds it from the associated source file;
 #	If the associated source file does not exist, it will fail.
 
-$(BUILDDIR)/%.o: %.c
-	@echo "[CC]\t$@"
-	@mkdir -p "$(dir $@)"
-	@$(CC) $(CFLAGS) $(COMPIL_INC) -o "$@" -c "$<"
+#(BUILDDIR)/%.o: %.c
+#	@echo "[CC]\t$@"
+#	@mkdir -p "$(dir $@)"
+#	@$(CC) $(CFLAGS) $(COMPIL_INC) -o "$@" -c "$<"
 
 
 # The elf rule. Depends on core lib.
-elf: core
+elf: core kernel
 	@echo "[LD]\ttracer.elf"
 	@$(CC) $(LDFLAGS) -o $(NAME).elf $(CORE_OBJS) $(LINK_LIBS)
-
-
-
-
-#The general build target will simply build the elf file, but not the flashable format. No objcopy;
-build: elf
 
 
 

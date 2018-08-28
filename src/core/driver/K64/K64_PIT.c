@@ -7,7 +7,7 @@
 
 #include <kernel/syscall.h>
 
-#include <driver/timer.h>
+#include <core/driver/timer.h>
 
 #include <core/debug.h>
 #include <string.h>

@@ -350,7 +350,7 @@ void PI::process_t(char *command, uint8_t size) {
 /*
  * add_task : this function sends a task to the scheduler :
  *
- *  It starts by creating the struct to contain dynamic_args data, then it saves it.
+ *  It starts by creating the types to contain dynamic_args data, then it saves it.
  *
  *  Finally, it sends the task to task to the scheduler.
  *
@@ -364,7 +364,7 @@ void PI::schedule_task(task_state_t (*task)(void *), char *command, uint8_t size
 
         uint8_t index = arguments_storage.insert_argument(command, size);
 
-        //Create a struct in the heap to contain argument_t-related data.
+        //Create a types in the heap to contain argument_t-related data.
         program_interface_data_t *data = new program_interface_data_t();
         data->arguments_index = index;
 
