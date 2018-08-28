@@ -171,6 +171,7 @@ static void heap_check_free_block(const struct heap_head *const heap, const stru
 	//Cache the block's status;
 	uint32_t status = block->status;
 
+
 	/*
 	 * Verify that the block is valid. A valid memory block will always be in status FREE;
 	 * 	Though, an invalid memory block may be in status FREE; This method is an indicator, it will not
@@ -523,6 +524,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 	//Cache the first available block;
 	struct heap_block *const first_block = heap->first_available_block;
 
+
 	//If there is no available block :
 	if (!first_block) {
 
@@ -545,11 +547,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 		//TODO ERROR MESSAGE
 		//TODO DISABLE CHECKING
 
-		DEBUG_BREAK(9);
-
 		heap_check_free_block(heap, block);
-
-		DEBUG_BREAK(10);
 
 		//Cache the block data size;
 		const size_t block_data_size = block->data_size;
@@ -557,11 +555,6 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 		//If the block can contain @size bytes :
 		if (block_data_size >= size) {
 
-			if (debug_flag) {
-				DEBUG_BREAK(4);
-
-				core_error("NO ERROR LAUL!");
-			}
 
 			//We can split the block in two blocks, the first being of the required size;
 			heap_split_block(heap, block, size);
@@ -569,13 +562,8 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 			//Set to allocated;
 			block->status = HEAP_ALLOCATED_STATUS;
 
-
-
 			//Remove the block from the available list;
 			elist_remove(struct heap_block, available_head, block);
-
-
-
 
 
 			//Return the lowest address of the block's data zone;
@@ -583,12 +571,6 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 
 		}
 
-
-		if (debug_flag) {
-			DEBUG_BREAK(5);
-
-			core_error("NO ERROR LAUL!");
-		}
 		//Re-iterate for the next available block;
 		block = block->available_head.next;
 
@@ -660,10 +642,7 @@ void *heap_ialloc(struct heap_head *heap, size_t size, void *initializer) {
 		return 0;
 	}
 
-	DEBUG_BREAK(1);
-
 	debug_flag = true;
-
 
 	//Allocate a block of the required size;
 	void *ptr = heap_malloc(heap, size);

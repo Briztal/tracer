@@ -5,6 +5,8 @@
 #ifndef TRACER_MEMORY_H
 #define TRACER_MEMORY_H
 
+#include <stdbool.h>
+
 #include <stdint.h>
 
 #include <stddef.h>
@@ -43,8 +45,15 @@ struct prog_mem {
 };
 
 
+
+
+//Create a process memory struct. Referential data can be allocated in itself;
+struct prog_mem *prog_mem_create_special(size_t ram_size, uint8_t nb_stacks, size_t stack_size, bool self_referenced);
+
 //Create a process memory struct in the kernel heap;
-struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size);
+static inline struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size) {
+	prog_mem_create_special(ram_size, nb_stacks, stack_size, false);
+}
 
 //Delete a process memory struct in the kernel heap;
 void prog_mem_delete(struct prog_mem *);
