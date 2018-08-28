@@ -26,6 +26,9 @@
 #include <stdbool.h>
 
 
+//The debug flag, initialised to false;
+bool debug_flag = false;
+
 /**
  * debug_led_halt : lights the debug led and enter an empty infinite loop;
  */

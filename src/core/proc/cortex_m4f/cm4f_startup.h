@@ -27,44 +27,6 @@
 
 #include "stddef.h"
 
-#include "kinetis.h"
-
-
-/*
- * -------------------------------------- Types --------------------------------------
- */
-
-//The process stack type;
-typedef struct {
-	
-	//The current stack pointer;
-    void *stack_pointer;
-
-	//The initial of the stack;
-    void *stack_begin;
-	
-	//The end of the stack;
-    void *stack_end;
-
-} core_stack_t;
-
-
-//The empty stack initializer;
-#define EMPTY_CORE_STACK() (core_stack_t) {.stack_pointer = 0, .stack_begin = 0, .stack_end = 0,}
-
-
-//The core process structure;
-typedef struct {
-
-    //The process's stack;
-    core_stack_t *process_stack;
-
-    //The comput time granted to the process before its preemption;
-    uint16_t activity_time;
-
-} core_process_t;
-
-
 //-------------------------------------- Init --------------------------------------
 
 //Initialise the core;

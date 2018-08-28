@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 
+#include <stddef.h>
+
 /*
  * This file summarises registers location described in the ARMV7 Reference Manual, and implements system functions
  * 	over these;

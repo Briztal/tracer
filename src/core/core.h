@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-//#define ENABLE_CORE_ERRORS
+#define ENABLE_CORE_ERRORS
 
 
 /*

@@ -93,6 +93,5 @@ void panic_reset_log() {
 //Trigger a kernel panic;
 void kernel_panic() {
 
-}
 
-#endif //TRACER_ERROR_H
+}

@@ -7,7 +7,7 @@ CORE_INC += -Isrc/core
 CORE_SRCS += core/core.c
 CORE_SRCS += core/debug.c
 CORE_SRCS += core/ram.c
-CORE_SRCS += core/startup.c
+
 
 #Add type sources;
 CORE_SRCS += core/type/list.c

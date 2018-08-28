@@ -59,10 +59,13 @@ core : $(CORE_OBJS)
 
 #---------------------------------------------------- Kernel Module ----------------------------------------------------
 
-#The kernel include path;
-KERNEL_INC :=
+#The kernel include path; The core lib is provided;
+KERNEL_INC := $(CORE_INC)
 
-#The kernel lib sources, with system drivers and nonstandard drivers;
+#The kernel lib public sources, available to processes and modules;
+KERNEL_PUB_SRCS :=
+
+#The kernel lib internal sources, only available to kernel sources;
 KERNEL_SRCS :=
 
 
@@ -72,6 +75,7 @@ include src/kernel/Makefile
 
 #Build the objects set from sources and reroute to build dir;
 KERNEL_OBJS := $(foreach src, $(KERNEL_SRCS:.c=.o), $(BUILDDIR)/$(src))
+KERNEL_PUB_OBJS := $(foreach src, $(KERNEL_PUB_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
 
 #The general kernel object build rule : depends on the related source file, located in the src directory;
@@ -102,7 +106,22 @@ kernel : $(KERNEL_OBJS)
 # The elf rule. Depends on core lib.
 elf: core kernel
 	@echo "[LD]\ttracer.elf"
-	@$(CC) $(LDFLAGS) -o $(NAME).elf $(CORE_OBJS) $(LINK_LIBS)
+	@$(CC) $(LDFLAGS) -o $(NAME).elf $(CORE_OBJS) $(KERNEL_OBJS)
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
+	#TODO THIS IS NOT LINKED PROPERLY !!
 
 
 

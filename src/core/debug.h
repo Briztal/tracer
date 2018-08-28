@@ -21,6 +21,8 @@
 #ifndef TRACER_DEBUG_H
 #define TRACER_DEBUG_H
 
+#include <stdbool.h>
+
 #include <stdint.h>
 
 #include <stddef.h>
@@ -51,8 +53,11 @@ void debug_led_cmp(size_t c);
 //Display bits of a byte, blink fast for 1, blink slow for 0;
 void debug_led_dump(uint8_t c);
 
+//A flag, to use for debug purposes;
+extern bool debug_flag;
+
 //Break + msg : sends break concatenated with the message, and waits for one second;
-#define DEBUG_BREAK(i) {core_log("break"#i);core_delay_ms(1000);}
+#define DEBUG_BREAK(i) {core_log("break"#i);core_delay_ms(300);}
 
 //Break_wait + msg + time : sends break concatenated with the message, and waits for one second;
 #define DEBUG_BREAK_WAIT(i, time) {core_log("break"#i); core_delay_ms(time);}

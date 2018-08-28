@@ -3,6 +3,8 @@
 //
 
 
+#include <core/core.h>
+#include <core/debug.h>
 #include "mem.h"
 
 #include "core/ram.h"
@@ -32,8 +34,11 @@
 
 struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stacks_size) {
 
+
 	//Allocate some memory in the RAM to contain the heap;
 	void *ram_block = ram_alloc(ram_size);
+
+
 
 	//Create a heap owning the whole RAM block;
 	struct heap_head *heap = heap_create(ram_block, ram_size, heap_fifo_insertion);//TODO SORTED INSERTION;
@@ -58,7 +63,7 @@ struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stac
 
 
 	//Correct the stacks size;
-	stacks_size = core_correct_size(stacks_size);
+	stacks_size = stack_correct_size(stacks_size);
 
 
 	//For each stack to create :
@@ -71,7 +76,7 @@ struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stac
 		void *stack_reset = (void *) ((uint8_t *)thread_stack + stacks_size);
 
 		//Correct the stack's highest address;
-		stack_reset = core_correct_stack_reset(stack_reset);
+		stack_reset = stack_correct_reset_ptr(stack_reset);
 
 		//Create the core_stack initializer;
 		struct core_stack cs_init = {
@@ -87,8 +92,12 @@ struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stac
 
 		};
 
+		DEBUG_BREAK(0);
+
 		//Allocate, initialise and save the struct in the kernel heap;
 		progm_init.stacks[stack_id] = kialloc(sizeof(struct core_stack), &cs_init);
+
+
 
 	}
 

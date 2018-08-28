@@ -30,13 +30,12 @@ static void kernel_memory_init();
 
 static void kernel_init() {
 
-	//TODO INIT ERROR MANAGER;
-
 	//Initialise the RAM manager;
 	ram_init();
 
 	//Initialise the kernel program memory;
 	kernel_memory_init();
+
 
 	//TODO INIT FILE SYSTEM;
 
@@ -51,6 +50,21 @@ static void kernel_init() {
 
 }
 
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
 
 /**
  * __program_start : the function called by the core library after init;
@@ -62,40 +76,6 @@ void __program_start() {
 	kernel_init();
 
 }
-
-
-/*
- * kernel_panic : this function is called when a fatal error is detected in the kernel;
- */
-
-void kernel_panic(const char *error_message) {
-
-	//Stop the scheduler;
-	//scheduler_stop();
-
-	//Exit all critical sections;
-	//ic_force_critical_section_exit();
-
-	//TODO RESET IDLE INTERRUPT HANDLERS
-
-	//TODO THREAD MODES;
-
-	/*
-	if (error_message_function) {
-
-		//Transmit the message;
-		(*error_message_function)(error_message);
-
-	}
-	 */
-
-	//infinite SOS sequence on debug led;
-	core_error(error_message);
-
-	while (1);
-
-}
-
 
 
 //----------------------------------------------------- Kernel Heap ----------------------------------------------------

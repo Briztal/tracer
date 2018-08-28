@@ -195,6 +195,9 @@ const uint8_t flashconfigbytes[16] = {
 };
 
 
+extern void __program_start();
+
+
 void __entry_point(void) {
 
 	/*
@@ -257,11 +260,8 @@ void __entry_point(void) {
 	//Configure the oscillator;
 	mcg_configure_osc(&osc_conf);
 
-	core_error("SUUS MA BITE GROS CHIBRE!!!!!!");
 
-	debug_led_blink(10000);
 
-	debug_led_count(2);
 /*
 
 	struct mcg_pll_config pll_conf = {
@@ -295,12 +295,14 @@ void __entry_point(void) {
 	mcg_enter_PEE();
 
 
+
 	while (1) {
 		core_led_high();
 		core_delay_ms(100);
 		core_led_low();
 		core_delay_ms(50);
 	}
+ */
 
 
 	//TODO PLL ENGAGED;
@@ -309,25 +311,10 @@ void __entry_point(void) {
 
 	//TODO CORE BUS FLEX FLASH CLOCK DIVIDER;
 
+	//TODO RENAME INTO CORE_INIT
+	//TODO IN STARTUP.H
 
-	/*
-	 * Then, initialise global variables;
-	 */
-
-	__asm__ volatile("cpsid i":::"memory");
-
-	core_error("SUUS");
-
-	while (1) {
-		core_led_high();
-		core_delay_ms(500);
-		core_led_low();
-		core_delay_ms(100);
-	}
-
-	startup_initialise_globals();
-
-
+	__program_start();
 
 }
 
