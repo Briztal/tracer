@@ -30,14 +30,13 @@ static void kernel_memory_init();
 
 static void kernel_init() {
 
+
 	//Initialise the RAM manager;
 	ram_init();
 
-	core_log("RAM_INIT");
-
+	//TODO SET MAIN STACK POINTER TO HIT THE KERNEL STACK;
 	//Initialise the kernel program memory;
 	kernel_memory_init();
-
 
 	//TODO INIT FILE SYSTEM;
 
@@ -45,6 +44,8 @@ static void kernel_init() {
 
 	//Start the scheduler;
 	//scheduler_start(kernel_init_function);
+
+	core_log("KERNEL_END");
 
 	//TODO ERROR LOG;
 	while(1);
@@ -95,9 +96,8 @@ static void kernel_memory_init() {
 	 * The kernel heap is not ready yet, the prog_mem will be self-referential;
 	 * The kernel is mono-tasked, with a large heap space;
 	 */
-	kernel_memory = prog_mem_create_special(KERNEL_RAM_SIZE, 1, KERNEL_STACK_SIZE, true);
 
-	core_log("SUUS MON CHIMMMMBRE");
+	kernel_memory = prog_mem_create_special(KERNEL_RAM_SIZE, 1, KERNEL_STACK_SIZE, true);
 
 }
 

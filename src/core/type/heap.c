@@ -27,9 +27,9 @@
 static inline size_t __correct_alignment_size(size_t size) {
 
 	//If size is not a multiple of alignment_size(that is a power of 2);
-	if (size & ~(alignment_size - 1)) {
+	if (size & (alignment_size - 1)) {
 
-		//Add alignment_wordto be superior to @size, and truncate to the closest inferior multiple of alignment_size;
+		//Add alignment_word to be superior to @size, and truncate to the closest inferior multiple of alignment_size;
 		return ((size + alignment_size) & ~(alignment_size - 1));
 
 	} else {
@@ -44,7 +44,7 @@ static inline size_t __correct_alignment_size(size_t size) {
 
 //For speed purposes, the following macro updates the variable. No call required, easier to optimise;
 #define correct_alignment_size(size) {\
-        if ((size) & ~(alignment_size- 1)) {\
+        if ((size) & (alignment_size- 1)) {\
             (size) =  (((size) + alignment_size) & ~(alignment_size- 1));\
         }\
     }
@@ -94,6 +94,84 @@ struct heap_block {
 #define HEAP_BLOCK_OFFSET sizeof(struct heap_block);
 
 
+void heap_print(struct heap_head *head) {
+
+	core_log("heap print : ");
+	core_log_int(sizeof(struct heap_head));
+	core_log_int(sizeof(struct heap_block));
+
+	core_log("blocks print : ");
+
+	{
+		//Cache the first block;
+		struct heap_block *const blk = head->first_block, *b = blk;
+
+		uint32_t i = 0;
+
+		do {
+
+			core_log_int(i++);
+			core_log_int((uint32_t)b);
+
+			if (b->status == HEAP_FREE_STATUS) {
+				core_log("\tfree");
+			} else if (b->status == HEAP_ALLOCATED_STATUS) {
+				core_log("\tallocated;");
+			} else {
+				core_log("\tinvalid;");
+			}
+
+			core_log("size : ");
+			core_log_int(b->data_size);
+
+			core_log("\n");
+
+			//Update the next block
+			b = b->head.next;
+
+		} while (b != blk);
+	}
+	{
+
+		core_log("av blocks print : ");
+
+		//Cache the first block;
+		struct heap_block *const blk = head->first_available_block, *b = blk;
+
+		if (!blk) {
+			core_log("No  available blocks");
+			return;
+		}
+
+		uint32_t i = 0;
+
+		do {
+
+			core_log_int(i++);
+			core_log_int((uint32_t)b);
+
+			if (b->status == HEAP_FREE_STATUS) {
+				core_log("\tfree");
+			} else if (b->status == HEAP_ALLOCATED_STATUS) {
+				core_log("\tallocated;");
+			} else {
+				core_log("\tinvalid;");
+			}
+
+			core_log("size : ");
+			core_log_int(b->data_size);
+
+			core_log("\n");
+
+			//Update the next block
+			b = b->available_head.next;
+
+
+		} while (b != blk);
+
+	}
+
+}
 
 
 //-------------------------------------------- Available list manipulation ---------------------------------------------
@@ -132,7 +210,6 @@ static void heap_remove_available_block(struct heap_head *heap, struct heap_bloc
 	//If the block is the first element of the available blocks list :
 	if (heap->first_available_block == block) {
 
-		//Cache @block's successor;
 		struct heap_block *next = block->available_head.next;
 
 		//If @block is the only element of the list :
@@ -275,14 +352,16 @@ static void heap_check_block(const struct heap_head *const heap, const struct he
  * @return : 0 if init failed, the address of the heap head if it succeeded;
  */
 
-struct heap_head *heap_create(void *start_address, size_t size, heap_insertion_f  insertion_f) {
+struct heap_head *heap_create(void *start_address, size_t size, heap_insertion_f insertion_f) {
 
+	//Save the creation address;
+	void *const creation_address = start_address;
 
 	//If the size is not alignable, decrease it to meet alignment requirement;
 	size = size & ~(alignment_size - 1);
 
 	//If the start address is not aligned properly : 
-	if (((size_t) start_address) & ~(alignment_size - 1)) {
+	if (((size_t) start_address) & (alignment_size - 1)) {
 
 		//Increase the start address to meet alignment requirements;
 		start_address = (void *) (((size_t) start_address + alignment_size) & ~(alignment_size - 1));
@@ -317,11 +396,13 @@ struct heap_head *heap_create(void *start_address, size_t size, heap_insertion_f
 
 	}
 
+	//TODO RESET THE HEAP;
+
 	//Set the first heap block right after the heap head;
 	struct heap_block *first_block = start_address;
 
 	//Update @size size to reflect the available space of the first block;
-	size -= sizeof(struct heap_head);
+	size -= sizeof(struct heap_block);
 
 	//Create the first block initializer;
 	struct heap_block first_block_init = {
@@ -351,6 +432,7 @@ struct heap_head *heap_create(void *start_address, size_t size, heap_insertion_f
 
 	//Create the initializer for the heap head;
 	struct heap_head head_init = {
+		.creation_address = creation_address,
 		.first_block = first_block,
 		.first_available_block = first_block,
 		.insertion_f = insertion_f,
@@ -413,9 +495,12 @@ static void heap_split_block(struct heap_head *head, struct heap_block *block, s
 
 		//The new block's data is located after its header, that is after the first block's data;
 		//All sizes and pointers are properly aligned, no correction required;
-		.data_size = block->data_size - block_size - sizeof(struct heap_block),
+		.data_size = block->data_size - block_size,
 
 	};
+
+	//Update the previous block's size;
+	block->data_size = data_size;
 
 	//Initialise the new block;
 	memcpy(new_block, &new_block_init, sizeof(struct heap_block));
@@ -521,6 +606,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 	//First, correct the size, so that it maintains alignment during pointer arithmetic;
 	correct_alignment_size(size);
 
+
 	//Cache the first available block;
 	struct heap_block *const first_block = heap->first_available_block;
 
@@ -555,7 +641,6 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 		//If the block can contain @size bytes :
 		if (block_data_size >= size) {
 
-
 			//We can split the block in two blocks, the first being of the required size;
 			heap_split_block(heap, block, size);
 
@@ -563,8 +648,7 @@ void *heap_malloc(struct heap_head *heap, size_t size) {
 			block->status = HEAP_ALLOCATED_STATUS;
 
 			//Remove the block from the available list;
-			elist_remove(struct heap_block, available_head, block);
-
+			heap_remove_available_block(heap, block);
 
 			//Return the lowest address of the block's data zone;
 			return (void *) ((uint8_t *) block + sizeof(struct heap_block));
@@ -641,8 +725,6 @@ void *heap_ialloc(struct heap_head *heap, size_t size, void *initializer) {
 	if (!size) {
 		return 0;
 	}
-
-	debug_flag = true;
 
 	//Allocate a block of the required size;
 	void *ptr = heap_malloc(heap, size);

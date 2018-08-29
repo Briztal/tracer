@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include <stddef.h>
+#include <core/core.h>
 
 //A list head contains two pointers to list heads;
 struct list_head {
@@ -60,19 +61,43 @@ static inline bool list_empty(struct list_head *head) {
 
 
 /**
- * list_add : concatenates the end of s0 and the head of l1
+ * list_add : from h0::h00::t0 and h1::t1, forms h0::h1::t1::h00::t0;
+ *
+ * links h0 and h1, and t1
  */
-static inline void list_add(struct list_head *src, struct list_head *dst) {
+static inline void list_add(struct list_head *h0, struct list_head *h1) {
 
 	//Cache ends of src and dst;
-	struct list_head *src_e = src->prev;
-	struct list_head *dst_e = dst->prev;
+	struct list_head *t0 = h0->next;
+	struct list_head *t1 = h1->prev;
 
 	//Link the end of dst to the head of src;
-	__list_link(dst_e, src);
+	__list_link(h0, h1);
 
 	//Link the end of src to the head of dst;
-	__list_link(src_e, dst);
+	__list_link(t1, t0);
+
+}
+
+
+
+/**
+ * list_add : from h0::t0 and h1::t1, forms h0::t0::h1::t1;
+ *
+ * links h0 and h1, and t1
+ */
+
+static inline void list_concat(struct list_head *h0, struct list_head *h1) {
+
+	//Cache ends of src and dst;
+	struct list_head *t0 = h0->prev;
+	struct list_head *t1 = h1->prev;
+
+	//Link the end of dst to the head of src;
+	__list_link(t1, h0);
+
+	//Link the end of src to the head of dst;
+	__list_link(t0, h1);
 
 }
 
@@ -154,7 +179,7 @@ static inline void __elist_add(void *src, void *dst, size_t head_offset) {
 static inline void __elist_remove(void *l, size_t head_offset) {
 
 	//First, cache the list neighbors;
-	struct list_head *prev = __elist_prev(l, head_offset), *next = __elist_next(l, head_offset);
+	void *prev = __elist_prev(l, head_offset), *next = __elist_next(l, head_offset);
 
 	//Link prev and next;
 	__elist_link(prev, next, head_offset);

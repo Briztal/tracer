@@ -18,7 +18,7 @@
 
 */
 
-#include <kernel/scheduler/sprocess.h>
+#include <kernel/scheduler/process.h>
 
 #include "systick.h"
 

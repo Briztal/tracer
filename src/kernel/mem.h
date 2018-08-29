@@ -16,8 +16,6 @@
 #include "core/type/heap.h"
 
 
-//---------------------------------------------------- Progmem ---------------------------------------------------
-
 /*
  * The program memory environment reflects the memory structure a program can access. It is a contiguous memory block
  * containing primarily a heap.
@@ -37,7 +35,7 @@ struct prog_mem {
 	struct heap_head *heap;
 
 	//The number of stacks available for the program;
-	const uint8_t nb_stacks;
+	uint8_t nb_stacks;
 
 	//The stack references array;
 	struct core_stack *stacks[NB_THREADS];
@@ -45,18 +43,15 @@ struct prog_mem {
 };
 
 
+//Create a process memory struct, containing only a heap;
+struct prog_mem *prog_mem_create(size_t ram_size);
 
+//Initialise the process memory : reset the heap, and create as many stacks as required;
+void prog_mem_init(struct prog_mem *mem, uint8_t nb_stacks, size_t stack_size);
 
-//Create a process memory struct. Referential data can be allocated in itself;
-struct prog_mem *prog_mem_create_special(size_t ram_size, uint8_t nb_stacks, size_t stack_size, bool self_referenced);
+//Delete the process memory. All references must be contained in the kernel heap;
+void prog_mem_delete_from_kernel_heap(struct prog_mem *);
 
-//Create a process memory struct in the kernel heap;
-static inline struct prog_mem *prog_mem_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size) {
-	prog_mem_create_special(ram_size, nb_stacks, stack_size, false);
-}
-
-//Delete a process memory struct in the kernel heap;
-void prog_mem_delete(struct prog_mem *);
 
 
 #endif //TRACER_MEMORY_H

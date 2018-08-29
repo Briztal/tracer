@@ -13,6 +13,9 @@ CORE_SRCS += core/ram.c
 CORE_SRCS += core/type/list.c
 CORE_SRCS += core/type/heap.c
 
+#Add util sources;
+CORE_SRCS += core/util/string.c
+
 #Add the communication protocol;//TODO CONFIG
 CORE_SRCS += core/log/probe.c
 

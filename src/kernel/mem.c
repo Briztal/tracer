@@ -21,32 +21,21 @@
  * 	A RAM block will be reserved, and an empty heap will be initialised in it, its ownership being transferred
  * 	to the struct;
  *
- * 	A given number of stacks will be created in the heap, and related core_stack structs will be declared in the
- * 	kernel heap, and saved in the @stacks array;
- *
- * 	The required number of stacks will be majored by the number of hardware stacks;
- *
  * 	If the current program memory to initialise is the kernel memory, kernel dynamic memory is not ready, and would
  * 	lead to manipulating the heap we currently initialise, all dynamic allocations will be made in the created heap;
  *
  * @param ram_size : total size allocated to the program;
- * @param nb_stacks : the number of stacks to create;;
- * @param stacks_size : the size of each stack;
- * @param self_referenced : if set, all dynamic allocations will be made in the heap we created;
+ * @param self_referenced : if set, the struct will be allocated in the heap we created;
  * @return a ref to the initialised struct, located in the kernel heap;
  */
 
-struct prog_mem *prog_mem_create_special(size_t ram_size, uint8_t nb_stacks, size_t stacks_size, bool self_referenced) {
+struct prog_mem *prog_mem_create_special(size_t ram_size, bool self_referenced) {
 
 	//Allocate some memory in the RAM to contain the heap;
 	void *ram_block = ram_alloc(ram_size);
 
 	//Create a heap owning the whole RAM block;
 	struct heap_head *heap = heap_create(ram_block, ram_size, heap_fifo_insertion);//TODO SORTED INSERTION;
-
-	//Major the number of stacks by its maximum;
-	if (nb_stacks > NB_THREADS)
-		nb_stacks = NB_THREADS;
 
 	//Create the initializer for the prog_mem;
 	struct prog_mem progm_init = {
@@ -58,21 +47,68 @@ struct prog_mem *prog_mem_create_special(size_t ram_size, uint8_t nb_stacks, siz
 		.heap = heap,
 
 		//Save the number of stacks;
-		.nb_stacks = nb_stacks,
+		.nb_stacks = 0,
 
 	};
 
 
+	//If the progmem must contain its referential data :
+	if (self_referenced) {
+
+		//Initialise the progmem in the heap we created;
+		return heap_ialloc(heap, sizeof(struct prog_mem), &progm_init);
+
+
+	} else {
+
+		//Create, initialise and return the program memory struct;
+		return kialloc(sizeof(struct prog_mem), &progm_init);
+
+	}
+
+}
+
+
+/**
+ * prog_mem_init : clears the heap, and allocates the required number of stacks in it;
+ *
+ * 	A given number of stacks will be created in the heap, and related core_stack structs will be declared in the
+ * 	kernel heap, and saved in the @stacks array;
+ *
+ * 	The required number of stacks will be majored by the number of hardware stacks;
+ *
+ * @param nb_stacks : the number of stacks to create;;
+ * @param stacks_size : the size of each stack;
+ * @param self_referenced : if set, all dynamic allocations will be made in the heap we created;
+ * @return a ref to the initialised struct, located in the kernel heap;
+ */
+
+
+void prog_mem_init(struct prog_mem *mem, uint8_t nb_stacks, size_t stacks_size) {
+
+	//Major the number of stacks by its maximum;
+	if (nb_stacks > NB_THREADS)
+		nb_stacks = NB_THREADS;
+
+	//Save the number of stacks;
+	mem->nb_stacks = nb_stacks;
+
+	//Reset the stacks container;
+	for (uint8_t i = NB_THREADS; i--;) {
+		mem->stacks[i] = 0;
+	}
+
 	//Correct the stacks size;
 	stacks_size = stack_correct_size(stacks_size);
 
+	//Clear heap;
+	heap_clear()
 
 	//For each stack to create :
 	for (size_t stack_id = nb_stacks; stack_id--;) {
 
 		//Allocate some memory for the thread's stack in the newly created heap;
-		void *thread_stack = heap_malloc(heap, stacks_size);
-
+		void *thread_stack = heap_malloc(mem->heap, stacks_size);
 
 		//Determine the stack's highest address;
 		void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
@@ -94,36 +130,13 @@ struct prog_mem *prog_mem_create_special(size_t ram_size, uint8_t nb_stacks, siz
 
 		};
 
-		//If the progmem must contain its referential data :
-		if (self_referenced) {
-
-			//Allocate, initialise and save the struct in the kernel heap;
-			progm_init.stacks[stack_id] = heap_ialloc(heap, sizeof(struct core_stack), &cs_init);
-
-		} else {
-
-			//Allocate, initialise and save the struct in the heap;
-			progm_init.stacks[stack_id] = kialloc(sizeof(struct core_stack), &cs_init);
-
-		}
-
-
-	}
-
-	//If the progmem must contain its referential data :
-	if (self_referenced) {
-
-		//Initialise the progmem in the heap we created;
-		return heap_ialloc(heap, sizeof(struct prog_mem), &progm_init);
-
-	} else {
-
-		//Create, initialise and return the program memory struct;
-		return kialloc(sizeof(struct prog_mem), &progm_init);
+		//Allocate, initialise and save the struct in the heap;
+		mem->stacks[stack_id] = kialloc(sizeof(struct core_stack), &cs_init);
 
 	}
 
 }
+
 
 /**
  * prog_mem_delete : deletes a program memory struct;

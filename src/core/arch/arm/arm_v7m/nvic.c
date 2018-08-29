@@ -6,20 +6,216 @@
 
 
 
-//-------------------------------------------------- System interrupts -------------------------------------------------
+//-------------------------------------------- Interrupt handling ---------------------------------------------
+
+/**
+ * vector_table_in_ram : determines whether the NVIC vector table is in flash or in RAM; At init, it is located in
+ * 	flash;
+ */
+
+static bool vector_table_in_ram = false;
+
+
+/**
+ * in_flash_handlers : the array of isr handlers when the vector table is in flash. Obsolete when the vector table
+ * 	is in RAM;
+ *
+ * 	When the vector table is in flash, null function pointers are authorised, as a dedicated isr_handler will cache
+ * 	the function pointer and execute it if it is not null;
+ * 	At startup, the irq handlers contains only null pointers;
+ *
+ * 	When the vector table is in RAM, handlers are called automatically by the NVIC module. Null pointers will be
+ * 	dereferenced, and are as a consequence forbidden; They should be replaced by the nop_function defined behind;
+ *
+ * 	When relocating the vector table in RAM, the handlers array will be filled with nop_function references;
+ */
+
+void (*irq_handlers[256])(void) = {0};
+
 
 /*
- * To handle system interrupts, following functions will be used;
+ * When the vector table is located in flash memory (at startup at least), it cannot be altered.
+ *
+ * A supplementary mechanism is required in order to update the handler for a particular interrupt channel.
  */
+
+
+
+//------------------------------------------------- Handlers Management ------------------------------------------------
 
 
 //All un-handled interrupts will trigger this empty function;
 static void nop_function() {};
 
+
+/**
+ * update_handler : update the handler of the absolute interrupt channel, system interrupts comprised;
+ *
+ * @param channel : the channel to update;
+ * @param handler : the function to handle the interrupt. Can be null if interrupt can be disabled;
+ */
+
+static void update_handler(const uint16_t channel, void (*const handler)()) {
+
+	//If the vector table is located in flash, no null pointer check required :
+	if (!vector_table_in_ram) {
+
+		//Update the correct non-system handler;
+		irq_handlers[channel + 16] = handler;
+
+	} else {
+		//If the vector table is located in RAM, a null pointer check is required;
+
+		//If the handler is null, save the empty handler; If not, save the handler;
+		irq_handlers[channel + 16] = (handler) ? handler : nop_function;
+	}
+
+}
+
+
+
+//----------------------------------------------- IC standard interrupts -----------------------------------------------
+
+
+/**
+ * ic_enable_interrupts : enables the interrupt control;
+ */
+
+void ic_enable_interrupts() {
+	__asm__ volatile("cpsie i":::"memory");
+}
+
+
+/**
+ * ic_disable_interrupts : enables the interrupt control;
+ */
+
+void ic_disable_interrupts() {
+	__asm__ volatile("cpsid i":::"memory");
+}
+
+
+
+/**
+ * ic_enable_interrupt : enables the required non-system interrupt channel;
+ * @param channel : the channel to enable;
+ */
+
+void ic_enable_interrupt(uint16_t channel) {
+	armv7m_nvic_enable_interrupt(channel);
+}
+
+/**
+ * ic_disable_interrupt : disables the required non-system interrupt channel;
+ * @param channel : the channel to disable;
+ */
+
+void ic_disable_interrupt(uint16_t channel){
+	armv7m_nvic_disable_interrupt(channel);
+}
+
+
+/**
+ * ic_set_interrupt_pending : sets the required non-system interrupt in the pending state;
+ * @param channel : the channel to set in the pending state;
+ */
+
+void ic_set_interrupt_pending(uint16_t channel) {
+	armv7m_nvic_set_interrupt_pending(channel);
+}
+
+
+
+/**
+ * ic_set_interrupt_pending : sets the required non-system interrupt in the not-pending state;
+ * @param channel : the channel to set in the not-pending state;
+ */
+
+void ic_clear_interrupt_pending(uint16_t channel) {
+	armv7m_nvic_clear_interrupt_pending(channel);
+}
+
+/**
+ * ic_is_interrupt_pending : sets the required non-system interrupt in the not-pending state;
+ * @param channel : the channel to set in the not-pending state;
+ */
+
+void ic_is_interrupt_pending(uint16_t channel) {
+	armv7m_nvic_clear_interrupt_pending(channel);
+}
+
+
+/**
+ * ic_set_interrupt_priority : applies the provided priority to the required non-system interupt channel;
+ *
+ * @param channel : the channel to apply the priority;
+ * @param priority : the priority to apply
+ */
+
+void ic_set_interrupt_priority(uint16_t channel, uint8_t priority) {
+	armv7m_nvic_set_priority(channel, priority);
+}
+
+/**
+ * ic_get_interrupt_priority : applies the provided priority to the required non-system interupt channel;
+ *
+ * @param channel : the channel to apply the priority;
+ * @param priority : the priority to apply
+ */
+
+uint8_t ic_get_interrupt_priority(uint16_t channel, uint8_t priority) {
+	return armv7m_nvic_get_priority(channel);
+}
+
+
+/**
+ * ic_set_interrupt_handler : updates the required non-system interrupt handler;
+ *
+ * @param non_system_channel : the channel to update. must be inferior to 240;
+ *
+ * @param handler : the handler. Can be null if interrupt must be disabled;
+ */
+
+void ic_set_interrupt_handler(const uint8_t non_system_channel, void (*const handler)()) {
+
+	//If the channel is invalid :
+	if (non_system_channel >= 240) {
+
+		//Do nothing, errors can't be triggered from here; TODO USAGE FAULT;
+		return;
+
+	}
+
+	//Update the handler, for the interrupt channel;
+	update_handler(non_system_channel + (uint8_t) 16, handler);
+
+}
+
+
+/**
+ * ic_reset_interrupt_handler : resets the handler of the required channel to 0, isr will return immediately;
+ * @param channel : the interrupt channel to update;
+ */
+
+void ic_reset_interrupt_handler(uint16_t channel) {
+	ic_set_interrupt_handler(channel, 0);
+}
+
+
+/**
+ * ic_in_handler_mode :
+ *
+ * @return true is a handler is curently in execution;
+ */
+bool ic_in_handler_mode() {
+	return (bool) armv7m_get_exception_number();
+}
+
+
 //-------------------------------------------- SysendSV exceptiontem Interrupts Management --------------------------------------------
 
-//Enable a system interrupt;
-void ic_enable_system_interrupt(enum ic_system_exception exception) {
+//Enable an exception;
+void nvic_enable_exception(enum nvic_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -69,8 +265,8 @@ void ic_enable_system_interrupt(enum ic_system_exception exception) {
 }
 
 
-//Disable a system interrupt;
-void ic_disable_system_interrupt(enum ic_system_exception exception) {
+//Disable an exception;
+void nvic_disable_exception(enum nvic_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -120,8 +316,8 @@ void ic_disable_system_interrupt(enum ic_system_exception exception) {
 }
 
 
-//Set a system interrupt pending;
-void ic_set_system_interrupt_pending(enum ic_system_exception exception) {
+//Set an exception pending;
+void nvic_set_exception_pending(enum nvic_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -172,8 +368,8 @@ void ic_set_system_interrupt_pending(enum ic_system_exception exception) {
 }
 
 
-//Clear a system interrupt's pending state;
-void ic_clear_system_interrupt_pending(enum ic_system_exception exception) {
+//Clear an exception's pending state;
+void nvic_clear_exception_pending(enum nvic_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -223,8 +419,8 @@ void ic_clear_system_interrupt_pending(enum ic_system_exception exception) {
 }
 
 
-//Is a system interrupt in the pending state;
-bool ic_is_system_exception_pending(enum ic_system_exception exception) {
+//Is an exception in the pending state;
+bool nvic_is_exception_pending(enum nvic_exception exception) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -271,7 +467,7 @@ bool ic_is_system_exception_pending(enum ic_system_exception exception) {
 
 
 //Update the nmi handler;
-void ic_set_system_interrupt_priority(enum ic_system_exception exception, uint8_t priority) {
+void nvic_set_exception_priority(enum nvic_exception exception, uint8_t priority) {
 
 	//Evaluate the exception type :
 	switch (exception) {
@@ -320,82 +516,15 @@ void ic_set_system_interrupt_priority(enum ic_system_exception exception, uint8_
 
 }
 
-
-
-
-//-------------------------------------------- Interrupt handling ---------------------------------------------
-
-
-
 /**
- * vector_table_in_ram : determines whether the NVIC vector table is in flash or in RAM; At init, it is located in
- * 	flash;
- */
-
-static bool vector_table_in_ram = false;
-
-
-/**
- * in_flash_handlers : the array of isr handlers when the vector table is in flash. Obsolete when the vector table
- * 	is in RAM;
- *
- * 	When the vector table is in flash, null function pointers are authorised, as a dedicated isr_handler will cache
- * 	the function pointer and execute it if it is not null;
- * 	At startup, the irq handlers contains only null pointers;
- *
- * 	When the vector table is in RAM, handlers are called automatically by the NVIC module. Null pointers will be
- * 	dereferenced, and are as a consequence forbidden; They should be replaced by the nop_function defined behind;
- *
- * 	When relocating the vector table in RAM, the handlers array will be filled with nop_function references;
- */
-
-void (*irq_handlers[256])(void) = {0};
-
-
-/*
- * When the vector table is located in flash memory (at startup at least), it cannot be altered.
- *
- * A supplementary mechanism is required in order to update the handler for a particular interrupt channel.
- */
-
-
-
-//------------------------------------------------- Handlers Management ------------------------------------------------
-
-/**
- * update_handler : update the handler of the absolute interrupt channel, system interrupts comprised;
- *
- * @param channel : the channel to update;
- * @param handler : the function to handle the interrupt. Can be null if interrupt can be disabled;
- */
-
-static void update_handler(const uint8_t channel, void (*const handler)()) {
-
-	//If the vector table is located in flash, no null pointer check required :
-	if (!vector_table_in_ram) {
-
-		//Update the correct non-system handler;
-		irq_handlers[channel + 16] = handler;
-
-	} else {
-		//If the vector table is located in RAM, a null pointer check is required;
-
-		//If the handler is null, save the empty handler; If not, save the handler;
-		irq_handlers[channel + 16] = (handler) ? handler : nop_function;
-	}
-
-}
-
-
-/**
- * ic_set_system_interrupt_handler : updates a system interrupt handler.
+ * nvic_set_exception_handler : updates an exception handler.
  * 	For safety, those channels are accessed indirectly, via the system channel enum;
  *
  * @param system_channel : the system channel to update;
  * @param handler : the function to handler the IRQ;
  */
 
-void ic_set_system_interrupt_handler(const enum ic_system_exception system_channel, void (*const handler)()) {
+void nvic_set_exception_handler(const enum nvic_exception system_channel, void (*const handler)()) {
 
 	//Use the value of the enum to update the handler;
 	update_handler(system_channel, handler);
@@ -404,27 +533,23 @@ void ic_set_system_interrupt_handler(const enum ic_system_exception system_chann
 
 
 /**
- * ic_set_interrupt_handler : updates the required non-system interrupt handler;
+ * nvic_reset_exception_handler : resets the handler of the required system interrupt to 0, isr will return
+ * 	immediately;
  *
- * @param non_system_channel : the channel to update. must be inferior to 240;
- *
- * @param handler : the handler. Can be null if interrupt must be disabled;
+ * @param channel : the interrupt channel to update;
  */
 
-void ic_set_interrupt_handler(const uint8_t non_system_channel, void (*const handler)()) {
-
-	//If the channel is invalid :
-	if (non_system_channel >= 240) {
-
-		//Do nothing, errors can't be triggered from here; TODO USAGE FAULT;
-		return;
-
-	}
-
-	//Update the handler, for the interrupt channel;
-	update_handler(non_system_channel + (uint8_t) 16, handler);
-
+void nvic_reset_exception_handler(enum nvic_exception channel) {
+	nvic_set_exception_handler(channel, 0);
 }
+
+
+//TODO SEPARATE AGAIN;
+//TODO SEPARATE AGAIN;
+//TODO SEPARATE AGAIN;
+//TODO SEPARATE AGAIN;
+//TODO SEPARATE AGAIN;
+//TODO SEPARATE AGAIN;
 
 //
 

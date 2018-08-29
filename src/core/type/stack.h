@@ -45,4 +45,12 @@ static inline void *stack_correct_reset_ptr(void *stack_reset) {
 }
 
 
+//Reset an allocated stack. Saves the arg in the stack;
+void stack_reset(struct core_stack *stack, void (*init_f)(), void (*exit_f)(), void *arg);
+
+
+//Get the arg saved in the stack;
+void *stack_get_arg();
+
+
 #endif //TRACER_CORE_STACK_H

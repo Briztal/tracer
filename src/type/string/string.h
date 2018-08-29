@@ -27,6 +27,7 @@
 
 #include "stdbool.h"
 
+
 typedef struct {
 
 	//The current length of the string;

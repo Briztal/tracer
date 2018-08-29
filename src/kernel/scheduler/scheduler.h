@@ -22,7 +22,7 @@
 #ifndef TRACER_SCHEDULER_H
 #define TRACER_SCHEDULER_H
 
-#include "sprocess.h"
+#include "process.h"
 
 //Stopped processes are given directly to semaphores and other sync objects;
 //To avoid an unintentional access to process data from there programs, we will define a specific type;

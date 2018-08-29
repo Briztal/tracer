@@ -16,7 +16,37 @@ typedef void (*heap_insertion_f)(struct heap_block **first_block, struct heap_bl
  */
 
 struct heap_head {
-	
+
+	//The address we created the heap in. Used to free the space;
+	void *creation_address;
+
+	//The size of the heap;
+	const size_t heap_size;
+
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+	//TODO CLEAR THE HEAP
+
 	//The first block of the heap, constant;
 	struct heap_block *const first_block;
 	
@@ -39,12 +69,7 @@ struct heap_head *heap_create(
 );
 
 
-//TODO TEST HEAP START ALIGNMENT
-//TODO TEST HEAP ALIGNMENT PROPAGATION
-//TODO TEST HEAP INSERTION ALGORITHMS
-//TODO TEST HEAP MEMORY REFILL
-//TODO TEST HEAP OVF FAIL;
-
+void heap_print(struct heap_head *head);
 
 
 //---------------------------------------------------- Manipulation ----------------------------------------------------
