@@ -55,6 +55,10 @@ enum prcs_state {
 };
 
 
+struct prc_desc {
+
+};
+
 //TODO;
 struct prcs {
 

@@ -37,7 +37,6 @@ struct list_head {
 //Validity check for list add; Library internal;
 void __list_add_valid(struct list_head *new, struct list_head *prev, struct list_head *next);
 
-
 //Add the new element between previous and next. Library internal, doesn't make check;
 static inline void __list_add(struct list_head *new, struct list_head *prev, struct list_head *next) {
 

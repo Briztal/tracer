@@ -101,8 +101,8 @@ void prog_mem_init(struct prog_mem *mem, uint8_t nb_stacks, size_t stacks_size) 
 	//Correct the stacks size;
 	stacks_size = stack_correct_size(stacks_size);
 
-	//Clear heap;
-	heap_clear()
+	//Reset the heap;
+	heap_reset(mem->heap);
 
 	//For each stack to create :
 	for (size_t stack_id = nb_stacks; stack_id--;) {

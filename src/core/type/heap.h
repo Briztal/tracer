@@ -21,31 +21,7 @@ struct heap_head {
 	void *creation_address;
 
 	//The size of the heap;
-	const size_t heap_size;
-
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
-	//TODO CLEAR THE HEAP
+	const size_t init_block_size;
 
 	//The first block of the heap, constant;
 	struct heap_block *const first_block;
@@ -67,6 +43,9 @@ struct heap_head *heap_create(
 	size_t size,
 	heap_insertion_f insertion_f
 );
+
+//Reset the heap; All data will be invalidated;
+void heap_reset(struct heap_head *heap);
 
 
 void heap_print(struct heap_head *head);

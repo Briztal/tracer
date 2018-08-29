@@ -34,13 +34,15 @@
 //---------------------------- Private functions ----------------------------
 
 //The entry function for prcses;
-void prcs_init();
+static void prcs_init();
 
 //Execution function for prcses;
-void prcs_function(volatile struct prcs *volatile prcs);
+static void prcs_function(volatile struct prcs *volatile prcs);
 
-//Exit functions for prcses;
-void prcs_exit() { while (1); }
+//Processes exit function Never reached;
+static void prcs_exit() {
+	kernel_panic("process.c : exit function reached. That should never happen.");
+}
 
 
 //---------------------------- Process initialisation ----------------------------
@@ -68,7 +70,7 @@ struct prcs *prcs_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size) 
 	struct prcs *prcs = kmalloc(sizeof(struct prcs));
 
 	//Create the program memory, referenced in the kernel heap;
-	struct prog_mem *mem = prog_mem_create(ram_size, nb_stacks, stack_size);
+	struct prog_mem *mem = prog_mem_create(ram_size);
 
 	//Create the initializer;
 	struct prcs prcs_init = {
@@ -114,7 +116,8 @@ struct prcs *prcs_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size) 
  */
 void prcs_reset(struct prcs *prcs) {
 
-	//Reset the heap;
+	//Reset the process memory;
+	struct prog_mem
 	
 	//Reset the stack;
 	kernel_stack_reset(&prcs->stack, &prcs_init, &prcs_exit, prcs);
