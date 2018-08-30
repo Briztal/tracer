@@ -6,7 +6,11 @@
 #define TRACER_KRNL_H
 
 #include <stddef.h>
+#include <kernel/scheduler/process.h>
 
+
+//Execute a process;
+void kernel_execute(struct prc_desc *descriptor, struct kernel_prio_data *priority);
 
 //----------------------------------------------------- Kernel Heap ----------------------------------------------------
 

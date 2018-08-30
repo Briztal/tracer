@@ -22,6 +22,28 @@
 
 #include <kernel/krnl.h>
 #include <core/driver/ic.h>
+#include <string.h>
+
+
+/**
+ * Insert new elements in the active elements list, and maintain it sorted;
+ *
+ * 	This function is not defined here; It is left to the implementation;
+ *
+ * @param sched : the scheduler to insert new elements in;
+ * @param new_elements : the list of elements to insert in the active list;
+ */
+
+extern void scheduler_sort_active_list(struct sched_data *sched, struct sched_element *new_elements);
+
+
+//-------------------------------------------------- Private functions -------------------------------------------------
+
+//Delete a scheduler element;
+static void sched_delete_element(struct sched_element *element);
+
+
+//------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 /**
  * sched_delete_element :
@@ -33,7 +55,7 @@
  * @param element : the element to delete;
  */
 
-void sched_delete_element(struct sched_element *element) {
+static void sched_delete_element(struct sched_element *element) {
 
 	//Access to the process list is critical;
 	ic_enter_critical_section();
@@ -43,9 +65,6 @@ void sched_delete_element(struct sched_element *element) {
 
 	//Access to the process list is critical;
 	ic_leave_critical_section();
-
-	//Delete the priority data;
-	kfree(element->priority_data);
 
 	//Delete the process;
 	prc_delete(element->process);
@@ -67,15 +86,7 @@ void sched_delete_element(struct sched_element *element) {
  * @return the scheduler reference;
  */
 
-struct sched_data *sched_create(
-
-	//The first scheduler element;
-	struct sched_element *first_process,
-
-	//The function to insert new elements in the active list and maintaining it sorted;
-	void (*const sort_active_list)(struct sched_data *sched, struct sched_element *new_elements)
-
-) {
+struct sched_data *sched_create(struct prc *first_process) {
 
 	//If the first process is null :
 	if (!first_process) {
@@ -85,24 +96,46 @@ struct sched_data *sched_create(
 
 	}
 
-	//Link the first scheduler element to itself;
-	__list_link((struct list_head *) first_process, (struct list_head *) first_process);
+	//Allocate some memory for the first process;
+	struct sched_element *first_element = kmalloc(sizeof(struct sched_element));
 
+	//Create the first element initializer;
+	struct sched_element felmt_init = {
+
+		//Link the first element to itself in both lists;
+		.status_head = {
+			.next = first_element,
+			.prev = first_element,
+		},
+		.main_head  = {
+			.next = first_element,
+			.prev = first_element,
+		},
+
+		//Transfer the ownership of the first process;
+		.process = first_process,
+
+		//The first process is active;
+		.active = true,
+
+	};
+
+	//Initialise the first element;
+	memcpy(first_element, &felmt_init, sizeof(struct sched_element));
+
+	//Create the scheduler initializer;
 	struct sched_data sched_init = {
 
 		//Save the first process. If it gets terminated, a kernel panic will be thrown;
-		.main_list = first_process,
+		.main_list = first_element,
 
 		//The first process is available for selection;
-		.active_list = first_process,
+		.active_list = first_element,
 
 		//Initialise the shared fifo empty;
 		.to_activate = {
 			.list = 0,
 		},
-
-		//Transmit the sort function reference;
-		.sort_active_list = sort_active_list,
 
 		//No termination or stop required;
 		.termination_required  = false,
@@ -147,7 +180,6 @@ void sched_delete(struct sched_data *data) {
 
 
 //----------------------------------------------------- Scheduling -----------------------------------------------------
-
 
 /**
  * sched_active_remove_first : removes first element of the active list, and returns it;
@@ -230,7 +262,7 @@ void scheduler_commit(struct sched_data *sched) {
 	struct sched_element *to_activate = (struct sched_element *) shared_fifo_get_all(&sched->to_activate);
 
 	//Insert elements and sort the active list;
-	(*(sched->sort_active_list))(sched, to_activate);
+	scheduler_sort_active_list(sched, to_activate);
 
 }
 

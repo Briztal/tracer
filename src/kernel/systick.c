@@ -56,7 +56,7 @@ void systick_tick() {
         if (!--task_duration) {
 
             //Trigger the preemption;
-            core_preempt_process();
+            core_trigger_preemption();
 
             //Task activity_time becomes 0, preemption won't be called anymore;
 

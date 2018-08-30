@@ -8,18 +8,36 @@
 
 #include <core/ram.h>
 #include <core/core.h>
+#include <kernel/scheduler/sched.h>
 
 
 #define KERNEL_RAM_SIZE 2048
 #define KERNEL_STACK_SIZE 512
 
-//------------------------------------------------------- Private ------------------------------------------------------
+//-------------------------------------------------- Kernel variables --------------------------------------------------
 
 //The kernel heap head;
 static struct prog_mem *kernel_memory;
 
-//Initialise the memory struct;
+//The kernel scheduler;
+static struct sched_data *kernel_scheduler;
+
+//--------------------------------------------------- First function ---------------------------------------------------
+
+//The kernel's first process function;
+extern void __kernel_first_function(void *);
+
+
+//------------------------------------------------------- Private ------------------------------------------------------
+
+//Initialise the kernel memory and the syscall environment;TODO SYSCALL ENV;
 static void kernel_memory_init();
+
+//Initialise the kernel scheduler;
+static void kernel_scheduler_init();
+
+//Initialise the execution environment and start the execution;
+static void kernel_start_execution();
 
 
 //----------------------------------------------------- Kernel init ----------------------------------------------------
@@ -38,18 +56,19 @@ static void kernel_init() {
 	//Initialise the kernel program memory;
 	kernel_memory_init();
 
+
 	//TODO INIT FILE SYSTEM;
 
 	//TODO INIT DRIVER MGR;
 
-	//Start the scheduler;
-	//scheduler_start(kernel_init_function);
+	//Initialise the kernel scheduler;
+	kernel_scheduler_init();
 
-	core_log("KERNEL_END");
+	//Start the process execution;
+	kernel_start_execution();
 
-	//TODO ERROR LOG;
-	while(1);
-
+	//This point should never be reached;
+	kernel_panic("kernel_init : execution not started;");
 
 }
 
@@ -81,10 +100,10 @@ void __program_start() {
 }
 
 
-//----------------------------------------------------- Kernel Heap ----------------------------------------------------
+//----------------------------------------------------- Kernel Init ----------------------------------------------------
 
 /**
- * kernel_memory->heap_init : initialises the kernel heap;
+ * kernel_memory_init : initialises the kernel heap;
  *
  * 	Requires the RAM manager to be initialised;
  */
@@ -97,10 +116,84 @@ static void kernel_memory_init() {
 	 * The kernel is mono-tasked, with a large heap space;
 	 */
 
-	kernel_memory = prog_mem_create_special(KERNEL_RAM_SIZE, 1, KERNEL_STACK_SIZE, true);
+	struct prog_mem *km = kernel_memory = prog_mem_create(KERNEL_RAM_SIZE, true);
+	prog_mem_create_stacks(km, 1, KERNEL_STACK_SIZE);
 
 }
 
+
+/**
+ * TODO;
+ */
+
+static void kernel_scheduler_init() {
+
+	//Create the first process descriptor;
+	struct prc_desc dsc = {
+
+		//kernel first function;
+		.function = &__kernel_first_function,
+
+		//No arguments;
+		.args = 0,
+		.args_size = 0,
+
+		//2KiB memory available;
+		.ram_size = 2048,
+
+		//One thread;
+		.nb_threads = 1,
+
+		//1KiB stack available;
+		.stack_size = 1024,
+
+		//10ms activity;
+		.activity_time = 10,
+
+	};
+
+	//Create the first process;
+	struct prc *first_process = prc_create(&dsc);
+
+	//Initialise the scheduler providing the first process;
+	kernel_scheduler = sched_create(first_process);
+
+}
+
+
+/**
+ * kernel_start_execution : TODO;
+ */
+
+static void kernel_start_execution() {
+
+	//TODO SYSTICK;
+
+	//TODO UPDATE CORE STACK PROVIDER;
+
+
+	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
+	core_enter_thread_mode(kernel_memory->stacks[0]->sp_reset);
+
+	//TODO PREEMPTION;
+
+}
+
+//-------------------------------------------------- Process Switching -------------------------------------------------
+
+
+//void kernel
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+//TODO KERNEL PROCESS SWITCHING
+
+
+//--------------------------------------------------- Dynamic Memory ---------------------------------------------------
 
 /**
  * kmalloc : allocates and return a block of memory in the kernel heap;

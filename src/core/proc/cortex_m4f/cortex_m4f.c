@@ -145,6 +145,68 @@ void core_execute_process_DO_NOT_USE_THIS(void *stack_ptr, void (*function)(void
 
 }
 
+//Go in thread mode, and update the exception stack;
+void core_enter_thread_mode(void *exception_stack) {
+
+	//If we are in handler mode, ignore the request;
+	if (ic_in_handler_mode()) {//TODO
+
+		//Error, this function can't be executed in handler mode;
+		core_error("cortex_m4f : core_enter_thread_mode : executed while in handler mode;");
+
+		//Never reached;
+		return;
+
+	}
+
+	//TODO CHECK THAT WE ARE NOT ALREADY IN THREAD MODE;
+
+	//Disable all interrupts;
+	ic_disable_interrupts();
+
+	static void *volatile msp;
+	static void *volatile psp;
+
+	//Save the exception stack value in msp;
+	msp = exception_stack;
+
+
+	//Save the current main stack pointer in psp's cache;
+	__asm__ __volatile__ (\
+			"mrs %0, msp\n\t"::"r" (psp):"memory"
+	);
+
+
+	//Update the process stack pointer;
+	__asm__ __volatile__ (\
+			"msr psp, %0\n\t"::"r" (psp):"memory"
+	);
+
+
+	//Update the main stack pointer so that exceptions occur in the exception stack;
+	__asm__ __volatile__ (\
+			"msr psp, %0\n\t"::"r" (psp):"memory"
+	);
+
+	//Execute an ISB;
+	__asm__ __volatile__ ("ISB");
+
+
+	//Update the control register to use PSP;//TODO UNPRIVILLEGE
+	__asm__ __volatile__(\
+        "mov r4, #2 \n\t"\
+        "msr control, r4\n\t":::"r4", "cc", "memory"
+	);
+
+
+	//Execute an ISB;
+	__asm__ __volatile__ ("ISB");
+
+	//Leave the critical section;
+	ic_enable_interrupts();
+
+
+}
 
 //------------------------------------- Stack management  -------------------------------------
 

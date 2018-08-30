@@ -22,11 +22,16 @@
 //Execute a function;
 void core_execute_process_DO_NOT_USE_THIS(void *stack_ptr, void (*function)(void *), void *arg);
 
+//Go in thread mode, and update the exception stack;
+void core_enter_thread_mode(void *exception_stack);
+
 //Initialise the stack for initialisation. Implemented by the proc lib;
 extern void core_init_stack(struct core_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //Get the initial arg;
 extern void *core_get_init_arg();
+
+
 
 
 //----------------------------------------------------- Preemption -----------------------------------------------------

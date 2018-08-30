@@ -63,17 +63,12 @@ struct sched_element {
 	//The main head. Used to reference all processes in their add order; Access is critical;
 	struct list_head main_head;
 
-
-	//TODO INDEX;
-
-	//The activity state; Set if the element is active;
-	bool active;
-
-	//The priority data only concerns the priority manager, and is specified by the implementation;
-	void *priority_data;
-
 	//The process itself. Its form is not specified;
 	struct prc *process;
+
+	//TODO ENABLE ONLY FOR DEBUG;
+	//The activity state; Set if the element is active;
+	bool active;
 
 };
 
@@ -89,15 +84,11 @@ struct sched_data {
 	//The shared fifo, that contains processes to activate;
 	struct shared_fifo to_activate;
 
-	//The function to sort the active list;
-	void (*const sort_active_list)(struct sched_data *sched, struct sched_element *new_elements);
-
 	//If set the current process will be terminated at next @select call;
 	bool termination_required;
 
 	//If set the current process will be stopped at next @select call;
 	bool stop_required;
-
 
 };
 
@@ -106,15 +97,7 @@ struct sched_data {
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 //Create a scheduler in the kernel heap;
-struct sched_data *sched_create(
-
-	//The first function to execute;
-	struct sched_element *init,
-
-	//The function to insert new elements in the active list and maintaining it sorted;
-	void (*const sort_active_list)(struct sched_data *sched, struct sched_element *new_elements)
-);
-
+struct sched_data *sched_create(struct prc *init);
 
 //Delete a scheduler;
 void sched_delete(struct sched_data *);

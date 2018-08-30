@@ -23,37 +23,15 @@
 
 
 #include <core/type/list.h>
+
 #include <kernel/mem.h>
+
 #include "kernel/scheduler/tasks/stask.h"
 
 
 /*
  * The process library provides functions create, reset and delete scheduler processes;
  */
-
-
-
-/**
- * A process can be in different states, in the scheduler's point of view;
- */
-enum prc_state {
-
-	//Execution required;
-		PRC_PENDING = 0,
-
-	//Process stop required by a semaphore;
-		PRC_STOP_REQUIRED = 1,
-
-	//Thread unregistered;
-		PRC_STOPPED = 2,
-
-	//Execution done;
-		PRC_TERMINATION_REQUIRED = 3,
-
-	//Execution done;
-		PRC_TERMINATED = 4,
-
-};
 
 
 struct prc_desc {
@@ -76,7 +54,7 @@ struct prc_desc {
 	//The size available for each stack;
 	size_t stack_size;
 
-	//The period between two preemptions for this task;
+	//The required period between two preemptions;
 	uint16_t activity_time;
 
 };
@@ -84,17 +62,11 @@ struct prc_desc {
 
 struct prc {
 
-	//A list head;
-	struct list_head head;
-
 	//The process descriptor;
 	struct prc_desc desc;
 
 	//The program memory;
 	struct prog_mem *prog_mem;
-
-	//The process state;
-	enum prc_state state;
 
 };
 
