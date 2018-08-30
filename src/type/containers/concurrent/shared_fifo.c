@@ -5,6 +5,7 @@
 #include "shared_fifo.h"
 
 #include <kernel/syscall.h>
+#include <core/driver/ic.h>
 
 
 /**
@@ -16,7 +17,7 @@
 void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head) {
 
 	//Enter in a critical section;
-	kernel_enter_critical_section();
+	ic_enter_critical_section();
 
 	//Cache the fifo's list;
 	struct list_head *const list = fifo->list;
@@ -39,7 +40,7 @@ void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head)
 	}
 
 	//Leave the critical section;
-	kernel_leave_critical_section();
+	ic_leave_critical_section();
 
 }
 
@@ -53,7 +54,7 @@ void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head)
 struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo) {
 
 	//Enter in a critical section;
-	kernel_enter_critical_section();
+	ic_enter_critical_section();
 
 	//Cache the fifo's head. We will return this value :
 	struct list_head *const head = fifo->list;
@@ -83,9 +84,34 @@ struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo) {
 	}
 
 	//Leave the critical section;
-	kernel_leave_critical_section();
+	ic_leave_critical_section();
 
 	//Return the removed value;
+	return head;
+
+}
+
+
+
+/**
+ * shared_fifo_get_all : returns the first element, can be 0, and resets the cached element to 0;
+ */
+
+struct list_head *shared_fifo_get_all(volatile struct shared_fifo *fifo) {
+
+	//Enter in a critical section;
+	ic_enter_critical_section();
+
+	//Cache the fifo's head;
+	struct list_head *head = fifo->list;
+
+	//Reset the fifo's head;
+	fifo->list = 0;
+
+	//Leave the critical section;
+	ic_leave_critical_section();
+
+	//Return the linked list head;
 	return head;
 
 }

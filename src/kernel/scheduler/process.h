@@ -32,66 +32,77 @@
  */
 
 
+
 /**
  * A process can be in different states, in the scheduler's point of view;
  */
-enum prcs_state {
+enum prc_state {
 
 	//Execution required;
-		PRCS_PENDING = 0,
+		PRC_PENDING = 0,
 
 	//Process stop required by a semaphore;
-		PRCS_STOP_REQUIRED = 1,
+		PRC_STOP_REQUIRED = 1,
 
 	//Thread unregistered;
-		PRCS_STOPPED = 2,
+		PRC_STOPPED = 2,
 
 	//Execution done;
-		PRCS_TERMINATION_REQUIRED = 3,
+		PRC_TERMINATION_REQUIRED = 3,
 
 	//Execution done;
-		PRCS_TERMINATED = 4,
+		PRC_TERMINATED = 4,
 
 };
 
 
 struct prc_desc {
 
+	//The task's function;
+	void (*function)(void *args);
+
+	//The function's arguments;
+	const void *args;
+
+	//The arguments size;
+	size_t args_size;
+
+	//The required ram size;
+	size_t ram_size;
+
+	//The required number of threads;
+	uint8_t nb_threads;
+	
+	//The size available for each stack;
+	size_t stack_size;
+
+	//The period between two preemptions for this task;
+	uint16_t activity_time;
+
 };
 
-//TODO;
-struct prcs {
+
+struct prc {
 
 	//A list head;
 	struct list_head head;
+
+	//The process descriptor;
+	struct prc_desc desc;
 
 	//The program memory;
 	struct prog_mem *prog_mem;
 
 	//The process state;
-	enum prcs_state state;
-
-	//The task data;//TODO EXEC_ENV
-	stask_t *task;
-
-	//uint8_t counter;
-
-	//TODO PRIO DATA;
+	enum prc_state state;
 
 };
 
 
 //Create a process in the kernel heap with a stack of the required size;
-struct prcs *prcs_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size);
-
-//Reset a process;
-void prcs_reset(struct prcs *process);
+struct prc *prc_create(const struct prc_desc *desc);
 
 //Delete a process, and free its stack;
-void prcs_delete(struct prcs *process);
-
-//Execute a process. If succeeds, doesn't return;
-//void prcs_execute(struct prcs *process);
-
+void prc_delete(struct prc *process);
 
 #endif //TRACER_THREADMANAGER_H

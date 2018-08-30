@@ -17,7 +17,7 @@ void *kmalloc(size_t);
 void *kcalloc(size_t);
 
 //Allocate and initialise some data in the kernel heap and initialise them;;
-void *kialloc(size_t, void *);
+void *kialloc(size_t, const void *);
 
 //Free some data in the kernel heap;
 void kfree(void *);

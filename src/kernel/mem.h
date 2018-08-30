@@ -47,7 +47,7 @@ struct prog_mem {
 struct prog_mem *prog_mem_create(size_t ram_size);
 
 //Initialise the process memory : reset the heap, and create as many stacks as required;
-void prog_mem_init(struct prog_mem *mem, uint8_t nb_stacks, size_t stack_size);
+void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stack_size);
 
 //Delete the process memory. All references must be contained in the kernel heap;
 void prog_mem_delete_from_kernel_heap(struct prog_mem *);

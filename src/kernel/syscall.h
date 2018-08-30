@@ -29,28 +29,6 @@
 
 
 
-//Update the error function;
-void kernel_set_error_output(void (*error_log)(const char *));
-
-//Raise an error, halt the code, log;
-void kernel_error(const char *error_message);
-
-
-//------------------------------------------- Stack management -------------------------------------------
-
-//Allocate a stack for a process;
-void kernel_stack_alloc(core_stack_t *stack, size_t stack_size,
-	void (*function)(), void (*exit_loop)(), void *arg);
-
-
-
-//Reset an allocated stack;
-void kernel_stack_reset(core_stack_t *stack, void (*init_f)(), void (*exit_f)(), void *arg);
-
-//Free an allocated stack;
-void kernel_stack_free(core_stack_t *);
-
-
 //------------------------------------------- Heap management -------------------------------------------
 
 //The malloc function to use across the code;

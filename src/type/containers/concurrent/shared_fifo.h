@@ -6,7 +6,9 @@
 #define TRACER_SHARED_FIFO_H
 
 
-#include <data_structures/containers/non_concurrent/list.h>
+#include <stdint.h>
+
+#include <core/type/list.h>
 
 /*
  * The shared fifo encapsulates a list, and wraps concerned functions in critical sections;
@@ -27,6 +29,8 @@ void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *eleme
 //Pull and return and element from @fifo. 0 returned if no element available;
 struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo);
 
+//Get the whole linked list; List will be empty after;
+struct list_head *shared_fifo_get_all(volatile struct shared_fifo *fifo);
 
 
 /**

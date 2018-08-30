@@ -1,5 +1,5 @@
 /*
-  prcs.c Part of TRACER
+  prc.c Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -20,223 +20,174 @@
 
 #include "process.h"
 
-#include "scheduler.h"
-
-#include <kernel/systick.h>
-
-#include <kernel/syscall.h>
-#include <kernel/scheduler/tasks/stask.h>
 #include <kernel/krnl.h>
+
 #include <string.h>
 
 
+bool process_terminated = false;
 
 //---------------------------- Private functions ----------------------------
 
-//The entry function for prcses;
-static void prcs_init();
 
-//Execution function for prcses;
-static void prcs_function(volatile struct prcs *volatile prcs);
+//The process execution function. Retrieves the execution data, executes the process function and returns;
+static void prc_exec();
 
-//Processes exit function Never reached;
-static void prcs_exit() {
-	kernel_panic("process.c : exit function reached. That should never happen.");
-}
+//The process exit function. Called when prc_entry returns; Calls the kernel for termination;
+static void prc_exit();
 
 
 //---------------------------- Process initialisation ----------------------------
 
+/**
+ * prc_exec_env : contains all data the process need to run;
+ */
+
+struct prc_exec_env {
+
+	//The process function;
+	void (*function)(void *args);
+
+	//The function's arguments;
+	const void *args;
+
+};
+
+
 /*
- * prcs_create : this function allocates a stack, and then initialises stack pointers;
+ * prc_create : this function allocates a stack, and then initialises stack pointers;
  *
  *  Finally, it sets the thread's sequences_initialised as Terminated;
  */
 
 /**
- * prcs_create : allocates ram data for the process and creates and initialises its reference struct in the
+ * prc_create : allocates ram data for the process and creates and initialises its reference struct in the
  * 	kernel heap:
  *
  *
  * @param ram_size : the ram size allocated to the process;
  * @param nb_stacks : the number of stacks available for the process;
  * @param stack_size : the size of each stack;
- * @return an initialised prcs struct;
+ * @return an initialised prc struct;
  */
 
-struct prcs *prcs_create(size_t ram_size, uint8_t nb_stacks, size_t stack_size) {
+struct prc *prc_create(const struct prc_desc *const desc) {
 
 	//Allocate memory for the process;
-	struct prcs *prcs = kmalloc(sizeof(struct prcs));
+	struct prc *prc = kmalloc(sizeof(struct prc));
 
 	//Create the program memory, referenced in the kernel heap;
-	struct prog_mem *mem = prog_mem_create(ram_size);
+	struct prog_mem *mem = prog_mem_create(desc->ram_size);
+
+	//Create stacks;
+	prog_mem_create_stacks(mem, desc->nb_threads, desc->stack_size);
 
 	//Create the initializer;
-	struct prcs prcs_init = {
+	struct prc prc_init = {
 
 		//Initialise the head;
 		.head = {
-			.prev = prcs,
-			.next = prcs,
+			.prev = prc,
+			.next = prc,
 		},
+		
+		//Copy the process descriptor; Args will be updated after;
+		.desc = *desc,
 
 		//Transfer the ownership of the memory;
 		.prog_mem = mem,
 
 		//The process has no task, it is terminated;
-		.state = PRCS_TERMINATED,
-
-		//No task;
-		.task = 0,
+		.state = PRC_TERMINATED,
 
 	};
+
+	//Copy args in the process heap and update the reference;
+	prc_init.desc.args = heap_ialloc(mem->heap, desc->args_size, desc->args);
 
 	//Initialise the process struct;
-	memcpy(prcs, &prcs_init, sizeof(struct prcs));
-
-	//Create a stack of the required size;
-	kernel_stack_alloc(&sprocess->stack, stack_size, &sprocess_init, &sprocess_exit, sprocess);
+	memcpy(prc, &prc_init, sizeof(struct prc));
 
 
-	//Return the created process;
-	return prcs;
-	
-}
-
-
-/*
- * prcs_reset : resets the prcs to its initial stack pointer,
- * and initialises the context to its initial;
- */
-/**
- * prcs_reset : resets the process referenced by the struct;
- *
- * @param prcs : the process reference;
- */
-void prcs_reset(struct prcs *prcs) {
-
-	//Reset the process memory;
-	struct prog_mem
-	
-	//Reset the stack;
-	kernel_stack_reset(&prcs->stack, &prcs_init, &prcs_exit, prcs);
-	
-	//Cache the prcs's task;
-	stask_t *task = prcs->task;
-
-	//If the prcs's has a pending task, clean it;
-	if (task) {
-		scheduler_cleanup_task(task);
-	}	
-
-    //The prcs has no more function to execute; Mark it terminated; 
-    prcs->state = PRCS_TERMINATED;
-
-}
-
-
-/*
- * prcs_delete : frees the process task and the process;
- */
-
-void prcs_delete(struct prcs *prcs) {
-
-	//Cleanup the process;
-	prcs_reset(prcs);
-	
-	//Free the prcs's stack;
-	kernel_stack_free(&prcs->stack);
-	
-	//Free the process;
-	kernel_free(prcs);
-
-}
-
-
-/*
- * prcs_init : this function is called when a prcs is started on the fly, 
- * 	without proper function call, due to a context switch;
- *
- *  As the prcs pointer has been saved in the register at the thread initialisation, 
- * 	the first step is to get it back;
- *
- *  Then, we can call properly the run function;
- */
-
-void prcs_init() {
-
-    //Get the thread index and run the associated thread;
-    prcs_function((volatile struct prcs *volatile) core_get_init_arg());
-
-}
-
-
-/*
- * prcs_function : this function is the routine executed by a process_t;
- */
-
-void prcs_function(volatile struct prcs *volatile prcs) {
-
-
-
-    //The prcs must be pending, otherwise, there has been an error in the scheduler.
-    if ((volatile prcs_state_t) prcs->state != PRCS_PENDING) {
-
-        //Kernel panic;
-        kernel_error("prcs.c : prcs_function : Attempted to start a non pending process;");
-
-    }
-
-    //Cache the task pointer;
-    volatile stask_t *volatile task = prcs->task;
-
-    //Execute the function, passing args;
-    (*(task->function))((void *) task->args);
-
-    //Cache the exit function;
-    void (*volatile cleanup)() = task->cleanup;
-
-    //If the function is not null, execute it;
-    if (cleanup) {
-        (*cleanup)();
-    }
-
-    //Mark the process_t inactive; Scheduler will be notified at context switch;
-    prcs->state = (volatile prcs_state_t) PRCS_TERMINATION_REQUIRED;
-
-    //Require a context switch, as the task is finished;
-    core_preempt_process();
-
-
-    kernel_error("prcs.c : prcs_function : preemption invoked but failed."
-						 "Might be caused by an unfinished critical section;");
-
-	//Infinite loop;
-    while (true);
-
-}
-
-
-/*
- * prcs_execute : If we are in process mode, interrupts the current program and 
- * 	executes the provided process;
- * 
- * 	If it succeeds, the function will never return;
- */
-
-void prcs_execute(struct prcs *prcs) {
-
-	//Compute the core process from the prcs;
-	core_process_t core_process = {
-			.process_stack = &prcs->stack,
-			.activity_time = prcs->task->activity_time,
+	//Create the process execution data initializer;
+	struct prc_exec_env exec_data_init = {
+		.function = desc->function,
+		.args = desc->args,
 	};
 
-    //Execute the first process;
-	core_execute_process_DO_NOT_USE_THIS(&core_process, (void (*)(void *volatile)) prcs_function, prcs);
+	//Create and initialize the execution data structure in the process heap;
+	struct prc_exec_env *exec_data = heap_ialloc(mem->heap, sizeof(struct prc_exec_env), &exec_data_init);
+
+	//TODO INITIALISE ALL STACKS; WATCH ARGUMENTS CAREFULY;
+
+	//Initialise the stack and pass the execution environment;
+	core_init_stack(prc->prog_mem->stacks[0], &prc_exec, &prc_exit, exec_data);
+
+	//Return the created process;
+	return prc;
+	
+}
+
+
+/*
+ * prc_delete : frees the process task and the process;
+ */
+
+void prc_delete(struct prc *prc) {
+
+	//Cleanup the program memory;
+	prog_mem_delete_from_kernel_heap(prc->prog_mem);
+
+	//Free the process;
+	kfree(prc);
 
 }
+
+
+//------------------------------------------------------- Runtime ------------------------------------------------------
+
+/*
+ * prc_exec : the process execution function. ;
+ *
+ * 	Executes the process function, with the process args, and returns;
+ */
+
+static void prc_exec() {
+
+	//Cache the execution data, saved in the stack;
+	volatile struct prc_exec_env *volatile exec_data = core_get_init_arg();
+
+	//Execute the function, passing args;
+	(*(exec_data->function))((void *) exec_data->args);
+
+}
+
+
+/**
+ * prc_exit : the process exit function. Called automatically when prc_entry returns;
+ *
+ * 	Marks the process terminated and triggers the preemption;
+ *
+ * 	If preemption fails, an internal error has occurred, and a kernel panic is generated;
+ */
+
+static void prc_exit() {
+
+	//TODO SYSCALL;
+	//TODO SYSCALL AND PREEMPTION TRIGGER;
+
+	//Mark the process terminated;
+	process_terminated = true;
+
+	//TODO SYSCALL KERNEL PREEMPT
+	//Require a context switch, process will be deleted;
+	core_trigger_preemption();
+
+	//Panic, preemption failed;
+	kernel_panic("process.c : exit function reached. That should never happen.");
+
+}
+
 
 
 

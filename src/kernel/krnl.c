@@ -136,7 +136,7 @@ void *kcalloc(size_t size) {
  * @return the lowest address of the allocated block;
  */
 
-void *kialloc(size_t size, void *init) {
+void *kialloc(size_t size, const void *init) {
 
 	//If the kernel heap is not initialise
 	return heap_ialloc(kernel_memory->heap, size, init);

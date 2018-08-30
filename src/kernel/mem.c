@@ -13,8 +13,6 @@
 
 //------------------------------------------------------ prog_mem ------------------------------------------------------
 
-
-
 /**
  * prog_mem_create_special : creates and initialises a program memory struct in the kernel heap;
  *
@@ -84,19 +82,17 @@ struct prog_mem *prog_mem_create_special(size_t ram_size, bool self_referenced) 
  */
 
 
-void prog_mem_init(struct prog_mem *mem, uint8_t nb_stacks, size_t stacks_size) {
+void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stacks_size) {
 
 	//Major the number of stacks by its maximum;
 	if (nb_stacks > NB_THREADS)
 		nb_stacks = NB_THREADS;
 
+	//If the process already has stacks initialised :
+	kernel_panic("mem.c : prog_mem_create_stacks : stacks already created;");
+
 	//Save the number of stacks;
 	mem->nb_stacks = nb_stacks;
-
-	//Reset the stacks container;
-	for (uint8_t i = NB_THREADS; i--;) {
-		mem->stacks[i] = 0;
-	}
 
 	//Correct the stacks size;
 	stacks_size = stack_correct_size(stacks_size);
@@ -144,8 +140,7 @@ void prog_mem_init(struct prog_mem *mem, uint8_t nb_stacks, size_t stacks_size) 
  * @param mem : the program memory struct to delete;
  */
 
-void prog_mem_delete(struct prog_mem *mem) {
-
+void prog_mem_delete_from_kernel_heap(struct prog_mem *mem) {
 
 	//For each allocated stack :
 	for (uint8_t stack_id = mem->nb_stacks; stack_id--;) {

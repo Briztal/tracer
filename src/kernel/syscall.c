@@ -23,7 +23,7 @@
 
 #include <string.h>
 
-#include <kernel/scheduler/scheduler.h>
+#include <kernel/scheduler/sched.h>
 
 #include <driver/ic.h>
 

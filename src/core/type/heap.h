@@ -60,7 +60,7 @@ void *heap_malloc(struct heap_head *heap, size_t size);
 void *heap_calloc(struct heap_head *heap, size_t size);
 
 //Allocate some data in the heap, and copy the initializer in the allocated memory region;
-void *heap_ialloc(struct heap_head *heap, size_t size, void *initializer);
+void *heap_ialloc(struct heap_head *heap, size_t size, const void *initializer);
 
 //Free some data in the heap;
 void heap_free(struct heap_head *heap, void *ptr);

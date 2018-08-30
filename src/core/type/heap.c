@@ -956,7 +956,7 @@ void heap_fifo_insertion(struct heap_block **first_block, struct heap_block *new
 	struct heap_block *f = *first_block;
 
 	//Add the new block before the first block;
-	elist_add(struct heap_block, available_head, new_block, f);
+	elist_concat(struct heap_block, available_head, new_block, f);
 
 	//Set the new block to be the first block;
 	*first_block = new_block;
@@ -994,7 +994,7 @@ void heap_size_sort_insertion(struct heap_block **first_block_p, struct heap_blo
 	//Bloc is the first greater than new_block;
 
 	//Add the new block before @block;
-	elist_add(struct heap_block, available_head, new_block, block);
+	elist_concat(struct heap_block, available_head, new_block, block);
 
 	//If new_block has the lowest size of the list :
 	if (first) {

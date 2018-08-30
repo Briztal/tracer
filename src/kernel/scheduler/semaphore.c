@@ -20,7 +20,7 @@
 
 #include "semaphore.h"
 
-#include "scheduler.h"
+#include "sched.h"
 
 #include <kernel/syscall.h>
 

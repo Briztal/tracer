@@ -20,7 +20,7 @@
 
 #include <kernel/syscall.h>
 
-#include <kernel/scheduler/scheduler.h>
+#include <kernel/scheduler/sched.h>
 #include <kernel/scheduler/tasks/service.h>
 #include <kernel/scheduler/tasks/sequences.h>
 

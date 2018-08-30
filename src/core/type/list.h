@@ -153,22 +153,22 @@ static inline void list_remove(struct list_head *l) {
 /**
  * list_add : concatenates the end of s0 and the head of l1
  */
-static inline void __elist_add(void *src, void *dst, size_t head_offset) {
+static inline void __elist_concat(void *h0, void *h1, size_t head_offset) {
 
 	//Cache ends of src and dst;
-	void *src_e = __elist_prev(src, head_offset);
-	void *dst_e = __elist_prev(dst, head_offset);
+	void *t0 = __elist_prev(h0, head_offset);
+	void *t1 = __elist_prev(h1, head_offset);
 
 	//Link the end of dst to the head of src;
-	__elist_link(dst_e, src, head_offset);
+	__elist_link(t1, h0, head_offset);
 
 	//Link the end of src to the head of dst;
-	__elist_link(src_e, dst, head_offset);
+	__elist_link(t0, h1, head_offset);
 
 }
 
-#define elist_add(struct_name, field_name, src, dst)\
-	__elist_add((src), (dst), offsetof(struct_name, field_name));
+#define elist_concat(struct_name, field_name, src, dst)\
+	__elist_concat((src), (dst), offsetof(struct_name, field_name));
 
 
 /**
