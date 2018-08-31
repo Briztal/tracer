@@ -24,129 +24,40 @@
 #include <core/type/stack.h>
 #include <core/core.h>
 #include <core/ic.h>
+#include <core/arch/arm/arm_v7m/arm_v7m.h>
+#include <core/arch/arm/arm_v7m/nvic.h>
 
 
-/*
- * ------------------------------------- Systick -------------------------------------
- */
 
-/*
- * core_start_systick_timer :
- *  - sets the system timer reload value;
- *  - sets the function to execute at undf;
- *  - resets the undf flag;
- *  - enables the timer;
- *
- *  The timer must overflow every 1ms, and call the systick_tick function;
- *
- *  It must reset the process activity_time to 0ms to disable preemption;
- *
- *  the reload value is determined by :
- *
- *      timer_period_seconds = 1 / F_CPU seconds;
- *      systick_period_seconds = systick_period_ms / 1000;
- *
- *      nb_ticks = systick_period / timer_period = F_CPU * systick_period_ms / 1000
- *
- *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
- */
-
-/*
-
-void core_systick_init() {
-
-    //Reset the systick process activity_time to disable preemption;
-    systick_set_process_duration(0);
-
-    //Set the systick function;
-    _VectorsRam[15] = systick_tick;
-
-    //Set the last byte of SHPR3 (systick prio) to 0, highest priority.
-    *((uint8_t *)&SCB_SHPR3 + 3) = 0;
-
-    //Set the systick priority to the highest priority level;
-    //NVIC_SET_PRIORITY(-1, 0);
-
-    //Update the reload value register;
-    SYST_RVR = (uint32_t) ((float) F_CPU / (float) 2000);
-
-    //Clear the systick flag;
-    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;
-
-    //Enable the systick interrupt;
-    SYST_CSR |= SYST_CSR_ENABLE;
-
-}
-
-*/
-
-
+//---------------------------------------------------- Threads setup ---------------------------------------------------
 
 /**
- * core_execute_process : TODO;
+ * core_enter_thread_mode : this function initialises threads in a safe state. It never returns.
+ * 	The preemption environment must have been initialised before;
  *
- * @param stack_ptr
- * @param function
- * @param arg
+ * 	- initialises all threads in their lowest privilege state;
+ * 	- updates exception stacks;
+ * 	- triggers the preemption;
+ * 	- make all threads run an infinite loop;
+ *
+ * @param exception_stacks : stacks that must be used in case of interrupt;
  */
 
-void core_execute_process_DO_NOT_USE_THIS(void *stack_ptr, void (*function)(void *), void *arg) {
+void core_enter_thread_mode(struct core_stack **exception_stacks, void (*syscall)()) {
 
-	//If we are in handler mode, ignore the request;
-	if (ic_in_handler_mode()) {//TODO
+	//A static var will insure that the function is called at most once;
+	static bool entered = false;
 
-		//Error, this function can't be executed in handler mode;
-		core_error("cortex_m4f : core_execute_process_DO_NOT_USE_THIS : function returned;");
+	//If the flag has already been set, the function is called for the second time.
+	if (entered) {
 
-		//Never reached;
-		return;
+		//Error, must not happen;
+		core_error("cortex_m4f : core_enter_thread_mode : Function called a second time;");
 
 	}
 
-	//Disable all interrupts;
-	ic_disable_interrupts();
-
-	//As this function contains a context switch, we will copy our args in static variables;
-	static void (*volatile sf)(void *volatile);
-	static void *volatile sa;
-
-	//Cache the function and the arg in static vars;
-	sf = function;
-	sa = arg;
-
-
-	//Update the process stack pointer;
-	__asm__ __volatile__ (\
-			"msr psp, %0\n\t"::"r" (stack_ptr):"memory"
-	);
-
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-
-
-	//Update the control register to use PSP;//TODO UNPRIVILLEGE
-	__asm__ __volatile__(\
-        "mov r4, #2 \n\t"\
-        "msr control, r4\n\t":::"r4", "cc", "memory"
-	);
-
-
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-
-	//Leave the critical section;
-	ic_enable_interrupts();
-
-	//Execute the cached function with the cached arg;
-	(*sf)(sa);
-
-	//If the function returns, we must halt, call env has been altered;
-	core_error("cortex_m4f : core_execute_process_DO_NOT_USE_THIS : function returned;");
-
-}
-
-//Go in thread mode, and update the exception stack;
-void core_enter_thread_mode(void *exception_stack) {
+	//Mark the function called;
+	entered = true;
 
 	//If we are in handler mode, ignore the request;
 	if (ic_in_handler_mode()) {//TODO
@@ -159,16 +70,18 @@ void core_enter_thread_mode(void *exception_stack) {
 
 	}
 
-	//TODO CHECK THAT WE ARE NOT ALREADY IN THREAD MODE;
-
 	//Disable all interrupts;
 	ic_disable_interrupts();
 
 	static void *volatile msp;
 	static void *volatile psp;
+	static void (*volatile sysc)();
+
+	//Save the syscall;
+	sysc = syscall;
 
 	//Save the exception stack value in msp;
-	msp = exception_stack;
+	msp = exception_stacks[0]->sp;
 
 
 	//Save the current main stack pointer in psp's cache;
@@ -185,7 +98,7 @@ void core_enter_thread_mode(void *exception_stack) {
 
 	//Update the main stack pointer so that exceptions occur in the exception stack;
 	__asm__ __volatile__ (\
-			"msr psp, %0\n\t"::"r" (psp):"memory"
+			"msr msp, %0\n\t"::"r" (msp):"memory"
 	);
 
 	//Execute an ISB;
@@ -205,10 +118,15 @@ void core_enter_thread_mode(void *exception_stack) {
 	//Leave the critical section;
 	ic_enable_interrupts();
 
+	//Execute the syscall, to trigger the preemption;
+	(*syscall)();
+
+	//Wait eternally for the preemption to be triggered;
+	while(1);
 
 }
 
-//------------------------------------- Stack management  -------------------------------------
+//-------------------------------------------------- Stack management  -------------------------------------------------
 
 /*
  * Notice :
@@ -280,31 +198,13 @@ void *core_get_init_arg() {
 	return (void *)arg;
 }
 
-//------------------------------- Preemtion -------------------------------
+//----------------------------------------------------- Preemption -----------------------------------------------------
 
-/*
- * core_preemption_init : sets function and priority for the pendSV interrupt;
- */
-
-/*
-void core_preemption_init() {
-
-    //Clear the pendSV pending status;
-    SCB_ICSR &= ~SCB_ICSR_PENDSVSET;
-
-    //Set the pendSV function;
-    _VectorsRam[14] = core_preemption;
-
-    //Set the third byte of SHPR3 (pendSV prio) to 240, lowest priority.
-    *((uint8_t *)&SCB_SHPR3 + 2) = 240;
-
-
-}
-*/
 
 
 //The process stack provider; Declared in the core lib;
-extern void *(*core_stack_provider)(void *);
+extern void *(*core_stack_provider)(uint8_t, void *);
+
 
 /*
  * The context switcher :
@@ -316,7 +216,7 @@ extern void *(*core_stack_provider)(void *);
 
 //TODO MAKE ANOTHER ONE FOR NO FPU SAVE;
 
-void core_preemption() {
+void core_context_switcher() {
 
 	//TODO ONLY IN HANDLER MODE;
 
@@ -351,10 +251,8 @@ void core_preemption() {
 	//Enable interrupts;
 	__asm__ __volatile__("cpsie i");
 
-
-	//Provide the old stack and get a new one;
-	psp = (*core_stack_provider)(psp);
-
+	//Provide the old stack and get a new one; There is only one thread, with the index 0;
+	psp = (*core_stack_provider)(0, psp);
 
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");
@@ -379,4 +277,123 @@ void core_preemption() {
 	__asm__ __volatile__("cpsie i");
 
 }
+
+
+/*
+ * ------------------------------------- Systick -------------------------------------
+ */
+
+/*
+ * core_start_systick_timer :
+ *  - sets the system timer reload value;
+ *  - sets the function to execute at undf;
+ *  - resets the undf flag;
+ *  - enables the timer;
+ *
+ *  The timer must overflow every 1ms, and call the systick_tick function;
+ *
+ *  It must reset the process activity_time to 0ms to disable preemption;
+ *
+ *  the reload value is determined by :
+ *
+ *      timer_period_seconds = 1 / F_CPU seconds;
+ *      systick_period_seconds = systick_period_ms / 1000;
+ *
+ *      nb_ticks = systick_period / timer_period = F_CPU * systick_period_ms / 1000
+ *
+ *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
+ */
+
+/*
+
+void core_systick_init() {
+
+    //Reset the systick process activity_time to disable preemption;
+    systick_set_process_duration(0);
+
+    //Set the systick function;
+    _VectorsRam[15] = systick_tick;
+
+    //Set the last byte of SHPR3 (systick prio) to 0, highest priority.
+    *((uint8_t *)&SCB_SHPR3 + 3) = 0;
+
+    //Set the systick priority to the highest priority level;
+    //NVIC_SET_PRIORITY(-1, 0);
+
+    //Update the reload value register;
+    SYST_RVR = (uint32_t) ((float) F_CPU / (float) 2000);
+
+    //Clear the systick flag;
+    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;
+
+    //Enable the systick interrupt;
+    SYST_CSR |= SYST_CSR_ENABLE;
+
+}
+
+*/
+
+/**
+ * core_execute_process : TODO;
+ *
+ * @param stack_ptr
+ * @param function
+ * @param arg
+ */
+/*
+void core_execute_process_DO_NOT_USE_THIS(void *stack_ptr, void (*function)(void *), void *arg) {
+
+	//If we are in handler mode, ignore the request;
+	if (ic_in_handler_mode()) {//TODO
+
+		//Error, this function can't be executed in handler mode;
+		core_error("cortex_m4f : core_execute_process_DO_NOT_USE_THIS : called by a handler;");
+
+		//Never reached;
+		return;
+
+	}
+
+	//Disable all interrupts;
+	ic_disable_interrupts();
+
+	//As this function contains a context switch, we will copy our args in static variables;
+	static void (*volatile sf)(void *volatile);
+	static void *volatile sa;
+
+	//Cache the function and the arg in static vars;
+	sf = function;
+	sa = arg;
+
+
+	//Update the process stack pointer;
+	__asm__ __volatile__ (\
+			"msr psp, %0\n\t"::"r" (stack_ptr):"memory"
+	);
+
+	//Execute an ISB;
+	__asm__ __volatile__ ("ISB");
+
+
+	//Update the control register to use PSP;//TODO UNPRIVILLEGE
+	__asm__ __volatile__(\
+        "mov r4, #2 \n\t"\
+        "msr control, r4\n\t":::"r4", "cc", "memory"
+	);
+
+
+	//Execute an ISB;
+	__asm__ __volatile__ ("ISB");
+
+	//Leave the critical section;
+	ic_enable_interrupts();
+
+	//Execute the cached function with the cached arg;
+	(*sf)(sa);
+
+	//If the function returns, we must halt, call env has been altered;
+	core_error("cortex_m4f : core_execute_process_DO_NOT_USE_THIS : function returned;");
+
+}
+*/
 

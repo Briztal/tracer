@@ -5,6 +5,41 @@
 #include "nvic.h"
 
 
+/*
+ * The ARMV7 NVIC support 8 bit priorities. The number of bits evaluated depends on the implementation, but there
+ * 	are at least 3 bits evaluated, which allows the library to implement all core priority levels;
+ */
+
+//The lowest priority level;
+const uint8_t ic_priority_0 = 0xE0;
+const uint8_t ic_priority_1 = 0xC0;
+const uint8_t ic_priority_2 = 0xA0;
+const uint8_t ic_priority_3 = 0x80;
+const uint8_t ic_priority_4 = 0x60;
+const uint8_t ic_priority_5 = 0x40;
+const uint8_t ic_priority_6 = 0x20;
+const uint8_t ic_priority_7 = 0x00;
+
+
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+//TODO NUMBER OF INTERRUPTS INITIALISED BY THE ARM LIB;
+
 
 //-------------------------------------------- Interrupt handling ---------------------------------------------
 
@@ -250,7 +285,7 @@ void nvic_enable_exception(enum nvic_exception exception) {
 			//Always enabled;
 			break;
 
-			//Channel 14 : The PensSV Interrupt;
+			//Channel 14 : The PendSV Interrupt;
 		case NVIC_PENDSV :
 			//Always enabled;
 			break;
@@ -301,7 +336,7 @@ void nvic_disable_exception(enum nvic_exception exception) {
 			//Always enabled;
 			break;
 
-			//Channel 14 : The PensSV Interrupt;
+			//Channel 14 : The PendSV Interrupt;
 		case NVIC_PENDSV :
 			//Always enabled;
 			break;
@@ -353,7 +388,7 @@ void nvic_set_exception_pending(enum nvic_exception exception) {
 			//asm __volatile__ ("svc");
 			break;
 
-			//Channel 14 : The PensSV Interrupt;
+			//Channel 14 : The PendSV Interrupt;
 		case NVIC_PENDSV :
 			armv7m_set_pendsv_pending();
 			break;
@@ -404,7 +439,7 @@ void nvic_clear_exception_pending(enum nvic_exception exception) {
 			//Can't be cleared;
 			break;
 
-			//Channel 14 : The PensSV Interrupt;
+			//Channel 14 : The PendSV Interrupt;
 		case NVIC_PENDSV :
 			armv7m_clr_pendsv_pending();
 			break;
@@ -451,7 +486,7 @@ bool nvic_is_exception_pending(enum nvic_exception exception) {
 		case NVIC_SVC :
 			return armv7m_is_svc_pending();
 
-			//Channel 14 : The PensSV Interrupt;
+			//Channel 14 : The PendSV Interrupt;
 		case NVIC_PENDSV :
 			return armv7m_is_pendsv_pending();
 

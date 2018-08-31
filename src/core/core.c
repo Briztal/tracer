@@ -13,37 +13,18 @@
 //-------------------------------------------------- Stack provision ---------------------------------------------------
 
 
-//The default stack provider. Simply return 1ms for process time and does not change the stack pointer;
-static void *default_stack_provider(void *stack_pointer) {}
-
 //The process stack provider; Initialised to the default provider;
-void *(*core_stack_provider)(void *) = &default_stack_provider;
+void *(*core_stack_provider)(uint8_t, void *);
 
-
-
-
-//----------------------------------------------------- Execution ------------------------------------------------------
 
 /*
- * core_set_process_provider : updates the stack provider;
+ * core_set_stack_provider : updates the stack provider;
  */
 
-void core_set_process_provider(void *(*new_provider)(void *)) {
+void core_set_stack_provider(void *(*new_provider)(uint8_t, void *)) {
 
 	//Update the new provider;
 	core_stack_provider = new_provider;
-
-}
-
-
-/*
- * core_reset_process_provider : resets the stack provider;
- */
-
-void core_reset_process_provider() {
-
-	//Update the new provider;
-	core_stack_provider = &default_stack_provider;
 
 }
 
