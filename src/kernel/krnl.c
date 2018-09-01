@@ -325,7 +325,13 @@ static void kernel_start_execution() {
 	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
 
 
-	while(1);
+
+	while(1) {
+
+		core_log_int(armv7m_systick_get_count());
+
+		core_delay_ms(500);
+	}
 
 	//TODO TIMER NOT WORKING;
 
