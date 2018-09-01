@@ -1,7 +1,7 @@
 /*
   mk64fx512.h Part of TRACER
 
-  Copyright (c) 2017 Raphaël Outhier
+  Copyright (c) 2018 Raphaël Outhier
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

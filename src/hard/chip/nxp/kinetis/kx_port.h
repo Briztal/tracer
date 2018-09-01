@@ -1,5 +1,5 @@
 /*
-  K64_PORT.h Part of TRACER
+  kx_port.h Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 

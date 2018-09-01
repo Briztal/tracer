@@ -1,7 +1,7 @@
 /*
   timer.h Part of TRACER
 
-  Copyright (c) 2017 Raphaël Outhier
+  Copyright (c) 2018 Raphaël Outhier
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
   aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
 
 #ifndef TIMER_H
 #define TIMER_H

@@ -1,7 +1,7 @@
 /*
-  K64_PORT.c Part of TRACER
+  kx_port.c Part of TRACER
 
-  Copyright (c) 2017 Raphaël Outhier, Paul Stoffergen, for its K64 macros;
+  Copyright (c) 2018 Raphaël Outhier, Paul Stoffergen, for its K64 macros;
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

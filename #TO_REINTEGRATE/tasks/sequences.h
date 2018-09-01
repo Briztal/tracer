@@ -26,7 +26,7 @@
 
 #include "stdbool.h"
 
-#include <kernel/scheduler/tasks/stask.h>
+#include "stask.h"
 
 /*
  * The sequence task type is composed of a task and of a sequence identifier;

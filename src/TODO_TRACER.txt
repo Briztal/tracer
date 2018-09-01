@@ -18,6 +18,7 @@
 //TODO MEM_DESC TRANSFER FUNCTION : PERFORM CHECKS AND MAKE BETTER FUNCTIONS FOR CONTIGUOUS MEMORY ZONES;
 
 //TODO STATICIFY PRIVATE FUNCTIONS
+
 /*
  *------------------------------------- Kernel tasks -------------------------------------
 

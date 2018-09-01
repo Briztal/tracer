@@ -55,6 +55,8 @@ CORE_INC :=
 #The util sources;
 CORE_SRCS :=
 
+#TODO SELECT LOG PROTOCOL
+
 #Include the core makefile;
 include src/core/Makefile
 
