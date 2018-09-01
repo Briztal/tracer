@@ -85,13 +85,3 @@ void panic_reset_log() {
 	log_index = 0;
 
 }
-
-
-
-//------------------------------------------------------ Log stack -----------------------------------------------------
-
-//Trigger a kernel panic;
-void kernel_panic() {
-
-
-}

@@ -16,6 +16,7 @@
 
 //Start the core timer;
 void core_timer_start() {
+	armv7m_systick_select_core_clock();
 	armv7m_systick_enable();
 }
 
@@ -39,10 +40,7 @@ void core_timer_int_disable() {
 void core_timer_int_set_frequency(uint32_t frequency) {
 
 	//TODO. FOR INSTANCE, ONLY THE 10MS IS LOADED;
-	//armv7m_systick_set_reload(armv7m_systick_get_10ms_reload());
-	armv7m_systick_set_reload(3);
-
-
+	armv7m_systick_set_reload(8000);
 
 }
 
@@ -51,10 +49,6 @@ void core_timer_int_set_frequency(uint32_t frequency) {
 extern void core_timer_int_set_priority(uint8_t priority) {
 
 	armv7m_set_systick_priority(priority);
-
-	core_log("prio : ");
-	core_log_int(priority);
-
 
 
 }
@@ -66,8 +60,5 @@ void core_timer_int_set_handler(void (*handler)()) {
 	//TODO ERROR or log if null;
 
 	nvic_set_exception_handler(NVIC_SYSTICK, handler);
-
-	core_log("prio : ");
-	core_log_int(handler);
 
 }

@@ -13,7 +13,6 @@
 
 #include <string.h>
 #include <core/core.h>
-#include <core/arch/arm/arm_v7m/arm_v7m.h>
 
 
 #define KERNEL_RAM_SIZE 2048
@@ -42,7 +41,9 @@ static uint8_t nb_active_threads;
 
 //The kernel's first process function;
 extern void __kernel_first_function(void *unused) {
-	core_error("SUUS");
+
+	while(1);
+
 }
 
 
@@ -73,6 +74,8 @@ static void kernel_syscall_handler() {
 
 static void kernel_init() {
 
+	//Disable interrupt management:
+	ic_disable_interrupts();
 
 	//Initialise the RAM manager;
 	ram_init();
@@ -80,7 +83,6 @@ static void kernel_init() {
 	//TODO SET MAIN STACK POINTER TO HIT THE KERNEL STACK;
 	//Initialise the kernel program memory;
 	kernel_memory_init();
-
 
 	//TODO INIT FILE SYSTEM;
 
@@ -124,6 +126,35 @@ void __program_start() {
 
 }
 
+
+
+//---------------------------------------------------- Kernel panic ---------------------------------------------------
+
+//The kernel panic function;
+void kernel_panic(const char *msg) {
+
+	//TODO NOOOOOOOOP, MAKE USE OF THE PANIC LOG STACK;
+
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+	//TODO THERE IS A KERNEL PANIC IN MEM.C !
+
+	_core_error(msg);
+	//TODO HALT;
+
+}
 
 //----------------------------------------------------- Kernel Init ----------------------------------------------------
 
@@ -172,8 +203,8 @@ static void kernel_scheduler_init() {
 		//1KiB stack available;
 		.stack_size = 1024,
 
-		//10ms activity;
-		.activity_time = 10,
+		//10ms activity;TODO
+		.activity_time = 3000,
 
 	};
 
@@ -298,48 +329,16 @@ static void kernel_start_execution() {
 	//Enable the interrupt;
 	core_timer_int_enable();
 
-
-	ic_enable_interrupts();
-
 	//Start the core timer;
 	core_timer_start();
 
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-	//TODO THE TIMER DOESN'T START, BUT INTERRUPT IS PENDEABLE. CHECK TIMER VALUE TO SEE IF IT MOVES...
-
-
-
-	while(1) {
-
-		core_log_int(armv7m_systick_get_count());
-
-		core_delay_ms(500);
-	}
-
-	//TODO TIMER NOT WORKING;
 
 	/*
 	 * Start execution;
 	 */
 
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
+	//Interrupts will be enabled at the end of the function;
 	core_enter_thread_mode(kernel_memory->stacks, &core_preemption_trigger);
 
 }
@@ -355,6 +354,9 @@ static void kernel_start_execution() {
  * @param sp : the previous stack pointer;
  * @return the the new stack pointer;
  */
+
+extern bool prc_process_terminated;
+
 
 static void *kernel_provide_new_stack(const volatile uint8_t thread_id, void *volatile sp) {
 
@@ -381,13 +383,28 @@ static void *kernel_provide_new_stack(const volatile uint8_t thread_id, void *vo
 	//If no more threads have to stop :
 	if (!nb_active_threads) {
 
+		//TODO IN SYSCALL;
+		if (prc_process_terminated) {
+
+			//Terminate the current process;
+			sched_terminate_prc(kernel_scheduler);
+
+			//Clear termination flag;
+			prc_process_terminated = false;
+
+		}
+
 		//Commit changes to the scheduler;
 		scheduler_commit(kernel_scheduler);
 
-		//TODO SYSTICK;
-
 		//Get the first process;
 		current_process = sched_get(kernel_scheduler);
+
+		//Update the duration until next preemption;
+		systick_set_process_duration(current_process->desc.activity_time);
+
+		//Update the number of active threads;
+		nb_active_threads = core_nb_threads;
 
 		//Update the flag;
 		process_updated = true;

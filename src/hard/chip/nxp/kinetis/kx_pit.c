@@ -3,7 +3,7 @@
 //
 
 
-#include "K64_PIT.h"
+#include "kx_pit.h"
 
 #include <kernel/syscall.h>
 

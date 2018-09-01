@@ -666,7 +666,6 @@ extern uint32_t _ram_highest;
 
 static void isr_generic_flash_handler(uint8_t i) {
 
-	core_error("SUUS MON ISR");
 
 	//Cache the isr handler;
 	void (*handler)(void) = irq_handlers[i];
@@ -688,7 +687,7 @@ static void isr_generic_flash_handler(uint8_t i) {
 //TODO OPTIMISATION FOR FLASH RELOCATION : ONLY COPY THE TWO FIST BYTES AND DO NOT DEFINE THOSE FUNCTIONS.
 
 //The handler link : a function that calls the handler link with a specific value;
-#define channel(i) static void isr_##i() {core_error("AH");isr_generic_flash_handler(i);}
+#define channel(i) static void isr_##i() {isr_generic_flash_handler(i);}
 
 //Define all isrs;
 #include "nvic_channel_list.h"

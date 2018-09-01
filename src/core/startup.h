@@ -6,7 +6,6 @@
 #define TRACER_STARTUP_H
 
 #include <stdint.h>
-#include "debug.h"
 
 const extern uint8_t _data_lma;
 extern uint8_t _data_vma;

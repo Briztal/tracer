@@ -18,7 +18,7 @@
 
 */
 
-#include "K64_UART.h"
+#include "kx_uart.h"
 
 
 #include <kernel/syscall.h>

@@ -63,6 +63,9 @@ uint32_t get_psp() {
 
 void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preemption_call)()) {
 
+	//Disable all interrupts;
+	ic_disable_interrupts();
+
 	//A static var will insure that the function is called at most once;
 	static bool entered = false;
 
@@ -87,9 +90,6 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 		return;
 
 	}
-
-	//Disable all interrupts;
-	ic_disable_interrupts();
 
 	static volatile void *volatile msp;
 	static volatile void *volatile psp;
@@ -134,11 +134,11 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
 
-	//Leave the critical section;
-	ic_enable_interrupts();
-
 	//Execute the preemption call;
 	(*prempt)();
+
+	//Enable interrupts;
+	ic_enable_interrupts();
 
 	//Wait eternally for the preemption to be triggered;
 	while(1);
@@ -272,6 +272,8 @@ void core_context_switcher() {
 
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
 	psp = (*core_stack_provider)(0, psp);
+
+	core_log("PREEMPTION");
 
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");

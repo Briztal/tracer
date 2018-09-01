@@ -26,7 +26,7 @@
 #include <core/core.h>
 
 
-bool process_terminated = false;
+bool prc_process_terminated = false;
 
 //---------------------------- Private functions ----------------------------
 
@@ -169,14 +169,15 @@ static void prc_exit() {
 	//TODO SYSCALL AND PREEMPTION TRIGGER;
 
 	//Mark the process terminated;
-	process_terminated = true;
+	prc_process_terminated = true;
 
 	//TODO SYSCALL KERNEL PREEMPT
+
 	//Require a context switch, process will be deleted;
 	core_preemption_trigger();
 
 	//Panic, preemption failed;
-	kernel_panic("process.c : prempt function reached. That should never happen.");
+	kernel_panic("process.c : post preempt state reached. That should never happen.");
 
 }
 

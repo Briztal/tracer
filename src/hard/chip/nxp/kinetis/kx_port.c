@@ -18,7 +18,7 @@
 
 */
 
-#include "K64_PORT.h"
+#include "kx_port.h"
 
 #include <kernel/syscall.h>
 

@@ -35,6 +35,9 @@ extern const uint8_t core_nb_threads;
  * 	- updates exception stacks;
  * 	- calls the provided function, that should trigger the preemption;
  * 	- make all threads run an infinite loop;
+ * 	- execute the preemption call;
+ * 	- enable interrupts;
+ * 	- loop;
  *
  * @param exception_stacks : stacks that must be used in case of interrupt;
  */
@@ -105,6 +108,7 @@ extern void core_timer_int_enable();
 
 //Disable the core interrupt;
 extern void core_timer_int_disable();
+
 
 //Set the core timer interrupt frequency. The core frequency must be known;
 extern void core_timer_int_set_frequency(uint32_t frequency);

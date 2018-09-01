@@ -20,7 +20,6 @@
 
 #include <kernel/scheduler/prc.h>
 #include <core/core.h>
-
 #include "systick.h"
 
 //---------------------- System tick ----------------------
@@ -47,12 +46,8 @@ volatile uint32_t task_duration = 0;
 
 void systick_tick() {
 
-	core_error("TIQ SAL BATAR");
-
     //Increment the ms/2 counter;
     systick_half_millis++;
-
-    core_log_int(systick_half_millis);
 
     //If the current task can pe preempted :
     if (task_duration) {

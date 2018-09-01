@@ -647,8 +647,11 @@ static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) 
 #define ARMV7_SYST_CSR_ENABLE ((uint32_t) (1 << 0))
 
 
+
+
 static inline void armv7m_systick_enable() {
 	*ARMV7_SYST_CSR |= ARMV7_SYST_CSR_ENABLE;
+
 }
 
 static inline void armv7m_systick_disable() {
@@ -663,6 +666,15 @@ static inline void armv7m_systick_int_enable() {
 static inline void armv7m_systick_int_disable() {
 	*ARMV7_SYST_CSR &= ~ARMV7_SYST_CSR_TICKINT;
 }
+
+static inline void armv7m_systick_select_core_clock() {
+	*ARMV7_SYST_CSR |= ARMV7_SYST_CSR_CLKSOURCE;
+}
+
+static inline void armv7m_systick_select_external_clock() {
+	*ARMV7_SYST_CSR &= ~ARMV7_SYST_CSR_CLKSOURCE;
+}
+
 
 
 
