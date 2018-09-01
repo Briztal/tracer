@@ -10,8 +10,6 @@
 //TODO RAM PAGES ALLOC;
 
 
-//TODO LE SCHEDULER PLANTE QUAND IL N'A PLUS DE PROCESS
-
 
 //TODO CHECK THAT KINETIS UART DRIVER NOT LAREADY INITALISED
 
@@ -23,10 +21,6 @@
 /*
  *------------------------------------- Kernel tasks -------------------------------------
 
-
-//URGENT :
-
-//TODO kERNEL MALLOC CLEAN. EXECUTE A FIND AND CORRECT EVERYTHING
 
 
 //LONG TERM :
