@@ -2,7 +2,6 @@
 // Created by root on 8/28/18.
 //
 
-#include <core/core.h>
 #include "string.h"
 
 const char alphabet[37] = "0123456789abcdefghijklmnopqrstuvwxyz";

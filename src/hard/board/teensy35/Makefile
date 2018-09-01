@@ -1,11 +1,11 @@
 
 #include the chip makefile;
-include src/core/chip/nxp/kinetis/mk64fx512/Makefile
+include src/hard/chip/nxp/kinetis/mk64fx512/Makefile
 
-T35_DIR := src/core/board/teensy35
+T35_DIR := src/hard/board/teensy35
 
 #Add the teensy folder to include path;
-COMPIL_INC += -I$(T35_DIR)
+HARD_INC += -I$(T35_DIR)
 
 #configurable options
 CFLAGS += -DUSB_SERIAL -DLAYOUT_US_ENGLISH

@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 
-#include <core/util/string.h>
+#include <util/string.h>
+
 
 
 //TODO REORDER

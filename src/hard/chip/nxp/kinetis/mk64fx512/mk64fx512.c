@@ -25,9 +25,11 @@
 
 #include <core/startup.h>
 #include <core/debug.h>
-#include <core/chip/nxp/kinetis/kx_wdog.h>
-#include <core/chip/nxp/kinetis/kx_mcg.h>
-#include <core/chip/nxp/kinetis/kx_sim.h>
+
+#include <chip/nxp/kinetis/kx_wdog.h>
+#include <chip/nxp/kinetis/kx_mcg.h>
+#include <chip/nxp/kinetis/kx_sim.h>
+
 #include <core/core.h>
 
 

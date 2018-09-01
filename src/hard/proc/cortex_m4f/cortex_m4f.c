@@ -23,8 +23,6 @@
 
 #include <core/mem/stack.h>
 #include <core/core.h>
-#include <core/arch/arm/arm_v7m/arm_v7m.h>
-#include <core/arch/arm/arm_v7m/nvic.h>
 
 static volatile uint32_t kill_me;
 
@@ -93,7 +91,7 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 
 	static volatile void *volatile msp;
 	static volatile void *volatile psp;
-	static volatile void (*volatile prempt)();
+	static void (*volatile prempt)();
 
 	//Save the preemption_call;
 	prempt = preemption_call;

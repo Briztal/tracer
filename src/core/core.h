@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include <core/mem/stack.h>
+#include <mem/stack.h>
 
 /*
  * The core library provides an abstraction layer over the core module.
