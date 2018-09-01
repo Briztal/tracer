@@ -21,7 +21,7 @@ void iobuffer_persist_insertion(iobuffer_t *iobuffer, size_t transfer_size);
 void iobuffer_persist_deletion(iobuffer_t *iobuffer, size_t transfer_size);
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 /*
  * iobuffer_create : creates an IOBuffer from a couple of channels, and registers itself to active ones;

@@ -41,7 +41,7 @@ struct K64_PIT_specs {
 
 struct K64_PIT_driver {
 
-	//The kernel driver base, referencing init and exit;
+	//The kernel driver base, referencing init and prempt;
 	struct kernel_driver driver;
 
 	//The hardware specs set;

@@ -18,11 +18,12 @@
 
 */
 
-#include "process.h"
+#include "prc.h"
 
 #include <kernel/krnl.h>
 
 #include <string.h>
+#include <core/core.h>
 
 
 bool process_terminated = false;
@@ -33,7 +34,7 @@ bool process_terminated = false;
 //The process execution function. Retrieves the execution data, executes the process function and returns;
 static void prc_exec();
 
-//The process exit function. Called when prc_entry returns; Calls the kernel for termination;
+//The process prempt function. Called when prc_entry returns; Calls the kernel for termination;
 static void prc_exit();
 
 
@@ -77,28 +78,19 @@ struct prc *prc_create(const struct prc_desc *const desc) {
 	struct prc *prc = kmalloc(sizeof(struct prc));
 
 	//Create the program memory, referenced in the kernel heap;
-	struct prog_mem *mem = prog_mem_create(desc->ram_size);
+	struct prog_mem *mem = prog_mem_create(desc->ram_size, false);
 
 	//Create stacks;
 	prog_mem_create_stacks(mem, desc->nb_threads, desc->stack_size);
 
 	//Create the initializer;
 	struct prc prc_init = {
-
-		//Initialise the head;
-		.head = {
-			.prev = prc,
-			.next = prc,
-		},
 		
 		//Copy the process descriptor; Args will be updated after;
 		.desc = *desc,
 
 		//Transfer the ownership of the memory;
 		.prog_mem = mem,
-
-		//The process has no task, it is terminated;
-		.state = PRC_TERMINATED,
 
 	};
 
@@ -181,10 +173,10 @@ static void prc_exit() {
 
 	//TODO SYSCALL KERNEL PREEMPT
 	//Require a context switch, process will be deleted;
-	core_trigger_preemption();
+	core_preemption_trigger();
 
 	//Panic, preemption failed;
-	kernel_panic("process.c : exit function reached. That should never happen.");
+	kernel_panic("process.c : prempt function reached. That should never happen.");
 
 }
 

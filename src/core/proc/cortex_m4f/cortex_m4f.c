@@ -21,13 +21,30 @@
 
 #include <stdint.h>
 
-#include <core/type/stack.h>
+#include <core/mem/stack.h>
 #include <core/core.h>
-#include <core/ic.h>
 #include <core/arch/arm/arm_v7m/arm_v7m.h>
 #include <core/arch/arm/arm_v7m/nvic.h>
 
+static volatile uint32_t kill_me;
 
+uint32_t get_msp() {
+
+	//Save the current main stack pointer in psp's cache;
+	__asm__ __volatile__ ("mrs %0, msp" : "=r" (kill_me):);
+
+	return kill_me;
+
+}
+
+uint32_t get_psp() {
+
+	//Save the current main stack pointer in psp's cache;
+	__asm__ __volatile__ ("mrs %0, psp" : "=r" (kill_me):);
+
+	return kill_me;
+
+}
 
 //---------------------------------------------------- Threads setup ---------------------------------------------------
 
@@ -41,9 +58,10 @@
  * 	- make all threads run an infinite loop;
  *
  * @param exception_stacks : stacks that must be used in case of interrupt;
+ * @param preemption_call : the function to execute in the executing thread when all other threads are idle;
  */
 
-void core_enter_thread_mode(struct core_stack **exception_stacks, void (*syscall)()) {
+void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preemption_call)()) {
 
 	//A static var will insure that the function is called at most once;
 	static bool entered = false;
@@ -73,32 +91,34 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*syscall
 	//Disable all interrupts;
 	ic_disable_interrupts();
 
-	static void *volatile msp;
-	static void *volatile psp;
-	static void (*volatile sysc)();
+	static volatile void *volatile msp;
+	static volatile void *volatile psp;
+	static volatile void (*volatile prempt)();
 
-	//Save the syscall;
-	sysc = syscall;
+	//Save the preemption_call;
+	prempt = preemption_call;
 
 	//Save the exception stack value in msp;
 	msp = exception_stacks[0]->sp;
 
-
 	//Save the current main stack pointer in psp's cache;
+	__asm__ __volatile__ ("mrs %0, msp" : "=r" (psp):);
+
+	//Execute an ISB;
+	__asm__ __volatile__ ("DMB");
+
+	//Update the main stack pointer so that exceptions occur in the exception stack;
 	__asm__ __volatile__ (\
-			"mrs %0, msp\n\t"::"r" (psp):"memory"
+			"msr msp, %0\n\t"::"r" (msp):"memory"
 	);
+
+	//Execute an ISB;
+	__asm__ __volatile__ ("ISB");
 
 
 	//Update the process stack pointer;
 	__asm__ __volatile__ (\
 			"msr psp, %0\n\t"::"r" (psp):"memory"
-	);
-
-
-	//Update the main stack pointer so that exceptions occur in the exception stack;
-	__asm__ __volatile__ (\
-			"msr msp, %0\n\t"::"r" (msp):"memory"
 	);
 
 	//Execute an ISB;
@@ -111,15 +131,14 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*syscall
         "msr control, r4\n\t":::"r4", "cc", "memory"
 	);
 
-
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
 
 	//Leave the critical section;
 	ic_enable_interrupts();
 
-	//Execute the syscall, to trigger the preemption;
-	(*syscall)();
+	//Execute the preemption call;
+	(*prempt)();
 
 	//Wait eternally for the preemption to be triggered;
 	while(1);
@@ -159,10 +178,7 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*syscall
 void core_init_stack(struct core_stack *stack, void (*function)(), void (*exit_loop)(), void *arg) {
 
 	//Reset the stack;
-	stack->sp = stack->sp_reset;
-
-	//Cast the pointer to a manipulable pointer;
-	uint32_t *sp4 = (uint32_t *)stack->sp;
+	uint32_t *sp4 = stack->sp_reset;
 
 	//Store the mode //TODO DOC
 	*(sp4 - 1) = 0x01000000;
@@ -218,10 +234,11 @@ extern void *(*core_stack_provider)(uint8_t, void *);
 
 void core_context_switcher() {
 
+
 	//TODO ONLY IN HANDLER MODE;
 
 	//A static variable will contain the temporary psp that we transmit to the stack provider;
-	static void *psp;
+	static void *volatile psp;
 
 	/*
 	 * This function happens in an interrupt basis. Will not happen during a critical section.
@@ -231,12 +248,14 @@ void core_context_switcher() {
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");
 
+
 	//As R0 is already saved in memory, we can use it;
 	__asm__ __volatile__ (\
 	        "mrs r0, psp \n\t"\
     	    "stmdb r0!, {r4 - r11}\n\t"\
-        	"vstmdb r0!, {s16 - s31}"\
+        	/*"vstmdb r0!, {s16 - s31}"\*/
 	 );
+
 
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
@@ -263,11 +282,11 @@ void core_context_switcher() {
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
 
-	//Unstack the context from the new stack; R0 will be updated at interrupt exit, we can use it;
+	//Unstack the context from the new stack; R0 will be updated at interrupt prempt, we can use it;
 	__asm__ __volatile__ (\
        		"mrs r0, psp \n\t"\
         	"ldmdb r0!, {r4 - r11} \n\t"\
-    	    "vldmdb r0!, {s16 - s31} "\
+    	    /*"vldmdb r0!, {s16 - s31} "\*/
     );
 
 	//Execute an ISB;
@@ -277,123 +296,3 @@ void core_context_switcher() {
 	__asm__ __volatile__("cpsie i");
 
 }
-
-
-/*
- * ------------------------------------- Systick -------------------------------------
- */
-
-/*
- * core_start_systick_timer :
- *  - sets the system timer reload value;
- *  - sets the function to execute at undf;
- *  - resets the undf flag;
- *  - enables the timer;
- *
- *  The timer must overflow every 1ms, and call the systick_tick function;
- *
- *  It must reset the process activity_time to 0ms to disable preemption;
- *
- *  the reload value is determined by :
- *
- *      timer_period_seconds = 1 / F_CPU seconds;
- *      systick_period_seconds = systick_period_ms / 1000;
- *
- *      nb_ticks = systick_period / timer_period = F_CPU * systick_period_ms / 1000
- *
- *      ex : FCPU = 120 E6 , for 1 ms systick period, nb_ticks = 120 E6 / 1000 = 120 E3
- */
-
-/*
-
-void core_systick_init() {
-
-    //Reset the systick process activity_time to disable preemption;
-    systick_set_process_duration(0);
-
-    //Set the systick function;
-    _VectorsRam[15] = systick_tick;
-
-    //Set the last byte of SHPR3 (systick prio) to 0, highest priority.
-    *((uint8_t *)&SCB_SHPR3 + 3) = 0;
-
-    //Set the systick priority to the highest priority level;
-    //NVIC_SET_PRIORITY(-1, 0);
-
-    //Update the reload value register;
-    SYST_RVR = (uint32_t) ((float) F_CPU / (float) 2000);
-
-    //Clear the systick flag;
-    SCB_ICSR &= ~SCB_ICSR_PENDSTSET;
-
-    //Enable the systick interrupt;
-    SYST_CSR |= SYST_CSR_ENABLE;
-
-}
-
-*/
-
-/**
- * core_execute_process : TODO;
- *
- * @param stack_ptr
- * @param function
- * @param arg
- */
-/*
-void core_execute_process_DO_NOT_USE_THIS(void *stack_ptr, void (*function)(void *), void *arg) {
-
-	//If we are in handler mode, ignore the request;
-	if (ic_in_handler_mode()) {//TODO
-
-		//Error, this function can't be executed in handler mode;
-		core_error("cortex_m4f : core_execute_process_DO_NOT_USE_THIS : called by a handler;");
-
-		//Never reached;
-		return;
-
-	}
-
-	//Disable all interrupts;
-	ic_disable_interrupts();
-
-	//As this function contains a context switch, we will copy our args in static variables;
-	static void (*volatile sf)(void *volatile);
-	static void *volatile sa;
-
-	//Cache the function and the arg in static vars;
-	sf = function;
-	sa = arg;
-
-
-	//Update the process stack pointer;
-	__asm__ __volatile__ (\
-			"msr psp, %0\n\t"::"r" (stack_ptr):"memory"
-	);
-
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-
-
-	//Update the control register to use PSP;//TODO UNPRIVILLEGE
-	__asm__ __volatile__(\
-        "mov r4, #2 \n\t"\
-        "msr control, r4\n\t":::"r4", "cc", "memory"
-	);
-
-
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-
-	//Leave the critical section;
-	ic_enable_interrupts();
-
-	//Execute the cached function with the cached arg;
-	(*sf)(sa);
-
-	//If the function returns, we must halt, call env has been altered;
-	core_error("cortex_m4f : core_execute_process_DO_NOT_USE_THIS : function returned;");
-
-}
-*/
-

@@ -21,8 +21,8 @@
 #include "sched.h"
 
 #include <kernel/krnl.h>
-#include <core/driver/ic.h>
 #include <string.h>
+#include <core/core.h>
 
 
 /**
@@ -35,6 +35,19 @@
  */
 
 extern void scheduler_sort_active_list(struct sched_data *sched, struct sched_element *new_elements);
+
+
+
+/*
+ * A simple round robin implementation;
+ */
+
+void scheduler_sort_active_list(struct sched_data *sched, struct sched_element *new_elements) {
+
+	//Simply concatenate new elements and active list;
+	list_concat((struct list_head *) new_elements, (struct list_head *) sched->active_list);
+
+}
 
 
 //-------------------------------------------------- Private functions -------------------------------------------------

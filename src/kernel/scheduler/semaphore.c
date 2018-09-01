@@ -79,7 +79,7 @@ void sem_wait(semaphore_t *semaphore) {
             //Add the sprocess pointer to the locked threads array;
 			vlarray_append_element(&semaphore->locked_threads, &process);
 
-            //Trigger the context switch; Will be effective after the critical section exit;
+            //Trigger the context switch; Will be effective after the critical section prempt;
             core_preempt_process();
 
         } else {

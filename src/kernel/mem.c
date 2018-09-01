@@ -7,7 +7,7 @@
 #include <core/debug.h>
 #include "mem.h"
 
-#include "core/ram.h"
+#include "core/mem/ram.h"
 
 #include "krnl.h"
 
@@ -27,7 +27,7 @@
  * @return a ref to the initialised struct, located in the kernel heap;
  */
 
-struct prog_mem *prog_mem_create_special(size_t ram_size, bool self_referenced) {
+struct prog_mem *prog_mem_create(size_t ram_size, bool self_referenced) {
 
 	//Allocate some memory in the RAM to contain the heap;
 	void *ram_block = ram_alloc(ram_size);

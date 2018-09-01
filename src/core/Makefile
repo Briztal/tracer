@@ -6,12 +6,15 @@ CORE_INC += -Isrc/core
 #Add general core sources;
 CORE_SRCS += core/core.c
 CORE_SRCS += core/debug.c
-CORE_SRCS += core/ram.c
+
+#Add memory management sources;
+CORE_SRCS += core/mem/ram.c
+CORE_SRCS += core/mem/heap.c
 
 
 #Add type sources;
 CORE_SRCS += core/type/list.c
-CORE_SRCS += core/type/heap.c
+CORE_SRCS += core/type/shared_fifo.c
 
 #Add util sources;
 CORE_SRCS += core/util/string.c

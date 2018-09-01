@@ -57,7 +57,7 @@ typedef struct {
 } rwbuffer_t;
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 //Initialise the buffer with direct access on both sides;
 rwbuffer_t *rwbuffer_initialise(size_t size);

@@ -116,7 +116,7 @@ typedef struct {
 
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 //Create a dataset host, with the owning [length] elements of [element_size] bytes; Concurrency not supported;
 void dshost_initialise(dshost_t *dshost, size_t data_element_size, size_t nb_elements, const mutex_t *mutex);

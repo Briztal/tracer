@@ -95,14 +95,14 @@ static void update_handler(const uint16_t channel, void (*const handler)()) {
 	//If the vector table is located in flash, no null pointer check required :
 	if (!vector_table_in_ram) {
 
-		//Update the correct non-system handler;
-		irq_handlers[channel + 16] = handler;
+		//Update the correct handler;
+		irq_handlers[channel] = handler;
 
 	} else {
 		//If the vector table is located in RAM, a null pointer check is required;
 
 		//If the handler is null, save the empty handler; If not, save the handler;
-		irq_handlers[channel + 16] = (handler) ? handler : nop_function;
+		irq_handlers[channel] = (handler) ? handler : nop_function;
 	}
 
 }
@@ -211,7 +211,7 @@ uint8_t ic_get_interrupt_priority(uint16_t channel, uint8_t priority) {
  * @param handler : the handler. Can be null if interrupt must be disabled;
  */
 
-void ic_set_interrupt_handler(const uint8_t non_system_channel, void (*const handler)()) {
+void ic_set_interrupt_handler(const uint16_t non_system_channel, void (*const handler)()) {
 
 	//If the channel is invalid :
 	if (non_system_channel >= 240) {
@@ -579,6 +579,53 @@ void nvic_reset_exception_handler(enum nvic_exception channel) {
 }
 
 
+
+//----------------------------------------------------- Preemption -----------------------------------------------------
+
+//Set the handler of the preemption exception;
+extern void core_preemption_set_handler(void (*handler)(void)) {
+	nvic_set_exception_handler(NVIC_PENDSV, handler);
+}
+
+//Set the priority of the preemption exception;
+extern void core_preemption_set_priority(uint8_t priority) {
+	armv7m_set_pendsv_priority(priority);
+}
+
+//Enable the preemption exception;
+extern void core_preemption_enable() {
+	//PendSV is always enabled;
+}
+
+//Trigger the preemption;
+extern void core_preemption_trigger() {
+	armv7m_set_pendsv_pending();
+}
+
+
+//----------------------------------------------------- Syscall -----------------------------------------------------
+
+//Set the handler of the syscall exception;
+extern void core_syscall_set_handler(void (*handler)(void)) {
+	nvic_set_exception_handler(NVIC_SVC, handler);
+}
+
+//Set the priority of the syscall exception;
+extern void core_syscall_set_priority(uint8_t priority) {
+	armv7m_set_svcall_priority(priority);
+}
+
+//Enable the syscall exception;
+extern void core_syscall_enable() {
+	//Always enabled;
+}
+
+//Trigger the syscall;
+extern void core_syscall_trigger() {
+	__asm__ __volatile ("");//TODO SVC ??? NOT WORKING...
+}
+
+
 //TODO SEPARATE AGAIN;
 //TODO SEPARATE AGAIN;
 //TODO SEPARATE AGAIN;
@@ -594,6 +641,7 @@ void nvic_reset_exception_handler(enum nvic_exception channel) {
 
 
 #include <stdint.h>
+#include <core/core.h>
 
 
 /*
@@ -618,6 +666,8 @@ extern uint32_t _ram_highest;
 
 static void isr_generic_flash_handler(uint8_t i) {
 
+	core_error("SUUS MON ISR");
+
 	//Cache the isr handler;
 	void (*handler)(void) = irq_handlers[i];
 
@@ -638,7 +688,7 @@ static void isr_generic_flash_handler(uint8_t i) {
 //TODO OPTIMISATION FOR FLASH RELOCATION : ONLY COPY THE TWO FIST BYTES AND DO NOT DEFINE THOSE FUNCTIONS.
 
 //The handler link : a function that calls the handler link with a specific value;
-#define channel(i) static void isr_##i() {isr_generic_flash_handler(i);}
+#define channel(i) static void isr_##i() {core_error("AH");isr_generic_flash_handler(i);}
 
 //Define all isrs;
 #include "nvic_channel_list.h"

@@ -579,7 +579,7 @@ configure_transmission_layer(const struct K64_UART_hw *const hw_specs, const str
 }
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 /*
  * K64_UART_start : configures the transmission stack, creates streams, and starts the UART;

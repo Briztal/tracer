@@ -28,15 +28,8 @@
 #include <core/debug.h>
 
 
-//------------------------------------- Base Timer -------------------------------------
-
-/*
- * A basic timer contains one state register (enabled / disabled),
- * 	a value register, and a conversion factor;
- */
 
 struct timer_interface {
-
 
 	//Update the base frequency;
 	void (*const set_base_frequency)(struct timer_interface *, uint32_t base_frequency);
@@ -83,7 +76,7 @@ struct timer_interface {
 	bool (*const int_flag_set)(struct timer_interface *);
 
 	//Is the interrupt flag enabled ?
-	void (*const clr_int_flag)(struct timer_interface *);
+	void (*const int_flag_clr)(struct timer_interface *);
 
 
 	//The function to destruct the timer instance;
@@ -171,7 +164,7 @@ static inline bool timer_int_flag_set(struct timer_interface *timer) {
 
 //Disable the reload interrupt;
 static inline void timer_clr_int_flag(struct timer_interface *timer) {
-	(*(timer->clr_int_flag))(timer);
+	(*(timer->int_flag_clr))(timer);
 }
 
 //Delete the timer interface;

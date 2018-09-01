@@ -26,8 +26,6 @@
 
 #include <kernel/mem.h>
 
-#include "kernel/scheduler/tasks/stask.h"
-
 
 /*
  * The process library provides functions create, reset and delete scheduler processes;

@@ -364,7 +364,7 @@ bool K64_PIT_init(struct K64_PIT_driver *driver, void *unused) {
 		.update_handler = (void (*)(struct timer_interface *, void (*)())) &K64_PIT_update_handler,
 
 		.int_flag_set = (bool (*)(struct timer_interface *)) &K64_PIT_flag_set,
-		.clr_int_flag = (void (*)(struct timer_interface *)) &K64_PIT_clear_flag,
+		.int_flag_clr = (void (*)(struct timer_interface *)) &K64_PIT_clear_flag,
 
 		.deleter = (void (*)(const struct timer_interface *)) K64_PIT_timer_interface_delete,
 

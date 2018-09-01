@@ -51,8 +51,9 @@
 
 #include <core/type/list.h>
 
-#include <type/containers/concurrent/shared_fifo.h>
-#include "process.h"
+#include <core/type/shared_fifo.h>
+
+#include "prc.h"
 
 
 struct sched_element {

@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include <core/type/stack.h>
+#include <core/mem/stack.h>
 
 /*
  * The core library provides an abstraction layer over the core module.
@@ -39,7 +39,7 @@ extern const uint8_t core_nb_threads;
  * @param exception_stacks : stacks that must be used in case of interrupt;
  */
 
-void core_enter_thread_mode(struct core_stack **exception_stacks, void (*syscall)());
+extern void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preemption_call)());
 
 
 //Initialise the stack for initialisation. Implemented by the proc lib;
@@ -49,20 +49,71 @@ extern void core_init_stack(struct core_stack *stack, void (*function)(), void (
 extern void *core_get_init_arg();
 
 
-//----------------------------------------------------- Preemption -----------------------------------------------------
+//--------------------------------------------------- Context Switch ---------------------------------------------------
+
+//The core context switcher; Should be set as the preemption handler for a preemption to occur;
+extern void core_context_switcher();
 
 //Updates the stack provider;
 void core_set_stack_provider(void *(*new_provider)(uint8_t, void *));
 
-//Trigger the preemption;
-extern void core_trigger_preemption();
 
-//The core context switcher;
-void core_context_switcher();
+//----------------------------------------------------- Preemption -----------------------------------------------------
+
+//Set the handler of the preemption exception;
+extern void core_preemption_set_handler(void (*)(void));
+
+//Set the priority of the preemption exception;
+extern void core_preemption_set_priority(uint8_t priority);
+
+//Enable the preemption exception;
+extern void core_preemption_enable();
+
+//Trigger the preemption;
+extern void core_preemption_trigger();
+
+
+//----------------------------------------------------- Syscall -----------------------------------------------------
+
+//Set the handler of the syscall exception;
+extern void core_syscall_set_handler(void (*)(void));
+
+//Set the priority of the syscall exception;
+extern void core_syscall_set_priority(uint8_t priority);
+
+//Enable the syscall exception;
+extern void core_syscall_enable();
+
+//Trigger the syscall;
+extern void core_syscall_trigger();
 
 
 //------------------------------------------------------- Systick ------------------------------------------------------
 
+/*
+ * The core library provides a system timer, with basic functions.
+ */
+
+//Start the core timer;
+extern void core_timer_start();
+
+//Stop the core timer;
+extern void core_timer_stop();
+
+//Enable the core interrupt;
+extern void core_timer_int_enable();
+
+//Disable the core interrupt;
+extern void core_timer_int_disable();
+
+//Set the core timer interrupt frequency. The core frequency must be known;
+extern void core_timer_int_set_frequency(uint32_t frequency);
+
+//Set the core timer interrupt priority;
+extern void core_timer_int_set_priority(uint8_t priority);
+
+//Set the core timer interrupt handler;
+extern void core_timer_int_set_handler(void (*handler)());
 
 
 
@@ -89,7 +140,8 @@ extern void core_log(const char *log);
 //Convert an int to its string value and send it;
 void core_log_int(uint32_t integer);
 
-
+//Convert an int to its hex string value and send it;
+void core_log_hex(uint32_t integer);
 
 
 //---------------------------------------------- General Interrupt control ---------------------------------------------
@@ -172,11 +224,32 @@ void ic_set_interrupt_priority(uint16_t channel, uint8_t priority);
 //Returns the priority to the required non-system interupt channel;
 uint8_t ic_get_interrupt_priority(uint16_t channel, uint8_t priority);
 
+//Sets the handler of the required channel to 0, isr will return immediately;
+void ic_set_interrupt_handler(uint16_t channel, void (*handler)(void));
+
 //Resets the handler of the required channel to 0, isr will return immediately;
 void ic_reset_interrupt_handler(uint16_t channel);
 
 //Assert if a handler is currently in execution;
 bool ic_in_handler_mode();
+
+
+//-------------------------------------------------- Critical sections -------------------------------------------------
+
+//Enter a critical section;
+void ic_enter_critical_section();
+
+//Leave a critical section;
+void ic_leave_critical_section();
+
+//Force leaving a critical section. Unsafe, must be executed by the kernel only;
+void ic_force_critical_section_exit();
+
+
+//-------------------------------------------------- spinlocks -------------------------------------------------
+
+//TODO
+
 
 
 //------------------------------------------------------- Error --------------------------------------------------------

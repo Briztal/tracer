@@ -13,3 +13,4 @@ CFLAGS += -mthumb -MMD -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LDFLAGS +=  --specs=nano.specs -mcpu=cortex-m4 -mthumb
 LDFLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
+CORE_SRCS += core/proc/cortex_m4f/cortex_m4f.c

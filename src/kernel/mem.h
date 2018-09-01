@@ -11,9 +11,9 @@
 
 #include <stddef.h>
 
-#include <core/type/stack.h>
+#include <core/mem/stack.h>
 
-#include "core/type/heap.h"
+#include "core/mem/heap.h"
 
 
 /*

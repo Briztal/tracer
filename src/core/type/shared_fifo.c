@@ -4,8 +4,7 @@
 
 #include "shared_fifo.h"
 
-#include <kernel/syscall.h>
-#include <core/driver/ic.h>
+#include <core/core.h>
 
 
 /**

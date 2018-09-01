@@ -117,11 +117,6 @@ void nvic_set_exception_handler(enum nvic_exception channel, void (*handler)());
 
 
 
-//TODO IN CORE_IC
-//Update a non-system interrupt handler;
-void nvic_set_interrupt_handler(uint8_t channel, void (*handler)());
-
-
 //---------------------------------------------------- Handler reset ----------------------------------------------------
 //TODO RESET HEADERS
 

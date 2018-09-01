@@ -33,11 +33,6 @@ char *itoa(uint32_t value, char *buffer, size_t buffer_size, const uint8_t radix
 
 	while (1) {
 
-		//While the value is not null, iterate
-		if ((value == 0) || (buffer_size == 0)) {
-			return dst;
-		}
-
 		//Focus on the next char;
 		dst--;
 
@@ -53,6 +48,10 @@ char *itoa(uint32_t value, char *buffer, size_t buffer_size, const uint8_t radix
 		//Decrement the size;
 		buffer_size--;
 
+		//While the value is not null, iterate
+		if ((value == 0) || (buffer_size == 0)) {
+			return dst;
+		}
 
 	}
 

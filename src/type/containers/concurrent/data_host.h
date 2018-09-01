@@ -38,7 +38,7 @@ typedef struct {
 } dhost_t;
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 //Initialise the data host structure;
 void dhost_initialise(dhost_t *dhost, size_t size, mutex_t *mutex);
@@ -47,7 +47,7 @@ void dhost_initialise(dhost_t *dhost, size_t size, mutex_t *mutex);
 //Delete the data host structure;
 void dhost_delete(dhost_t *dhost);
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 //Is the data storage empty ? Purely indicative, unreliable result, fail-safe, concurrent safe;
 bool dhost_empty(const dhost_t *dhost);

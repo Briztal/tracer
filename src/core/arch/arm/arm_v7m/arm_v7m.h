@@ -80,7 +80,7 @@ static inline uint16_t armv7m_get_nb_interrupts() {
 #define ARMV7_ICSR_PENDSTCLR ((uint32_t) (1 << 25))
 
 
-//If set, a pending exception will be serviced on exit from the debug halt state;
+//If set, a pending exception will be serviced on prempt from the debug halt state;
 #define ARMV7_ICSR_ISRPREEMPT ((uint32_t) (1 << 23))
 
 //Indicates if an external configurable (NVIC generated) interrupt is pending;
@@ -647,6 +647,27 @@ static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) 
 #define ARMV7_SYST_CSR_ENABLE ((uint32_t) (1 << 0))
 
 
+static inline void armv7m_systick_enable() {
+	*ARMV7_SYST_CSR |= ARMV7_SYST_CSR_ENABLE;
+}
+
+static inline void armv7m_systick_disable() {
+	*ARMV7_SYST_CSR &= ~ARMV7_SYST_CSR_ENABLE;
+}
+
+
+static inline void armv7m_systick_int_enable() {
+	*ARMV7_SYST_CSR |= ARMV7_SYST_CSR_TICKINT;
+}
+
+static inline void armv7m_systick_int_disable() {
+	*ARMV7_SYST_CSR &= ~ARMV7_SYST_CSR_TICKINT;
+}
+
+
+
+
+
 //----------------- RVR - RW : Systick Reload Value Register -----------------
 
 #define ARMV7_SYST_RVR ((volatile uint32_t *) 0xE000E014)
@@ -654,9 +675,24 @@ static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) 
 #define ARMV7_SYST_RVR_MAX ((uint32_t ) 0x00FFFFFF)
 
 
+static inline void armv7m_systick_set_reload(uint32_t reload24b) {
+	*ARMV7_SYST_RVR = reload24b & ARMV7_SYST_RVR_MAX;
+}
+
+
 //----------------- CVR - RW : Systick Current Value Register -----------------
 
 #define ARMV7_SYST_CVR 	((volatile uint32_t *) 0xE000E018)
+
+
+static inline void armv7m_systick_clear_countflag() {
+	*ARMV7_SYST_CVR;
+}
+
+static inline uint32_t armv7m_systick_get_count() {
+	return *ARMV7_SYST_CVR;
+}
+
 
 
 //----------------- CVR - RO : Systick Calibration Register -----------------
@@ -668,6 +704,19 @@ static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) 
 #define ARMV7_SYST_CALIB_SKEW  ((uint32_t) (1 << 30))
 #define ARMV7_SYST_CALIB_TENMS_MASK ((uint32_t) 0x00FFFFFF)
 
+
+
+static inline uint32_t armv7m_systick_get_10ms_reload() {
+	return (*ARMV7_SYST_CALIB & ARMV7_SYST_CALIB_TENMS_MASK);
+}
+
+static inline bool armv7m_systick_10_ms_accurate() {
+	return (bool) (*ARMV7_SYST_CALIB & ARMV7_SYST_CALIB_SKEW);
+}
+
+static inline bool armv7m_systick_noref() {
+	return (bool) (*ARMV7_SYST_CALIB & ARMV7_SYST_CALIB_NOREF);
+}
 
 //TODO;
 

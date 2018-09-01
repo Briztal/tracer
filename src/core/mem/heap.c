@@ -779,7 +779,7 @@ void *heap_calloc(struct heap_head *heap, size_t size) {
  * @return the lowest data address of the allocated block;
  */
 
-void *heap_ialloc(struct heap_head *heap, size_t size, void *initializer) {
+void *heap_ialloc(struct heap_head *heap, size_t size, const void *initializer) {
 
 	//If the size is null, return 0;
 	if (!size) {

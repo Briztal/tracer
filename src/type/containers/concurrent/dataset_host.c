@@ -34,7 +34,7 @@ dshost_element_t *dshost_queue_remove_first(mutex_t *mutex, dshost_queue_t *queu
 void dshost_queue_insert_element(mutex_t *mutex, dshost_queue_t *queue, dshost_element_t *new_element);
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 
 

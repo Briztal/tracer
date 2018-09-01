@@ -105,7 +105,7 @@ typedef struct iobuffer_t {
 } iobuffer_t;
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 //Initialise the buffer with direct access on both sides;
 void iobuffer_create(size_t size, iochannel_t *input_channel, iochannel_t *output_channel);

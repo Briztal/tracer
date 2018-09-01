@@ -10,7 +10,6 @@
 #include <stdint.h>
 
 #include <stddef.h>
-#include <core/core.h>
 
 //A list head contains two pointers to list heads;
 struct list_head {

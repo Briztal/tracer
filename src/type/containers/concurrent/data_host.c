@@ -9,7 +9,7 @@
 #include <kernel/syscall.h>
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 /*
  * dhost_initialise : allocates memory to contain a data element, initialises flags and data structure;
@@ -68,7 +68,7 @@ void dhost_delete(dhost_t *const dhost) {
 }
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 /*
  * dhost_data_available : asserts if the data storage owns its data and if it is not initialised;;

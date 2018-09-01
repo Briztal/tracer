@@ -7,7 +7,7 @@
 #include "rwbuffer.h"
 
 
-//----------------------------------------------------- Init - exit ----------------------------------------------------
+//----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 /*
  * rwbuffer_initialise : allocates memory for the buffer itself, and allocates and initialise the rwbuffer;

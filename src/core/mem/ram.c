@@ -5,8 +5,8 @@
 
 #include "ram.h"
 
-#include "core/type/heap.h"
-#include "core.h"
+#include "heap.h"
+#include "core/core.h"
 
 #include <core/debug.h>
 
