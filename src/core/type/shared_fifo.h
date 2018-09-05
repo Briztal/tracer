@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include <core/type/list.h>
+#include <util/type.h>
 
 /*
  * The shared fifo encapsulates a list, and wraps concerned functions in critical sections;

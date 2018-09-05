@@ -26,6 +26,11 @@
 #include <stdint.h>
 
 #include <stddef.h>
+//---------------------------------------------------- Basic types ----------------------------------------------------
+
+//TODO
+
+//---------------------------------------------------- Simple lists ----------------------------------------------------
 
 //A list head contains two pointers to list heads;
 struct list_head {
@@ -35,7 +40,6 @@ struct list_head {
 
 };
 
-//---------------------------------------------------- Simple lists ----------------------------------------------------
 
 /*
  * Simple lists are structs whose first field (offset 0) is a list head. They can be casted into a list head;
@@ -119,18 +123,40 @@ static inline void list_concat(struct list_head *h0, struct list_head *h1) {
 /**
  * list_remove : Remove the list head from the rest of the list; head will be linked to itself;
  */
-static inline void list_remove(struct list_head *l) {
+static inline void list_remove(struct list_head *head) {
 
 	//First, cache the list neighbors;
-	struct list_head *prev = l->prev, *next = l->next;
+	struct list_head *prev = head->prev, *next = head->next;
 
 	//Link prev and next;
 	__list_link(prev, next);
 
 	//Link l with itself;
-	__list_link(l, l);
+	__list_link(head, head);
 
 }
+
+
+/**
+ * list_concat_ref : concatenates @h0 and the list head referenced by h1.
+ * 	If h1 is null, h1 will now reference h0;
+ *
+ * @param h0 : the list head to concat on the left;
+ * @param h1 : the reference to the list head to concat on the right;
+ */
+
+void list_concat_ref(struct list_head *h0, struct list_head **h1);
+
+/**
+ * list_remove_ref : when we must remove an element from a list with a particular element referenced, these functions
+ * 	can be used;
+ *
+ * 	It updates @ref to 0 when @head is the only element of the list, or to @head's successor or predecessor;
+ */
+
+void list_remove_ref_next(struct list_head *head, struct list_head **ref);
+
+void list_remove_ref_prev(struct list_head *head, struct list_head **ref);
 
 
 //--------------------------------------------------- Extended lists ---------------------------------------------------

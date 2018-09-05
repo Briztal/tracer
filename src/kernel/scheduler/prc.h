@@ -22,7 +22,7 @@
 #define TRACER_THREADMANAGER_H
 
 
-#include <core/type/list.h>
+#include <util/type.h>
 
 #include <kernel/mem.h>
 

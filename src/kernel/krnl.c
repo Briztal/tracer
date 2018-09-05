@@ -61,6 +61,8 @@ extern void __kernel_first_function(void *unused) {
 
 }
 
+extern void __create_drivers();
+
 
 //------------------------------------------------------- Private ------------------------------------------------------
 
@@ -105,6 +107,9 @@ static void kernel_init() {
 
 	//Initialise the kernel scheduler;
 	kernel_scheduler_init();
+
+	//Create drivers;
+	__create_drivers();
 
 	//Start the process execution;
 	kernel_start_execution();

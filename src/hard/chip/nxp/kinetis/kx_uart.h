@@ -220,7 +220,7 @@ void K64_UART_delete(struct K64_UART_driver_t *);
 //Initialise the UART; The internal network interface is created;
 void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_config_t *config);
 
-//De-initialise the UART; The internal network interface is deleted;
+//De-initialise the UART; The internal network interface is to_delete;
 void K64_UART_stop(const struct K64_UART_driver_t *driver_data);
 
 

@@ -29,106 +29,105 @@
 #include <core/debug.h>
 
 
-
 struct timer_interface {
 
 	//Update the base frequency;
-	void (*const set_base_frequency)(struct timer_interface *, uint32_t base_frequency);
+	void (*const set_base_frequency)(uint32_t base_frequency);
 
 
 	//Start the timer;
-	void (*const start)(struct timer_interface *);
+	void (*const start)();
 
 	//Stop the timer;
-	void (*const stop)(struct timer_interface *);
+	void (*const stop)();
 
 	//Is the timer started ?;
-	bool (*const started)(struct timer_interface *);
+	bool (*const started)();
 
 
 	//Set the timer's count;
-	void (*const set_count)(struct timer_interface *, float period);
+	void (*const set_count)(float period);
 
 	//Get the timer's count;
-	float (*const get_count)(struct timer_interface *);
+	float (*const get_count)();
 
 
 	//Set the reload interrupt value;
-	void (*const set_ovf_value)(struct timer_interface *, float period);
+	void (*const set_ovf_value)(float period);
 
 	//Get the reload interrupt value;
-	float (*const get_ovf_value)(struct timer_interface *);
+	float (*const get_ovf_value)();
 
 
 	//Enable the reload interrupt;
-	void (*const enable_int)(struct timer_interface *);
+	void (*const enable_int)();
 
 	//Enable the reload interrupt;
-	void (*const disable_int)(struct timer_interface *);
+	void (*const disable_int)();
 
 	//Is the reload interrupt enabled ?
-	bool (*const int_enabled)(struct timer_interface *);
+	bool (*const int_enabled)();
 
 	//Update the interrupt handler;
-	void (*const update_handler)(struct timer_interface *, void (*handler)());
+	void (*const update_handler)(void (*handler)());
 
 
 	//Is the interrupt flag enabled ?
-	bool (*const int_flag_set)(struct timer_interface *);
+	bool (*const int_flag_set)();
 
 	//Is the interrupt flag enabled ?
-	void (*const int_flag_clr)(struct timer_interface *);
+	void (*const int_flag_clr)();
 
 
 	//The function to destruct the timer instance;
-	void (*deleter)(const struct timer_interface *);
+	void (*deleter)();
 
 
 };
 
 //Initialise the timer. Disable timer, interrupt and flag, set the base frequency, and reset count and reload;
-void timer_init(struct timer_interface *timer, uint32_t base_frequency);
+void timer_init(struct timer_interface *, uint32_t base_frequency);
 
 //Stop the timer, stop the interrupt, reset counts, reset the handler to 0;
-void timer_reset(struct timer_interface *timer);
+void timer_reset((struct timer_interface *);
 
 
 //Set the base frequency of the timer;
-static inline void timer_set_base_frequency(struct timer_interface *timer, uint32_t base_frequency) {
+static inline void timer_set_base_frequency(timer, uint32_t base_frequency) {
 	(*(timer->set_base_frequency))(timer, base_frequency);
 }
 
 //Start the timer;
-static inline void timer_start(struct timer_interface *timer) { (*(timer->start))(timer); }
+static inline void timer_start(timer) { (*(timer->start))(timer); }
 
 //Start the timer;
-static inline void timer_stop(struct timer_interface *timer) { (*(timer->stop))(timer); }
+static inline void timer_stop(timer) { (*(timer->stop))(timer); }
 
 //Is the timer started;
-static inline bool timer_started(struct timer_interface *timer) { return (*(timer->started))(timer); }
+static inline bool timer_started(timer) { return (*(timer->started))(timer); }
 
 
 //Set the timer count value;
-static inline void timer_set_count(struct timer_interface *timer, float period) {
+static inline void timer_set_count(timer, float period) {
 	(*(timer->set_count))(timer, period);
 
 }
 
 //Set the timer count value;
-static inline float timer_get_count(struct timer_interface *timer) {
+static inline float timer_get_count(timer) {
 
 	return (*(timer->get_count))(timer);
 }
 
 
 //Set the timer reload value;
-static inline void timer_set_ovf_value(struct timer_interface *timer, float period) {
+static inline void timer_set_ovf_value(timer, float period) {
 
 	(*(timer->set_ovf_value))(timer, period);
 }
 
 //Set the timer count value;
-static inline float timer_get_ovf_value(struct timer_interface *timer) {
+static inline float timer_get_ovf_value(timer) {
 
 	return (*(timer->get_ovf_value))(timer);
 }
@@ -137,39 +136,39 @@ static inline float timer_get_ovf_value(struct timer_interface *timer) {
 
 
 //Enable the reload interrupt;
-static inline void timer_enable_int(struct timer_interface *timer) {
+static inline void timer_enable_int(timer) {
 	(*(timer->enable_int))(timer);
 }
 
 //Disable the reload interrupt;
-static inline void timer_disable_int(struct timer_interface *timer) {
+static inline void timer_disable_int(timer) {
 	(*(timer->disable_int))(timer);
 }
 
 //Disable the reload interrupt;
-static inline bool timer_int_enabled(struct timer_interface *timer) {
+static inline bool timer_int_enabled(timer) {
 	return (*(timer->int_enabled))(timer);
 }
 
 //Set the timer count value;
-static inline void timer_update_handler(struct timer_interface *timer, void (*handler)()) {
+static inline void timer_update_handler(timer, void (*handler)()) {
 
 	(*(timer->update_handler))(timer, handler);
 }
 
 
 //Enable the reload interrupt;
-static inline bool timer_int_flag_set(struct timer_interface *timer) {
+static inline bool timer_int_flag_set(timer) {
 	return (*(timer->int_flag_set))(timer);
 }
 
 //Disable the reload interrupt;
-static inline void timer_clr_int_flag(struct timer_interface *timer) {
+static inline void timer_clr_int_flag(timer) {
 	(*(timer->int_flag_clr))(timer);
 }
 
 //Delete the timer interface;
-static inline void timer_delete(struct timer_interface *timer) { (*(timer->deleter))(timer); }
+static inline void timer_delete(timer) { (*(timer->deleter))(timer); }
 
 
 #endif

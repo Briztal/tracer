@@ -69,6 +69,9 @@ struct kernel_driver {
 
 };
 
+//Register a driver;
+void register_driver(const char *name, struct kernel_driver *driver);
+
 
 /**
  * driver_init : shortcut for driver initialisation. Checks that the driver is not already initialised;
@@ -105,6 +108,26 @@ static inline void driver_exit(struct kernel_driver *driver) {
 
 
 }
+
+
+/**
+ * driver_exit : shortcut for driver de-initialisation. Checks that the driver is initialised;
+ * @param driver : the driver to initialise;
+ */
+
+static inline void driver_delete(struct kernel_driver *driver) {
+
+	if (driver->initialised) {
+		driver_exit(driver);
+	}
+
+	//Delete the driver;
+	(*(driver->delete))(driver);
+
+
+}
+
+
 
 
 #endif //TRACER_DRIVER_H

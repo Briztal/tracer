@@ -1,7 +1,7 @@
 /*
-  string.h Part of TRACER
+  driver.c Part of TRACER
 
-  Copyright (c) 2017 Raphaël Outhier
+  Copyright (c) 2018 Raphaël Outhier
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,23 +18,18 @@
 
 */
 
-#ifndef TRACER_STRING_H
-#define TRACER_STRING_H
-
-#include <stdbool.h>
-
-#include <stdint.h>
-
-#include <stddef.h>
-
-//Returns the length of the string, or the max if superior;
-size_t strlen_safe(const char *str, size_t max_lengh);
-
-//Copy the string and null terminate. src can be not null terminated, will not deadloop;
-void strcopy_safe(char *dst, const char *src, size_t length);
-
-//TODO DOC
-char *itoa(uint32_t value, char *buffer, size_t buffer_size, uint8_t radix);
+#include <kernel/fs/dfs.h>
+#include "driver.h"
 
 
-#endif //TRACER_STRING_H
+//Register a driver;
+void register_driver(const char *name, struct kernel_driver *driver) {
+
+	//Create a file representing the driver;
+	dfs_create(name, DFS_DRIVER, driver);
+
+}
+
+
+
+#endif //TRACER_DRIVER_H

@@ -31,11 +31,15 @@
 
 //------------------------------------------- Heap management -------------------------------------------
 
+
+
+//------------------------------------------- Heap management -------------------------------------------
+
 //The malloc function to use across the code;
 void *syscall_malloc(size_t size);
 
 //A shortcut to allocate and copy from a memory zone;
-void *syscall_malloc_copy(size_t size, const void *initialiser);
+void *syscall_ialloc(size_t size, const void *initialiser);
 
 //The realloc function to use across the code;
 void *syscall_realloc(void *, size_t size);

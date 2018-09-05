@@ -173,7 +173,7 @@ static void prc_exit() {
 
 	//TODO SYSCALL KERNEL PREEMPT
 
-	//Require a context switch, process will be deleted;
+	//Require a context switch, process will be to_delete;
 	core_preemption_trigger();
 
 	//Panic, preemption failed;

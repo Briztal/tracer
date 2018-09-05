@@ -256,7 +256,7 @@ void scheduler_commit(struct sched_data *sched) {
 
 		}
 
-		//If the removed element can be deleted safely, delete it;
+		//If the removed element can be to_delete safely, delete it;
 		sched_delete_element(removed);
 
 	} else if (sched->stop_required) {

@@ -1,6 +1,8 @@
 
 //----------------------------- Prioritary -----------------------------
 
+//TODO HEAP FREE CHECK THAT THE BLOCK BELONGS TO THE HEAP;
+
 //TODO CORE CLOCK MANAGER
 
 //TODO ARMV7 SYSTICK REAL FREQUENCY UPDATE USING CLOCK MANAGER

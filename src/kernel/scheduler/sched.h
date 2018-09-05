@@ -49,7 +49,7 @@
  * 		Those processes will still be inactive, until they are read and scheduled by the select function;
  */
 
-#include <core/type/list.h>
+#include <util/type.h>
 
 #include <core/type/shared_fifo.h>
 
@@ -135,7 +135,7 @@ void sched_resume_prc(struct sched_data *, struct sched_element *);
 //Set the current process in the stopped state, and return its ref;
 struct sched_element *sched_stop_prc(struct sched_data *);
 
-//Terminate the current process; Will be deleted at next select call;
+//Terminate the current process; Will be to_delete at next select call;
 void sched_terminate_prc(struct sched_data *);
 
 

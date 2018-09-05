@@ -20,11 +20,68 @@
 
 #include "string.h"
 
-const char alphabet[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
+#include <string.h>
+
+
+/**
+ * strlen_safe : determines the length of the provided char array; If the length is superior to the max, it returns the
+ * 	max;
+ *
+ * @param str : the string whose length must be determined;
+ * @param max_lengh : the maximal length of the string;
+ * @return the length of the string, or the max if greater;
+ */
+
+size_t strlen_safe(const char *str, size_t max_lengh) {
+
+	//Initialise the length;
+	size_t len = 0;
+
+	while (len < max_lengh) {
+
+		//If we found the null termination char :
+		if (!(str++)) {
+
+			//Return the length;
+			return len;
+
+		}
+
+		//If not, increase the length;
+		len++;
+
+	}
+
+	//If no null termination was found, return the max size;
+	return max_lengh;
+
+}
+
+
+/**
+ * strcopy_safe : copies src into dst, and ensure that dst is null terminated;
+ * @param dst : the location where src must be copied;
+ * @param src : the string to copy;
+ * @param length : the length to copy. Doesn't include the null termination character;
+ */
+void strcopy_safe(char *dst, const char *src, size_t length) {
+
+	//Copy the string;
+	memcpy(dst, src, length);
+
+	//Null terminate;
+	dst[length] = 0;
+
+}
+
+
+
 
 
 //TODO DOC;
 char *itoa(uint32_t value, char *buffer, size_t buffer_size, const uint8_t radix) {
+
+	static const char alphabet[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	//As we will build the string reversed, focus on the last case of the buffer;
 	char *dst = buffer + buffer_size;

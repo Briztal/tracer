@@ -28,7 +28,7 @@
 #include "heap.h"
 #include "core/core.h"
 
-#include <core/type/list.h>
+#include <util/type.h>
 #include <core/debug.h>
 
 

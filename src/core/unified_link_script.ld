@@ -24,7 +24,9 @@ INCLUDE memory_map.ld
 
 /*
  * The linking script will provide the following constants :
- *  - _data_lma     :   the load address of the data region, in FLASG
+ *  - _emod_start   :   the start address of kernel embedded modules structs in FLASH;
+ *  - _emod_end     :   the end address of kernel embedded modules structs in FLASH;
+ *  - _data_lma     :   the load address of the data region, in FLASH
  *  - _data_vma     :   the lowest address of the data region in RAM;
  *  - _end_data     :   the highest address of the data region in RAM;
  *  - _bss_vma      :   the lowest address of the bss region in RAM;
@@ -32,8 +34,6 @@ INCLUDE memory_map.ld
  *  - _ram_lowest   :   the lowest bound of the ram's available zone;
  *  - _ram_highest  :   the highest bound of the ram's available zone;
  */
-
-/*TODO : */
 
 
 SECTIONS {
@@ -62,6 +62,17 @@ SECTIONS {
         . = ALIGN(4);
         *(.text)
     } > FLASH
+
+
+    _emod_start = .;
+
+    /*The embedded modules section contains kernel modules to load at init;*/
+    .embedded_modules : {
+        . = ALIGN(4);
+        *(.embedded_modules)
+     } > FLASH
+
+     _emod_end = .;
 
 
     /*The rodata section contains constant data (const, strings, ...);*/

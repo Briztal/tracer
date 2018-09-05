@@ -21,8 +21,6 @@
 
 //#include "kinetis.h"
 
-#include "mk64fx512.h"
-
 #include <core/startup.h>
 #include <core/debug.h>
 
@@ -97,7 +95,7 @@ void core_delay_us(uint32_t us_counter) {
 
 	while (us_counter--) {
 		//Count to;
-		for (volatile uint32_t i = 2; i--;);
+		for (volatile uint32_t i = 3; i--;);
 	}
 
 }
@@ -133,6 +131,7 @@ struct kinetis_PORT_driver_t *PORT;
 /*
  * The mk64fx512 comprises 4 pits;
  */
+
 #define PIT_MCR_REG (void *)0x40037000
 #define PIT_REGISTERS (void *)0x40037100
 #define PIT_NB_TIMERS 4
@@ -140,6 +139,47 @@ struct kinetis_PORT_driver_t *PORT;
 
 //Declare the PIT driver;
 struct kinetis_PIT_driver *PIT;
+
+
+/*
+ * Solution 1 :
+ *
+ * 	A function to initialise. No code duplication;
+ *
+ * 	The driver will communicate with the kernel, to register interfaces, whose names depend on the implementation
+ * 	-> the abstract driver must own a copy of all arguments;
+ *
+ * 	-> the generic driver will allocate and store data in driver structs, those can be variable -> more use of
+ * 	-> More RAM occupation, code larger;
+ *
+ * 	-> must provide a copy at exit time too;
+ *
+ * 	-> must generate a function for each outside call
+ *
+ * 	Ex : PIT :
+ * 		- Call to the abstract driver, allocates data dynamically in a struct;
+ * 		-
+ *
+ *
+ */
+void pit_init() {
+
+
+	//Create the specs types;
+	types kinetis_PIT_specs PIT_specs = {
+		.MCR = PIT_MCR_REG,
+		.nb_PITs = PIT_NB_TIMERS,
+		.first_area = PIT_REGISTERS,
+		.spacing = PIT_SPACING,
+		.int_channels = int_channels,
+		.clock_frequency = F_BUS,
+	};
+
+	//Define PIT chip;
+	PIT = (types kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
+
+
+}
 
 
 /*
