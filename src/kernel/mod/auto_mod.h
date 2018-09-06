@@ -39,7 +39,7 @@ struct auto_mod {
 	void (*const init)();
 
 	//The module's exit function; Must free any resource owned by the module;
-	void (*const exit)();
+	bool (*const exit)();
 
 	//The module's name; has
 	const char *const name;

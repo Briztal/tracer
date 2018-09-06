@@ -2,80 +2,21 @@
 // Created by root on 9/4/18.
 //
 
-#include "mod.h"
+#include "auto_mod.h"
 
+#include <kernel/struct/nlist.h>
 
-#include <util/type.h>
-
-#include <kernel/krnl.h>
-
-#include <util/string.h>
-#include <string.h>
-
-
-//---------------------------------------------------- Module struct ---------------------------------------------------
-
-struct mod {
-
-	//Modules are linked together;
-	struct list_head head;
-
-	//The module's name;
-	const char *const name;
-
-	//The module's entry function;
-	void (*const init)();
-
-	//The module's exit function;
-	void (*const exit)();
-
-};
+#include <core/core.h>
 
 
 //--------------------------------------------------- Modules globals --------------------------------------------------
 
 #define MOD_NAME_MAX_LENGTH 32
 
-//The modules list reference;
-static struct mod *modules;
-
-
-//---------------------------------------------------- Module search ---------------------------------------------------
-
-
-/**
- * mod_find : returns a reference to the module that has the required name, if it exists, 0 if not;
- * @param name : the name to search for;
- */
-
-static struct mod *mod_find(const char *const name) {
-
-	//Cache the first module;
-	struct mod *const first = modules, *module = first;
-
-	//If no modules are registered, stop here;
-	if (!first) {
-		return 0;
-	}
-
-	//For each registered module :
-	do {
-
-		//If the module matched :
-		if (!strcmp(module->name, name)) {
-
-			//Return the module's reference;
-			return module;
-
-		}
-
-		//Stop when all modules have been evaluated, or a match was found;
-	} while (module != first);
-
-	//Fail, all modules have been evaluated;
-	return 0;
-
-}
+static struct nlist modules = {
+	.elements = 0,
+	.name_max_length = MOD_NAME_MAX_LENGTH,
+};
 
 
 //------------------------------------------------- Modules management -------------------------------------------------
@@ -90,93 +31,87 @@ static struct mod *mod_find(const char *const name) {
 
 void mod_add(const char *name, void (*init)(), void (*exit)) {
 
+	//Add the exit function to the list;
+	bool added = nlist_add(&modules, name, exit);
 
-	//If another module has this name :
-	if (mod_find(name)) {
+	//If the add succeeded :
+	if (added) {
 
-		//Do nothing;
-		return;
+		//Call the initialisation function;
+		(*init)();
 
 	}
-
-	//Allocate some memory for the module;
-	struct mod *module = kmalloc(sizeof(struct mod));
-
-	//Get the length of the string;
-	size_t len = strlen_safe(name, MOD_NAME_MAX_LENGTH);
-
-	//Allocate some data for the name;
-	char *heap_name = kmalloc(len+1);
-
-	//Initialise the name;
-	strcopy_safe(heap_name, name, len);
-
-	//Create the module initializer;
-	struct mod module_init = {
-
-		//Link to itself;
-		.head = {
-			.next = module,
-			.prev = module,
-		},
-
-		//Transfer the ownership of the heap name;
-		.name = heap_name,
-
-		//Save the exit function;
-		.exit = exit,
-
-	};
-
-	//Initialise the module;
-	memcpy(module, &module_init, sizeof(struct mod));
-
-	//Link the module to the referenced list;
-	list_concat_ref((struct list_head *) module, (struct list_head **) modules);
-
-	//Call the initialisation function;
-	(*init)();
 
 }
 
 
 /**
- * mod_remove : serches for the required module, and if it exists :
- * 	- removes it from the list;
- * 	- frees its name of the heap;
- * 	- frees its struct;
+ * mod_remove : serches for the required module, and if it exists, removes it and executes its exit function;
  *
  * @param name : the name to search for;
  */
 
-void mod_remove(const char *name) {
+void mod_remove(const char *const name) {
 
-	struct mod *module = mod_find(name);
+	//Remove the module from the list, and cache its exit function;
+	bool (*exit)() = nlist_remove(&modules, name);
 
-	//If the module is null, stop here;
-	if (!module)
-		return;
+	//If the module was found and removed, and has a valid exit function :
+	if (exit) {
 
-	//The module exists, we can delete it;
+		//Execute it;
+		bool cleanup = (*exit)();
 
-	//Remove the module from the modules list;
-	list_remove_ref_next((struct list_head *) module, (struct list_head **) modules);
+		//If the module didn't manage to clean all its resources :
+		if (!cleanup) {
 
-	//Call the module's exit function;
-	(*(module->exit))();
+			//Reinsert the module, as it is still active;
+			nlist_add(&modules, name, exit);
 
-	//Delete the module's heap name;
-	kfree((void *) module->name);
+			//TODO LOG;
 
-	//Delete the module struct;
-	kfree(module);
+		}
+
+	}
 
 }
 
 
-//Load all automatically loadable modules;
+//The start address of kernel embedded modules structs in FLASH;
+extern uint32_t _emod_start;
+
+//The end address of kernel embedded modules structs in FLASH;
+extern uint32_t _emod_end;
+
+
+/**
+ * mod_autoload : loads all modules placed in the embedded modules area;
+ *
+ * 	This section is defined in the unified link script and resides in flash;
+ */
+
 void mod_autoload() {
 
+	//The [&_emod_start : &_emod_end] should contain only auto_mod structs. If size validity check fails :
+	if ((&_emod_end - &_emod_start) % sizeof (struct auto_mod)) {
 
+		//Core error;
+		core_error("mod.c : mod_autoload : embedded modules array bounds invalid;");
+
+	}
+
+	//Cache the array to the right type;
+	struct auto_mod *auto_module = (struct auto_mod *)&_emod_start;
+
+	//For each module :
+	while ((void *)auto_module < &_emod_end) {
+
+		//Load the module;
+		mod_add(auto_module->name, auto_module->init, auto_module->exit);
+
+		//Focus on the next module;
+		auto_module++;
+
+	}
 
 }

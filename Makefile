@@ -1,8 +1,6 @@
 
 #---------------------------------------------------- Initialisation ---------------------------------------------------
 
-#--------------------------- General Init ---------------------------
-
 #All sources will be built in ./build.
 BUILDDIR = build
 
@@ -17,61 +15,30 @@ NAME := $(BUILDDIR)/$(PROJECT_NAME)
 CFLAGS := -Wall -Os -g
 LDFLAGS := -Wall -Wl,--gc-sections -Os
 
+#The core include and sources lists are modified by the hardware makefile; They must be defined here;
+CORE_INC :=
+CORE_SRCS :=
+
 
 #--------------------------------------------------- Utilities Module --------------------------------------------------
 
-#The util include path;
+#The util include path; Available to all sources;
 UTIL_INC :=
-
-#The util sources;
-UTIL_SRCS :=
-
 
 #Include the core makefile, to build the core library appropriately;
 include src/util/Makefile
 
-#Build the objects set from sources and reroute to build dir;
-UTIL_OBJS := $(foreach src, $(UTIL_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
+#--------------------------------------------------- Core Module ---------------------------------------------------
 
-#The general core object build rule : depends on the related source file, located in the src directory;
-#	It changes the directory to the build dir;
+#The hardware module selects the memory map link script;
+LDSCRIPT_MMAP_DIR :=
 
-$(BUILDDIR)/util/%.o: src/util/%.c
-	@echo "[CC]\t$@"
-	@mkdir -p "$(dir $@)"
-	@$(CC) $(CFLAGS) -o $@ -c $<
-
-
-#The core library depends on all core objects mentionned by the core makefile and its subs;
-util : $(UTIL_OBJS)
-
-
-#----------------------------------------------------- Core Module -----------------------------------------------------
-
-#The util include path;
-CORE_INC :=
-
-#The util sources;
-CORE_SRCS :=
-
-#TODO SELECT LOG PROTOCOL
-
-#Include the core makefile;
+#Include the hard makefile, to build the hard library appropriately;
 include src/core/Makefile
 
-#Build the objects set from sources and reroute to build dir;
-CORE_OBJS := $(foreach src, $(CORE_SRCS:.c=.o), $(BUILDDIR)/$(src))
-
-#The general core compilation rule;
-$(BUILDDIR)/core/%.o: src/core/%.c
-	@echo "[CC]\t$@"
-	@mkdir -p "$(dir $@)"
-	@$(CC) $(CFLAGS) $(CORE_INC) -o $@ -c $<
-
-
-#The core library depends on sys lib, and all core objects mentionned by the core makefile and its subs;
-core : sys $(CORE_OBJS)
+#Now that the core makefile has updated link files, add appropriate options to the link flags;
+LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 
 #---------------------------------------------------- Kernel Module ----------------------------------------------------
@@ -106,51 +73,7 @@ $(BUILDDIR)/kernel/%.o: src/kernel/%.c
 # - the core library;
 # - the std drivers library;
 # - all kernel source files;
-kernel : core std $(KERNEL_OBJS)
-
-
-
-#--------------------------------------------------- Hardware Module ---------------------------------------------------
-
-#The hardware module will form two lists.
-
-#The sys list, comprising system drivers, used by the core module;
-SYS_SRCS :=
-
-#The std list, comprising standard drivers, used by the kernel module;
-STD_LIST :=
-
-#The hardware include list.
-HARD_INC :=
-
-
-#The hardware module will also select the memory map link script;
-LDSCRIPT_MMAP_DIR :=
-
-
-#Include the hard makefile, to build the hard library appropriately;
-include src/hard/Makefile
-
-
-#Now that the core makefile has updated link files, add appropriate options to the link flags;
-LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
-
-
-#Build both objects set from sources and reroute to build dir;
-SYS_OBJS := $(foreach src, $(SYS_SRCS:.c=.o), $(BUILDDIR)/$(src))
-STD_OBJS := $(foreach src, $(STD_SRCS:.c=.o), $(BUILDDIR)/$(src))
-
-
-#The general hard compilation rule;
-$(BUILDDIR)/hard/%.o: src/hard/%.c
-	@echo "[CC]\t$@"
-	@mkdir -p "$(dir $@)"
-	@$(CC) $(CFLAGS) $(HARD_INC) $(CORE_INC) -o $@ -c $<
-
-
-#Both libs depend on their respective object sets;
-sys : $(SYS_OBJS)
-std : $(STD_OBJS)
+kernel : core $(KERNEL_OBJS)
 
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
@@ -166,9 +89,9 @@ std : $(STD_OBJS)
 
 
 # The elf rule. Depends on core lib.
-elf: core kernel util
+elf: core kernel util $(KERNEL_DEP)
 	@echo "[LD]\ttracer.elf"
-	@$(CC) $(LDFLAGS) -o $(NAME).elf $(SYS_OBJS) $(STD_OBJS) $(CORE_OBJS) $(KERNEL_OBJS) $(UTIL_OBJS)
+	$(CC) $(LDFLAGS)  $(CORE_O)  $(KERNEL_OBJS) $(UTIL_OBJS) -o $(NAME).elf
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!

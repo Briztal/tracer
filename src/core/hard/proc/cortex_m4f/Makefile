@@ -1,5 +1,5 @@
 #The cortex M4 is based on the armv7 architecture;
-include src/hard/arch/arm/arm_v7m/Makefile
+include src/core/hard/arch/arm/arm_v7m/Makefile
 
 CPUARCH := cortex-m4
 
@@ -10,4 +10,4 @@ CFLAGS += -mthumb -MMD -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 LDFLAGS +=  --specs=nano.specs -mcpu=cortex-m4 -mthumb
 LDFLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
-SYS_SRCS += hard/proc/cortex_m4f/cortex_m4f.c
+CORE_SRCS += core/hard/proc/cortex_m4f/cortex_m4f.c

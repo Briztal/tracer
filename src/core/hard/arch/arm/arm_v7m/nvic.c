@@ -599,22 +599,22 @@ void nvic_reset_exception_handler(enum nvic_exception channel) {
 //----------------------------------------------------- Preemption -----------------------------------------------------
 
 //Set the handler of the preemption exception;
-extern void core_preemption_set_handler(void (*handler)(void)) {
+void core_preemption_set_handler(void (*handler)(void)) {
 	nvic_set_exception_handler(NVIC_PENDSV, handler);
 }
 
 //Set the priority of the preemption exception;
-extern void core_preemption_set_priority(uint8_t priority) {
+void core_preemption_set_priority(uint8_t priority) {
 	armv7m_set_pendsv_priority(priority);
 }
 
 //Enable the preemption exception;
-extern void core_preemption_enable() {
+void core_preemption_enable() {
 	//PendSV is always enabled;
 }
 
 //Trigger the preemption;
-extern void core_preemption_trigger() {
+void core_preemption_trigger() {
 	armv7m_set_pendsv_pending();
 }
 
@@ -622,22 +622,22 @@ extern void core_preemption_trigger() {
 //----------------------------------------------------- Syscall -----------------------------------------------------
 
 //Set the handler of the syscall exception;
-extern void core_syscall_set_handler(void (*handler)(void)) {
+void core_syscall_set_handler(void (*handler)(void)) {
 	nvic_set_exception_handler(NVIC_SVC, handler);
 }
 
 //Set the priority of the syscall exception;
-extern void core_syscall_set_priority(uint8_t priority) {
+void core_syscall_set_priority(uint8_t priority) {
 	armv7m_set_svcall_priority(priority);
 }
 
 //Enable the syscall exception;
-extern void core_syscall_enable() {
+void core_syscall_enable() {
 	//Always enabled;
 }
 
 //Trigger the syscall;
-extern void core_syscall_trigger() {
+void core_syscall_trigger() {
 	__asm__ __volatile ("");//TODO SVC ??? NOT WORKING...
 }
 
@@ -667,9 +667,9 @@ extern void core_syscall_trigger() {
  * 	- The array of IRQ handlers, provided by the nvic;
  */
 
-extern void __entry_point();
-extern uint32_t _ram_highest;
-//extern void (*irq_handlers[])(void);
+void __entry_point();
+uint32_t _ram_highest;
+//void (*irq_handlers[])(void);
 
 
 
@@ -681,7 +681,6 @@ extern uint32_t _ram_highest;
  */
 
 static void isr_generic_flash_handler(uint8_t i) {
-
 
 	//Cache the isr handler;
 	void (*handler)(void) = irq_handlers[i];

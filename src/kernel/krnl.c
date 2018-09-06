@@ -28,6 +28,7 @@
 
 #include <string.h>
 #include <core/core.h>
+#include <kernel/mod/mod.h>
 
 
 #define KERNEL_RAM_SIZE 2048
@@ -108,8 +109,8 @@ static void kernel_init() {
 	//Initialise the kernel scheduler;
 	kernel_scheduler_init();
 
-	//Create drivers;
-	__create_drivers();
+	//Initialise embedded drivers;
+	mod_autoload();
 
 	//Start the process execution;
 	kernel_start_execution();

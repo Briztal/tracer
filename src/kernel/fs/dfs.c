@@ -11,7 +11,8 @@ struct dfs_file *first_file;
 
 
 //Add a file in the file system;
-void dfs_create(const char *const name, const enum dfs_file_type type, void *const resource) {
+void dfs_create(const char *const name, const enum dfs_file_type type,
+				const struct dfs_file_operations *const operations, void *const resource) {
 
 	//Check that the file is not null;
 	if (!resource) {
@@ -32,8 +33,6 @@ void dfs_create(const char *const name, const enum dfs_file_type type, void *con
 			.next = file,
 		},
 
-		//Not to_delete for instance;
-		.to_delete = false,
 
 		//Duplicate the name;
 		.name = kialloc(strlen(name), name),
@@ -43,6 +42,9 @@ void dfs_create(const char *const name, const enum dfs_file_type type, void *con
 
 		//Save the type;
 		.type = type,
+
+		//Reference the operations structure;
+		.operations = operations,
 
 		//Transfer the ownership of the resource;
 		.resource = resource,
@@ -149,23 +151,24 @@ void dfs_delete(struct dfs_file *file) {
 
 
 //Delete a file from the file system;
-void dfs_remove(const char *name) {
+bool dfs_remove(const char *name) {
 
 	//Search for the required file;
 	struct dfs_file *file = dfs_search(name);
 
 	//If the file doesn't exist, stop here;
-	if (!file) return;
+	if (!file) return true;
 
-	//If the file is open, mark it for deletion;
+	//If the file is close, mark it for deletion and fail; file will not be openable anymore;
 	if (file->file_open) {
 
-		file->to_delete = true;
+		return false;
 
 	} else {
 
 		//If not, delete it;
 		dfs_delete(file);
+		return true;
 
 	}
 
@@ -191,6 +194,9 @@ struct dfs_file *dfs_open(const char *name) {
 	//Mark the file opened;
 	file->file_open = true;
 
+	//Call the open operation;
+	file_op_open(file);
+
 	//Return the file;
 	return file;
 
@@ -208,15 +214,8 @@ void dfs_close(struct dfs_file *file) {
 
 	}
 
-	//If the file is to delete :
-	if (file->to_delete) {
-
-		//Delete it;
-		dfs_delete(file);
-
-		return;
-
-	}
+	//Call the close operation;
+	file_op_close(file);
 
 	//If not, mark it closed;
 	file->file_open = false;

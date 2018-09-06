@@ -137,50 +137,6 @@ struct kinetis_PORT_driver_t *PORT;
 #define PIT_NB_TIMERS 4
 #define PIT_SPACING (size_t)0x10
 
-//Declare the PIT driver;
-struct kinetis_PIT_driver *PIT;
-
-
-/*
- * Solution 1 :
- *
- * 	A function to initialise. No code duplication;
- *
- * 	The driver will communicate with the kernel, to register interfaces, whose names depend on the implementation
- * 	-> the abstract driver must own a copy of all arguments;
- *
- * 	-> the generic driver will allocate and store data in driver structs, those can be variable -> more use of
- * 	-> More RAM occupation, code larger;
- *
- * 	-> must provide a copy at exit time too;
- *
- * 	-> must generate a function for each outside call
- *
- * 	Ex : PIT :
- * 		- Call to the abstract driver, allocates data dynamically in a struct;
- * 		-
- *
- *
- */
-void pit_init() {
-
-
-	//Create the specs types;
-	types kinetis_PIT_specs PIT_specs = {
-		.MCR = PIT_MCR_REG,
-		.nb_PITs = PIT_NB_TIMERS,
-		.first_area = PIT_REGISTERS,
-		.spacing = PIT_SPACING,
-		.int_channels = int_channels,
-		.clock_frequency = F_BUS,
-	};
-
-	//Define PIT chip;
-	PIT = (types kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
-
-
-}
-
 
 /*
  * --------------------------------------- UART ---------------------------------------

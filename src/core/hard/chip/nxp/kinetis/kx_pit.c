@@ -27,12 +27,12 @@
 #include <kernel/timer/timer.h>
 #include <kernel/mod/auto_mod.h>
 
-
+/*
 //Prerequisites
 
 #define __MCR__ (void *)0x40037000
 #define __NB_CHANNELS__ 4
-
+*/
 
 #define    MCR            ((volatile uint32_t *) __MCR__)
 #define    NB_CHANNELS        ((uint8_t)__NB_CHANNELS__)
@@ -68,8 +68,8 @@
 //CHANNEL_DECLARE will declare the channel struct and the channel init function;
 #define CHANNEL_DECLARE(i) \
 	struct timer_interface kx_pit_channel_##i;\
-	void kx_pit_channel_exit_##i();\
-	void kx_pit_channel_init_##i();
+	void kx_pit_channel_init_##i();\
+	bool kx_pit_channel_exit_##i();
 
 //Declare each channel;
 MULTI_MACRO(__NB_CHANNELS__, CHANNEL_DECLARE);
@@ -105,12 +105,6 @@ static void init() {
 
 	//Macro not used anymore;
 	#undef TIMER_INIT
-
-
-	//TODO REGISTER TO THE KERNEL;
-
-	//TODO CORE_INTERRUPTS SETUP;
-
 }
 
 
@@ -120,24 +114,30 @@ static void init() {
  * @param driver : the driver to delete;
  */
 
-void exit() {
+static bool exit() {
 
 	//TIMER_INIT calls a channel's exit function;
-	#define TIMER_INIT(i) kx_pit_channel_exit_##i();
+	#define TIMER_EXIT(i)\
+		 {if (!kx_pit_channel_exit_##i()) \
+				return false;}\
 
 	//Initialise each channel;
-	MULTI_MACRO(__NB_CHANNELS__, TIMER_INIT);
+	MULTI_MACRO(__NB_CHANNELS__, TIMER_EXIT);
 
 	//Macro not used anymore;
-	#undef TIMER_INIT
+	#undef TIMER_EXIT
 
-	//TODO UNREGISTER TO THE KERNEL;
 
-	//TODO CORE_INTERRUPTS CLEANUP;
+	//If all channels have been cleaned up properly :
+
 	//Disable clocks for all PITs;
 	*MCR = 0x02;
 
+	//Disable clock gating;
 	sim_disable_PIT_clock_gating();
+
+	//Complete;
+	return true;
 
 }
 

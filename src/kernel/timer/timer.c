@@ -20,6 +20,7 @@
 
 #include "timer.h"
 
+
 /**
  * timer_init :
  * 	- stops the timer;
@@ -71,6 +72,7 @@ void timer_init(struct timer_interface *timer, uint32_t base_frequency) {
  *
  * @param timer
  */
+
 void timer_reset(struct timer_interface *timer) {
 
 	//Stop the timer;
@@ -90,7 +92,5 @@ void timer_reset(struct timer_interface *timer) {
 
 	//Set the ovf to 1 period unit;
 	timer_set_ovf_value(timer, 1);
-
-
 
 }

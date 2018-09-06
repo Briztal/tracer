@@ -1,18 +1,9 @@
 
 #include the chip makefile;
-include src/hard/chip/nxp/kinetis/mk64fx512/Makefile
-
-T35_DIR := src/hard/board/teensy35
-
-#Add the teensy folder to include path;
-HARD_INC += -I$(T35_DIR)
-
-#configurable options
-CFLAGS += -DUSB_SERIAL -DLAYOUT_US_ENGLISH
+include src/core/hard/chip/nxp/kinetis/mk64fx512/Makefile
 
 #Define the tools path for flashing;
 TOOLSPATH := $(abspath $(CURDIR)/$(T35_DIR)/tool-teensy)
-
 
 hex: elf
 	@echo "[HEX]\tracer.hex"

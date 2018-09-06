@@ -480,7 +480,7 @@ void K64_PORT_get_pin_config(const struct K64_PORT_driver_t *const driver,
 	 *  Compiler optimised;
 	 */
 
-	//If the output is in open drain :
+	//If the output is in close drain :
 	if (config_register & PORT_PCR_ODE) {
 		config->output_mode = PORT_OPEN_DRAIN;
 	} else if (config_register & PORT_PCR_DSE) {

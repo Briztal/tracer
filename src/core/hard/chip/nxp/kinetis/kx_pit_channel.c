@@ -7,9 +7,9 @@
 
 #include <stdbool.h>
 
-#include <core/core.h>
 
 #include <kernel/timer/timer.h>
+#include <kernel/fs/dfs.h>
 
 
 
@@ -40,12 +40,15 @@
  * 
  */
 
+/*
+
 //PREREQUISITES :
 #define __CHANNEL_ID__ 			0
 #define __INT_CHANNEL__ 		0
 #define __REGISTERS_START__ 	0
 #define __REGISTERS_SPACING__ 	1024
 
+ */
 
 //Determine the address of the registers area;
 #define REGISTERS ((volatile uint32_t *)(__REGISTERS_START__ + (__CHANNEL_ID__ * __REGISTERS_SPACING__)))
@@ -66,11 +69,25 @@
 
 
 
-//--------------------------------------------------- Static code ---------------------------------------------------
+
+//Close the timer resource : will neutralise the interface;
+static void close();
+
+//Transmit the timer interface;
+static bool interface(void *data, size_t data_size);
+
+
+static struct dfs_file_operations file_operations = {
+	.close = &close,
+	.interface = &interface,
+};
+
+//-------------------------------------------------- Timer Operations --------------------------------------------------
 
 /*
  * All variables and methods in this section are private. No one can access them outside this translation unit;
  */
+
 
 //The ratio tics/period;
 static float period_to_tics;
@@ -84,7 +101,23 @@ static float max_period;
 static void set_base_frequency(uint32_t frequency) {
 
 	//Determine the tics/period ratio;
-	float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+
+	float _period_to_tics = ((float) 24000000) / ((float) frequency);
 
 	//Determine the maximal period;
 	float _max_period = ((float) (uint32_t) -1) / period_to_tics;
@@ -214,7 +247,6 @@ static void clear_flag() {
 
 
 
-
 //---------------------------------------------------- Hidden code -----------------------------------------------------
 
 /*
@@ -260,10 +292,25 @@ struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) 
 };
 
 
+//Two macros to determine the string name;
+#define STR(i) #i
+#define SNM(name) STR(NM(name))
+
+//Create the name;
+const char *const pit_name = SNM(pit_);
+
+//No more use for these macros;
+#undef STR(i)
+#undef SNM(name)
+
+
 /**
  * 	kx_pit_channel_init_i : initialises the channel; Called by the pit module's init function
  */
 void NM(kx_pit_channel_init)() {
+
+	//Register a file with no content leading to our operations;
+	dfs_create(pit_name, DFS_INTERFACE, &file_operations, 0);
 
 	//Initialise the timer;
 	timer_init(&NM(kx_pit_channel), 1000);
@@ -275,14 +322,32 @@ void NM(kx_pit_channel_init)() {
 /**
  * 	kx_pit_channel_exit_i : initialises the channel; Called by the pit module's init function
  */
-void NM(kx_pit_channel_exit)() {
+bool NM(kx_pit_channel_exit)() {
 
-	//Reset the timer;
-	timer_reset(&NM(kx_pit_channel));
+	//Attempt to remove the file;
+	if (dfs_remove(pit_name)) {
 
-	//TODO IC CLEANUP (PRIO, HANDLER);
+		//If success, reset the timer;
+		timer_reset(&NM(kx_pit_channel));
+
+		//Complete;
+		return true;
+
+		//TODO IC CLEANUP (PRIO, HANDLER);
+
+	}
+
+	//If removal failed, fail;
+	return false;
 
 }
 
-
 #undef NM
+
+//-------------------------------------------------- File Operations --------------------------------------------------
+
+
+/*
+ * All variables and methods in this section are private. No one can access them outside this translation unit;
+ */
+
