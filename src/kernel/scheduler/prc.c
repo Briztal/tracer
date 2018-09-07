@@ -25,6 +25,7 @@
 #include <string.h>
 #include <kernel/core.h>
 #include <kernel/panic.h>
+#include <kernel/debug/debug.h>
 
 
 bool prc_process_terminated = false;
@@ -94,6 +95,7 @@ struct prc *prc_create(const struct prc_desc *const desc) {
 		.prog_mem = mem,
 
 	};
+
 
 	//Copy args in the process heap and update the reference;
 	prc_init.desc.args = heap_ialloc(mem->heap, desc->args_size, desc->args);

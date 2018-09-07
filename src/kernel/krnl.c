@@ -32,7 +32,7 @@
 #include <kernel/core.h>
 
 #include <kernel/mod/mod.h>
-
+#include <kernel/debug/debug.h>
 
 
 #define KERNEL_RAM_SIZE 2048
@@ -103,7 +103,6 @@ static void kernel_init() {
 	//Initialise the RAM manager;
 	ram_init();
 
-	//TODO SET MAIN STACK POINTER TO HIT THE KERNEL STACK;
 	//Initialise the kernel program memory;
 	kernel_memory_init();
 
@@ -111,14 +110,8 @@ static void kernel_init() {
 
 	//TODO INIT DRIVER MGR;
 
-
-
 	//Initialise the kernel scheduler;
 	kernel_scheduler_init();
-
-
-	kernel_panic("SUiS");
-
 
 	//Initialise embedded drivers;
 	mod_autoload();
@@ -178,6 +171,7 @@ static void kernel_memory_init() {
 	 */
 
 	struct prog_mem *km = kernel_memory = prog_mem_create(KERNEL_RAM_SIZE, true);
+
 	prog_mem_create_stacks(km, 1, KERNEL_STACK_SIZE);
 
 }
@@ -188,6 +182,7 @@ static void kernel_memory_init() {
  */
 
 static void kernel_scheduler_init() {
+
 
 	//Create the first process descriptor;
 	struct prc_desc dsc = {
@@ -216,6 +211,7 @@ static void kernel_scheduler_init() {
 	//Create the first process;
 	struct prc *first_process = prc_create(&dsc);
 
+
 	//Initialise the scheduler providing the first process;
 	kernel_scheduler = sched_create(first_process);
 
@@ -240,6 +236,9 @@ static void kernel_scheduler_init() {
 
 	//Cache the number of threads;
 	const uint8_t nb_stks = core_nb_threads;
+
+
+
 
 	//Create the blank mem initializer;
  	struct prog_mem blank_mem_init =  {

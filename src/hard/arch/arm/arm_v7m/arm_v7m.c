@@ -18,7 +18,6 @@
 
 */
 
-
 #include "arm_v7m.h"
 
 //The armv7 M has only one core and one thread;
