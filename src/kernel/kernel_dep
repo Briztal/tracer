@@ -1,0 +1,13 @@
+
+//Light the debug led high; Implemented by the hardware;
+extern void debug_led_high();
+
+//Turn off the debug led; Implemented by the hardware;
+extern void debug_led_low();
+
+
+//Wait for a certain number of milliseconds. Not accurate or reliable; Implemented by the hardware;
+extern void debug_delay_ms(uint32_t ms);
+
+//Wait for a certain number of microsoconds. Not accurate or reliable; Implemented by the hardware;
+extern void debug_delay_us(uint32_t ms);

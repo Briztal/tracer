@@ -19,7 +19,7 @@
 */
 
 #include <kernel/scheduler/prc.h>
-#include <core/core.h>
+#include <kernel/core.h>
 #include "systick.h"
 
 //---------------------- System tick ----------------------

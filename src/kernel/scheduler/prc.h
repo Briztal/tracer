@@ -24,7 +24,7 @@
 
 #include <util/type.h>
 
-#include <kernel/mem.h>
+#include <kernel/mem/mem.h>
 
 
 /*

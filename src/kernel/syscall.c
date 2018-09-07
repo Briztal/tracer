@@ -28,19 +28,6 @@
 
 
 
-//------------------------------------------- Entry Point -------------------------------------------
-
-
-//Update the error message output function;
-void kernel_set_error_output(void (*error_msg)(const char *)) {
-
-	//Update the log function;
-	error_message_function = error_msg;
-
-}
-
-
-
 /*
  * -------------------------------------------- Heap management ---------------------------------------------
  */

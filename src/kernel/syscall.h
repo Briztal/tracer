@@ -21,17 +21,8 @@
 #ifndef TRACER_KERNEL_H
 #define TRACER_KERNEL_H
 
-#include <stdint.h>
 
 #include <stddef.h>
-
-#include <kernel/arch/arch.h>
-
-
-
-//------------------------------------------- Heap management -------------------------------------------
-
-
 
 //------------------------------------------- Heap management -------------------------------------------
 

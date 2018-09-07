@@ -119,6 +119,9 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	//Link the element to the referenced list;
 	list_concat_ref((struct list_head *) elmt, (struct list_head **) list->elements);
 
+	//Complete;
+	return true;
+
 
 }
 

@@ -23,7 +23,8 @@
 #include <kernel/krnl.h>
 
 #include <string.h>
-#include <core/core.h>
+#include <kernel/core.h>
+#include <kernel/panic.h>
 
 
 bool prc_process_terminated = false;

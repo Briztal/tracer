@@ -49,11 +49,11 @@
  * 		Those processes will still be inactive, until they are read and scheduled by the select function;
  */
 
+#include "prc.h"
+
 #include <util/type.h>
 
-#include <core/type/shared_fifo.h>
-
-#include "prc.h"
+#include <kernel/struct/shared_fifo.h>
 
 
 struct sched_element {

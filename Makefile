@@ -35,16 +35,17 @@ include src/util/Makefile
 LDSCRIPT_MMAP_DIR :=
 
 #Include the hard makefile, to build the hard library appropriately;
-include src/core/Makefile
+include src/hard/Makefile
 
 #Now that the core makefile has updated link files, add appropriate options to the link flags;
-LDFLAGS += -Tsrc/core/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
+LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 
 #---------------------------------------------------- Kernel Module ----------------------------------------------------
 
+
 #The kernel include path; The core lib is provided;
-KERNEL_INC :=
+KERNEL_INC := -Isrc/
 
 #The kernel lib public sources, available to processes and modules;
 KERNEL_PUB_SRCS :=
@@ -69,11 +70,7 @@ $(BUILDDIR)/kernel/%.o: src/kernel/%.c
 	@$(CC) $(CFLAGS) $(KERNEL_INC) $(CORE_INC) -o $@ -c $<
 
 
-#The kernel library depends on :
-# - the core library;
-# - the std drivers library;
-# - all kernel source files;
-kernel : core $(KERNEL_OBJS)
+kernel : $(KERNEL_OBJS)
 
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
@@ -91,7 +88,7 @@ kernel : core $(KERNEL_OBJS)
 # The elf rule. Depends on core lib.
 elf: core kernel util $(KERNEL_DEP)
 	@echo "[LD]\ttracer.elf"
-	$(CC) $(LDFLAGS)  $(CORE_O)  $(KERNEL_OBJS) $(UTIL_OBJS) -o $(NAME).elf
+	$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(UTIL_OBJS) -o $(NAME).elf
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!

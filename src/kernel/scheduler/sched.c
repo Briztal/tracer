@@ -22,7 +22,8 @@
 
 #include <kernel/krnl.h>
 #include <string.h>
-#include <core/core.h>
+#include <kernel/core.h>
+#include <kernel/panic.h>
 
 
 /**
@@ -139,7 +140,7 @@ struct sched_data *sched_create(struct prc *first_process) {
 	//Create the scheduler initializer;
 	struct sched_data sched_init = {
 
-		//Save the first process. If it gets terminated, a kernel panic will be thrown;
+		//Save the first process. If it gets terminated, a kernel debug will be thrown;
 		.main_list = first_element,
 
 		//The first process is available for selection;
@@ -209,7 +210,7 @@ static struct sched_element *sched_active_remove_first(struct sched_data *sched)
 	//If @v is the only element of the list :
 	if (elmt == next) {
 
-		//Kernel panic, total deadlock;
+		//Kernel debug, total deadlock;
 		kernel_panic("sched.c : total deadlock, all processes are stopped;");
 
 	} else {
@@ -251,7 +252,7 @@ void scheduler_commit(struct sched_data *sched) {
 		//If we removed the first element;
 		if (removed == sched->main_list) {
 
-			//Kernel panic. The first process must never terminate or be terminated;
+			//Kernel debug. The first process must never terminate or be terminated;
 			kernel_panic("sched.c : scheduler_select : attempted to terminate the first process;");
 
 		}

@@ -26,7 +26,7 @@
 
 #include "stdbool.h"
 
-#include <core/debug.h>
+#include <core/debug/debug.h>
 
 
 struct timer_interface {

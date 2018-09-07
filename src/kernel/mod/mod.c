@@ -6,7 +6,8 @@
 
 #include <kernel/struct/nlist.h>
 
-#include <core/core.h>
+#include <kernel/core.h>
+#include <kernel/panic.h>
 
 
 //--------------------------------------------------- Modules globals --------------------------------------------------
@@ -96,7 +97,7 @@ void mod_autoload() {
 	if ((&_emod_end - &_emod_start) % sizeof (struct auto_mod)) {
 
 		//Core error;
-		core_error("mod.c : mod_autoload : embedded modules array bounds invalid;");
+		kernel_panic("mod.c : mod_autoload : embedded modules array bounds invalid;");
 
 	}
 
@@ -104,7 +105,7 @@ void mod_autoload() {
 	struct auto_mod *auto_module = (struct auto_mod *)&_emod_start;
 
 	//For each module :
-	while ((void *)auto_module < &_emod_end) {
+	while ((size_t)auto_module < (size_t)&_emod_end) {
 
 		//Load the module;
 		mod_add(auto_module->name, auto_module->init, auto_module->exit);

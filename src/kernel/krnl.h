@@ -40,10 +40,6 @@ void *kialloc(size_t, const void *);
 void kfree(void *);
 
 
-//---------------------------------------------------- Kernel panic ---------------------------------------------------
-
-//The kernel panic function;
-void kernel_panic(const char *msg);
 
 
 

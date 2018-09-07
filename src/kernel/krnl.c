@@ -19,16 +19,20 @@
 */
 
 #include "krnl.h"
+#include "panic.h"
 
-#include "systick.h"
+#include <string.h>
 
-#include <core/mem/ram.h>
+#include <kernel/systick.h>
+
+#include <kernel/mem/ram.h>
 
 #include <kernel/scheduler/sched.h>
 
-#include <string.h>
-#include <core/core.h>
+#include <kernel/core.h>
+
 #include <kernel/mod/mod.h>
+
 
 
 #define KERNEL_RAM_SIZE 2048
@@ -92,6 +96,7 @@ static void kernel_syscall_handler() {
 
 static void kernel_init() {
 
+
 	//Disable interrupt management:
 	ic_disable_interrupts();
 
@@ -106,8 +111,14 @@ static void kernel_init() {
 
 	//TODO INIT DRIVER MGR;
 
+
+
 	//Initialise the kernel scheduler;
 	kernel_scheduler_init();
+
+
+	kernel_panic("SUiS");
+
 
 	//Initialise embedded drivers;
 	mod_autoload();
@@ -149,33 +160,6 @@ void __program_start() {
 
 
 
-//---------------------------------------------------- Kernel panic ---------------------------------------------------
-
-//The kernel panic function;
-void kernel_panic(const char *msg) {
-
-	//TODO NOOOOOOOOP, MAKE USE OF THE PANIC LOG STACK;
-
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-	//TODO THERE IS A KERNEL PANIC IN MEM.C !
-
-	_core_error(msg);
-	//TODO HALT;
-
-}
 
 //----------------------------------------------------- Kernel Init ----------------------------------------------------
 
@@ -397,7 +381,7 @@ static void *kernel_provide_new_stack(const volatile uint8_t thread_id, void *vo
 	if (!(nb_active_threads--)) {
 
 		//Error;
-		core_error("krnl.c : kernel_provide_new_stack : more entries than existing threads;")
+		kernel_panic("krnl.c : kernel_provide_new_stack : more entries than existing threads;");
 
 	}
 
