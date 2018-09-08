@@ -26,6 +26,7 @@
 
 #include <stdbool.h>
 
+
 /*
  * The systick is the reference clock for software;
  *
@@ -34,22 +35,18 @@
  * Every time its receives a systick, it verifies if it must trigger the context switch, and does it if so;
  */
 
-//---------------------- System tick ----------------------
+
+//Initialise the system clock;
+void sysclock_init();
 
 //Receive a system systick;
-void systick_tick();
-
-
-//---------------------- Context Switch ----------------------
+void sysclock_tick();
 
 //Update the current task's activity_time;
-void systick_set_process_duration(uint16_t ms);
-
-
-//---------------------- Time reference ----------------------
+void sysclock_set_process_duration(uint16_t ms);
 
 //Get the millisecond reference;
-uint32_t systick_milliseconds();
+uint32_t sysclock_milliseconds();
 
 //Wait till time has reached the given limit;
 void systick_wait(uint16_t ms_delay);

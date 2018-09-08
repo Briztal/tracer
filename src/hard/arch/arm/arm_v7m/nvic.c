@@ -84,6 +84,8 @@ static bool vector_table_in_ram = false;
 
 void (*irq_handlers[256])(void) = {0};
 
+//void (**irq_handlers)(void) = handlers;
+
 
 /*
  * When the vector table is located in flash memory (at startup at least), it cannot be altered.
@@ -600,22 +602,25 @@ void nvic_reset_exception_handler(enum nvic_exception channel) {
 //----------------------------------------------------- Preemption -----------------------------------------------------
 
 //Set the handler of the preemption exception;
-void core_preemption_set_handler(void (*handler)(void)) {
+void preemption_set_handler(void (*handler)(void)) {
 	nvic_set_exception_handler(NVIC_PENDSV, handler);
+
+
+
 }
 
 //Set the priority of the preemption exception;
-void core_preemption_set_priority(uint8_t priority) {
+void preemption_set_priority(uint8_t priority) {
 	armv7m_set_pendsv_priority(priority);
 }
 
 //Enable the preemption exception;
-void core_preemption_enable() {
+void preemption_enable() {
 	//PendSV is always enabled;
 }
 
 //Trigger the preemption;
-void core_preemption_trigger() {
+void preemption_trigger() {
 	armv7m_set_pendsv_pending();
 }
 
@@ -623,22 +628,22 @@ void core_preemption_trigger() {
 //----------------------------------------------------- Syscall -----------------------------------------------------
 
 //Set the handler of the syscall exception;
-void core_syscall_set_handler(void (*handler)(void)) {
+void syscall_set_handler(void (*handler)(void)) {
 	nvic_set_exception_handler(NVIC_SVC, handler);
 }
 
 //Set the priority of the syscall exception;
-void core_syscall_set_priority(uint8_t priority) {
+void syscall_set_priority(uint8_t priority) {
 	armv7m_set_svcall_priority(priority);
 }
 
 //Enable the syscall exception;
-void core_syscall_enable() {
+void syscall_enable() {
 	//Always enabled;
 }
 
 //Trigger the syscall;
-void core_syscall_trigger() {
+void syscall_trigger() {
 	__asm__ __volatile ("");//TODO SVC ??? NOT WORKING...
 }
 

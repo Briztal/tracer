@@ -23,30 +23,19 @@
 
 #include <stdbool.h>
 
-#include <kernel/mem/stack.h>
-#include <kernel/core.h>
-#include <kernel/panic.h>
+
 #include <kernel/debug/debug.h>
 
-static volatile uint32_t kill_me;
+#include <kernel/panic.h>
 
-uint32_t get_msp() {
 
-	//Save the current main stack pointer in psp's cache;
-	__asm__ __volatile__ ("mrs %0, msp" : "=r" (kill_me):);
+#include <kernel/krnl.h>
 
-	return kill_me;
+#include <kernel/ic.h>
 
-}
+#include <kernel/proc.h>
 
-uint32_t get_psp() {
 
-	//Save the current main stack pointer in psp's cache;
-	__asm__ __volatile__ ("mrs %0, psp" : "=r" (kill_me):);
-
-	return kill_me;
-
-}
 
 //---------------------------------------------------- Threads setup ---------------------------------------------------
 
@@ -63,7 +52,7 @@ uint32_t get_psp() {
  * @param preemption_call : the function to execute in the executing thread when all other threads are idle;
  */
 
-void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preemption_call)()) {
+void proc_enter_thread_mode(struct proc_stack **exception_stacks) {
 
 	//Disable all interrupts;
 	ic_disable_interrupts();
@@ -75,7 +64,7 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 	if (entered) {
 
 		//Error, must not happen;
-		kernel_panic("cortex_m4f : core_enter_thread_mode : Function called a second time;");
+		kernel_panic("cortex_m4f : proc_enter_thread_mode : Function called a second time;");
 
 	}
 
@@ -86,7 +75,7 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 	if (ic_in_handler_mode()) {//TODO
 
 		//Error, this function can't be executed in handler mode;
-		kernel_panic("cortex_m4f : core_enter_thread_mode : executed while in handler mode;");
+		kernel_panic("cortex_m4f : proc_enter_thread_mode : executed while in handler mode;");
 
 		//Never reached;
 		return;
@@ -95,10 +84,6 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 
 	static volatile void *volatile msp;
 	static volatile void *volatile psp;
-	static void (*volatile prempt)();
-
-	//Save the preemption_call;
-	prempt = preemption_call;
 
 	//Save the exception stack value in msp;
 	msp = exception_stacks[0]->sp;
@@ -136,16 +121,20 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
 
+
 	//Execute the preemption call;
-	(*prempt)();
+	preemption_trigger();
 
 	//Enable interrupts;
 	ic_enable_interrupts();
 
+
+	kernel_panic("NO_PREEMPTION");
 	//Wait eternally for the preemption to be triggered;
 	while(1);
 
 }
+
 
 //-------------------------------------------------- Stack management  -------------------------------------------------
 
@@ -167,7 +156,7 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
  */
 
 /*
- * core_init_stack : this function initialises the unstacking environment, so that the given function will
+ * proc_init_stack : this function initialises the unstacking environment, so that the given function will
  *  be executed at context switch time;
  *
  *  It starts by caching the process_t stack pointer, and stacks the process functions pointers, and the PSR.
@@ -177,7 +166,7 @@ void core_enter_thread_mode(struct core_stack **exception_stacks, void (*preempt
  *  Finally, it leaves space for empty stack frame and saves the stack pointer;
  */
 
-void core_init_stack(struct core_stack *stack, void (*function)(), void (*exit_loop)(), void *arg) {
+void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg) {
 
 	//Reset the stack;
 	uint32_t *sp4 = stack->sp_reset;
@@ -206,11 +195,11 @@ void core_init_stack(struct core_stack *stack, void (*function)(), void (*exit_l
 
 
 /*
- * core_get_init_arg : this function will return the value of r12. If called by the process init function,
+ * proc_get_init_arg : this function will return the value of r12. If called by the process init function,
  *  it will be equal to the previous function's arg;
  */
 
-void *core_get_init_arg() {
+void *proc_get_init_arg() {
 	uint32_t arg = 0;
 	__asm__ __volatile__("mov %0, r12": "=r" (arg):);
 	return (void *)arg;
@@ -234,8 +223,7 @@ extern void *(*core_stack_provider)(uint8_t, void *);
 
 //TODO MAKE ANOTHER ONE FOR NO FPU SAVE;
 
-void core_context_switcher() {
-
+void proc_context_switcher() {
 
 	//TODO ONLY IN HANDLER MODE;
 
@@ -272,8 +260,9 @@ void core_context_switcher() {
 	//Enable interrupts;
 	__asm__ __volatile__("cpsie i");
 
+
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
-	psp = (*core_stack_provider)(0, psp);
+	psp = kernel_switch_thread_stack(0, psp);
 
 	debug_log("PREEMPTION");
 

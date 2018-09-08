@@ -20,7 +20,7 @@
 
 
 
-#include <kernel/core.h>
+#include <kernel/proc.h>
 #include "debug.h"
 
 

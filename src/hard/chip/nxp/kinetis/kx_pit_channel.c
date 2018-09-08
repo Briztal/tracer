@@ -7,9 +7,11 @@
 
 #include <stdbool.h>
 
-
 #include <kernel/timer/timer.h>
+
 #include <kernel/fs/dfs.h>
+
+#include <kernel/ic.h>
 
 
 
@@ -40,6 +42,7 @@
  * 
  */
 
+
 /*
 
 //PREREQUISITES :
@@ -47,8 +50,8 @@
 #define __INT_CHANNEL__ 		0
 #define __REGISTERS_START__ 	0
 #define __REGISTERS_SPACING__ 	1024
+*/
 
- */
 
 //Determine the address of the registers area;
 #define REGISTERS ((volatile uint32_t *)(__REGISTERS_START__ + (__CHANNEL_ID__ * __REGISTERS_SPACING__)))

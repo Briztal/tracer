@@ -19,19 +19,72 @@
 */
 
 #include <kernel/scheduler/prc.h>
-#include <kernel/core.h>
-#include "systick.h"
+#include "sysclock.h"
+#include "preemption.h"
+#include "ic.h"
+
+
+//------------------------------------------------------- Systick ------------------------------------------------------
+
+/*
+ * The core library provides a system timer, with basic functions.
+ */
+
+//Start the core timer;
+extern void systimer_start();
+
+//Stop the core timer;
+extern void systimer_stop();
+
+//Enable the core interrupt;
+extern void systimer_int_enable();
+
+//Disable the core interrupt;
+extern void systimer_int_disable();
+
+
+//Set the core timer interrupt frequency. The core frequency must be known;
+extern void systimer_int_set_frequency(uint32_t frequency);
+
+//Set the core timer interrupt priority;
+extern void systimer_int_set_priority(uint8_t priority);
+
+//Set the core timer interrupt handler;
+extern void systimer_int_set_handler(void (*handler)());
+
 
 //---------------------- System tick ----------------------
 
 
-//The systick_milliseconds reference;
+//The sysclock_milliseconds reference;
 volatile uint32_t systick_half_millis = 0;
 
 //The current task's activity_time. At init, preemption disabled;
 volatile uint32_t task_duration = 0;
 
 
+
+void sysclock_init() {
+
+	//No preemption for instance;
+	sysclock_set_process_duration(0);
+
+	//2KHz systick, 2 per millisecond, to be 1ms accurate;
+	systimer_int_set_frequency(2000);
+
+	//Systick has its own priority;
+	systimer_int_set_priority(KERNEL_SYSTICK_PRIORITY);
+
+	//Set the core timer to trigger systick function;
+	systimer_int_set_handler(&sysclock_tick);
+
+	//Enable the interrupt;
+	systimer_int_enable();
+
+	//Start the core timer;
+	systimer_start();
+
+}
 //---------------------- System tick ----------------------
 
 /*
@@ -44,7 +97,7 @@ volatile uint32_t task_duration = 0;
  */
 
 
-void systick_tick() {
+void sysclock_tick() {
 
     //Increment the ms/2 counter;
     systick_half_millis++;
@@ -56,7 +109,7 @@ void systick_tick() {
         if (!--task_duration) {
 
             //Trigger the preemption;
-			core_preemption_trigger();
+			preemption_trigger();
 
             //Task activity_time becomes 0, preemption won't be called anymore;
 
@@ -73,10 +126,10 @@ void systick_tick() {
 /*
  * setTaskDuration : sets the current task's activity_time :
  *  - 0 : infinite;
- *  - x (!= 0) : activity_time of x systick_milliseconds;
+ *  - x (!= 0) : activity_time of x sysclock_milliseconds;
  */
 
-void systick_set_process_duration(uint16_t ms) {
+void sysclock_set_process_duration(uint16_t ms) {
 
     //Update the task's activity_time to the double of the provided activity_time;
     task_duration = ((uint32_t) ms) << 1;
@@ -87,10 +140,10 @@ void systick_set_process_duration(uint16_t ms) {
 //---------------------- Time reference ----------------------
 
 /*
- * milliseconds : returns the systick_milliseconds reference. It is obtained by dividing the ms/2 reference by 2;
+ * milliseconds : returns the sysclock_milliseconds reference. It is obtained by dividing the ms/2 reference by 2;
  */
 
-uint32_t systick_milliseconds() {
+uint32_t sysclock_milliseconds() {
     return systick_half_millis >> 1;
 }
 

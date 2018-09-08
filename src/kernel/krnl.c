@@ -20,16 +20,18 @@
 
 #include "krnl.h"
 #include "panic.h"
+#include "ic.h"
+#include "preemption.h"
 
 #include <string.h>
 
-#include <kernel/systick.h>
+#include <kernel/sysclock.h>
 
 #include <kernel/mem/ram.h>
 
 #include <kernel/scheduler/sched.h>
 
-#include <kernel/core.h>
+#include <kernel/proc.h>
 
 #include <kernel/mod/mod.h>
 #include <kernel/debug/debug.h>
@@ -57,6 +59,11 @@ static uint8_t nb_active_threads;
 //static core_spin_lock *active_lock;
 
 
+void kernel_private() {
+
+}
+
+
 //--------------------------------------------------- First function ---------------------------------------------------
 
 //The kernel's first process function;
@@ -80,8 +87,6 @@ static void kernel_scheduler_init();
 //Initialise the execution environment and start the execution;
 static void kernel_start_execution();
 
-//Provide a new stack to a thread during a context switch;
-static void *kernel_provide_new_stack(volatile uint8_t thread_id, void *volatile sp);
 
 static void kernel_syscall_handler() {
 	//TODO HANDLE SYSCALLS;
@@ -95,7 +100,6 @@ static void kernel_syscall_handler() {
  */
 
 static void kernel_init() {
-
 
 	//Disable interrupt management:
 	ic_disable_interrupts();
@@ -123,6 +127,8 @@ static void kernel_init() {
 	kernel_panic("kernel_init : execution not started;");
 
 }
+
+
 
 //TODO KERNEL HALT FOR PANIC
 //TODO KERNEL HALT FOR PANIC
@@ -226,16 +232,16 @@ static void kernel_scheduler_init() {
 	 * Those structs also need to be created;
 	 *
 	 * As core stacks are not contained in the process struct, we also need to create some.
-	 * As those will never be queried, used or again, we will use N time the same core_stack struct;
+	 * As those will never be queried, used or again, we will use N time the same proc_stack struct;
 	 */
 
 	static struct prc blank_process;
 	static struct prog_mem blank_mem;
-	static struct core_stack blank_stack;
+	static struct proc_stack blank_stack;
 
 
 	//Cache the number of threads;
-	const uint8_t nb_stks = core_nb_threads;
+	const uint8_t nb_stks = proc_nb_threads;
 
 
 
@@ -279,62 +285,40 @@ static void kernel_start_execution() {
 	 */
 
 	//Initialise the number of active threads;
-	nb_active_threads = core_nb_threads;
+	nb_active_threads = proc_nb_threads;
 
 
 	/*
 	 * Preemption;
 	 */
 
-	//Set the core stack provider;
-	core_set_stack_provider(&kernel_provide_new_stack);
-
 	//Update the preemption handler;
-	core_preemption_set_handler(&core_context_switcher);
+	preemption_set_handler(&proc_context_switcher);
 
 	//Update the preemption exception priority;
-	core_preemption_set_priority(KERNEL_PREMPTION_PRIORITY);
+	preemption_set_priority(KERNEL_PREMPTION_PRIORITY);
 
 	//Enable the preemption exception;
-	core_preemption_enable();
+	preemption_enable();
 
 
 	/*
 	 * Syscalls;
 	 */
 
+	/*
 	//Set the syscall handler; Same prio as preemption;
-	core_syscall_set_handler(kernel_syscall_handler);
+	syscall_set_handler(kernel_syscall_handler);
 
 	//Set the syscall exception priority to the lowest possible;
-	core_syscall_set_priority(KERNEL_PREMPTION_PRIORITY);
+	syscall_set_priority(KERNEL_PREMPTION_PRIORITY);
 
 	//Enable the syscall exception;
-	core_syscall_enable();
-
-
-
-	/*
-	 * Systick;
+	syscall_enable();
 	 */
 
-	//No preemption for instance;
-	systick_set_process_duration(0);
-
-	//1KHz systick; TODO DOUBLE ! THE SYSTICK LIB REQUIRES 500us window;
-	core_timer_int_set_frequency(1000);
-
-	//Systick has its own priority;
-	core_timer_int_set_priority(KERNEL_SYSTICK_PRIORITY);
-
-	//Set the core timer to trigger systick function;
-	core_timer_int_set_handler(&systick_tick);
-
-	//Enable the interrupt;
-	core_timer_int_enable();
-
-	//Start the core timer;
-	core_timer_start();
+	//Initialise the system clock;
+	sysclock_init();
 
 
 	/*
@@ -343,7 +327,7 @@ static void kernel_start_execution() {
 
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
 	//Interrupts will be enabled at the end of the function;
-	core_enter_thread_mode(kernel_memory->stacks, &core_preemption_trigger);
+	proc_enter_thread_mode(kernel_memory->stacks);
 
 }
 
@@ -362,7 +346,7 @@ static void kernel_start_execution() {
 extern bool prc_process_terminated;
 
 
-static void *kernel_provide_new_stack(const volatile uint8_t thread_id, void *volatile sp) {
+void *kernel_switch_thread_stack(const volatile uint8_t thread_id, void *volatile sp) {
 
 	//In order to know when new stack pointers can be safely queried, a static variable will be used;
 	static volatile bool process_updated;
@@ -380,7 +364,7 @@ static void *kernel_provide_new_stack(const volatile uint8_t thread_id, void *vo
 	if (!(nb_active_threads--)) {
 
 		//Error;
-		kernel_panic("krnl.c : kernel_provide_new_stack : more entries than existing threads;");
+		kernel_panic("krnl.c : kernel_switch_thread_stack : more entries than existing threads;");
 
 	}
 
@@ -405,10 +389,10 @@ static void *kernel_provide_new_stack(const volatile uint8_t thread_id, void *vo
 		current_process = sched_get(kernel_scheduler);
 
 		//Update the duration until next preemption;
-		systick_set_process_duration(current_process->desc.activity_time);
+		sysclock_set_process_duration(current_process->desc.activity_time);
 
 		//Update the number of active threads;
-		nb_active_threads = core_nb_threads;
+		nb_active_threads = proc_nb_threads;
 
 		//Update the flag;
 		process_updated = true;

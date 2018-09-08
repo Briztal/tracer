@@ -19,13 +19,13 @@
 */
 
 
-#include <kernel/core.h>
 
 #include "mem.h"
 
 #include "ram.h"
 
 #include <kernel/krnl.h>
+
 #include <kernel/panic.h>
 
 //------------------------------------------------------ prog_mem ------------------------------------------------------
@@ -118,7 +118,7 @@ void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stac
 	mem->nb_stacks = nb_stacks;
 
 	//Correct the stacks size;
-	stacks_size = stack_correct_size(stacks_size);
+	stacks_size = proc_stack_correct_size(stacks_size);
 
 	//Reset the heap;
 	heap_reset(mem->heap);
@@ -133,10 +133,10 @@ void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stac
 		void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
 
 		//Correct the stack's highest address;
-		stack_reset = stack_correct_reset_ptr(stack_reset);
+		stack_reset = proc_stack_correct_reset_ptr(stack_reset);
 
-		//Create the core_stack initializer;
-		struct core_stack cs_init = {
+		//Create the proc_stack initializer;
+		struct proc_stack cs_init = {
 
 			//The stack bound, not corrected;
 			.stack_limit = thread_stack,
@@ -150,7 +150,7 @@ void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stac
 		};
 
 		//Allocate, initialise and save the struct in the heap;
-		mem->stacks[stack_id] = kialloc(sizeof(struct core_stack), &cs_init);
+		mem->stacks[stack_id] = kialloc(sizeof(struct proc_stack), &cs_init);
 
 	}
 
@@ -168,7 +168,7 @@ void prog_mem_delete_from_kernel_heap(struct prog_mem *mem) {
 	//For each allocated stack :
 	for (uint8_t stack_id = mem->nb_stacks; stack_id--;) {
 
-		//Free the core_stack struct;
+		//Free the proc_stack struct;
 		kfree(mem->stacks[stack_id]);
 
 	}

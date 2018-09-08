@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "heap.h"
-#include "kernel/core.h"
+#include "kernel/proc.h"
 
 #include <util/type.h>
 #include <kernel/panic.h>

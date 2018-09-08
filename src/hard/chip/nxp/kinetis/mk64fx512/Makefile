@@ -38,9 +38,9 @@ pit:
 
 	#Compile four channels;
 	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=48 -D__CHANNEL_ID__=0 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=49 -D__CHANNEL_ID__=0 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=50 -D__CHANNEL_ID__=0 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=51 -D__CHANNEL_ID__=0 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=49 -D__CHANNEL_ID__=1 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=50 -D__CHANNEL_ID__=2 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=51 -D__CHANNEL_ID__=3 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
 
 	#Compile four channels;
 	@$(CC) $(CFLAGS) $(PIT_FLAGS) -o build/mod/PIT/pit -c $(K_DIR)/kx_pit.c

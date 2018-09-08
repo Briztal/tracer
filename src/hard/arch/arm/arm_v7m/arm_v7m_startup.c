@@ -19,7 +19,6 @@
 */
 
 #include <stdint.h>
-#include <kernel/core.h>
 
 
 /*
@@ -29,10 +28,9 @@
  * 	- The array of IRQ handlers, provided by the nvic;
  */
 
-void __entry_point();
+extern void __entry_point();
 extern uint32_t _ram_highest;
-void (*irq_handlers[])(void);
-
+extern void (*irq_handlers[])(void);
 
 //TODO COMPILE AND LINK PROPERLY
 //TODO COMPILE AND LINK PROPERLY

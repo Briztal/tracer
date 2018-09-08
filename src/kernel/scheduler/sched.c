@@ -22,8 +22,8 @@
 
 #include <kernel/krnl.h>
 #include <string.h>
-#include <kernel/core.h>
 #include <kernel/panic.h>
+#include <kernel/ic.h>
 
 
 /**

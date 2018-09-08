@@ -88,7 +88,7 @@ kernel : $(KERNEL_OBJS)
 # The elf rule. Depends on core lib.
 elf: core kernel util $(KERNEL_DEP)
 	@echo "[LD]\ttracer.elf"
-	$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(UTIL_OBJS) -o $(NAME).elf
+	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(UTIL_OBJS) -o $(NAME).elf
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!

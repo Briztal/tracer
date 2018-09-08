@@ -6,7 +6,7 @@
 
 #include <kernel/struct/nlist.h>
 
-#include <kernel/core.h>
+#include <kernel/proc.h>
 #include <kernel/panic.h>
 
 

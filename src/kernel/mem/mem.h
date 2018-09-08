@@ -27,7 +27,7 @@
 
 #include <stddef.h>
 
-#include <kernel/mem/stack.h>
+#include <kernel/proc.h>
 
 #include "heap.h"
 
@@ -54,7 +54,7 @@ struct prog_mem {
 	uint8_t nb_stacks;
 
 	//The stack references array;
-	struct core_stack *stacks[NB_THREADS];
+	struct proc_stack *stacks[NB_THREADS];
 
 };
 

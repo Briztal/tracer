@@ -1,4 +1,44 @@
 
+
+//------------------------------------------------------- Proc ------------------------------------------------------
+
+//The number of threads;
+extern const uint8_t proc_nb_threads;
+
+//Stack alignment size;
+extern const uint32_t proc_stack_alignment;
+
+
+/**
+ * proc_enter_thread_mode : this function initialises threads in a safe state. It never returns.
+ * 	The preemption environment must have been initialised before;
+ *
+ * 	- initialises all threads in their lowest privilege state;
+ * 	- updates exception stacks;
+ * 	- calls the provided function, that should trigger the preemption;
+ * 	- make all threads run an infinite loop;
+ * 	- execute the preemption call;
+ * 	- enable interrupts;
+ * 	- loop;
+ *
+ * @param exception_stacks : processor stacks that must be used in case of interrupt;
+ */
+
+extern void proc_enter_thread_mode(struct proc_stack **exception_stacks, void (*preemption_call)());
+
+//Initialise the stack for initialisation. Implemented by the proc lib;
+extern void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
+
+//Get the initial arg;
+extern void *proc_get_init_arg();
+
+//The context switcher; Should be set as the preemption handler for a preemption to occur;
+extern void proc_context_switcher();
+
+
+//------------------------------------------------------- Debug ------------------------------------------------------
+
+
 //Light the debug led high; Implemented by the hardware;
 extern void debug_led_high();
 
@@ -11,3 +51,125 @@ extern void debug_delay_ms(uint32_t ms);
 
 //Wait for a certain number of microsoconds. Not accurate or reliable; Implemented by the hardware;
 extern void debug_delay_us(uint32_t ms);
+
+
+//------------------------------------------------------- IC ------------------------------------------------------
+
+
+//The lowest priority level;
+extern const uint8_t ic_priority_0;
+
+//Priority 1;
+extern const uint8_t ic_priority_1;
+
+//Priority 2;
+extern const uint8_t ic_priority_2;
+
+//Priority 3;
+extern const uint8_t ic_priority_3;
+
+//Priority 4;
+extern const uint8_t ic_priority_4;
+
+//Priority 5;
+extern const uint8_t ic_priority_5;
+
+//Priority 6;
+extern const uint8_t ic_priority_6;
+
+//The highest priority level;
+extern const uint8_t ic_priority_7;
+
+
+
+//Enable the interrupt control;
+extern void ic_enable_interrupts();
+
+//Disables the interrupt control;
+extern void ic_disable_interrupts();
+
+//Enables the required interrupt channel;
+extern void ic_enable_interrupt(uint16_t channel);
+
+//Disables the required interrupt channel;
+extern void ic_disable_interrupt(uint16_t channel);
+
+//Sets the required non-system interrupt in the pending state;
+extern void ic_set_interrupt_pending(uint16_t channel);
+
+//Sets the required non-system interrupt in the not-pending state;
+extern void ic_clear_interrupt_pending(uint16_t channel);
+
+//Sets the required non-system interrupt in the not-pending state;
+extern void ic_is_interrupt_pending(uint16_t channel);
+
+//Applies the provided priority to the required non-system interupt channel;
+extern void ic_set_interrupt_priority(uint16_t channel, uint8_t priority);
+
+//Returns the priority to the required non-system interupt channel;
+extern uint8_t ic_get_interrupt_priority(uint16_t channel, uint8_t priority);
+
+//Sets the handler of the required channel to 0, isr will return immediately;
+extern void ic_set_interrupt_handler(uint16_t channel, void (*handler)(void));
+
+//Resets the handler of the required channel to 0, isr will return immediately;
+extern void ic_reset_interrupt_handler(uint16_t channel);
+
+//Assert if a handler is currently in execution;
+extern bool ic_in_handler_mode();
+
+
+
+
+//Set the handler of the syscall exception;
+extern void core_syscall_set_handler(void (*)(void));
+
+//Set the priority of the syscall exception;
+extern void core_syscall_set_priority(uint8_t priority);
+
+//Enable the syscall exception;
+extern void core_syscall_enable();
+
+//Trigger the syscall;
+extern void core_syscall_trigger();
+
+
+
+//Set the handler of the preemption exception;
+extern void preemption_set_handler(void (*)(void));
+
+//Set the priority of the preemption exception;
+extern void preemption_set_priority(uint8_t priority);
+
+//Enable the preemption exception;
+extern void preemption_enable();
+
+//Trigger the preemption;
+extern void preemption_trigger();
+
+
+//------------------------------------------------------- systimer ------------------------------------------------------
+
+
+//Start the core timer;
+extern void core_timer_start();
+
+//Stop the core timer;
+extern void core_timer_stop();
+
+//Enable the core interrupt;
+extern void core_timer_int_enable();
+
+//Disable the core interrupt;
+extern void core_timer_int_disable();
+
+
+//Set the core timer interrupt frequency. The core frequency must be known;
+extern void core_timer_int_set_frequency(uint32_t frequency);
+
+//Set the core timer interrupt priority;
+extern void core_timer_int_set_priority(uint8_t priority);
+
+//Set the core timer interrupt handler;
+extern void core_timer_int_set_handler(void (*handler)());
+

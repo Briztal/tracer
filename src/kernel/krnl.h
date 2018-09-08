@@ -21,8 +21,15 @@
 #ifndef TRACER_KRNL_H
 #define TRACER_KRNL_H
 
+#include <stdint.h>
+
 #include <stddef.h>
-#include <kernel/scheduler/prc.h>
+
+
+//----------------------------------------------------- Kernel Heap ----------------------------------------------------
+
+//receive a new thread stack, providing the core number and the current thread stack pointer;
+void *kernel_switch_thread_stack(volatile uint8_t thread_id, void *volatile sp);
 
 
 //----------------------------------------------------- Kernel Heap ----------------------------------------------------

@@ -1,5 +1,6 @@
 #include <kernel/debug/debug.h>
-#include "core.h"
+#include "proc.h"
+#include "ic.h"
 
 /*
   panic.c Part of TRACER
@@ -23,7 +24,6 @@
 
 
 void kernel_panic(const char *msg) {
-
 
 	ic_disable_interrupts();
 

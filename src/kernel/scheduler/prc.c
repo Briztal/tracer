@@ -23,10 +23,8 @@
 #include <kernel/krnl.h>
 
 #include <string.h>
-#include <kernel/core.h>
+#include <kernel/ic.h>
 #include <kernel/panic.h>
-#include <kernel/debug/debug.h>
-
 
 bool prc_process_terminated = false;
 
@@ -116,7 +114,7 @@ struct prc *prc_create(const struct prc_desc *const desc) {
 	//TODO INITIALISE ALL STACKS; WATCH ARGUMENTS CAREFULY;
 
 	//Initialise the stack and pass the execution environment;
-	core_init_stack(prc->prog_mem->stacks[0], &prc_exec, &prc_exit, exec_data);
+	proc_init_stack(prc->prog_mem->stacks[0], &prc_exec, &prc_exit, exec_data);
 
 	//Return the created process;
 	return prc;
@@ -150,7 +148,7 @@ void prc_delete(struct prc *prc) {
 static void prc_exec() {
 
 	//Cache the execution data, saved in the stack;
-	volatile struct prc_exec_env *volatile exec_data = core_get_init_arg();
+	volatile struct prc_exec_env *volatile exec_data = proc_get_init_arg();
 
 	//Execute the function, passing args;
 	(*(exec_data->function))((void *) exec_data->args);
@@ -177,7 +175,7 @@ static void prc_exit() {
 	//TODO SYSCALL KERNEL PREEMPT
 
 	//Require a context switch, process will be to_delete;
-	core_preemption_trigger();
+	preemption_trigger();
 
 	//Panic, preemption failed;
 	kernel_panic("process.c : post preempt state reached. That should never happen.");

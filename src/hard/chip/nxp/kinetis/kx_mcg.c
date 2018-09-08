@@ -22,7 +22,7 @@
 #include "kx_mcg.h"
 
 #include <stdint.h>
-#include <kernel/core.h>
+#include <kernel/proc.h>
 #include <kernel/panic.h>
 
 #define MCG_C1          ((volatile uint8_t *)0x40064000)

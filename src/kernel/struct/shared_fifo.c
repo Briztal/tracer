@@ -20,7 +20,7 @@
 
 #include "shared_fifo.h"
 
-#include <kernel/core.h>
+#include <kernel/ic.h>
 
 
 /**
