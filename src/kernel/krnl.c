@@ -21,7 +21,6 @@
 #include "krnl.h"
 #include "panic.h"
 #include "ic.h"
-#include "preemption.h"
 
 #include <string.h>
 

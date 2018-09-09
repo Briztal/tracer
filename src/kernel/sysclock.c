@@ -20,7 +20,6 @@
 
 #include <kernel/scheduler/prc.h>
 #include "sysclock.h"
-#include "preemption.h"
 #include "ic.h"
 
 

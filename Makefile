@@ -22,7 +22,7 @@ LDFLAGS := -Wall -Wl,--gc-sections -Os
 #The default include path set. Comprises just src.
 INC = -Isrc
 
-#--------------------------------------------------- Utilities Module --------------------------------------------------
+#--------------------------------------------------- Utilities lib --------------------------------------------------
 
 #The util sources list;
 UTIL_SRCS :=
@@ -37,7 +37,7 @@ UTIL_OBJS := $(foreach src, $(UTIL_SRCS:.c=.o), $(BUILDDIR)/$(src))
 util : $(UTIL_OBJS)
 
 
-#--------------------------------------------------- Hard Module ---------------------------------------------------
+#--------------------------------------------------- Hard lib ---------------------------------------------------
 
 #The hardware module selects the memory map link script;
 LDSCRIPT_MMAP_DIR :=
@@ -64,7 +64,7 @@ modules : $(MODULES)
 LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 
-#---------------------------------------------------- Kernel Module ----------------------------------------------------
+#---------------------------------------------------- Kernel lib ----------------------------------------------------
 
 #The kernel lib public sources, available to processes and modules;
 KERNEL_PUB_SRCS :=
