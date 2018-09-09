@@ -1,6 +1,22 @@
-//
-// Created by root on 9/4/18.
-//
+/*
+  mod.c Part of TRACER
+
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #include "auto_mod.h"
 
@@ -8,6 +24,7 @@
 
 #include <kernel/proc.h>
 #include <kernel/panic.h>
+#include <kernel/debug/debug.h>
 
 
 //--------------------------------------------------- Modules globals --------------------------------------------------
@@ -75,14 +92,15 @@ void mod_remove(const char *const name) {
 
 	}
 
+
 }
 
 
 //The start address of kernel embedded modules structs in FLASH;
-extern uint32_t _emod_start;
+extern uint8_t _emod_start;
 
 //The end address of kernel embedded modules structs in FLASH;
-extern uint32_t _emod_end;
+extern uint8_t _emod_end;
 
 
 /**
@@ -93,19 +111,23 @@ extern uint32_t _emod_end;
 
 void mod_autoload() {
 
-	//The [&_emod_start : &_emod_end] should contain only auto_mod structs. If size validity check fails :
-	if ((&_emod_end - &_emod_start) % sizeof (struct auto_mod)) {
 
-		//Core error;
+	//Determine the byte length of the module array;
+	const size_t module_array_size = &_emod_end - &_emod_start;
+
+	//The module array should contain only auto_mod structs. If size validity check fails :
+	if (module_array_size % sizeof(struct auto_mod)) {
+
+		//Kernel panic, invalid module array size, probably caused by poor linking;
 		kernel_panic("mod.c : mod_autoload : embedded modules array bounds invalid;");
 
 	}
 
 	//Cache the array to the right type;
-	struct auto_mod *auto_module = (struct auto_mod *)&_emod_start;
+	struct auto_mod *auto_module = (struct auto_mod *) &_emod_start;
 
 	//For each module :
-	while ((size_t)auto_module < (size_t)&_emod_end) {
+	while ((size_t) auto_module < (size_t) &_emod_end) {
 
 		//Load the module;
 		mod_add(auto_module->name, auto_module->init, auto_module->exit);
@@ -115,4 +137,5 @@ void mod_autoload() {
 
 	}
 
+	debug_log("Modules loaded");
 }

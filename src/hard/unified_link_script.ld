@@ -69,7 +69,7 @@ SECTIONS {
     /*The embedded modules section contains kernel modules to load at init;*/
     .embedded_modules : {
         . = ALIGN(4);
-        *(.embedded_modules)
+        KEEP(*(.kernel_embedded_modules*))
      } > FLASH
 
      _emod_end = .;

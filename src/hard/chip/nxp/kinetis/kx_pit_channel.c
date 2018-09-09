@@ -13,9 +13,6 @@
 
 #include <kernel/ic.h>
 
-#include <kernel/mod/make_args.h>
-
-
 
 
 /*
@@ -46,28 +43,31 @@
  */
 
 
-
-#ifndef MAKE_ARGS
-#define MAKE_ARGS 0,0,0,
-#endif
-
-#define MAKE_ARGS 0,0,0,
-
-
-
+//------------------------------------------------ Make parameters ------------------------------------------------
 /*
- * Make attributes :
- * 	- 0 : Channel identifier;
- * 	- 1 : interrupt channel;
- * 	- 2 : start of the channel's registers area;
+ * Makefile must provide :
+ * 	- CHANNEL_ID : Channel identifier;
+ * 	- INT_CHANNEL : interrupt channel;
+ * 	- REG : start of the channel's registers area;
  */
 
-//TODO MAKE ARGS:
+//If one of the macro was not provided :
+#if !defined(CHANNEL_ID) || !defined(INT_CHANNEL) || !defined(REG)
 
+//Log
+#error "Error, at least one macro argument hasn't been provided. Check the makefile;"
+
+//Define macros. Allows debugging on IDE environment;
 #define CHANNEL_ID 	0
-#define INT_CHANNEL MAKE_ARG(1)
-#define REGISTERS ((volatile uint32_t *)(MAKE_ARG(2)))
+#define INT_CHANNEL 0
+#define REG 0
 
+#endif
+
+
+//------------------------------------------------ Internal parameters ------------------------------------------------
+
+#define REGISTERS ((volatile uint32_t *)(REG))
 
 #define LDVAL 	((volatile uint32_t *) (REGISTERS))
 #define CVAL 	((volatile uint32_t *) (REGISTERS + 1))
@@ -84,20 +84,6 @@
 #define TFLG_TIF (1<<0)
 
 
-
-
-//Close the timer resource : will neutralise the interface;
-static void close();
-
-//Transmit the timer interface;
-static bool interface(void *data, size_t data_size);
-
-
-static struct dfs_file_operations file_operations = {
-	.close = &close,
-	.interface = &interface,
-};
-
 //-------------------------------------------------- Timer Operations --------------------------------------------------
 
 /*
@@ -106,41 +92,46 @@ static struct dfs_file_operations file_operations = {
 
 
 //The ratio tics/period;
-static float period_to_tics;
+static uint32_t period_to_tics;
 
 //The maximal period;
-static float max_period;
+static uint32_t max_period;
 
 
 //TODO BUS CLOCK;
 
 static void set_base_frequency(uint32_t frequency) {
+;
 
 	//Determine the tics/period ratio;
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
-	//TODO:::::::: float _period_to_tics = ((float) iface->clock_frequency) / ((float) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
 
-	float _period_to_tics = ((float) 24000000) / ((float) frequency);
+	//TODO FPU !!!!!!!!!!!!!!!!!!!!
+
+
+	uint32_t _period_to_tics = ((uint32_t) 24000000) / ((uint32_t) frequency);
 
 	//Determine the maximal period;
-	float _max_period = ((float) (uint32_t) -1) / period_to_tics;
+	uint32_t _max_period = ((uint32_t) -1) / period_to_tics;
 
 	//Save both constants;
 	period_to_tics = _period_to_tics;
 	max_period = _max_period;
+
 
 }
 
@@ -171,7 +162,7 @@ static bool enabled() {
 
 
 //Update the reload value;
-static void set_count(float period_count) {
+static void set_count(uint32_t period_count) {
 
 	if (period_count < max_period) {
 		*CVAL = (uint32_t) (period_to_tics * period_count);
@@ -180,13 +171,13 @@ static void set_count(float period_count) {
 }
 
 //Get the current value;
-static float get_count() {
-	return (((float) *CVAL) / period_to_tics);
+static uint32_t get_count() {
+	return (((uint32_t) *CVAL) / period_to_tics);
 }
 
 
 //Update the reload value;
-static void set_ovf(float period_count) {
+static void set_ovf(uint32_t period_count) {
 
 	if (period_count < max_period) {
 		*LDVAL = (uint32_t) (period_to_tics * period_count);
@@ -194,8 +185,8 @@ static void set_ovf(float period_count) {
 }
 
 //Get the reload value;
-static float get_ovf() {
-	return (((float) *LDVAL) / period_to_tics);
+static uint32_t get_ovf() {
+	return (((uint32_t) *LDVAL) / period_to_tics);
 }
 
 
@@ -208,6 +199,7 @@ static void enable_int() {
 
 //Disable the interrupt;
 static void disable_int() {
+
 	//Clear bit 1 of TCTRL;
 	*TCTRL &= ~TCTRL_TIE;
 }
@@ -278,9 +270,11 @@ static void clear_flag() {
 
 
 
-#define CCAT(a, b, ...) a##b##__VA_ARGS__
+#define _CAT(a, b, c) a##b##c
 
-#define NM(name) CCAT(name,_,CHANNEL_ID)
+#define CAT(a, b, c)  _CAT(a, b, c)
+
+#define NM(name) CAT(name,_,CHANNEL_ID)
 
 
 /*
@@ -317,11 +311,30 @@ struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) 
 #define SNM(name) STR(NM(name))
 
 //Create the name;
-const char *const pit_name = SNM(pit_);
+static const char *const pit_name = SNM(pit_);
 
 //No more use for these macros;
 #undef STR
 #undef SNM
+
+
+
+//Close the timer resource : will neutralise the interface;
+static void channel_close(){
+	//TODO
+}
+
+//Transmit the timer interface;
+static bool channel_interface(void *data, size_t data_size) {
+	return true;
+}
+
+
+static struct dfs_file_operations file_operations = {
+	.close = &channel_close,
+	.interface = &channel_interface,
+};
+
 
 
 /**
@@ -339,12 +352,10 @@ void NM(kx_pit_channel_init)() {
 }
 
 
-
-
 /**
  * 	kx_pit_channel_exit_i : initialises the channel; Called by the pit module's init function
  */
-bool NM(kx_pit_channel_exit)() {gi
+bool NM(kx_pit_channel_exit)() {
 
 	//Attempt to remove the file;
 	if (dfs_remove(pit_name)) {

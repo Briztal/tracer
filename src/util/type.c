@@ -1,5 +1,5 @@
 /*
-  list.h Part of TRACER
+  type.h Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 

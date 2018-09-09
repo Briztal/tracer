@@ -1,5 +1,5 @@
 /*
-  systick.h Part of TRACER
+  sysclock.h Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 

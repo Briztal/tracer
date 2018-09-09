@@ -27,33 +27,40 @@
 
 #include <kernel/mod/auto_mod.h>
 
-#include <kernel/mod/make_args.h>
+#include <util/macro/incr_call.h>
 
+
+
+
+//--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Make attributes : 
- * 	- 0 : MCR address;
- * 	- 1 : number of channels;
+ * Makefile must provide :
+ * 	- MCR_REG : address of the MCR register;
+ * 	- NB_CHANNELS : number of channels;
  */
 
 
+//If one of the macro was not provided :
+#if !defined(MCR_REG) || !defined(MCR_REG)
 
-#ifdef MAKE_ARGS
-//If make arguments are provided, use them to define macro symbols;
+//Log
+#error "Error, at least one macro argument hasn't been provided. Check the makefile;"
 
-#define    MCR            ((volatile uint32_t *) MAKE_ARG(0))
-#define    NB_CHANNELS    MAKE_ARG(1)
-
-#else
-//If not, set macro symbols to their default value. Used for IDE debug;
-
-#define    MCR         	((volatile uint32_t *) 0x40037000)
+//Define macros. Allows debugging on IDE environment;
+#define    MCR_REG      0
 #define    NB_CHANNELS  4
 
 #endif
 
 
+//------------------------------------------------- Internal parameters ------------------------------------------------
 
+//The casted address of the MCR
+#define MCR 	((volatile uint32_t *) MCR_REG)
+
+
+//------------------------------------------------ Channel declarations ------------------------------------------------
 
 /*
  * The PIT module interacts with a PIT peripheral.
@@ -66,27 +73,30 @@
 
 //CHANNEL_DECLARE will declare the channel struct and the channel init function;
 #define CHANNEL_DECLARE(i) \
-	struct timer_interface kx_pit_channel_##i;\
+	extern struct timer_interface kx_pit_channel_##i;\
 	void kx_pit_channel_init_##i();\
 	bool kx_pit_channel_exit_##i();
 
 //Declare each channel;
-MULTI_MACRO(NB_CHANNELS, CHANNEL_DECLARE);
+INCR_CALL(NB_CHANNELS, CHANNEL_DECLARE);
 
 //Macro not used anymore;
 #undef CHANNEL_DECLARE
 
 
+//--------------------------------------------------- Channel array ----------------------------------------------------
 
 //INIT_ARRAY will print the reference of the i-th timer channel;
 #define INIT_ARRAY(i) &kx_pit_channel_##i,
 
 //Initialize the interfaces array;
-struct timer_interface *interfaces[NB_CHANNELS] = {MULTI_MACRO(NB_CHANNELS, INIT_ARRAY)};
+struct timer_interface *interfaces[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
 
 //Macro not used anymore;
 #undef INIT_ARRAY
 
+
+//----------------------------------------------------- Init - Exit ----------------------------------------------------
 
 static void pit_init() {
 
@@ -100,10 +110,11 @@ static void pit_init() {
 	#define TIMER_INIT(i) kx_pit_channel_init_##i();
 
 	//Initialise each channel;
-	MULTI_MACRO(NB_CHANNELS, TIMER_INIT);
+	INCR_CALL(NB_CHANNELS, TIMER_INIT);
 
 	//Macro not used anymore;
 	#undef TIMER_INIT
+
 }
 
 
@@ -121,7 +132,7 @@ static bool pit_exit() {
 				return false;}\
 
 	//Initialise each channel;
-	MULTI_MACRO(NB_CHANNELS, TIMER_EXIT);
+	INCR_CALL(NB_CHANNELS, TIMER_EXIT);
 
 	//Macro not used anymore;
 	#undef TIMER_EXIT
@@ -142,4 +153,4 @@ static bool pit_exit() {
 
 
 //Embed the PIT module in the executable;
-KERNEL_EMBED_MODULE("pit", &pit_init, &pit_exit);
+KERNEL_EMBED_MODULE(pit, &pit_init, &pit_exit);

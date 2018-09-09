@@ -46,17 +46,17 @@ struct timer_interface {
 
 
 	//Set the timer's count;
-	void (*const set_count)(float period);
+	void (*const set_count)(uint32_t period);
 
 	//Get the timer's count;
-	float (*const get_count)();
+	uint32_t (*const get_count)();
 
 
 	//Set the reload interrupt value;
-	void (*const set_ovf_value)(float period);
+	void (*const set_ovf_value)(uint32_t period);
 
 	//Get the reload interrupt value;
-	float (*const get_ovf_value)();
+	uint32_t (*const get_ovf_value)();
 
 
 	//Enable the reload interrupt;
@@ -111,24 +111,24 @@ static inline bool timer_started(struct timer_interface *timer) {
 
 
 //Set the timer count value;
-static inline void timer_set_count(struct timer_interface *timer, float period) {
+static inline void timer_set_count(struct timer_interface *timer, uint32_t period) {
 	(*(timer->set_count))(period);
 
 }
 
 //Set the timer count value;
-static inline float timer_get_count(struct timer_interface *timer) {
+static inline uint32_t timer_get_count(struct timer_interface *timer) {
 	return (*(timer->get_count))();
 }
 
 
 //Set the timer reload value;
-static inline void timer_set_ovf_value(struct timer_interface *timer, float period) {
+static inline void timer_set_ovf_value(struct timer_interface *timer, uint32_t period) {
 	(*(timer->set_ovf_value))(period);
 }
 
 //Set the timer count value;
-static inline float timer_get_ovf_value(struct timer_interface *timer) {
+static inline uint32_t timer_get_ovf_value(struct timer_interface *timer) {
 	return (*(timer->get_ovf_value))();
 }
 

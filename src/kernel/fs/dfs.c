@@ -1,25 +1,36 @@
-//
-// Created by root on 9/3/18.
-//
+/*
+  dfs.c Part of TRACER
+
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 #include <kernel/driver/driver.h>
 #include <kernel/krnl.h>
 #include <string.h>
+#include <kernel/panic.h>
 #include "dfs.h"
 
-struct dfs_file *first_file;
+static struct dfs_file *files;
 
 
 //Add a file in the file system;
 void dfs_create(const char *const name, const enum dfs_file_type type,
 				const struct dfs_file_operations *const operations, void *const resource) {
 
-	//Check that the file is not null;
-	if (!resource) {
-
-		kernel_panic("dfs_create : null resource ptr");
-
-	}
 
 	//Allocate the memory for the file;
 	struct dfs_file *file = kmalloc(sizeof(struct dfs_file));
@@ -54,22 +65,14 @@ void dfs_create(const char *const name, const enum dfs_file_type type,
 	//Initialise;
 	memcpy(file, &init, sizeof(struct dfs_file));
 
+
 	/*
 	 * Add to the files list;
 	 */
 
-	//If the first file is null :
-	if (!first_file) {
 
-		//Set to be the first file;
-		first_file = file;
-
-	} else {
-
-		//If not, insert with no order;
-		list_concat((struct list_head *) file, (struct list_head *) first_file);
-
-	}
+	//If not, insert with no order;
+	list_concat_ref((struct list_head *) file, (struct list_head **) &files);
 
 }
 
@@ -78,7 +81,7 @@ void dfs_create(const char *const name, const enum dfs_file_type type,
 void *dfs_search(const char *name) {
 
 	//Cache the current file, as the first file;
-	struct dfs_file *const first = first_file, *file = first;
+	struct dfs_file *const first = files, *file = first;
 
 	//If there are no files :
 	if (!file) {
@@ -100,6 +103,9 @@ void *dfs_search(const char *name) {
 		file = file->head.next;
 
 	} while (file != first);
+
+	//File was not found, return 0;
+	return 0;
 
 }
 
@@ -126,26 +132,7 @@ void dfs_delete(struct dfs_file *file) {
 	 * Now delete the file;
 	 */
 
-	//If the file is the first file :
-	if (first_file == file) {
-
-		//Cache the file's successor;
-		struct dfs_file *next = file->head.next;
-
-		//If the file has a successor :
-		if (next != file) {
-
-			first_file = next;
-
-		} else {
-
-			first_file = 0;
-		}
-
-	}
-
-	//Remove the file from the list;
-	list_remove((struct list_head *) file);
+	list_remove_ref_next((struct list_head *) file, (struct list_head **) files);
 
 }
 

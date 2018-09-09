@@ -6,17 +6,29 @@ KERNEL_DIR := kernel
 KERNEL_PRIV_DIR += $(KERNEL_DIR)
 
 #The syscall source file can be linked to exernal libs;
-KERNEL_PUB_SRCS += $(KERNEL_DIR)/syscall.c
+
+#Add the communication protocol;
+KERNEL_SRCS +=  $(KERNEL_DIR)/debug/probe.c
+KERNEL_SRCS +=  $(KERNEL_DIR)/debug/debug.c
+
+
+#Add the communication protocol;
+KERNEL_SRCS +=  $(KERNEL_DIR)/fs/dfs.c
 
 #Add memory management sources;
 KERNEL_SRCS += $(KERNEL_DIR)/mem/ram.c
 KERNEL_SRCS += $(KERNEL_DIR)/mem/heap.c
 KERNEL_SRCS += $(KERNEL_DIR)/mem/mem.c
 
+#Mod sources;
+KERNEL_SRCS += $(KERNEL_DIR)/mod/mod.c
 
-#Add the communication protocol;
-KERNEL_SRCS +=  $(KERNEL_DIR)/debug/probe.c
-KERNEL_SRCS +=  $(KERNEL_DIR)/debug/debug.c
+#Add the scheduler folder
+KERNEL_SRCS += $(KERNEL_DIR)/scheduler/prc.c
+KERNEL_SRCS += $(KERNEL_DIR)/scheduler/sched.c
+
+#Add timer structs
+KERNEL_SRCS +=  $(KERNEL_DIR)/timer/timer.c
 
 #Struct sources;
 KERNEL_SRCS += $(KERNEL_DIR)/struct/nlist.c
@@ -29,10 +41,5 @@ KERNEL_SRCS += $(KERNEL_DIR)/krnl.c
 KERNEL_SRCS += $(KERNEL_DIR)/panic.c
 KERNEL_SRCS += $(KERNEL_DIR)/sysclock.c
 
-#Mod sources;
-KERNEL_SRCS += $(KERNEL_DIR)/mod/mod.c
+KERNEL_PUB_SRCS += $(KERNEL_DIR)/syscall.c
 
-
-#Add the scheduler folder
-KERNEL_SRCS += $(KERNEL_DIR)/scheduler/prc.c
-KERNEL_SRCS += $(KERNEL_DIR)/scheduler/sched.c

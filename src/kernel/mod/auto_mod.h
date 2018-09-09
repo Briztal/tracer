@@ -47,8 +47,8 @@ struct auto_mod {
 };
 
 #define KERNEL_EMBED_MODULE(name_litteral, init_function, exit_function)\
-	static struct auto_mod mod __attribute__((section("embedded_modules"), used)) = \
-	{.init = (init_function), .exit = (exit_function), .name = (name_litteral)};
+	static struct auto_mod mod##name_litteral __attribute__((section (".kernel_embedded_modules"), used)) = \
+	{.init = (init_function), .exit = (exit_function), .name = (#name_litteral)};
 
 
 

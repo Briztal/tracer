@@ -10,40 +10,61 @@ PROJECT_NAME := tracer
 #Elf - hex names;
 NAME := $(BUILDDIR)/$(PROJECT_NAME)
 
+#Board name; Must match a folder in src/hard/board;
+BOARD := teensy35
+
+#---------------------------------------------------- Primary config ---------------------------------------------------
 
 #Initialise compilation and linking flags;
 CFLAGS := -Wall -Os -g
 LDFLAGS := -Wall -Wl,--gc-sections -Os
 
-KERNEL_DEP :=
-
+#The default include path set. Comprises just src.
+INC = -Isrc
 
 #--------------------------------------------------- Utilities Module --------------------------------------------------
 
-#The util include path; Available to all sources;
-UTIL_INC :=
+#The util sources list;
+UTIL_SRCS :=
 
-#Include the core makefile, to build the core library appropriately;
+#The util makefile will add all util sources to UTIL_SRCS;
 include src/util/Makefile
 
+#Build the objects set from sources and reroute to build dir;
+UTIL_OBJS := $(foreach src, $(UTIL_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
-#--------------------------------------------------- Core Module ---------------------------------------------------
+#The core library depends on all core objects mentionned by the core makefile and its subs;
+util : $(UTIL_OBJS)
+
+
+#--------------------------------------------------- Hard Module ---------------------------------------------------
 
 #The hardware module selects the memory map link script;
 LDSCRIPT_MMAP_DIR :=
 
-#Include the hard makefile, to build the hard library appropriately;
-include src/hard/Makefile
+#The modules list references all rules that the module lib depends on;
+MODULES :=
 
-#Now that the core makefile has updated link files, add appropriate options to the link flags;
+#The modules objects references all objects files that the module lib comprises;
+MODULES_OBJS :=
+
+#Include the platform makefile;
+include src/hard/board/$(BOARD)/Makefile
+
+#Build the objects set from sources and reroute to build dir;
+HARD_OBJS := $(foreach src, $(HARD_SRCS:.c=.o), $(BUILDDIR)/$(src))
+
+#The hardware lib, depends on all selected hardware sources;
+hard : $(HARD_OBJS)
+
+#The modules lib depends on all modules rules;
+modules : $(MODULES)
+
+#Now that the hardware lib has updated link files, add appropriate options to the link flags;
 LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 
 #---------------------------------------------------- Kernel Module ----------------------------------------------------
-
-
-#The kernel include path; The core lib is provided;
-KERNEL_INC := -Isrc/
 
 #The kernel lib public sources, available to processes and modules;
 KERNEL_PUB_SRCS :=
@@ -51,58 +72,37 @@ KERNEL_PUB_SRCS :=
 #The kernel lib internal sources, only available to kernel sources;
 KERNEL_SRCS :=
 
-
 #Include the kernel makefile, to build the kernel library appropriately;
 include src/kernel/Makefile
-
 
 #Build the objects set from sources and reroute to build dir;
 KERNEL_OBJS := $(foreach src, $(KERNEL_SRCS:.c=.o), $(BUILDDIR)/$(src))
 KERNEL_PUB_OBJS := $(foreach src, $(KERNEL_PUB_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
 
-#The kernel compilation rule;
-$(BUILDDIR)/kernel/%.o: src/kernel/%.c
-	@echo "[CC]\t$@"
-	@mkdir -p "$(dir $@)"
-	@$(CC) $(CFLAGS) $(KERNEL_INC) -o $@ -c $<
-
-
-kernel : $(KERNEL_OBJS) $(KERNEL_DEP)
-
+kernel : $(KERNEL_OBJS)
 
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
 
-# The base compilation rule : takes a path that targets the build directory, truncates the source part,
-#	creates a directory to contain the object file and builds it from the associated source file;
-#	If the associated source file does not exist, it will fail.
+#The general compilation rule. Compiles a source file in src/, saves the output in the corresponding path in build/;
+#Requires the compiler (CC) to be up to date, and all C flags to be appropriately set;
+$(BUILDDIR)/%.o: src/%.c
 
-#(BUILDDIR)/%.o: %.c
-#	@echo "[CC]\t$@"
-#	@mkdir -p "$(dir $@)"
-#	@$(CC) $(CFLAGS) $(COMPIL_INC) -o "$@" -c "$<"
+#Display the name of the source we compile;
+	@echo "[CC]\t$@"
+
+#Create a dir if necessary;TODO NOPE, TAKES WAY TOO MUCH TIME !
+	@mkdir -p "$(dir $@)"
+
+#Compile, providing only src in include path, and all C flags;
+	@$(CC) $(CFLAGS) $(INC) -o $@ -c $<
 
 
-# The elf rule. Depends on core lib.
-elf: core kernel util
+
+elf: hard modules kernel util
 	@echo "[LD]\ttracer.elf"
-	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) -Wl,--whole-archive $(MODULES) -Wl,--no-whole-archive $(UTIL_OBJS) -o $(NAME).elf
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
-	#TODO THIS IS NOT LINKED PROPERLY !!
+	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(MODULES_OBJS) $(UTIL_OBJS) -o $(NAME).elf
 
 
 
