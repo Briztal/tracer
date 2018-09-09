@@ -24,11 +24,12 @@ LDSCRIPT_MMAP_DIR := src/hard/chip/nxp/kinetis/mk64fx512/
 
 #------------------ Periodic Interrupt Timer ------------------
 
-#Add the pit module to the kernel dependencies
-#KERNEL_DEP += pit
 
-#Hardware specs are required to build the PIT
-PIT_FLAGS = -D__MCR__=0x40037000 -D__REGISTERS_START__=0x40037100 -D__REGISTERS_SPACING__=0x10 -D__NB_CHANNELS__=4
+SK_DIR	:=  src/hard/chip/nxp/kinetis
+BK_DIR	:=  build/hard/chip/nxp/kinetis
+
+#Add the pit module to the kernel dependencies
+KERNEL_DEP += pit
 
 #This rule will build the pit archive;
 pit:
@@ -36,19 +37,20 @@ pit:
 	#Create a directory for the PIT library;
 	@mkdir -p build/mod/PIT
 
-	#Compile four channels;
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=48 -D__CHANNEL_ID__=0 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=49 -D__CHANNEL_ID__=1 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=50 -D__CHANNEL_ID__=2 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) $(CORE_INC) -D__INT_CHANNEL__=51 -D__CHANNEL_ID__=3 -o build/mod/PIT/pit_channel_0 -c src/$(K_DIR)/kx_pit_channel.c
+	#Compile four channels; Each channel takes 4 arguments :
+	#	channel identifier, interrupt channel,start of the registers area;
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -DMAKE_ARGS=0,48,0x40037100, -o $(BK_DIR)/pit0.o -c $(SK_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -DMAKE_ARGS=1,49,0x40037110, -o $(BK_DIR)/pit1.o -c $(SK_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -DMAKE_ARGS=2,50,0x40037120, -o $(BK_DIR)/pit2.o -c $(SK_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -DMAKE_ARGS=3,51,0x40037120, -o $(BK_DIR)/pit3.o -c $(SK_DIR)/kx_pit_channel.c
 
-	#Compile four channels;
-	@$(CC) $(CFLAGS) $(PIT_FLAGS) -o build/mod/PIT/pit -c $(K_DIR)/kx_pit.c
+	#Compile the pit manager; It takes two arguments, the mcr address and the number of channels;
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -DMAKE_ARGS=0x40037000,4 -o $(BK_DIR)/pit.o -c $(SK_DIR)/kx_pit.c
 
-    #Archive the module to hide symbols;
-	@$(AR) cr build/mod/PIT/libpit.ar
+    #Link the pit module;
+	@$(AR) cr build/mod/pit.a $(BK_DIR)/pit.o $(BK_DIR)/pit0.o $(BK_DIR)/pit1.o $(BK_DIR)/pit2.o $(BK_DIR)/pit3.o
 
 
 #Add the PIT module to the modules list;
-MODULES += buld/mod/PIT/libpit.ar
+MODULES += build/mod/pit.a
 

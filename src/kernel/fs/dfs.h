@@ -39,6 +39,30 @@ struct dfs_file_operations {
 };
 
 
+
+struct dfs_file {
+
+	//files are linked;
+	struct list_head head;
+
+	//The name of the file;
+	const char *const name;
+
+	//The status of the file;
+	bool file_open;
+
+	//The type of resource;
+	const enum dfs_file_type type;
+
+	//The associated file operation struct;
+	const struct dfs_file_operations *const operations;
+
+	//The resource itself;
+	void *const resource;
+
+};
+
+
 static inline void file_op_open(struct dfs_file *file) {
 
 	//Cache the function;
@@ -74,28 +98,6 @@ static inline bool file_op_interface(struct dfs_file *file, void *data, size_t s
 
 }
 
-
-struct dfs_file {
-
-	//files are linked;
-	struct list_head head;
-
-	//The name of the file;
-	const char *const name;
-
-	//The status of the file;
-	bool file_open;
-
-	//The type of resource;
-	const enum dfs_file_type type;
-
-	//The associated file operation struct;
-	const struct dfs_file_operations *const operations;
-
-	//The resource itself;
-	void *const resource;
-
-};
 
 
 //Add a file in the file system;

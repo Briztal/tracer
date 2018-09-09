@@ -15,9 +15,7 @@ NAME := $(BUILDDIR)/$(PROJECT_NAME)
 CFLAGS := -Wall -Os -g
 LDFLAGS := -Wall -Wl,--gc-sections -Os
 
-#The core include and sources lists are modified by the hardware makefile; They must be defined here;
-CORE_INC :=
-CORE_SRCS :=
+KERNEL_DEP :=
 
 
 #--------------------------------------------------- Utilities Module --------------------------------------------------
@@ -67,10 +65,11 @@ KERNEL_PUB_OBJS := $(foreach src, $(KERNEL_PUB_SRCS:.c=.o), $(BUILDDIR)/$(src))
 $(BUILDDIR)/kernel/%.o: src/kernel/%.c
 	@echo "[CC]\t$@"
 	@mkdir -p "$(dir $@)"
-	@$(CC) $(CFLAGS) $(KERNEL_INC) $(CORE_INC) -o $@ -c $<
+	@$(CC) $(CFLAGS) $(KERNEL_INC) -o $@ -c $<
 
 
-kernel : $(KERNEL_OBJS)
+kernel : $(KERNEL_OBJS) $(KERNEL_DEP)
+
 
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
@@ -86,9 +85,9 @@ kernel : $(KERNEL_OBJS)
 
 
 # The elf rule. Depends on core lib.
-elf: core kernel util $(KERNEL_DEP)
+elf: core kernel util
 	@echo "[LD]\ttracer.elf"
-	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(UTIL_OBJS) -o $(NAME).elf
+	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) -Wl,--whole-archive $(MODULES) -Wl,--no-whole-archive $(UTIL_OBJS) -o $(NAME).elf
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!
 	#TODO THIS IS NOT LINKED PROPERLY !!
