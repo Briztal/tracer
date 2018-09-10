@@ -36,7 +36,6 @@
 size_t strlen_safe(const char *str, size_t max_lengh) {
 
 	//Initialise the length;
-
 	size_t len = 0;
 
 	while (len < max_lengh) {

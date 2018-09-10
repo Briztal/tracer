@@ -68,6 +68,14 @@ extern void debug_delay_us(uint32_t ms);
  * ----------------------------------------------------- Log Debug -----------------------------------------------------
  */
 
+/*
+ * ----------------------------------------------------- Log Debug -----------------------------------------------------
+ */
+
+
+//Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
+void debug_print_char(char);
+
 
 //Send a string over the debug interface, encoded by the log protocol. Implemented by the log protocol;
 void debug_log(const char *msg);

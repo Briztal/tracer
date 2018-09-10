@@ -25,6 +25,7 @@
 #include <kernel/proc.h>
 #include <kernel/panic.h>
 #include <kernel/debug/debug.h>
+#include <kernel/log.h>
 
 
 //--------------------------------------------------- Modules globals --------------------------------------------------
@@ -137,5 +138,5 @@ void mod_autoload() {
 
 	}
 
-	debug_log("Modules loaded");
+	kernel_log_s("Modules loaded");
 }

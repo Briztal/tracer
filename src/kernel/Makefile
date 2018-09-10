@@ -38,6 +38,7 @@ KERNEL_SRCS += $(KERNEL_DIR)/struct/shared_fifo.c
 #Add all files of the kernel dir;
 KERNEL_SRCS += $(KERNEL_DIR)/ic.c
 KERNEL_SRCS += $(KERNEL_DIR)/krnl.c
+KERNEL_SRCS += $(KERNEL_DIR)/log.c
 KERNEL_SRCS += $(KERNEL_DIR)/panic.c
 KERNEL_SRCS += $(KERNEL_DIR)/sysclock.c
 

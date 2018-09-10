@@ -35,6 +35,7 @@
 #include <kernel/mod/mod.h>
 #include <kernel/debug/debug.h>
 #include <kernel/fs/dfs.h>
+#include <kernel/log.h>
 
 
 #define KERNEL_RAM_SIZE 2048
@@ -71,7 +72,7 @@ extern void __kernel_first_function(void *unused) {
 
 
 	while(1) {
-		debug_log("BITe");
+		//TODO debug_log("BITe");
 		dfs_list();
 		debug_delay_ms(500);
 	}
@@ -114,6 +115,16 @@ static void kernel_init() {
 
 	//Initialise the kernel program memory;
 	kernel_memory_init();
+
+	uint32_t t[] = {2476856};
+
+	kernel_log("SUUS %d BITE", t, 1);
+
+	while(1) {
+		kernel_log("SUUS %d BITE", t, 1);
+
+		debug_delay_ms(1000);
+	}
 
 	//TODO INIT FILE SYSTEM;
 

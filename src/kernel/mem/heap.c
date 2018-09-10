@@ -117,6 +117,7 @@ struct heap_block {
 
 void heap_print(struct heap_head *head) {
 
+	/*
 	debug_log("heap print : ");
 	debug_log_int(sizeof(struct heap_head));
 	debug_log_int(sizeof(struct heap_block));
@@ -191,6 +192,7 @@ void heap_print(struct heap_head *head) {
 		} while (b != blk);
 
 	}
+	 */
 
 }
 

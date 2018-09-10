@@ -44,7 +44,7 @@
  * @param c : the char to encode
  */
 
-void probe_send(char c) {
+void debug_print_char(char c) {
 
 	//Turn off the led;
 	debug_led_low();
@@ -97,13 +97,13 @@ void debug_log(const char *msg) {
 	while ((c = *(msg++))) {
 
 		//Send it;
-		probe_send(c);
+		debug_print_char(c);
 
 	}
 
 	//Send a new line and a carriage return;
-	probe_send('\n');
-	probe_send('\r');
+	debug_print_char('\n');
+	debug_print_char('\r');
 
 }
 

@@ -97,7 +97,7 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	//If another element has this name :
 	if (nlist_search(list, name)) {
 
-		debug_log("FILE WITH SAME NAME EXISTS");
+		//TODO debug_log("FILE WITH SAME NAME EXISTS");
 
 		//Do nothing;
 		return false;
@@ -239,14 +239,14 @@ void nlist_list(struct nlist *list) {
 
 	//If there are no files :
 	if (!file) {
-		debug_log("no files");
+		//TODO debug_log("no files");
 		return;
 	}
 
 	//For each file :
 	do {
 
-		debug_log(file->name);
+		//TODO debug_log(file->name);
 
 
 		//If not, focus on the next file;

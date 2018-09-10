@@ -1,6 +1,7 @@
 #include <kernel/debug/debug.h>
 #include "proc.h"
 #include "ic.h"
+#include "log.h"
 
 /*
   panic.c Part of TRACER
@@ -30,7 +31,7 @@ void kernel_panic(const char *msg) {
 	while (1) {
 
 		//Transmit the message;;
-		debug_log(msg);
+		kernel_log(msg, 0, 0);
 
 		//Wait for one second;
 		debug_delay_ms((uint32_t) 1000);
