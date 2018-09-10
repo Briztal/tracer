@@ -21,9 +21,6 @@ void stdout_str(void (*print)(char), const char *msg) {
 		//Send it;
 		(*print)(c);
 
-		//Debug
-		print('X');
-
 	}
 
 
@@ -35,24 +32,13 @@ void stdout_str(void (*print)(char), const char *msg) {
 void stdout_int(void (*print)(char), uint32_t integer, uint8_t base) {
 
 	//Cache an array of the appropriate length;
-	char t[32];
-
-	debug_log("");
-	debug_log_hex(t);
-
-	debug_log_hex(t + 32);
+	char t[33];
 
 	//Convert the integer;
 	char *str = itoa(integer, t, 32, base);
-	debug_log_hex(str);
-
-
 
 	//Log the value;
 	stdout_str(print, str);
-
-	//Debug
-	print('X');
 
 }
 
@@ -103,8 +89,6 @@ void stdout(void (*print)(char), const char *str, const uint32_t *args, size_t a
 					case 'd':
 						stdout_int(print, *args, 10);
 
-						//Debug
-						print('V');
 						break;
 
 						//Hexadecimal value;
@@ -117,12 +101,9 @@ void stdout(void (*print)(char), const char *str, const uint32_t *args, size_t a
 
 				}
 
-				/*
-
 				//Update the current arg, and decrease the number of arguments;
 				args++;
 				args_size--;
-				 */
 
 			}
 
