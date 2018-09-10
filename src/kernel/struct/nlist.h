@@ -54,5 +54,8 @@ void *nlist_remove(struct nlist *list, const char *name);
 //Clear the list; A function must be provided to delete properly all elements;
 void nlist_clear(struct nlist *list, void (*deleter)(void *));
 
+//Print all names in the list;
+void nlist_list(struct nlist *list);
+
 
 #endif //TRACER_NLIST_H

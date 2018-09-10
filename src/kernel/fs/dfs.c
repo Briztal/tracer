@@ -22,9 +22,14 @@
 #include <kernel/krnl.h>
 #include <string.h>
 #include <kernel/panic.h>
+#include <kernel/debug/debug.h>
+#include <kernel/struct/nlist.h>
 #include "dfs.h"
 
-static struct dfs_file *files;
+static struct nlist files = {
+	.elements = 0,
+	.name_max_length = 32,
+};
 
 
 //Add a file in the file system;
@@ -32,21 +37,8 @@ void dfs_create(const char *const name, const enum dfs_file_type type,
 				const struct dfs_file_operations *const operations, void *const resource) {
 
 
-	//Allocate the memory for the file;
-	struct dfs_file *file = kmalloc(sizeof(struct dfs_file));
-
 	//Create the file initializer;
 	struct dfs_file init = {
-
-		//Link to itself;
-		.head = {
-			.prev = file,
-			.next = file,
-		},
-
-
-		//Duplicate the name;
-		.name = kialloc(strlen(name), name),
 
 		//File closed;
 		.file_open = false,
@@ -62,55 +54,17 @@ void dfs_create(const char *const name, const enum dfs_file_type type,
 
 	};
 
-	//Initialise;
-	memcpy(file, &init, sizeof(struct dfs_file));
 
+	//Allocate the memory for the file;
+	struct dfs_file *file = kialloc(sizeof(struct dfs_file), &init);
 
-	/*
-	 * Add to the files list;
-	 */
-
-
-	//If not, insert with no order;
-	list_concat_ref((struct list_head *) file, (struct list_head **) &files);
+	//Add to the files list;
+	nlist_add(&files, name, file);
 
 }
 
 
-//Get a file from the file system;
-void *dfs_search(const char *name) {
-
-	//Cache the current file, as the first file;
-	struct dfs_file *const first = files, *file = first;
-
-	//If there are no files :
-	if (!file) {
-		return 0;
-	}
-
-	//For each file :
-	do {
-
-		//If names match :
-		if (!strcmp(name, file->name)) {
-
-			//Return the file;
-			return file;
-
-		}
-
-		//If not, focus on the next file;
-		file = file->head.next;
-
-	} while (file != first);
-
-	//File was not found, return 0;
-	return 0;
-
-}
-
-
-void dfs_delete(struct dfs_file *file) {
+void dfs_delete(struct dfs_file *file, const char *name) {
 
 	//Delete the resource;
 	switch (file->type) {
@@ -132,7 +86,7 @@ void dfs_delete(struct dfs_file *file) {
 	 * Now delete the file;
 	 */
 
-	list_remove_ref_next((struct list_head *) file, (struct list_head **) files);
+	nlist_remove(&files, name);
 
 }
 
@@ -141,7 +95,7 @@ void dfs_delete(struct dfs_file *file) {
 bool dfs_remove(const char *name) {
 
 	//Search for the required file;
-	struct dfs_file *file = dfs_search(name);
+	struct dfs_file *file = nlist_search(&files, name);
 
 	//If the file doesn't exist, stop here;
 	if (!file) return true;
@@ -154,7 +108,7 @@ bool dfs_remove(const char *name) {
 	} else {
 
 		//If not, delete it;
-		dfs_delete(file);
+		dfs_delete(file, name);
 		return true;
 
 	}
@@ -164,7 +118,7 @@ bool dfs_remove(const char *name) {
 
 struct dfs_file *dfs_open(const char *name) {
 
-	struct dfs_file *file = dfs_search(name);
+	struct dfs_file *file = nlist_search(&files, name);
 
 	if (!file) {
 		return 0;
@@ -206,6 +160,14 @@ void dfs_close(struct dfs_file *file) {
 
 	//If not, mark it closed;
 	file->file_open = false;
+
+}
+
+
+//List all files;
+void dfs_list() {
+
+	nlist_list(&files);
 
 }
 

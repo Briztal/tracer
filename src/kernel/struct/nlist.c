@@ -21,6 +21,7 @@
 #include <kernel/krnl.h>
 #include <util/string.h>
 #include <string.h>
+#include <kernel/debug/debug.h>
 #include "nlist.h"
 
 
@@ -92,8 +93,11 @@ void *nlist_search(const struct nlist *list, const char *const name) {
 
 bool nlist_add(struct nlist *list, const char *name, void *data) {
 
+
 	//If another element has this name :
 	if (nlist_search(list, name)) {
+
+		debug_log("FILE WITH SAME NAME EXISTS");
 
 		//Do nothing;
 		return false;
@@ -133,7 +137,7 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	memcpy(elmt, &elmt_init, sizeof(struct nlist_elmt));
 
 	//Link the element to the referenced list;
-	list_concat_ref((struct list_head *) elmt, (struct list_head **) list->elements);
+	list_concat_ref((struct list_head *) elmt, (struct list_head **) &list->elements);
 
 	//Complete;
 	return true;
@@ -222,5 +226,32 @@ void nlist_clear(struct nlist *list, void (*deleter)(void *)) {
 
 	//Reset the list reference;
 	list->elements = 0;
+
+}
+
+
+
+//List all files;
+void nlist_list(struct nlist *list) {
+
+	//Cache the current file, as the first file;
+	struct nlist_elmt *const first = list->elements, *file = first;
+
+	//If there are no files :
+	if (!file) {
+		debug_log("no files");
+		return;
+	}
+
+	//For each file :
+	do {
+
+		debug_log(file->name);
+
+
+		//If not, focus on the next file;
+		file = file->head.next;
+
+	} while (file != first);
 
 }

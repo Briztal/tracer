@@ -264,7 +264,7 @@ void proc_context_switcher() {
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
 	psp = kernel_switch_thread_stack(0, psp);
 
-	debug_log("PREEMPTION");
+	//debug_log("PREEMPTION");
 
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");

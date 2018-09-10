@@ -21,6 +21,7 @@
 #include "string.h"
 
 #include <string.h>
+#include <kernel/debug/debug.h>
 
 
 /**
@@ -35,12 +36,13 @@
 size_t strlen_safe(const char *str, size_t max_lengh) {
 
 	//Initialise the length;
+
 	size_t len = 0;
 
 	while (len < max_lengh) {
 
 		//If we found the null termination char :
-		if (!(str++)) {
+		if (!(*(str++))) {
 
 			//Return the length;
 			return len;
@@ -73,8 +75,6 @@ void strcopy_safe(char *dst, const char *src, size_t length) {
 	dst[length] = 0;
 
 }
-
-
 
 
 

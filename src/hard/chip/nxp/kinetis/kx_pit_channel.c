@@ -307,16 +307,12 @@ struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) 
 
 
 //Two macros to determine the string name;
-#define STR(i) #i
-#define SNM(name) STR(NM(name))
+#define _ST(x) #x
+#define ST(x) _ST(x)
+#define PNM "pit_" ST(CHANNEL_ID)
 
 //Create the name;
-static const char *const pit_name = SNM(pit_);
-
-//No more use for these macros;
-#undef STR
-#undef SNM
-
+static const char *const pit_name = PNM;
 
 
 //Close the timer resource : will neutralise the interface;

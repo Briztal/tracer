@@ -58,12 +58,6 @@ struct dfs_file_operations {
 
 struct dfs_file {
 
-	//files are linked;
-	struct list_head head;
-
-	//The name of the file;
-	const char *const name;
-
 	//The status of the file;
 	bool file_open;
 
@@ -117,8 +111,10 @@ static inline bool file_op_interface(struct dfs_file *file, void *data, size_t s
 
 
 //Add a file in the file system;
-void
-dfs_create(const char *name, enum dfs_file_type type, const struct dfs_file_operations *operations, void *resource);
+void dfs_create(const char *name,
+				enum dfs_file_type type,
+				const struct dfs_file_operations *operations,
+				void *resource);
 
 //Open a file;
 struct dfs_file *dfs_open(const char *name);
@@ -129,5 +125,7 @@ void dfs_close(struct dfs_file *file);
 //Remove a file; Will be deleted is file closed;
 bool dfs_remove(const char *name);
 
+//List all files;
+void dfs_list();
 
 #endif //TRACER_DFS_H
