@@ -18,6 +18,8 @@
 
 */
 
+#include <stdio.h>
+
 #include <kernel/driver/driver.h>
 #include <kernel/krnl.h>
 #include <string.h>
@@ -35,7 +37,6 @@ static struct nlist files = {
 //Add a file in the file system;
 void dfs_create(const char *const name, const enum dfs_file_type type,
 				const struct dfs_file_operations *const operations, void *const resource) {
-
 
 	//Create the file initializer;
 	struct dfs_file init = {

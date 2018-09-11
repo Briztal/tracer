@@ -20,9 +20,69 @@
 
 #include "string.h"
 
-#include <string.h>
 #include <kernel/debug/debug.h>
 
+
+//Copy @num bytes from src to dst;
+void memcpy(void *dst, const void *src, size_t num) {
+
+	//For each byte to copy :
+	while(num--) {
+
+		//Copy a byte from src to dst;
+		*((uint8_t *)(dst++)) = *((const uint8_t *)(src++));
+
+	}
+
+}
+
+//Initialise a memory block to a value;
+void memset(void *dst, uint8_t value, size_t num) {
+
+	//For each byte to copy :
+	while(num--) {
+
+		//Copy a byte from src to dst;
+		*((uint8_t *)(dst++)) = value;
+
+	}
+
+}
+
+
+/* Copyright (C) 1991-2018 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+   The GNU C Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   You should have received a copy of the GNU Lesser General Public
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
+
+
+/* Compare S1 and S2, returning less than, equal to or
+   greater than zero if S1 is lexicographically less than,
+   equal to or greater than S2.  */
+
+int8_t strcmp (const char *p1, const char *p2) {
+
+	const unsigned char *s1 = (const unsigned char *) p1;
+	const unsigned char *s2 = (const unsigned char *) p2;
+	unsigned char c1, c2;
+	do {
+		c1 = *s1++;
+		c2 = *s2++;
+		if (c1 == '\0')
+			return c1 - c2;
+	}
+	while (c1 == c2);
+	return c1 - c2;
+}
 
 /**
  * strlen_safe : determines the length of the provided char array; If the length is superior to the max, it returns the

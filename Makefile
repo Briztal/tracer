@@ -16,8 +16,8 @@ BOARD := teensy35
 #---------------------------------------------------- Primary config ---------------------------------------------------
 
 #Initialise compilation and linking flags;
-CFLAGS := -Wall -Os -g
-LDFLAGS := -Wall -Wl,--gc-sections -Os
+CFLAGS := -Wall -Os -g -std=c99 -ffreestanding
+LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 
 #The default include path set. Comprises just src.
 INC = -Isrc
@@ -106,7 +106,6 @@ $(BUILDDIR)/%.o: src/%.c
 
 #Compile, providing only src in include path, and all C flags;
 	@$(CC) $(CFLAGS) $(INC) -o $@ -c $<
-
 
 
 elf: hard modules kernel util

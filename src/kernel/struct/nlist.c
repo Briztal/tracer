@@ -19,10 +19,11 @@
 */
 
 #include <kernel/krnl.h>
+
 #include <util/string.h>
-#include <string.h>
-#include <kernel/debug/debug.h>
+
 #include <kernel/log.h>
+
 #include "nlist.h"
 
 

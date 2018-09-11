@@ -27,6 +27,15 @@
 
 #include <stddef.h>
 
+
+//Copy @num bytes from src to dst;
+void memcpy(void *dst, const void *src, size_t num);
+
+//Initialise a memory block to a value;
+void memset(void *dst, uint8_t value, size_t num);
+
+int8_t strcmp(const char *c1, const char *c2);
+
 //Returns the length of the string, or the max if superior;
 size_t strlen_safe(const char *str, size_t max_lengh);
 
