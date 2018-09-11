@@ -57,9 +57,6 @@ HARD_OBJS := $(foreach src, $(HARD_SRCS:.c=.o), $(BUILDDIR)/$(src))
 #The hardware lib, depends on all selected hardware sources;
 hard : $(HARD_OBJS)
 
-#The modules lib depends on all modules rules;
-modules : $(MODULES)
-
 #Now that the hardware lib has updated link files, add appropriate options to the link flags;
 LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
@@ -82,6 +79,18 @@ KERNEL_PUB_OBJS := $(foreach src, $(KERNEL_PUB_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
 kernel : $(KERNEL_OBJS)
 
+#---------------------------------------------------- Custom modules ----------------------------------------------------
+
+MODULES_SRCS :=
+
+#Include the modules makefile, to embed all required modules;
+include src/modules/Makefile
+
+#Build the objects set from sources and reroute to build dir;
+MODULES_OBJS += $(foreach src, $(MODULES_SRCS:.c=.o), $(BUILDDIR)/$(src))
+
+#The modules lib depends on all modules rules and all modules files;
+modules : $(MODULES) $(MODULES_OBJS)
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
 

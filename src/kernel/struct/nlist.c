@@ -22,6 +22,7 @@
 #include <util/string.h>
 #include <string.h>
 #include <kernel/debug/debug.h>
+#include <kernel/log.h>
 #include "nlist.h"
 
 
@@ -97,7 +98,7 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	//If another element has this name :
 	if (nlist_search(list, name)) {
 
-		//TODO debug_log("FILE WITH SAME NAME EXISTS");
+		kernel_log("\nWarning : nlist_add : file with name [%s] already exists;", name);
 
 		//Do nothing;
 		return false;
@@ -239,14 +240,14 @@ void nlist_list(struct nlist *list) {
 
 	//If there are no files :
 	if (!file) {
-		//TODO debug_log("no files");
+		kernel_log_("no files");
 		return;
 	}
 
 	//For each file :
 	do {
 
-		//TODO debug_log(file->name);
+		kernel_log_(file->name);
 
 
 		//If not, focus on the next file;

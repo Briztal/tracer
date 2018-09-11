@@ -153,4 +153,4 @@ static bool pit_exit() {
 
 
 //Embed the PIT module in the executable;
-KERNEL_EMBED_MODULE(pit, &pit_init, &pit_exit);
+KERNEL_EMBED_PERIPHERAL_MODULE(pit, &pit_init, &pit_exit);

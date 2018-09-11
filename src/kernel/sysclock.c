@@ -21,6 +21,7 @@
 #include <kernel/scheduler/prc.h>
 #include "sysclock.h"
 #include "ic.h"
+#include "log.h"
 
 
 //------------------------------------------------------- Systick ------------------------------------------------------
@@ -82,6 +83,9 @@ void sysclock_init() {
 
 	//Start the core timer;
 	systimer_start();
+
+	//Log;
+	kernel_log_("system clock initialised");
 
 }
 //---------------------- System tick ----------------------

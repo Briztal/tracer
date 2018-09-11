@@ -46,9 +46,29 @@ struct auto_mod {
 
 };
 
-#define KERNEL_EMBED_MODULE(name_litteral, init_function, exit_function)\
-	static struct auto_mod mod##name_litteral __attribute__((section (".kernel_embedded_modules"), used)) = \
-	{.init = (init_function), .exit = (exit_function), .name = (#name_litteral)};
+
+
+#define _KERNEL_EMBED_MODULE(name_l, section_name, init_f, exit_f)\
+	static struct auto_mod mod##name_l __attribute__((section (section_name), used)) = \
+	{.init = (init_f), .exit = (exit_f), .name = (#name_l)};
+
+/*
+ * There are distinct type of modules, that rely on different pre-initialisations :
+ * 	- Peripheral modules, that only rely on base kernel initialisation;
+ * 	- System modules, TODO;
+ * 	- User modules that can rely on peripheral modules and system modules;
+ */
+
+#define KERNEL_EMBED_PERIPHERAL_MODULE(name, init, exit)\
+	_KERNEL_EMBED_MODULE(name, ".kernel_peripheral_modules", init, exit)
+
+
+#define KERNEL_EMBED_SYSTEM_MODULE(name, init, exit)\
+	_KERNEL_EMBED_MODULE(name, ".kernel_system_modules", init, exit)
+
+
+#define KERNEL_EMBED_USER_MODULE(name, init, exit)\
+	_KERNEL_EMBED_MODULE(name, ".kernel_user_modules", init, exit)
 
 
 

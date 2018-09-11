@@ -74,7 +74,7 @@ void debug_print_char(char c) {
 		word >>= 1;
 
 		//Wait one millisecond time;
-		debug_delay_us(500);
+		debug_delay_us(250);
 
 	}
 
@@ -83,7 +83,7 @@ void debug_print_char(char c) {
 
 
 	//Wait three millisecond time;
-	debug_delay_ms(7);
+	debug_delay_us(600);
 
 }
 

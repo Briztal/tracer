@@ -24,8 +24,16 @@ INCLUDE memory_map.ld
 
 /*
  * The linking script will provide the following constants :
- *  - _emod_start   :   the start address of kernel embedded modules structs in FLASH;
- *  - _emod_end     :   the end address of kernel embedded modules structs in FLASH;
+
+ * Kernel modules :
+ *  - _pmod_start   :   the start address of kernel peripheral modules structs in FLASH;
+ *  - _pmod_end     :   the end address of kernel peripheral modules structs in FLASH;
+ *  - _smod_start   :   the start address of kernel system modules structs in FLASH;
+ *  - _smod_end     :   the end address of kernel system modules structs in FLASH;
+ *  - _umod_start   :   the start address of kernel user modules structs in FLASH;
+ *  - _umod_end     :   the end address of kernel user modules structs in FLASH;
+ *
+ *
  *  - _data_lma     :   the load address of the data region, in FLASH
  *  - _data_vma     :   the lowest address of the data region in RAM;
  *  - _end_data     :   the highest address of the data region in RAM;
@@ -64,15 +72,24 @@ SECTIONS {
     } > FLASH
 
 
-    _emod_start = .;
-
     /*The embedded modules section contains kernel modules to load at init;*/
-    .embedded_modules : {
+    .kernel_modules : {
+
         . = ALIGN(4);
-        KEEP(*(.kernel_embedded_modules*))
+        _pmod_start = .;
+        KEEP(*(.kernel_peripheral_modules))
+        _pmod_end = .;
+
+        _smod_start = .;
+        KEEP(*(.kernel_system_modules))
+        _smod_end = .;
+
+        _umod_start = .;
+        KEEP(*(.kernel_user_modules))
+        _umod_end = .;
+
      } > FLASH
 
-     _emod_end = .;
 
 
     /*The rodata section contains constant data (const, strings, ...);*/

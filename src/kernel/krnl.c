@@ -107,6 +107,9 @@ static void kernel_syscall_handler() {
 
 static void kernel_init() {
 
+	//Log.
+	kernel_log_("Entering kernel initialisation sequence;\n")
+
 	//Disable interrupt management:
 	ic_disable_interrupts();
 
@@ -116,15 +119,8 @@ static void kernel_init() {
 	//Initialise the kernel program memory;
 	kernel_memory_init();
 
-	uint32_t t[] = {2476856};
-
-	kernel_log("SUUS %d BITE", t, 1);
-
-	while(1) {
-		kernel_log("SUUS %d BITE", t, 1);
-
-		debug_delay_ms(1000);
-	}
+	//Initialise the system clock;
+	sysclock_init();
 
 	//TODO INIT FILE SYSTEM;
 
@@ -135,6 +131,7 @@ static void kernel_init() {
 
 	//Initialise embedded drivers;
 	mod_autoload();
+
 
 	//Start the process execution;
 	kernel_start_execution();
@@ -194,7 +191,12 @@ static void kernel_memory_init() {
 
 	struct prog_mem *km = kernel_memory = prog_mem_create(KERNEL_RAM_SIZE, true);
 
+	kernel_log_("kernel memory initialised, creating kernel stacks ...");
+
 	prog_mem_create_stacks(km, 1, KERNEL_STACK_SIZE);
+
+	//Log;
+	kernel_log("\t%d kernel threads created", 1);
 
 }
 
@@ -204,7 +206,6 @@ static void kernel_memory_init() {
  */
 
 static void kernel_scheduler_init() {
-
 
 	//Create the first process descriptor;
 	struct prc_desc dsc = {
@@ -260,8 +261,6 @@ static void kernel_scheduler_init() {
 	const uint8_t nb_stks = proc_nb_threads;
 
 
-
-
 	//Create the blank mem initializer;
  	struct prog_mem blank_mem_init =  {
 		.heap = 0,
@@ -286,6 +285,8 @@ static void kernel_scheduler_init() {
 
 	//Initialise the current process;
 	current_process = &blank_process;
+
+	kernel_log_("scheduler initialised");
 
 }
 
@@ -317,6 +318,10 @@ static void kernel_start_execution() {
 	//Enable the preemption exception;
 	preemption_enable();
 
+	//Log;
+	kernel_log_("preemption initialised");
+
+
 
 	/*
 	 * Syscalls;
@@ -333,13 +338,14 @@ static void kernel_start_execution() {
 	syscall_enable();
 	 */
 
-	//Initialise the system clock;
-	sysclock_init();
-
 
 	/*
 	 * Start execution;
 	 */
+
+	//Log;
+	kernel_log_("\nKernel initialisation sequence complete. Entering thread mode ...\n");
+
 
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
 	//Interrupts will be enabled at the end of the function;

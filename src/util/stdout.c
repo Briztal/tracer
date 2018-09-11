@@ -23,8 +23,6 @@ void stdout_str(void (*print)(char), const char *msg) {
 
 	}
 
-
-
 }
 
 
@@ -43,7 +41,7 @@ void stdout_int(void (*print)(char), uint32_t integer, uint8_t base) {
 }
 
 
-void stdout(void (*print)(char), const char *str, const uint32_t *args, size_t args_size) {
+void stdout(void (*print)(char), const char *str, const void **args, size_t args_size) {
 
 	//The current char;
 	char c;
@@ -69,31 +67,42 @@ void stdout(void (*print)(char), const char *str, const uint32_t *args, size_t a
 
 				//If we have no more arguments to process, continue;
 				if (!args_size) {
-					break;
+					continue;
 				}
 
 				//Evaluate the argument type :
 				switch (c) {
 
-					//Binary value;
+					//boolean value;
+					case '?':
+						(*print)((*args) ? (char) '1' : (char) '0');
+						break;
+
+						//Binary value;
 					case 'b':
-						stdout_int(print, *args, 2);
+						stdout_int(print, (uint32_t) *args, 2);
 						break;
 
 						//Octal value;
 					case 'o':
-						stdout_int(print, *args, 8);
+						stdout_int(print, (uint32_t) *args, 8);
 						break;
 
 						//Decimal value;
 					case 'd':
-						stdout_int(print, *args, 10);
+						stdout_int(print, (uint32_t) *args, 10);
 
 						break;
 
 						//Hexadecimal value;
 					case 'h':
-						stdout_int(print, *args, 16);
+						stdout_int(print, (uint32_t) *args, 16);
+						break;
+
+
+						//String insertion;
+					case 's':
+						stdout_str(print, (char *) *args);
 						break;
 
 					default:

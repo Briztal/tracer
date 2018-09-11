@@ -97,24 +97,10 @@ void mod_remove(const char *const name) {
 }
 
 
-//The start address of kernel embedded modules structs in FLASH;
-extern uint8_t _emod_start;
-
-//The end address of kernel embedded modules structs in FLASH;
-extern uint8_t _emod_end;
-
-
-/**
- * mod_autoload : loads all modules placed in the embedded modules area;
- *
- * 	This section is defined in the unified link script and resides in flash;
- */
-
-void mod_autoload() {
-
+static void load_modules(const uint8_t *const mod_start, const uint8_t *const mod_end) {
 
 	//Determine the byte length of the module array;
-	const size_t module_array_size = &_emod_end - &_emod_start;
+	const size_t module_array_size = mod_end - mod_start;
 
 	//The module array should contain only auto_mod structs. If size validity check fails :
 	if (module_array_size % sizeof(struct auto_mod)) {
@@ -125,18 +111,61 @@ void mod_autoload() {
 	}
 
 	//Cache the array to the right type;
-	struct auto_mod *auto_module = (struct auto_mod *) &_emod_start;
+	const struct auto_mod *auto_module = (const struct auto_mod *) mod_start;
 
-	//For each module :
-	while ((size_t) auto_module < (size_t) &_emod_end) {
+	//If no modules are to load :
+	if ((size_t) auto_module >= (size_t) mod_end) {
+
+		//Log;
+		kernel_log_("\tNo modules to load");
+
+	}
+
+		//For each module :
+	while ((size_t) auto_module < (size_t) mod_end) {
 
 		//Load the module;
 		mod_add(auto_module->name, auto_module->init, auto_module->exit);
+
+		//Log;
+		kernel_log("\t%s module loaded", auto_module->name);
 
 		//Focus on the next module;
 		auto_module++;
 
 	}
 
-	kernel_log_s("Modules loaded");
 }
+
+
+/**
+ * mod_autoload : loads all modules placed in the embedded modules area;
+ *
+ * 	This section is defined in the unified link script and resides in flash;
+ */
+
+void mod_autoload() {
+
+	//The start and end address of kernel peripheral, system and user modules structs in FLASH;
+	extern const uint8_t _pmod_start, _pmod_end,  _smod_start, _smod_end, _umod_start, _umod_end;
+
+	//Log;
+	kernel_log_("detecting peripheral modules ...");
+
+	//Load peripheral modules;
+	load_modules(&_pmod_start, &_pmod_end);
+
+	//Log;
+	kernel_log_("detecting system modules ...");
+
+	//Load system modules;
+	load_modules(&_smod_start, &_smod_end);
+
+	//Log;
+	kernel_log_("detecting user modules ...");
+
+	//Load user modules;
+	load_modules(&_umod_start, &_umod_end);
+
+}
+
