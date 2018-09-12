@@ -151,6 +151,7 @@ void debug_led_dump(const uint8_t c) {
 
 //----------------------------------------------------- Execution ------------------------------------------------------
 
+/*
 //Convert an integer to its string expression in the required base, and send it;
 void debug_log_base(uint32_t integer, uint8_t base) {
 
@@ -163,7 +164,7 @@ void debug_log_base(uint32_t integer, uint8_t base) {
 	//Log the value;
 	debug_log(str);
 }
-
+*/
 
 
 

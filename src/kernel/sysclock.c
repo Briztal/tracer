@@ -112,7 +112,7 @@ void sysclock_tick() {
         if (!--task_duration) {
 
             //Trigger the preemption;
-			preemption_trigger();
+			preemption_set_pending();
 
             //Task activity_time becomes 0, preemption won't be called anymore;
 

@@ -13,6 +13,9 @@
 
 #include <kernel/ic.h>
 
+#include <util/string.h>
+#include <kernel/log.h>
+
 
 
 /*
@@ -58,7 +61,7 @@
 #error "Error, at least one macro argument hasn't been provided. Check the makefile;"
 
 //Define macros. Allows debugging on IDE environment;
-#define CHANNEL_ID 	0
+#define CHANNEL_ID    0
 #define INT_CHANNEL 0
 #define REG 0
 
@@ -69,16 +72,16 @@
 
 #define REGISTERS ((volatile uint32_t *)(REG))
 
-#define LDVAL 	((volatile uint32_t *) (REGISTERS))
-#define CVAL 	((volatile uint32_t *) (REGISTERS + 1))
-#define TCTRL	((volatile uint32_t *) (REGISTERS + 2))
-#define TFLG 	((volatile uint32_t *) (REGISTERS + 3))
+#define LDVAL    ((volatile uint32_t *) (REGISTERS))
+#define CVAL    ((volatile uint32_t *) (REGISTERS + 1))
+#define TCTRL    ((volatile uint32_t *) (REGISTERS + 2))
+#define TFLG    ((volatile uint32_t *) (REGISTERS + 3))
 
 //Enable the timer;
-#define TCTRL_TEN	((uint32_t)(1<<0))
+#define TCTRL_TEN    ((uint32_t)(1<<0))
 
 //Enable the interrupt;
-#define TCTRL_TIE 	((uint32_t)(1<<1))
+#define TCTRL_TIE    ((uint32_t)(1<<1))
 
 //Timer interrupt flag. W1C
 #define TFLG_TIF (1<<0)
@@ -101,7 +104,7 @@ static uint32_t max_period;
 //TODO BUS CLOCK;
 
 static void set_base_frequency(uint32_t frequency) {
-;
+	;
 
 	//Determine the tics/period ratio;
 	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
@@ -132,12 +135,11 @@ static void set_base_frequency(uint32_t frequency) {
 	period_to_tics = _period_to_tics;
 	max_period = _max_period;
 
-
 }
 
 
 //Enable the timer;
-static void enable() {
+static void start() {
 
 	//Set TEN;
 	(*TCTRL) |= TCTRL_TEN;
@@ -145,7 +147,7 @@ static void enable() {
 
 
 //Disable the timer;
-static void disable() {
+static void stop() {
 
 	//Clear TEN;
 	*TCTRL &= ~TCTRL_TEN;
@@ -153,7 +155,7 @@ static void disable() {
 
 
 //Is the timer enabled ?
-static bool enabled() {
+static bool started() {
 
 	//Return the state of TCTRL_TEN;
 	return (bool) (*TCTRL & TCTRL_TEN);
@@ -179,9 +181,17 @@ static uint32_t get_count() {
 //Update the reload value;
 static void set_ovf(uint32_t period_count) {
 
-	if (period_count < max_period) {
-		*LDVAL = (uint32_t) (period_to_tics * period_count);
+	//If the period count is invalid, use the maximal period;
+	if (period_count >= max_period) {
+		period_count = max_period - 1;
 	}
+
+	/*
+	 * Update LDVAL, so that interrupts happen at the required period, and update CVAL, so that the next
+	 * interrupt hapens in @period_count period units;
+	 */
+	*LDVAL = *CVAL = (uint32_t) (period_to_tics * period_count);
+
 }
 
 //Get the reload value;
@@ -213,46 +223,48 @@ static bool int_enabled() {
 }
 
 
-//Update the handler;
-static void update_handler(void (*handler)()) {
-
-	//If the handler is not null :
-	if (handler) {
-
-		//Update the handler;
-		ic_set_interrupt_handler((uint16_t)INT_CHANNEL, handler);
-
-		//Enable the interrupt;
-		ic_enable_interrupt((uint16_t)INT_CHANNEL);
-
-	} else {
-
-		//If the handler is null :
-
-		//Disable the interrupt;
-		ic_disable_interrupt((uint16_t)INT_CHANNEL);
-
-		//Reset the default handler;
-		ic_reset_interrupt_handler((uint16_t)INT_CHANNEL);
-
-	}
-
-}
-
-
 //Is the flag set ?
-static bool flag_set() {
+static bool flag_is_set() {
 	//Is bit 0 of TFLG set ?
 	return (bool) (*TFLG);
 }
 
 
 //Clear the interrupt flag;
-static void clear_flag() {
+static void flag_clr() {
 	//Set bit 0 of TFLG;
 	*TFLG = 1;
 }
 
+
+//The client handler. Can be modified, and null;
+static void (*client_handler)();
+
+/**
+ * The channel handler. Clears the interrupt flag, and calls the client handler if not null;
+ */
+
+static void handler() {
+
+	//Clear the flag, to prevent more interrupt requests;
+	flag_clr();
+
+	//Cache the custom handler;
+	void (*hdlr)() = client_handler;
+
+	//If the custom handler is not null, execute it;
+	if (hdlr) (*hdlr)();
+
+}
+
+
+//Update the handler;
+static void set_handler(void (*handler)()) {
+
+	//Update the client handler;
+	client_handler = handler;
+
+}
 
 
 //---------------------------------------------------- Hidden code -----------------------------------------------------
@@ -281,13 +293,13 @@ static void clear_flag() {
  * The timer interface;
  */
 
-struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) = {
+const struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) = {
 
 	.set_base_frequency = &set_base_frequency,
 
-	.start = &enable,
-	.stop = &disable,
-	.started = &enabled,
+	.start = &start,
+	.stop = &stop,
+	.started = &started,
 
 	.set_count = &set_count,
 	.get_count = &get_count,
@@ -298,12 +310,16 @@ struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) 
 	.enable_int = &enable_int,
 	.disable_int = &disable_int,
 	.int_enabled = &int_enabled,
-	.update_handler = &update_handler,
 
-	.int_flag_set = &flag_set,
-	.int_flag_clr = &clear_flag,
+	.flag_is_set = &flag_is_set,
+	.flag_clr = &flag_clr,
+
+	.set_handler = &set_handler,
 
 };
+
+//The interface will be copied, and neutralised when
+static void *timer_if_copy = 0;
 
 
 //Two macros to determine the string name;
@@ -315,16 +331,53 @@ struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) 
 static const char *const pit_name = PNM;
 
 
-//Close the timer resource : will neutralise the interface;
-static void channel_close(){
-	//TODO
-}
-
 //Transmit the timer interface;
 static bool channel_interface(void *data, size_t data_size) {
+
+	//If the channel is already interfaced :
+	if (timer_if_copy) {
+
+		//Fail, only one interface is made at the time;
+		return false;
+
+	}
+
+	//If the data size doesn't match a timer interface :
+	if (data_size != sizeof(struct timer_interface)) {
+
+		//Fail;
+		return false;
+
+	}
+
+	//Transmit a copy of the interface;
+	memcpy(data, &NM(kx_pit_channel), sizeof(struct timer_interface));
+
+	//Save the reference of the copy for future neutralisation;
+	timer_if_copy = data;
+
+	//Complete;
 	return true;
+
 }
 
+//Close the timer resource : will neutralise the interface;
+static void channel_close() {
+
+	//If the timer is already interfaced :
+	if (timer_if_copy) {
+
+		//Neutralise the timer interface;
+		memcpy(timer_if_copy, &neutral_timer_interface, sizeof(struct timer_interface));
+
+	}
+
+}
+
+
+/*
+ * The file operations for a pit channel are limited to interface, and close that neutralises the interface;
+ */
 
 static struct dfs_file_operations file_operations = {
 	.close = &channel_close,
@@ -332,37 +385,50 @@ static struct dfs_file_operations file_operations = {
 };
 
 
-
 /**
  * 	kx_pit_channel_init_i : initialises the channel; Called by the pit module's init function
  */
+
 void NM(kx_pit_channel_init)() {
 
 	//Register a file with no content leading to our operations;
 	dfs_create(pit_name, DFS_INTERFACE, &file_operations, 0);
 
-	//Initialise the timer;
-	timer_init(&NM(kx_pit_channel), 1000);
+	//Reset the timer, and set the base frequency to 1KHz
+	timer_reset(&NM(kx_pit_channel), 1000);
 
-	//TODO IC SETUP (PRIO, HANDLER);
+	//Register the pit handler;
+	ic_set_interrupt_handler(INT_CHANNEL, &handler);
+
+	//Set the channel int priority;
+	ic_set_interrupt_priority(INT_CHANNEL, KERNEL_DRIVER_STATUS_PRIORITY);
+
+	//Enable the channel interrupt;
+	ic_enable_interrupt(INT_CHANNEL);
+
 }
 
 
 /**
  * 	kx_pit_channel_exit_i : initialises the channel; Called by the pit module's init function
  */
+
 bool NM(kx_pit_channel_exit)() {
 
 	//Attempt to remove the file;
 	if (dfs_remove(pit_name)) {
 
-		//If success, reset the timer;
-		timer_reset(&NM(kx_pit_channel));
+		//Reset the timer, and set the base frequency to 1KHz
+		timer_reset(&NM(kx_pit_channel), 1000);
+
+		//Unregister the pit handler;
+		ic_set_interrupt_handler(INT_CHANNEL, 0);
+
+		//Disable the channel interrupt;
+		ic_disable_interrupt(INT_CHANNEL);
 
 		//Complete;
 		return true;
-
-		//TODO IC CLEANUP (PRIO, HANDLER);
 
 	}
 
@@ -370,6 +436,7 @@ bool NM(kx_pit_channel_exit)() {
 	return false;
 
 }
+
 
 #undef NM
 

@@ -23,8 +23,37 @@
 
 #include <stddef.h>
 
+//------------------------------------------------------- Config -------------------------------------------------------
 
-void kernel_panic(const char *msg);
+//Uncomment to disable kernel panic log;
+//#define DISABLE_PANIC_LOG
+
+
+//-------------------------------------------------------- Panic -------------------------------------------------------
+
+//If panic logs are enabled :
+#ifndef DISABLE_PANIC_LOG
+
+
+//Declare the function that will trigger a kernel panic, and displaying a message related to the error;
+void _kernel_panic(const char *msg);
+
+//Use panic with log;
+#define kernel_panic(msg) _kernel_panic(msg)
+
+
+//If panic logs are disabled :
+#else
+
+
+//Declare a special function that will trigger a kernel panic, displaying a default message;
+void _kernel_panic_nolog();
+
+//Use panic with no logs;
+#define kernel_panic(msg) _kernel_panic_nolog()
+
+
+#endif
 
 
 #endif //TRACER_ERROR_H

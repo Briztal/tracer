@@ -123,7 +123,7 @@ void proc_enter_thread_mode(struct proc_stack **exception_stacks) {
 
 
 	//Execute the preemption call;
-	preemption_trigger();
+	preemption_set_pending();
 
 	//Enable interrupts;
 	ic_enable_interrupts();

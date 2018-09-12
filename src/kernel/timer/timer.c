@@ -35,7 +35,7 @@
  * @param base_frequency : the required base frequency for the timer;
  */
 
-void timer_init(struct timer_interface *timer, uint32_t base_frequency) {
+void timer_init(const struct timer_interface *timer, uint32_t base_frequency, uint32_t ovf_period, void (*handler)()) {
 
 	//Stop the timer;
 	timer_stop(timer);
@@ -44,19 +44,23 @@ void timer_init(struct timer_interface *timer, uint32_t base_frequency) {
 	timer_disable_int(timer);
 
 	//Clear the interrupt flag;
-	timer_clr_int_flag(timer);
+	timer_flag_clr(timer);
 
-	//Reset the handler to 0;
-	timer_update_handler(timer, 0);
+	//Set the handler;
+	timer_set_handler(timer, handler);
 
 	//Set the base frequency;
 	timer_set_base_frequency(timer, base_frequency);
 
-	//Set the count to 0 period units;
-	timer_set_count(timer, 0);
+	//Set the count and ovf to required values;
+	timer_set_ovf_value(timer, ovf_period);
 
-	//Set the ovf to 1 period unit;
-	timer_set_ovf_value(timer, 1);
+	//Enable the timer interrupt;
+	timer_enable_int(timer);
+
+	//Start the timer;
+	timer_start(timer);
+
 
 }
 
@@ -73,7 +77,7 @@ void timer_init(struct timer_interface *timer, uint32_t base_frequency) {
  * @param timer
  */
 
-void timer_reset(struct timer_interface *timer) {
+void timer_reset(const struct timer_interface *timer, uint32_t base_frequency) {
 
 	//Stop the timer;
 	timer_stop(timer);
@@ -82,15 +86,49 @@ void timer_reset(struct timer_interface *timer) {
 	timer_disable_int(timer);
 
 	//Clear the interrupt flag;
-	timer_clr_int_flag(timer);
+	timer_flag_clr(timer);
 
 	//Reset the handler to 0;
-	timer_update_handler(timer, 0);
+	timer_set_handler(timer, 0);
 
-	//Set the count to 0 period units;
-	timer_set_count(timer, 0);
+	//Set the base frequency;
+	timer_set_base_frequency(timer, base_frequency);
 
-	//Set the ovf to 1 period unit;
+	//Set the ovf to 1 period unit; count will be updated at the same time;
 	timer_set_ovf_value(timer, 1);
 
 }
+
+//---------------------------------------------------- Neutral timer interface
+
+//Dumb functions;
+void n_sbf(uint32_t u){};
+uint32_t n_g(){return 0;};
+void n_st() {};
+bool n_stt() {return false;};
+void n_uh(void (*h)()) {};
+
+
+/*
+ * The neutral timer interface can be written safely on any timer interface. It will prevent access to previous
+ * 	functions, without causing null pointer access. Functions have no side effects;
+ */
+
+const struct timer_interface neutral_timer_interface = {
+
+	.set_base_frequency = n_sbf,
+	.start = n_st,
+	.stop = n_st,
+	.started = n_stt,
+	.set_count = n_sbf,
+	.get_count = n_g,
+	.set_ovf_value = n_sbf,
+	.get_ovf_value = n_g,
+	.enable_int = n_st,
+	.disable_int = n_st,
+	.int_enabled = n_stt,
+	.flag_is_set = n_stt,
+	.flag_clr = n_st,
+	.set_handler = n_uh,
+
+};

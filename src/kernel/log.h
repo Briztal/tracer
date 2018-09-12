@@ -13,6 +13,22 @@
 #include <stddef.h>
 
 
+//------------------------------------------------------- Config -------------------------------------------------------
+
+//Uncomment this to disable log.
+//#define DISABLE_LOG
+
+//----------------------------------------------------- Kernel log -----------------------------------------------------
+
+//Display a message in the log interface;
+void _kernel_log(const char *str, const void **args, size_t args_size);
+
+
+//------------------------------------------------------- Macros -------------------------------------------------------
+
+//If logs are enabled :
+#ifndef DISABLE_LOG
+
 #define SELECT(_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _N, ...) _N
 
 #define PACKAGE_RIGHT ARGS_PACKAGE_10, ARGS_PACKAGE_9, ARGS_PACKAGE_8, ARGS_PACKAGE_7, ARGS_PACKAGE_6, ARGS_PACKAGE_5, ARGS_PACKAGE_4, ARGS_PACKAGE_3, ARGS_PACKAGE_2, ARGS_PACKAGE_1, ARGS_PACKAGE_0
@@ -46,9 +62,6 @@
 
 
 
-//Display a message in the log interface;
-void _kernel_log(const char *str, const void **args, size_t args_size);
-
 
 #define kernel_log(msg, ...) {\
 		const void *__klog_args__[] = ARGS_PACKAGE(__VA_ARGS__);\
@@ -58,12 +71,23 @@ void _kernel_log(const char *str, const void **args, size_t args_size);
 #define kernel_log_(msg) _kernel_log(msg, 0, 0);
 
 
+//If logs are disabled :
+#else
+
+#define kernel_log(msg, ...)
+
+#define kernel_log_(msg)
+
+#endif
+
 
 /*
  * ----------------------------------------------------- Log Debug -----------------------------------------------------
  */
 
 
+//TODO REMOVE
+/*
 //Send a string over the debug interface, encoded by the log protocol. Implemented by the log protocol;
 void debug_log(const char *msg);
 
@@ -81,6 +105,6 @@ void debug_log_base(uint32_t integer, uint8_t base);
 
 //Convert an integer to its hexadecimal string expression and send it;
 #define debug_log_hex(i) {debug_log_base(i, 16);}
-
+*/
 
 #endif //TRACER_LOG_H

@@ -619,10 +619,16 @@ void preemption_enable() {
 	//PendSV is always enabled;
 }
 
-//Trigger the preemption;
-void preemption_trigger() {
+//Set the preemption exception pending;
+void preemption_set_pending() {
 	armv7m_set_pendsv_pending();
 }
+
+//Set the preemption exception not pending;
+void preemption_clear_pending() {
+	armv7m_clr_pendsv_pending();
+}
+
 
 
 //----------------------------------------------------- Syscall -----------------------------------------------------

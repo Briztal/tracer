@@ -67,6 +67,9 @@ struct dfs_file {
 	//The associated file operation struct;
 	const struct dfs_file_operations *const operations;
 
+	//The deletion function;
+	void (*const deleter)(struct dfs_file *);
+
 	//The resource itself;
 	void *const resource;
 
@@ -108,6 +111,14 @@ static inline bool file_op_interface(struct dfs_file *file, void *data, size_t s
 
 }
 
+static inline void file_delete(struct dfs_file *file) {
+
+	void (*deleter)(struct dfs_file *) = file->deleter;
+
+	if (deleter) {
+		(*deleter)(file);
+	}
+}
 
 
 //Add a file in the file system;

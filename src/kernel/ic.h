@@ -119,8 +119,12 @@ extern void preemption_set_priority(uint8_t priority);
 //Enable the preemption exception;
 extern void preemption_enable();
 
-//Trigger the preemption;
-extern void preemption_trigger();
+//Set the preemption exception pending;
+extern void preemption_set_pending();
+
+//Set the preemption exception not pending;
+extern void preemption_clear_pending();
+
 
 
 //Set the handler of the syscall exception;

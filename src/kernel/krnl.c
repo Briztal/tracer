@@ -70,16 +70,11 @@ void kernel_private() {
 //The kernel's first process function;
 extern void __kernel_first_function(void *unused) {
 
-
 	while(1) {
-		//TODO debug_log("BITe");
-		dfs_list();
-		debug_delay_ms(500);
+
 	}
 
 }
-
-extern void __create_drivers();
 
 
 //------------------------------------------------------- Private ------------------------------------------------------
@@ -297,6 +292,10 @@ static void kernel_scheduler_init() {
 
 static void kernel_start_execution() {
 
+
+	//Disable all interrupts;
+	ic_disable_interrupts();
+
 	/*
 	 * Thread count;
 	 */
@@ -308,6 +307,9 @@ static void kernel_start_execution() {
 	/*
 	 * Preemption;
 	 */
+
+	//Set the preemption exception not pending;
+	preemption_clear_pending();
 
 	//Update the preemption handler;
 	preemption_set_handler(&proc_context_switcher);

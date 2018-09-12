@@ -65,23 +65,9 @@ void dfs_create(const char *const name, const enum dfs_file_type type,
 }
 
 
-void dfs_delete(struct dfs_file *file, const char *name) {
+static void dfs_delete(struct dfs_file *file, const char *name) {
 
-	//Delete the resource;
-	switch (file->type) {
-		case DFS_DRIVER:
-
-			//Delete the driver;
-			driver_delete(file->resource);
-			break;
-
-		case DFS_INTERFACE:
-
-			break;
-		default:
-			kernel_panic("dfs_delete : unknown file type;");
-	}
-
+	file_delete(file);
 
 	/*
 	 * Now delete the file;

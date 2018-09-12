@@ -23,8 +23,10 @@
 
 */
 
+#include "panic.h"
 
-void kernel_panic(const char *msg) {
+
+void _kernel_panic(const char *msg) {
 
 	ic_disable_interrupts();
 
@@ -39,3 +41,19 @@ void kernel_panic(const char *msg) {
 	}
 
 }
+
+
+//If panic logs are disabled :
+#ifdef DISABLE_PANIC_LOG
+
+//Trigger a kernel panic, displaying a default message;
+void _kernel_panic_nolog() {
+
+	//Display the default error message;
+	_kernel_panic("A kernel panic has occurred. As log has been disabled at compile time, you are fucked.\n"
+					  "Try to re-enable them, recompile and reproduce error conditions.\n"
+					  "Good luck pal !");
+
+}
+
+#endif

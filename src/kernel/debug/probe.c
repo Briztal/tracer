@@ -87,6 +87,7 @@ void debug_print_char(char c) {
 
 }
 
+/*
 
 void debug_log(const char *msg) {
 
@@ -106,6 +107,4 @@ void debug_log(const char *msg) {
 	debug_print_char('\r');
 
 }
-
-//Encode a char to an array of durations;
-//char sw_uart_decode(uint16_t bit_time, const uint16_t *durations, size_t);
+ */
