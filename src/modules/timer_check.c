@@ -11,16 +11,15 @@
 #include <kernel/timer/timer.h>
 #include <kernel/panic.h>
 
+
 static void suus() {
 
 	kernel_log_("GROS CHIBRE EN PLATRE");
 
-
-
 };
 
-static void check_init() {
 
+static void check_init() {
 
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying timer file : ");
@@ -51,6 +50,7 @@ static void check_init() {
 
 	}
 
+	dfs_close(file);
 
 	kernel_log_("Initialising timer");
 
