@@ -143,7 +143,7 @@ struct K64_UART_net21 {
 
 
 /*
- * Kinetis UART driver : contains a hardware specs set and a reference to an interface;
+ * Kinetis UART interface : contains a hardware specs set and a reference to an interface;
  */
 
 struct K64_UART_driver_t {
@@ -208,10 +208,10 @@ types K64_UART_stream_t {
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
-//Create an instance of a K64 UART driver from hardware specs;
+//Create an instance of a K64 UART interface from hardware specs;
 struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *);
 
-//Delete an instance of a K64 UART driver;
+//Delete an instance of a K64 UART interface;
 void K64_UART_delete(struct K64_UART_driver_t *);
 
 

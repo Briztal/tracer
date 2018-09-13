@@ -30,7 +30,7 @@
 
 enum dfs_file_type {
 
-	//The memory zone is a driver struct;
+	//The memory zone is a interface struct;
 		DFS_DRIVER,
 
 	//The memory zone is an interface struct;

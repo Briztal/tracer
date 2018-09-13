@@ -41,7 +41,7 @@ enum memory_type {
 	//The memory zone is a folder; No content;
 		MEM_FOLDER,
 
-	//The memory zone is a driver struct;
+	//The memory zone is a interface struct;
 		MEM_DRIVER,
 
 	//The memory zone is a

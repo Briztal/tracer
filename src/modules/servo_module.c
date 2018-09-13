@@ -19,6 +19,8 @@
 */
 
 #include <util/type.h>
+#include <kernel/driver/timer.h>
+#include <kernel/log.h>
 
 struct servo_channel {
 
@@ -44,19 +46,19 @@ struct servo_channel {
 
 //--------------------------------------------------- Private structs --------------------------------------------------
 
-typedef struct {
+struct servo_manager {
 
-    //The microsecond based timer used by the controller;
-    timer_base_t *us_timer;
+    //The timer we use;
+    struct timer_interface timer;
 
     //The list of started channels;
-	servo_channel enabled_channels;
+	struct servo_channel *enabled_channels;
 
     //The list of unregistered channels;
-    linked_list_t disabled_channels;
+    struct servo_channel *disabled_channels;
 
     //The currently active channel;
-    const servo_channel_t *active_channel;
+    const struct servo_channel *active_channel;
 
     //The period of all servo channels;
     float period;
@@ -64,26 +66,22 @@ typedef struct {
     //The free time after a cycle;
     float complement;
 
-    //A flag set if the controller is initialiser;
-    volatile bool initialised;
-
     //A flag to stop the isr handler;
     volatile bool started;
 
-} servo_controller_t;
+} ;
 
 
 //------------------------------------------------------- Globals ------------------------------------------------------
 
 //There exists only one servo controller, for interrupt;
-static servo_controller_t servo_controller = {
-        .us_timer = 0,
-        .enabled_channels = EMPTY_LINKED_LIST(255),
-        .disabled_channels = EMPTY_LINKED_LIST(255),
+static struct servo_manager manager = {
+        .timer = {},
+        .enabled_channels = 0,
+        .disabled_channels = 0,
         .active_channel = 0,
         .period = 20000,
         .complement = 20000,
-        .initialised = false,
         .started = false,
 };
 
@@ -91,28 +89,28 @@ static servo_controller_t servo_controller = {
 //--------------------------------------------------- Private headers --------------------------------------------------
 
 //Check that a cycle can happen correctly;
-void servo_check_cycle(const servo_controller_t *);
+static void servo_check_cycle();
 
 //Count the max duration of a channel list;
-float servo_check_duration(const linked_list_t *channels);
+static float servo_check_duration();
 
 
 //Enable a channel providing an impulse value;
-void servo_enable_channel(servo_controller_t *controller, servo_channel_t *channel, float impulse_duration);
+static void servo_enable_channel(struct servo_channel *channel, float impulse_duration);
 
 //Enable a channel providing an impulse value;
-void servo_disable_channel(servo_controller_t *, servo_channel_t *channel);
+static void servo_disable_channel(struct servo_channel *channel);
 
 
 //Update the complement to all delays;
-void servo_update_complement(servo_controller_t *);
+static void servo_update_complement();
 
 
 //Start the timer routine;
-void servo_service_start(servo_controller_t *);
+static void servo_start();
 
 //Stop the timer routine;
-void servo_service_stop(servo_controller_t *);
+static void servo_stop();
 
 //The interrupt function;
 void servo_isr_handler();
@@ -120,14 +118,11 @@ void servo_isr_handler();
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
 
-/*
- * servo_module_init : initialises the servo controller; Must provide a us based timer with an ovf interrupt capability;
- */
 
-void servo_module_init(timer_base_t *const us_timer, const float period_us) {
+static void servo_module_init() {
 
     //Cache the controller;
-    servo_controller_t *controller = &servo_controller;
+    servo_controller_t *controller = &manager;
 
     //If the controller is already initialised :
     if (controller->initialised) {
@@ -159,7 +154,7 @@ void servo_module_init(timer_base_t *const us_timer, const float period_us) {
 void servo_module_exit() {
 
     //Cache the controller;
-    servo_controller_t *controller = &servo_controller;
+    struct servo_manager *controller = &manager;
 
     //If the controller is not initialised :
     if (!controller->initialised) {
@@ -188,33 +183,24 @@ void servo_module_exit() {
 void servo_module_set_period(const float new_period) {
 
     //Cache the servo controller pointer;
-    servo_controller_t *controller = &servo_controller;
+    struct servo_manager *manager = &manager;
 
-    //If the controller is already initialised :
-    if (controller->initialised) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_set_period : the servo controller is not initialised;");
-
-    }
-
-    //If the controller is started :
-    if (controller->started) {
+    //If the interrupt routine is started :
+    if (manager->started) {
 
         //Error;
-        kernel_error("servo.c : servo_module_set_period : the servo controller is currently started;");
-
+        kernel_log("servo : Attempted to update the period when the servo controller started. Aborted;");
 
     }
 
     //Update the period;
-    controller->period = new_period;
+    manager->period = new_period;
 
-    //Check that complete cycle can happen correctly;
-    servo_check_cycle(controller);
+    //Check that the complete cycle can happen correctly;
+    servo_check_cycle(manager);
 
     //Update the complement;
-    servo_update_complement(controller);
+    servo_update_complement(a);
 
 
 }
@@ -280,7 +266,7 @@ servo_channel_t *servo_module_add_channel(PORT_pin_t *initialised_pin, const flo
                          const uint16_t impulse_min, const uint16_t impulse_max) {
 
     //Cache the servo controller pointer;
-    servo_controller_t *controller = &servo_controller;
+    servo_controller_t *controller = &manager;
 
     //If the controller is already initialised :
     if (controller->initialised) {
@@ -354,7 +340,7 @@ servo_channel_t *servo_module_add_channel(PORT_pin_t *initialised_pin, const flo
 void servo_module_remove_channel(servo_channel_t *const channel) {
 
     //Cache the servo controller pointer;
-    servo_controller_t *controller = &servo_controller;
+    servo_controller_t *controller = &manager;
 
     //If the controller is already initialised :
     if (controller->initialised) {
@@ -402,7 +388,7 @@ void servo_module_remove_channel(servo_channel_t *const channel) {
 void servo_module_set_channel_value(servo_channel_t *const channel, float value) {
 
     //Cache the controller;
-    servo_controller_t *controller = &servo_controller;
+    servo_controller_t *controller = &manager;
 
     //Cache value bounds;
     float v_min = channel->value_min;
@@ -491,7 +477,7 @@ void servo_module_disable_channel(servo_channel_t *const channel) {
         return;
 
     //Cache the controller;
-    servo_controller_t *controller = &servo_controller;
+    servo_controller_t *controller = &manager;
 
     //Access to channels is servo-critical;
 
@@ -682,7 +668,7 @@ void servo_service_stop(servo_controller_t *const controller) {
 void servo_isr_handler() {
 
     //Cache the servo controller pointer;
-    servo_controller_t *const controller = &servo_controller;
+    servo_controller_t *const controller = &manager;
 
     //Cache the servo timer pointer;
     const timer_base_t *const timer = controller->us_timer;

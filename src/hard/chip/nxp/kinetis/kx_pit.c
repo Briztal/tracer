@@ -23,7 +23,7 @@
 
 #include "kx_sim.h"
 
-#include <kernel/timer/timer.h>
+#include <kernel/driver/timer.h>
 
 #include <kernel/mod/auto_mod.h>
 
@@ -67,7 +67,7 @@
  *
  * 	The PIT peripheral provides an array of independently configurable general-purpose timers;
  *
- * 	The PIT driver offers a timer interface for each one of there channels. It will register these structs to the
+ * 	The PIT interface offers a timer interface for each one of there channels. It will register these structs to the
  * 	kernel at init, and un-register them at exit;
  */
 

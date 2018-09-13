@@ -324,7 +324,7 @@ void mk64fx512_hardware_init() {
 	//Enable PORT clock gating;
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
 
-	//Define the PORT driver;
+	//Define the PORT interface;
 	PORT = kinetis_PORT_create(PORT_A_REGISTERS, GPIO_A_REGISTERS, 5, 0x1000, 0x40);
 
 	//Create the int channels array;

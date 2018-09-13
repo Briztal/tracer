@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 
-#include <kernel/timer/timer.h>
+#include <kernel/driver/timer.h>
 
 #include <kernel/fs/dfs.h>
 

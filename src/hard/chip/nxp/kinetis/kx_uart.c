@@ -314,7 +314,7 @@ void stop_peripheral(const struct K64_UART_hw *driver_data) {
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 /*
- * K64_UART_create : creates an instance of a K64 UART driver from hardware driver specs;
+ * K64_UART_create : creates an instance of a K64 UART interface from hardware interface specs;
  */
 
 struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *const specs) {
@@ -322,7 +322,7 @@ struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *const specs) {
 	//Initialise the peripheral;
 	initialise_peripheral(specs);
 
-	//Create the driver struct initializer;
+	//Create the interface struct initializer;
 	struct K64_UART_driver_t init = {
 
 		//Copy the hardware data set;
@@ -333,7 +333,7 @@ struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *const specs) {
 
 	};
 
-	//Allocate, initialise and return the driver data structure;
+	//Allocate, initialise and return the interface data structure;
 	return kernel_malloc_copy(sizeof(struct K64_UART_driver_t), &init);
 
 }
@@ -348,7 +348,7 @@ void K64_UART_delete(struct K64_UART_driver_t *driver_data) {
 	//Reset the peripheral;
 	stop_peripheral(&driver_data->hw_specs);
 
-	//Delete the driver data structure;
+	//Delete the interface data structure;
 	kernel_free(driver_data);
 
 }

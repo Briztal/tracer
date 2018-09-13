@@ -69,7 +69,7 @@ struct kernel_driver {
 
 };
 
-//Register a driver;
+//Register a interface;
 void register_driver(const char *name, struct kernel_driver *driver);
 
 
@@ -81,12 +81,12 @@ void register_driver(const char *name, struct kernel_driver *driver);
 
 static inline void driver_init(struct kernel_driver *driver, void *config) {
 
-	//If the driver is already initialised, nothing to do;
+	//If the interface is already initialised, nothing to do;
 	if (driver->initialised) {
 		return;
 	}
 
-	//Initialise the driver, set the init flag if success;
+	//Initialise the interface, set the init flag if success;
 	driver->initialised = (*(driver->init))(driver, config);
 
 }
@@ -103,7 +103,7 @@ static inline void driver_exit(struct kernel_driver *driver) {
 		return;
 	}
 
-	//De-initialise the driver, reset the init flag if success;
+	//De-initialise the interface, reset the init flag if success;
 	driver->initialised = !(*(driver->exit))(driver);
 
 
@@ -121,7 +121,7 @@ static inline void driver_delete(struct kernel_driver *driver) {
 		driver_exit(driver);
 	}
 
-	//Delete the driver;
+	//Delete the interface;
 	(*(driver->delete))(driver);
 
 

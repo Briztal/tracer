@@ -8,7 +8,7 @@
 #include <kernel/log.h>
 #include <kernel/fs/dfs.h>
 #include <kernel/mod/auto_mod.h>
-#include <kernel/timer/timer.h>
+#include <kernel/driver/timer.h>
 #include <kernel/panic.h>
 
 

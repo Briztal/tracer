@@ -46,10 +46,10 @@ extern const uint8_t ic_priority_7;
 //The preemption has the lowest priority level, so that a context switch never occurs over an interrupt;
 #define KERNEL_PREMPTION_PRIORITY ic_priority_0
 
-//A driver status interrupt has a low priority;
+//A interface status interrupt has a low priority;
 #define KERNEL_DRIVER_STATUS_PRIORITY ic_priority_2
 
-//A driver error must be caught, and so has a higher priority;
+//A interface error must be caught, and so has a higher priority;
 #define KERNEL_DRIVER_ERROR_PRIORITY ic_priority_4
 
 //The systick has the highest priority level, so that ticks are never missed;

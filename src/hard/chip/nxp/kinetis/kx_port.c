@@ -18,9 +18,8 @@
 
 */
 
-#include "kx_port.h"
 
-#include <kernel/syscall.h>
+#include <stdint.h>
 
 
 // --------------------------------------------- Hardware constants macros ---------------------------------------------
@@ -61,7 +60,7 @@
 //-------------------------------------------------- Memory structures --------------------------------------------------
 
 /*
- * The K64 PORT specific memory data;
+ * The kx port memory map;
  */
 
 struct __attribute__ ((packed)) K64_PORT_registers {
@@ -97,7 +96,7 @@ struct __attribute__ ((packed)) K64_PORT_registers {
 
 
 /*
- * The GPIO specific memory data;
+ * The kx gpio memory map;
  */
 
 struct __attribute__ ((packed)) K64_GPIO_memory_t {
@@ -130,7 +129,7 @@ bool K64_PORT_get_gpio_descriptor(const struct K64_PORT_driver_t *, enum gpio_re
 									  const struct io_desc_t *,
 									  volatile void **gpio_register, void *mask_p);
 
-//Delete a K64 PORT driver;
+//Delete a K64 PORT interface;
 void K64_PORT_destructor(struct K64_PORT_driver_t *driver_data);
 
 
@@ -147,14 +146,14 @@ void K64_PORT_configure_pin(const struct K64_PORT_driver_t *driver, const struct
 uint8_t type_to_IRQ_bits(enum PORT_interrupt_t type);
 
 //Determine interrupt type from IRQ bits;
-enum PORT_interrupt_t IRQ_bits_to_type(uint8_t bits);
+enum port_interrupt_t IRQ_bits_to_type(uint8_t bits);
 
 
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 /*
- * K64_GPIO_create : creates a K64 port driver. Initialises function pointers and gpio registers sizes,
+ * K64_GPIO_create : creates a K64 port interface. Initialises function pointers and gpio registers sizes,
  * 	and initialises memory zones;
  */
 
@@ -168,7 +167,7 @@ struct K64_PORT_driver_t *K64_PORT_create(volatile void *const first_port_periph
 
 		.port_driver = {
 
-			//Function pointers will only cast port driver pointer in the K64 port driver pointer in function args,
+			//Function pointers will only cast port interface pointer in the K64 port interface pointer in function args,
 			// legit because K64_PORT_driver is composed by port_driver;
 
 			//Provide access to the pin config getter;
@@ -231,19 +230,19 @@ struct K64_PORT_driver_t *K64_PORT_create(volatile void *const first_port_periph
 
 	};
 
-	//Allocate, initialise, and return the gpio driver struct;
+	//Allocate, initialise, and return the gpio interface struct;
 	return kernel_malloc_copy(sizeof(struct K64_PORT_driver_t), &init);
 
 }
 
 
 /*
- * K64_GPIO_destructor : deletes the K64 GPIO driver struct;
+ * K64_GPIO_destructor : deletes the K64 GPIO interface struct;
  */
 
 void K64_PORT_destructor(struct K64_PORT_driver_t *const driver_data) {
 
-	//The K64 GPIO driver doesn't own any dynamic data, we can just free the structure;
+	//The K64 GPIO interface doesn't own any dynamic data, we can just free the structure;
 	return kernel_free(driver_data);
 
 }
@@ -312,7 +311,7 @@ bool K64_PORT_get_gpio_descriptor(const struct K64_PORT_driver_t *driver, const 
  * type_to_IRQ_bits : determines the value to set in the IRQ bits of the PCR, depending on the interrupt type;
  */
 
-uint8_t type_to_IRQ_bits(const enum PORT_interrupt_t type) {
+uint8_t type_to_IRQ_bits(const enum port_interrupt_t type) {
 
 	/*
 	 * Direct from the K64 datasheet;
@@ -348,7 +347,7 @@ uint8_t type_to_IRQ_bits(const enum PORT_interrupt_t type) {
  * type_to_IRQ_bits : determines the value to set in the IRQ bits of the PCR, depending on the interrupt type;
  */
 
-enum PORT_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
+enum port_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
 
 	/*
 	 * Direct from the K64 datasheet;
