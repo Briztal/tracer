@@ -22,22 +22,6 @@
 #define TRACER_PORT_H
 
 
-//---------------------------------------------------- IO descriptor ---------------------------------------------------
-
-/*
- * To configure IOs correctly, we need the following set of information, provided by the board header;
- */
-
-struct io_desc_t {
-
-	//The port identifier;
-	uint8_t port_index;
-
-	//The bit identifier;
-	uint8_t bit_index;
-
-};
-
 //--------------------------------------------------- Port pin config --------------------------------------------------
 
 /*

@@ -20,6 +20,17 @@
 
 
 #include <stdint.h>
+#include <kernel/interface/port.h>
+#include <util/macro/incr_call.h>
+#include <kernel/interface/gpio.h>
+#include <stdbool.h>
+#include <kernel/fs/dfs.h>
+#include <kernel/log.h>
+#include <util/string.h>
+#include <kernel/mod/auto_mod.h>
+#include "kx_sim.h"
+
+
 
 
 // --------------------------------------------- Hardware constants macros ---------------------------------------------
@@ -63,7 +74,7 @@
  * The kx port memory map;
  */
 
-struct __attribute__ ((packed)) K64_PORT_registers {
+struct __attribute__ ((packed)) port_memory {
 
 	//32 Pin Configuration Registers;
 	volatile uint32_t PCR[32];
@@ -99,7 +110,7 @@ struct __attribute__ ((packed)) K64_PORT_registers {
  * The kx gpio memory map;
  */
 
-struct __attribute__ ((packed)) K64_GPIO_memory_t {
+struct __attribute__ ((packed)) gpio_memory {
 
 	//Port Data Output Register;
 	volatile uint32_t PDOR;
@@ -122,200 +133,166 @@ struct __attribute__ ((packed)) K64_GPIO_memory_t {
 };
 
 
-//--------------------------------------------------- Private Headers --------------------------------------------------
-
-//Get the descriptor for a single IO pin : the register and the appropriate mask for the pin
-bool K64_PORT_get_gpio_descriptor(const struct K64_PORT_driver_t *, enum gpio_register_type_e type,
-									  const struct io_desc_t *,
-									  volatile void **gpio_register, void *mask_p);
-
-//Delete a K64 PORT interface;
-void K64_PORT_destructor(struct K64_PORT_driver_t *driver_data);
 
 
-//Get a pin's current configuration;
-void K64_PORT_get_pin_config(const struct K64_PORT_driver_t *driver, const struct io_desc_t *pin,
-								 struct K64_pin_configuration_t *config);
-
-//Set a pin's current configuration;
-void K64_PORT_configure_pin(const struct K64_PORT_driver_t *driver, const struct io_desc_t *pin,
-								struct K64_pin_configuration_t *config);
-
-
-//Determine IRQ bits from interrupt type;
-uint8_t type_to_IRQ_bits(enum PORT_interrupt_t type);
-
-//Determine interrupt type from IRQ bits;
-enum port_interrupt_t IRQ_bits_to_type(uint8_t bits);
-
-
-
-//------------------------------------------------- Creation - Deletion ------------------------------------------------
+//--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * K64_GPIO_create : creates a K64 port interface. Initialises function pointers and gpio registers sizes,
- * 	and initialises memory zones;
+ * Makefile must provide :
+ * 	- NB_PORTS : 		number of ports;
+ * 	- PORT_REG : 		start of the port register area;
+ * 	- PORT_SPACING : 	spacing between two port register areas
+ * 	- GPIO_REG : 		start of the port register area;
+ * 	- GPIO_SPACING : 	spacing between two port register areas
  */
 
-struct K64_PORT_driver_t *K64_PORT_create(volatile void *const first_port_peripheral,
-												  volatile void *const first_gpio_peripheral,
-												  const uint8_t nb_peripherals,
-												  const size_t port_memory_spacing, const size_t gpio_memory_spacing) {
 
-	//Create the initializer;
-	const struct K64_PORT_driver_t init = {
+//If one of the macro was not provided :
+#if !defined(PORT_REG) || !defined(PORT_SPACING) || !defined(GPIO_REG) || !defined(GPIO_SPACING)
 
-		.port_driver = {
+//Log
+#error "Error, at least one macro argument hasn't been provided. Check the makefile;"
 
-			//Function pointers will only cast port interface pointer in the K64 port interface pointer in function args,
-			// legit because K64_PORT_driver is composed by port_driver;
+//Define macros. Allows debugging on IDE environment;
+#define    PORT_REG    4
+#define    PORT_SPACING 4
+#define    GPIO_REG    4
+#define    GPIO_SPACING 4
 
-			//Provide access to the pin config getter;
-			.get_pin_config =
-			(void (*const)(const struct port_driver *, const struct io_desc_t *, void *))
-				&K64_PORT_get_pin_config,
+#endif
 
-			//Provide access to the pin configuration setter;
-			.configure_pin =
-			(void (*const)(const struct port_driver *, const struct io_desc_t *, void *))
-				&K64_PORT_configure_pin,
+//--------------------------------------------------- Build constants --------------------------------------------------
 
 
-			//gpio registers are 32 bits long;
-			.gpio_register_size = 4,
+//There are 5 ports on the kx port module;
+#define NB_PORTS 5
+
+//The total number of registered pins must be known; The following macro will add an increment expression
+// for each registered pin;
+#define PIN_REGISTER(...) (+ 1)
+
+//Declare the variable, and let the macro add increment expression;
+static const uint8_t nb_pins = 0
+
+#include "kx_port_pins.h"
+
+//Terminate the statement
+;
+
+//Macro not used anymore;
+#undef PIN_REGISTER;
 
 
-			//Provide access to the descriptor provider;
-			.get_gpio_descriptor =
-			(bool (*const)(const struct port_driver *, enum gpio_register_type_e, const struct io_desc_t *,
-						   volatile void **, void *))
-				&K64_PORT_get_gpio_descriptor,
+//----------------------------------------------- PORT pointers structs ----------------------------------------------
 
-			//Provide access to the deleter;
-			.destructor =  (void (*const)(struct port_driver *)) &K64_PORT_destructor,
+struct port_ptrs {
 
-		},
+	//The port register area;
+	struct port_memory *port;
 
-		//Initialise the port memory zone;
-		.ports = {
+	//The gpio register area;
+	struct gpio_memory *gpio;
 
-			.memory_map = {
-				.start_address = first_port_peripheral,
-				.block_spacing = port_memory_spacing,
-			},
+};
 
-			.bloc_desc = {
-				.nb_blocks = nb_peripherals,
-				.block_size = sizeof(struct K64_PORT_registers),
-			}
+//INIT_ARRAY will print the reference of the i-th timer channel;
+#define INIT_AR(i)\
+    {\
+        .port =  (struct port_memory *) (PORT_REG + (i) * PORT_SPACING),\
+        .gpio = (struct gpio_memory *)(GPIO_REG + (i) * PORT_SPACING)\
+    },
 
-		},
+//Initialize the areas array;
+static const struct port_ptrs port_areas[NB_PORTS] = {INCR_CALL(NB_PORTS, INIT_AR)};
+
+//Macro not used anymore;
+#undef INIT_AR
+
+//--------------------------------------------------- PORT operations --------------------------------------------------
+
+//GPIO_DEFINE will define all io functions for a GPIO
+#define GPIO_DEFINE(i) \
+    static void set_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PSOR = mask;}\
+    static void clear_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PCOR = mask;}\
+    static void toggle_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PTOR = mask;}\
+    static void write_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PDOR = mask;}\
+    static size_t read_##i() {return (size_t)(((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PDIR);}\
+
+//Declare each channel;
+INCR_CALL(NB_PORTS, GPIO_DEFINE);
+
+//Macro not used anymore;
+#undef GPIO_DEFINE
 
 
-		//Initialise the gpios memory zone;
-		.gpios = {
+//----------------------------------------------- Port operations structs ----------------------------------------------
 
-			.memory_map = {
-				.start_address = first_gpio_peripheral,
-				.block_spacing = gpio_memory_spacing,
-			},
+//INIT_ARRAY will print the reference of the i-th timer channel;
+#define INIT_AR(i) {.set = &set_##i, .clear = &clear_##i, .toggle = &toggle_##i, .write = &write_##i, .read = &read_##i},
 
-			.bloc_desc = {
-				.nb_blocks = nb_peripherals,
-				.block_size = sizeof(struct K64_GPIO_memory_t)
-			}
+//Initialize the operations array;
+static const struct gpio_port_operations operations[NB_PORTS] = {INCR_CALL(NB_PORTS, INIT_AR)};
 
-		},
+//Macro not used anymore;
+#undef INIT_AR
 
 
-	};
 
-	//Allocate, initialise, and return the gpio interface struct;
-	return kernel_malloc_copy(sizeof(struct K64_PORT_driver_t), &init);
-
-}
-
+//---------------------------------------------------- Pins structs ----------------------------------------------------
 
 /*
- * K64_GPIO_destructor : deletes the K64 GPIO interface struct;
+ * A pin data contains a port identifier and a bit identifier;
  */
 
-void K64_PORT_destructor(struct K64_PORT_driver_t *const driver_data) {
+struct pin_data {
 
-	//The K64 GPIO interface doesn't own any dynamic data, we can just free the structure;
-	return kernel_free(driver_data);
+	//The id of the port;
+	const uint8_t port_id;
 
-}
+	//The id of the bit;
+	const uint8_t bit_id;
 
+	//The registration id of the bit;
 
-
-//------------------------------------------------- Descriptor access ------------------------------------------------
+};
 
 
 /*
- * K64_PORT_get_gpio_descriptor : Get the descriptor for a single IO pin
- * 	(updates the register and the appropriate mask for the pin);
+ * There is a fixed number of declared pins, that is decided at compile time;
+ * 	The following struct keeps track of their data;
  */
 
-bool K64_PORT_get_gpio_descriptor(const struct K64_PORT_driver_t *driver, const enum gpio_register_type_e type,
-									  const struct io_desc_t *io_desc,
-									  volatile void **const gpio_register, void *const mask_p) {
+//PIN_REGISTER will initialise a pin data struct;
+#define PIN_REGISTER(name, port, bit, suus) {.port_id = (port), .bit_id = (bit)},
+
+static const struct pin_data pins[NB_PORTS] = {
+
+//Initilalise all pins;
+#include "kx_port_pins.h"
+
+};
+
+//Macro not used anymore;
+#undef PIN_REGISTER
 
 
-	//Cache the gpio memory descriptor struct;
-	const struct mem_desc_t *gpio_desc = &driver->gpios;
-
-	//Cache the port index;
-	uint8_t port_index = io_desc->port_index;
-
-	//Cache the bit index;
-	uint8_t bit_index = io_desc->bit_index;
-
-	//Create a temp var containing the selected register;
-	volatile void *gpio_reg;
-
-	//Switch the type of register required;
-	switch (type) {
-		case GPIO_OUTPUT_DATA_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PDOR));
-			break;
-		case GPIO_OUTPUT_SET_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PSOR));
-			break;
-		case GPIO_OUTPUT_CLEAR_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PCOR));
-			break;
-		case GPIO_OUTPUT_TOGGLE_REGISTER:
-			gpio_reg = mem_desc_get_bloc_member(gpio_desc, port_index, offsetof(struct K64_GPIO_memory_t, PTOR));
-			break;
-		default:
-			//If no correct register type was provided, fail;
-			return false;
-	}
-
-	//Assign the register pointer;
-	*gpio_register = gpio_reg;
-
-	//Determine the mask; The GPIO peripheral eases our life;
-	*(uint32_t *) mask_p = (uint32_t) 1 << bit_index;
-
-	//Complete;
-	return true;
-
-}
+/*
+ * Pins can be interfaced with; We must keep track of interfaced structs, in order to neutralise them
+ * 	at close time;
+ */
+static void *interfaces[nb_pins] = {0};
 
 
-//----------------------------------------------------- IRQ options ----------------------------------------------------
+
+//-------------------------------------------------- Pin configuration -------------------------------------------------
 
 /*
  * type_to_IRQ_bits : determines the value to set in the IRQ bits of the PCR, depending on the interrupt type;
  */
 
-uint8_t type_to_IRQ_bits(const enum port_interrupt_t type) {
+static uint8_t type_to_IRQ_bits(const enum port_interrupt_t type) {
 
-	/*
-	 * Direct from the K64 datasheet;
-	 */
+	//Cf kinetis datasheet;
 
 	switch (type) {
 		case PORT_NO_INTERRUPT :
@@ -347,11 +324,9 @@ uint8_t type_to_IRQ_bits(const enum port_interrupt_t type) {
  * type_to_IRQ_bits : determines the value to set in the IRQ bits of the PCR, depending on the interrupt type;
  */
 
-enum port_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
+static enum port_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
 
-	/*
-	 * Direct from the K64 datasheet;
-	 */
+	//Cf kinetis datasheet;
 
 	switch (bits) {
 		case 1 :
@@ -378,146 +353,15 @@ enum port_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
 }
 
 
-//----------------------------------------------------- Pins config ----------------------------------------------------
+static void pin_configuration(const struct pin_data *const pin, const struct port_pin_config *const config) {
 
-/*
- * PORT_get_pin_config : retrieves a pin's current configuration (avoid defaults mistakes);
- */
+	//Cache port and bit index;
+	const uint8_t port_id = pin->port_id;
+	const uint8_t bit = pin->bit_id;
 
-void K64_PORT_get_pin_config(const struct K64_PORT_driver_t *const driver,
-								 const struct io_desc_t *const pin,
-								 struct K64_pin_configuration_t *const config) {
-
-	//Cache the peripheral index and the bit index;
-	uint8_t port_id = pin->port_index;
-	uint8_t bit = pin->bit_index;
-
-	//Cache the concerned port and gpio chip memory addresses;
-	volatile struct K64_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
-	volatile struct K64_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
-
-	//Declare the configuration register to write; Set the flag bit to clear it by default;
-	uint32_t config_register = port->PCR[bit];
-
-	//Get IRQ bits;
-	uint8_t IRQ_bits = (uint8_t) PORT_PCR_FROM_IRQC(config_register);
-
-	//Update the interrupt type in the config struct;
-	config->interrupt_type = IRQ_bits_to_type(IRQ_bits);
-
-	//Update the interrupt function if the interrupt is enabled;
-	if (IRQ_bits) {
-
-		//TODO INTERRUPT FUNCTION;
-
-	}
-
-	//Set the multiplexer channel;
-	config->mux_channel = (uint8_t) PORT_PCR_FROM_MUX(config_register);
-
-	//If the direction is output, set it. Otherwise, set input;
-	if (gpio->PDDR & (uint32_t) 1 << bit) {
-		config->direction = PORT_OUTPUT;
-	} else {
-		config->direction = PORT_INPUT;
-	}
-
-
-	/*
-	 * Input mode :
-	 */
-
-	//Evaluate the input mode;
-	switch (config->input_mode) {
-
-		//Only the pullup requires the PS bit set;
-		case PORT_PULL_UP:
-			SET(config_register, PORT_PCR_PS, 32);
-
-			//Both pull-modes require the PE bit set;
-		case PORT_PULL_DOWN:
-			SET(config_register, PORT_PCR_PE, 32);
-
-			//Hysteresis is not supported, High Impedance is the default mode;
-		default:
-			break;
-
-	}
-
-
-	/*
-	 * Filtering :
-	 */
-
-	//If the active filtering is enabled :
-	if (port->DFER & (uint32_t) (1 << bit)) {
-
-		//Set the type and the filtering length;
-		config->input_filter = PORT_DIGITAL_FILTERING;
-		config->filtering_length = (uint8_t) port->DFWR;
-
-	} else {
-
-		//Reset the filtering length;
-		config->filtering_length = 1;
-
-		//If the passive filtering is enabled, mark it. Otherwise, mark the non filtering sequences_initialised;
-		if (config_register & PORT_PCR_PFE) {
-			config->input_filter = PORT_PASSIVE_FILTERING;
-		} else {
-			config->input_filter = PORT_NO_FILTERING;
-		}
-
-	}
-
-
-
-	/*
-	 * Output mode :
-	 *
-	 * Set the output mode. The section is left verbose to clearly sequences_initialised that all cases are handled;
-	 *  Compiler optimised;
-	 */
-
-	//If the output is in close drain :
-	if (config_register & PORT_PCR_ODE) {
-		config->output_mode = PORT_OPEN_DRAIN;
-	} else if (config_register & PORT_PCR_DSE) {
-		config->output_mode = PORT_HIGH_DRIVE;
-	} else {
-		config->output_mode = PORT_PUSH_PULL;
-	}
-
-	//Determine and save the slew rate;
-	if (config_register & PORT_PCR_SRE) {
-		config->slew_rate = PORT_HIGH_RATE;
-	} else {
-		config->slew_rate = PORT_LOW_RATE;
-	}
-
-}
-
-
-/*
- * PORT_set_pin_configuration : sets all registers to fit the required configuration;
- *
- *  An invalid configuration generates an error;
- */
-
-void K64_PORT_configure_pin(const struct K64_PORT_driver_t *const driver,
-								const struct io_desc_t *const pin,
-								struct K64_pin_configuration_t *const config) {
-
-	//First, Update the mux channel;
-	config->mux_channel = pin->mux_channel;
-
-	//Cache the peripheral index and the bit index;
-	uint8_t port_id = pin->port_index;
-	uint8_t bit = pin->bit_index;
-
-	//Cache the concerned port and gpio chip memory addresses;
-	volatile struct K64_PORT_registers *port = mem_desc_get_bloc(&driver->ports, port_id);
-	volatile struct K64_GPIO_memory_t *gpio = mem_desc_get_bloc(&driver->gpios, port_id);
+	//Get port and gpio memory areas;
+	struct port_memory *const port = port_areas[port_id].port;
+	struct gpio_memory *const gpio = port_areas[port_id].gpio;
 
 	//TODO ERRORS IN CASE OF BAD CONFIGURATION;
 
@@ -569,8 +413,10 @@ void K64_PORT_configure_pin(const struct K64_PORT_driver_t *const driver,
 
 
 		/*
-		 * Filtering :
+		 * Filtering : Not handled for instance;
 		 */
+
+		/*
 
 		switch (config->input_filter) {
 
@@ -603,6 +449,7 @@ void K64_PORT_configure_pin(const struct K64_PORT_driver_t *const driver,
 				break;
 
 		}
+		 */
 
 	} else {
 
@@ -642,3 +489,159 @@ void K64_PORT_configure_pin(const struct K64_PORT_driver_t *const driver,
 }
 
 
+
+//--------------------------------------------------- File operations --------------------------------------------------
+
+/*
+ * A port pin supports configuration, interface and close;
+ *
+ * A port supports configuration;
+ */
+
+
+static bool fs_pin_config(void *const pin_id, const void *const config, const size_t config_size) {
+
+	//If the configuration struct is not valid
+	if (config_size != sizeof(struct port_pin_config)) {
+
+		//Abort;
+		return false;
+
+	}
+
+	//Configure the pin, providing the proper pin data struct reference;
+	pin_configuration(&pins[(size_t) pin_id], config);
+
+}
+
+
+//TODO
+static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, size_t iface_size) {
+
+	//If the configuration struct is not valid
+	if (iface_size != sizeof(struct gpio_interface)) {
+
+		//Abort;
+		return false;
+
+	}
+
+	//If another struct is interfaced :
+	if (interfaces[(size_t) pin_id]) {
+
+		//Abort;
+		return false;
+
+	}
+
+	//Cache port and bit identifier;
+	uint8_t port_id = pins[(size_t) pin_id].port_id;
+	uint8_t bit_id = pins[(size_t) pin_id].bit_id;
+
+	//Cache the port register;
+	struct port_memory *port_area = port_areas[port_id].port;
+
+	//Create the gpio interface initializer;
+	struct gpio_interface init = {
+
+		//Provide the address of the port area; It is unique;
+		.port_identifier = (size_t) port_area,
+
+		//Provide access to the operations struct;
+		.operations = operations + port_id,
+
+		//Determine and save the pin's bit mask;
+		.pin_mask = (size_t) (((size_t) 1) << bit_id),
+
+	};
+
+	//Keep track of the interface struct for eventual neutralisation;
+	interfaces[(size_t) pin_id] = gpio_iface;
+
+	//Interface the struct;
+	memcpy(gpio_iface, &init, sizeof(struct gpio_interface));
+
+}
+
+
+//TODO
+static void fs_pin_close(void *const pin_id) {
+
+	//Cache the location of the reference of the eventual interface struct;
+	void *iface_p = interfaces[(size_t) pin_id];
+
+	//If the pin is interfaced :
+	if (iface_p) {
+
+		//Neutralise the struct;
+		memcpy(iface_p, &neutral_gpio_interface, sizeof(struct gpio_interface));
+
+		//Reset the interface pointer;
+		interfaces[(size_t) pin_id] = 0;
+
+	}
+
+}
+
+/*
+ * The port pin file operation structure will be the same for all pins;
+ */
+static const struct dfs_file_operations port_pin_file_ops = {
+	.configure = &fs_pin_config,
+	.interface = &fs_pin_interface,
+	.close = &fs_pin_close,
+};
+
+
+//-------------------------------------------------- Pins registration -------------------------------------------------
+
+static void register_pin(const char *name, size_t pin_id) {
+
+	//We must register the file, providing related pin data and file operations;
+	dfs_create(name, &port_pin_file_ops, (void *) pin_id);
+
+}
+
+
+//------------------------------------------------- Init - Exit ------------------------------------------------
+
+
+
+static void kx_port_init() {
+
+	//Enable gating for all ports;
+	sim_enable_PORTA_clock_gating();
+	sim_enable_PORTB_clock_gating();
+	sim_enable_PORTC_clock_gating();
+	sim_enable_PORTD_clock_gating();
+	sim_enable_PORTE_clock_gating();
+
+	//TODO REGISTER ALL PORTS;
+
+	/*
+	 * Pin registration;
+	 */
+
+	size_t pin_id = 0;
+
+	//To register a pin, we simply call register_pin, providing its name and its address.
+	// The index is then incremented;
+	#define PIN_REGISTER(name, port, bit, suus) register_pin(name, pin_id++);
+
+	//Register all pins
+	#include "kx_port_pins.h"
+
+	//Macro not used anymore;
+	#undef PIN_REGISTER
+
+}
+
+
+bool kx_port_exit() {
+
+	//TODO REMOVE
+
+}
+
+//Embed the module in the executable;
+KERNEL_EMBED_PERIPHERAL_MODULE(port, &kx_port_init, &kx_port_exit);

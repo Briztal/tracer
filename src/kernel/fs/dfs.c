@@ -20,11 +20,9 @@
 
 #include <stdio.h>
 
-#include <kernel/driver/driver.h>
 #include <kernel/krnl.h>
 #include <string.h>
 #include <kernel/panic.h>
-#include <kernel/debug/debug.h>
 #include <kernel/struct/nlist.h>
 #include "dfs.h"
 
@@ -35,17 +33,13 @@ static struct nlist files = {
 
 
 //Add a file in the file system;
-void dfs_create(const char *const name, const enum dfs_file_type type,
-				const struct dfs_file_operations *const operations, void *const resource) {
+void dfs_create(const char *const name, const struct dfs_file_operations *const operations, void *const resource) {
 
 	//Create the file initializer;
 	struct dfs_file init = {
 
 		//File closed;
 		.file_open = false,
-
-		//Save the type;
-		.type = type,
 
 		//Reference the operations structure;
 		.operations = operations,

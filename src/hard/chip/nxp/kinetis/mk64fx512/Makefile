@@ -24,6 +24,32 @@ LDSCRIPT_MMAP_DIR := src/hard/chip/nxp/kinetis/mk64fx512/
 SK_DIR	:=  src/hard/chip/nxp/kinetis
 BK_DIR	:=  build/hard/chip/nxp/kinetis
 
+
+
+#------------------ Port + gpio module
+
+#The port source file takes four arguments, addresses and spacings of port and gpio register areas;
+port_arg = -DPORT_REG=0x40049000 -DPORT_SPACING=0x1000 -DGPIO_REG=0x400FF000 -DGPIO_SPACING=0x40
+
+port:
+
+#Create a directory for the PORT library;
+	@mkdir -p build/mod/PORT
+
+#Log the compilation of the manager;
+	@echo "[CC]\t$(SK_DIR)/kx_port.c"
+
+#Compile the pit manager;
+	@$(CC) $(CFLAGS) $(INC) $(port_args) -o $(BK_DIR)/port.o -c $(SK_DIR)/kx_port.c
+
+
+#Add the port rule to the module dependencies list;
+MODULES += port
+
+#Add the PORT objects to the modules list;
+MODULES_OBJS += $(BK_DIR)/port.o
+
+
 #------------------ Periodic Interrupt Timer
 
 #The PIT manager takes two arguments, the address of the MCR register, and the number of channels;

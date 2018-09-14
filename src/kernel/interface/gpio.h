@@ -52,6 +52,9 @@ struct gpio_interface {
 
 };
 
+//The gpio lib includes a neutral gpio interface, so that gpio drivers can prevent access to their functions;
+extern const struct gpio_interface neutral_gpio_interface;
+
 
 //Static inline shortcut generator;
 #define GPIO_SHORTCUT(name, type)\

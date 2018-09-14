@@ -43,15 +43,17 @@ struct dfs_file;
 
 struct dfs_file_operations {
 
-	//Open the file;
-	void (*open)();
+	//Open the resource;
+	void (*open)(void *file_data);
 
-	//Close the file;
-	void (*close)();
+	//Configure the resource.
+	bool (*configure)(void *file_data, const void *config, size_t config_size);
 
-	//Get a copy of the file's internal structure. The passed pointer will be
-	bool (*interface)(void *data, size_t size);
+	//Get a copy of the resource's internal structure.
+	bool (*interface)(void *file_data, void *iface_struct, size_t size);
 
+	//Close the resource;
+	void (*close)(void *file_data);
 };
 
 
@@ -60,9 +62,6 @@ struct dfs_file {
 
 	//The status of the file;
 	bool file_open;
-
-	//The type of resource;
-	const enum dfs_file_type type;
 
 	//The associated file operation struct;
 	const struct dfs_file_operations *const operations;
@@ -79,21 +78,24 @@ struct dfs_file {
 static inline void file_op_open(struct dfs_file *file) {
 
 	//Cache the function;
-	void (*open)() = file->operations->open;
+	void (*open)(void *) = file->operations->open;
 
 	//If the function is not null, call it;
-	if (open) { (*open)(); }
+	if (open) { (*open)(file->resource); }
 
 }
 
 
-static inline void file_op_close(struct dfs_file *file) {
+static inline bool file_op_configure(struct dfs_file *file, void *data, size_t size) {
 
 	//Cache the function;
-	void (*close)() = file->operations->close;
+	bool (*configure)(void *, const void *, size_t) = file->operations->configure;
 
 	//If the function is not null, call it;
-	if (close) { (*close)(); }
+	if (configure) {return (*configure)(file->resource, data, size); }
+
+	//If null pointer, fail;
+	return false;
 
 }
 
@@ -101,15 +103,27 @@ static inline void file_op_close(struct dfs_file *file) {
 static inline bool file_op_interface(struct dfs_file *file, void *data, size_t size) {
 
 	//Cache the function;
-	bool (*interface)(void *, size_t) = file->operations->interface;
+	bool (*interface)(void *,void *, size_t) = file->operations->interface;
 
 	//If the function is not null, call it;
-	if (interface) {return (*interface)(data, size); }
+	if (interface) {return (*interface)(file->resource, data, size); }
 
 	//If null pointer, fail;
 	return false;
 
 }
+
+
+static inline void file_op_close(struct dfs_file *file) {
+
+	//Cache the function;
+	void (*close)(void *) = file->operations->close;
+
+	//If the function is not null, call it;
+	if (close) { (*close)(file->resource); }
+
+}
+
 
 static inline void file_delete(struct dfs_file *file) {
 
@@ -122,10 +136,7 @@ static inline void file_delete(struct dfs_file *file) {
 
 
 //Add a file in the file system;
-void dfs_create(const char *name,
-				enum dfs_file_type type,
-				const struct dfs_file_operations *operations,
-				void *resource);
+void dfs_create(const char *name, const struct dfs_file_operations *operations, void *resource);
 
 //Open a file;
 struct dfs_file *dfs_open(const char *name);

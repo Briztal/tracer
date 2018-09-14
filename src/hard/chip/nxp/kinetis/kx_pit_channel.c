@@ -15,6 +15,7 @@
 
 #include <util/string.h>
 #include <kernel/log.h>
+#include <kernel/interface/timer.h>
 
 
 
@@ -293,7 +294,7 @@ static void set_handler(void (*handler)()) {
  * The timer interface;
  */
 
-const struct timer_interface NM(kx_pit_channel) __attribute__((visibility("hidden"))) = {
+const struct timer_interface NM(kx_pit_channel) = {
 
 	.set_base_frequency = &set_base_frequency,
 
@@ -392,7 +393,7 @@ static struct dfs_file_operations file_operations = {
 void NM(kx_pit_channel_init)() {
 
 	//Register a file with no content leading to our operations;
-	dfs_create(pit_name, DFS_INTERFACE, &file_operations, 0);
+	dfs_create(pit_name, &file_operations, 0);
 
 	//Reset the timer, and set the base frequency to 1KHz
 	timer_reset(&NM(kx_pit_channel), 1000);
