@@ -23,7 +23,7 @@
 
 #include "kx_sim.h"
 
-#include <kernel/driver/timer.h>
+#include <kernel/interface/timer.h>
 
 #include <kernel/mod/auto_mod.h>
 

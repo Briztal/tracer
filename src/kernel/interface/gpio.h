@@ -59,7 +59,7 @@ extern const struct gpio_interface neutral_gpio_interface;
 //Static inline shortcut generator;
 #define GPIO_SHORTCUT(name, type)\
 static inline type gpio_##name(struct gpio_interface *gpio, size_t mask) {\
-	(*(gpio->operations->name))(mask);\
+	return (*(gpio->operations->name))(mask);\
 }
 
 

@@ -7,15 +7,13 @@
 
 #include <stdbool.h>
 
-#include <kernel/driver/timer.h>
+#include <kernel/interface/timer.h>
 
 #include <kernel/fs/dfs.h>
 
 #include <kernel/ic.h>
 
 #include <util/string.h>
-#include <kernel/log.h>
-#include <kernel/interface/timer.h>
 
 
 
@@ -333,7 +331,7 @@ static const char *const pit_name = PNM;
 
 
 //Transmit the timer interface;
-static bool channel_interface(void *data, size_t data_size) {
+static bool channel_interface(void *data, void *const iface, const size_t iface_size) {
 
 	//If the channel is already interfaced :
 	if (timer_if_copy) {
@@ -343,8 +341,8 @@ static bool channel_interface(void *data, size_t data_size) {
 
 	}
 
-	//If the data size doesn't match a timer interface :
-	if (data_size != sizeof(struct timer_interface)) {
+	//If the iface size doesn't match a timer interface :
+	if (iface_size != sizeof(struct timer_interface)) {
 
 		//Fail;
 		return false;
@@ -352,10 +350,10 @@ static bool channel_interface(void *data, size_t data_size) {
 	}
 
 	//Transmit a copy of the interface;
-	memcpy(data, &NM(kx_pit_channel), sizeof(struct timer_interface));
+	memcpy(iface, &NM(kx_pit_channel), sizeof(struct timer_interface));
 
 	//Save the reference of the copy for future neutralisation;
-	timer_if_copy = data;
+	timer_if_copy = iface;
 
 	//Complete;
 	return true;
@@ -363,7 +361,7 @@ static bool channel_interface(void *data, size_t data_size) {
 }
 
 //Close the timer resource : will neutralise the interface;
-static void channel_close() {
+static void channel_close(void *data) {
 
 	//If the timer is already interfaced :
 	if (timer_if_copy) {

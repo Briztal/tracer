@@ -8,8 +8,10 @@
 #include <kernel/log.h>
 #include <kernel/fs/dfs.h>
 #include <kernel/mod/auto_mod.h>
-#include <kernel/driver/timer.h>
+#include <kernel/interface/timer.h>
 #include <kernel/panic.h>
+#include <kernel/interface/gpio.h>
+#include <kernel/debug/debug.h>
 
 
 static void suus() {
@@ -20,6 +22,47 @@ static void suus() {
 
 
 static void check_init() {
+
+	kernel_log_("\n\n\n");
+	kernel_log_("Querying led file : ");
+
+	struct dfs_file *f = dfs_open("led");
+
+	if (!f) {
+
+		kernel_log_("File doesn't exist. Aborting.");
+
+		return;
+
+	}
+
+	kernel_log("File : %h", f);
+
+	kernel_log_("Interfacing with gpio : ");
+
+	struct gpio_interface giface;
+
+	bool s = file_op_interface(f, &giface, sizeof(giface));
+
+	if (!s) {
+
+		kernel_log_("Operation failed. Aborting");
+
+		return;
+
+	}
+
+	kernel_log("success, %h", giface.pin_mask);
+
+
+	while(1) {
+		gpio_set(&giface, giface.pin_mask);
+		debug_delay_ms(500);
+		gpio_clear(&giface, giface.pin_mask);
+		debug_delay_ms(500);
+	}
+
+	return;
 
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying timer file : ");
@@ -57,6 +100,8 @@ static void check_init() {
 	timer_init(&iface, 1000, 2000, &suus);
 
 	kernel_log_("Success");
+
+
 
 
 }

@@ -29,7 +29,7 @@ BK_DIR	:=  build/hard/chip/nxp/kinetis
 #------------------ Port + gpio module
 
 #The port source file takes four arguments, addresses and spacings of port and gpio register areas;
-port_arg = -DPORT_REG=0x40049000 -DPORT_SPACING=0x1000 -DGPIO_REG=0x400FF000 -DGPIO_SPACING=0x40
+port_args = -DPORT_REG=0x40049000 -DPORT_SPACING=0x1000 -DGPIO_REG=0x400FF000 -DGPIO_SPACING=0x40
 
 port:
 

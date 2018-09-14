@@ -31,8 +31,6 @@
 #include "kx_sim.h"
 
 
-
-
 // --------------------------------------------- Hardware constants macros ---------------------------------------------
 
 //TODO PJRC TRIBUTE
@@ -68,7 +66,7 @@
 //TODO BITWISE.h
 
 
-//-------------------------------------------------- Memory structures --------------------------------------------------
+//--------------------------------------------------- Memory structs ---------------------------------------------------
 
 /*
  * The kx port memory map;
@@ -163,24 +161,8 @@ struct __attribute__ ((packed)) gpio_memory {
 
 //--------------------------------------------------- Build constants --------------------------------------------------
 
-
 //There are 5 ports on the kx port module;
 #define NB_PORTS 5
-
-//The total number of registered pins must be known; The following macro will add an increment expression
-// for each registered pin;
-#define PIN_REGISTER(...) (+ 1)
-
-//Declare the variable, and let the macro add increment expression;
-static const uint8_t nb_pins = 0
-
-#include "kx_port_pins.h"
-
-//Terminate the statement
-;
-
-//Macro not used anymore;
-#undef PIN_REGISTER;
 
 
 //----------------------------------------------- PORT pointers structs ----------------------------------------------
@@ -199,7 +181,7 @@ struct port_ptrs {
 #define INIT_AR(i)\
     {\
         .port =  (struct port_memory *) (PORT_REG + (i) * PORT_SPACING),\
-        .gpio = (struct gpio_memory *)(GPIO_REG + (i) * PORT_SPACING)\
+        .gpio = (struct gpio_memory *)(GPIO_REG + (i) * GPIO_SPACING)\
     },
 
 //Initialize the areas array;
@@ -212,11 +194,11 @@ static const struct port_ptrs port_areas[NB_PORTS] = {INCR_CALL(NB_PORTS, INIT_A
 
 //GPIO_DEFINE will define all io functions for a GPIO
 #define GPIO_DEFINE(i) \
-    static void set_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PSOR = mask;}\
-    static void clear_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PCOR = mask;}\
-    static void toggle_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PTOR = mask;}\
-    static void write_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PDOR = mask;}\
-    static size_t read_##i() {return (size_t)(((struct gpio_memory *) (GPIO_REG + (i) * PORT_SPACING))->PDIR);}\
+    static void set_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * GPIO_SPACING))->PSOR = mask;}\
+    static void clear_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * GPIO_SPACING))->PCOR = mask;}\
+    static void toggle_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * GPIO_SPACING))->PTOR = mask;}\
+    static void write_##i(size_t mask) {((struct gpio_memory *) (GPIO_REG + (i) * GPIO_SPACING))->PDOR = mask;}\
+    static size_t read_##i() {return (size_t)(((struct gpio_memory *) (GPIO_REG + (i) * GPIO_SPACING))->PDIR);}\
 
 //Declare each channel;
 INCR_CALL(NB_PORTS, GPIO_DEFINE);
@@ -263,7 +245,7 @@ struct pin_data {
  */
 
 //PIN_REGISTER will initialise a pin data struct;
-#define PIN_REGISTER(name, port, bit, suus) {.port_id = (port), .bit_id = (bit)},
+#define PIN_REGISTER(name, port, bit) {.port_id = (port), .bit_id = (bit)},
 
 static const struct pin_data pins[NB_PORTS] = {
 
@@ -280,7 +262,20 @@ static const struct pin_data pins[NB_PORTS] = {
  * Pins can be interfaced with; We must keep track of interfaced structs, in order to neutralise them
  * 	at close time;
  */
-static void *interfaces[nb_pins] = {0};
+
+
+//PIN_REGISTER will initialise a pin data struct;
+#define PIN_REGISTER(name, port, bit) 0,
+
+static void *interfaces[] = {
+
+//Initilalise all pins;
+#include "kx_port_pins.h"
+
+};
+
+//Macro not used anymore;
+#undef PIN_REGISTER
 
 
 
@@ -323,6 +318,7 @@ static uint8_t type_to_IRQ_bits(const enum port_interrupt_t type) {
 /*
  * type_to_IRQ_bits : determines the value to set in the IRQ bits of the PCR, depending on the interrupt type;
  */
+/*
 
 static enum port_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
 
@@ -351,6 +347,7 @@ static enum port_interrupt_t IRQ_bits_to_type(const uint8_t bits) {
 	}
 
 }
+*/
 
 
 static void pin_configuration(const struct pin_data *const pin, const struct port_pin_config *const config) {
@@ -512,11 +509,14 @@ static bool fs_pin_config(void *const pin_id, const void *const config, const si
 	//Configure the pin, providing the proper pin data struct reference;
 	pin_configuration(&pins[(size_t) pin_id], config);
 
+	//Complete;
+	return true;
+
 }
 
 
 //TODO
-static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, size_t iface_size) {
+static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, const size_t iface_size) {
 
 	//If the configuration struct is not valid
 	if (iface_size != sizeof(struct gpio_interface)) {
@@ -533,6 +533,8 @@ static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, size_t 
 		return false;
 
 	}
+
+
 
 	//Cache port and bit identifier;
 	uint8_t port_id = pins[(size_t) pin_id].port_id;
@@ -560,6 +562,9 @@ static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, size_t 
 
 	//Interface the struct;
 	memcpy(gpio_iface, &init, sizeof(struct gpio_interface));
+
+	//Complete;
+	return true;
 
 }
 
@@ -626,7 +631,7 @@ static void kx_port_init() {
 
 	//To register a pin, we simply call register_pin, providing its name and its address.
 	// The index is then incremented;
-	#define PIN_REGISTER(name, port, bit, suus) register_pin(name, pin_id++);
+	#define PIN_REGISTER(name, port, bit) register_pin(#name, pin_id++);
 
 	//Register all pins
 	#include "kx_port_pins.h"
@@ -639,7 +644,11 @@ static void kx_port_init() {
 
 bool kx_port_exit() {
 
-	//TODO REMOVE
+	//TODO REMOVE ALL FILES
+
+	return true;
+
+
 
 }
 

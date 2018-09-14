@@ -28,7 +28,8 @@ KERNEL_SRCS += $(KERNEL_DIR)/scheduler/prc.c
 KERNEL_SRCS += $(KERNEL_DIR)/scheduler/sched.c
 
 #Add timer structs
-KERNEL_SRCS +=  $(KERNEL_DIR)/timer/timer.c
+KERNEL_SRCS +=  $(KERNEL_DIR)/interface/gpio.c
+KERNEL_SRCS +=  $(KERNEL_DIR)/interface/timer.c
 
 #Struct sources;
 KERNEL_SRCS += $(KERNEL_DIR)/struct/nlist.c

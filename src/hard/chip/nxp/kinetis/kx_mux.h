@@ -24,60 +24,48 @@
 
 
 /*
- * the teensy35's port idendifiers;
+ * the k64 IO MUX configs; This is a transcription of K64 datasheet;
  */
-
-#define PORT_A 0
-#define PORT_B 1
-#define PORT_C 2
-#define PORT_D 3
-#define PORT_E 4
-
 
 /*
- * the teensy35's IO MUX configs; This is a transcription of K64 datasheet;
- */
-
-
 //------------------------------------------ PORT B ------------------------------------------
-
 
 //------------------ PORT B, pin 12(this marker will separate pins configs from each other)
 
-#define PTB12 			{PORT_B, 12, 1};
-#define UART3_RTS_b  	{PORT_B, 12, 2};
-#define FTM1_CH0 	 	{PORT_B, 12, 3};
-#define FTM0_CH4 	 	{PORT_B, 12, 4};
-#define FTM1_QD_PHA 	{PORT_B, 12, 6};
+B12_GPIO 		1
+B12_UART3_RTS_b 2
+B12_FTM1_CH0 	3
+B12_FTM0_CH4 	4
+B12_FTM1_QD_PHA 6
 
 //------------------ PORT B, pin 13
 
-#define PTB13			{PORT_B, 13, 1};
-#define UART3_CTS_b  	{PORT_B, 13, 2};
-#define FTM1_CH1 	 	{PORT_B, 13, 3};
-#define FTM0_CH5 	 	{PORT_B, 13, 4};
-#define FTM1_QD_PHB 	{PORT_B, 13, 6};
+B13_PTB13		1
+B13_UART3_CTS_b 2
+B13_FTM1_CH1 	3
+B13_FTM0_CH5 	4
+B13_FTM1_QD_PHB 6
 
 
 //------------------ PORT B, pin 16
 
 
-#define PTB16			{PORT_B, 16, 1};
-#define SPI1_OUT		{PORT_B, 16, 2};
-#define UART0_RX		{PORT_B, 16, 3};
-#define FTM_CLKIN0		{PORT_B, 16, 4};
-#define FB_AD17			{PORT_B, 16, 5};
-#define EWIM_IN			{PORT_B, 16, 6};
+B16_PTB16		1
+B16_SPI1_OUT	2
+B16_UART0_RX	3
+B16_FTM_CLKIN0	4
+B16_FB_AD17		5
+B16_EWIM_IN		6
 
 
 //------------------ PORT B, pin 17
 
-#define PTB17			{PORT_B, 17, 1};
-#define SPI1_IN			{PORT_B, 17, 2};
-#define UART0_TX		{PORT_B, 17, 3};
-#define FTM_CLKIN1		{PORT_B, 17, 4};
-#define FB_AD16			{PORT_B, 17, 5};
-#define EWIM_OUT_b		{PORT_B, 17, 6};
+B17_PTB17		1
+B17_SPI1_IN		2
+B17_UART0_TX	3
+B17_FTM_CLKIN1	4
+B17_FB_AD16		5
+B17_EWIM_OUT_b	6
 
 
 
@@ -85,106 +73,94 @@
 
 //------------------ PORT C, pin 0
 
-#define ADC0_SE14		{PORT_C, 0, 0};
-#define PTC0			{PORT_C, 0, 1};
-#define SPI0_PCS4		{PORT_C, 0, 2};
-#define PDB0_EXTRG		{PORT_C, 0, 3};
-#define USB_SOF_OUT		{PORT_C, 0, 4};
-#define FB_AD14			{PORT_C, 0, 5};
-#define I2S0_TXD1		{PORT_C, 0, 6};
+C0_ADC0_SE14	0
+C0_PTC0			1
+C0_SPI0_PCS4	2
+C0_PDB0_EXTRG	3
+C0_USB_SOF_OUT	4
+C0_FB_AD14		5
+C0_I2S0_TXD1	6
 
 
 //------------------ PORT C, pin 1
 
-#define ADC0_SE15		{PORT_C, 1, 0};
-#define PTC1			{PORT_C, 1, 1};
-#define LLWU_P6			{PORT_C, 1, 1};
-#define SPI0_PCS3		{PORT_C, 1, 2};
-#define UART1_RTS_b		{PORT_C, 1, 3};
-#define FTM0_CH0		{PORT_C, 1, 4};
-#define FB_AD13			{PORT_C, 1, 5};
-#define I2S0_TXD0		{PORT_C, 1, 6};
+C1_ADC0_SE15	0
+C1_PTC1			1
+C1_LLWU_P6		1
+C1_SPI0_PCS3	2
+C1_UART1_RTS_b	3
+C1_FTM0_CH0		4
+C1_FB_AD13		5
+C1_I2S0_TXD0	6
 
 
 //------------------ PORT C, pin 2
 
-#define ADC0_SE4b		{PORT_C, 2, 0};
-#define CMP1_IN0		{PORT_C, 2, 0};
-#define PTC2			{PORT_C, 2, 1};
-#define SPI0_PCS2		{PORT_C, 2, 2};
-#define UART1_CTS_b		{PORT_C, 2, 3};
-#define FTM0_CH1		{PORT_C, 2, 4};
-#define FB_AD12			{PORT_C, 2, 5};
-#define I2S0_TX_FS		{PORT_C, 2, 6};
+C2_ADC0_SE4b	0
+C2_CMP1_IN0		0
+C2_PTC2			1
+C2_SPI0_PCS2	2
+C2_UART1_CTS_b	3
+C2_FTM0_CH1		4
+C2_FB_AD12		5
+C2_I2S0_TX_FS	6
 
 
 //------------------ PORT C, pin 3
 
-#define CMP1_IN1		{PORT_C, 3, 0};
-#define PTC3			{PORT_C, 3, 1};
-#define LLWU_P7			{PORT_C, 3, 1};
-#define SPI0_PCS1		{PORT_C, 3, 2};
-//#define UART1_RX		{PORT_C, 3, 3};
-#define FTM0_CH2		{PORT_C, 3, 4};
-#define CLKOUT			{PORT_C, 3, 5};
-#define I2S0_BCLK		{PORT_C, 3, 6};
+C3_CMP1_IN1		0
+C3_PTC3			1
+C3_LLWU_P7		1
+C3_SPI0_PCS1	2
+C3_UART1_RX		3
+C3_FTM0_CH2		4
+C3_CLKOUT		5
+C3_I2S0_BCLK	6
 
 
 //------------------ PORT C, pin 4
 
-#define PTC4			{PORT_C, 4, 1};
-#define LLWU_P8			{PORT_C, 4, 1};
-#define SPI0_PCS0		{PORT_C, 4, 2};
-//#define UART1_TX		{PORT_C, 4, 3};
-#define FTM0_CH3		{PORT_C, 4, 4};
-#define FB_AD11			{PORT_C, 4, 5};
-#define CMP1_OUT		{PORT_C, 4, 6};
-
+C4_PTC4			1
+C4_LLWU_P8		1
+C4_SPI0_PCS0	2
+C4_UART1_TX		3
+C4_FTM0_CH3		4
+C4_FB_AD11		5
+C4_CMP1_OUT		6
 
 //------------------ PORT C, pin 5
 
-#define PTC5			{PORT_C, 5, 1};
-#define LLWU_P9			{PORT_C, 5, 1};
-#define SPI0_SCK		{PORT_C, 5, 2};
-#define LPTMR0_ALT2		{PORT_C, 5, 3};
-#define I2S0_RXD0		{PORT_C, 5, 4};
-#define FB_AD10			{PORT_C, 5, 5};
-#define CMP0_OUT		{PORT_C, 5, 6};
-//TODO#define FTM0_CH2		{PORT_C, 5, 7};
+C5_PTC5			1
+C5_LLWU_P9		1
+C5_SPI0_SCK		2
+C5_LPTMR0_ALT2	3
+C5_I2S0_RXD0	4
+C5_FB_AD10		5
+C5_CMP0_OUT		6
+C5_FTM0_CH2		7
 
 
 //------------------ PORT C, pin 6
 
-#define CMP0_IN0		{PORT_C, 6, 0};
-#define PTC6			{PORT_C, 6, 1};
-#define LLWU_P10		{PORT_C, 6, 1};
-#define SPI0_SOUT		{PORT_C, 6, 2};
-#define PSB0_EXTRG		{PORT_C, 6, 3};
-#define I2S0_RX_BCLK	{PORT_C, 6, 4};
-#define FB_AD9			{PORT_C, 6, 5};
-#define I2S0_MCLK		{PORT_C, 6, 6};
+C6_CMP0_IN0		0
+C6_PTC6			1
+C6_LLWU_P10		1//TODO ERROR, CHECK;
+C6_SPI0_SOUT	2
+C6_PSB0_EXTRG	3
+C6_I2S0_RX_BCLK	4
+C6_FB_AD9		5
+C6_I2S0_MCLK	6
 
 
 //------------------ PORT C, pin 7
 
-#define CMP0_IN1		{PORT_C, 7, 0};
-#define PTC7			{PORT_C, 7, 1};
-#define SPI0_SIN		{PORT_C, 7, 2};
-//TODO#define USB_SOF_OUT		{PORT_C, 7, 3};
-#define I2S0_RX_FS		{PORT_C, 7, 4};
-#define FB_AD8			{PORT_C, 7, 5};
+C7_CMP0_IN1		0
+C7_PTC7			1
+C7_SPI0_SIN		2
+C7_USB_SOF_OUT	3
+C7_I2S0_RX_FS	4
+C7_FB_AD8		5
 
-/*
- * TODO
-#define 		{PORT_C, , 0};
-#define 		{PORT_C, , 1};
-#define 		{PORT_C, , 2};
-#define 		{PORT_C, , 3};
-#define 		{PORT_C, , 4};
-#define 		{PORT_C, , 5};
-#define 		{PORT_C, , 6};
-#define 		{PORT_C, , 7};
- */
 
 
 
@@ -192,147 +168,129 @@
 
 //------------------ PORT E, pin 0
 
-#define ADC1_SE4a		{PORT_E, 0, 0};
-#define PTE0			{PORT_E, 0, 1};
-#define SPI1_PCS1		{PORT_E, 0, 2};
-#define UART1_TX		{PORT_E, 0, 3};
-#define SDHC0_D1		{PORT_E, 0, 4};
-#define TRACE_CLKOUT	{PORT_E, 0, 5};
-#define I2C1_SDA		{PORT_E, 0, 6};
-#define RTC_CLKOUT		{PORT_E, 0, 7};
+E0_ADC1_SE4a	0
+E0_PTE0			1
+E0_SPI1_PCS1	2
+E0_UART1_TX		3
+E0_SDHC0_D1		4
+E0_TRACE_CLKOUT	5
+E0_I2C1_SDA		6
+E0_RTC_CLKOUT	7
 
 
 //------------------ PORT E, pin 1
 
-#define ADC1_SE5a		{PORT_E, 1, 0};
-#define PTE1			{PORT_E, 1, 1};
-#define LLWU_P0			{PORT_E, 1, 1};
-#define SPI1_SOUT		{PORT_E, 1, 2};
-#define UART1_RX		{PORT_E, 1, 3};
-#define SDHC0_D0		{PORT_E, 1, 4};
-#define TRACE_D3		{PORT_E, 1, 5};
-#define I2C1_SCL		{PORT_E, 1, 6};
-#define SPI1_SIN		{PORT_E, 1, 7};
+E1_ADC1_SE5a	0
+E1_PTE1			1
+E1_LLWU_P0		1
+E1_SPI1_SOUT	2
+E1_UART1_RX		3
+E1_SDHC0_D0		4
+E1_TRACE_D3		5
+E1_I2C1_SCL		6
+E1_SPI1_SIN		7
 
 
 //------------------ PORT E, pin 2
 
-#define ADC0_DP2 		{PORT_E, 2, 0};
-#define ADC0_1_SE6a		{PORT_E, 2, 0};
-#define PTE2			{PORT_E, 2, 1};
-#define LLWU_P1			{PORT_E, 2, 1};
-#define SPI1_SCK		{PORT_E, 2, 2};
-#define UART_1_CTS_b	{PORT_E, 2, 3};
-#define SDHC0_DCLK		{PORT_E, 2, 4};
-#define TRACE_D2		{PORT_E, 2, 5};
+E2_ADC0_DP2 	0
+E2_ADC0_1_SE6a	0
+E2_PTE2			1//TODO ERROR CHECK
+E2_LLWU_P1		1
+E2_SPI1_SCK		2
+E2_UART_1_CTS_b	3
+E2_SDHC0_DCLK	4
+E2_TRACE_D2		5
 
 
 //------------------ PORT E, pin 3
 
-#define ADC0_DM2		{PORT_E, 3, 0};
-#define ADC1_SE7A		{PORT_E, 3, 0};
-#define PTE3			{PORT_E, 3, 1};
-//TODO#define SPI1_SIN		{PORT_E, 3, 2};
-//TODO##define UART1_RTS_b		{PORT_E, 3, 3};
-#define SDHC0_CMD		{PORT_E, 3, 4};
-#define TRACE_D1		{PORT_E, 3, 5};
-//TODO##define SPI1_SOUT		{PORT_E, 3, 7};
+E3_ADC0_DM2		0//TODO ERROR CHECK BORDEL
+E3_ADC1_SE7A	0
+E3_PTE3			1
+E3_SPI1_SIN		2
+E3_UART1_RTS_b	3
+E3_SDHC0_CMD	4
+E3_TRACE_D1		5
+E3_SPI1_SOUT	7
 
 //------------------ PORT E, pin 4
 
-#define PTE4			{PORT_E, 4, 1};
-#define LLWU_P2			{PORT_E, 4, 1};
-#define SPI1_PCS0		{PORT_E, 4, 2};
-#define UART3_TX		{PORT_E, 4, 3};
-#define SDHC0_D3		{PORT_E, 4, 4};
-#define TRACE_D0		{PORT_E, 4, 5};
+E4_PTE4			1//TODO ERROR CHECK
+E4_LLWU_P2		1
+E4_SPI1_PCS0	2
+E4_UART3_TX		3
+E4_SDHC0_D3		4
+E4_TRACE_D0		5
 
 
 //------------------ PORT E, pin 5
 
-#define PTE5			{PORT_E, 5, 1};
-#define SPI1_PCS2		{PORT_E, 5, 2};
-#define UART3_RX		{PORT_E, 5, 3};
-#define SDHC0_D2		{PORT_E, 5, 4};
-#define FTM3_CH0		{PORT_E, 5, 6};
+E5_PTE5			1
+E5_SPI1_PCS2	2
+E5_UART3_RX		3
+E5_SDHC0_D2		4
+E5_FTM3_CH0		6
 
 
 //------------------ PORT E, pin 6
 
-#define PTE6			{PORT_E, 6, 1};
-#define SPI1_PCS3		{PORT_E, 6, 2};
-//TODO##define UART3_CTS_b		{PORT_E, 6, 3};
-//TODO##define I2S0_MCLK		{PORT_E, 6, 4};
-#define FTM3_CH1		{PORT_E, 6, 6};
-//TODO##define USB_SOF_OUT		{PORT_E, 6, 7};
+E6_PTE6			1
+E6_SPI1_PCS3	2
+E6_UART3_CTS_b	3
+E6_I2S0_MCLK	4
+E6_FTM3_CH1		6
+E6_USB_SOF_OUT	7
 
 
 //------------------ PORT E, pin 7
 
-#define PTE7			{PORT_E, 7, 1};
-//TODO##define UART3_RTS_b		{PORT_E, 7, 3};
-//TODO##define I2S0_RXD0		{PORT_E, 7, 4};
-#define FTM3_CH2		{PORT_E, 7, 6};
+E7_PTE7			1
+E7_UART3_RTS_b	3
+E7_I2S0_RXD0	4
+E7_FTM3_CH2		6
 
 
 //------------------ PORT E, pin 8
 
-#define PTE8			{PORT_E, 8, 1};
-#define I2S0_RXD1		{PORT_E, 8, 2};
-#define UART5_TX		{PORT_E, 8, 3};
-//TODO##define I2S0_RX_FS		{PORT_E, 8, 4};
-#define FTM3_CH3		{PORT_E, 8, 6};
+E8_PTE8			1
+E8_I2S0_RXD1	2
+E8_UART5_TX		3
+E8_I2S0_RX_FS	4
+E8_FTM3_CH3		6
 
 
 //------------------ PORT E, pin 9
 
-//TODO##define I2S0_TXD1		{PORT_E, 9, 1};
-#define PTE9			{PORT_E, 9, 2};
-#define UART5_RX		{PORT_E, 9, 3};
-//TODO##define I2S0_RX_BCLK	{PORT_E, 9, 4};
-#define FTM3_CH4		{PORT_E, 9, 6};
+E9_I2S0_TXD1	1
+E9_PTE9			2
+E9_UART5_RX		3
+E9_I2S0_RX_BCLK	4
+E9_FTM3_CH4		6
 
 
 //------------------ PORT E, pin 10
 
-#define PTE10			{PORT_E, 10, 1};
-#define UART5_CTS_b		{PORT_E, 10, 3};
-//TODO##define I2S0_TXD0		{PORT_E, 10, 4};
-#define FTM3_CH5		{PORT_E, 10, 6};
+E10_PTE10		1
+E10_UART5_CTS_b	3
+E10_I2S0_TXD0	4
+E10_FTM3_CH5	6
 
 
 //------------------ PORT E, pin 11
 
-#define PTE11			{PORT_E, 11, 1};
-#define UART5_RTS_b		{PORT_E, 11, 3};
-//TODO##define I2S0_TX_FS		{PORT_E, 11, 4};
-#define FTM3_CH6		{PORT_E, 11, 6};
+E11_PTE11		1
+E11_UART5_RTS_b	3
+E11_I2S0_TX_FS	4
+E11_FTM3_CH6	6
 
 
 //------------------ PORT E, pin 12
 
-#define PTE12			{PORT_E, 12, 1};
-#define I2S0_TX_BCLK	{PORT_E, 12, 4};
-#define FTM3_CH7		{PORT_E, 12, 6};
+E12_PTE12			1
+E12_I2S0_TX_BCLK	4
+E12_FTM3_CH7		6
 
-/*
-#define 		{PORT_E, , 0};
-#define 		{PORT_E, , 1};
-#define 		{PORT_E, , 2};
-#define 		{PORT_E, , 3};
-#define 		{PORT_E, , 4};
-#define 		{PORT_E, , 5};
-#define 		{PORT_E, , 6};
-#define 		{PORT_E, , 7};
-
-#define 		{PORT_E, , 0};
-#define 		{PORT_E, , 1};
-#define 		{PORT_E, , 2};
-#define 		{PORT_E, , 3};
-#define 		{PORT_E, , 4};
-#define 		{PORT_E, , 5};
-#define 		{PORT_E, , 6};
-#define 		{PORT_E, , 7};
  */
 
 
