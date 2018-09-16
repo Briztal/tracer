@@ -19,621 +19,135 @@
 */
 
 #include <util/type.h>
-#include <kernel/driver/timer.h>
 #include <kernel/log.h>
+#include <kernel/interface/timer.h>
+#include <kernel/interface/gpio.h>
+#include <kernel/krnl.h>
+#include <util/string.h>
+#include <kernel/ic.h>
+#include <kernel/fs/dfs.h>
+
+
+/*
+ * The Servo control module manages a variable number of servo channels, each channel communicating with one servo.
+ *
+ * 	The servo module has build-in parameters, that can be changed in the makefile :
+ * 	- the timer to used, defined by its name; An invalid name will cause module to be unloaded;
+ * 	- the period of all servos;
+ * 	- the tolerance.
+ *
+ * 	All parameters that only concern one channel;
+ *
+ * 	Channels can be created, deleted, and their value can be set.
+ *
+ * 	All channels share the same period;
+ *
+ * Module lifecycle :
+ *
+ * 	- Initialisation :
+ * 		The servo timer, the total period, and the minimal duration are provided;
+ * 		No channel is added for instance, as the cycle period is not know;
+ *
+ *
+ * 	- channels setup :
+ * 		channels are created, adjusted, or deleted; The ISR becomes active if channels are active, and inactive if no
+ * 		channel is active;
+ *
+ *
+ *
+ * Channels lifecycle :
+ *
+ * 	- Channels creation :
+ * 		Channels are created with a name, a gpio and a maximal duration;
+ * 		Their duration is set to 0, so that they only become active when required;
+ *
+ * 	- Channels duration setup;
+ * 		A channel's duration can be adjusted at any time, while the channel exists; If the requires duration is beyond
+ * 		its maximal value, it will be decreased to it; If
+ *
+ * 	- Channels deletion;
+ * 		A channel can be deleted at any time, via the file system; The associated GPIO will be cleared;
+ *
+ */
+
+
+//--------------------------------------------------- Structs --------------------------------------------------
 
 struct servo_channel {
 
-    //Servo channels are stored in linked lists;
-    struct list_head head;
+	//Servo channels are stored in linked lists; Access outside the ISR must be done in a critical section;
+	struct list_head head;
 
-    //The minimal value of the chanel;
-    float value_min;
+	//The gpio file descriptor. Used to close the gpio file at channel deletion;
+	struct dfs_file *const gpio_fd;
 
-    //The maximal value of the chanel;
-    float value_max;
+	//Each servo channel interfaces with a gpio pin; Access outside the ISR must be done in a critical section;
+	const struct gpio_interface gpio;
 
-    //The minimal duration (in us) of an impulse on the channel;
-    uint16_t impulse_min;
+	//The maximal duration (in us) of an impulse on the channel; Constant
+	const uint32_t duration_max;
 
-    //The maximal duration (in us) of an impulse on the channel;
-    uint16_t impulse_max;
-
-    //The current impulse duration;
-    float impulse_duration;
-
+	//The current impulse duration; Can be written outside the ISR, for setup;
+	uint32_t duration;
 };
 
-//--------------------------------------------------- Private structs --------------------------------------------------
 
 struct servo_manager {
 
-    //The timer we use;
-    struct timer_interface timer;
+	/*
+	 * Channels lists. Access outside the ISR must be done in a critical section;
+	 */
 
-    //The list of started channels;
-	struct servo_channel *enabled_channels;
+	//The first element of the channels list. This particular channel is the complement;
+	// It is adjusted so that the duration of the complete cycle matches the period;
+	struct servo_channel *const channels;
 
-    //The list of unregistered channels;
-    struct servo_channel *disabled_channels;
+	//The currently active channel;
+	struct servo_channel *active_channel;
 
-    //The currently active channel;
-    const struct servo_channel *active_channel;
+	/*
+	 * Constant data, provided at compile time;
+	 */
 
-    //The period of all servo channels;
-    float period;
+	//The timer we use;
+	const struct timer_interface timer;
 
-    //The free time after a cycle;
-    float complement;
+	//The period of all servo channels;
+	const uint32_t period;//TODO MACRO-ISE
 
-    //A flag to stop the isr handler;
-    volatile bool started;
+	//The time tolerance;
+	const uint32_t tolerance;//TODO MACRO-ISE
 
-} ;
+
+	//Is the ISR routine started ?;
+	volatile bool started;
+
+	//The total available time for new channels;
+	uint32_t available_time;
+
+
+};
 
 
 //------------------------------------------------------- Globals ------------------------------------------------------
 
 //There exists only one servo controller, for interrupt;
-static struct servo_manager manager = {
-        .timer = {},
-        .enabled_channels = 0,
-        .disabled_channels = 0,
-        .active_channel = 0,
-        .period = 20000,
-        .complement = 20000,
-        .started = false,
-};
-
-
-//--------------------------------------------------- Private headers --------------------------------------------------
-
-//Check that a cycle can happen correctly;
-static void servo_check_cycle();
-
-//Count the max duration of a channel list;
-static float servo_check_duration();
-
-
-//Enable a channel providing an impulse value;
-static void servo_enable_channel(struct servo_channel *channel, float impulse_duration);
-
-//Enable a channel providing an impulse value;
-static void servo_disable_channel(struct servo_channel *channel);
-
-
-//Update the complement to all delays;
-static void servo_update_complement();
-
-
-//Start the timer routine;
-static void servo_start();
-
-//Stop the timer routine;
-static void servo_stop();
-
-//The interrupt function;
-void servo_isr_handler();
+static struct servo_manager servos;
 
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
 
+//TODO
 
-static void servo_module_init() {
 
-    //Cache the controller;
-    servo_controller_t *controller = &manager;
-
-    //If the controller is already initialised :
-    if (controller->initialised) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_init : the servo controller is already initialised;");
-
-    }
-
-    //Initialise the servo controller;
-    *controller = (servo_controller_t) {
-            .us_timer = us_timer,
-            .enabled_channels = EMPTY_LINKED_LIST(255),
-            .disabled_channels = EMPTY_LINKED_LIST(255),
-            .active_channel = 0,
-            .period = period_us,
-            .complement = period_us,
-            .initialised = true,
-            .started = false,
-    };
-
-}
-
-
-/*
- * servo_module_exit : de-initialises the servo controller;
- */
-
-void servo_module_exit() {
-
-    //Cache the controller;
-    struct servo_manager *controller = &manager;
-
-    //If the controller is not initialised :
-    if (!controller->initialised) {
-
-        //Nothing to do;
-        return;
-
-    }
-
-    //De initialise the timer;
-    timer_exit(controller->us_timer);
-
-    //Mark the controller de-initialised and unregistered;
-    controller->initialised = controller->started = false;
-
-}
-
-
-
-//-------------------------------------------------- Controller setup --------------------------------------------------
-
-/*
- * servo_module_set_period : updates the period of the servo controller;
- */
-
-void servo_module_set_period(const float new_period) {
-
-    //Cache the servo controller pointer;
-    struct servo_manager *manager = &manager;
-
-    //If the interrupt routine is started :
-    if (manager->started) {
-
-        //Error;
-        kernel_log("servo : Attempted to update the period when the servo controller started. Aborted;");
-
-    }
-
-    //Update the period;
-    manager->period = new_period;
-
-    //Check that the complete cycle can happen correctly;
-    servo_check_cycle(manager);
-
-    //Update the complement;
-    servo_update_complement(a);
-
-
-}
-
-
-/*
- * servo_check_cycle : verifies that all channels can be active at full time in the required period;
- */
-
-void servo_check_cycle(const servo_controller_t *const controller) {
-
-    //Determine the total period;
-    float period =
-            servo_check_duration(&controller->enabled_channels) + servo_check_duration(&controller->disabled_channels);
-
-    //If the determined period exceeds (or equals) the required period :
-    if (period >= controller->period) {
-
-        //Error. No time for complement, or complement negative;
-        kernel_error("servo.c : servo_check_cycle : the sum of all channels exceed the required period");
-
-    }
-
-}
-
-
-/*
- * servo_check_duration : counts the maximal duration of the channels list;
- */
-
-float servo_check_duration(const linked_list_t *const channels) {
-
-    //Initialise the duration sum;
-    float duration = 0;
-
-    //Cache the first channel;
-    const linked_element_t *channel = channels->first;
-
-    //Cache the number of channels in the list;
-    size_t nb_channels = channels->nb_elements;
-
-    //For each channel :
-    while (nb_channels--) {
-
-        //Sum the duration;
-        duration += ((servo_channel_t *) channel)->impulse_duration;
-
-        //Update the channel;
-        channel = channel->next;
-
-    }
-
-	//Return the total duration;
-	return duration;
-
-}
-
-/* 
- * servo_module_add_channel : adds a channel to the servo controller; The pin must have been properly initialised;
- */
-
-servo_channel_t *servo_module_add_channel(PORT_pin_t *initialised_pin, const float value_min, const float value_max,
-                         const uint16_t impulse_min, const uint16_t impulse_max) {
-
-    //Cache the servo controller pointer;
-    servo_controller_t *controller = &manager;
-
-    //If the controller is already initialised :
-    if (controller->initialised) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_add_channel : the servo controller is not initialised;");
-
-    }
-
-    //If the controller is started :
-    if (controller->started) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_add_channel : the servo controller is currently started;");
-
-    }
-
-    //If values are incorrect
-    if (value_min >= value_max) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_add_channel : value_min is greater or equal than value_max;");
-
-    }
-
-    //If values are incorrect
-    if (impulse_min >= impulse_max) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_add_channel : impulse_min is greater or equal than impulse_max;");
-
-    }
-
-    //Create registers structs;
-    GPIO_output_registers_t GPIO_regs;
-
-    //Get GPIO output registers for provided port;
-    PORT_get_GPIO_output_registers(initialised_pin->port_data, &GPIO_regs);
-
-    //Create the bitmask for C5;
-    GPIO_mask_t mask = GPIO_get_mask(initialised_pin);
-
-    //Create the servo channel initializer;
-    servo_channel_t init = {
-            .link = EMPTY_LINKED_ELEMENT(),
-            .pin_set_register = GPIO_regs.data_register,
-            .pin_clear_register = GPIO_regs.data_register,
-            .pin_mask = mask,
-            .value_min = value_min,
-            .value_max = value_max,
-            .impulse_min = impulse_min,
-            .impulse_max = impulse_max,
-            .impulse_duration = 0,//Stopped -> duration of 0;
-    };
-
-    //Create the servo channel in the kernel heap;
-    servo_channel_t *channel = kernel_malloc_copy(sizeof(servo_channel_t), &init);
-
-    //Add the channel at the end of the unregistered list;
-    llist_insert_last(&controller->disabled_channels, (linked_element_t *) channel);
-
-	//Return the channel;
-	return channel;
-}
-
-
-/*
- * servo_module_remove_channel : removes a channel from the servo controller;
- */
-
-void servo_module_remove_channel(servo_channel_t *const channel) {
-
-    //Cache the servo controller pointer;
-    servo_controller_t *controller = &manager;
-
-    //If the controller is already initialised :
-    if (controller->initialised) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_add_channel : the servo controller is not initialised;");
-
-    }
-
-    //If the controller is started :
-    if (controller->started) {
-
-        //Error;
-        kernel_error("servo.c : servo_module_add_channel : the servo controller is currently started;");
-
-    }
-
-    //If the channel is in the started list (impulse not null) :
-    if (channel->impulse_duration) {
-
-        //Remove the channel from the enabled list;
-        llist_remove_element(&controller->enabled_channels, (linked_element_t *) channel);
-
-    } else {
-
-        //Remove the channel from the disabled list;
-        llist_remove_element(&controller->disabled_channels, (linked_element_t *) channel);
-
-    }
-
-    //Finally, delete the channel;
-    kernel_free(channel);
-
-}
-
-
-
-//--------------------------------------------------- Channels setup ---------------------------------------------------
-
-/*
- * servo_module_set_channel_value : Determines the impulse duration, and stops or starts the channel.
- *  Public function, critical checks are made;
- */
-
-void servo_module_set_channel_value(servo_channel_t *const channel, float value) {
-
-    //Cache the controller;
-    servo_controller_t *controller = &manager;
-
-    //Cache value bounds;
-    float v_min = channel->value_min;
-    float v_max = channel->value_max;
-
-    /*Force the value to be inside the bounds;*/
-    if (value < v_min) value = v_min;
-    if (v_max < value) value = v_max;
-
-    //Determine the new period in float;
-    float imp_min = channel->impulse_min;
-    float imp_max = channel->impulse_max;
-
-    //Determine the impulse length;
-    float duration = imp_min + ((imp_max - imp_min) * (value - v_min) / (v_max - v_min));
-
-
-    //Access to channels is servo-critical;
-
-    //Cache the timer;
-    timer_base_t *timer = controller->us_timer;
-
-    //If the module is enabled :
-    if (controller->started) {
-
-        //Enter the servo-critical section
-        timer_interrupt_disable(&timer->reload_interrupt);
-
-    }
-
-    //Cache the current state;
-    bool enabled = channel->impulse_duration != 0;
-
-    //If the duration is not null, the channel must be enabled;
-    if (duration) {
-
-        //If the channel is disabled :
-        if (!enabled) {
-
-            //Enable the channel;
-            servo_enable_channel(controller, channel, duration);
-
-        } else {
-
-            //If the channel is already enabled, simply update its duration;
-            channel->impulse_duration = duration;
-
-        }
-
-    } else {
-
-        //If the channel is enabled :
-        if (enabled) {
-
-            //Stop the channel;
-            servo_disable_channel(controller, channel);
-
-        }
-
-        //If not enabled, nothing to do;
-
-    }
-
-    //Update the complement;
-    servo_update_complement(controller);
-
-    //If the module is enabled :
-    if (controller->started) {
-
-        //Leave the servo-critical section
-        timer_interrupt_disable(&timer->reload_interrupt);
-
-    }
-
-}
-
-
-/*
- * servo_module_disable_channel : disabled a channel. Public method, critical check is made;
- */
-
-void servo_module_disable_channel(servo_channel_t *const channel) {
-
-    //If the channel is already disabled, nothing to do;
-    if (!channel->impulse_duration)
-        return;
-
-    //Cache the controller;
-    servo_controller_t *controller = &manager;
-
-    //Access to channels is servo-critical;
-
-    //Cache the timer;
-    timer_base_t *timer = controller->us_timer;
-
-    //If the module is enabled :
-    if (controller->started) {
-
-        //Enter the servo-critical section
-        timer_interrupt_disable(&timer->reload_interrupt);
-
-    }
-
-    //Disable the channel;
-    servo_disable_channel(controller, channel);
-
-    //Update the complement;
-    servo_update_complement(controller);
-
-    //If the module is enabled :
-    if (controller->started) {
-
-        //Leave the servo-critical section
-        timer_interrupt_disable(&timer->reload_interrupt);
-
-    }
-
-}
-
-
-/*
- * servo_enable_channel : enables a channel. Private method, no critical check is made;
- */
-
-void servo_enable_channel(servo_controller_t *const controller, servo_channel_t *const channel,
-                          const float impulse_duration) {
-
-    //Update the channel's duration;
-    channel->impulse_duration = impulse_duration;
-
-    //Remove the channel from the disabled list;
-    llist_remove_element(&controller->disabled_channels, (linked_element_t *) channel);
-
-    //Insert the element in the enabled list;
-    llist_insert_last(&controller->enabled_channels, (linked_element_t *) channel);
-
-    //If the service is not started :
-    if (!controller->started) {
-
-        //Start it;
-        servo_service_start(controller);
-
-    }
-
-}
-
-
-/*
- * servo_disable_channel : disabled a channel. Private method, no critical check is made;
- *
- *  If no more channels are enabled, stop the module;
- */
-
-void servo_disable_channel(servo_controller_t *controller, servo_channel_t *channel) {
-
-    //Reset the channel's duration;
-    channel->impulse_duration = 0;
-
-    //If the channel is active :
-    if (channel == controller->active_channel) {
-
-        //Disable its line;
-        GPIO_clear_bits(channel->pin_clear_register, channel->pin_mask);
-
-        //Update the channel;
-        controller->active_channel = (const servo_channel_t *) ((linked_element_t *) channel)->prev;
-
-    }
-
-    //Remove the channel from the disabled list;
-    llist_remove_element(&controller->disabled_channels, (linked_element_t *) channel);
-
-    //Insert the element in the enabled list;
-    llist_insert_last(&controller->enabled_channels, (linked_element_t *) channel);
-
-    //If there are no more active channels and the service is running:
-    if ((!controller->enabled_channels.nb_elements) && (controller->started)) {
-
-        //Stop it;
-        servo_service_stop(controller);
-
-
-    }
-
-}
-
-
-/*
- * update_complement : this function will determine the period complement,
- *  so that a complete servo cycle lasts exactly one period.
- */
-
-void servo_update_complement(servo_controller_t *const controller) {
-
-    //Cache the value complement;
-    float complement = controller->period;
-
-    //Cache the number of active channels;
-    size_t nb_channels = controller->enabled_channels.nb_elements;
-
-    //Cache the first active channel;
-    linked_element_t *channel = controller->enabled_channels.first;
-
-    //For each channel :
-    while (nb_channels--) {
-
-        //Subtract the channel's value;
-        complement -= ((servo_channel_t *) channel)->impulse_duration;
-
-        //Update the next channel;
-        channel = channel->next;
-
-    }
-
-    //Initialise the new complement to its default value;
-    controller->complement = complement;
-
-}
-
-
-//---------------------------------------------------- Start - Stop ----------------------------------------------------
+//--------------------------------------------------------- ISR --------------------------------------------------------
 
 /*
  * servo_service_start : this function starts the servo interrupt routine.
  */
 
-void servo_service_start(servo_controller_t *const controller) {
-
-    //Mark the controller started;
-    controller->started = true;
-
-    //Reset the active channel;
-    controller->active_channel = 0;
-
-    //Cache the timer;
-    timer_base_t *timer = controller->us_timer;
-
-    //Set the interrupt function;
-    timer_interrupt_set_handler(&timer->reload_interrupt, servo_isr_handler);
-
-    //Start the timer;
-    timer_start_timer((const timer_base_t *) timer);
-
-    //Start the interrupt routine;
-    servo_isr_handler();
+static void start() {
+	//TODO
 
 }
 
@@ -642,93 +156,329 @@ void servo_service_start(servo_controller_t *const controller) {
  * servo_service_stop : stop the interrupt routine;
  */
 
-void servo_service_stop(servo_controller_t *const controller) {
-
-    //Access to started flag is critical;
-    kernel_enter_critical_section();
-
-    //Mark the controller started;
-    controller->started = false;
-
-    //Leave the critical section
-    kernel_leave_critical_section();
-
-    //The routine will be unregistered and cleaned at next interrupt;
+static void stop() {
+	//TODO
 
 }
 
 
-//------------------------------------------------- Interrupt handler --------------------------------------------------
+static void update_isr_state() {
+
+	//Cache manager parameters;
+	const uint32_t complement = servos.channels->duration;
+	const uint32_t period = servos.period;
+	const bool started = servos.started;
+	
+
+	//If the manager is stopped, and the duration is not null :
+	if ((!(started)) && (complement != period)) {
+
+		//Start the ISR routine;
+		start();
+
+	} else if (started && (complement == period)) {
+		//If the manager is started and the complement equals the period (no more active channels)
+
+		//Stop the ISR routine;
+		stop();
+
+	}
+
+}
 
 
 /*
- * interrupt_routine : this function handles the interaction with servos;
+ * servo_isr_handler : the servo isr, called during a channel switch;
+ * 	
+ * 	It must clear the active channel's line, update the active channel, and set its line;
  */
 
 void servo_isr_handler() {
 
-    //Cache the servo controller pointer;
-    servo_controller_t *const controller = &manager;
+	//Cache the servo timer pointer;
+	const struct timer_interface *const timer = &servos.timer;
 
-    //Cache the servo timer pointer;
-    const timer_base_t *const timer = controller->us_timer;
+	//Disable the interruption;
+	timer_disable_int(timer);
 
-    //Prevent the handler from being called again;;
-    timer_interrupt_disable(&timer->reload_interrupt);
+	
+	//The active channel and its gpio;
+	const struct servo_channel *active_channel = servos.active_channel;
+	const struct gpio_interface *gpio = &active_channel->gpio;
+	
+	//Clear the channel
+	gpio_clear(gpio, gpio->pin_mask);
 
-    //Cache the previously set channel;
-    const servo_channel_t *active_channel = controller->active_channel;
+	//Update the active channel and its gpio;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;d
+	//TODO NOPE, TRAVERSE THE LIST UNTIL A NON NULL IS FOUND;
+	active_channel = active_channel->head.next;
+	gpio = &active_channel->gpio;
+	
+	//Set the channel
+	gpio_set(gpio, gpio->pin_mask);
 
-    //If the previous channel exists :
-    if (active_channel) {
+	//Save the active channel;
+	servos.active_channel = active_channel;
 
-        //Disable the channel
-        GPIO_clear_bits(active_channel->pin_clear_register, active_channel->pin_mask);
+	
+	/*
+	 * Timer setup for the next switch;
+	 */
+	
+	//Program an overflow
+	timer_set_ovf_value(timer, active_channel->duration);
+	
+	//Clear the interrupt flag;
+	timer_flag_clr(timer);
 
-        //Update the active channel;
-        active_channel = (servo_channel_t *) ((linked_element_t *) active_channel)->next;
-
-    } else {
-
-        //If there is no active channel (reload), the first element of the list becomes the first element;
-        active_channel = (servo_channel_t *) controller->enabled_channels.first;
-
-    }
-
-    //If we must stop the routine :
-    if (!controller->started) {
-
-        //Reset the active channel
-        controller->active_channel = 0;
-
-        //Stop the timer;
-        timer_stop_timer(timer);
-
-        //Complete, as the interrupt is disabled;
-        return;
-
-    }
-
-    //If the newly active channel exists :
-    if (active_channel) {
-
-        //Disable the channel
-        GPIO_set_bits(active_channel->pin_set_register, active_channel->pin_mask);
-
-        //Set the new period;
-        timer_set_period(timer, active_channel->impulse_duration);
-
-    } else {
-
-        //Set the new period;
-        timer_set_period(timer, controller->complement);
-
-    }
-
-    //Save the active channel in the servo controller;
-    controller->active_channel = active_channel;
-
-    //Enable the servo interrupt;
-    timer_interrupt_enable(&timer->reload_interrupt);
+	//Enable the servo interrupt;
+	timer_enable_int(timer);
 
 }
+
+
+//--------------------------------------------------- Channels setup ---------------------------------------------------
+
+
+static struct servo_channel *add_channel(const char *gpio_name, const uint32_t duration_max) {
+
+	//If the new channel doesn't fit :
+	if (duration_max > servos.available_time) {
+
+		//Log;
+		kernel_log_("servo : add_channel : not enough time.");
+
+		//Fail;
+		return 0;
+
+	}
+
+	//Open the gpio file;
+	struct dfs_file *gpio_fd = dfs_open(gpio_name);
+
+	//If the file does not exist :
+	if (!gpio_fd) {
+
+		//Log;
+		kernel_log_("servo : add_channel : file not found.");
+
+		//Fail;
+		return 0;
+
+	}
+
+	//Create the servo channel initializer; Gpio will be interfaced with it;
+	struct servo_channel init = {
+
+		//Save the file descriptor;
+		.gpio_fd = gpio_fd,
+
+		//Save the duration;
+		.duration_max = duration_max,
+
+		//Stopped, duration of 0;
+		.duration = 0,
+
+	};
+
+	//Interface with the gpio;
+	bool success = file_op_interface(gpio_fd, (void *) &init.gpio, sizeof(struct gpio_interface));
+
+
+	//If the interfacing failed :
+	if (!success) {
+
+		//Close the file;
+		dfs_close(gpio_fd);
+
+		//Log;
+		kernel_log_("servo : add_channel : interfacing failed.");
+
+		//Fail;
+		return 0;
+
+	}
+
+	//Allocate some data for the channel;
+	struct servo_channel *channel = kmalloc(sizeof(struct servo_channel));
+
+	//Link the channel to itself;
+	init.head.prev = init.head.next = channel;
+
+
+	//Initialise the channel;
+	memcpy(channel, &init, sizeof(struct servo_channel));
+
+	//Update the available time;
+	servos.available_time -= duration_max;
+
+	//Access to the channels list is critical;
+	ic_enter_critical_section();
+
+	//Add the channel at the end of the channels list;
+	list_concat((struct list_head *) channel, (struct list_head *) servos.channels);
+
+	//Access to the channels list is critical;
+	ic_leave_critical_section();
+
+	//No start, as the channel has a duration of 0;
+
+	//Return the channel;
+	return channel;
+
+}
+
+
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+//TODO INITIALISE THE FIRST CHANNEL AS THE COMPLEMENT;
+
+
+/*
+ * servo_module_remove_channel : removes a channel from the servo controller;
+ */
+
+static void remove_channel(struct servo_channel *const channel) {
+
+	//If we attempt to remove the first channel (complement)
+	if (channel == servos.channels) {
+
+		//Log;
+		kernel_log_("servo : remove_channel : attempted to remove the complement");
+
+		//Fail;
+		return;
+
+	}
+
+	//Access to the channels list is critical;
+	ic_enter_critical_section();
+
+	//If the channel we remove is the active one :
+	if (channel == servos.active_channel) {
+
+		//The previous one becomes the active channel;
+		servos.active_channel = channel->head.prev;
+
+	}
+
+	//Remove the channel from the channels list;
+	list_remove((struct list_head *) channel);
+
+	//No more access to the list;
+	ic_leave_critical_section();
+
+
+	//Cache the channel's gpio;
+	const struct gpio_interface *gpio = &channel->gpio;
+
+	//Clear the channel's gpio
+	gpio_clear(gpio, gpio->pin_mask);
+
+	//Close the gpio file;
+	dfs_close(channel->gpio_fd);
+
+	//Update the complement;
+	servos.channels->duration += channel->duration;
+
+	//Update the available time;
+	servos.available_time += channel->duration_max;
+
+	//Finally, delete the channel;
+	kfree(channel);
+
+}
+
+
+static void channel_set_value(struct servo_channel *const channel, uint32_t duration) {
+
+
+	/*
+	 * The duration must be adjusted, to take bounds into account;
+	 */
+
+	//Cache the maximal duration;
+	const uint32_t dmax = channel->duration_max;
+
+	//The duration can't be greater than its maximal duration;
+	if (duration > dmax) {
+		duration = dmax;
+	}
+
+	//The duration can't be lower than the tolerance;
+	if (duration < servos.tolerance) {
+		duration = 0;
+	}
+
+
+	/*
+	 * We must update the complement, as we modify the duration;
+	 */
+
+	//Cache the previous duration;
+	const uint32_t current_duration = channel->duration;
+
+	//Cache the previous complement;
+	uint32_t complement = servos.channels->duration;
+
+	//If the duration is not changed :
+	if (current_duration == duration) {
+
+		//Do nothing;
+		return;
+
+	} else if (current_duration < duration) {
+		//If the duration is decreased :
+
+		//Increase the complement;
+		complement += duration - current_duration;
+
+	} else {
+		//If the duration is increased :
+
+		//Decrease the complement;
+		complement -= current_duration - duration;
+
+	}
+
+	//Update the complement;
+	servos.channels->duration = complement;
+
+	//Update the channel's duration;
+	channel->duration = duration;
+
+
+	/*
+	 * One channel has been modified, and the ISR routine must be eventually started or stopped;
+	 */
+
+	update_isr_state();
+}
+

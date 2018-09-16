@@ -77,7 +77,7 @@ void pwm_stop();
 //------------------------------------------------------- Globals ------------------------------------------------------
 
 //The pwm manager;
-struct pwm_manager manager;
+struct pwm_manager servos;
 
 //TODO PREDEFINE CHANNELS;
 
@@ -95,7 +95,7 @@ struct pwm_manager manager;
 static bool channel_setup(struct pwm_channel *channel, uint32_t high_duration) {
 
 	//Cache the manager's tolerance;
-	uint32_t tolerance = manager.tolerance;
+	uint32_t tolerance = servos.tolerance;
 
 	//If the high_duration is lower than the tolerance, force deactivation;
 	bool deactivation = (high_duration <= tolerance);
@@ -179,7 +179,7 @@ static void channel_set_high_duration(struct pwm_channel *channel, uint32_t high
 			ic_enter_critical_section();
 
 			//Remove the list from the inactive list;
-			list_remove_ref_next((struct list_head *) channel, (struct list_head **) manager.inactive_list);
+			list_remove_ref_next((struct list_head *) channel, (struct list_head **) servos.inactive_list);
 
 			//Reset the channel's delay;
 			channel->toogle_delay = 0;
@@ -188,7 +188,7 @@ static void channel_set_high_duration(struct pwm_channel *channel, uint32_t high
 			channel->next_state = true;
 
 			//Insert the channel after the next channel to be toggled;
-			list_concat((struct list_head *) manager.active_list, (struct list_head *) channel);
+			list_concat((struct list_head *) servos.active_list, (struct list_head *) channel);
 
 			//Mark the channel active;
 			channel->inactive = false;
@@ -421,10 +421,10 @@ static void channel_insert(struct pwm_channel **channels, struct pwm_channel *co
 static void pwm_irq() {
 
 	//Cache the active list;
-	struct pwm_channel **active_list = &manager.active_list;
+	struct pwm_channel **active_list = &servos.active_list;
 
 	//Cache the first pwm of the active list;
-	struct pwm_channel *channel = manager.active_list;
+	struct pwm_channel *channel = servos.active_list;
 
 	//If the list is empty :
 	if (!channel) {
@@ -436,7 +436,7 @@ static void pwm_irq() {
 
 
 	//Cache the pwm tolerance;
-	const uint32_t tolerance = manager.tolerance;
+	const uint32_t tolerance = servos.tolerance;
 
 	//We will toggle all channels until the delay becomes greater than the tolerance;
 	do {
@@ -454,7 +454,7 @@ static void pwm_irq() {
 		if (!channel->high_duration) {
 
 			//Insert the channel in the inactive list;
-			list_concat_ref((struct list_head *) channel, (struct list_head **) &manager.inactive_list);
+			list_concat_ref((struct list_head *) channel, (struct list_head **) &servos.inactive_list);
 			
 			//Mark the channel de-activated;
 			channel->inactive = true;
@@ -504,7 +504,7 @@ static void pwm_irq() {
 	*active_list = channel;
 
 	//Cache the timer ref;
-	const struct timer_interface *iface = &manager.timer;
+	const struct timer_interface *iface = &servos.timer;
 
 	//Update the timer's period to interrupt;
 	timer_set_ovf_value(iface, delay);

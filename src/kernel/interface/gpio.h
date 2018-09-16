@@ -18,19 +18,19 @@
 struct gpio_port_operations {
 
 	//Set some bits in the GPIO register;
-	void (*set)(size_t mask);
+	void (*const set)(size_t mask);
 
 	//Clear some bits in the GPIO register;
-	void (*clear)(size_t mask);
+	void (*const clear)(size_t mask);
 
 	//Toogle some bits in the GPIO register;
-	void (*toggle)(size_t mask);
+	void (*const toggle)(size_t mask);
 
 	//Write the port;
-	void (*write)(size_t data);
+	void (*const write)(size_t data);
 
 	//Read the port;
-	size_t (*read)();
+	size_t (*const read)();
 
 };
 
@@ -58,7 +58,7 @@ extern const struct gpio_interface neutral_gpio_interface;
 
 //Static inline shortcut generator;
 #define GPIO_SHORTCUT(name, type)\
-static inline type gpio_##name(struct gpio_interface *gpio, size_t mask) {\
+static inline type gpio_##name(const struct gpio_interface *gpio, size_t mask) {\
 	return (*(gpio->operations->name))(mask);\
 }
 
