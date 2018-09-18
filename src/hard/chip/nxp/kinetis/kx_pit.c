@@ -19,23 +19,6 @@
 */
 
 
-#include <stdint.h>
-
-#include "kx_sim.h"
-#include "kx_pit_channel.h"
-
-#include <kernel/interface/timer.h>
-
-#include <kernel/mod/auto_mod.h>
-
-#include <util/macro/incr_call.h>
-#include <kernel/fs/inode.h>
-#include <util/string.h>
-#include <kernel/ic.h>
-
-
-
-
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
@@ -56,6 +39,27 @@
 #define    NB_CHANNELS  4
 
 #endif
+
+
+//--------------------------------------------------- Includes --------------------------------------------------
+
+
+
+#include <kernel/mod/auto_mod.h>
+
+#include <kernel/fs/inode.h>
+
+#include <kernel/ic.h>
+
+
+#include <util/macro/incr_call.h>
+
+#include <util/string.h>
+
+
+#include "kx_sim.h"
+
+#include "kx_pit_channel.h"
 
 
 //------------------------------------------------- Internal parameters ------------------------------------------------
@@ -91,10 +95,11 @@ INCR_CALL(NB_CHANNELS, CHANNEL_DECLARE);
 #define INIT_ARRAY(i) &kx_pit_channel_##i,
 
 //Initialize the channels data array;
-struct kx_pit_channel_data *channels[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
+static struct kx_pit_channel_data *channels[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
 
 //Macro not used anymore;
 #undef INIT_ARRAY
+
 
 //-------------------------------------------------- File Operations --------------------------------------------------
 
@@ -112,7 +117,7 @@ struct channel_inode {
 };
 
 //Inodes will be stored in an array;
-struct channel_inode inodes[NB_CHANNELS];
+static struct channel_inode inodes[NB_CHANNELS];
 
 
 /*

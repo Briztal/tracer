@@ -57,10 +57,10 @@ struct timer_if {
 
 
 	//Set the reload interrupt value, and adjust the count so that reload happens in this period;
-	void (*const set_ovf_value)(uint32_t period);
+	void (*const set_int_period)(uint32_t period);
 
 	//Get the reload interrupt value;
-	uint32_t (*const get_ovf_value)();
+	uint32_t (*const get_int_period)();
 
 
 	//Enable the reload interrupt;
@@ -132,8 +132,9 @@ t_if_inline(stop, void)
 t_if_inline(started, bool)
 t_if_inline_a(set_count, uint32_t)
 t_if_inline(get_count, uint32_t)
-t_if_inline_a(set_ovf_value, uint32_t)
-t_if_inline(get_ovf_value, uint32_t)
+
+t_if_inline_a(set_int_period, uint32_t)
+t_if_inline(get_int_period, uint32_t)
 t_if_inline(enable_int, void)
 t_if_inline(disable_int, void)
 t_if_inline(int_enabled, bool)

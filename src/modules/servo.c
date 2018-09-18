@@ -1,5 +1,5 @@
 /*
-  servo_module.c -  Part of TRACER
+  servo.c -  Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -58,6 +58,7 @@
 #endif
 
 
+//------------------------------------------------------ Includes ------------------------------------------------------
 
 //If one of the macro was not provided :
 #include <kernel/fs/inode.h>
@@ -130,7 +131,7 @@ static void channel_update_##name(uint32_t duration) {\
 #define SERVO(name, gpio, max_duration) {.iface = {.set = &channel_update_##name}, .ref = 0,},
 
 //Create the interfaces array;
-struct command_if_ref interfaces[] = {
+static struct command_if_ref interfaces[] = {
 	//Add the complement channel. Never interfaced with;
 	{},
 
@@ -199,6 +200,8 @@ static volatile bool started;
 static void servos_isr_handler() {
 
 
+	//kernel_log_("servo handler.");
+
 	//Disable the interruption;
 	timer_disable_int(&timer);
 
@@ -212,19 +215,19 @@ static void servos_isr_handler() {
 	//Clear the channel
 	gpio_clear(gpio, gpio->pin_mask);
 
+
 	//Traverse the list :
 	do {
 
 		//Focus on the next channel
-		if (active_id) active_id--;
-		else active_id = NB_CHANNELS;
+		if (!active_id) active_id = NB_CHANNELS;
+		active_id--;
 
 		//Update the channel;
 		channel = channels[active_id];
 
 		//While the channel's duration is null;
 	} while (!channel->duration);
-
 
 	//Cache the channel's gpio,
 	gpio = &channel->gpio;
@@ -241,7 +244,7 @@ static void servos_isr_handler() {
 	 */
 
 	//Program an overflow
-	timer_set_ovf_value(&timer, channel->duration);
+	timer_set_int_period(&timer, channel->duration);
 
 	//Clear the interrupt flag;
 	timer_flag_clr(&timer);
@@ -258,6 +261,8 @@ static void servos_isr_handler() {
 
 static void start() {
 
+	kernel_log_("servo starting.");
+
 	//Update the active channel;
 	active_index = 0;
 
@@ -266,6 +271,10 @@ static void start() {
 
 	//Initialise the timer : 1MHz base, ovf in the first duration,
 	timer_init(&timer, 1000000, channels[0]->duration, &servos_isr_handler);
+
+	kernel_log("dur : %d", channels[0]->duration);
+
+	ic_enable_interrupts();
 
 }
 
@@ -324,7 +333,7 @@ static bool check_max_durations() {
 	#undef SERVO
 
 	//The cycle is valid if all channels can be set to their maximal durations without overflow;
-	return durations_sum < PERIOD;
+	return durations_sum <= PERIOD;
 
 }
 
@@ -347,7 +356,7 @@ static bool init_channel(size_t channel_id, const char *const gpio_name) {
 	if (!gpio_fd) {
 
 		//Log;
-		kernel_log_("servo : add_channel : file not found.");
+		kernel_log("servo : %s gpio file not found.", gpio_name);
 
 		//Fail;
 		return false;
@@ -371,7 +380,7 @@ static bool init_channel(size_t channel_id, const char *const gpio_name) {
 		fs_close(gpio_fd);
 
 		//Log;
-		kernel_log_("servo : init_channel : interfacing failed.");
+		kernel_log("servo : %s gpio interfacing failed.", gpio_name);
 
 		//Fail;
 		return false;
@@ -410,6 +419,11 @@ static void update_channel_duration(uint32_t *dst, uint32_t duration) {
 	if (duration > current) complement -= duration - current;
 	else complement += current - duration;
 
+	//Update the duration and the complement;
+	*dst = duration;
+	complement_channel.duration = complement;
+
+
 	//If the manager is stopped, and the duration is not null :
 	if ((!(started)) && (complement != PERIOD)) {
 
@@ -423,17 +437,8 @@ static void update_channel_duration(uint32_t *dst, uint32_t duration) {
 		stop();
 	}
 
-	//Update the duration and the complement;
-	*dst = duration;
-	complement_channel.duration = complement;
 
 };
-
-/*
- * ---------------------------------------------------------------------------------------------------------------------
- * ----------------------------------------------- Kernel Interface -----------------------------------------------
- * ---------------------------------------------------------------------------------------------------------------------
- */
 
 
 //----------------------------------------------- File system interaction ----------------------------------------------
@@ -441,6 +446,7 @@ static void update_channel_duration(uint32_t *dst, uint32_t duration) {
 /*
  * The channel inode is only used for interfacing. Only Interfacing data will be stored inside;
  */
+
 struct channel_inode {
 
 	//The inode base;
@@ -541,7 +547,7 @@ static void channel_close(const struct channel_inode *const node) {
  * Servo channel inodes accept following calls. Cast is required in order to downcast inodes into channel_inodes. Safe;
  */
 
-const struct inode_ops channel_ops = {
+static const struct inode_ops channel_ops = {
 	.interface = (bool (*)(struct inode *, void *, size_t)) &channel_interface,
 	.close = (void (*)(struct inode *)) &channel_close,
 
@@ -613,7 +619,7 @@ static bool servo_init() {
 	if (!fd) {
 
 		//Log;
-		kernel_log_("servo : add_channel : file not found.");
+		kernel_log_("servo : timer file not found.");
 
 		//Fail;
 		return false;
@@ -631,7 +637,7 @@ static bool servo_init() {
 		fs_close(fd);
 
 		//Log;
-		kernel_log_("servo : add_channel : interfacing failed.");
+		kernel_log_("servo : timer interfacing failed.");
 
 		//Fail;
 		return false;

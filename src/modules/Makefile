@@ -1,10 +1,10 @@
 
-MODULES_SRCS += modules/timer_check.c
+MODULES_SRCS += modules/test.c
 
 #MODULES_SRCS += modules/pwm.c
 
 
-servo_args := -DPERIOD=20000 -DTOLERANCE=10 -DTIMER_NAME=pit0 -DMODULE_NAME=servo -DCHANNELS_FILE="lol"
+servo_args := -DPERIOD=20000 -DTOLERANCE=10 -DTIMER_NAME=pit_0 -DMODULE_NAME=servo -DCHANNELS_FILE="lol"
 
 servo:
 

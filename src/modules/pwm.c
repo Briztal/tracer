@@ -507,7 +507,7 @@ static void pwm_irq() {
 	const struct timer_if *iface = &servos.timer;
 
 	//Update the timer's period to interrupt;
-	timer_set_ovf_value(iface, delay);
+	timer_set_int_period(iface, delay);
 
 	//Clear the timer ovf flag;
 	timer_flag_clr(iface);

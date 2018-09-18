@@ -1,7 +1,7 @@
 /*
   kx_port.c Part of TRACER
 
-  Copyright (c) 2018 Raphaël Outhier, Paul Stoffergen, for its K64 macros;
+  Copyright (c) 2018 Raphaël Outhier, Paul Stoffergen, for its port macros;
 
   TRACER is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,16 +19,32 @@
 */
 
 
-#include <stdint.h>
-#include <kernel/interface/port.h>
-#include <util/macro/incr_call.h>
-#include <kernel/interface/gpio.h>
-#include <stdbool.h>
-#include <kernel/fs/inode.h>
-#include <kernel/log.h>
-#include <util/string.h>
-#include <kernel/mod/auto_mod.h>
-#include "kx_sim.h"
+
+//--------------------------------------------------- Make parameters --------------------------------------------------
+
+/*
+ * Makefile must provide :
+ * 	- NB_PORTS : 		number of ports;
+ * 	- PORT_REG : 		start of the port register area;
+ * 	- PORT_SPACING : 	spacing between two port register areas
+ * 	- GPIO_REG : 		start of the port register area;
+ * 	- GPIO_SPACING : 	spacing between two port register areas
+ */
+
+
+//If one of the macro was not provided :
+#if !defined(PORT_REG) || !defined(PORT_SPACING) || !defined(GPIO_REG) || !defined(GPIO_SPACING)
+
+//Log
+#error "Error, at least one macro argument hasn't been provided. Check the makefile;"
+
+//Define macros. Allows debugging on IDE environment;
+#define    PORT_REG    4
+#define    PORT_SPACING 4
+#define    GPIO_REG    4
+#define    GPIO_SPACING 4
+
+#endif
 
 
 // --------------------------------------------- Hardware constants macros ---------------------------------------------
@@ -49,21 +65,31 @@
 #define PORT_PCR_PS                 ((uint32_t)0x00000001)        // Pull Select
 
 
-/*
- * SET : will set [data]'s bits that are set to 1 in [mask]. [data] is of size [size];
- */
+//--------------------------------------------------- Build constants --------------------------------------------------
 
-#define SET(data, mask, size) (data) |= (uint##size##_t)(mask)
-
-
-/*
- * CLEAR : will clear [data]'s bits that are set to 1 in [mask]. [data] is of size [size];
- */
-
-#define CLEAR(data, mask, size) (data) &= ~(uint##size##_t)(mask)
+//There are 5 ports on the kx port module;
+#define NB_PORTS 5
 
 
-//TODO BITWISE.h
+//------------------------------------------------------ Includes ------------------------------------------------------
+
+
+#include <kernel/interface/port.h>
+
+#include <kernel/interface/gpio.h>
+
+#include <kernel/fs/inode.h>
+
+#include <kernel/mod/auto_mod.h>
+
+
+#include <util/macro/incr_call.h>
+
+#include <util/string.h>
+
+
+#include "kx_sim.h"
+
 
 
 //--------------------------------------------------- Memory structs ---------------------------------------------------
@@ -129,40 +155,6 @@ struct __attribute__ ((packed)) gpio_memory {
 	volatile uint32_t PDDR;
 
 };
-
-
-
-
-//--------------------------------------------------- Make parameters --------------------------------------------------
-
-/*
- * Makefile must provide :
- * 	- NB_PORTS : 		number of ports;
- * 	- PORT_REG : 		start of the port register area;
- * 	- PORT_SPACING : 	spacing between two port register areas
- * 	- GPIO_REG : 		start of the port register area;
- * 	- GPIO_SPACING : 	spacing between two port register areas
- */
-
-
-//If one of the macro was not provided :
-#if !defined(PORT_REG) || !defined(PORT_SPACING) || !defined(GPIO_REG) || !defined(GPIO_SPACING)
-
-//Log
-#error "Error, at least one macro argument hasn't been provided. Check the makefile;"
-
-//Define macros. Allows debugging on IDE environment;
-#define    PORT_REG    4
-#define    PORT_SPACING 4
-#define    GPIO_REG    4
-#define    GPIO_SPACING 4
-
-#endif
-
-//--------------------------------------------------- Build constants --------------------------------------------------
-
-//There are 5 ports on the kx port module;
-#define NB_PORTS 5
 
 
 //----------------------------------------------- PORT pointers structs ----------------------------------------------
@@ -343,13 +335,13 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 	//TODO ERRORS IN CASE OF BAD CONFIGURATION;
 
 	//Declare the configuration register to write; Set the flag bit to clear it by default;
-	uint32_t config_register = PORT_PCR_ISF;
+	uint32_t config_register = (PORT_PCR_ISF);
 
 	//Get IRQ bits;
 	uint8_t IRQ_bits = type_to_IRQ_bits(config->interrupt_type);
 
 	//Set IRQ bits in the register;
-	SET(config_register, PORT_PCR_TO_IRQC(IRQ_bits), 32);
+	config_register |= PORT_PCR_TO_IRQC(IRQ_bits);
 
 	//Update the interrupt function if the interrupt is enabled;
 	if (IRQ_bits) {
@@ -359,7 +351,7 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 	}
 
 	//Set the multiplexer channel;
-	SET(config_register, PORT_PCR_TO_MUX(config->mux_channel), 32);
+	config_register |= (PORT_PCR_TO_MUX(config->mux_channel));
 
 	//If the data is received :
 	if (config->direction == PORT_INPUT) {
@@ -373,11 +365,11 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 
 			//Only the pullup requires the PS bit set;
 			case PORT_PULL_UP:
-				SET(config_register, PORT_PCR_PS, 32);
+				config_register |= (PORT_PCR_PS);
 
 				//Both pull-modes require the PE bit set;
 			case PORT_PULL_DOWN:
-				SET(config_register, PORT_PCR_PE, 32);
+				config_register |= (PORT_PCR_PE);
 
 				//Hysteresis and repeater are not supported, High Impedance is the default mode;
 			default://TODO ERROR
@@ -386,7 +378,7 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 		}
 
 		//Clear the appropriate bit in the GPIO direction register;
-		CLEAR(gpio->PDDR, 1 << bit, 32);
+		gpio->PDDR &= ~((uint32_t) 1 << bit);
 
 
 		/*
@@ -441,22 +433,22 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 			case PORT_PUSH_PULL:
 				break;//Nothing to do;
 			case PORT_HIGH_DRIVE:
-				SET(config_register, PORT_PCR_DSE, 32);
+				config_register |= PORT_PCR_DSE;
 				break;
 			case PORT_OPEN_DRAIN:
 			default:
 				//Open drain in default case
-				SET(config_register, PORT_PCR_ODE, 32);
+				config_register |= PORT_PCR_ODE, 32;
 				break;
 		}
 
 		//If the slew rate is slow, set the appropriate bit;
 		if (config->slew_rate == PORT_HIGH_RATE) {
-			SET(config_register, PORT_PCR_SRE, 32);
+			config_register |= PORT_PCR_SRE, 32;
 		}
 
 		//Set the appropriate bit in the GPIO direction register;
-		SET(gpio->PDDR, 1 << bit, 32);
+		gpio->PDDR |= ((uint32_t) 1 << bit);
 
 	}
 
@@ -636,7 +628,6 @@ static void register_pin(const char *name, size_t pin_index) {
 
 
 //------------------------------------------------- Init - Exit ------------------------------------------------
-
 
 
 static bool kx_port_init() {

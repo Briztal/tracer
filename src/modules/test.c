@@ -12,6 +12,8 @@
 #include <kernel/panic.h>
 #include <kernel/interface/gpio.h>
 #include <kernel/debug/debug.h>
+#include <kernel/interface/command.h>
+#include <kernel/ic.h>
 
 
 static void suus() {
@@ -68,8 +70,8 @@ static bool gpio_check() {
 
 	return true;
 
-
 }
+
 
 static bool timer_check() {
 
@@ -77,7 +79,9 @@ static bool timer_check() {
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying timer file : ");
 
-	file_descriptor fd = fs_open("pit_0");
+	fs_list();
+
+	file_descriptor fd = fs_open("pit_1");
 
 	if (!fd) {
 
@@ -107,16 +111,80 @@ static bool timer_check() {
 
 	kernel_log_("Initialising timer");
 
-	timer_init(&iface, 1000, 2000, &suus);
+	timer_init(&iface, 1000000, 2000000, &suus);
 
 	kernel_log_("Success");
 
 }
 
 
+static bool servo_check() {
+
+	kernel_log_("\n\n\n");
+	kernel_log_("Querying servo file : ");
+
+	file_descriptor fd = fs_open("servo_0");
+
+	if (!fd) {
+
+		kernel_log_("File doesn't exist. Aborting.");
+
+		return false;
+
+	}
+
+	kernel_log("File : %h", fd);
+
+	kernel_log_("Interfacing with servo : ");
+
+	struct command_if iface;
+
+	bool success = inode_interface(fd, &iface, sizeof(iface));
+
+	if (!success) {
+
+		kernel_log_("Operation failed. Aborting");
+
+		return false;
+
+	}
+
+	//fs_close(fd);
+
+	kernel_log_("Starting channel servo");
+
+	ic_enable_interrupts();
+
+	while(1) {
+
+		command_set(&iface, 5000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 10000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 15000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 20000);
+
+		debug_delay_ms(1000);
+
+	}
+
+	kernel_log_("Success");
+
+	return true;
+
+}
+
+
 static bool check_init() {
 
-	return timer_check();
+	return servo_check();
 
 }
 

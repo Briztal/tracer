@@ -54,7 +54,7 @@ void timer_init(const struct timer_if *timer, uint32_t base_frequency, uint32_t 
 	timer_set_base_frequency(timer, base_frequency);
 
 	//Set the count and ovf to required values;
-	timer_set_ovf_value(timer, ovf_period);
+	timer_set_int_period(timer, ovf_period);
 
 	//Enable the timer interrupt;
 	timer_enable_int(timer);
@@ -96,7 +96,7 @@ void timer_reset(const struct timer_if *timer, uint32_t base_frequency) {
 	timer_set_base_frequency(timer, base_frequency);
 
 	//Set the ovf to 1 period unit; count will be updated at the same time;
-	timer_set_ovf_value(timer, 1);
+	timer_set_int_period(timer, 1);
 
 }
 
@@ -127,8 +127,8 @@ const struct timer_if neutral_timer_if = {
 	.started = n_stt,
 	.set_count = n_sbf,
 	.get_count = n_g,
-	.set_ovf_value = n_sbf,
-	.get_ovf_value = n_g,
+	.set_int_period = n_sbf,
+	.get_int_period = n_g,
 	.enable_int = n_st,
 	.disable_int = n_st,
 	.int_enabled = n_stt,

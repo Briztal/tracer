@@ -14,7 +14,7 @@
 struct command_if {
 
 	//Set the value;
-	void (*set)(uint32_t);
+	void (*const set)(uint32_t);
 
 };
 
@@ -23,5 +23,10 @@ DECLARE_INTERFACE(command_if);
 
 //The neutral command interface. Does nothing;
 extern struct command_if neutral_command_if;
+
+
+static inline void command_set(const struct command_if *iface, uint32_t value) {
+	(*(iface->set))(value);
+}
 
 #endif //TRACER_CMD_H

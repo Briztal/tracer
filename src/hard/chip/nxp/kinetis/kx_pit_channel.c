@@ -1,6 +1,22 @@
-//
-// Created by root on 9/5/18.
-//
+/*
+  kx_pit_channel.c Part of TRACER
+
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 
 //------------------------------------------------ Make parameters ------------------------------------------------
@@ -31,7 +47,7 @@
 #define REGISTERS ((volatile uint32_t *)(REG))
 
 #define LDVAL    ((volatile uint32_t *) (REGISTERS))
-#define CVAL    ((volatile uint32_t *) (REGISTERS + 1))
+#define CVAL    ((const volatile uint32_t *) (REGISTERS + 1))
 #define TCTRL    ((volatile uint32_t *) (REGISTERS + 2))
 #define TFLG    ((volatile uint32_t *) (REGISTERS + 3))
 
@@ -50,15 +66,6 @@
 #include <stdbool.h>
 
 #include "kx_pit_channel.h"
-
-#include <kernel/interface/timer.h>
-
-#include <kernel/fs/inode.h>
-
-#include <kernel/ic.h>
-
-#include <util/string.h>
-
 
 
 /*
@@ -98,10 +105,10 @@
 
 
 //The ratio tics/period;
-static uint32_t period_to_tics;
+static uint32_t global_period_to_tics;
 
 //The maximal period;
-static uint32_t max_period;
+static uint32_t global_max_period;
 
 
 //TODO BUS CLOCK;
@@ -110,33 +117,34 @@ static void set_base_frequency(uint32_t frequency) {
 	;
 
 	//Determine the tics/period ratio;
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t _period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
+	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
 
 	//TODO FPU !!!!!!!!!!!!!!!!!!!!
 
 
-	uint32_t _period_to_tics = ((uint32_t) 24000000) / ((uint32_t) frequency);
+	uint32_t period_to_tics = ((uint32_t) 24000000) / ((uint32_t) frequency);
 
 	//Determine the maximal period;
-	uint32_t _max_period = ((uint32_t) -1) / period_to_tics;
+	uint32_t max_period = ((uint32_t) -1) / period_to_tics;
 
 	//Save both constants;
-	period_to_tics = _period_to_tics;
-	max_period = _max_period;
+	global_period_to_tics = period_to_tics;
+	global_max_period = max_period;
+
 
 }
 
@@ -169,15 +177,32 @@ static bool started() {
 //Update the reload value;
 static void set_count(uint32_t period_count) {
 
-	if (period_count < max_period) {
-		*CVAL = (uint32_t) (period_to_tics * period_count);
-	}
+	//Cache the current reload value;;
+	uint32_t reload = *LDVAL;
+
+	//Determine the new value;
+	uint32_t val = (uint32_t) (global_period_to_tics * period_count);
+
+	//Disable the timer;
+	stop();
+
+	//Set the new reload value;
+	*LDVAL = val;
+
+	//Start, so that count starts at val;
+	start();
+
+	//Data memory barrier;
+	__asm__ __volatile ("DMB");
+
+	//Restore the previous value;
+	*LDVAL = reload;
 
 }
 
 //Get the current value;
 static uint32_t get_count() {
-	return (((uint32_t) *CVAL) / period_to_tics);
+	return (((uint32_t) *CVAL) );/// period_to_tics);
 }
 
 
@@ -185,21 +210,36 @@ static uint32_t get_count() {
 static void set_ovf(uint32_t period_count) {
 
 	//If the period count is invalid, use the maximal period;
-	if (period_count >= max_period) {
-		period_count = max_period - 1;
+	if (period_count >= global_max_period) {
+		period_count = global_max_period - 1;
 	}
 
 	/*
 	 * Update LDVAL, so that interrupts happen at the required period, and update CVAL, so that the next
 	 * interrupt hapens in @period_count period units;
 	 */
-	*LDVAL = *CVAL = (uint32_t) (period_to_tics * period_count);
+
+	//Determine the value to store;
+	uint32_t value = (global_period_to_tics * period_count);
+
+	//Update reload value;
+	*LDVAL = value;
+
+	//Stop the timer;
+	stop();
+
+	//Memory barrier;
+	__asm__ __volatile__ ("DMB");
+
+	//Start the timer, to restart a cycle at value;
+	start();
+
 
 }
 
 //Get the reload value;
 static uint32_t get_ovf() {
-	return (((uint32_t) *LDVAL) / period_to_tics);
+	return (((uint32_t) *LDVAL) / global_period_to_tics);
 }
 
 
@@ -236,7 +276,7 @@ static bool flag_is_set() {
 //Clear the interrupt flag;
 static void flag_clr() {
 	//Set bit 0 of TFLG;
-	*TFLG = 1;
+	*TFLG = TFLG_TIF;
 }
 
 
@@ -319,8 +359,8 @@ struct kx_pit_channel_data NM(kx_pit_channel) = {
 			.set_count = &set_count,
 			.get_count = &get_count,
 
-			.set_ovf_value = &set_ovf,
-			.get_ovf_value = &get_ovf,
+			.set_int_period = &set_ovf,
+			.get_int_period = &get_ovf,
 
 			.enable_int = &enable_int,
 			.disable_int = &disable_int,

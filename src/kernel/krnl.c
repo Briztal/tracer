@@ -70,6 +70,8 @@ void kernel_private() {
 //The kernel's first process function;
 extern void __kernel_first_function(void *unused) {
 
+	fs_list();
+
 	while(1) {
 
 	}
