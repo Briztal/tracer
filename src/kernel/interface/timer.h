@@ -26,10 +26,14 @@
 
 #include "stdbool.h"
 
+#include "stddef.h"
+
+#include "iface.h"
+
 
 //-------------------------------------------------- Timer interface ---------------------------------------------------
 
-struct timer_interface {
+struct timer_if {
 
 	//Update the base frequency;
 	void (*const set_base_frequency)(uint32_t base_frequency);
@@ -83,12 +87,15 @@ struct timer_interface {
 
 
 //The timer lib includes a neutral timer interface, so that timer drivers can prevent access to their functions;
-extern const struct timer_interface neutral_timer_interface;
+extern const struct timer_if neutral_timer_if;
+
+//The lib used interface capabilities;
+DECLARE_INTERFACE(timer_if)
 
 
 //---------------------------------------------------- Timer config ----------------------------------------------------
 
-#define t_if timer_interface
+#define t_if timer_if
 
 //Configures the timer and starts it.
 void timer_init(const struct t_if *, uint32_t base_frequency, uint32_t ovf_period, void (*handler)());

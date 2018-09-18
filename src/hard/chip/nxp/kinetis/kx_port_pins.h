@@ -3,9 +3,9 @@
 //
 
 
-#ifdef PIN_REGISTER
+#ifdef PIN
 
 //C5
-PIN_REGISTER(led, 2, 5)
+PIN(led, 2, 5)
 
 #endif

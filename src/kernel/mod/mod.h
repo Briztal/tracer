@@ -23,7 +23,7 @@
 #define TRACER_MOD_H
 
 //Add a module to the kernel;
-void mod_add(const char *name, void (*init)(), void (*exit));
+void mod_add(const char *name, void (*init)());
 
 //Remove a module from the kernel;
 void mod_remove(const char *name);

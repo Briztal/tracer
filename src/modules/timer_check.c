@@ -21,79 +21,89 @@ static void suus() {
 };
 
 
-static void check_init() {
+
+static bool gpio_check() {
 
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying led file : ");
 
-	struct dfs_file *f = fs_open("led");
+	file_descriptor fd = fs_open("led");
 
-	if (!f) {
+	if (!fd) {
 
 		kernel_log_("File doesn't exist. Aborting.");
 
-		return;
+		return false;
 
 	}
 
-	kernel_log("File : %h", f);
+	kernel_log("File : %h", fd);
 
 	kernel_log_("Interfacing with gpio : ");
 
 	struct gpio_interface giface;
 
-	bool s = file_op_interface(f, &giface, sizeof(giface));
+	bool s = inode_interface(fd, &giface, sizeof(giface));
 
 	if (!s) {
 
 		kernel_log_("Operation failed. Aborting");
 
-		return;
+		return false;
 
 	}
+
+	fs_close(fd);
 
 	kernel_log("success, %h", giface.pin_mask);
 
 
-	while(1) {
+	while (1) {
 		gpio_set(&giface, giface.pin_mask);
-		debug_delay_ms(500);
+		debug_delay_ms(250);
 		gpio_clear(&giface, giface.pin_mask);
-		debug_delay_ms(500);
+		debug_delay_ms(750);
+		kernel_log_("SUUS MA BITE");
 	}
 
-	return;
+	return true;
+
+
+}
+
+static bool timer_check() {
+
 
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying timer file : ");
 
-	struct dfs_file *file = fs_open("pit_0");
+	file_descriptor fd = fs_open("pit_0");
 
-	if (!file) {
+	if (!fd) {
 
 		kernel_log_("File doesn't exist. Aborting.");
 
-		return;
+		return false;
 
 	}
 
-	kernel_log("File : %h", file);
+	kernel_log("File : %h", fd);
 
 	kernel_log_("Interfacing with timer : ");
 
-	struct timer_interface iface;
+	struct timer_if iface;
 
-	bool success = file_op_interface(file, &iface, sizeof(iface));
+	bool success = inode_interface(fd, &iface, sizeof(iface));
 
 	if (!success) {
 
 		kernel_log_("Operation failed. Aborting");
 
-		return;
+		return false;
 
 	}
 
-	fs_close(file);
+	//fs_close(fd);
 
 	kernel_log_("Initialising timer");
 
@@ -101,14 +111,14 @@ static void check_init() {
 
 	kernel_log_("Success");
 
+}
 
 
+static bool check_init() {
+
+	return timer_check();
 
 }
 
-static bool check_exit() {
-	return true;
 
-}
-
-KERNEL_EMBED_USER_MODULE(timer_check, &check_init, &check_exit);
+KERNEL_EMBED_USER_MODULE(timer_check, &check_init);

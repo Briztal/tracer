@@ -60,7 +60,7 @@ struct pwm_manager {
 
 	//The timer we use;
 	// Modification is only allowed when the module is stopped;
-	struct timer_interface timer;
+	struct timer_if timer;
 
 };
 
@@ -504,7 +504,7 @@ static void pwm_irq() {
 	*active_list = channel;
 
 	//Cache the timer ref;
-	const struct timer_interface *iface = &servos.timer;
+	const struct timer_if *iface = &servos.timer;
 
 	//Update the timer's period to interrupt;
 	timer_set_ovf_value(iface, delay);

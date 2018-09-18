@@ -20,59 +20,20 @@
 
 
 
-/*
- * The Servo control module manages a variable number of servo channels, each channel communicating with one servo.
- *
- * 	The servo module has build-in parameters, that can be changed in the makefile :
- * 	- the timer to used, defined by its name; An invalid name will cause module to be unloaded;
- * 	- the period of all servos;
- * 	- the tolerance.
- *
- * 	All parameters that only concern one channel;
- *
- * 	Channels can be created, deleted, and their value can be set.
- *
- * 	All channels share the same period;
- *
- * Module lifecycle :
- *
- * 	- Initialisation :
- * 		The servo timer, the total period, and the minimal duration are provided;
- * 		No channel is added for instance, as the cycle period is not know;
- *
- *
- * 	- channels setup :
- * 		channels are created, adjusted, or deleted; The ISR becomes active if channels are active, and inactive if no
- * 		channel is active;
- *
- *
- *
- * Channels lifecycle :
- *
- * 	- Channels creation :
- * 		Channels are created with a name, a gpio and a maximal duration;
- * 		Their duration is set to 0, so that they only become active when required;
- *
- * 	- Channels duration setup;
- * 		A channel's duration can be adjusted at any time, while the channel exists; If the requires duration is beyond
- * 		its maximal value, it will be decreased to it; If
- *
- * 	- Channels deletion;
- * 		A channel can be deleted at any time, via the file system; The associated GPIO will be cleared;
- *
- */
-
-
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
-//If one of the macro was not provided :
-#include <kernel/fs/inode.h>
-#include <kernel/interface/gpio.h>
-#include <kernel/interface/command.h>
-#include <kernel/interface/timer.h>
-#include <kernel/log.h>
-#include <kernel/ic.h>
-#include <kernel/mod/auto_mod.h>
+/*
+ * Please provide in the compilation call :
+ * 	- PERIOD : the period of the cycle, expressed in microseconds;
+ * 	- TOLERANCE : the minimal activity time of a channel, expressed in microseconds;
+ * 	- TIMER_NAME : the name of the timer to interface with. No quotes required;
+ * 	- MODULE_NAME : the name the module should be embedded with. No quotes required;
+ * 	- CHANNELS_FILE : the name of the file where servo channels macros are defined. Quotes required;
+ *
+ * 	You may use this line : in your makefile :
+ *
+ * 	-DPERIOD= -DTOLERANCE= -DTIMER_NAME= -DMODULE_NAME= -DCHANNELS_FILE=
+ */
 
 #if !defined(PERIOD) || !defined(TOLERANCE) || !defined(TIMER_NAME) || !defined(MODULE_NAME) || !defined(CHANNELS_FILE)
 
@@ -95,6 +56,17 @@
 #define CHANNELS_FILE "servo.h"
 
 #endif
+
+
+
+//If one of the macro was not provided :
+#include <kernel/fs/inode.h>
+#include <kernel/interface/gpio.h>
+#include <kernel/interface/command.h>
+#include <kernel/interface/timer.h>
+#include <kernel/log.h>
+#include <kernel/ic.h>
+#include <kernel/mod/auto_mod.h>
 
 
 //------------------------------------------------------ Channels ------------------------------------------------------
@@ -130,11 +102,15 @@ static struct servo_channel complement_channel = {};
 
 //--------------------------------------------- Channels update functions ----------------------------------------------
 
+
+//Declare the duration update function;
+static void update_channel_duration(uint32_t *, uint32_t);
+
 //Define the update function for a channel; It will decrease the duration if requried, and call the duration updater;
 #define SERVO(name, gpio, max_duration)\
-static void channel_update_##name(const uint32_t duration) {\
+static void channel_update_##name(uint32_t duration) {\
 	if (duration > (uint32_t) (max_duration)) duration = (max_duration);\
-    channel_update_duration(&channel_##name.duration, duration);\
+    update_channel_duration(&channel_##name.duration, duration);\
 }
 
 //Define all update functions;
@@ -151,13 +127,12 @@ static void channel_update_##name(const uint32_t duration) {\
  */
 
 //Initialise the interface struct for a channel;
-#define SERVO(name, gpio, max_duration) {.iface = {.set = channel_update_##name}, .ref = 0},
+#define SERVO(name, gpio, max_duration) {.iface = {.set = &channel_update_##name}, .ref = 0,},
 
 //Create the interfaces array;
 struct command_if_ref interfaces[] = {
-
 	//Add the complement channel. Never interfaced with;
-	0,
+	{},
 
 	//Add each servo channel's reference;
 #include "servo.h"
@@ -205,7 +180,7 @@ static size_t active_index;
 static file_descriptor timer_fd;
 
 //The timer we use;
-static struct timer_interface timer;
+static struct timer_if timer;
 
 //Is the ISR routine started ?;
 static volatile bool started;
@@ -492,7 +467,7 @@ static struct channel_inode inodes[] = {
 };
 
 //Macro not used anymore;
-#undef SERVO;
+#undef SERVO
 
 
 /**
@@ -646,7 +621,7 @@ static bool servo_init() {
 	}
 
 	//Interface with the gpio;
-	bool success = inode_interface(fd, &timer, sizeof(struct timer_interface));
+	bool success = inode_interface(fd, &timer, sizeof(struct timer_if));
 
 
 	//If the interfacing failed :
@@ -681,7 +656,9 @@ static bool servo_init() {
 	/*
 	 * Complement channel init;
 	 */
-	complement_channel = {
+
+	//Create the complement channel initializer;
+	struct servo_channel cpl_init = {
 
 		//Occupies the whole period;
 		.duration = PERIOD,
@@ -694,6 +671,9 @@ static bool servo_init() {
 
 	};
 
+	//Initialise the complement channel;
+	memcpy(&complement_channel, &cpl_init, sizeof(struct servo_channel));
+
 
 	/*
 	 * Standard interfaces init and registration;
@@ -704,15 +684,21 @@ static bool servo_init() {
 
 	//Initialize a channel and register it to the file system;
 	#define SERVO(name, gpio, duration)\
-        init_channel(i, gpio);\
-        channel_register(i++, name);
+        init_channel(i, #gpio);\
+        channel_register(#name, i);\
+		i++;
+
+	//TODO SEPARATE REGISTRATION AND INITIALISATION;
+	//TODO CLEANUP IF NOT PROPERLY INITIALISED : CLOSE GPIO FILES, AND UNREGISTER.
 
 	//Add all initializers;
 	#include "servo.h"
 
 	//Macro not used anymore;
-	#undef SERVO;
+	#undef SERVO
 
+	//Complete;
+	return true;
 
 }
 

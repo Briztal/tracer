@@ -48,17 +48,17 @@ static struct nlist modules = {
  * @param exit : the module's deinit function; will be executed when the module will be removed;
  */
 
-void mod_add(const char *name, void (*init)(), void (*exit)) {
+void mod_add(const char *name, bool (*init)()) {
+
+	//Call the initialisation function;
+	(*init)();
 
 	//Add the exit function to the list;
-	bool added = nlist_add(&modules, name, exit);
+	bool success = nlist_add(&modules, name, 0);//TODO EXIT;
 
 	//If the add succeeded :
-	if (added) {
-
-		//Call the initialisation function;
-		(*init)();
-
+	if (!success) {
+		//TODO EXIT;
 	}
 
 }
@@ -72,9 +72,10 @@ void mod_add(const char *name, void (*init)(), void (*exit)) {
 
 void mod_remove(const char *const name) {
 
-	//Remove the module from the list, and cache its exit function;
-	bool (*exit)() = nlist_remove(&modules, name);
+	//Remove the module from the list; TODO cache its exit function;
+	nlist_remove(&modules, name);
 
+	/*
 	//If the module was found and removed, and has a valid exit function :
 	if (exit) {
 
@@ -91,7 +92,7 @@ void mod_remove(const char *const name) {
 
 		}
 
-	}
+	}*/
 
 
 }
@@ -125,7 +126,7 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 	while ((size_t) auto_module < (size_t) mod_end) {
 
 		//Load the module;
-		mod_add(auto_module->name, auto_module->init, auto_module->exit);
+		mod_add(auto_module->name, auto_module->init);
 
 		//Log;
 		kernel_log("\t%s module loaded", auto_module->name);

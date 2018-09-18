@@ -13,7 +13,7 @@ KERNEL_SRCS +=  $(KERNEL_DIR)/debug/debug.c
 
 
 #Add the communication protocol;
-KERNEL_SRCS +=  $(KERNEL_DIR)/fs/dfs.c
+KERNEL_SRCS +=  $(KERNEL_DIR)/fs/inode.c
 
 #Add memory management sources;
 KERNEL_SRCS += $(KERNEL_DIR)/mem/ram.c
@@ -28,6 +28,7 @@ KERNEL_SRCS += $(KERNEL_DIR)/scheduler/prc.c
 KERNEL_SRCS += $(KERNEL_DIR)/scheduler/sched.c
 
 #Add timer structs
+KERNEL_SRCS +=  $(KERNEL_DIR)/interface/command.c
 KERNEL_SRCS +=  $(KERNEL_DIR)/interface/gpio.c
 KERNEL_SRCS +=  $(KERNEL_DIR)/interface/timer.c
 

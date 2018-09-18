@@ -22,12 +22,16 @@
 #include <stdint.h>
 
 #include "kx_sim.h"
+#include "kx_pit_channel.h"
 
 #include <kernel/interface/timer.h>
 
 #include <kernel/mod/auto_mod.h>
 
 #include <util/macro/incr_call.h>
+#include <kernel/fs/inode.h>
+#include <util/string.h>
+#include <kernel/ic.h>
 
 
 
@@ -72,10 +76,7 @@
  */
 
 //CHANNEL_DECLARE will declare the channel struct and the channel init function;
-#define CHANNEL_DECLARE(i) \
-	extern struct timer_interface kx_pit_channel_##i;\
-	void kx_pit_channel_init_##i();\
-	bool kx_pit_channel_exit_##i();
+#define CHANNEL_DECLARE(i) extern struct kx_pit_channel_data kx_pit_channel_##i;
 
 //Declare each channel;
 INCR_CALL(NB_CHANNELS, CHANNEL_DECLARE);
@@ -89,16 +90,139 @@ INCR_CALL(NB_CHANNELS, CHANNEL_DECLARE);
 //INIT_ARRAY will print the reference of the i-th timer channel;
 #define INIT_ARRAY(i) &kx_pit_channel_##i,
 
-//Initialize the interfaces array;
-struct timer_interface *interfaces[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
+//Initialize the channels data array;
+struct kx_pit_channel_data *channels[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
 
 //Macro not used anymore;
 #undef INIT_ARRAY
 
+//-------------------------------------------------- File Operations --------------------------------------------------
+
+/*
+ * The channel inode will only contain the channel index;
+ */
+struct channel_inode {
+
+	//The inode base;
+	struct inode node;
+
+	//The channel index;
+	uint8_t channel_index;
+
+};
+
+//Inodes will be stored in an array;
+struct channel_inode inodes[NB_CHANNELS];
+
+
+/*
+ * All variables and methods in this section are private. No one can access them outside this translation unit;
+ */
+
+//Transmit the timer interface;
+static bool channel_interface(const struct channel_inode *const node, void *const iface, const size_t iface_size) {
+
+	//Cache the channel data ref;
+	struct kx_pit_channel_data *channel = channels[node->channel_index];
+
+	//Eventually interface with the channel;
+	return timer_if_interface(iface, &channel->ref, iface_size);
+
+}
+
+
+//Close the timer resource : will neutralise the interface;
+static void channel_close(const struct channel_inode *const node) {
+
+	//Cache the channel data ref;
+	struct kx_pit_channel_data *channel = channels[node->channel_index];
+
+	//Neutralise the eventual interface;
+	timer_if_neutralise(&channel->ref);
+}
+
+
+/*
+ * The file operations for a pit channel are limited to interface, and close that neutralises the interface;
+ */
+
+static struct inode_ops channel_ops = {
+	.close =  (void (*)(struct inode *)) &channel_close,
+	.interface = (bool (*)(struct inode *, void *, size_t)) &channel_interface,
+};
+
+
+/**
+ * 	kx_pit_channel_init_i : initialises the channel; Called by the pit module's init function
+ */
+
+static void channel_init(uint8_t channel_index) {
+
+	//Cache the channel data ref;
+	struct kx_pit_channel_data *channel = channels[channel_index];
+
+
+	/*
+	 * Inode initialisation;
+	 */
+
+	//Cache the inode;
+	struct channel_inode *node = inodes + channel_index;
+
+	//Create the inode initializer;
+	struct channel_inode init = {
+
+		//Transmit operations;
+		.node = INODE (&channel_ops),
+
+		//Initialise the channel index;
+		.channel_index = channel_index,
+
+	};
+
+	//Initialise the inode;
+	memcpy(node, &init, sizeof(struct channel_inode));
+
+
+	/*
+	 * Fs registration;
+	 */
+
+	//Register a file with no content leading to our operations;
+	fs_create(channel->name, (struct inode *) node);
+
+
+	/*
+	 * Timer reset;
+	 */
+
+	//Reset the timer, and set the base frequency to 1KHz
+	timer_reset(&channel->ref.iface, 1000);
+
+
+	/*
+	 * Interrupt settings;
+	 */
+
+	//Cache the interrupt channel;
+	const uint16_t int_channel = channel->interrupt_channel;
+
+	//Register the pit handler;
+	ic_set_interrupt_handler(int_channel, channel->handler);
+
+	//Set the channel int priority;
+	ic_set_interrupt_priority(int_channel, KERNEL_DRIVER_STATUS_PRIORITY);
+
+	//Enable the channel interrupt;
+	ic_enable_interrupt(int_channel);
+
+}
+
+
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
 
-static void pit_init() {
+static bool pit_init() {
 
 	//Enable PIT clock gating;
 	sim_enable_PIT_clock_gating();
@@ -106,45 +230,14 @@ static void pit_init() {
 	//Enable clocks for all PITs;
 	*MCR = 0x00;
 
-	//TIMER_INIT calls a channel's initialisation function;
-	#define TIMER_INIT(i) kx_pit_channel_init_##i();
+	//Write the call to the initialisation function;
+	#define TIMER_INIT(i) channel_init(i);
 
-	//Initialise each channel;
+	//Write each channel's init call;
 	INCR_CALL(NB_CHANNELS, TIMER_INIT);
 
 	//Macro not used anymore;
 	#undef TIMER_INIT
-
-}
-
-
-/**
- * kx_pit_delete : calls exit, and delete the driver struct;
- *
- * @param driver : the driver to delete;
- */
-
-static bool pit_exit() {
-
-	//TIMER_INIT calls a channel's exit function;
-	#define TIMER_EXIT(i)\
-		 {if (!kx_pit_channel_exit_##i()) \
-				return false;}\
-
-	//Initialise each channel;
-	INCR_CALL(NB_CHANNELS, TIMER_EXIT);
-
-	//Macro not used anymore;
-	#undef TIMER_EXIT
-
-
-	//If all channels have been cleaned up properly :
-
-	//Disable clocks for all PITs;
-	*MCR = 0x02;
-
-	//Disable clock gating;
-	sim_disable_PIT_clock_gating();
 
 	//Complete;
 	return true;
@@ -152,5 +245,6 @@ static bool pit_exit() {
 }
 
 
+
 //Embed the PIT module in the executable;
-KERNEL_EMBED_PERIPHERAL_MODULE(pit, &pit_init, &pit_exit);
+KERNEL_EMBED_PERIPHERAL_MODULE(pit, &pit_init);

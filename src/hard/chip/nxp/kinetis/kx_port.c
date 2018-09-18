@@ -219,7 +219,6 @@ static const struct gpio_port_operations operations[NB_PORTS] = {INCR_CALL(NB_PO
 #undef INIT_AR
 
 
-
 //---------------------------------------------------- Pins structs ----------------------------------------------------
 
 /*
@@ -234,7 +233,8 @@ struct pin_data {
 	//The id of the bit;
 	const uint8_t bit_id;
 
-	//The registration id of the bit;
+	//The interfaced struct;
+	struct gpio_interface *interface;
 
 };
 
@@ -244,38 +244,18 @@ struct pin_data {
  * 	The following struct keeps track of their data;
  */
 
-//PIN_REGISTER will initialise a pin data struct;
-#define PIN_REGISTER(name, port, bit) {.port_id = (port), .bit_id = (bit)},
+//PIN will initialise a pin data struct;
+#define PIN(name, port, bit) {.port_id = (port), .bit_id = (bit), .interface = 0},
 
-static const struct pin_data pins[NB_PORTS] = {
+static struct pin_data pins[] = {
 
-//Initilalise all pins;
+//Initialise all pins;
 #include "kx_port_pins.h"
 
 };
 
 //Macro not used anymore;
-#undef PIN_REGISTER
-
-
-/*
- * Pins can be interfaced with; We must keep track of interfaced structs, in order to neutralise them
- * 	at close time;
- */
-
-
-//PIN_REGISTER will initialise a pin data struct;
-#define PIN_REGISTER(name, port, bit) 0,
-
-static void *interfaces[] = {
-
-//Initilalise all pins;
-#include "kx_port_pins.h"
-
-};
-
-//Macro not used anymore;
-#undef PIN_REGISTER
+#undef PIN
 
 
 
@@ -486,17 +466,47 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 }
 
 
-
 //--------------------------------------------------- File operations --------------------------------------------------
 
 /*
- * A port pin supports configuration, interface and close;
- *
- * A port supports configuration;
+ * A pin inode contains only the index of the pin it references;
  */
 
+struct pin_inode {
 
-static bool fs_pin_config(void *const pin_id, const void *const config, const size_t config_size) {
+	//The inode base;
+	struct inode node;
+
+	//The pin index;
+	const size_t pin_index;
+
+};
+
+/*
+ * There is a fixed number of declared pins, that is decided at compile time;
+ * 	The following struct keeps track of their data;
+ */
+
+//PIN will add an inode initializer;
+#define PIN(name, port, bit) {},
+
+//Declare the inodes array and let initializers determine the size;
+static struct pin_inode inodes[] = {
+
+//Add all initializers;
+#include "kx_port_pins.h"
+
+};
+
+//Macro not used anymore;
+#undef PIN
+
+
+/*
+ * A port pin supports configuration, interface and close;
+ */
+
+static bool fs_pin_config(const struct pin_inode *const node, const void *const config, const size_t config_size) {
 
 	//If the configuration struct is not valid
 	if (config_size != sizeof(struct port_pin_config)) {
@@ -507,7 +517,7 @@ static bool fs_pin_config(void *const pin_id, const void *const config, const si
 	}
 
 	//Configure the pin, providing the proper pin data struct reference;
-	pin_configuration(&pins[(size_t) pin_id], config);
+	pin_configuration(&pins[node->pin_index], config);
 
 	//Complete;
 	return true;
@@ -516,7 +526,7 @@ static bool fs_pin_config(void *const pin_id, const void *const config, const si
 
 
 //TODO
-static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, const size_t iface_size) {
+static bool fs_pin_interface(const struct pin_inode *const node, void *const gpio_iface, const size_t iface_size) {
 
 	//If the configuration struct is not valid
 	if (iface_size != sizeof(struct gpio_interface)) {
@@ -526,19 +536,20 @@ static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, const s
 
 	}
 
+	//Cache the pin index;
+	size_t pin_index = node->pin_index;
+
 	//If another struct is interfaced :
-	if (interfaces[(size_t) pin_id]) {
+	if (pins[pin_index].interface) {
 
 		//Abort;
 		return false;
 
 	}
 
-
-
 	//Cache port and bit identifier;
-	uint8_t port_id = pins[(size_t) pin_id].port_id;
-	uint8_t bit_id = pins[(size_t) pin_id].bit_id;
+	uint8_t port_id = pins[pin_index].port_id;
+	uint8_t bit_id = pins[pin_index].bit_id;
 
 	//Cache the port register;
 	struct port_memory *port_area = port_areas[port_id].port;
@@ -558,7 +569,7 @@ static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, const s
 	};
 
 	//Keep track of the interface struct for eventual neutralisation;
-	interfaces[(size_t) pin_id] = gpio_iface;
+	pins[pin_index].interface = gpio_iface;
 
 	//Interface the struct;
 	memcpy(gpio_iface, &init, sizeof(struct gpio_interface));
@@ -570,19 +581,22 @@ static bool fs_pin_interface(void *const pin_id, void *const gpio_iface, const s
 
 
 //TODO
-static void fs_pin_close(void *const pin_id) {
+static void fs_pin_close(const struct pin_inode *const node) {
+
+	//Cache the pin index;
+	size_t pin_index = node->pin_index;
 
 	//Cache the location of the reference of the eventual interface struct;
-	void *iface_p = interfaces[(size_t) pin_id];
+	struct gpio_interface *iface = pins[pin_index].interface;
 
 	//If the pin is interfaced :
-	if (iface_p) {
+	if (iface) {
 
 		//Neutralise the struct;
-		memcpy(iface_p, &neutral_gpio_interface, sizeof(struct gpio_interface));
+		memcpy(iface, &neutral_gpio_interface, sizeof(struct gpio_interface));
 
 		//Reset the interface pointer;
-		interfaces[(size_t) pin_id] = 0;
+		pins[pin_index].interface = 0;
 
 	}
 
@@ -590,20 +604,33 @@ static void fs_pin_close(void *const pin_id) {
 
 /*
  * The port pin file operation structure will be the same for all pins;
+ * 	A safe up-case is made to cast pin_inode * into inode *;
  */
-static const struct dfs_file_operations port_pin_file_ops = {
-	.configure = &fs_pin_config,
-	.interface = &fs_pin_interface,
-	.close = &fs_pin_close,
+static const struct inode_ops port_pin_file_ops = {
+	.configure = (bool (*)(struct inode *, const void *, size_t)) &fs_pin_config,
+	.interface = (bool (*)(struct inode *, void *, size_t)) &fs_pin_interface,
+	.close = (void (*)(struct inode *)) &fs_pin_close,
 };
 
 
 //-------------------------------------------------- Pins registration -------------------------------------------------
 
-static void register_pin(const char *name, size_t pin_id) {
+static void register_pin(const char *name, size_t pin_index) {
 
-	//We must register the file, providing related pin data and file operations;
-	fs_create(name, &port_pin_file_ops, (void *) pin_id);
+	//Cache the pin inode;
+	struct pin_inode *inode = &inodes[pin_index];
+
+	//Create the inode initializer;
+	struct pin_inode init = {
+		.node = INODE(&port_pin_file_ops),
+		.pin_index = pin_index,
+	};
+
+	//Initialise the inode;
+	memcpy(inode, &init, sizeof(struct pin_inode));
+
+	//Register the inode;
+	fs_create(name, (struct inode *) inode);
 
 }
 
@@ -612,7 +639,7 @@ static void register_pin(const char *name, size_t pin_id) {
 
 
 
-static void kx_port_init() {
+static bool kx_port_init() {
 
 	//Enable gating for all ports;
 	sim_enable_PORTA_clock_gating();
@@ -620,8 +647,6 @@ static void kx_port_init() {
 	sim_enable_PORTC_clock_gating();
 	sim_enable_PORTD_clock_gating();
 	sim_enable_PORTE_clock_gating();
-
-	//TODO REGISTER ALL PORTS;
 
 	/*
 	 * Pin registration;
@@ -631,26 +656,19 @@ static void kx_port_init() {
 
 	//To register a pin, we simply call register_pin, providing its name and its address.
 	// The index is then incremented;
-	#define PIN_REGISTER(name, port, bit) register_pin(#name, pin_id++);
+	#define PIN(name, port, bit) register_pin(#name, pin_id++);
 
 	//Register all pins
 	#include "kx_port_pins.h"
 
 	//Macro not used anymore;
-	#undef PIN_REGISTER
+	#undef PIN
 
-}
-
-
-bool kx_port_exit() {
-
-	//TODO REMOVE ALL FILES
-
+	//Complete;
 	return true;
 
-
-
 }
 
+
 //Embed the module in the executable;
-KERNEL_EMBED_PERIPHERAL_MODULE(port, &kx_port_init, &kx_port_exit);
+KERNEL_EMBED_PERIPHERAL_MODULE(port, &kx_port_init);

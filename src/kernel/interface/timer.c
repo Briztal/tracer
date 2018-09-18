@@ -20,6 +20,7 @@
 
 #include "timer.h"
 
+#include <util/string.h>
 
 /**
  * timer_init :
@@ -35,7 +36,7 @@
  * @param base_frequency : the required base frequency for the timer;
  */
 
-void timer_init(const struct timer_interface *timer, uint32_t base_frequency, uint32_t ovf_period, void (*handler)()) {
+void timer_init(const struct timer_if *timer, uint32_t base_frequency, uint32_t ovf_period, void (*handler)()) {
 
 	//Stop the timer;
 	timer_stop(timer);
@@ -77,7 +78,7 @@ void timer_init(const struct timer_interface *timer, uint32_t base_frequency, ui
  * @param timer
  */
 
-void timer_reset(const struct timer_interface *timer, uint32_t base_frequency) {
+void timer_reset(const struct timer_if *timer, uint32_t base_frequency) {
 
 	//Stop the timer;
 	timer_stop(timer);
@@ -99,7 +100,11 @@ void timer_reset(const struct timer_interface *timer, uint32_t base_frequency) {
 
 }
 
-//---------------------------------------------------- Neutral timer interface
+//Implement interface capabilities;
+DEFINE_INTERFACE(timer_if);
+
+//----------------------------------------------- Neutral timer interface ----------------------------------------------
+
 
 //Dumb functions;
 void n_sbf(uint32_t u){};
@@ -114,7 +119,7 @@ void n_uh(void (*h)()) {};
  * 	functions, without causing null pointer access. Functions have no side effects;
  */
 
-const struct timer_interface neutral_timer_interface = {
+const struct timer_if neutral_timer_if = {
 
 	.set_base_frequency = n_sbf,
 	.start = n_st,
