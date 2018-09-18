@@ -14,7 +14,7 @@
 struct command_if {
 
 	//Set the value;
-	void (*set)(struct command_if *, uint32_t);
+	void (*set)(uint32_t);
 
 };
 
