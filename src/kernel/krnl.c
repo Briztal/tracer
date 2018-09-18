@@ -34,7 +34,7 @@
 
 #include <kernel/mod/mod.h>
 #include <kernel/debug/debug.h>
-#include <kernel/fs/dfs.h>
+#include <kernel/fs/inode.h>
 #include <kernel/log.h>
 
 

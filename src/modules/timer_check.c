@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 #include <kernel/log.h>
-#include <kernel/fs/dfs.h>
+#include <kernel/fs/inode.h>
 #include <kernel/mod/auto_mod.h>
 #include <kernel/interface/timer.h>
 #include <kernel/panic.h>
@@ -26,7 +26,7 @@ static void check_init() {
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying led file : ");
 
-	struct dfs_file *f = dfs_open("led");
+	struct dfs_file *f = fs_open("led");
 
 	if (!f) {
 
@@ -67,7 +67,7 @@ static void check_init() {
 	kernel_log_("\n\n\n");
 	kernel_log_("Querying timer file : ");
 
-	struct dfs_file *file = dfs_open("pit_0");
+	struct dfs_file *file = fs_open("pit_0");
 
 	if (!file) {
 
@@ -93,7 +93,7 @@ static void check_init() {
 
 	}
 
-	dfs_close(file);
+	fs_close(file);
 
 	kernel_log_("Initialising timer");
 

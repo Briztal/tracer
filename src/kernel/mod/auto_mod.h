@@ -35,22 +35,20 @@
 
 struct auto_mod {
 
-	//The module's initialisation function;
-	void (*const init)();
-
-	//The module's exit function; Must free any resource owned by the module;
-	bool (*const exit)();
-
-	//The module's name; has
+	//The module's name;
 	const char *const name;
+
+	//The module's initialisation function;
+	bool (*const init)();
+
 
 };
 
 
 
-#define _KERNEL_EMBED_MODULE(name_l, section_name, init_f, exit_f)\
+#define _KERNEL_EMBED_MODULE(name_l, section_name, init_f)\
 	static struct auto_mod mod##name_l __attribute__((section (section_name), used)) = \
-	{.init = (init_f), .exit = (exit_f), .name = (#name_l)};
+	{.name = (#name_l), .init = (init_f)};
 
 /*
  * There are distinct type of modules, that rely on different pre-initialisations :
@@ -59,16 +57,16 @@ struct auto_mod {
  * 	- User modules that can rely on peripheral modules and system modules;
  */
 
-#define KERNEL_EMBED_PERIPHERAL_MODULE(name, init, exit)\
-	_KERNEL_EMBED_MODULE(name, ".kernel_peripheral_modules", init, exit)
+#define KERNEL_EMBED_PERIPHERAL_MODULE(name, init)\
+	_KERNEL_EMBED_MODULE(name, ".kernel_peripheral_modules", init)
 
 
-#define KERNEL_EMBED_SYSTEM_MODULE(name, init, exit)\
-	_KERNEL_EMBED_MODULE(name, ".kernel_system_modules", init, exit)
+#define KERNEL_EMBED_SYSTEM_MODULE(name, init)\
+	_KERNEL_EMBED_MODULE(name, ".kernel_system_modules", init)
 
 
-#define KERNEL_EMBED_USER_MODULE(name, init, exit)\
-	_KERNEL_EMBED_MODULE(name, ".kernel_user_modules", init, exit)
+#define KERNEL_EMBED_USER_MODULE(name, init)\
+	_KERNEL_EMBED_MODULE(name, ".kernel_user_modules", init)
 
 
 

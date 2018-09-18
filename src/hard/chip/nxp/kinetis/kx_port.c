@@ -24,7 +24,7 @@
 #include <util/macro/incr_call.h>
 #include <kernel/interface/gpio.h>
 #include <stdbool.h>
-#include <kernel/fs/dfs.h>
+#include <kernel/fs/inode.h>
 #include <kernel/log.h>
 #include <util/string.h>
 #include <kernel/mod/auto_mod.h>
@@ -603,7 +603,7 @@ static const struct dfs_file_operations port_pin_file_ops = {
 static void register_pin(const char *name, size_t pin_id) {
 
 	//We must register the file, providing related pin data and file operations;
-	dfs_create(name, &port_pin_file_ops, (void *) pin_id);
+	fs_create(name, &port_pin_file_ops, (void *) pin_id);
 
 }
 

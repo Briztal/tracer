@@ -120,7 +120,7 @@ void netf2_init(
 		.list = 0,
 	};
 
-	//Create the ifaces initializer;
+	//Create the if_array initializer;
 	struct netf2 iface_init = {
 
 		//Allocate and initialise all lists;

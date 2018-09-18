@@ -108,10 +108,10 @@ void netf2_delete(struct netf2 *iface);
 
 //---------------------------------------------------- IRQ functions ---------------------------------------------------
 
-//Push @block in rx_nonempty list of @ifaces, transfer in both rx lists, pull-return a block from rx_empty (can be 0);
+//Push @block in rx_nonempty list of @if_array, transfer in both rx lists, pull-return a block from rx_empty (can be 0);
 struct data_block *netf2_get_new_rx_block(struct netf2 *iface, struct data_block *block);
 
-//Push @block in tx_empty list of @ifaces, transfer in both tx lists, pull-return a block from tx_nonempty (can be 0);
+//Push @block in tx_empty list of @if_array, transfer in both tx lists, pull-return a block from tx_nonempty (can be 0);
 struct data_block *netf2_get_new_tx_block(struct netf2 *iface, struct data_block *block);
 
 

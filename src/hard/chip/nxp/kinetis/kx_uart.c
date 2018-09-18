@@ -611,7 +611,7 @@ void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_con
 	//Get both FIFOs sizes;
 	sizes_from_PFIFO(registers->PFIFO, &rx_fifo_size, &tx_fifo_size);
 
-	//Initialise the ifaces struct;
+	//Initialise the if_array struct;
 	struct K64_UART_net21 interface_init = {
 
 		//Initialise the l2 adapter

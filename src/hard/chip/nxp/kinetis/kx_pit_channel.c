@@ -9,7 +9,7 @@
 
 #include <kernel/interface/timer.h>
 
-#include <kernel/fs/dfs.h>
+#include <kernel/fs/inode.h>
 
 #include <kernel/ic.h>
 
@@ -391,7 +391,7 @@ static struct dfs_file_operations file_operations = {
 void NM(kx_pit_channel_init)() {
 
 	//Register a file with no content leading to our operations;
-	dfs_create(pit_name, &file_operations, 0);
+	fs_create(pit_name, &file_operations, 0);
 
 	//Reset the timer, and set the base frequency to 1KHz
 	timer_reset(&NM(kx_pit_channel), 1000);
@@ -415,7 +415,7 @@ void NM(kx_pit_channel_init)() {
 bool NM(kx_pit_channel_exit)() {
 
 	//Attempt to remove the file;
-	if (dfs_remove(pit_name)) {
+	if (fs_remove(pit_name)) {
 
 		//Reset the timer, and set the base frequency to 1KHz
 		timer_reset(&NM(kx_pit_channel), 1000);
