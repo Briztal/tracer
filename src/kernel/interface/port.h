@@ -21,6 +21,7 @@
 #ifndef TRACER_PORT_H
 #define TRACER_PORT_H
 
+#include <stdint.h>
 
 //--------------------------------------------------- Port pin config --------------------------------------------------
 

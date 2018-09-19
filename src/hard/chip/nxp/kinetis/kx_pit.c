@@ -55,6 +55,7 @@
 #include <util/macro/incr_call.h>
 
 #include <util/string.h>
+#include <kernel/mod/module_array.h>
 
 
 #include "kx_sim.h"
@@ -78,27 +79,36 @@
  * 	The PIT interface offers a timer interface for each one of there channels. It will register these structs to the
  * 	kernel at init, and un-register them at exit;
  */
+/*
 
 //CHANNEL_DECLARE will declare the channel struct and the channel init function;
-#define CHANNEL_DECLARE(i) extern struct kx_pit_channel_data kx_pit_channel_##i;
+#define CHANNEL_DECLARE(i) extern struct channel_specs kx_pit_channel_##i;
 
 //Declare each channel;
 INCR_CALL(NB_CHANNELS, CHANNEL_DECLARE);
 
 //Macro not used anymore;
 #undef CHANNEL_DECLARE
+*/
 
+MODULE_DECLARE_CHANNELS();
 
 //--------------------------------------------------- Channel array ----------------------------------------------------
 
+/*
 //INIT_ARRAY will print the reference of the i-th timer channel;
 #define INIT_ARRAY(i) &kx_pit_channel_##i,
 
 //Initialize the channels data array;
-static struct kx_pit_channel_data *channels[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
+static struct channel_specs *channels[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
 
 //Macro not used anymore;
 #undef INIT_ARRAY
+*/
+
+
+MODULE_CREATE_ARRAY(channels);
+
 
 
 //-------------------------------------------------- File Operations --------------------------------------------------
@@ -128,7 +138,7 @@ static struct channel_inode inodes[NB_CHANNELS];
 static bool channel_interface(const struct channel_inode *const node, void *const iface, const size_t iface_size) {
 
 	//Cache the channel data ref;
-	struct kx_pit_channel_data *channel = channels[node->channel_index];
+	struct channel_specs *channel = channels[node->channel_index];
 
 	//Eventually interface with the channel;
 	return timer_if_interface(iface, &channel->ref, iface_size);
@@ -140,7 +150,7 @@ static bool channel_interface(const struct channel_inode *const node, void *cons
 static void channel_close(const struct channel_inode *const node) {
 
 	//Cache the channel data ref;
-	struct kx_pit_channel_data *channel = channels[node->channel_index];
+	struct channel_specs *channel = channels[node->channel_index];
 
 	//Neutralise the eventual interface;
 	timer_if_neutralise(&channel->ref);
@@ -164,7 +174,7 @@ static struct inode_ops channel_ops = {
 static void channel_init(uint8_t channel_index) {
 
 	//Cache the channel data ref;
-	struct kx_pit_channel_data *channel = channels[channel_index];
+	struct channel_specs *channel = channels[channel_index];
 
 
 	/*

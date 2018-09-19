@@ -7,10 +7,10 @@
 
 #include <kernel/interface/timer.h>
 
-struct kx_pit_channel_data {
+struct channel_specs {
 
 	//The timer interface ref struct;
-	struct timer_if_ref ref;
+	const struct timer_if_ref ref;
 
 	//The channel's name;
 	const char *name;

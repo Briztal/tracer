@@ -16,7 +16,7 @@ BOARD := teensy35
 #---------------------------------------------------- Primary config ---------------------------------------------------
 
 #Initialise compilation and linking flags;
-CFLAGS := -Wall -Os -g -std=c99 -ffreestanding
+CFLAGS := -Wall -Os -g -std=gnu99 -ffreestanding
 LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 
 #The default include path set. Comprises just src.

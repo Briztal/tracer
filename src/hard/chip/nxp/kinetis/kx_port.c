@@ -438,13 +438,13 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 			case PORT_OPEN_DRAIN:
 			default:
 				//Open drain in default case
-				config_register |= PORT_PCR_ODE, 32;
+				config_register |= PORT_PCR_ODE;
 				break;
 		}
 
 		//If the slew rate is slow, set the appropriate bit;
 		if (config->slew_rate == PORT_HIGH_RATE) {
-			config_register |= PORT_PCR_SRE, 32;
+			config_register |= PORT_PCR_SRE;
 		}
 
 		//Set the appropriate bit in the GPIO direction register;

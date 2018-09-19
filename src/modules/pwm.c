@@ -135,6 +135,7 @@ static bool channel_setup(struct pwm_channel *channel, uint32_t high_duration) {
  * @param channel : the channel whose high duration must be modified;
  * @param high_duration : the new high duration;
  */
+
 static void channel_set_high_duration(struct pwm_channel *channel, uint32_t high_duration) {
 
 	//Channel durations can be accessed and modified with no restrictions. Setup the channel.

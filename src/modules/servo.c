@@ -1,4 +1,4 @@
-/*
+channel_specs/*
   servo.c -  Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
@@ -18,24 +18,14 @@
 
 */
 
+//-------------------------------------------------- Module array head -------------------------------------------------
+
+#include <kernel/mod/module_array.h>
 
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
-/*
- * Please provide in the compilation call :
- * 	- PERIOD : the period of the cycle, expressed in microseconds;
- * 	- TOLERANCE : the minimal activity time of a channel, expressed in microseconds;
- * 	- TIMER_NAME : the name of the timer to interface with. No quotes required;
- * 	- MODULE_NAME : the name the module should be embedded with. No quotes required;
- * 	- CHANNELS_FILE : the name of the file where servo channels macros are defined. Quotes required;
- *
- * 	You may use this line : in your makefile :
- *
- * 	-DPERIOD= -DTOLERANCE= -DTIMER_NAME= -DMODULE_NAME= -DCHANNELS_FILE=
- */
-
-#if !defined(PERIOD) || !defined(TOLERANCE) || !defined(TIMER_NAME) || !defined(MODULE_NAME) || !defined(CHANNELS_FILE)
+#if !defined(PERIOD) || !defined(TOLERANCE) || !defined(TIMER_NAME)
 
 //Log
 #error "Error, at least one macro argument hasn't been provided. Check the makefile;"
@@ -52,15 +42,10 @@
 //RDM
 #define MODULE_NAME servos
 
-//default config file;
-#define CHANNELS_FILE "servo.h"
-
 #endif
-
 
 //------------------------------------------------------ Includes ------------------------------------------------------
 
-//If one of the macro was not provided :
 #include <kernel/fs/inode.h>
 #include <kernel/interface/gpio.h>
 #include <kernel/interface/command.h>
@@ -69,10 +54,19 @@
 #include <kernel/ic.h>
 #include <kernel/mod/auto_mod.h>
 
+#include "servo_channel.h"
 
-//------------------------------------------------------ Channels ------------------------------------------------------
 
-struct servo_channel {
+//------------------------------------------------- Channels const data ------------------------------------------------
+
+MODULE_DECLARE_CHANNELS();
+
+MODULE_CREATE_ARRAY(channels_specs);
+
+
+//------------------------------------------------ Channels dynamic data -----------------------------------------------
+
+struct channel_data {
 
 	//The gpio file descriptor. Used to close the gpio file at channel deletion;
 	file_descriptor gpio_fd;
@@ -80,99 +74,25 @@ struct servo_channel {
 	//Each servo channel interfaces with a gpio pin; Access outside the ISR must be done in a critical section;
 	struct gpio_interface gpio;
 
+	//The ref of the struct interfaced with the channel;
+	struct command_if *iface_ref;
+	
 	//The current impulse duration; Can be written outside the ISR, for setup;
 	uint32_t duration;
+	
 };
-
-
-//------------------------------------------------ Channels structures -------------------------------------------------
 
 //Define the complement channel. At init, occupies the whole period;
-static struct servo_channel complement_channel = {};
+static struct channel_data complement_channel = {};
 
-//Define a servo channel struct;
-#define SERVO(name, gpio, max_duration) static struct servo_channel channel_##name = {};
-
-//Defin all servo channels;
-#include "servo.h"
-
-//Macro not used anymore
-#undef SERVO
-
-
-
-//--------------------------------------------- Channels update functions ----------------------------------------------
-
-
-//Declare the duration update function;
-static void update_channel_duration(uint32_t *, uint32_t);
-
-//Define the update function for a channel; It will decrease the duration if requried, and call the duration updater;
-#define SERVO(name, gpio, max_duration)\
-static void channel_update_##name(uint32_t duration) {\
-	if (duration > (uint32_t) (max_duration)) duration = (max_duration);\
-    update_channel_duration(&channel_##name.duration, duration);\
-}
-
-//Define all update functions;
-#include "servo.h"
-
-//Macro not used anymore
-#undef SERVO
-
-
-//--------------------------------------------- Channels interfaces ----------------------------------------------
-
-/*
- * channels interfaces are stored in an array, and accessed by index during interfacing;
- */
-
-//Initialise the interface struct for a channel;
-#define SERVO(name, gpio, max_duration) {.iface = {.set = &channel_update_##name}, .ref = 0,},
-
-//Create the interfaces array;
-static struct command_if_ref interfaces[] = {
-	//Add the complement channel. Never interfaced with;
-	{},
-
-	//Add each servo channel's reference;
-#include "servo.h"
-
-};
-
-//Macro not used anymore
-#undef SERVO
-
-
-
-
-//---------------------------------------------- Channels array ----------------------------------------------
-
-
-//There is a constant number of servo channels; The array size will be determined by the initializer;
-#define SERVO(name, gpio, max_duration) &channel_##name,
-
-//Create the channels array;
-static struct servo_channel *channels[] = {
-
-	//Add the complement channel's reference;
-	&complement_channel,
-
-	//Add each servo channel's reference;
-#include "servo.h"
-
-};
-
-//Macro not used anymore;
-#undef SERVO
-
-
+//Create the dynamic data array; Contains all channels, plus the complement;
+static struct channel_data *channels[NB_CHANNELS + 1];
 
 
 //--------------------------------------------------- Controller data --------------------------------------------------
 
 //The number of channels, complement comprised;
-#define NB_CHANNELS (sizeof(channels) / sizeof(struct servo_channel *))
+#define NB_CHANNELS (sizeof(channels) / sizeof(struct channel_data *))
 
 //The currently active channel;
 static size_t active_index;
@@ -207,7 +127,7 @@ static void servos_isr_handler() {
 
 	//Cache the active channel;
 	size_t active_id = active_index;
-	struct servo_channel *channel = channels[active_id];
+	struct channel_data *channel = channels[active_id];
 
 	//The active channel and its gpio;
 	const struct gpio_interface *gpio = &channel->gpio;
@@ -316,24 +236,18 @@ static void stop() {
  */
 
 static bool check_max_durations() {
+	
+	//Initialise the sum;
+	uint8_t sum = 0;
+	
+	//For each channel :
+	for (uint8_t i = NB_CHANNELS; i--;) {
+		sum += channels_specs[i]->max_duration;
+	}
 
-	//Insert an incrementation of the maximal duration;
-	#define SERVO(name, gpio, max_duration) + (max_duration)
-
-	//Declare the sum of all maximal durations;
-	size_t durations_sum = 0
-
-							   //Sum all durations;
-						   #include "servo.h"
-
-	//Terminate;
-	;
-
-	//Macro not used anymore;
-	#undef SERVO
 
 	//The cycle is valid if all channels can be set to their maximal durations without overflow;
-	return durations_sum <= PERIOD;
+	return sum <= PERIOD;
 
 }
 
@@ -344,10 +258,16 @@ static bool check_max_durations() {
  * @return true if the initialisation was made properly. If not, the module should fail;
  */
 
-static bool init_channel(size_t channel_id, const char *const gpio_name) {
+static bool init_channel(size_t channel_id) {
+	
+	//Cache the specs array;
+	const struct channel_specs *specs = channels_specs[channel_id];
 
-	//Cache the channel struct;
-	struct servo_channel *channel = channels[channel_id];
+	//Cache the channel data struct;
+	struct channel_data *channel = channels[channel_id];
+
+	//Cache the gpio file name;
+	const char *gpio_name = specs->gpio_name;
 
 	//Open the gpio file;
 	file_descriptor gpio_fd = fs_open(gpio_name);
@@ -457,23 +377,9 @@ struct channel_inode {
 
 };
 
-
-//Write the initializer for an inode;
-#define SERVO(name, gpio, max) {},
-
 //Inodes can be stored in an array, as their amount is predetermined, and never altered;
-static struct channel_inode inodes[] = {
+static struct channel_inode inodes[NB_CHANNELS];
 
-	//Add the complement;
-	{},
-
-	//Add all inodes.
-#include "servo.h"
-
-};
-
-//Macro not used anymore;
-#undef SERVO
 
 
 /**
@@ -507,7 +413,7 @@ static bool channel_interface(
 	}
 
 	//Allow interfacing. Size check is taken in charge.
-	command_if_interface(if_struct, interfaces + channel_id, size);
+	command_if_interface(if_struct, &channels_specs[channel_id]->iface,  &channels[channel_id]->iface_ref, size);
 
 	//Complete;
 	return true;
@@ -538,7 +444,7 @@ static void channel_close(const struct channel_inode *const node) {
 	}
 
 	//Neutralise the interface, if interfaced;
-	command_if_neutralise(interfaces + channel_id);
+	command_if_neutralise(&channels[channel_id]->iface_ref);
 
 }
 
@@ -561,7 +467,7 @@ static const struct inode_ops channel_ops = {
  * @param channel_index
  */
 
-void channel_register(const char *channel_name, const size_t channel_index) {
+void channel_register(const size_t channel_index) {
 
 	//Cache the inode ref;
 	struct channel_inode *node = inodes + channel_index;
@@ -580,7 +486,7 @@ void channel_register(const char *channel_name, const size_t channel_index) {
 	memcpy(node, &init, sizeof(struct channel_inode));
 
 	//Register the inode to the file system; Safe up-cast;
-	fs_create(channel_name, (struct inode *) node);
+	fs_create(channels_specs[channel_index]->channel_name, (struct inode *) node);
 
 }
 
@@ -664,7 +570,7 @@ static bool servo_init() {
 	 */
 
 	//Create the complement channel initializer;
-	struct servo_channel cpl_init = {
+	struct channel_data cpl_init = {
 
 		//Occupies the whole period;
 		.duration = PERIOD,
@@ -678,30 +584,19 @@ static bool servo_init() {
 	};
 
 	//Initialise the complement channel;
-	memcpy(&complement_channel, &cpl_init, sizeof(struct servo_channel));
+	memcpy(&complement_channel, &cpl_init, sizeof(struct channel_data));
 
 
 	/*
 	 * Standard interfaces init and registration;
 	 */
 
-	//Channel 0 is the complement, has already been initialised, and must not be registered;
-	size_t i = 1;
+	//For each regular channel :
+	for (uint8_t channel_id = NB_CHANNELS; channel_id--;) {
+		init_channel(channel_id);\
+        channel_register(channel_id);\
+	}
 
-	//Initialize a channel and register it to the file system;
-	#define SERVO(name, gpio, duration)\
-        init_channel(i, #gpio);\
-        channel_register(#name, i);\
-		i++;
-
-	//TODO SEPARATE REGISTRATION AND INITIALISATION;
-	//TODO CLEANUP IF NOT PROPERLY INITIALISED : CLOSE GPIO FILES, AND UNREGISTER.
-
-	//Add all initializers;
-	#include "servo.h"
-
-	//Macro not used anymore;
-	#undef SERVO
 
 	//Complete;
 	return true;
