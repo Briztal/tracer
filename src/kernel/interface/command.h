@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <util/string.h>
+#include <stddef.h>
+
 #include "iface.h"
 
 //The command interface references a single value that can be adjusted;

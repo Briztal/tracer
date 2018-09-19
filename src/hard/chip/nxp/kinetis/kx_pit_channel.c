@@ -26,7 +26,7 @@
 
 /*
  * Makefile must provide, in addition to channel parameters :
- * 	- CHANNEL_SYMBOL : name of the channel;
+ * 	- REFERENCE_SYMBOL : name of the channel;
  * 	- INT_CHANNEL : interrupt channel;
  * 	- REG : start of the channel's registers area;
  */
@@ -178,7 +178,7 @@ static void set_count(uint32_t period_count) {
 
 //Get the current value;
 static uint32_t get_count() {
-	return (((uint32_t) *CVAL) );/// period_to_tics);
+	return (((uint32_t) *CVAL));/// period_to_tics);
 }
 
 
@@ -296,37 +296,29 @@ static void set_handler(void (*handler)()) {
 
 static struct channel_specs channel = {
 
-	//Initialise the reference;
-	.ref = {
+	//Initialise the interface;
+	.iface = {
 
-		//Initialise the interface;
-		.iface = {
+		.set_base_frequency = &set_base_frequency,
 
-			.set_base_frequency = &set_base_frequency,
+		.start = &start,
+		.stop = &stop,
+		.started = &started,
 
-			.start = &start,
-			.stop = &stop,
-			.started = &started,
+		.set_count = &set_count,
+		.get_count = &get_count,
 
-			.set_count = &set_count,
-			.get_count = &get_count,
+		.set_int_period = &set_ovf,
+		.get_int_period = &get_ovf,
 
-			.set_int_period = &set_ovf,
-			.get_int_period = &get_ovf,
+		.enable_int = &enable_int,
+		.disable_int = &disable_int,
+		.int_enabled = &int_enabled,
 
-			.enable_int = &enable_int,
-			.disable_int = &disable_int,
-			.int_enabled = &int_enabled,
+		.flag_is_set = &flag_is_set,
+		.flag_clr = &flag_clr,
 
-			.flag_is_set = &flag_is_set,
-			.flag_clr = &flag_clr,
-
-			.set_handler = &set_handler,
-
-		},
-
-		//Null reference for instance;
-		.ref = 0,
+		.set_handler = &set_handler,
 
 	},
 

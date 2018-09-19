@@ -29,24 +29,38 @@
 #endif
 
 
+//--------------------------------------------------- Symbol creation --------------------------------------------------
 
 //Concatenate the module name, "_ch_" and the channel id. No argument expansion is made;
-#define _CH_SYMB(module_name, channel_id) module_name##_ch_##channel_id
+#define _REF_SYMB(module_name, channel_id) module_name##_##channel_id
 
 //Expand arguments before concatenating the result;
-#define CHANNEL_SYMBOL(module_name, channel_id) _CH_SYMB(module_name, channel_id)
+#define REFERENCE_SYMBOL(module_name, channel_id) _REF_SYMB(module_name, channel_id)
 
+
+//------------------------------------------------ Specs array creation ------------------------------------------------
 
 //Declare the i-th channel data. Must match a compiled channel;
-#define _DECLARE_CHANNEL(i) extern const struct channel_specs CHANNEL_SYMBOL(MODULE_NAME, i);
-
-//Declare all channels. Uses NB_CHANNELS;
-#define MODULE_DECLARE_CHANNELS() INCR_CALL(NB_CHANNELS, _DECLARE_CHANNEL)
+#define _DECLARE_CHANNEL(i) extern const struct channel_specs REFERENCE_SYMBOL(MODULE_NAME, i);
 
 //Provide the reference of the i-th channel;
-#define _REFERENCE_CHANNEL(i) &CHANNEL_SYMBOL(MODULE_NAME, i),
+#define _REFERENCE_CHANNEL(i) &REFERENCE_SYMBOL(MODULE_NAME, i),
 
 //Create an array of channel_specs pointers, initialised with all channels references;
-#define MODULE_CREATE_ARRAY(name) static const struct channel_specs *name[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, _REFERENCE_CHANNEL)};
+#define MODULE_CREATE_SPECS_ARRAY(name)\
+INCR_CALL(NB_CHANNELS, _DECLARE_CHANNEL);\
+static const struct channel_specs *name[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, _REFERENCE_CHANNEL)};
+
+
+//------------------------------------------------ Function referencing ------------------------------------------------
+
+
+//Create a global symbol aliasing the provided function. Type must "channel_specs";
+#define MODULE_REFERENCE_FUNCTION(function, ret, args)\
+	ret REFERENCE_SYMBOL(MODULE_NAME, function) args __attribute__((alias(#function)));
+
+//void f () __attribute__ ((weak, alias ("__f")));
+
+
 
 #endif //TRACER_CH_NAME_H

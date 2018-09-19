@@ -56,13 +56,13 @@ MODULES_OBJS += $(BK_DIR)/port.o
 pit_args =  -DMODULE_NAME=pit -DNB_CHANNELS=4 -DMCR_REG=0x40037000
 
 #Each PIT channel takes three arguments, its index, the interrupt channel, and its register area address;
-pitx_args = $(pit_args) -DCHANNEL_NAME=$(1) -DCHANNEL_ID=$(2) -DINT_CHANNEL=$(3) -DREG=$(4)
+pitx_args = $(pit_args) -DCHANNEL_ID=$(1) -DCHANNEL_NAME=$(2) -DINT_CHANNEL=$(3) -DREG=$(4)
 
 #Generate args sequences for each channel;
-pit0_args := $(call pitx_args,pit_0,0,48,0x40037100)
-pit1_args := $(call pitx_args,pit_1,1,49,0x40037110)
-pit2_args := $(call pitx_args,pit_2,2,50,0x40037120)
-pit3_args := $(call pitx_args,pit_3,3,51,0x40037120)
+pit0_args := $(call pitx_args,0,pit_0,48,0x40037100)
+pit1_args := $(call pitx_args,1,pit_1,49,0x40037110)
+pit2_args := $(call pitx_args,2,pit_2,50,0x40037120)
+pit3_args := $(call pitx_args,3,pit_3,51,0x40037120)
 
 
 #This rule will build the pit archive;

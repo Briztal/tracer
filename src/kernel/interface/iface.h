@@ -14,7 +14,7 @@ void if_struct##_neutralise(struct if_struct **ref);
 bool if_struct##_interface(struct if_struct *const dst, const struct if_struct *const src, struct if_struct **const ref, const size_t size) {\
 	if (size != sizeof(struct if_struct)) { return false; }\
 	if (*ref) { return false; }\
-	memcpy(dst, &src, sizeof(struct if_struct));\
+	memcpy(dst, src, sizeof(struct if_struct));\
 	*ref = dst;\
 	return true;\
 }\

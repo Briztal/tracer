@@ -56,6 +56,7 @@
 
 #include <util/string.h>
 #include <kernel/mod/module_array.h>
+#include <kernel/log.h>
 
 
 #include "kx_sim.h"
@@ -69,45 +70,18 @@
 #define MCR 	((volatile uint32_t *) MCR_REG)
 
 
-//------------------------------------------------ Channel declarations ------------------------------------------------
+//------------------------------------------------ Specs declarations ------------------------------------------------
+
+MODULE_CREATE_SPECS_ARRAY(channels);
+
+
+//----------------------------------------- Channels dynamic data declarations -----------------------------------------
 
 /*
- * The PIT module interacts with a PIT peripheral.
- *
- * 	The PIT peripheral provides an array of independently configurable general-purpose timers;
- *
- * 	The PIT interface offers a timer interface for each one of there channels. It will register these structs to the
- * 	kernel at init, and un-register them at exit;
+ * Channels dynamic data simply consist on interface references;
  */
-/*
 
-//CHANNEL_DECLARE will declare the channel struct and the channel init function;
-#define CHANNEL_DECLARE(i) extern struct channel_specs kx_pit_channel_##i;
-
-//Declare each channel;
-INCR_CALL(NB_CHANNELS, CHANNEL_DECLARE);
-
-//Macro not used anymore;
-#undef CHANNEL_DECLARE
-*/
-
-MODULE_DECLARE_CHANNELS();
-
-//--------------------------------------------------- Channel array ----------------------------------------------------
-
-/*
-//INIT_ARRAY will print the reference of the i-th timer channel;
-#define INIT_ARRAY(i) &kx_pit_channel_##i,
-
-//Initialize the channels data array;
-static struct channel_specs *channels[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, INIT_ARRAY)};
-
-//Macro not used anymore;
-#undef INIT_ARRAY
-*/
-
-
-MODULE_CREATE_ARRAY(channels);
+struct timer_if *if_refs[NB_CHANNELS] = {0};
 
 
 
@@ -137,11 +111,19 @@ static struct channel_inode inodes[NB_CHANNELS];
 //Transmit the timer interface;
 static bool channel_interface(const struct channel_inode *const node, void *const iface, const size_t iface_size) {
 
-	//Cache the channel data ref;
-	struct channel_specs *channel = channels[node->channel_index];
+	//Cache the channel index,
+	uint8_t channel_index = node->channel_index;
+
+	//kernel_log("interfacing with %d ", channel_index);
+
+	//Cache the channel specs ref;
+	const struct channel_specs *channel = channels[node->channel_index];
+
+	//Cache the interface ref ref;
+	struct timer_if **if_ref = (if_refs + channel_index);
 
 	//Eventually interface with the channel;
-	return timer_if_interface(iface, &channel->ref, iface_size);
+	return timer_if_interface(iface, &channel->iface, if_ref , iface_size);
 
 }
 
@@ -149,11 +131,9 @@ static bool channel_interface(const struct channel_inode *const node, void *cons
 //Close the timer resource : will neutralise the interface;
 static void channel_close(const struct channel_inode *const node) {
 
-	//Cache the channel data ref;
-	struct channel_specs *channel = channels[node->channel_index];
-
 	//Neutralise the eventual interface;
-	timer_if_neutralise(&channel->ref);
+	timer_if_neutralise(if_refs + node->channel_index);
+
 }
 
 
@@ -174,7 +154,7 @@ static struct inode_ops channel_ops = {
 static void channel_init(uint8_t channel_index) {
 
 	//Cache the channel data ref;
-	struct channel_specs *channel = channels[channel_index];
+	const struct channel_specs *channel = channels[channel_index];
 
 
 	/*
@@ -212,7 +192,7 @@ static void channel_init(uint8_t channel_index) {
 	 */
 
 	//Reset the timer, and set the base frequency to 1KHz
-	timer_reset(&channel->ref.iface, 1000);
+	timer_reset(&channel->iface, 1000);
 
 
 	/*

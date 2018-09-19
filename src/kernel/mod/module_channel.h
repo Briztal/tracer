@@ -32,15 +32,29 @@
 
 #define STR(x) _STR(x)
 
+//--------------------------------------------------- Symbol creation --------------------------------------------------
+
 
 //Concatenate the module name, "_ch_" and the channel id. No argument expansion is made;
-#define _CH_SYMB(module_name, channel_id) module_name##_ch_##channel_id
+#define _REF_SYMB(module_name, channel_id) module_name##_##channel_id
 
 //Expand arguments before concatenating the result;
-#define CHANNEL_SYMBOL(module_name, channel_id) _CH_SYMB(module_name, channel_id)
+#define REFERENCE_SYMBOL(module_name, channel_id) _REF_SYMB(module_name, channel_id)
+
+
+//------------------------------------------------ Specs ref creation ------------------------------------------------
 
 //Create a global symbol aliasing the provided variable. Type must "channel_specs";
 #define MODULE_REFERENCE_CHANNEL(data_name)\
-	extern const struct channel_specs CHANNEL_SYMBOL(MODULE_NAME, CHANNEL_ID) __attribute__((alias(#data_name)));
+	extern const struct channel_specs REFERENCE_SYMBOL(MODULE_NAME, CHANNEL_ID) __attribute__((alias(#data_name)));
+
+
+//------------------------------------------------ referenced function declaration ------------------------------------------------
+
+//Create the header for a referenced function;
+#define MODULE_DECLARE_FUNCTION(function, ret, args)\
+	ret REFERENCE_SYMBOL(MODULE_NAME, function) args;\
+
+
 
 #endif //TRACER_CH_NAME_H

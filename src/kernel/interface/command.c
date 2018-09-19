@@ -4,6 +4,9 @@
 
 #include "command.h"
 
+#include <util/string.h>
+
+
 //Define interfacing and neutralisation functions;
 DEFINE_INTERFACE(command_if);
 

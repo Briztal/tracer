@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include <kernel/mod/module_channel.h>
+#include <kernel/log.h>
 #include "servo_channel.h"
 
 
@@ -44,8 +45,7 @@
 //-------------------------------------------------- Command interface -------------------------------------------------
 
 //Declare the duration update function;
-void update_channel_duration(uint32_t *, uint32_t);
-
+void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint32_t *dst, uint32_t duration);
 
 /**
  * channel_update : calls the channel updater providing the channel id and the target duration;
@@ -53,7 +53,7 @@ void update_channel_duration(uint32_t *, uint32_t);
 
 static void channel_update(uint32_t duration) {
 
-	update_channel_duration(CHANNEL_ID, duration);
+	REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(CHANNEL_ID, duration);
 
 }
 
@@ -79,7 +79,7 @@ static struct channel_specs channel = {
 	.gpio_name = STR(GPIO_NAME),
 
 	//Save the channel file name;
-	.gpio_name = STR(CHANNEL_NAME),
+	.channel_name = STR(CHANNEL_NAME),
 
 	//Save the channel's maximal duration;
 	.max_duration = MAX_DURATION,

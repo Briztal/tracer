@@ -1,4 +1,4 @@
-channel_specs/*
+/*
   servo.c -  Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
@@ -46,6 +46,8 @@ channel_specs/*
 
 //------------------------------------------------------ Includes ------------------------------------------------------
 
+#include <stdint.h>
+
 #include <kernel/fs/inode.h>
 #include <kernel/interface/gpio.h>
 #include <kernel/interface/command.h>
@@ -53,15 +55,14 @@ channel_specs/*
 #include <kernel/log.h>
 #include <kernel/ic.h>
 #include <kernel/mod/auto_mod.h>
+#include <util/string.h>
 
 #include "servo_channel.h"
 
 
 //------------------------------------------------- Channels const data ------------------------------------------------
 
-MODULE_DECLARE_CHANNELS();
-
-MODULE_CREATE_ARRAY(channels_specs);
+MODULE_CREATE_SPECS_ARRAY(specs);
 
 
 //------------------------------------------------ Channels dynamic data -----------------------------------------------
@@ -82,17 +83,11 @@ struct channel_data {
 	
 };
 
-//Define the complement channel. At init, occupies the whole period;
-static struct channel_data complement_channel = {};
-
 //Create the dynamic data array; Contains all channels, plus the complement;
-static struct channel_data *channels[NB_CHANNELS + 1];
+static struct channel_data channels[NB_CHANNELS + 1];
 
 
 //--------------------------------------------------- Controller data --------------------------------------------------
-
-//The number of channels, complement comprised;
-#define NB_CHANNELS (sizeof(channels) / sizeof(struct channel_data *))
 
 //The currently active channel;
 static size_t active_index;
@@ -127,7 +122,7 @@ static void servos_isr_handler() {
 
 	//Cache the active channel;
 	size_t active_id = active_index;
-	struct channel_data *channel = channels[active_id];
+	struct channel_data *channel = channels + active_id;
 
 	//The active channel and its gpio;
 	const struct gpio_interface *gpio = &channel->gpio;
@@ -140,11 +135,11 @@ static void servos_isr_handler() {
 	do {
 
 		//Focus on the next channel
-		if (!active_id) active_id = NB_CHANNELS;
+		if (!active_id) active_id = NB_CHANNELS + 1;
 		active_id--;
 
 		//Update the channel;
-		channel = channels[active_id];
+		channel = channels +active_id;
 
 		//While the channel's duration is null;
 	} while (!channel->duration);
@@ -184,15 +179,15 @@ static void start() {
 	kernel_log_("servo starting.");
 
 	//Update the active channel;
-	active_index = 0;
+	active_index = NB_CHANNELS;
 
 	//Mark the servo module started;
 	started = true;
 
 	//Initialise the timer : 1MHz base, ovf in the first duration,
-	timer_init(&timer, 1000000, channels[0]->duration, &servos_isr_handler);
+	timer_init(&timer, 1000000, channels[NB_CHANNELS].duration, &servos_isr_handler);
 
-	kernel_log("dur : %d", channels[0]->duration);
+	kernel_log("dur : %d", channels[NB_CHANNELS].duration);
 
 	ic_enable_interrupts();
 
@@ -242,7 +237,7 @@ static bool check_max_durations() {
 	
 	//For each channel :
 	for (uint8_t i = NB_CHANNELS; i--;) {
-		sum += channels_specs[i]->max_duration;
+		sum += specs[i]->max_duration;
 	}
 
 
@@ -260,14 +255,14 @@ static bool check_max_durations() {
 
 static bool init_channel(size_t channel_id) {
 	
-	//Cache the specs array;
-	const struct channel_specs *specs = channels_specs[channel_id];
+	//Cache the specs struct;
+	const struct channel_specs *channel_specs = specs[channel_id];
 
 	//Cache the channel data struct;
-	struct channel_data *channel = channels[channel_id];
+	struct channel_data *channel = channels + channel_id;
 
 	//Cache the gpio file name;
-	const char *gpio_name = specs->gpio_name;
+	const char *gpio_name = channel_specs->gpio_name;
 
 	//Open the gpio file;
 	file_descriptor gpio_fd = fs_open(gpio_name);
@@ -289,9 +284,9 @@ static bool init_channel(size_t channel_id) {
 	//Stopped, duration of 0;
 	channel->duration = 0;
 
+
 	//Interface with the gpio;
 	bool success = inode_interface(gpio_fd, &channel->gpio, sizeof(struct gpio_interface));
-
 
 	//If the interfacing failed :
 	if (!success) {
@@ -320,7 +315,14 @@ static bool init_channel(size_t channel_id) {
  * @param max_duration : the maximal value of the duration;
  */
 
-static void update_channel_duration(uint32_t *dst, uint32_t duration) {
+void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint8_t channel_index, uint32_t duration) {
+
+
+	//Cache the channel's maximal duration;
+	uint32_t max = specs[channel_index]->max_duration;
+
+	//Major the duration;
+	if (duration > max) duration = max;
 
 	//if the channel must be stopped :
 	if (duration < TOLERANCE) {
@@ -330,7 +332,10 @@ static void update_channel_duration(uint32_t *dst, uint32_t duration) {
 	}
 
 	//Cache the current complement;
-	uint32_t complement = complement_channel.duration;
+	uint32_t complement = channels[NB_CHANNELS].duration;
+
+	//Cache the current duration;
+	uint32_t *dst = &channels[channel_index].duration;
 
 	//Cache the current duration;
 	const uint32_t current = *dst;
@@ -341,7 +346,7 @@ static void update_channel_duration(uint32_t *dst, uint32_t duration) {
 
 	//Update the duration and the complement;
 	*dst = duration;
-	complement_channel.duration = complement;
+	channels[NB_CHANNELS].duration = complement;
 
 
 	//If the manager is stopped, and the duration is not null :
@@ -356,7 +361,6 @@ static void update_channel_duration(uint32_t *dst, uint32_t duration) {
 		//Stop the ISR routine;
 		stop();
 	}
-
 
 };
 
@@ -403,21 +407,21 @@ static bool channel_interface(
 	const size_t channel_id = node->channel_index;
 
 	//If the channel id is invalid :
-	if ((!channel_id) || (channel_id > NB_CHANNELS)) {
+	if ((channel_id >= NB_CHANNELS)) {
 
 		//Log;
-		kernel_log_("servo : channel_interface : invalid index provided;")
+		kernel_log_("servo : channel_interface : invalid index provided;");
 
 		//Fail;
 		return false;
 	}
 
+	kernel_log("Interfacing  : %d", channel_id);
+
 	//Allow interfacing. Size check is taken in charge.
-	command_if_interface(if_struct, &channels_specs[channel_id]->iface,  &channels[channel_id]->iface_ref, size);
+	bool b =  command_if_interface(if_struct, &specs[channel_id]->iface,  &channels[channel_id].iface_ref, size);
 
-	//Complete;
-	return true;
-
+	return b;
 }
 
 
@@ -444,7 +448,7 @@ static void channel_close(const struct channel_inode *const node) {
 	}
 
 	//Neutralise the interface, if interfaced;
-	command_if_neutralise(&channels[channel_id]->iface_ref);
+	command_if_neutralise(&channels[channel_id].iface_ref);
 
 }
 
@@ -486,7 +490,7 @@ void channel_register(const size_t channel_index) {
 	memcpy(node, &init, sizeof(struct channel_inode));
 
 	//Register the inode to the file system; Safe up-cast;
-	fs_create(channels_specs[channel_index]->channel_name, (struct inode *) node);
+	fs_create(specs[channel_index]->channel_name, (struct inode *) node);
 
 }
 
@@ -518,6 +522,7 @@ static bool servo_init() {
 	 * Timer interfacing;
 	 */
 
+
 	//Open the timer file;
 	file_descriptor fd = fs_open(ST(TIMER_NAME));
 
@@ -532,8 +537,10 @@ static bool servo_init() {
 
 	}
 
-	//Interface with the gpio;
+
+	//Interface with the timer;
 	bool success = inode_interface(fd, &timer, sizeof(struct timer_if));
+
 
 
 	//If the interfacing failed :
@@ -556,7 +563,7 @@ static bool servo_init() {
 	 */
 
 	//Mark the complement channel active;
-	active_index = 0;
+	active_index = NB_CHANNELS;
 
 	//Save the file descriptor;
 	timer_fd = fd;
@@ -584,7 +591,7 @@ static bool servo_init() {
 	};
 
 	//Initialise the complement channel;
-	memcpy(&complement_channel, &cpl_init, sizeof(struct channel_data));
+	memcpy(&channels[NB_CHANNELS], &cpl_init, sizeof(struct channel_data));
 
 
 	/*
@@ -593,8 +600,9 @@ static bool servo_init() {
 
 	//For each regular channel :
 	for (uint8_t channel_id = NB_CHANNELS; channel_id--;) {
-		init_channel(channel_id);\
-        channel_register(channel_id);\
+		init_channel(channel_id);
+
+        channel_register(channel_id);
 	}
 
 

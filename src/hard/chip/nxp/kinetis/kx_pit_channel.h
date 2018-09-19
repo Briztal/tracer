@@ -10,7 +10,7 @@
 struct channel_specs {
 
 	//The timer interface ref struct;
-	const struct timer_if_ref ref;
+	const struct timer_if iface;
 
 	//The channel's name;
 	const char *name;
