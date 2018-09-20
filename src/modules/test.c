@@ -43,7 +43,7 @@ static bool gpio_check() {
 
 	kernel_log_("Interfacing with gpio : ");
 
-	struct gpio_interface giface;
+	struct gpio_if giface;
 
 	bool s = inode_interface(fd, &giface, sizeof(giface));
 
@@ -155,6 +155,19 @@ static bool servo_check() {
 
 	ic_enable_interrupts();
 
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+
 	while(1) {
 
 		command_set(&iface, 5000);
@@ -173,6 +186,15 @@ static bool servo_check() {
 
 		debug_delay_ms(1000);
 
+
+		//TODO TEST!!!!!!!!!!
+		//TODO TEST!!!!!!!!!!
+		//TODO TEST!!!!!!!!!!
+		//TODO TEST!!!!!!!!!!
+		command_set(&iface, 0);
+
+		debug_delay_ms(1000);
+
 	}
 
 	kernel_log_("Success");
@@ -182,9 +204,89 @@ static bool servo_check() {
 }
 
 
+static bool pwm_check() {
+
+	kernel_log_("\n\n\n");
+	kernel_log_("Querying pwm file : ");
+
+	file_descriptor fd = fs_open("pwm_0");
+
+	if (!fd) {
+
+		kernel_log_("File doesn't exist. Aborting.");
+
+		return false;
+
+	}
+
+	kernel_log("File : %h", fd);
+
+	kernel_log_("Interfacing with pwm : ");
+
+	struct command_if iface;
+
+	bool success = inode_interface(fd, &iface, sizeof(iface));
+
+	if (!success) {
+
+		kernel_log_("Operation failed. Aborting");
+
+		return false;
+
+	}
+
+	//fs_close(fd);
+
+	kernel_log_("Starting channel pwm");
+
+	ic_enable_interrupts();
+
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
+
+	while(1) {
+
+		command_set(&iface, 5000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 10000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 15000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 20000);
+
+		debug_delay_ms(1000);
+
+		command_set(&iface, 0);
+
+		debug_delay_ms(1000);
+
+	}
+
+	kernel_log_("Success");
+
+	return true;
+
+}
+
 static bool check_init() {
 
-	return servo_check();
+	return pwm_check();
 
 }
 

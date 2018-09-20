@@ -73,7 +73,7 @@ struct channel_data {
 	file_descriptor gpio_fd;
 
 	//Each servo channel interfaces with a gpio pin; Access outside the ISR must be done in a critical section;
-	struct gpio_interface gpio;
+	struct gpio_if gpio;
 
 	//The ref of the struct interfaced with the channel;
 	struct command_if *iface_ref;
@@ -96,7 +96,7 @@ static size_t active_index;
 static file_descriptor timer_fd;
 
 //The timer we use;
-static struct timer_if timer;
+static struct timer_if pwm_timer;
 
 //Is the ISR routine started ?;
 static volatile bool started;
@@ -118,14 +118,14 @@ static void servos_isr_handler() {
 	//kernel_log_("servo handler.");
 
 	//Disable the interruption;
-	timer_disable_int(&timer);
+	timer_disable_int(&pwm_timer);
 
 	//Cache the active channel;
 	size_t active_id = active_index;
 	struct channel_data *channel = channels + active_id;
 
 	//The active channel and its gpio;
-	const struct gpio_interface *gpio = &channel->gpio;
+	const struct gpio_if *gpio = &channel->gpio;
 
 	//Clear the channel
 	gpio_clear(gpio, gpio->pin_mask);
@@ -159,13 +159,13 @@ static void servos_isr_handler() {
 	 */
 
 	//Program an overflow
-	timer_set_int_period(&timer, channel->duration);
+	timer_set_int_period(&pwm_timer, channel->duration);
 
 	//Clear the interrupt flag;
-	timer_flag_clr(&timer);
+	timer_flag_clr(&pwm_timer);
 
 	//Enable the servo interrupt;
-	timer_enable_int(&timer);
+	timer_enable_int(&pwm_timer);
 
 }
 
@@ -185,11 +185,9 @@ static void start() {
 	started = true;
 
 	//Initialise the timer : 1MHz base, ovf in the first duration,
-	timer_init(&timer, 1000000, channels[NB_CHANNELS].duration, &servos_isr_handler);
+	timer_init(&pwm_timer, 1000000, channels[NB_CHANNELS].duration, &servos_isr_handler);
 
 	kernel_log("dur : %d", channels[NB_CHANNELS].duration);
-
-	ic_enable_interrupts();
 
 }
 
@@ -204,7 +202,7 @@ static void stop() {
 	ic_enter_critical_section();
 
 	//Reset the timer;
-	timer_reset(&timer, 1000000);
+	timer_reset(&pwm_timer, 1000000);
 
 	//Mark the servo module stopped;
 	started = false;
@@ -215,97 +213,7 @@ static void stop() {
 }
 
 
-//--------------------------------------------------- Channels setup ---------------------------------------------------
-
-/**
- * check_max_durations : this function is called once only at the module initialisation;
- *
- * 	It will determine the sum of all maximal durations and assert if it is inferior to the period.
- *
- * 	If it asserts, the module can work correctly at this configuration;
- *
- * 	If not, the module initialisation should fail, as all servos can't be set at their maximal value in teh required
- * 	period;
- *
- * 	@return false if the module has been badly configured;
- */
-
-static bool check_max_durations() {
-	
-	//Initialise the sum;
-	uint8_t sum = 0;
-	
-	//For each channel :
-	for (uint8_t i = NB_CHANNELS; i--;) {
-		sum += specs[i]->max_duration;
-	}
-
-
-	//The cycle is valid if all channels can be set to their maximal durations without overflow;
-	return sum <= PERIOD;
-
-}
-
-
-/**
- * init_channel : opens the required gpio, interfaces with it, and initialises the channel data;
- *
- * @return true if the initialisation was made properly. If not, the module should fail;
- */
-
-static bool init_channel(size_t channel_id) {
-	
-	//Cache the specs struct;
-	const struct channel_specs *channel_specs = specs[channel_id];
-
-	//Cache the channel data struct;
-	struct channel_data *channel = channels + channel_id;
-
-	//Cache the gpio file name;
-	const char *gpio_name = channel_specs->gpio_name;
-
-	//Open the gpio file;
-	file_descriptor gpio_fd = fs_open(gpio_name);
-
-	//If the file does not exist :
-	if (!gpio_fd) {
-
-		//Log;
-		kernel_log("servo : %s gpio file not found.", gpio_name);
-
-		//Fail;
-		return false;
-
-	}
-
-	//Save the file descriptor;
-	channel->gpio_fd = gpio_fd;
-
-	//Stopped, duration of 0;
-	channel->duration = 0;
-
-
-	//Interface with the gpio;
-	bool success = inode_interface(gpio_fd, &channel->gpio, sizeof(struct gpio_interface));
-
-	//If the interfacing failed :
-	if (!success) {
-
-		//Close the file;
-		fs_close(gpio_fd);
-
-		//Log;
-		kernel_log("servo : %s gpio interfacing failed.", gpio_name);
-
-		//Fail;
-		return false;
-
-	}
-
-	//If the interfacing succeeded, complete;
-	return true;
-
-}
+//---------------------------------------------- Channels duration update ----------------------------------------------
 
 /**
  * update_channel_duration : sets the duration of the required channel, and updates the complement's duration;
@@ -316,7 +224,6 @@ static bool init_channel(size_t channel_id) {
  */
 
 void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint8_t channel_index, uint32_t duration) {
-
 
 	//Cache the channel's maximal duration;
 	uint32_t max = specs[channel_index]->max_duration;
@@ -358,12 +265,110 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint8_t channel_ind
 	} else if (started && (complement == PERIOD)) {
 		//If the manager is started and the complement equals the period (no more active channels)
 
+		//Cache the gpio iface;
+		struct gpio_if *gpio = &channels[channel_index].gpio;
+
+		//Turn the GPIO down;
+		gpio_clear(gpio, gpio->pin_mask);
+
 		//Stop the ISR routine;
 		stop();
 	}
 
 };
 
+
+//--------------------------------------------------- Channels setup ---------------------------------------------------
+
+/**
+ * check_max_durations : this function is called once only at the module initialisation;
+ *
+ * 	It will determine the sum of all maximal durations and assert if it is inferior to the period.
+ *
+ * 	If it asserts, the module can work correctly at this configuration;
+ *
+ * 	If not, the module initialisation should fail, as all servos can't be set at their maximal value in teh required
+ * 	period;
+ *
+ * 	@return false if the module has been badly configured;
+ */
+
+static bool check_max_durations() {
+
+	//Initialise the sum;
+	uint8_t sum = 0;
+
+	//For each channel :
+	for (uint8_t i = NB_CHANNELS; i--;) {
+		sum += specs[i]->max_duration;
+	}
+
+
+	//The cycle is valid if all channels can be set to their maximal durations without overflow;
+	return sum <= PERIOD;
+
+}
+
+
+/**
+ * init_channel : opens the required gpio, interfaces with it, and initialises the channel data;
+ *
+ * @return true if the initialisation was made properly. If not, the module should fail;
+ */
+
+static bool init_channel(size_t channel_id) {
+
+	//Cache the specs struct;
+	const struct channel_specs *channel_specs = specs[channel_id];
+
+	//Cache the channel data struct;
+	struct channel_data *channel = channels + channel_id;
+
+	//Cache the gpio file name;
+	const char *gpio_name = channel_specs->gpio_name;
+
+	//Open the gpio file;
+	file_descriptor gpio_fd = fs_open(gpio_name);
+
+	//If the file does not exist :
+	if (!gpio_fd) {
+
+		//Log;
+		kernel_log("servo : %s gpio file not found.", gpio_name);
+
+		//Fail;
+		return false;
+
+	}
+
+	//Save the file descriptor;
+	channel->gpio_fd = gpio_fd;
+
+	//Stopped, duration of 0;
+	channel->duration = 0;
+
+
+	//Interface with the gpio;
+	bool success = inode_interface(gpio_fd, &channel->gpio, sizeof(struct gpio_if));
+
+	//If the interfacing failed :
+	if (!success) {
+
+		//Close the file;
+		fs_close(gpio_fd);
+
+		//Log;
+		kernel_log("servo : %s gpio interfacing failed.", gpio_name);
+
+		//Fail;
+		return false;
+
+	}
+
+	//If the interfacing succeeded, complete;
+	return true;
+
+}
 
 //----------------------------------------------- File system interaction ----------------------------------------------
 
@@ -415,8 +420,6 @@ static bool channel_interface(
 		//Fail;
 		return false;
 	}
-
-	kernel_log("Interfacing  : %d", channel_id);
 
 	//Allow interfacing. Size check is taken in charge.
 	bool b =  command_if_interface(if_struct, &specs[channel_id]->iface,  &channels[channel_id].iface_ref, size);
@@ -471,7 +474,7 @@ static const struct inode_ops channel_ops = {
  * @param channel_index
  */
 
-void channel_register(const size_t channel_index) {
+static void channel_register(const size_t channel_index) {
 
 	//Cache the inode ref;
 	struct channel_inode *node = inodes + channel_index;
@@ -539,7 +542,7 @@ static bool servo_init() {
 
 
 	//Interface with the timer;
-	bool success = inode_interface(fd, &timer, sizeof(struct timer_if));
+	bool success = inode_interface(fd, &pwm_timer, sizeof(struct timer_if));
 
 
 

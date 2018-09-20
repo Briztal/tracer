@@ -69,6 +69,7 @@
 #include <stdint.h>
 
 #include <stdbool.h>
+#include <kernel/ic.h>
 
 #include "kx_pit_channel.h"
 
@@ -251,6 +252,9 @@ static bool flag_is_set() {
 
 //Clear the interrupt flag;
 static void flag_clr() {
+
+	ic_clear_interrupt_pending(INT_CHANNEL);
+
 	//Set bit 0 of TFLG;
 	*TFLG = TFLG_TIF;
 }

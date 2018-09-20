@@ -36,10 +36,10 @@ struct gpio_port_operations {
 
 
 /*
- * gpio_interface : contains all data required to interface with a gpio pin;
+ * gpio_if : contains all data required to interface with a gpio pin;
  */
 
-struct gpio_interface {
+struct gpio_if {
 
 	//The port identifier. Interfaces with the same identifier have the same operations set, and can be combined;
 	const size_t port_identifier;
@@ -53,12 +53,12 @@ struct gpio_interface {
 };
 
 //The gpio lib includes a neutral gpio interface, so that gpio drivers can prevent access to their functions;
-extern const struct gpio_interface neutral_gpio_interface;
+extern const struct gpio_if neutral_gpio_interface;
 
 
 //Static inline shortcut generator;
 #define GPIO_SHORTCUT(name, type)\
-static inline type gpio_##name(const struct gpio_interface *gpio, size_t mask) {\
+static inline type gpio_##name(const struct gpio_if *gpio, size_t mask) {\
 	return (*(gpio->operations->name))(mask);\
 }
 

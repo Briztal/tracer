@@ -29,7 +29,7 @@ static const struct gpio_port_operations neutral_ops = {
  * The neutral gpio interface. Can be safely copied on a gpio interface to safely neutralise all accesses;
  */
 
-const struct gpio_interface neutral_gpio_interface = {
+const struct gpio_if neutral_gpio_interface = {
 	.port_identifier = 0,
 	.operations = &neutral_ops,
 	.pin_mask = 0,

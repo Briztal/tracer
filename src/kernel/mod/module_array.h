@@ -29,6 +29,13 @@
 #endif
 
 
+//---------------------------------------------------- String macro ----------------------------------------------------
+
+#define _STR(x) #x
+
+#define STR(x) _STR(x)
+
+
 //--------------------------------------------------- Symbol creation --------------------------------------------------
 
 //Concatenate the module name, "_ch_" and the channel id. No argument expansion is made;

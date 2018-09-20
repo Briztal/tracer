@@ -226,7 +226,7 @@ struct pin_data {
 	const uint8_t bit_id;
 
 	//The interfaced struct;
-	struct gpio_interface *interface;
+	struct gpio_if *interface;
 
 };
 
@@ -521,7 +521,7 @@ static bool fs_pin_config(const struct pin_inode *const node, const void *const 
 static bool fs_pin_interface(const struct pin_inode *const node, void *const gpio_iface, const size_t iface_size) {
 
 	//If the configuration struct is not valid
-	if (iface_size != sizeof(struct gpio_interface)) {
+	if (iface_size != sizeof(struct gpio_if)) {
 
 		//Abort;
 		return false;
@@ -547,7 +547,7 @@ static bool fs_pin_interface(const struct pin_inode *const node, void *const gpi
 	struct port_memory *port_area = port_areas[port_id].port;
 
 	//Create the gpio interface initializer;
-	struct gpio_interface init = {
+	struct gpio_if init = {
 
 		//Provide the address of the port area; It is unique;
 		.port_identifier = (size_t) port_area,
@@ -564,7 +564,7 @@ static bool fs_pin_interface(const struct pin_inode *const node, void *const gpi
 	pins[pin_index].interface = gpio_iface;
 
 	//Interface the struct;
-	memcpy(gpio_iface, &init, sizeof(struct gpio_interface));
+	memcpy(gpio_iface, &init, sizeof(struct gpio_if));
 
 	//Complete;
 	return true;
@@ -579,13 +579,13 @@ static void fs_pin_close(const struct pin_inode *const node) {
 	size_t pin_index = node->pin_index;
 
 	//Cache the location of the reference of the eventual interface struct;
-	struct gpio_interface *iface = pins[pin_index].interface;
+	struct gpio_if *iface = pins[pin_index].interface;
 
 	//If the pin is interfaced :
 	if (iface) {
 
 		//Neutralise the struct;
-		memcpy(iface, &neutral_gpio_interface, sizeof(struct gpio_interface));
+		memcpy(iface, &neutral_gpio_interface, sizeof(struct gpio_if));
 
 		//Reset the interface pointer;
 		pins[pin_index].interface = 0;
