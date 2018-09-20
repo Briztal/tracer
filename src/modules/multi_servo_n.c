@@ -21,23 +21,23 @@
 #include <stdint.h>
 
 #include <kernel/mod/module_channel.h>
-
-#include "pwm_channel.h"
+#include <kernel/log.h>
+#include "multi_servo_n.h"
 
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 
-#if !defined(CHANNEL_NAME) || !defined(GPIO_NAME) || !defined(PERIOD)
+#if !defined(CHANNEL_NAME) || !defined(GPIO_NAME) || !defined(MAX_DURATION)
 
 //Log
 #error "Error, at least one macro argument hasn't been provided. Check the makefile;"
 
-#define CHANNEL_NAME pwm_0
+#define CHANNEL_NAME servo_0
 
 #define GPIO_NAME gpio
 
-#define PERIOD 20000
+#define MAX_DURATION 20000
 
 #endif
 
@@ -82,7 +82,7 @@ static struct channel_specs channel = {
 	.channel_name = STR(CHANNEL_NAME),
 
 	//Save the channel's maximal duration;
-	.period = PERIOD,
+	.max_duration = MAX_DURATION,
 
 };
 

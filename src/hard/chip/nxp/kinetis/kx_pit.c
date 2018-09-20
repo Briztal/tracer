@@ -61,7 +61,7 @@
 
 #include "kx_sim.h"
 
-#include "kx_pit_channel.h"
+#include "kx_pit_n.h"
 
 
 //------------------------------------------------- Internal parameters ------------------------------------------------

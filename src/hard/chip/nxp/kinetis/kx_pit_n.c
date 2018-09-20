@@ -71,7 +71,7 @@
 #include <stdbool.h>
 #include <kernel/ic.h>
 
-#include "kx_pit_channel.h"
+#include "kx_pit_n.h"
 
 
 //-------------------------------------------------- Timer Operations --------------------------------------------------

@@ -75,10 +75,10 @@ pit:
 	@echo "[CC]\t$(SK_DIR)/kx_pit_channel.c"
 
 #Compile all 4 channels with their respective args;
-	@$(CC) $(CFLAGS) $(INC) $(pit0_args) -o $(BK_DIR)/pit0.o -c $(SK_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(INC) $(pit1_args) -o $(BK_DIR)/pit1.o -c $(SK_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(INC) $(pit2_args) -o $(BK_DIR)/pit2.o -c $(SK_DIR)/kx_pit_channel.c
-	@$(CC) $(CFLAGS) $(INC) $(pit3_args) -o $(BK_DIR)/pit3.o -c $(SK_DIR)/kx_pit_channel.c
+	@$(CC) $(CFLAGS) $(INC) $(pit0_args) -o $(BK_DIR)/pit0.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit1_args) -o $(BK_DIR)/pit1.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit2_args) -o $(BK_DIR)/pit2.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit3_args) -o $(BK_DIR)/pit3.o -c $(SK_DIR)/kx_pit_n.c
 
 #Log the compilation of the manager;
 	@echo "[CC]\t$(SK_DIR)/kx_pit.c"

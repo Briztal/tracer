@@ -57,7 +57,7 @@
 #include <kernel/mod/auto_mod.h>
 #include <util/string.h>
 
-#include "servo_channel.h"
+#include "multi_servo_n.h"
 
 
 //------------------------------------------------- Channels const data ------------------------------------------------
@@ -113,7 +113,6 @@ static volatile bool started;
  */
 
 static void servos_isr_handler() {
-
 
 	//kernel_log_("servo handler.");
 

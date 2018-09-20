@@ -1,5 +1,5 @@
 /*
-  servo.c -  Part of TRACER
+  multi_pwm_n.c -  Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,34 +18,39 @@
 
 */
 
-#include <stdint.h>
+//----------------------------------------------- Module channel header ------------------------------------------------
 
 #include <kernel/mod/module_channel.h>
-#include <kernel/log.h>
-#include "servo_channel.h"
 
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 
-#if !defined(CHANNEL_NAME) || !defined(GPIO_NAME) || !defined(MAX_DURATION)
+#if !defined(CHANNEL_NAME) || !defined(GPIO_NAME) || !defined(PERIOD)
 
 //Log
 #error "Error, at least one macro argument hasn't been provided. Check the makefile;"
 
-#define CHANNEL_NAME servo_0
+#define CHANNEL_NAME pwm_0
 
 #define GPIO_NAME gpio
 
-#define MAX_DURATION 20000
+#define PERIOD 20000
 
 #endif
+
+
+//------------------------------------------------------- Headers ------------------------------------------------------
+
+#include <stdint.h>
+
+#include "multi_pwm_n.h"
 
 
 //-------------------------------------------------- Command interface -------------------------------------------------
 
 //Declare the duration update function;
-void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint32_t *dst, uint32_t duration);
+void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint8_t channel_id, uint32_t duration);
 
 /**
  * channel_update : calls the channel updater providing the channel id and the target duration;
@@ -82,7 +87,7 @@ static struct channel_specs channel = {
 	.channel_name = STR(CHANNEL_NAME),
 
 	//Save the channel's maximal duration;
-	.max_duration = MAX_DURATION,
+	.period = PERIOD,
 
 };
 
