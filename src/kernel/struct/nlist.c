@@ -23,6 +23,7 @@
 #include <util/string.h>
 
 #include <kernel/log.h>
+#include <kernel/debug/debug.h>
 
 #include "nlist.h"
 
@@ -95,7 +96,6 @@ void *nlist_search(const struct nlist *list, const char *const name) {
 
 bool nlist_add(struct nlist *list, const char *name, void *data) {
 
-
 	//If another element has this name :
 	if (nlist_search(list, name)) {
 
@@ -115,7 +115,6 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	//Allocate some data for the name;
 	char *heap_name = kmalloc(len + 1);
 
-	//Initialise the name;
 	strcopy_safe(heap_name, name, len);
 
 	//Create the element initializer;

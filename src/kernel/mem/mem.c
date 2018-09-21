@@ -27,6 +27,8 @@
 #include <kernel/krnl.h>
 
 #include <kernel/panic.h>
+#include <kernel/log.h>
+#include <kernel/debug/debug.h>
 
 //------------------------------------------------------ prog_mem ------------------------------------------------------
 

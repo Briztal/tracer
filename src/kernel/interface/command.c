@@ -11,8 +11,10 @@
 DEFINE_INTERFACE(command_if);
 
 static void ds(uint32_t u) {};
+static void dbl() {};
 
 //The neutral command interface. Does nothing;
 struct command_if neutral_command_if = {
-	.set = &ds,
+	.sett = &ds,
+	.disable = &dbl,
 };

@@ -42,11 +42,14 @@ struct channel_specs {
 	//The name of the gpio file;
 	const char *gpio_name;
 
+	//The mux channel of the gpio pin;
+	const uint8_t gpio_mux;
+
 	//The period of the pwm;
-	const uint32_t period;
+	const uint32_t period_us;
 
 	//The tolerance of the timer;
-	const uint32_t tolerance;
+	const uint32_t tolerance_us;
 
 };
 

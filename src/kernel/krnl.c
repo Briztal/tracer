@@ -38,8 +38,8 @@
 #include <kernel/log.h>
 
 
-#define KERNEL_RAM_SIZE 2048
-#define KERNEL_STACK_SIZE 512
+#define KERNEL_RAM_SIZE 7000
+#define KERNEL_STACK_SIZE 1000
 
 //-------------------------------------------------- Kernel variables --------------------------------------------------
 

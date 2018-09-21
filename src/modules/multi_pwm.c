@@ -111,7 +111,7 @@ struct channel_data {
 struct channel_data *active_channels;
 
 //The channels array;
-struct channel_data channels_data[NB_CHANNELS];
+struct channel_data dynamic_data[NB_CHANNELS];
 
 //The status flag. Set when the IRQ routine is enabled.
 bool started;
@@ -491,7 +491,7 @@ static bool channel_setup(uint8_t channel_id, uint32_t high_duration) {
 	}
 
 	//Cache the channel ref :
-	struct channel_data *const channel = channels_data + channel_id;
+	struct channel_data *const channel = dynamic_data + channel_id;
 
 	//Update parameters;
 	channel->high_duration = high_duration, channel->low_duration = low_duration;
@@ -516,7 +516,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 	bool deactivation = channel_setup(channel_id, high_duration);
 
 	//Cache the channel ref :
-	struct channel_data *const channel = channels_data + channel_id;
+	struct channel_data *const channel = dynamic_data + channel_id;
 
 	/*pwm_exit
 	 * Changing durations is sufficient in the following cases :
@@ -670,7 +670,7 @@ static bool channel_interface(
 	}
 
 	//Allow interfacing. Size check is taken in charge.
-	return command_if_interface(if_struct, &specs[channel_id]->iface, &channels_data[channel_id].iface_ref, size);
+	return command_if_interface(if_struct, &specs[channel_id]->iface, &dynamic_data[channel_id].iface_ref, size);
 
 }
 
@@ -698,7 +698,7 @@ static void channel_close(const struct channel_inode *const node) {
 	}
 
 	//Neutralise the interface, if interfaced;
-	command_if_neutralise(&channels_data[channel_id].iface_ref);
+	command_if_neutralise(&dynamic_data[channel_id].iface_ref);
 
 }
 
@@ -777,7 +777,7 @@ static bool init_channel(size_t channel_id) {
 	}
 
 	//Cache the channel data struct;
-	struct channel_data *channel = channels_data + channel_id;
+	struct channel_data *channel = dynamic_data + channel_id;
 
 	//Create the initializer for the channel;
 	struct channel_data init = {
@@ -823,7 +823,7 @@ static bool init_channel(size_t channel_id) {
 	}
 
 	//Initialise the channel;
-	memcpy(channel, &init, sizeof(channels_data));
+	memcpy(channel, &init, sizeof(dynamic_data));
 
 	//If the interfacing succeeded, complete;
 	return true;

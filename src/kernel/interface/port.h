@@ -72,10 +72,10 @@ enum port_interrupt_t {
 enum port_pin_direction_t {
 
 	//Pin is used to collect data;
-		PORT_INPUT,
+		PIN_INPUT,
 
 	//Pin is used to provide data;
-		PORT_OUTPUT
+		PIN_OUTPUT
 
 };
 
@@ -184,8 +184,6 @@ struct port_pin_config {
 	void (*interrupt_function)(void);
 
 };
-
-
 
 
 #endif //TRACER_PORT_H

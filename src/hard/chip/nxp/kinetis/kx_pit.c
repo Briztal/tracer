@@ -41,9 +41,7 @@
 #endif
 
 
-//--------------------------------------------------- Includes --------------------------------------------------
-
-
+//------------------------------------------------------ Includes ------------------------------------------------------
 
 #include <kernel/mod/auto_mod.h>
 
@@ -70,7 +68,7 @@
 #define MCR 	((volatile uint32_t *) MCR_REG)
 
 
-//------------------------------------------------ Specs declarations ------------------------------------------------
+//------------------------------------------------- Specs declarations -------------------------------------------------
 
 MODULE_CREATE_SPECS_ARRAY(channels);
 
@@ -85,7 +83,7 @@ struct timer_if *if_refs[NB_CHANNELS] = {0};
 
 
 
-//-------------------------------------------------- File Operations --------------------------------------------------
+//--------------------------------------------------- File Operations --------------------------------------------------
 
 /*
  * The channel inode will only contain the channel index;
@@ -191,8 +189,8 @@ static void channel_init(uint8_t channel_index) {
 	 * Timer reset;
 	 */
 
-	//Reset the timer, and set the base frequency to 1KHz
-	timer_reset(&channel->iface, 1000);
+	//Reset the timer;
+	timer_reset(&channel->iface);
 
 
 	/*

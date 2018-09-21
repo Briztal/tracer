@@ -76,52 +76,13 @@
 
 //-------------------------------------------------- Timer Operations --------------------------------------------------
 
-/*
- * All variables and methods in this section are private. No one can access them outside this translation unit;
- */
-
-
-//The ratio tics/period;
-static uint32_t global_period_to_tics;
-
-//The maximal period;
-static uint32_t global_max_period;
-
 
 //TODO BUS CLOCK;
 
-static void set_base_frequency(uint32_t frequency) {
-	;
+static uint32_t get_frequency(uint32_t frequency) {
 
-	//Determine the tics/period ratio;
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-	//TODO:::::::: uint32_t period_to_tics = ((uint32_t) iface->clock_frequency) / ((uint32_t) frequency);
-
-	//TODO FPU !!!!!!!!!!!!!!!!!!!!
-
-
-	uint32_t period_to_tics = ((uint32_t) 24000000) / ((uint32_t) frequency);
-
-	//Determine the maximal period;
-	uint32_t max_period = ((uint32_t) -1) / period_to_tics;
-
-	//Save both constants;
-	global_period_to_tics = period_to_tics;
-	global_max_period = max_period;
-
+	return 24000000;
+	//TODO::::::: get the appropriate clock;
 
 }
 
@@ -152,19 +113,23 @@ static bool started() {
 
 
 //Update the reload value;
-static void set_count(uint32_t period_count) {
+static void set_count(uint32_t count) {
+
+
+	//If the period count is invalid, use the maximal period;
+	if (count >= (uint32_t) -1) {
+		count = (uint32_t) -1;
+	}
 
 	//Cache the current reload value;;
 	uint32_t reload = *LDVAL;
 
-	//Determine the new value;
-	uint32_t val = (uint32_t) (global_period_to_tics * period_count);
 
 	//Disable the timer;
 	stop();
 
 	//Set the new reload value;
-	*LDVAL = val;
+	*LDVAL = count;
 
 	//Start, so that count starts at val;
 	start();
@@ -184,11 +149,11 @@ static uint32_t get_count() {
 
 
 //Update the reload value;
-static void set_ovf(uint32_t period_count) {
+static void set_ovf(uint32_t count) {
 
 	//If the period count is invalid, use the maximal period;
-	if (period_count >= global_max_period) {
-		period_count = global_max_period - 1;
+	if (count >= (uint32_t) -1) {
+		count = (uint32_t) -1;
 	}
 
 	/*
@@ -197,7 +162,7 @@ static void set_ovf(uint32_t period_count) {
 	 */
 
 	//Determine the value to store;
-	uint32_t value = (global_period_to_tics * period_count);
+	uint32_t value = count;
 
 	//Update reload value;
 	*LDVAL = value;
@@ -216,7 +181,7 @@ static void set_ovf(uint32_t period_count) {
 
 //Get the reload value;
 static uint32_t get_ovf() {
-	return (((uint32_t) *LDVAL) / global_period_to_tics);
+	return *LDVAL;
 }
 
 
@@ -303,7 +268,10 @@ static struct channel_specs channel = {
 	//Initialise the interface;
 	.iface = {
 
-		.set_base_frequency = &set_base_frequency,
+		.maximum = (uint32_t) -1,
+		.frequency = 0,
+
+		.get_frequency = &get_frequency,
 
 		.start = &start,
 		.stop = &stop,

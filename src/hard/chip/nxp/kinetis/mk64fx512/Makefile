@@ -62,7 +62,7 @@ pitx_args = $(pit_args) -DCHANNEL_ID=$(1) -DCHANNEL_NAME=$(2) -DINT_CHANNEL=$(3)
 pit0_args := $(call pitx_args,0,pit_0,48,0x40037100)
 pit1_args := $(call pitx_args,1,pit_1,49,0x40037110)
 pit2_args := $(call pitx_args,2,pit_2,50,0x40037120)
-pit3_args := $(call pitx_args,3,pit_3,51,0x40037120)
+pit3_args := $(call pitx_args,3,pit_3,51,0x40037130)
 
 
 #This rule will build the pit archive;

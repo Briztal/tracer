@@ -86,6 +86,7 @@
 #include <util/macro/incr_call.h>
 
 #include <util/string.h>
+#include <kernel/log.h>
 
 
 #include "kx_sim.h"
@@ -237,7 +238,7 @@ struct pin_data {
  */
 
 //PIN will initialise a pin data struct;
-#define PIN(name, port, bit) {.port_id = (port), .bit_id = (bit), .interface = 0},
+#define PIN(name, port, bit) {.port_id = (port), .bit_id = (bit), .interface = 0,},
 
 static struct pin_data pins[] = {
 
@@ -350,11 +351,13 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 
 	}
 
+	//kernel_log("port : %d - %h, pin %d, alt %d", port_id, port, bit, config->mux_channel);
+
 	//Set the multiplexer channel;
 	config_register |= (PORT_PCR_TO_MUX(config->mux_channel));
 
 	//If the data is received :
-	if (config->direction == PORT_INPUT) {
+	if (config->direction == PIN_INPUT) {
 
 		/*
 		 * Input mode :
@@ -654,6 +657,7 @@ static bool kx_port_init() {
 
 	//Macro not used anymore;
 	#undef PIN
+
 
 	//Complete;
 	return true;

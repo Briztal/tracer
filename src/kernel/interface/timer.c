@@ -36,7 +36,7 @@
  * @param base_frequency : the required base frequency for the timer;
  */
 
-void timer_init(const struct timer_if *timer, uint32_t base_frequency, uint32_t ovf_period, void (*handler)()) {
+void timer_init(const struct timer_if *timer, uint32_t ovf_period, void (*handler)()) {
 
 	//Stop the timer;
 	timer_stop(timer);
@@ -49,9 +49,6 @@ void timer_init(const struct timer_if *timer, uint32_t base_frequency, uint32_t 
 
 	//Set the handler;
 	timer_set_handler(timer, handler);
-
-	//Set the base frequency;
-	timer_set_base_frequency(timer, base_frequency);
 
 	//Set the count and ovf to required values;
 	timer_set_int_period(timer, ovf_period);
@@ -78,7 +75,7 @@ void timer_init(const struct timer_if *timer, uint32_t base_frequency, uint32_t 
  * @param timer
  */
 
-void timer_reset(const struct timer_if *timer, uint32_t base_frequency) {
+void timer_reset(const struct timer_if *timer) {
 
 	//Stop the timer;
 	timer_stop(timer);
@@ -91,9 +88,6 @@ void timer_reset(const struct timer_if *timer, uint32_t base_frequency) {
 
 	//Reset the handler to 0;
 	timer_set_handler(timer, 0);
-
-	//Set the base frequency;
-	timer_set_base_frequency(timer, base_frequency);
 
 	//Set the ovf to 1 period unit; count will be updated at the same time;
 	timer_set_int_period(timer, 1);
@@ -108,6 +102,7 @@ DEFINE_INTERFACE(timer_if);
 
 //Dumb functions;
 void n_sbf(uint32_t u){};
+uint32_t gbf(){return 1;};
 uint32_t n_g(){return 0;};
 void n_st() {};
 bool n_stt() {return false;};
@@ -120,8 +115,10 @@ void n_uh(void (*h)()) {};
  */
 
 const struct timer_if neutral_timer_if = {
+	.frequency = 1,
+	.maximum = 1,
 
-	.set_base_frequency = n_sbf,
+	.get_frequency = gbf,
 	.start = n_st,
 	.stop = n_st,
 	.started = n_stt,

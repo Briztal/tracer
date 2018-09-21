@@ -25,6 +25,8 @@
 #include <string.h>
 #include <kernel/ic.h>
 #include <kernel/panic.h>
+#include <kernel/log.h>
+#include <kernel/debug/debug.h>
 
 bool prc_process_terminated = false;
 

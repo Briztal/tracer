@@ -47,7 +47,6 @@ void debug_led_high() {
 
 	//Set
 	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
-
 }
 
 
@@ -56,7 +55,6 @@ void debug_led_high() {
  */
 
 void debug_led_low() {
-
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
 
@@ -65,7 +63,6 @@ void debug_led_low() {
 
 	//Clear
 	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
-
 }
 
 

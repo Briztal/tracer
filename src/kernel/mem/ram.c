@@ -42,6 +42,9 @@ extern uint32_t _ram_highest;
 static struct heap_head *ram_heap = 0;
 
 
+void ram_print() {
+	heap_print(ram_heap);
+}
 //------------------------------------------------------- RAM mgt ------------------------------------------------------
 
 /**
@@ -84,8 +87,12 @@ void *ram_alloc(size_t size) {
 	}
 
 	//Allocate and return some data in the heap;
-	return heap_malloc(heap, size);
+	void *ptr =  heap_malloc(heap, size);
 
+	kernel_log("ram : %h %h", ptr, size);
+
+
+	return ptr;
 }
 
 

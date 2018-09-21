@@ -39,5 +39,7 @@ void *ram_alloc(size_t);
 //Release some reserved memory;
 void ram_free(void *);
 
+void ram_print();
+
 
 #endif //TRACER_RAM_H

@@ -25,7 +25,7 @@
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
-#if !defined(CHANNEL_NAME) || !defined(TIMER_NAME) || !defined(GPIO_NAME) || !defined(PERIOD)  || !defined(TOLERANCE)
+#if !defined(CHANNEL_NAME) || !defined(TIMER_NAME) || !defined(GPIO_NAME) || !defined(GPIO_MUX) || !defined(PERIOD)  || !defined(TOLERANCE)
 
 #error "Error, at least one macro argument hasn't been provided. Check the makefile;"
 
@@ -34,6 +34,8 @@
 #define TIMER_NAME timer
 
 #define GPIO_NAME gpio
+
+#define GPIO_MUX 1
 
 #define PERIOD 20000
 
@@ -44,6 +46,7 @@
 //------------------------------------------------------ Headers -------------------------------------------------------
 
 #include <stdint.h>
+
 #include "pwm_n.h"
 
 
@@ -52,6 +55,7 @@
 //Declare the duration update function;
 void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint8_t channel_id, uint32_t high_duration);
 
+
 /**
  * channel_update : calls the channel updater providing the channel id and the target duration;
  */
@@ -59,6 +63,20 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint8_t channel_id,
 static void channel_update(uint32_t duration) {
 
 	REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(CHANNEL_ID, duration);
+
+}
+
+
+//Declare the duration update function;
+void REFERENCE_SYMBOL(MODULE_NAME, disable_channel) (uint8_t channel_id);
+
+/**
+ * channel_update : calls the channel updater providing the channel id and the target duration;
+ */
+
+static void channel_disable() {
+
+	REFERENCE_SYMBOL(MODULE_NAME, disable_channel)(CHANNEL_ID);
 
 }
 
@@ -89,8 +107,16 @@ static struct channel_specs channel = {
 	//Initialise the command interface;
 	.iface = {
 
+		//The high level min and max will never change;
+		.hl_min = 0,
+		.hl_max = PERIOD,
+
+		//Min and max depend on the timer configuration. They will be determined at init;
+
 		//Update the set function;
-		.set = &channel_update,
+		.sett = &channel_update,
+
+		.disable = &channel_disable,
 
 	},
 
@@ -105,11 +131,14 @@ static struct channel_specs channel = {
 	//Save the gpio file name;
 	.gpio_name = STR(GPIO_NAME),
 
+	//Save the gpio mux chanel;
+	.gpio_mux = GPIO_MUX,
+
 	//Save the channel's maximal duration;
-	.period = PERIOD,
+	.period_us = PERIOD,
 
 	//Save the channel's tolerance;;
-	.tolerance = TOLERANCE,
+	.tolerance_us = TOLERANCE,
 
 };
 

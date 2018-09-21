@@ -35,6 +35,8 @@
 #include <kernel/log.h>
 #include <util/string.h>
 #include <kernel/mod/auto_mod.h>
+#include <kernel/interface/port.h>
+#include <kernel/debug/debug.h>
 
 #include "pwm_n.h"
 
@@ -71,6 +73,12 @@ struct channel_data {
 	//The current state of the GPIO; Non IRQ can access only when channel is inactive. IRQ has full access;
 	bool next_state;
 
+	//The pwm's period, in timer tics;
+	uint32_t period;
+
+	//The timer tolerance, in timer tics;
+	uint32_t tolerance;
+
 	//The duration of a high state; Can be modified asynchronously to setup the pwm;
 	//A high duration of 0 is equivalent to the ISR routine stopped;
 	uint32_t high_duration;
@@ -83,7 +91,7 @@ struct channel_data {
 
 
 //The array of channel data;
-struct channel_data channels_data[NB_CHANNELS];
+static struct channel_data dynamic_data[NB_CHANNELS];
 
 
 //------------------------------------------------------- PWM irq ------------------------------------------------------
@@ -95,7 +103,7 @@ struct channel_data channels_data[NB_CHANNELS];
 static void start(const uint8_t channel_index) {
 
 	//Cache the channel data ref;
-	struct channel_data *channel = channels_data + channel_index;
+	struct channel_data *channel = dynamic_data + channel_index;
 
 	//If the IRQ routine is already started, fail;
 	if (channel->high_duration) {
@@ -106,7 +114,7 @@ static void start(const uint8_t channel_index) {
 	channel->next_state = true;
 
 	//Initialise the timer : 1MHz base, ovf immediately;
-	timer_init(&channel->timer, 1000000, 1, channels_specs[channel_index]->isr_handler);
+	timer_init(&channel->timer, 1, channels_specs[channel_index]->isr_handler);
 
 }
 
@@ -119,17 +127,17 @@ static void stop(const uint8_t channel_index) {
 
 
 	//Cache the channel data ref;
-	struct channel_data *channel = channels_data + channel_index;
+	struct channel_data *channel = dynamic_data + channel_index;
 
 	//If the channel is already stopped, complete;
 	if (!channel->high_duration) return;
 
 	//Reset the timer;
-	timer_reset(&channel->timer, 1000000);
+	timer_reset(&channel->timer);
 
 	//Reset the channel's data;
 	channel->high_duration = 0;
-	channel->low_duration = channels_specs[channel_index]->period;
+	channel->low_duration = channel->period;
 	channel->next_state = true;
 
 	//Cache the channel's gpio;
@@ -149,7 +157,7 @@ static void stop(const uint8_t channel_index) {
 void REFERENCE_SYMBOL(MODULE_NAME, isr_handler)(const uint8_t channel_index) {
 
 	//Cache the channel data;
-	struct channel_data *channel = channels_data + channel_index;
+	struct channel_data *channel = dynamic_data + channel_index;
 
 	//Cache the GPIO interface;
 	struct gpio_if *gpio = &channel->gpio;
@@ -213,6 +221,13 @@ void REFERENCE_SYMBOL(MODULE_NAME, isr_handler)(const uint8_t channel_index) {
 }
 
 
+void REFERENCE_SYMBOL(MODULE_NAME, disable_channel)(uint8_t channel_id) {
+
+	stop(channel_id);
+
+}
+
+
 /**
  * channel_setup : updates a channel's durations according to the required high duration;
  *
@@ -224,12 +239,13 @@ void REFERENCE_SYMBOL(MODULE_NAME, isr_handler)(const uint8_t channel_index) {
 
 void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, uint32_t high_duration) {
 
-	//Cache the channel's specs;
-	const struct channel_specs *specs = channels_specs[channel_id];
+
+	//Cache the channel's data;
+	struct channel_data *const channel = dynamic_data + channel_id;
 
 	//Cache the channel's period and tolerance;
-	const uint32_t period = specs->period;
-	const uint32_t tolerance = specs->tolerance;
+	const uint32_t period = channel->period;
+	const uint32_t tolerance = channel->tolerance;
 
 	//If the channel must be stopped :
 	if (high_duration < tolerance) {
@@ -253,9 +269,6 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 
 		}
 
-		//Cache the channel ref :
-		struct channel_data *const channel = channels_data + channel_id;
-
 		//If the channel is stopped :
 		if (!channel->high_duration) {
 
@@ -266,6 +279,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 
 		//Update parameters;
 		channel->high_duration = high_duration, channel->low_duration = low_duration;
+
 
 	}
 
@@ -323,7 +337,7 @@ static bool channel_interface(
 	}
 
 	//Allow interfacing. Size check is taken in charge.
-	return command_if_interface(if_struct, &channels_specs[channel_id]->iface, &channels_data[channel_id].iface_ref, size);
+	return command_if_interface(if_struct, &channels_specs[channel_id]->iface, &dynamic_data[channel_id].iface_ref, size);
 
 }
 
@@ -351,7 +365,7 @@ static void channel_close(const struct channel_inode *const node) {
 	}
 
 	//Neutralise the interface, if interfaced;
-	command_if_neutralise(&channels_data[channel_id].iface_ref);
+	command_if_neutralise(&dynamic_data[channel_id].iface_ref);
 
 }
 
@@ -392,6 +406,7 @@ static void channel_register(const size_t channel_index) {
 	//Initialise the channel;
 	memcpy(node, &init, sizeof(struct channel_inode));
 
+
 	//Register the inode to the file system; Safe up-cast;
 	fs_create(channels_specs[channel_index]->channel_name, (struct inode *) node);
 
@@ -408,6 +423,8 @@ static void channel_register(const size_t channel_index) {
  */
 
 static bool init_channel(size_t channel_id) {
+
+
 
 	//Cache the specs struct;
 	const struct channel_specs *channel_specs = channels_specs[channel_id];
@@ -444,9 +461,24 @@ static bool init_channel(size_t channel_id) {
 	}
 
 
+	//Create the pin configuration structure;
+	struct port_pin_config pin_config = {
+
+		.mux_channel = channel_specs->gpio_mux,
+
+		.direction = PIN_OUTPUT,
+
+		.output_mode = PORT_HIGH_DRIVE,
+
+		.slew_rate = PORT_HIGH_RATE,
+
+	};
+
+	//configure;
+	bool config_success = inode_configure(gpio_fd, &pin_config, sizeof(pin_config));
+
 	//Create the initializer for the channel;
 	struct channel_data init = {
-
 
 		//Save the file descriptor;
 		.gpio_fd = gpio_fd,
@@ -465,10 +497,11 @@ static bool init_channel(size_t channel_id) {
 
 		//Not active;
 		.high_duration = 0,
-		.low_duration = channel_specs->period,
+		.low_duration = 0, //Initialised right after;
 		.next_state = true,
 
 	};
+
 
 
 	//Interface with the gpio and the timer;
@@ -477,11 +510,18 @@ static bool init_channel(size_t channel_id) {
 
 
 	//If the interfacing failed :
-	if (!(gpio_success && timer_success)) {
+	if (!(config_success && gpio_success && timer_success)) {
 
 		//Close files;
 		fs_close(gpio_fd);
 		fs_close(timer_fd);
+
+		if (!config_success) {
+
+			//Log;
+			kernel_log_("pwm : gpio configuration failed.");
+
+		}
 
 		if (!gpio_success) {
 
@@ -502,16 +542,43 @@ static bool init_channel(size_t channel_id) {
 
 	}
 
-	//Cache the channel data struct;
-	struct channel_data *channel = channels_data + channel_id;
+	//Update the frequency of the timer;
+	timer_update_frequency(&init.timer);
+
+	//Compute the maximal timer period;
+	init.period = init.low_duration = timer_convert_to_tics(&init.timer, 1000000, channel_specs->period_us);
+	init.tolerance = timer_convert_to_tics(&init.timer, 1000000, channel_specs->tolerance_us);
+
+	//kernel_log("channel id : %d", channel_id);
+	//Cache the channel data %dstruct;
+	struct channel_data *channel = dynamic_data + channel_id;
+
 
 	//Initialise the channel;
-	memcpy(channel, &init, sizeof(channels_data));
+	memcpy(channel, &init, sizeof(struct channel_data));
+
 
 	//If the interfacing succeeded, complete;
 	return true;
 
 }
+
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
+//TODO TEST GPIO CONFIGURATION
 
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
@@ -527,7 +594,11 @@ static bool pwm_init() {
 
 		init_channel(channel_id);
 
+		kernel_log_("OK init");
+
 		channel_register(channel_id);
+
+		kernel_log_("OK regist");
 	}
 
 	//Complete;

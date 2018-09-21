@@ -31,6 +31,7 @@
 #include <util/type.h>
 #include <kernel/panic.h>
 #include <kernel/debug/debug.h>
+#include <kernel/log.h>
 
 
 #define alignment_size (sizeof(size_t))
@@ -117,14 +118,15 @@ struct heap_block {
 
 void heap_print(struct heap_head *head) {
 
-	/*
-	debug_log("heap print : ");
-	debug_log_int(sizeof(struct heap_head));
-	debug_log_int(sizeof(struct heap_block));
+	
+	kernel_log_("heap print : ");
 
-	debug_log("blocks print : ");
+	kernel_log("head : %h, block : %h", sizeof(struct heap_head), sizeof(struct heap_block));
 
 	{
+
+		kernel_log_("block list : ");
+
 		//Cache the first block;
 		struct heap_block *const blk = head->first_block, *b = blk;
 
@@ -132,21 +134,20 @@ void heap_print(struct heap_head *head) {
 
 		do {
 
-			debug_log_int(i++);
-			debug_log_int((uint32_t) b);
+			kernel_log("block %d at %h, to %h ", i, b,(void *) b + b->block_size);
+			kernel_log("size : %h - %d", b->block_size, b->block_size);
+			i++;
 
 			if (b->status == HEAP_FREE_STATUS) {
-				debug_log("\tfree");
+				kernel_log_("\tfree");
 			} else if (b->status == HEAP_ALLOCATED_STATUS) {
-				debug_log("\tallocated;");
+				kernel_log_("\tallocated;");
 			} else {
-				debug_log("\tinvalid;");
+				kernel_log_("\tinvalid;");
 			}
 
-			debug_log("block size : ");
-			debug_log_int(b->block_size);
 
-			debug_log("\n");
+			kernel_log_("");
 
 			//Update the next block
 			b = b->head.next;
@@ -155,13 +156,13 @@ void heap_print(struct heap_head *head) {
 	}
 	{
 
-		debug_log("av blocks print : ");
+		kernel_log_("av blocks print : ");
 
 		//Cache the first block;
 		struct heap_block *const blk = head->first_available_block, *b = blk;
 
 		if (!blk) {
-			debug_log("No  available blocks");
+			kernel_log_("No  available blocks");
 			return;
 		}
 
@@ -169,21 +170,19 @@ void heap_print(struct heap_head *head) {
 
 		do {
 
-			debug_log_int(i++);
-			debug_log_int((uint32_t) b);
+			kernel_log("block %d at %h, to %h ", i, b,(void *) b + b->block_size);
+			kernel_log("size : %h - %d", b->block_size, b->block_size);
+
 
 			if (b->status == HEAP_FREE_STATUS) {
-				debug_log("\tfree");
+				kernel_log_("\tfree");
 			} else if (b->status == HEAP_ALLOCATED_STATUS) {
-				debug_log("\tallocated;");
+				kernel_log_("\tallocated;");
 			} else {
-				debug_log("\tinvalid;");
+				kernel_log_("\tinvalid;");
 			}
 
-			debug_log("block size : ");
-			debug_log_int(b->block_size);
-
-			debug_log("\n");
+			kernel_log_("");
 
 			//Update the next block
 			b = b->available_head.next;
@@ -192,7 +191,6 @@ void heap_print(struct heap_head *head) {
 		} while (b != blk);
 
 	}
-	 */
 
 }
 
@@ -271,7 +269,6 @@ static void heap_check_free_block(const struct heap_head *const heap, const stru
 	//Cache the block's status;
 	uint32_t status = block->status;
 
-
 	/*
 	 * Verify that the block is valid. A valid memory block will always be in status FREE;
 	 * 	Though, an invalid memory block may be in status FREE; This method is an indicator, it will not
@@ -285,12 +282,12 @@ static void heap_check_free_block(const struct heap_head *const heap, const stru
 		if (status == HEAP_ALLOCATED_STATUS) {
 
 			//Log and quit;
-			kernel_panic("heap.c : heap_malloc : block is marked allocated, memory leak;");
+			kernel_panic("heap.c : heap_check_free_block : block is marked allocated, memory leak;");
 
 		} else {
 
 			//Log and quit;
-			kernel_panic("heap.c : heap_malloc : block status invalid, memory leak.");
+			kernel_panic("heap.c : heap_check_free_block : block status invalid, memory leak.");
 
 		}
 
@@ -321,13 +318,13 @@ static void heap_check_allocated_block(const struct heap_head *const heap, const
 		if (status == HEAP_FREE_STATUS) {
 
 			//Log and quit;
-			kernel_panic("heap.c : heap_free : block marked free; double free - invalid free and status collision"
+			kernel_panic("heap.c : heap_check_allocated_block : block marked free; double free - invalid free and status collision"
 						   " - memory leak.");
 
 		} else {
 
 			//Log and quit;
-			kernel_panic("heap.c : heap_free : block status invalid. memory leak - invalid free");
+			kernel_panic("heap.c : heap_check_allocated_block : block status invalid. memory leak - invalid free");
 
 		}
 
@@ -559,7 +556,7 @@ static void heap_split_block(struct heap_head *const head, struct heap_block *co
 
 
 	//The new block will be located after the current block, block head and data comprised;
-	struct heap_block *new_block = block + block_size;
+	struct heap_block *new_block = (struct heap_block *) ((uint8_t *)block + block_size);
 
 	//Create the new block's initializer;
 	struct heap_block new_block_init = {
@@ -585,6 +582,8 @@ static void heap_split_block(struct heap_head *const head, struct heap_block *co
 		.block_size = block->block_size - block_size,
 
 	};
+
+
 
 	//Update the previous block's size;
 	block->block_size = block_size;
