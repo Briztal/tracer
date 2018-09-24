@@ -319,44 +319,44 @@ static bool pwm_check_4() {
 	while(1) {
 
 		command_set(&iface0, 120000);
-		command_set(&iface1, 120000);
-		command_set(&iface2, 120000);
-		command_set(&iface3, 120000);
+		command_set(&iface1, 240000);
+		command_set(&iface2, 360000);
+		command_set(&iface3, 480000);
 
 		debug_delay_ms(1000);
 
-		command_set(&iface0, 240000);
-		command_set(&iface1, 240000);
+		command_set(&iface0, 480000);
+		command_set(&iface1, 120000);
 		command_set(&iface2, 240000);
-		command_set(&iface3, 240000);
+		command_set(&iface3, 360000);
 
 
 		debug_delay_ms(1000);
 
 
 		command_set(&iface0, 360000);
-		command_set(&iface1, 360000);
-		command_set(&iface2, 360000);
-		command_set(&iface3, 360000);
-
-		debug_delay_ms(1000);
-
-
-		command_set(&iface0, 480000);
 		command_set(&iface1, 480000);
+		command_set(&iface2, 120000);
+		command_set(&iface3, 240000);
+
+		debug_delay_ms(1000);
+
+
+		command_set(&iface0, 240000);
+		command_set(&iface1, 360000);
 		command_set(&iface2, 480000);
-		command_set(&iface3, 480000);
+		command_set(&iface3, 120000);
 
 		debug_delay_ms(1000);
 
-
-		command_set(&iface0, 0);
-		command_set(&iface1, 0);
-		command_set(&iface2, 0);
-		command_set(&iface3, 0);
+		/*
+		command_disable(&iface0);
+		command_disable(&iface1);
+		command_disable(&iface2);
+		command_disable(&iface3);
 
 		debug_delay_ms(1000);
-
+		*/
 	}
 
 	kernel_log_("Success");

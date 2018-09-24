@@ -16,16 +16,16 @@ servo:
 
 	@mkdir -p build/mod/servo
 
-	@$(CC) $(CFLAGS) $(INC) $(servo_c0_args) -o build/mod/servo/servo_channel0.o -c src/modules/servo_channel.c
+	@$(CC) $(CFLAGS) $(INC) $(servo_c0_args) -o build/mod/servo_channel0.o -c src/modules/servo_channel.c
 
-	@$(CC) $(CFLAGS) $(INC) $(servo_args) -o build/mod/servo/servo.o -c src/modules/servo.c
+	@$(CC) $(CFLAGS) $(INC) $(servo_args) -o build/mod/servo.o -c src/modules/servo.c
 
 
 #Add the servo rule to the module dependencies list;
 #MODULES += servo
 
 #Add the servo object to the modules list;
-##MODULES_OBJS += build/mod/servo/servo.o  build/mod/servo/servo_channel0.o
+##MODULES_OBJS += build/mod/servo.o  build/mod/servo_channel0.o
 
 
 
@@ -38,18 +38,18 @@ multi_pwm_0_args := $(call multi_pwm_n_args,0,pwm_0,led,20000)
 
 multi_pwm:
 
-	@mkdir -p build/mod/multi_pwm
+	@mkdir -p build/mod
 
-	@$(CC) $(CFLAGS) $(INC) $(multi_pwm_0_args) -o build/mod/multi_pwm/multi_pwm_0.o -c src/modules/multi_pwm_n.c
+	@$(CC) $(CFLAGS) $(INC) $(multi_pwm_0_args) -o build/mod/multi_pwm_0.o -c src/modules/multi_pwm_n.c
 
-	@$(CC) $(CFLAGS) $(INC) $(multi_pwm_args) -o build/mod/multi_pwm/multi_pwm.o -c src/modules/multi_pwm.c
+	@$(CC) $(CFLAGS) $(INC) $(multi_pwm_args) -o build/mod/multi_pwm.o -c src/modules/multi_pwm.c
 
 
 #Add the servo rule to the module dependencies list;
 #MODULES += multi_pwm
 
 #Add the servo object to the modules list;
-#MODULES_OBJS += build/mod/multi_pwm/multi_pwm.o  build/mod/multi_pwm/multi_pwm_0.o
+#MODULES_OBJS += build/mod/multi_pwm.o  build/mod/multi_pwm_0.o
 
 
 
@@ -67,18 +67,18 @@ pwm:
 
 	@mkdir -p build/mod/pwm
 
-	@$(CC) $(CFLAGS) $(INC) $(pwm_0_args) -o build/mod/pwm/pwm_0.o -c src/modules/pwm_n.c
-	@$(CC) $(CFLAGS) $(INC) $(pwm_1_args) -o build/mod/pwm/pwm_1.o -c src/modules/pwm_n.c
-	@$(CC) $(CFLAGS) $(INC) $(pwm_2_args) -o build/mod/pwm/pwm_2.o -c src/modules/pwm_n.c
-	@$(CC) $(CFLAGS) $(INC) $(pwm_3_args) -o build/mod/pwm/pwm_3.o -c src/modules/pwm_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pwm_0_args) -o build/mod/pwm_0.o -c src/modules/pwm_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pwm_1_args) -o build/mod/pwm_1.o -c src/modules/pwm_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pwm_2_args) -o build/mod/pwm_2.o -c src/modules/pwm_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pwm_3_args) -o build/mod/pwm_3.o -c src/modules/pwm_n.c
 
-	@$(CC) $(CFLAGS) $(INC) $(pwm_n_args) -o build/mod/pwm/pwm.o -c src/modules/pwm.c
+	@$(CC) $(CFLAGS) $(INC) $(pwm_n_args) -o build/mod/pwm.o -c src/modules/pwm.c
 
 
 #Add the servo rule to the module dependencies list;
 MODULES += pwm
 
 #Add the servo object to the modules list;
-MODULES_OBJS += build/mod/pwm/pwm.o build/mod/pwm/pwm_0.o build/mod/pwm/pwm_1.o build/mod/pwm/pwm_2.o build/mod/pwm/pwm_3.o
+MODULES_OBJS += build/mod/pwm.o build/mod/pwm_0.o build/mod/pwm_1.o build/mod/pwm_2.o build/mod/pwm_3.o
 
 

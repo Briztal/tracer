@@ -36,7 +36,6 @@
 #include <util/string.h>
 #include <kernel/mod/auto_mod.h>
 #include <kernel/interface/port.h>
-#include <kernel/debug/debug.h>
 
 #include "pwm_n.h"
 
@@ -562,23 +561,6 @@ static bool init_channel(size_t channel_id) {
 	return true;
 
 }
-
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
-//TODO TEST GPIO CONFIGURATION
 
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------

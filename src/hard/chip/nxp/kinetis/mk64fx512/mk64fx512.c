@@ -24,10 +24,12 @@
 #include <kernel/startup.h>
 
 #include <hard/chip/nxp/kinetis/kx_wdog.h>
-#include <hard/chip/nxp/kinetis/kx_mcg.h>
+#include <hard/chip/nxp/kinetis/kx_mcg/kx_mcg.h>
 #include <hard/chip/nxp/kinetis/kx_sim.h>
 
 #include <kernel/panic.h>
+#include <kernel/log.h>
+#include <kernel/debug/debug.h>
 
 
 
@@ -209,56 +211,21 @@ void __entry_point(void) {
 	sim_enable_PORTE_clock_gating();
 
 	startup_initialise_globals();
-
-	struct mcg_osc0_init osc_init = {
-
-		//16M freq;
-		.osc0_frequency = 16000000,
-
-		//Low power;
-		.low_power_mode = true,
-
-		//Connection 1;
-		.connection_id = OSC_CONNECTION_1,
-
-		//Enable 2 and 8pf for teensy;
-		.capacitor_2pf_enabled = true,
-		.capacitor_4pf_enabled = false,
-		.capacitor_8pf_enabled = true,
-		.capacitor_16pf_enabled = false,
-
-	};
-
-	mcg_initialise_osc0(&osc_init);
-
-	//Create the OSC initialisation struct;
-	struct mcg_osc_config osc_conf = {
-
-		//Enable output;
-		.output_enabled = true,
-
-		//External clock not selected;
-		.external_clock_selected = false,
-
-		//OSC0 selected;
-		.osc0_selected = true,
-
-		//Stay enabled in stop mode;
-		.stay_enabled_in_stop_mode = true,
-
-		//No interrupt for loss of clock;
-		.loss_of_clock_generates_reset = false,
-
-	};
-
-	//Configure the oscillator;
-	mcg_configure_osc(&osc_conf);
-
-
+	
+	
+	kernel_log_("SUUS");
+	
+	//Autotune to 4 MHz
+	//mcg_autotune(32000 * 2560);
+	mcg_autotune(20000000);
+	
+	kernel_log_("tuning complete, stopping...");
+	
+	while (1);
 
 /*
 
-	struct mcg_pll_config pll_conf = {
+	struct kx_pll_config pll_conf = {
 
 		//Enable external clock;
 		.enable_mcg_pllclk = false,
@@ -281,7 +248,7 @@ void __entry_point(void) {
 	};
 
 	//Configure the PLL;
-	mcg_configure_pll(&pll_conf);
+	kx_pll_configure(&pll_conf);
 
 	//TODO CONGIGURE IRC;
 

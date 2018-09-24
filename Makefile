@@ -22,6 +22,16 @@ LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 #The default include path set. Comprises just src.
 INC = -Isrc
 
+
+build_dirs:
+
+#Create a directory for the chip library;
+	@mkdir build
+	@mkdir build/hard
+	@mkdir build/mod
+	@mkdir build/kernel
+
+
 #--------------------------------------------------- Utilities lib --------------------------------------------------
 
 #The util sources list;
@@ -51,15 +61,15 @@ MODULES_OBJS :=
 #Include the platform makefile;
 include src/hard/board/$(BOARD)/Makefile
 
-#Build the objects set from sources and reroute to build dir;
-HARD_OBJS := $(foreach src, $(HARD_SRCS:.c=.o), $(BUILDDIR)/$(src))
-
-#The hardware lib, depends on all selected hardware sources;
-hard : $(HARD_OBJS)
-
 #Now that the hardware lib has updated link files, add appropriate options to the link flags;
 LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
+
+#Build the objects set from sources and reroute to build dir;
+#HARD_OBJS := $(foreach src, $(HARD_SRCS:.c=.o), $(BUILDDIR)/$(src))
+
+#The hardware lib, depends on all selected hardware sources;
+#hard : $(HARD_OBJS)
 
 #---------------------------------------------------- Kernel lib ----------------------------------------------------
 
@@ -86,11 +96,13 @@ MODULES_SRCS :=
 #Include the modules makefile, to embed all required modules;
 include src/modules/Makefile
 
+
 #Build the objects set from sources and reroute to build dir;
-MODULES_OBJS += $(foreach src, $(MODULES_SRCS:.c=.o), $(BUILDDIR)/$(src))
+#MODULES_OBJS += $(foreach src, $(MODULES_SRCS:.c=.o), $(BUILDDIR)/$(src))
 
 #The modules lib depends on all modules rules and all modules files;
-modules : $(MODULES) $(MODULES_OBJS)
+modules : $(MODULES)
+
 
 #------------------------------------------------------ Make rules -----------------------------------------------------
 
@@ -107,8 +119,12 @@ $(BUILDDIR)/%.o: src/%.c
 #Compile, providing only src in include path, and all C flags;
 	@$(CC) $(CFLAGS) $(INC) -o $@ -c $<
 
+HARD_OBJS = $(wildcard build/hard/*.o)
 
-elf: hard modules kernel util
+MODULES_OBJS = $(wildcard build/mod/*.o)
+
+
+elf: build_dirs hard modules kernel util
 	@echo "[LD]\ttracer.elf"
 	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(MODULES_OBJS) $(UTIL_OBJS) -o $(NAME).elf
 

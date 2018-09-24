@@ -136,6 +136,7 @@ static void kernel_init() {
 	//This point should never be reached;
 	kernel_panic("kernel_init : execution not started;");
 
+
 }
 
 
