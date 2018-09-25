@@ -49,14 +49,16 @@ struct auto_mod {
 
 #define PERIPHERAL_MODULE ".kernel_peripheral_modules"
 
-#define SYSTEM_MODULE ".kernel_peripheral_modules"
+#define SYSTEM_MODULE ".kernel_system_modules"
 
-#define USER_MODULE ".kernel_peripheral_modules"
+#define USER_MODULE ".kernel_user_modules"
 
+
+#define MOD_ST(x) #x
 
 #define KERNEL_EMBED_MODULE(module_type, name_l,  init_f)\
-	static struct auto_mod mod##name_l __attribute__((section (module_type), used)) = \
-	{.name = (#name_l), .init = (init_f)};
+	static struct auto_mod name_l __attribute__((section (module_type), used)) = \
+	{.name = MOD_ST(name_l), .init = (init_f)};
 
 
 #endif //TRACER_AUTO_MOD_H

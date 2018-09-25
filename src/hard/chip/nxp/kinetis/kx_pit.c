@@ -240,4 +240,4 @@ static bool pit_init() {
 
 
 //Embed the PIT module in the executable;
-KERNEL_EMBED_PERIPHERAL_MODULE(pit, &pit_init);
+KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, pit, &pit_init);

@@ -75,6 +75,7 @@
 
 static void enter_FEI() {
 	
+	//Set the FLL internal clocking, ;
 	kx_fll_set_internal_clocking();
 	
 	//To engage the FLL, we must wait till the PLL acquires the PLLS clock;
@@ -527,10 +528,13 @@ static enum mcg_mode get_mode() {
 	CHECK_MODE(PBE)
 	
 	//Check all modes;
-	CHECK_MODE(FEE)
+	CHECK_MODE(PEE)
 	
 	//If the current mode is invalid :
 	kernel_panic("mcg : get_mode : current mode is invalid;");
+	
+	//Never reached;
+	return FBI;
 	
 }
 
@@ -704,32 +708,14 @@ void mcg_configure(const struct kx_mcg_config *config) {
 	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
 	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
 	
-	
-	kernel_log("config found : frequency : %d, mode %d", config->mcgout_freq, config->mode);
-	
-	//TODO DISABLE CLOCKING MONITORING HERE;
-	
-	
-	kernel_log_("Returning to FBI");
-	
 	//Now, go back to FLL bypassed Internal, to configure the hardware;
 	mcg_return_FBI();
-	
-	
-	kernel_log_("Configuring hardware ...");
 	
 	//Configure the required hardware;
 	mcg_configure_hardware(config);
 	
-	
-	kernel_log("Entering mode %d ...", config->mode);
-	
 	//Enter the required mcg mode;
 	enter_mode(config->mode);
 	
-	
-	kernel_log_("STOPPING");
-	
-	debug_led_blink(1000);
 	
 }

@@ -24,6 +24,7 @@
 #include <hard/chip/nxp/kinetis/kx_sim.h>
 #include <kernel/clock/clock.h>
 #include <kernel/mod/auto_mod.h>
+#include <kernel/debug/debug.h>
 
 #include "kx_clock.h"
 
@@ -331,9 +332,10 @@ static bool kx_clock_init() {
 	};
 	
 	//Configure the clock, and update kernel clocks;
-	kx_clock_configure(&initial_config, sizeof(struct kx_clock_config));
+	clock_tune(&initial_config, sizeof(struct kx_clock_config));
 	
 }
+
 
 KERNEL_EMBED_MODULE(CORE_MODULE, kx_clock, kx_clock_init);
 

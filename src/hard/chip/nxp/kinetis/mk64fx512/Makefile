@@ -48,21 +48,25 @@ mk64fx512: cortex_m4f
 clock:
 
 #compile the IRC;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_irc.o -c $(SK_DIR)/kx_clock/kx_irc.c
+	@$(CC) $(CFLAGS) $(INC) -o build/mod/kx_irc.o -c $(SK_DIR)/kx_clock/kx_irc.c
 
 #compile the OSC;
-	@$(CC) $(CFLAGS) $(INC) $(osc_gp_args) $(osc_crystal_args) -o build/hard/kx_osc.o -c $(SK_DIR)/kx_clock/kx_osc.c
+	@$(CC) $(CFLAGS) $(INC) $(osc_gp_args) $(osc_crystal_args) -o build/mod/kx_osc.o -c $(SK_DIR)/kx_clock/kx_osc.c
 
 #compile the FLL;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_fll.o -c $(SK_DIR)/kx_clock/kx_fll.c
+	@$(CC) $(CFLAGS) $(INC) -o build/mod/kx_fll.o -c $(SK_DIR)/kx_clock/kx_fll.c
 
 #compile the PLL;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/hard/kx_pll.o -c $(SK_DIR)/kx_clock/kx_pll.c
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/mod/kx_pll.o -c $(SK_DIR)/kx_clock/kx_pll.c
 
 #Compile the MCG;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/hard/kx_mcg.o -c $(SK_DIR)/kx_clock/kx_mcg.c
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/mod/kx_mcg.o -c $(SK_DIR)/kx_clock/kx_mcg.c
 
+#Compile the clock module;
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/mod/kc_clock.o -c $(SK_DIR)/kx_clock/kx_clock.c
 
+#Add the port rule to the module dependencies list;
+MODULES += clock
 
 #------------------ Port + gpio module
 

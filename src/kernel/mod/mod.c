@@ -49,18 +49,18 @@ static struct nlist modules = {
  */
 
 void mod_add(const char *name, bool (*init)()) {
-
+	
 	//Call the initialisation function;
 	(*init)();
-
+	
 	//Add the exit function to the list;
 	bool success = nlist_add(&modules, name, 0);//TODO EXIT;
-
+	
 	//If the add succeeded :
 	if (!success) {
 		//TODO EXIT;
 	}
-
+	
 }
 
 
@@ -71,10 +71,10 @@ void mod_add(const char *name, bool (*init)()) {
  */
 
 void mod_remove(const char *const name) {
-
+	
 	//Remove the module from the list; TODO cache its exit function;
 	nlist_remove(&modules, name);
-
+	
 	/*
 	//If the module was found and removed, and has a valid exit function :
 	if (exit) {
@@ -93,49 +93,49 @@ void mod_remove(const char *const name) {
 		}
 
 	}*/
-
-
+	
+	
 }
 
 
 static void load_modules(const uint8_t *const mod_start, const uint8_t *const mod_end) {
-
+	
 	//Determine the byte length of the module array;
 	const size_t module_array_size = mod_end - mod_start;
-
+	
 	//The module array should contain only auto_mod structs. If size validity check fails :
 	if (module_array_size % sizeof(struct auto_mod)) {
-
+		
 		//Kernel panic, invalid module array size, probably caused by poor linking;
 		kernel_panic("mod.c : mod_autoload : embedded modules array bounds invalid;");
-
+		
 	}
-
+	
 	//Cache the array to the right type;
 	const struct auto_mod *auto_module = (const struct auto_mod *) mod_start;
-
+	
 	//If no modules are to load :
 	if ((size_t) auto_module >= (size_t) mod_end) {
-
+		
 		//Log;
 		kernel_log_("\tNo modules to load");
-
+		
 	}
-
-		//For each module :
+	
+	//For each module :
 	while ((size_t) auto_module < (size_t) mod_end) {
-
+		
 		//Load the module;
 		mod_add(auto_module->name, auto_module->init);
-
+		
 		//Log;
 		kernel_log("\t%s module loaded", auto_module->name);
-
+		
 		//Focus on the next module;
 		auto_module++;
-
+		
 	}
-
+	
 }
 
 
@@ -146,27 +146,33 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
  */
 
 void mod_autoload() {
-
+	
 	//The start and end address of kernel peripheral, system and user modules structs in FLASH;
-	extern const uint8_t _pmod_start, _pmod_end,  _smod_start, _smod_end, _umod_start, _umod_end;
-
+	extern const uint8_t _cmod_start, _cmod_end, _pmod_start, _pmod_end, _smod_start, _smod_end, _umod_start, _umod_end;
+	
+	//Log;
+	kernel_log_("detecting core modules ...");
+	
+	//Load peripheral modules;
+	load_modules(&_cmod_start, &_cmod_end);
+	
 	//Log;
 	kernel_log_("detecting peripheral modules ...");
-
+	
 	//Load peripheral modules;
 	load_modules(&_pmod_start, &_pmod_end);
-
+	
 	//Log;
 	kernel_log_("detecting system modules ...");
-
+	
 	//Load system modules;
 	load_modules(&_smod_start, &_smod_end);
-
+	
 	//Log;
 	kernel_log_("detecting user modules ...");
-
+	
 	//Load user modules;
 	load_modules(&_umod_start, &_umod_end);
-
+	
 }
 

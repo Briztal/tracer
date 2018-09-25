@@ -21,6 +21,7 @@
 #include "kx_mcg.h"
 
 #include <kernel/panic.h>
+#include <kernel/debug/debug.h>
 
 
 /*
@@ -76,7 +77,6 @@ void kx_fll_configure(struct kx_fll_config config) {
 		*MCG_C1 = C1;
 		
 	}
-	
 	
 	
 	/*
@@ -135,6 +135,9 @@ void kx_fll_set_internal_clocking() {
 	
 	//Wait till IREFST is set;
 	while(!((*MCG_S) & S_IREFST));
+	
+	//Wait 1 ms, so that FLL locks the internal reference frequency;
+	debug_delay_ms(1);
 	
 }
 

@@ -7,6 +7,9 @@ KERNEL_PRIV_DIR += $(KERNEL_DIR)
 
 #The syscall source file can be linked to exernal libs;
 
+#Add the clock lib;
+KERNEL_SRCS +=  $(KERNEL_DIR)/clock/clock.c
+
 #Add the communication protocol;
 KERNEL_SRCS +=  $(KERNEL_DIR)/debug/probe.c
 KERNEL_SRCS +=  $(KERNEL_DIR)/debug/debug.c

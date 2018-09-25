@@ -666,4 +666,4 @@ static bool kx_port_init() {
 
 
 //Embed the module in the executable;
-KERNEL_EMBED_PERIPHERAL_MODULE(port, &kx_port_init);
+KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, port, &kx_port_init);

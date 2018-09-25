@@ -576,11 +576,8 @@ static bool pwm_init() {
 
 		init_channel(channel_id);
 
-		kernel_log_("OK init");
-
 		channel_register(channel_id);
-
-		kernel_log_("OK regist");
+		
 	}
 
 	//Complete;
@@ -589,5 +586,5 @@ static bool pwm_init() {
 }
 
 //Embed the module in the executable;
-KERNEL_EMBED_SYSTEM_MODULE(MODULE_NAME, &pwm_init);
+KERNEL_EMBED_MODULE(SYSTEM_MODULE, MODULE_NAME, &pwm_init);
 

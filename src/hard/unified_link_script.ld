@@ -26,12 +26,14 @@ INCLUDE memory_map.ld
  * The linking script will provide the following constants :
 
  * Kernel modules :
- *  - _pmod_start   :   the start address of kernel peripheral modules structs in FLASH;
- *  - _pmod_end     :   the end address of kernel peripheral modules structs in FLASH;
- *  - _smod_start   :   the start address of kernel system modules structs in FLASH;
- *  - _smod_end     :   the end address of kernel system modules structs in FLASH;
- *  - _umod_start   :   the start address of kernel user modules structs in FLASH;
- *  - _umod_end     :   the end address of kernel user modules structs in FLASH;
+ *  - _cmod_start   :   the start address of core kernel modules structs in FLASH;
+ *  - _cmod_end     :   the end address of core kernel modules structs in FLASH;
+ *  - _pmod_start   :   the start address of peripheral kernel modules structs in FLASH;
+ *  - _pmod_end     :   the end address of peripheral kernel modules structs in FLASH;
+ *  - _smod_start   :   the start address of system kernel modules structs in FLASH;
+ *  - _smod_end     :   the end address of system kernel modules structs in FLASH;
+ *  - _umod_start   :   the start address of user kernel modules structs in FLASH;
+ *  - _umod_end     :   the end address of user kernel modules structs in FLASH;
  *
  *
  *  - _data_lma     :   the load address of the data region, in FLASH
@@ -76,6 +78,10 @@ SECTIONS {
     .kernel_modules : {
 
         . = ALIGN(4);
+        _cmod_start = .;
+        KEEP(*(.kernel_core_modules))
+        _cmod_end = .;
+
         _pmod_start = .;
         KEEP(*(.kernel_peripheral_modules))
         _pmod_end = .;
