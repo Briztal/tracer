@@ -1,5 +1,5 @@
 /*
-  kx_mcg.h Part of TRACER
+  kx_mcg.c Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
@@ -22,6 +22,7 @@
 #include <kernel/panic.h>
 #include <kernel/log.h>
 #include <kernel/debug/debug.h>
+
 #include "kx_mcg.h"
 
 
@@ -44,10 +45,6 @@
 /*
  * ------------------------------------------- MCG operation modes selection -------------------------------------------
  */
-
-//The current MGCOUT frequency; At startup, the FLL (factor of 640), clocked by the slow IRC (32000Hz), is selected;
-static uint32_t mcg_out_frequency = 20480000;
-
 
 
 
@@ -76,23 +73,24 @@ static uint32_t mcg_out_frequency = 20480000;
  * 	The IRC slow frequency is not at 32786 Hertz, the only field required is the frequency range;
  */
 
-void mcg_enter_FEI() {
+static void enter_FEI() {
 	
 	kx_fll_set_internal_clocking();
 	
 	//To engage the FLL, we must wait till the PLL acquires the PLLS clock;
 	kx_fll_acquire_plls();
 	
-	debug_delay_ms(1000);
-	
-	
-	kernel_log("Clearing C1 %h", *MCG_S);
-	
 	//Clear CLKS bits; Will stay like this;
 	*MCG_C1 &= ~C1_CLKS;
 	
+}
+
+static bool in_FEI(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 0) && (IREFS) && (!PLLS);
 	
 }
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -123,27 +121,13 @@ void mcg_enter_FEI() {
  * Entering in FEE mode will select the OSC external reference signal as input, and update the output frequency range;
  */
 
-void mcg_enter_FEE() {
-	
-	kernel_log("ENTERING FEE %h", *MCG_S);
-	
+static void enter_FEE() {
 	
 	//Set the FLL in external clocking;
 	kx_fll_set_external_clocking();
 	
-	kernel_log_("CLEARING PLLS");
-	
-	//Clear the PLLS bit in C6 to select the FLL;
-	*MCG_C6 &= ~C6_PLLS;
-	
-	kernel_log_("ACQUIRING");
-	
 	//To engage the FLL, we must wait till the PLL acquires the PLLS clock;
 	kx_fll_acquire_plls();
-	
-	
-	
-	kernel_log_("CACHING C1");
 	
 	//Cache C1;
 	uint8_t C1 = *MCG_C1;
@@ -151,12 +135,15 @@ void mcg_enter_FEE() {
 	//Clear CLKS bits; Will stay like this;
 	C1 &= ~C1_CLKS;
 	
-	
-	
-	kernel_log_("WRITING C1");
-	
 	//Write C1;
 	*MCG_C1 = C1;
+	
+}
+
+
+static bool in_FEE(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 0) && (!IREFS) && (!LP);
 	
 }
 
@@ -189,7 +176,7 @@ void mcg_enter_FEE() {
  */
 
 //Enter in FBI mode. The clock selected is determined by the current IRC configuration;
-void mcg_enter_FBI() {
+static void enter_FBI() {
 	
 	//Cache C1;
 	uint8_t C1 = *MCG_C1;
@@ -214,6 +201,11 @@ void mcg_enter_FBI() {
 	
 }
 
+static bool in_FBI(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 1) && (IREFS) && (!PLLS) && (!LP);
+	
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -242,10 +234,8 @@ void mcg_enter_FBI() {
  */
 
 //Enter in FBE mode. The OSC external ref is selected;
-void mcg_enter_FBE() {
-	
-	kernel_log("FBE :  %h", *MCG_S);
-	
+static void enter_FBE() {
+
 	//Cache C1;
 	uint8_t C1 = *MCG_C1;
 	
@@ -267,7 +257,11 @@ void mcg_enter_FBE() {
 	//Disable low power;
 	*MCG_C2 &= ~C2_LP;
 	
-	kernel_log("FBE :  %h", *MCG_S);
+}
+
+static bool in_FBE(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 2) && (!IREFS) && (!PLLS) && (!LP);
 	
 }
 
@@ -295,7 +289,7 @@ void mcg_enter_FBE() {
  * 	The FLL is disabled in a low-power state.
  */
 
-void mcg_enter_PEE() {
+static void enter_PEE() {
 	
 	//To engage the PLL, we must wait till the PLL is locked;
 	kx_pll_acquire_lock();
@@ -320,6 +314,14 @@ void mcg_enter_PEE() {
 	*MCG_C1 = C1;
 	
 }
+
+static bool in_PEE(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 0) && (!IREFS) && (PLLS);
+	
+}
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -348,7 +350,7 @@ void mcg_enter_PEE() {
  * 	valid PLL reference clock. The FLL is disabled in a low-power state.
  */
 
-void mcg_enter_PBE() {
+static void enter_PBE() {
 	
 	//Cache C1;
 	uint8_t C1 = *MCG_C1;
@@ -373,6 +375,13 @@ void mcg_enter_PBE() {
 	
 }
 
+static bool in_PBE(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 2) && (!IREFS) && (PLLS) && (!IREFS);
+	
+}
+
+
 //----------------------------------------------------------------------------------------------------------------------
 
 /*
@@ -390,7 +399,7 @@ void mcg_enter_PBE() {
  *  even if C5[PLLCLKEN] is set to 1.
  */
 
-void mcg_enter_BLPI() {
+static void enter_BLPI() {
 	
 	//Cache C1;
 	uint8_t C1 = *MCG_C1;
@@ -413,8 +422,15 @@ void mcg_enter_BLPI() {
 	//Enable low power;
 	*MCG_C2 |= C2_LP;
 	
+}
+
+
+static bool in_BLPI(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 1) && (IREFS) && (!PLLS) && (IREFS);
 	
 }
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -432,7 +448,7 @@ void mcg_enter_BLPI() {
  *  disabled even if the C5[PLLCLKEN] is set to 1.
  */
 
-void mcg_enter_BLPE() {
+static void enter_BLPE() {
 	
 	//Cache C1;
 	uint8_t C1 = *MCG_C1;
@@ -454,32 +470,93 @@ void mcg_enter_BLPE() {
 	
 }
 
+static bool in_BLPE(uint8_t CLKS, bool IREFS, bool PLLS, bool LP) {
+	
+	return (CLKS == 2) && (!IREFS) && (IREFS);
+	
+}
 
-//------------------------------------------------------ Autotune ------------------------------------------------------
+
+//------------------------------------------------------ Mode determination ------------------------------------------------------
+
+/*
+ * get_mode : evaluates all modes and returns the current state;
+ *
+ * If the current state is invalid, a kernel panic will be triggered;
+ */
+
+static enum mcg_mode get_mode() {
+	
+	//Cache CLKS;
+	uint8_t CLKS = (*MCG_C1) >> 6;
+	
+	//Cache IREFS;
+	bool IREFS = (bool) ((*MCG_C1) & C1_IREFS);
+	
+	//Cache PLLS;
+	bool PLLS = (bool) ((*MCG_C6) & C6_PLLS);
+	
+	//Cache PLLS;
+	bool LP = (bool) ((*MCG_C2) & C2_LP);
+	
+	
+	#define CHECK_MODE(mode)\
+	if (in_##mode(CLKS, IREFS, PLLS, LP)){\
+		return mode;\
+	}
+	
+	//Check all modes;
+	CHECK_MODE(FBI)
+	
+	//Check all modes;
+	CHECK_MODE(FEI)
+	
+	//Check all modes;
+	CHECK_MODE(BLPI)
+	
+	//Check all modes;
+	CHECK_MODE(FBE)
+	
+	//Check all modes;
+	CHECK_MODE(FEE)
+	
+	//Check all modes;
+	CHECK_MODE(BLPE)
+	
+	//Check all modes;
+	CHECK_MODE(PBE)
+	
+	//Check all modes;
+	CHECK_MODE(FEE)
+	
+	//If the current mode is invalid :
+	kernel_panic("mcg : get_mode : current mode is invalid;");
+	
+}
+
+
+//------------------------------------------------------ Tuning ------------------------------------------------------
 
 //There are 8 modes;
 #define NB_MODES 8
 
-//The current state of the MCG;
-static enum mcg_mode current_mcg_mode = FEI;
-
 
 //Functions to enter in different modes;
-void (*enter_mode[NB_MODES])() = {
+static void (*mode_transitions[NB_MODES])() = {
 	
 	//Level 0;
-	&mcg_enter_FBI,
-	&mcg_enter_FEI,
-	&mcg_enter_BLPI,
-	&mcg_enter_FBE,
+	&enter_FBI,
+	&enter_FEI,
+	&enter_BLPI,
+	&enter_FBE,
 	
 	//Level 1;
-	&mcg_enter_FEE,
-	&mcg_enter_BLPE,
-	&mcg_enter_PBE,
+	&enter_FEE,
+	&enter_BLPE,
+	&enter_PBE,
 	
 	//Level 2;
-	&mcg_enter_PEE,
+	&enter_PEE,
 	
 };
 
@@ -488,83 +565,69 @@ void (*enter_mode[NB_MODES])() = {
  * TODO
  */
 
-void mcg_return_FBI() {
+static void mcg_return_FBI() {
 	
 	//First, configure the IRC to use the fast clock;
 	kx_irc_configure(1);
 	
+	//Get the current mode;
+	enum mcg_mode mode = get_mode();
+	
 	//Depending on the current state, different paths must be traversed;
-	switch (current_mcg_mode) {
+	switch (mode) {
 		
 		//If PEE, go to PBE;
 		case PEE:
-			mcg_enter_PBE();
+			enter_PBE();
 			
 			//If PBE, FEE (comprised previous case) or BLPE, enter FBE;
 		case PBE:
 		case FEE:
 		case BLPE:
-			mcg_enter_FBE();
+			enter_FBE();
 			
 			//Now, we can safely enter FBI;
 		default:
-			mcg_enter_FBI();
+			enter_FBI();
 		
 	}
-	
-	//Update the current mode;
-	current_mcg_mode = FBI;
 	
 }
 
 /*
- * mcg_enter_mode : this function assumes the current mode is FBI (safe configuration mode), and traverses the
+ * enter_mode : this function assumes the current mode is FBI (safe configuration mode), and traverses the
  * 	appropriate path to enter the required mode;
  */
 
-void mcg_enter_mode(const enum mcg_mode mode) {
-	
-	//If the current mode is not FBI :
-	if (current_mcg_mode != FBI) {
-		
-		//Panic, not supposed to be called when not in FBI;
-		kernel_panic("mcg_enter_mode : called while not in FBI mode;");
-		
-	}
+void enter_mode(const enum mcg_mode mode) {
 	
 	/*
 	 * If the mode can't be entered directly, we must execute transitions;
 	 */
+	
 	//If target mode is in level 1 :
 	if (mode > FBE) {
 		
-		kernel_log_("FBE");
-		
 		//Enter FBE;
-		mcg_enter_FBE();
+		enter_FBE();
 		
 		//If target mode is in level 2 :
 		if (mode == PEE) {
-			kernel_log_("PBE");
-			
-			
+
 			//Enter FBE;
-			mcg_enter_PBE();
+			enter_PBE();
 			
 		}
 		
 	}
 	
 	//Enter to this mode directly;
-	(*(enter_mode[mode]))();
-	
-	//Update the current mode;
-	current_mcg_mode = mode;
+	(*(mode_transitions[mode]))();
 	
 }
 
 
-static void mcg_configure_hardware(struct mcg_config *config) {
+static void mcg_configure_hardware(const struct kx_mcg_config *config) {
 	
 	/*
 	 * IRC configuration :
@@ -584,20 +647,13 @@ static void mcg_configure_hardware(struct mcg_config *config) {
 	 */
 	
 	
-	kernel_log_("OSC");
-	
-	
 	//If the OSC must be enabled :
 	if (config->osc_enabled) {
-		
-		kernel_log_("OSC config");
 		
 		//Configure the OSC;
 		kx_osc_configure(config->osc_channel);
 		
 	} else {
-		
-		kernel_log_("OSC stop");
 		
 		//If the OSC is not used, turn it off;
 		kx_osc_stop();
@@ -610,13 +666,8 @@ static void mcg_configure_hardware(struct mcg_config *config) {
 	 */
 	
 	
-	
-	kernel_log_("FLL");
-	
 	//If the FLL is used :
 	if (config->fll_used) {
-		
-		kernel_log_("FLL config");
 		
 		kx_fll_configure(config->fll_configuration);
 		
@@ -627,13 +678,8 @@ static void mcg_configure_hardware(struct mcg_config *config) {
 	 * PLL configuration;
 	 */
 	
-	kernel_log_("PLL");
-	
 	//If the PLL is used :
 	if (config->pll_used) {
-		
-		kernel_log_("PLL config");
-		
 		
 		kx_pll_configure(config->pll_configuration);
 		
@@ -642,42 +688,8 @@ static void mcg_configure_hardware(struct mcg_config *config) {
 }
 
 
-//tODO
-#define NB_CONFIGURATION_FINDER 3
 
-/*
- * This static array contains functions that can be used to search an adapted configuration;
- */
-
-static bool (*const config_search[NB_CONFIGURATION_FINDER])(uint32_t target, struct mcg_config *config) = {
-	
-	/*
-	 * First, internal clocking configs will be evaluated;
-	 *
-	 * !!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!
-	 *
-	 * The IRC can always work and provide a proper configuration. It can be called with an
-	 * empty config (config.frequency = 0).
-	 * All others will trigger a kernel panic if they get called with an empty configuration;
-	 */
-	
-	&kx_irc_find_configuration,
-	
-	//External clocking configs will be evaluated after;
-	&kx_osc_find_configuration,
-	
-	//FLL clocking configs will then be evaluated;
-	&kx_fll_find_configuration,
-	
-	/*
-	//PLL clocking configs will finally be evaluated;
-	&kx_pll_find_configuration,
-	 */
-	
-};
-
-
-void mcg_autotune(const uint32_t frequency_target) {
+void mcg_configure(const struct kx_mcg_config *config) {
 	
 	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
 	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
@@ -692,39 +704,8 @@ void mcg_autotune(const uint32_t frequency_target) {
 	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
 	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
 	
-	//Declare the target configuration;
-	struct mcg_config config;
 	
-	//TODO;
-	bool exact = false;
-	
-	
-	debug_delay_ms(1000);
-	
-	kernel_log_("Evaluating ...");
-	
-	//For each configuration finder :
-	for (uint8_t finder_id = 0; finder_id < NB_CONFIGURATION_FINDER; finder_id++) {
-		
-		/*
-		 * Search for a config that hits the target frequency;
-		 * If a config closer than the current one is found, the config will be updated;
-		 * If a config matching the target frequency is found, 1 will be returned, and 0 if not;
-		 */
-		
-		exact = (*(config_search[finder_id]))(frequency_target, &config);
-		
-		//If a matching solution is found, stop here;
-		if (exact)
-			break;
-		
-	}
-	
-	kernel_log_("Done");
-	
-	debug_delay_ms(1000);
-	
-	kernel_log("Exact config found : %d, frequency : %d, mode %d", exact, config.frequency, config.mode);
+	kernel_log("config found : frequency : %d, mode %d", config->mcgout_freq, config->mode);
 	
 	//TODO DISABLE CLOCKING MONITORING HERE;
 	
@@ -734,25 +715,21 @@ void mcg_autotune(const uint32_t frequency_target) {
 	//Now, go back to FLL bypassed Internal, to configure the hardware;
 	mcg_return_FBI();
 	
+	
 	kernel_log_("Configuring hardware ...");
 	
 	//Configure the required hardware;
-	mcg_configure_hardware(&config);
+	mcg_configure_hardware(config);
 	
-	kernel_log("Entering mode %d ...", config.mode);
+	
+	kernel_log("Entering mode %d ...", config->mode);
 	
 	//Enter the required mcg mode;
-	mcg_enter_mode(config.mode);
+	enter_mode(config->mode);
 	
-	//Update the mcg frequency;
-	mcg_out_frequency = config.frequency;
-	
-	debug_led_blink(1000);
 	
 	kernel_log_("STOPPING");
 	
-	
-	while (1);
-	
+	debug_led_blink(1000);
 	
 }

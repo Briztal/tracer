@@ -274,23 +274,23 @@ SIM_DEFINE_GATING(7, MPU, 2);
 
 
 /**
- * Clock dividers : a number between 1 and 16 must be provided. If not, call will be ignored;
+ * Clock dividers : a number between 0 and 15 must be provided. If not, call will be ignored;
  * @param clock_divider : the required clock divider;
  */
 
 //All functions are the same, at name except for divider offset. A macro will take care of this;
 #define SIM_DEFINE_CLOCK_SETTER(name, offset)\
+static inline uint16_t sim_get_##name##_clock_divider(uint8_t clock_divider) {\
+    return (*SIM_CLKDIV1 & (((uint32_t) 0x0F) << (offset))) >> (offset);\
+}\
 static inline void sim_set_##name##_clock_divider(uint8_t clock_divider) {\
-	/*Decrement the clock divider;*/\
-    (clock_divider)--;\
     /*If the clock divider is not between 0 and 15, stop here;*/\
     if ((clock_divider) & 0xF0) {\
-		\
         return;\
 	}\
 	uint32_t var = *SIM_CLKDIV1;\
     var &= ~(((uint32_t) 0x0F) << (offset));\
-    var |= ~(((uint32_t) (clock_divider)) << (offset));\
+    var |= (((uint32_t) (clock_divider)) << (offset));\
     *SIM_CLKDIV1 = var;\
 }
 
@@ -304,7 +304,7 @@ SIM_DEFINE_CLOCK_SETTER(bus, 24);
 SIM_DEFINE_CLOCK_SETTER(flexbus, 20);
 
 //The flash clock part starts at bit 16;
-SIM_DEFINE_CLOCK_SETTER(flash, 26);
+SIM_DEFINE_CLOCK_SETTER(flash, 16);
 
 
 

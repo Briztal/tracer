@@ -45,29 +45,18 @@ struct auto_mod {
 };
 
 
+#define CORE_MODULE ".kernel_core_modules"
 
-#define _KERNEL_EMBED_MODULE(name_l, section_name, init_f)\
-	static struct auto_mod mod##name_l __attribute__((section (section_name), used)) = \
+#define PERIPHERAL_MODULE ".kernel_peripheral_modules"
+
+#define SYSTEM_MODULE ".kernel_peripheral_modules"
+
+#define USER_MODULE ".kernel_peripheral_modules"
+
+
+#define KERNEL_EMBED_MODULE(module_type, name_l,  init_f)\
+	static struct auto_mod mod##name_l __attribute__((section (module_type), used)) = \
 	{.name = (#name_l), .init = (init_f)};
-
-/*
- * There are distinct type of modules, that rely on different pre-initialisations :
- * 	- Peripheral modules, that only rely on base kernel initialisation;
- * 	- System modules, TODO;
- * 	- User modules that can rely on peripheral modules and system modules;
- */
-
-#define KERNEL_EMBED_PERIPHERAL_MODULE(name, init)\
-	_KERNEL_EMBED_MODULE(name, ".kernel_peripheral_modules", init)
-
-
-#define KERNEL_EMBED_SYSTEM_MODULE(name, init)\
-	_KERNEL_EMBED_MODULE(name, ".kernel_system_modules", init)
-
-
-#define KERNEL_EMBED_USER_MODULE(name, init)\
-	_KERNEL_EMBED_MODULE(name, ".kernel_user_modules", init)
-
 
 
 #endif //TRACER_AUTO_MOD_H

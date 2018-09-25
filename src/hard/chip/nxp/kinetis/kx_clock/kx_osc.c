@@ -1,7 +1,22 @@
-//
-// Created by root on 9/22/18.
-//
+/*
+  kx_osc.c Part of TRACER
 
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
@@ -400,114 +415,3 @@ void kx_osc_configure(uint8_t channel) {
 	#endif //(OSC0_CONN_ID != 0)
 	
 }
-
-
-/**
- * kx_irc_find_configuration : this function will evaluate all configurations of the IRC, and determine
- * 	if one is closer to the target frequency than the current mcg config;
- *
- * 	If so, the current config will be overwritten;
- *
- * @param target_frequency : the frequency that the mcg should have after config;
- *
- * @param config : the current configuration of the MCG.
- *
- *
- */
-
-bool kx_osc_find_configuration(const uint32_t target_frequency, struct mcg_config *const config) {
-	
-	//Cache the current frequency;
-	const uint32_t current_frequency = config->frequency;
-	
-	//If the current frequency is null :
-	if (!current_frequency) {
-		
-		//Fail, this function can't be called with an empty config.
-		kernel_panic("kx_osc_find_configuration : called with an empty configuration; "
-						 "the IRC finder must be called before;");
-		
-	}
-	
-	//Determine the current distance;
-	uint32_t current_dist = U32_DIST(current_frequency, target_frequency);
-	
-	//A flag, set if a closer configuration has been found; If the current frequency is null, it is set;
-	bool improvement = false;
-	
-	//If the flag is set, represents the channel closest to the target frequency;
-	uint8_t best_channel = 0;
-	
-	//A flag, set if the target frequency is reached;
-	bool target_reached = false;
-	
-	//Evaluate OSC0 and OSC1
-	for (uint8_t channel_id = 2; channel_id--;) {
-		
-		//Cache the channel's frequency;
-		uint32_t channel_freq = osc_frequencies[channel_id];
-		
-		//Determine the frequency distance;
-		uint32_t channel_dist = U32_DIST(channel_freq, target_frequency);
-		
-		//If the channel is closer than the current best configuration;
-		if (channel_dist < current_dist) {
-			
-			//Update the improvement flag, and the best channel;
-			improvement = true, best_channel = channel_id, current_dist = channel_dist;
-			
-			//If the channel hits the target frequency :
-			if (channel_dist == 0) {
-				
-				//Update the related flag;
-				target_reached = true;
-				
-				//Stop here;
-				break;
-				
-			}
-			
-		}
-		
-	}
-	
-	//If a better configuration has been found :
-	if (improvement) {
-		
-		//Create the config initializer;
-		struct mcg_config new_config = {
-			
-			//Save the frequency;
-			.frequency = osc_frequencies[best_channel],
-			
-			//Only the OSC will be used;
-			.mode = BLPE,
-			
-			//The IRC will not be used;
-			.irc_used = false,
-			
-			//OSC not used,
-			.osc_enabled = true,
-			
-			//Save the channel to configure the IRC properly;
-			.osc_channel = best_channel,
-			
-			
-			//FLL not used,
-			.fll_used = false,
-			
-			//PLL not used,
-			.pll_used = false,
-			
-		};
-		
-		//Update the mcg configuration;
-		*config = new_config;
-		
-	}
-	
-	//Return true if the target frequency is reached;
-	return target_reached;
-	
-}
-

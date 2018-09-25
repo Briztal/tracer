@@ -24,21 +24,22 @@
 
 #include <kernel/log.h>
 #include <kernel/debug/debug.h>
+#include <kernel/scheduler/sched.h>
 
 #include "nlist.h"
 
 
 struct nlist_elmt {
-
+	
 	//Modules are linked together;
 	struct list_head head;
-
+	
 	//The element's name;
 	const char *const name;
-
+	
 	//The data structure referenced by the element;
 	void *data;
-
+	
 };
 
 
@@ -50,37 +51,38 @@ struct nlist_elmt {
  * @param name : the name to search for;
  */
 
-void *nlist_search(const struct nlist *list, const char *const name) {
-
+static struct nlist_elmt *nlist_find(const struct nlist *list, const char *const name) {
+	
 	//Cache the first element;
 	struct nlist_elmt *const first = list->elements, *element = first;
-
+	
 	//If no elements are registered, stop here;
 	if (!first) {
 		return 0;
 	}
-
+	
 	//For each registered element :
 	do {
-
+		
 		//If the element matched :
 		if (!strcmp(element->name, name)) {
-
+			
 			//Return the element's reference;
-			return element->data;
-
+			return element;
+			
 		}
-
+		
 		//Update the element;
 		element = element->head.next;
-
+		
 		//Stop when all elements have been evaluated, or a match was found;
 	} while (element != first);
-
+	
 	//Fail, all elements have been evaluated;
 	return 0;
-
+	
 }
+
 
 
 //-------------------------------------------------- List manipulation -------------------------------------------------
@@ -95,55 +97,105 @@ void *nlist_search(const struct nlist *list, const char *const name) {
  */
 
 bool nlist_add(struct nlist *list, const char *name, void *data) {
-
+	
 	//If another element has this name :
-	if (nlist_search(list, name)) {
-
+	if (nlist_find(list, name)) {
+		
 		kernel_log("\nWarning : nlist_add : file with name [%s] already exists;", name);
-
+		
 		//Do nothing;
 		return false;
-
+		
 	}
-
+	
 	//Allocate some memory for the element;
 	struct nlist_elmt *elmt = kmalloc(sizeof(struct nlist_elmt));
-
+	
 	//Get the length of the string;
 	size_t len = strlen_safe(name, list->name_max_length);
-
+	
 	//Allocate some data for the name;
 	char *heap_name = kmalloc(len + 1);
-
+	
 	strcopy_safe(heap_name, name, len);
-
+	
 	//Create the element initializer;
 	struct nlist_elmt elmt_init = {
-
+		
 		//Link to itself;
 		.head = {
 			.next = elmt,
 			.prev = elmt,
 		},
-
+		
 		//Transfer the ownership of the heap name;
 		.name = heap_name,
-
+		
 		//Save the exit function;
 		.data = data,
-
+		
 	};
-
+	
 	//Initialise the element;
 	memcpy(elmt, &elmt_init, sizeof(struct nlist_elmt));
-
+	
 	//Link the element to the referenced list;
 	list_concat_ref((struct list_head *) elmt, (struct list_head **) &list->elements);
-
+	
 	//Complete;
 	return true;
+	
+	
+}
 
 
+/**
+ * mod_find : returns a reference to the content of the element that has the required name, if it exists, 0 if not;
+ * @param name : the name to search for;
+ */
+
+void *nlist_get(const struct nlist *list, const char *const name) {
+	
+	//Find an element with this name;
+	struct nlist_elmt *elmnt = nlist_find(list, name);
+	
+	//If the element is null :
+	if (!elmnt) {
+		
+		//Default value;
+		return 0;
+		
+	}
+	
+	//If not, return the element data;
+	return elmnt->data;
+	
+}
+
+
+//Set an element in the list, return the previous element;
+void *nlist_set(struct nlist *list, const char *name, void *new_data) {
+	
+	//Find an element with this name;
+	struct nlist_elmt *elmnt = nlist_find(list, name);
+	
+	//If the element is null :
+	if (!elmnt) {
+		
+		//Default value;
+		return 0;
+		
+	}
+	
+	//Cache the element data;
+	void *data = elmnt->data;
+	
+	//Update the element data;
+	elmnt->data = new_data;
+	
+	//Return the previous data;
+	return data;
+	
 }
 
 
@@ -158,31 +210,31 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
  */
 
 void *nlist_remove(struct nlist *list, const char *name) {
-
+	
 	//Search for an element with that name;
-	struct nlist_elmt *element = nlist_search(list, name);
-
+	struct nlist_elmt *element = nlist_find(list, name);
+	
 	//If the element is null, stop here;
 	if (!element)
 		return 0;
-
+	
 	//The element exists, we can delete it;
-
+	
 	//Remove the element from the elements list;
 	list_remove_ref_next((struct list_head *) element, (struct list_head **) list->elements);
-
+	
 	//Cache the element's content;;
 	void *data = element->data;
-
+	
 	//Delete the element's heap name;
 	kfree((void *) element->name);
-
+	
 	//Delete the element struct;
 	kfree(element);
-
+	
 	//Return the content;
 	return data;
-
+	
 }
 
 //---------------------------------------------------- List cleanup ----------------------------------------------------
@@ -195,64 +247,63 @@ void *nlist_remove(struct nlist *list, const char *name) {
  */
 
 void nlist_clear(struct nlist *list, void (*deleter)(void *)) {
-
+	
 	//Cache the first element;
 	struct nlist_elmt *const first = list->elements, *element = first;
-
+	
 	//If no elements are registered, stop here;
 	if (!first) {
 		return;
 	}
-
+	
 	//For each element :
 	do {
-
+		
 		//Cache the successor;
 		struct nlist_elmt *next = element->head.next;
-
+		
 		//Delete the element's content;
 		(*deleter)(element->data);
-
+		
 		//Delete the element's heap name;
 		kfree((void *) element->name);
-
+		
 		//Delete the element struct;
 		kfree(element);
-
+		
 		//Update the element;
 		element = next;
-
+		
 		//Stop when all elements have been evaluated, or a match was found;
 	} while (element != first);
-
+	
 	//Reset the list reference;
 	list->elements = 0;
-
+	
 }
-
 
 
 //List all files;
 void nlist_list(struct nlist *list) {
-
+	
 	//Cache the current file, as the first file;
 	struct nlist_elmt *const first = list->elements, *file = first;
-
+	
 	//If there are no files :
 	if (!file) {
 		kernel_log_("no files");
 		return;
 	}
-
+	
 	//For each file :
 	do {
-
+		
 		kernel_log_(file->name);
-
-
+		
+		
 		//If not, focus on the next file;
 		file = file->head.next;
-
+		
 	} while (file != first);
-
+	
 }

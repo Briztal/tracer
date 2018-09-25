@@ -1,40 +1,336 @@
-//
-// Created by root on 9/22/18.
-//
+/*
+  kx_clock_auto.c Part of TRACER
 
-#include "kx_mcg.h"
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 
 #include <kernel/panic.h>
-#include <kernel/log.h>
+#include <kernel/clock/clock.h>
 #include <kernel/debug/debug.h>
+#include <kernel/log.h>
 
+#include "kx_clock_auto.h"
+
+#define U32_DIST(a, b) (((a) < (b)) ? ((b) - (a)) : ((a) - (b)))
+
+
+/*
+ * -------------------------------------------------------- IRC --------------------------------------------------------
+ */
+
+//TODO
+#define NB_CONFIGURATION_FINDER 3
+
+/*
+ * This static array contains functions that can be used to search an adapted configuration;
+ */
+
+static bool (*const config_search[NB_CONFIGURATION_FINDER])(uint32_t target, struct kx_mcg_config *config) = {
+	
+	/*
+	 * First, internal clocking configs will be evaluated;
+	 *
+	 * !!!!!!!!!!!!!!!!!!! IMPORTANT !!!!!!!!!!!!!!!!!
+	 *
+	 * The IRC can always work and provide a proper configuration. It can be called with an
+	 * empty config (config.frequency = 0).
+	 * All others will trigger a kernel panic if they get called with an empty configuration;
+	 */
+	
+	&kx_irc_find_configuration,
+	
+	//External clocking configs will be evaluated after;
+	&kx_osc_find_configuration,
+	
+	//FLL clocking configs will then be evaluated;
+	&kx_fll_find_configuration,
+	
+	/*
+	//PLL clocking configs will finally be evaluated;
+	&kx_pll_find_configuration,
+	 */
+	
+};
+
+
+void kx_clock_autotune(const uint32_t frequency_target) {
+	
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	//TODO NOTE : STATUS CHANGES DURING MODE TRANSITION (INTERNAL TO EXTERNAL RESETS THE INTERNAL REF CLOCK);
+	
+	//Declare the target configuration;
+	struct kx_mcg_config config;
+	
+	debug_delay_ms(1000);
+	
+	kernel_log_("Evaluating ...");
+	
+	//For each configuration finder :
+	for (uint8_t finder_id = 0; finder_id < NB_CONFIGURATION_FINDER; finder_id++) {
+		
+		/*
+		 * Search for a config that hits the target frequency;
+		 * If a config closer than the current one is found, the config will be updated;
+		 * If a config matching the target frequency is found, 1 will be returned, and 0 if not;
+		 */
+		
+		bool exact = (*(config_search[finder_id]))(frequency_target, &config);
+		
+		//If a matching solution is found, stop here;
+		if (exact)
+			break;
+		
+	}
+	
+	
+	kernel_log_("Done. Calling kernel clock config.");
+	
+	//Call the kernel clock tuning function;
+	clock_tune(&config, sizeof(struct kx_mcg_config));
+	
+}
+
+
+/**
+ * kx_irc_find_configuration : this function will evaluate all configurations of the IRC, and determine
+ * 	if one is closer to the target frequency than the current mcg config;
+ *
+ * 	If so, the current config will be overwritten;
+ *
+ * @param target_frequency : the frequency that the mcg should have after config;
+ *
+ * @param config : the current configuration of the MCG.
+ */
+
+bool kx_irc_find_configuration(const uint32_t target_frequency, struct kx_mcg_config *const config) {
+	
+	//Cache the current frequency;
+	const uint32_t current_frequency = config->mcgout_freq;
+	
+	//Determine the current distance;
+	uint32_t current_dist = U32_DIST(current_frequency, target_frequency);
+	
+	//A flag, set if a closer configuration has been found; If the current frequency is null, it is set;
+	bool improvement = (current_frequency == 0);
+	
+	//If the flag is set, represents the channel closest to the target frequency;
+	uint8_t best_channel = 0;
+	
+	//A flag, set if the target frequency is reached;
+	bool target_reached = false;
+	
+	//For each channel :
+	for (uint8_t channel_id = NB_IRC_CHANNELS; channel_id--;) {
+		
+		//Cache the channel's frequency;
+		uint32_t channel_freq = irc_frequencies[channel_id];
+		
+		//Determine the frequency distance;
+		uint32_t channel_dist = U32_DIST(channel_freq, target_frequency);
+		
+		//If the channel is closer than the current best configuration;
+		if (channel_dist < current_dist) {
+			
+			//Update the improvement flag, and the best channel;
+			improvement = true, best_channel = channel_id, current_dist = channel_dist;
+			
+			//If the channel hits the target frequency :
+			if (channel_dist == 0) {
+				
+				//Update the related flag;
+				target_reached = true;
+				
+				//Stop here;
+				break;
+				
+			}
+			
+		}
+		
+	}
+	
+	//If a better configuration has been found :
+	if (improvement) {
+		
+		//Create the config initializer;
+		struct kx_mcg_config new_config = {
+			
+			//Save the frequency;
+			.mcgout_freq = irc_frequencies[best_channel],
+			
+			//Only the IRC will be used;
+			.mode = BLPI,
+			
+			//Only the IRC will be used;
+			.irc_used = true,
+			
+			//Save the channel to configure the IRC properly;
+			.irc_channel = best_channel,
+			
+			//OSC not used,
+			.osc_enabled = false,
+			
+			//FLL not used,
+			.fll_used = false,
+			
+			//PLL not used,
+			.pll_used = false,
+			
+		};
+		
+		//Update the mcg configuration;
+		*config = new_config;
+		
+	}
+	
+	//Return true if the target frequency is reached;
+	return target_reached;
+	
+}
+
+
+/*
+ * -------------------------------------------------------- OSC --------------------------------------------------------
+ */
+
+/**
+ * kx_irc_find_configuration : this function will evaluate all configurations of the IRC, and determine
+ * 	if one is closer to the target frequency than the current mcg config;
+ *
+ * 	If so, the current config will be overwritten;
+ *
+ * @param target_frequency : the frequency that the mcg should have after config;
+ *
+ * @param config : the current configuration of the MCG.
+ *
+ *
+ */
+
+bool kx_osc_find_configuration(const uint32_t target_frequency, struct kx_mcg_config *const config) {
+	
+	//Cache the current frequency;
+	const uint32_t current_frequency = config->mcgout_freq;
+	
+	//If the current frequency is null :
+	if (!current_frequency) {
+		
+		//Fail, this function can't be called with an empty config.
+		kernel_panic("kx_osc_find_configuration : called with an empty configuration; "
+						 "the IRC finder must be called before;");
+		
+	}
+	
+	//Determine the current distance;
+	uint32_t current_dist = U32_DIST(current_frequency, target_frequency);
+	
+	//A flag, set if a closer configuration has been found; If the current frequency is null, it is set;
+	bool improvement = false;
+	
+	//If the flag is set, represents the channel closest to the target frequency;
+	uint8_t best_channel = 0;
+	
+	//A flag, set if the target frequency is reached;
+	bool target_reached = false;
+	
+	//Evaluate OSC0 and OSC1
+	for (uint8_t channel_id = 2; channel_id--;) {
+		
+		//Cache the channel's frequency;
+		uint32_t channel_freq = osc_frequencies[channel_id];
+		
+		//Determine the frequency distance;
+		uint32_t channel_dist = U32_DIST(channel_freq, target_frequency);
+		
+		//If the channel is closer than the current best configuration;
+		if (channel_dist < current_dist) {
+			
+			//Update the improvement flag, and the best channel;
+			improvement = true, best_channel = channel_id, current_dist = channel_dist;
+			
+			//If the channel hits the target frequency :
+			if (channel_dist == 0) {
+				
+				//Update the related flag;
+				target_reached = true;
+				
+				//Stop here;
+				break;
+				
+			}
+			
+		}
+		
+	}
+	
+	//If a better configuration has been found :
+	if (improvement) {
+		
+		//Create the config initializer;
+		struct kx_mcg_config new_config = {
+			
+			//Save the frequency;
+			.mcgout_freq = osc_frequencies[best_channel],
+			
+			//Only the OSC will be used;
+			.mode = BLPE,
+			
+			//The IRC will not be used;
+			.irc_used = false,
+			
+			//OSC not used,
+			.osc_enabled = true,
+			
+			//Save the channel to configure the IRC properly;
+			.osc_channel = best_channel,
+			
+			
+			//FLL not used,
+			.fll_used = false,
+			
+			//PLL not used,
+			.pll_used = false,
+			
+		};
+		
+		//Update the mcg configuration;
+		*config = new_config;
+		
+	}
+	
+	//Return true if the target frequency is reached;
+	return target_reached;
+	
+}
 
 
 /*
  * -------------------------------------------------------- FLL --------------------------------------------------------
  */
-
-/**
- * The Frequency Lock Loop is a hardware component that receives and locks an input frequency between
- * 	31250 and 39062.5 Hz, to generate an output signal whose frequency is proportional to the input frequency;
- *
- * 	The output frequency range can be selected between four ranges (expressed in MHz), low (20-25), mid (40-50),
- * 	mid-high (60-75), and high (80-100);
- *
- * 	The input signal can also be selected, between the OSC external ref and the RTC slow clock;
- *
- * 	If the OSC external reference is selected, its frequency may not be in the required range. To support this case,
- * 	a frequency divider is included, to ensure that the input frequency is in the correct range.
- *
- * 	This divisor must be determined properly after the oscillator is selected;
- *
- * 	The configuration of the FLL comprises two steps :
- * 	- The hardware config, made when the FLL is not engaged; multiplication factor is selected, and clock divisor is
- * 		computed;
- * 	- The selection, made when the FLL is engaged by the MCG. The source is selected, and the actual output frequency
- * 		computed;
- */
-
 
 //The FLL input frequency bounds;
 #define FLL_INPUT_MIN 31250
@@ -46,139 +342,8 @@
 //The tolerance around the fll frequency;
 #define FLL_INPUT_REF_TOLERANCE 2
 
-//The FLL output frequency; At init, at FEI mode with precise ref, fll factor = 640;
-#define FLL_OUTPUT_INIT (32000 * 640)
 
-
-/**
- * mcg_configure_fll_input : configures the input source of the FLL and determines the consequent input frequency;
- *
- * 	If the external reference is selected in input, a check will be made on if the oscillator is enabled, and
- * 	if the provided divider id determines an input frequency inside the PLL working window;
- *
- * 	If the slow internal reference is selected, @eref_divider_id is not used;
- *
- * @param external_ref : set if the external reference sould be used as input;
- * @param eref_divider_id : FRDIV in case of external ref selection;
- */
-
-void kx_fll_configure(struct kx_fll_config config) {
-	
-	/*
-	 * FLL input config : C1
-	 */
-	
-	
-	kernel_log("eref : %d", config.external_ref);
-	
-	
-	//If the external reference is selected :
-	if (config.external_ref) {
-	
-		//Cache the divider index;
-		const uint8_t divider_id = config.eref_divider_id;
-		
-		kernel_log("divider id : %d", divider_id);
-		
-		//If the divider is invalid :
-		if (divider_id > 7) {
-			
-			//Throw a core error;
-			kernel_panic("kx_mc.c : mcg_configure_fll_input : invalid divider;");
-			
-			//Never reached
-			return;
-			
-		}
-		
-		//Cache C1;
-		uint8_t C1 = *MCG_C1;
-		
-		//clear FRDIV bts;
-		C1 &= ~C1_FRDIV;
-		
-		//Copy FRDIV in C1;
-		C1 |= (divider_id << 3);
-		
-		//Update C1;
-		*MCG_C1 = C1;
-		
-	}
-	
-	
-	
-	/*
-	 * FLL output config : C4
-	 */
-	
-	//Cache C4, and clear DMX32 and DCO Range;
-	uint8_t C4 = *MCG_C4 & ~(C4_DMX32 | C4_DRST_DRS);
-	
-	//If the exact frequency must be selected :
-	if (config.exact_32768_ref) {
-		
-		//If the input frequency is appropriate :
-		
-		//Set the DMX32 flag;
-		C4 |= C4_DMX32;
-		
-	}
-	
-	//Save DCO range Select;
-	C4 |= (config.f_range & 3) << 5;
-	
-	
-	kernel_log("C4 : %h", C4);
-	
-	
-	//Write C4;
-	*MCG_C4 = C4;
-	
-}
-
-
-//Wait till FLL acquires the PLLS clock;
-void kx_fll_acquire_plls() {
-	
-	//Clear the PLLS bit in C6 to select the FLL;
-	*MCG_C6 &= ~C6_PLLS;
-	
-	//While the PLL owns PLLST (S_PLLST set);
-	while ((*MCG_S) & S_PLLST);
-	
-	kernel_log("S : %h", (uint32_t)(*MCG_S));
-}
-
-
-void kx_fll_set_external_clocking() {
-	
-	kernel_log_("CLEARING C1[IREFS]");
-	
-	//Clear IREFS;
-	*MCG_C1 &= ~C1_IREFS;
-	
-	//Wait till IREFST is set;
-	while((*MCG_S) & S_IREFST) {
-		kernel_log("SET %h", *MCG_S);
-		debug_delay_ms(100);
-	}
-}
-
-
-void kx_fll_set_internal_clocking() {
-	
-	kernel_log_("SETTING C1[IREFS]");
-	
-	//Set IREFS;
-	*MCG_C1 |= C1_IREFS;
-	
-	//Wait till IREFST is set;
-	while(!((*MCG_S) & S_IREFST));
-	
-}
-
-
-struct range_freqs {
+struct fll_range {
 	
 	const uint32_t min_freq;
 	
@@ -191,9 +356,9 @@ struct range_freqs {
 };
 
 
-#define NB_RANGES 4
+#define NB_FLL_RANGES 4
 
-static const struct range_freqs range_parameters[NB_RANGES] = {
+static const struct fll_range fll_range_parameters[NB_FLL_RANGES] = {
 	{.min_freq = 20000000, .max_freq = 25000000, .fll_factor = 640, .ref_freq = 24000000},
 	{.min_freq = 40000000, .max_freq = 50000000, .fll_factor = 1280, .ref_freq = 48000000,},
 	{.min_freq = 60000000, .max_freq = 75000000, .fll_factor = 1920, .ref_freq = 72000000,},
@@ -201,14 +366,14 @@ static const struct range_freqs range_parameters[NB_RANGES] = {
 };
 
 
-static uint8_t find_ranges(uint8_t *const ranges, const uint32_t target_frequency) {
+static uint8_t fll_find_ranges(uint8_t *const ranges, const uint32_t target_frequency) {
 	
 	/*
 	 * Limits
 	 */
 	
 	//If the target is below the lowest range :
-	if (target_frequency <= range_parameters[0].min_freq) {
+	if (target_frequency <= fll_range_parameters[0].min_freq) {
 		
 		//Plan evaluation of the first range only;
 		*ranges = 0;
@@ -218,10 +383,10 @@ static uint8_t find_ranges(uint8_t *const ranges, const uint32_t target_frequenc
 	}
 	
 	//If the target is below the lowest range :
-	if (target_frequency >= range_parameters[NB_RANGES - 1].max_freq) {
+	if (target_frequency >= fll_range_parameters[NB_FLL_RANGES - 1].max_freq) {
 		
 		//Plan evaluation of the first range onlt;
-		*ranges = NB_RANGES - 1;
+		*ranges = NB_FLL_RANGES - 1;
 		
 		//The couple of ranges that target is between has been found, we can stop here;
 		return 1;
@@ -233,11 +398,11 @@ static uint8_t find_ranges(uint8_t *const ranges, const uint32_t target_frequenc
 	 */
 	
 	//Evaluate each range;
-	for (uint8_t range_id = 0; range_id < NB_RANGES; range_id++) {
+	for (uint8_t range_id = 0; range_id < NB_FLL_RANGES; range_id++) {
 		
 		
 		//Cache range bounds;
-		const struct range_freqs freqs = range_parameters[range_id];
+		const struct fll_range freqs = fll_range_parameters[range_id];
 		
 		//If we found a range whose min frequency is higher than the target (first one found) :
 		if (target_frequency < freqs.min_freq) {
@@ -269,7 +434,7 @@ static uint8_t find_ranges(uint8_t *const ranges, const uint32_t target_frequenc
 
 
 //For each clock source, there can be multiple comptible dividers, each one determining a fll input frequency;
-struct divider_config {
+struct fll_divider_config {
 	
 	//The resulting frequency at the input of the FLL;
 	uint32_t frequency;
@@ -279,6 +444,7 @@ struct divider_config {
 	
 };
 
+
 /**
  * get_low_range_dividers : determines the compatible divider, and saves it, if it exists;
  * @param osc_freq : the frequency of the input oscillator;
@@ -286,17 +452,13 @@ struct divider_config {
  * @return 1 if a compatible divider exists, 0 if not;
  */
 
-static uint8_t get_low_range_dividers(uint32_t osc_freq, struct divider_config *dividers) {
-	
-	kernel_log("osc freq  : %d ", osc_freq);
+static uint8_t fll_get_low_range_dividers(uint32_t osc_freq, struct fll_divider_config *dividers) {
 	
 	//For each possible divider :
 	for (uint8_t divider_id = 0; divider_id < 8; divider_id++) {
 		
 		//If the resulting frequency is in the FLL input frequency window :
 		if ((osc_freq < FLL_INPUT_MAX) && (osc_freq > FLL_INPUT_MIN)) {
-			
-			kernel_log("fr  : %d, div id : %d ", osc_freq, divider_id);
 			
 			//Save the divider and its frequency;
 			(*dividers).frequency = osc_freq, (*dividers).divider_id = divider_id;
@@ -323,10 +485,7 @@ static uint8_t get_low_range_dividers(uint32_t osc_freq, struct divider_config *
  * @return the number of compatible dividers found;
  */
 
-static uint8_t get_high_range_dividers(uint32_t osc_freq, struct divider_config *dividers) {
-	
-	
-	kernel_log("osc freq  : %d ", osc_freq);
+static uint8_t fll_get_high_range_dividers(uint32_t osc_freq, struct fll_divider_config *dividers) {
 	
 	//A static array, containing dividers;
 	static uint16_t high_dividers[8] = {32, 64, 128, 256, 512, 1024, 1280, 1536};
@@ -339,9 +498,6 @@ static uint8_t get_high_range_dividers(uint32_t osc_freq, struct divider_config 
 		
 		//Determine the related frequency;
 		uint32_t input_freq = osc_freq / (uint32_t) high_dividers[divider_id];
-		
-		
-		kernel_log("fr  : %d, div id : %d ", input_freq, (uint32_t) high_dividers[divider_id]);
 		
 		//If the resulting frequency is in the FLL input frequency window :
 		if ((input_freq <= FLL_INPUT_MAX) && (input_freq >= FLL_INPUT_MIN)) {
@@ -421,7 +577,7 @@ struct fll_source_configuration {
  * @return true if a better configuration has been found, false if not;
  */
 
-static bool get_best_source_config(
+static bool fll_get_best_source_config(
 	const uint32_t target_frequency, uint32_t best_frequency,
 	const enum fll_source clock_source, const uint32_t source_freq,
 	struct fll_source_configuration *const best_config,
@@ -433,7 +589,7 @@ static bool get_best_source_config(
 	 */
 	
 	//Compatible dividers must be determined; there can be at most two compatible dividers;
-	struct divider_config dividers[2];
+	struct fll_divider_config dividers[2];
 	uint8_t nb_dividers;
 	
 	//If the clock source is the IRC slow :
@@ -447,9 +603,9 @@ static bool get_best_source_config(
 		
 		//Depending on the frequency range, we must check dividers for different values;
 		if (source_freq < 32786) {
-			nb_dividers = get_low_range_dividers(source_freq, dividers);
+			nb_dividers = fll_get_low_range_dividers(source_freq, dividers);
 		} else {
-			nb_dividers = get_high_range_dividers(source_freq, dividers);
+			nb_dividers = fll_get_high_range_dividers(source_freq, dividers);
 		}
 		
 	}
@@ -489,9 +645,6 @@ static bool get_best_source_config(
 	 * Configs evaluation;
 	 */
 	
-	
-	kernel_log("dividers : %d, ranges : %d ", nb_dividers, nb_ranges);
-	
 	//For each possible divider :
 	for (uint8_t divider_index = 0; divider_index < nb_dividers; divider_index++) {
 		
@@ -508,19 +661,11 @@ static bool get_best_source_config(
 			 * Compare config in standard mode;
 			 */
 			
-			kernel_log("in freq : %d ", input_freq);
-			
-			kernel_log("range index : %d, factor : %d ", range_index, range_parameters[range_index].fll_factor);
-			
 			//Determine the output frequency, in standard mode;
-			uint32_t output_freq = input_freq * (uint32_t) range_parameters[range_index].fll_factor;
-			
-			kernel_log("out freq : %d, target %d, current %d", output_freq, target_frequency, best_frequency);
+			uint32_t output_freq = input_freq * (uint32_t) fll_range_parameters[range_index].fll_factor;
 			
 			//Determine the distance;
 			uint32_t range_dist = U32_DIST(output_freq, target_frequency);
-			
-			kernel_log("rdist : %d ,tdist : %d ", range_dist, target_dist);
 			
 			//If this config is closer :
 			if (range_dist < target_dist) {
@@ -541,7 +686,7 @@ static bool get_best_source_config(
 				(input_freq > FLL_INPUT_REF - FLL_INPUT_REF_TOLERANCE)) {
 				
 				//Determine the output frequency, in ref mode;
-				output_freq = (uint32_t) range_parameters[range_index].ref_freq;
+				output_freq = (uint32_t) fll_range_parameters[range_index].ref_freq;
 				
 				//Determine the distance;
 				range_dist = U32_DIST(output_freq, target_frequency);
@@ -612,13 +757,13 @@ static bool get_best_source_config(
  * @return true if an exact configuration is found, false if not;
  */
 
-bool kx_fll_find_configuration(const uint32_t target_frequency, struct mcg_config *const config) {
+bool kx_fll_find_configuration(const uint32_t target_frequency, struct kx_mcg_config *const config) {
 	
 	//Cache the closest frequency;
-	uint32_t best_frequency = config->frequency;
+	uint32_t best_frequency = config->mcgout_freq;
 	
 	//If the current frequency is null :
-	if (!config->frequency) {
+	if (!config->mcgout_freq) {
 		
 		//Fail, this function can't be called with an empty config.
 		kernel_panic("kx_fll_find_configuration : called with an empty configuration; "
@@ -636,7 +781,7 @@ bool kx_fll_find_configuration(const uint32_t target_frequency, struct mcg_confi
 	
 	//TODO COMPARE DISTANCE HERE, TO REDUCE CALCULATIONS
 	//Determine relevant ranges and their number; Will be 1 or 2;
-	uint8_t nb_ranges = find_ranges(ranges, target_frequency);
+	uint8_t nb_ranges = fll_find_ranges(ranges, target_frequency);
 	
 	
 	/*
@@ -666,22 +811,24 @@ bool kx_fll_find_configuration(const uint32_t target_frequency, struct mcg_confi
 	
 	
 	//Evaluate the IRC slow config;
-	_improvement = get_best_source_config(target_frequency, best_frequency, FLL_IRC_SLOW, IRC_SLOW_FREQ, &best_config,
-										  ranges, nb_ranges);
+	_improvement = fll_get_best_source_config(target_frequency, best_frequency, FLL_IRC_SLOW, IRC_SLOW_FREQ,
+											  &best_config,
+											  ranges, nb_ranges);
 	
 	CHECK_IMPROVEMENT
 	
 	
 	//Evaluate the OSC0 config;
-	_improvement = get_best_source_config(target_frequency, best_frequency, FLL_OSC0, osc_frequencies[0], &best_config,
-										  ranges, nb_ranges);
+	_improvement = fll_get_best_source_config(target_frequency, best_frequency, FLL_OSC0, osc_frequencies[0],
+											  &best_config,
+											  ranges, nb_ranges);
 	
 	CHECK_IMPROVEMENT
 	
 	
 	//Evaluate the OSC1 config;
-	//_improvement = get_best_source_config(target_frequency, best_frequency, FLL_OSC1, osc_frequencies[1], &best_config,
-										 // ranges, nb_ranges);
+	//_improvement = fll_get_best_source_config(target_frequency, best_frequency, FLL_OSC1, osc_frequencies[1], &best_config,
+	// ranges, nb_ranges);
 	
 	//CHECK_IMPROVEMENT
 	
@@ -712,10 +859,10 @@ bool kx_fll_find_configuration(const uint32_t target_frequency, struct mcg_confi
 	internal_clk = (best_config.clock_source == FLL_IRC_SLOW);
 	
 	//Create the config initializer;
-	struct mcg_config new_config = {
+	struct kx_mcg_config new_config = {
 		
 		//Save the frequency;
-		.frequency = best_config.output_frequency,
+		.mcgout_freq = best_config.output_frequency,
 		
 		//Enter FEI if internal clocking, FEE if external clocking;
 		.mode = (internal_clk) ? FEI : FEE,

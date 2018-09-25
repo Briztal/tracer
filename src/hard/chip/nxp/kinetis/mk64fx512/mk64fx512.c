@@ -24,7 +24,6 @@
 #include <kernel/startup.h>
 
 #include <hard/chip/nxp/kinetis/kx_wdog.h>
-#include <hard/chip/nxp/kinetis/kx_mcg/kx_mcg.h>
 #include <hard/chip/nxp/kinetis/kx_sim.h>
 
 #include <kernel/panic.h>
@@ -211,69 +210,6 @@ void __entry_point(void) {
 	sim_enable_PORTE_clock_gating();
 
 	startup_initialise_globals();
-	
-	
-	kernel_log_("SUUS");
-	
-	//Autotune to 4 MHz
-	//mcg_autotune(32000 * 2560);
-	mcg_autotune(20000000);
-	
-	kernel_log_("tuning complete, stopping...");
-	
-	while (1);
-
-/*
-
-	struct kx_pll_config pll_conf = {
-
-		//Enable external clock;
-		.enable_mcg_pllclk = false,
-
-		//No interrupt for loss of clock;
-		.loss_of_lock_generates_interrupt = false,
-
-		//No reset at loss of clock;
-		.loss_of_lock_generates_reset = false,
-
-		//Enable during stop mode;
-		.enable_during_stop_mode = true,
-
-		//OSC output is 16MHz, 16/4 = 4MHz;
-		.external_divide_factor = 4,
-
-		//Expected output frequency : 120MHz = 4MHz * 30;
-		.output_multiplication_factor = 30,
-
-	};
-
-	//Configure the PLL;
-	kx_pll_configure(&pll_conf);
-
-	//TODO CONGIGURE IRC;
-
-	//Engage the PLL on external ref;
-	mcg_enter_PEE();
-
-
-
-	while (1) {
-		core_led_high();
-		core_delay_ms(100);
-		core_led_low();
-		core_delay_ms(50);
-	}
- */
-
-
-	//TODO PLL ENGAGED;
-
-	//TODO DEBUG INIT;
-
-	//TODO CORE BUS FLEX FLASH CLOCK DIVIDER;
-
-	//TODO RENAME INTO CORE_INIT
-	//TODO IN STARTUP.H
 
 	__program_start();
 

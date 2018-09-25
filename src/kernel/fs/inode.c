@@ -167,7 +167,7 @@ static void fs_delete(struct inode *node, const char *name) {
 bool fs_remove(const char *name) {
 
 	//Search for the required file;
-	struct inode *file = nlist_search(&files, name);
+	struct inode *file = nlist_get(&files, name);
 
 	//If the file doesn't exist, stop here;
 	if (!file) return true;
@@ -190,7 +190,7 @@ bool fs_remove(const char *name) {
 
 file_descriptor fs_open(const char *name) {
 
-	struct inode *node = nlist_search(&files, name);
+	struct inode *node = nlist_get(&files, name);
 
 	if (!node) {
 		return 0;

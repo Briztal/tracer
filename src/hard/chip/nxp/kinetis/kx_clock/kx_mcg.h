@@ -22,12 +22,8 @@
 #ifndef TRACER_KX_MGC_H
 #define TRACER_KX_MGC_H
 
-
 #include <stdbool.h>
 #include <stdint.h>
-
-
-#define U32_DIST(a, b) (((a) < (b)) ? ((b) - (a)) : ((a) - (b)))
 
 
 #define MCG_C1          ((volatile uint8_t *)0x40064000)
@@ -123,13 +119,15 @@
  * -------------------------------------------------------- IRC --------------------------------------------------------
  */
 
-
 //The Internal Reference Clock provided two clocks, the fast IRC at 4MHz and the slow IRC at 32kHz
 #define IRC_FAST_FREQ ((uint32_t) 4000000)
 #define IRC_SLOW_FREQ ((uint32_t) 32000)
 
+//The IRC has 9 channels, one slow clock one fast with 8 configurations;
+#define NB_IRC_CHANNELS 9
+
 //The array containing different IRC frequencies;
-extern const uint32_t irc_frequencies[9];
+extern const uint32_t irc_frequencies[NB_IRC_CHANNELS];
 
 //Configure the IRC;
 void kx_irc_configure(uint8_t channel_id);
@@ -188,7 +186,6 @@ void kx_pll_acquire_plls();
  * -------------------------------------------------------- FLL --------------------------------------------------------
  */
 
-
 struct kx_fll_config {
 	
 	//Set this flag if the OSC external ref must be selected as input;
@@ -203,7 +200,6 @@ struct kx_fll_config {
 	
 	//The desired output frequency range;
 	uint8_t f_range;
-	
 	
 };
 
@@ -275,20 +271,19 @@ enum mcg_mode {
 	 * Level 2 modes : another transition to PBE is required
 	 */
 	
-	
 	//PLL Engaged External,
 		PEE = 7,
 	
 };
 
 
-struct mcg_config {
+struct kx_mcg_config {
 	
 	//The operation mode;
 	enum mcg_mode mode;
 	
 	//The resulting mcg frequency;
-	uint32_t frequency;
+	uint32_t mcgout_freq;
 	
 	/*
 	 * OSC;
@@ -333,22 +328,6 @@ struct mcg_config {
 	
 };
 
-
-//------------------------------------------------ Configuration finding -----------------------------------------------
-
-//Evaluate all configurations, and update the mcg config, if a better config that the current is found;
-bool kx_irc_find_configuration(uint32_t target_frequency, struct mcg_config *config);
-
-//Evaluate all configurations, and update the mcg config, if a better config that the current is found;
-bool kx_osc_find_configuration(uint32_t target_frequency, struct mcg_config *config);
-
-//Evaluate all configurations, and update the mcg config, if a better config that the current is found;
-bool kx_fll_find_configuration(uint32_t target_frequency, struct mcg_config *config);
-
-
-//------------------------------------------------ Frequency tuning -----------------------------------------------
-
-void mcg_autotune(uint32_t frequency_target);
-
+void mcg_configure(const struct kx_mcg_config *config);
 
 #endif //TRACER_KX_MGC_H

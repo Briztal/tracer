@@ -45,8 +45,11 @@ struct nlist {
 //Add an element in the list;
 bool nlist_add(struct nlist *list, const char *name, void *data);
 
+//Set an element in the list, return the previous element;
+void * nlist_set(struct nlist *list, const char *name, void *data);
+
 //Search the list for an element;
-void *nlist_search(const struct nlist *list, const char *name);
+void *nlist_get(const struct nlist *list, const char *const name);
 
 //Remove an element from the list and return it;
 void *nlist_remove(struct nlist *list, const char *name);

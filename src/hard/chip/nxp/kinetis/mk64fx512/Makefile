@@ -38,24 +38,29 @@ mk64fx512: cortex_m4f
 #Init function must stop watchdog at init. Compile it;
 	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_wdog.o -c $(SK_DIR)/kx_wdog.c
 
-#compile the IRC;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_irc.o -c $(SK_DIR)/kx_mcg/kx_irc.c
-
-#compile the OSC;
-	@$(CC) $(CFLAGS) $(INC) $(osc_gp_args) $(osc_crystal_args) -o build/hard/kx_osc.o -c $(SK_DIR)/kx_mcg/kx_osc.c
-
-#compile the FLL;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_fll.o -c $(SK_DIR)/kx_mcg/kx_fll.c
-
-#compile the PLL;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/hard/kx_pll.o -c $(SK_DIR)/kx_mcg/kx_pll.c
-
-#Compile the MCG;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/hard/kx_mcg.o -c $(SK_DIR)/kx_mcg/kx_mcg.c
-
 
 
 #---------------------------------------------- Peripheral Modules ----------------------------------------------
+
+
+#------------------ clock module
+
+clock:
+
+#compile the IRC;
+	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_irc.o -c $(SK_DIR)/kx_clock/kx_irc.c
+
+#compile the OSC;
+	@$(CC) $(CFLAGS) $(INC) $(osc_gp_args) $(osc_crystal_args) -o build/hard/kx_osc.o -c $(SK_DIR)/kx_clock/kx_osc.c
+
+#compile the FLL;
+	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_fll.o -c $(SK_DIR)/kx_clock/kx_fll.c
+
+#compile the PLL;
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/hard/kx_pll.o -c $(SK_DIR)/kx_clock/kx_pll.c
+
+#Compile the MCG;
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/hard/kx_mcg.o -c $(SK_DIR)/kx_clock/kx_mcg.c
 
 
 
