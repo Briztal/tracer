@@ -16,7 +16,7 @@ For example, a 6DOF arm's actuator system has no direct spatial meaning, and spa
 to express in it.\\
 Target positions and speeds will be expressed in this system;\newline
 
-The geometry is the function that will be used to convert control positions to actuators positions;
+The geometric_model is the function that will be used to convert control positions to actuators positions;
 
 
 \subsection{Notations}
@@ -48,7 +48,7 @@ $C_i$ is an axis of the control system.
 $g :  \prod\limits_{i\in E} D_{i_C} \rightarrow \prod\limits_{i\in E} D_{i_A} $,
 $ (p_{i_C})_{i \in E}\rightarrow (p_{i_A})_{i \in E}$\newline
 
-is the geometry function, that translates control positions into actuators positions;
+is the geometric_model function, that translates control positions into actuators positions;
 
 
 \newpage
@@ -65,7 +65,7 @@ The state of the machine at a given time is defined by the following set of vari
 \end{itemize}
 
 There is a direct relation between control and actuation positions, and control and actuation speeds, given by
-the geometry function, but not between actuation positions and speeds, or control positions and speeds;\newline
+the geometric_model function, but not between actuation positions and speeds, or control positions and speeds;\newline
 
 To change the state of the machine, we execute a movement.\newline
 
@@ -84,7 +84,7 @@ The machine is controlled by actuators, that can be positioned at any point of t
 \newline
 
 However, precautions must be taken when attempting to move them. Each type of actuator has its own kind of speed
-limitations, often correlated with the geometry;\newline
+limitations, often correlated with the geometric_model;\newline
 
 For a given actuator, part of a machine, variation of the speed must be carefully monitored.
 If speed constraints are not met, actuators may halt, or be damaged, which in both case, would compromise the

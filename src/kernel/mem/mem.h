@@ -27,7 +27,7 @@
 
 #include <stddef.h>
 
-#include <kernel/proc.h>
+#include <kernel/proc/proc.h>
 
 #include "heap.h"
 

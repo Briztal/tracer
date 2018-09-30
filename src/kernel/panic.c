@@ -1,5 +1,5 @@
 #include <kernel/debug/debug.h>
-#include "proc.h"
+#include "kernel/proc/proc.h"
 #include "ic.h"
 #include "log.h"
 

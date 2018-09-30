@@ -28,6 +28,8 @@
 #include <stddef.h>
 
 
+//-------------------------------------------------------- Stack -------------------------------------------------------
+
 /**
  * The proc stack provides the two pointers that define a descending stack;
  */
@@ -46,12 +48,28 @@ struct proc_stack {
 };
 
 
+//---------------------------------------------------- Proc globals ----------------------------------------------------
+
 //The number of threads;
 extern const uint8_t proc_nb_threads;
 
-//The stack alignment, a const global power of 2 defined in the arch file;
-extern const size_t proc_stack_alignment;
 
+//--------------------------------------------------- Stack creation ---------------------------------------------------
+
+//Determine the closest inferior address, that would respect alignment requirements;
+extern void *proc_stack_align(void *stack_reset);
+
+//Initialise the stack for initialisation. Implemented by the proc lib;
+void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
+
+//A module can register a special function that adds a stack context header, for an FPU for ex;
+bool register_stack_header_creator(void (*new_creator)(struct proc_stack *));
+
+//Reset a previously registered stack header creator;
+void reset_stack_header_creator();
+
+
+//-------------------------------------------------- Execution control -------------------------------------------------
 
 /**
  * proc_enter_thread_mode : this function initialises threads in a safe state. It never returns.
@@ -70,8 +88,6 @@ extern const size_t proc_stack_alignment;
 
 extern void proc_enter_thread_mode(struct proc_stack **exception_stacks);
 
-//Initialise the stack for initialisation. Implemented by the proc lib;
-extern void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //Get the initial arg;
 extern void *proc_get_init_arg();
@@ -80,22 +96,13 @@ extern void *proc_get_init_arg();
 extern void proc_context_switcher();
 
 
-//Determine the closest inferior stack size, that would respect alignment requirements;
-static inline size_t proc_stack_correct_size(size_t stack_size) {
+//-------------------------------------------- Coprocessor context switching -------------------------------------------
 
-	//@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;
-	return stack_size & ~(proc_stack_alignment - 1);
+//A module can register a special context switcher for a coprocessor, (ex : FPU);
+// Context will be located on top of the stack;
+bool register_coprocessor_context_switcher(void (*store_context)(struct proc_stack *), void (*load_context)(struct proc_stack *));
 
-}
-
-//Determine the closest inferior address, that would respect alignment requirements;
-static inline void *proc_stack_correct_reset_ptr(void *stack_reset) {
-
-	//@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;
-	//TODO REMOVE THE OFFSET;
-	return (void *) ((((size_t) stack_reset) & ~(proc_stack_alignment - 1)) - 16);
-}
-
-
+//Reset a previously registered stack header creator;
+void reset_coprocessor_context_switcher();
 
 #endif //TRACER_CORE_H

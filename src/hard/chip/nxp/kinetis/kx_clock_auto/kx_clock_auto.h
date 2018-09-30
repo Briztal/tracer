@@ -26,9 +26,6 @@
 #include <stdint.h>
 
 
-#include "hard/chip/nxp/kinetis/kx_clock/kx_mcg.h"
-
-
 //------------------------------------------------ Configuration finding -----------------------------------------------
 
 //Evaluate all configurations, and update the mcg config, if a better config that the current is found;

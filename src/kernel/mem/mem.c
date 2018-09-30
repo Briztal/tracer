@@ -119,8 +119,6 @@ void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stac
 	//Save the number of stacks;
 	mem->nb_stacks = nb_stacks;
 
-	//Correct the stacks size;
-	stacks_size = proc_stack_correct_size(stacks_size);
 
 	//Reset the heap;
 	heap_reset(mem->heap);
@@ -134,8 +132,8 @@ void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stac
 		//Determine the stack's highest address;
 		void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
 
-		//Correct the stack's highest address;
-		stack_reset = proc_stack_correct_reset_ptr(stack_reset);
+		//Correct the stack's highest address for proper alignment;
+		stack_reset = proc_stack_align(stack_reset);
 
 		//Create the proc_stack initializer;
 		struct proc_stack cs_init = {

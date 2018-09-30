@@ -1,5 +1,5 @@
 /*
-  machine.h Part of TRACER
+  time_interval.h Part of TRACER
 
   Copyright (c) 2017 Raphaël Outhier
 
@@ -18,44 +18,19 @@
 
 */
 
-#ifndef TRACER_MACHINE_H
-#define TRACER_MACHINE_H
+#ifndef TRACER_TIME_INTERVAL_H
+#define TRACER_TIME_INTERVAL_H
 
 #include <stdbool.h>
 
 #include <stdint.h>
 
-#include "geometry.h"
-
-#include "movement.h"
-
-#include "actuation_physics.h"
-
-
-//------------------------------------------- Machine constants -------------------------------------------
-
-/*
- * The machine constants structure. Contains constant machine parameters;
- */
-
-typedef struct {
-
-	//The machine's dimension;
-	const uint8_t dimension;
-
-	//The machine's geometry;
-	const geometry_t *const geometry;
-
-} machine_constants_t;
-
-
-//------------------------------------------- Time interval -------------------------------------------
 
 /*
  * To describe durations, we here define time interval type;
  */
 
-typedef struct {
+struct time_interval {
 
 	//The minimum. Exists because the interval is closed; The minimum always exists, as duration is positive;
 	float min;
@@ -72,9 +47,24 @@ typedef struct {
 	//A useful flag, to mention that the interval is invalid in the considered circumstances;
 	bool valid;
 
-} time_interval_t;
+};
+
+//The largest interval; Can be used to reset a time interval;
+const struct time_interval time_interval_largest;
+
+//Modify the dst interval, to be the intersection of itself and the provided bound.
+// If intersection does not exist, dst is reduced to its appropriate bound;
+bool time_interval_intersect(struct time_interval *dst, struct time_interval bound);
+
+/*
+ * timer_interval_merge : this function returns an interval that :
+ * 	- has its max as the minimum of all intervals maximum bounds;
+ * 	- has its min as the maximum of all intervals minimum bounds;
+ * 	- is empty if all movements are empty;
+ * 	- is valid if all movements are valid, and min <= max;
+ */
+
+struct time_interval timer_interval_merge(uint8_t dimension, const struct time_interval *intervals);
 
 
-
-
-#endif //TRACER_MACHINE_H
+#endif //TRACER_TIME_INTERVAL_H

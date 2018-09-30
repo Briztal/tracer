@@ -30,7 +30,7 @@
 
 #include <kernel/scheduler/sched.h>
 
-#include <kernel/proc.h>
+#include <kernel/proc/proc.h>
 
 #include <kernel/mod/mod.h>
 #include <kernel/debug/debug.h>
@@ -398,6 +398,7 @@ void *kernel_switch_thread_stack(const volatile uint8_t thread_id, void *volatil
 	//If no more threads have to stop :
 	if (!nb_active_threads) {
 
+		//TODO
 		//TODO IN SYSCALL;
 		if (prc_process_terminated) {
 
@@ -454,7 +455,7 @@ void *kernel_switch_thread_stack(const volatile uint8_t thread_id, void *volatil
 
 void *kmalloc(size_t size) {
 
-	//If the kernel heap is not initialise
+	//If the kernel heap is not initialised
 	return heap_malloc(kernel_memory->heap, size);
 
 }

@@ -22,7 +22,7 @@
 
 #include <kernel/struct/nlist.h>
 
-#include <kernel/proc.h>
+#include <kernel/proc/proc.h>
 #include <kernel/panic.h>
 #include <kernel/debug/debug.h>
 #include <kernel/log.h>

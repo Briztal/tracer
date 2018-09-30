@@ -68,6 +68,7 @@ clock:
 #Add the port rule to the module dependencies list;
 MODULES += clock
 
+
 #------------------ Port + gpio module
 
 #The port source file takes four arguments, addresses and spacings of port and gpio register areas;
@@ -104,13 +105,12 @@ pit3_args := $(call pitx_args,3,pit_3,51,0x40037130)
 #This rule will build the pit archive;
 pit:
 
-	 echo $(call pitx_args,0,pit_0,48,0x40037100)
 
 #Log the compilation of the channel;
 	@echo "[CC]\t$(SK_DIR)/kx_pit_n.c"
 
 #Compile all 4 channels with their respective args;
-	$(CC) $(CFLAGS) $(INC) $(pit0_args) -o build/mod/pit0.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit0_args) -o build/mod/pit0.o -c $(SK_DIR)/kx_pit_n.c
 	@$(CC) $(CFLAGS) $(INC) $(pit1_args) -o build/mod/pit1.o -c $(SK_DIR)/kx_pit_n.c
 	@$(CC) $(CFLAGS) $(INC) $(pit2_args) -o build/mod/pit2.o -c $(SK_DIR)/kx_pit_n.c
 	@$(CC) $(CFLAGS) $(INC) $(pit3_args) -o build/mod/pit3.o -c $(SK_DIR)/kx_pit_n.c
