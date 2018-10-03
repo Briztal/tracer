@@ -81,7 +81,7 @@ static struct mcore core = {
 	.states = {
 		
 		//Candidate state is s1;
-		.candidate_is_s0 = false,
+		.current_is_s0 = false,
 		
 		//Current state is s0;
 		.current_state = 0,
@@ -111,6 +111,10 @@ static struct mcore core = {
 		
 	},
 	
+	//Not initialised;
+	.ready = false,
+	
+	//No movement receiver initialised;
 	.movement = 0,
 	
 };

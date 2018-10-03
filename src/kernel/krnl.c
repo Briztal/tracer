@@ -20,7 +20,7 @@
 
 #include "krnl.h"
 #include "panic.h"
-#include "ic.h"
+#include "kernel/async/interrupt.h"
 
 #include <string.h>
 

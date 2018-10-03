@@ -53,7 +53,7 @@
 #include <kernel/interface/command.h>
 #include <kernel/interface/timer.h>
 #include <kernel/log.h>
-#include <kernel/ic.h>
+#include <kernel/async/interrupt.h>
 #include <kernel/mod/auto_mod.h>
 #include <util/string.h>
 

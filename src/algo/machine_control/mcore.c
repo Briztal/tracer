@@ -144,8 +144,16 @@ static void machine_states_accept(struct mstates *states);
  * @param controller : the machine controller to register to the core;
  */
 
-void mcore_set_controller(struct mcore *core, struct mcontroller *controller) {
+void mcore_initialise(
+	struct mcore *core,
+	struct mcontroller *controller,
+	struct mstate *s0,
+	struct mstate *s1,
+	void *controller_computation_data
+) {
 	
+	//Cache the core dimension;
+	const uint8_t dimension = core->dimension;
 	
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
@@ -165,18 +173,57 @@ void mcore_set_controller(struct mcore *core, struct mcontroller *controller) {
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
 	
-	//If both dimensions are incompatible :
-	if (core->dimension != controller->dimension) {
+	//If controller dimensions are incompatible :
+	if (dimension != controller->dimension) {
 		
 		//Log;
-		kernel_log_("mcore_set_controller : incompatible dimensions");
+		kernel_log_("mcore_initialise : incompatible controller dimensions");
 		
 		//Fail;
 		return;
+		
+	}
+	
+	//Cache the first state dimension;
+	uint8_t s0_dimension = s0->dimension;
+	
+	
+	//If states are incompatible :
+	if (s0_dimension != s1->dimension) {
+		
+		//Log;
+		kernel_log_("mcore_initialise : state have different dimensions");
+		
+		//Fail;
+		return;
+		
+	}
+	
+	
+	//If controller dimensions are incompatible :
+	if (dimension != s0_dimension) {
+		
+		//Log;
+		kernel_log_("mcore_initialise : incompatible state dimensions");
+		
+		//Fail;
+		return;
+		
 	}
 	
 	//Update the machine controller;
 	core->controller = controller;
+	
+	//Provide access to states;
+	core->states.s0 = core->states.current_state = s0;
+	core->states.s1 = core->states.next_state = s0;
+	core->states.current_is_s0 = true;
+	
+	//Provide access to controller computation data;
+	core->cmp_data.controller_data = controller_computation_data;
+	
+	//Signal the core registered;
+	core->ready = true;
 	
 }
 
@@ -248,7 +295,9 @@ bool mcore_compute_movement(struct mcore *const core) {
 	if (!(ctrl->ready)) {
 		
 		//If one part of the controller is not initialised :
-		if (ctrl->nb_uninitialised_actuators ||
+		if ((!(ctrl->geometry)) ||
+			(!(ctrl->dist_computer)) ||
+			ctrl->nb_uninitialised_actuators ||
 			ctrl->nb_uninitialised_builder_cpts ||
 			ctrl->nb_uninitialised_kinematic_cnsts ||
 			ctrl->nb_uninitialised_state_cpts) {
@@ -287,6 +336,13 @@ bool mcore_compute_movement(struct mcore *const core) {
 	//Cache the movement builder; All temp fields are copied;
 	struct computation_data cmp_data = core->cmp_data;
 	
+	
+	/*
+	 * Init;
+	 */
+	
+	//Reset the next state's status;
+	next_state->status = 0;
 	
 	
 	/*
@@ -813,20 +869,20 @@ static void activate_corrections(
 static void machine_states_accept(struct mstates *const states) {
 	
 	//If the candidate state is s0 :
-	if (states->candidate_is_s0) {
-		
-		//Assign s0 to the current, and s1 to the candidate;
-		states->current_state = &(states->s0);
-		states->next_state = &(states->s1);
-		states->candidate_is_s0 = false;
-		
-	} else {
-		//If the candidate state is s1 :
+	if (states->current_is_s0) {
 		
 		//Assign s1 to the current, and s0 to the candidate;
 		states->current_state = &(states->s1);
 		states->next_state = &(states->s0);
-		states->candidate_is_s0 = true;
+		states->current_is_s0 = false;
+		
+	} else {
+		//If the candidate state is s1 :
+		
+		//Assign s0 to the current, and s1 to the candidate;
+		states->current_state = &(states->s0);
+		states->next_state = &(states->s1);
+		states->current_is_s0 = true;
 		
 	}
 	

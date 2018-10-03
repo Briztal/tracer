@@ -2,7 +2,7 @@
 // Created by root on 9/8/18.
 //
 
-#include "ic.h"
+#include "interrupt.h"
 
 //-------------------------------------------------- Critical sections -------------------------------------------------
 

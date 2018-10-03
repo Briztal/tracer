@@ -27,85 +27,31 @@
 
 
 #include "mcore.h"
+#include "actuation.h"
+#include "geometry.h"
 
 
 
-//--------------------------------------------------- Geometric model --------------------------------------------------
-
-/*
- * The geometric_model is the relation between control coordinates and actuation coordinates.
- *
- *	It achieves conversion in both directions;
- *
- * Each geometric_model implementation will be composed of the basic geometric_model struct, that only comprises
- * 	a pointer to the conversion function;
- */
-
-struct geometric_model {
-	
-	//A flag, determining if the geometric_model is regular, ie it transforms lines into lines;
-	//If the geometric_model is not regular, extra computation will be required for distances determination;
-	bool regular;
-	
-	//The pointer to the function used to convert control position to actuation position;
-	void (*const control_to_actuation)(const float *const control, int32_t *const actuation);
-	
-	//The pointer to the function used to convert actuation position to control position;
-	void (*const actuation_to_control)(const int32_t *const actuation, float *const control);
-	
-};
-
-
-//--------------------------------------------------- Actuator model ---------------------------------------------------
+//---------------------------------------------- Distance computation ----------------------------------------------
 
 /*
- * Actuators have physical limitations, that we must absolutely respect, otherwise, actuators or the machine could
- * 	be damaged;
+ * The controller comprises a data structure whose goal is to provide the distance target for the next
+ * 	movement.
  *
- * 	An actuator physics model is an interface, containing an instance and two functions :
- * 	- one to compute the largest acceptable duration interval for a movement of a given distance, given
- * 		the current state of the machine;
- * 	- one to compute a distance that matches physical limitation, for a movement of a given time, given the current
- * 		state of the machine state and the target distance;
- *  - A supplementary flag can be used to signal that the distance on this axis can be adjusted to comply with
- *  	physical limitations;
+ * 	During this computation, it has access to the current state, that it can't alter, and to the current state,
+ * 	that it can modify, to pre-compute some data, computations that it will signal in the state's status;
+ *
+ * 	It also has access to the array where distances must be stored;
  */
 
-struct actuator_model {
-	
-	/*
-	 * The function to compute the time interval; takes following arguments;
-	 * 	This function pointer can be null; If so, the duration interval will be set to its maximum;
-	 */
-	void (*const compute_duration_interval)(
-		
-		//The actuator physics instance;
-		struct actuator_model *instance,
-		
-		//The actuator's movement distance;
-		int16_t distance,
-		
-		//The machine's current state, constant;
+struct distance_computer {
+
+	//The function that will compute movement distances;
+	bool (*compute_distances)(
+		struct distance_computer *,
 		const struct mstate *current_state,
-		
-		//The location where to store the duration window, mutable;
-		struct time_interval *const duration_window);
-	
-	
-	/*
-	 * The function to compute the minimal distance to fit duration requirements;
-	 * 	This function pointer can be null; If so, no distance correction will happen;
-	 */
-	void (*const compute_minimal_distance)(
-		
-		//The actuator physics instance, mutable;
-		struct actuator_model *instance,
-		
-		//The movement's duration, constant;
-		const float movement_duration,
-		
-		//The pointer referencing the distance target. Must be updated with the calculated distance, mutable;
-		int16_t *const distance_target);
+		struct mstate *new_state,
+		int16_t *distances);
 	
 };
 
@@ -172,7 +118,7 @@ typedef void (*state_cpt)(const struct mstate *const current_state,
  * A machine controller is composed of :
  * 	- a dimension;
  * 	- a geometric model;
- * 	- a distances computer;
+ * 	- a distances dist_computer;
  * 	- an actuator model;
  * 	- an array of controller builder computations;
  * 	- an array of kinematic constraints
@@ -182,7 +128,6 @@ typedef void (*state_cpt)(const struct mstate *const current_state,
 
 struct mcontroller {
 	
-	
 	//---------------------------------------------- Dimension ----------------------------------------------
 	
 	//The machine dimension. Constant;
@@ -191,13 +136,13 @@ struct mcontroller {
 	//---------------------------------------------- geometry ----------------------------------------------
 	
 	//The machine's geometric_model, mutable ref;
-	const struct geometric_model *geometry;
+	struct geometric_model *geometry;
 	
 	
 	//---------------------------------------------- Distance computation ----------------------------------------------
 	
-	//The function that will compute movement distances;
-	bool (*compute_distances)(const struct mstate *current_state, struct mstate *new_state, int16_t *distances);
+	//The distance dist_computer;
+	struct distance_computer *dist_computer;
 	
 	
 	//----------------------------------------------- Actuators models ----------------------------------------------
@@ -255,17 +200,23 @@ struct mcontroller {
 
 //--------------------------------------------------- Initialisation ---------------------------------------------------
 
+//Set the geometric model;
+void mcontroller_set_geometric_model(struct mcontroller *ctrl, struct geometric_model *geometry);
+
+//Set the distance computer;
+void mcontroller_set_distance_computer(struct mcontroller *ctrl, struct distance_computer *cptr);
+
 //Update the model of an actuator;
 void mcontroller_init_actuator_model(struct mcontroller *ctrl, uint8_t actuator_id, struct actuator_model *model);
 
 //Set a builder computation function;
-void mcontroller_set_builder_cmp(struct mcontroller *ctrl, uint8_t cmp_id, builder_cpt computation);
+void mcontroller_init_builder_cmp(struct mcontroller *ctrl, uint8_t cmp_id, builder_cpt computation);
 
 //Set a kinematic constraint function;
-void mcontroller_set_kinematic_cnst(struct mcontroller *ctrl, uint8_t cnst_id, kinematic_cnst constraint);
+void mcontroller_init_kinematic_cnst(struct mcontroller *ctrl, uint8_t cnst_id, kinematic_cnst constraint);
 
 //Set a state computation function;
-void mcontroller_set_state_cmp(struct mcontroller *ctrl, uint8_t cmp_id, state_cpt computation);
+void mcontroller_init_state_cmp(struct mcontroller *ctrl, uint8_t cmp_id, state_cpt computation);
 
 
 

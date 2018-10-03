@@ -1,6 +1,7 @@
 #include <kernel/debug/debug.h>
+#include <util/stdout.h>
 #include "kernel/proc/proc.h"
-#include "ic.h"
+#include "kernel/async/interrupt.h"
 #include "log.h"
 
 /*
@@ -26,15 +27,18 @@
 #include "panic.h"
 
 
-void _kernel_panic(const char *msg) {
+static void (*log_output) = &debug_print_char;
+
+
+void _kernel_panic(const char *str, const void **args, size_t args_size)  {
 
 	ic_disable_interrupts();
 
 	while (1) {
 
 		//Transmit the message;;
-		kernel_log(msg, 0, 0);
-
+		stdout(log_output, str, args, args_size);
+		
 		//Wait for one second;
 		debug_delay_ms((uint32_t) 1000);
 

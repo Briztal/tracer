@@ -23,6 +23,42 @@
 #include <kernel/log.h>
 
 
+//--------------------------------------------------- Update ---------------------------------------------------
+
+//Set the geometric model;
+void mcontroller_set_geometric_model(struct mcontroller *ctrl, struct geometric_model *geometry) {
+
+	//Update the geometric model;
+	ctrl->geometry = geometry;
+	
+	//If the geometric model is null :
+	if (!geometry) {
+		
+		//The controller is not initialised anymore;
+		ctrl->ready = false;
+		
+	}
+	
+}
+
+
+//Set the distance computer;
+void mcontroller_set_distance_computer(struct mcontroller *ctrl, struct distance_computer *cptr) {
+	
+	//Update the distance computer;
+	ctrl->dist_computer = cptr;
+	
+	//If the distance computer is null :
+	if (!cptr) {
+		
+		//The controller is not initialised anymore;
+		ctrl->ready = false;
+		
+	}
+	
+}
+
+
 //--------------------------------------------------- Initialisation ---------------------------------------------------
 
 //Init the model of an actuator;
@@ -62,7 +98,7 @@ void mcontroller_init_actuator_model(struct mcontroller *ctrl, uint8_t actuator_
 }
 
 //Set a builder computation function;
-void mcontroller_set_builder_cmp(struct mcontroller *ctrl, uint8_t cmp_id, builder_cpt computation) {
+void mcontroller_init_builder_cmp(struct mcontroller *ctrl, uint8_t cmp_id, builder_cpt computation) {
 	
 	
 	//If the index is invalid :
@@ -100,7 +136,7 @@ void mcontroller_set_builder_cmp(struct mcontroller *ctrl, uint8_t cmp_id, build
 }
 
 //Set a kinematic constraint function;
-void mcontroller_set_kinematic_cnst(struct mcontroller *ctrl, uint8_t cnst_id, kinematic_cnst constraint) {
+void mcontroller_init_kinematic_cnst(struct mcontroller *ctrl, uint8_t cnst_id, kinematic_cnst constraint) {
 	
 	//If the index is invalid :
 	if (cnst_id >= ctrl->nb_kinematic_cnsts) {
@@ -136,7 +172,7 @@ void mcontroller_set_kinematic_cnst(struct mcontroller *ctrl, uint8_t cnst_id, k
 }
 
 //Set a state computation function;
-void mcontroller_set_state_cmp(struct mcontroller *ctrl, uint8_t cmp_id, state_cpt computation) {
+void mcontroller_init_state_cmp(struct mcontroller *ctrl, uint8_t cmp_id, state_cpt computation) {
 	
 	//If the index is invalid :
 	if (cmp_id >= ctrl->nb_state_cpts) {

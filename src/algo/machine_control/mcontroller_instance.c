@@ -91,7 +91,7 @@ void *state_cmp[NB_STATE_CPTS] = {0};
 
 /*
  * A machine controller is composed of :
- * 	- a distances computer;
+ * 	- a distances dist_computer;
  * 	- an array of controller builder computations;
  * 	- an array of kinematic constraints
  * 	- an array of controller state computations;
@@ -105,7 +105,7 @@ static struct mcontroller controller = {
 	//Geometric model not provided for instance;
 	.geometry = 0,
 	
-	//Distance computer not provided for instance;
+	//Distance dist_computer not provided for instance;
 	.compute_distances = 0,
 	
 	

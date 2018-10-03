@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 
-#include "nvic.h"
+#include "arm_v7m_nvic.h"
 
 #include "arm_v7m.h"
 

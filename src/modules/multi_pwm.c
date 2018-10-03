@@ -48,7 +48,7 @@
 #include <kernel/log.h>
 #include <kernel/mod/auto_mod.h>
 
-#include <kernel/ic.h>
+#include <kernel/async/interrupt.h>
 
 #include <kernel/interface/timer.h>
 #include <kernel/interface/gpio.h>

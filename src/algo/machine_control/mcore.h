@@ -61,6 +61,9 @@ struct movement {
 
 struct mstate {
 	
+	//States are created independently from any core or controller. Their dimension must be check at init;
+	const uint8_t dimension;
+	
 	//The status of the computation; Each bit marks one computation stage realised; Bit 31 is reserved;
 	uint32_t status;
 	
@@ -101,7 +104,7 @@ struct mstates {
 	void *next_state;
 	
 	//The machine state identifier; set when "*next_state == s0";
-	bool candidate_is_s0;
+	bool current_is_s0;
 	
 	//The first machine state;
 	struct mstate *s0;
@@ -172,6 +175,11 @@ struct mcore {
 	//The movement builder, owned, mutable;
 	struct computation_data cmp_data;
 	
+	/*
+	 * State;
+	 */
+	
+	bool ready;
 	
 	/*
 	 * Result;
@@ -184,8 +192,14 @@ struct mcore {
 };
 
 
-//Create a machine core from machine constants, a controller, and an array of actuator physics managers;
-void mcore_set_controller(struct mcore *, struct mcontroller *);
+//Initialise a machine core, providing a machine controller, two states, and a ref to the controller computation struct;
+void mcore_initialise(
+	struct mcore *core,
+	struct mcontroller *controller,
+	struct mstate *s0,
+	struct mstate *s1,
+	void *controller_computation_data
+);
 
 //Set the location where the computed movement should be stored;
 void mcore_set_movement_dst(struct mcore *, struct movement *);

@@ -20,7 +20,7 @@
 
 #include <kernel/scheduler/prc.h>
 #include "sysclock.h"
-#include "ic.h"
+#include "kernel/async/interrupt.h"
 #include "log.h"
 
 

@@ -13,7 +13,7 @@
 #include <kernel/interface/gpio.h>
 #include <kernel/debug/debug.h>
 #include <kernel/interface/command.h>
-#include <kernel/ic.h>
+#include <kernel/async/interrupt.h>
 
 
 static void suus() {

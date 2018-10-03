@@ -18,26 +18,46 @@
 
 */
 
+/*
+ * This source file is the only file to include in the executable to make the kernel work properly.
+ * 	All other components (FPU, MPU, etc...) included in modules;
+ */
+
+
+//------------------------------------------------ Make parameters -----------------------------------------------
+
+/*
+ * Makefile must provide :
+ * 	- NB_INTERRUPTS : the number of interrupts supported by the chip.
+ */
+
+#if !defined(NB_INTERRUPTS)
+
+#error "The number of interrupts was not provided. Check your makefile;"
+
+#define NB_INTERRUPTS 256
+
+#endif
+
+
+//------------------------------------------------ Includes -----------------------------------------------
 
 #include <stdint.h>
 #include <kernel/krnl.h>
-#include <kernel/ic.h>
+#include <kernel/async/interrupt.h>
 #include <kernel/panic.h>
 #include <kernel/proc/proc.h>
+#include <kernel/async/fault.h>
 
-//The armv7 M has only one core and one thread;
+
+//------------------------------------------------ Arch and proc globals -----------------------------------------------
+
+//The arm v7m has only one core and one thread;
 const uint8_t proc_nb_threads = 1;
 
 
-//Determine the closest inferior address, that would respect alignment requirements;
-void *proc_stack_align(void *stack_reset) {
-	
-	//@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;
-	return (void *) ((((size_t) stack_reset) & ~((size_t) 7)));
-	
-}
-
 //-------------------------------------------------- Stack management  -------------------------------------------------
+
 
 /*
  * Notice :
@@ -102,6 +122,15 @@ void *proc_get_init_arg() {
 	uint32_t arg = 0;
 	__asm__ __volatile__("mov %0, r12": "=r" (arg):);
 	return (void *) arg;
+}
+
+
+//Determine the closest inferior address, that would respect alignment requirements;
+void *proc_stack_align(void *stack_reset) {
+	
+	//@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;
+	return (void *) ((((size_t) stack_reset) & ~((size_t) 7)));
+	
 }
 
 
@@ -283,3 +312,192 @@ void proc_context_switcher() {
 	
 }
 
+
+//------------------------------------------------- Faults ------------------------------------------------
+
+static void arm_v7m_hard_fault_handler() {
+	kernel_handle_fault(0);
+}
+
+static void arm_v7m_mem_fault_handler() {
+	kernel_handle_fault(2);
+}
+
+static void arm_v7m_bus_fault_handler() {
+	kernel_handle_fault(1);
+}
+
+
+static void arm_v7m_usg_fault_handler() {
+	kernel_handle_fault(2);
+}
+
+
+//------------------------------------------------- kernel vector table ------------------------------------------------
+
+/*
+ * Some data is required to start the processor properly. Namely :
+ * 	- The initial stack pointer, provided by the linker;
+ * 	- The first function to execute, defined in another piece of code;
+ */
+
+extern void __entry_point();
+
+extern uint32_t _ram_highest;
+
+
+
+//Define an empty ISR handler
+void no_isr() {};
+
+//We need the address of the kernel vector table;
+void (*kernel_vtable[NB_INTERRUPTS])(void) = {
+	
+	//0 : not assigned;
+	&no_isr,
+	
+	//1 : reset; Effectively used when NVIC is relocated;
+	&__entry_point,
+	
+	//2 : NMI. Not supported for instance;
+	&no_isr,
+	
+	//3 : HardFault.
+	&arm_v7m_hard_fault_handler,
+	
+	//4 : MemManage fault;
+	&arm_v7m_mem_fault_handler,
+	
+	//5 : BusFault.
+	&arm_v7m_bus_fault_handler,
+	
+	//6 : UsageFault;
+	&arm_v7m_usg_fault_handler,
+	
+	//7 : Reserved;
+	&no_isr,
+	
+	//8 : Reserved;
+	&no_isr,
+	
+	//9 : Reserved;
+	&no_isr,
+	
+	//10 : Reserved;
+	&no_isr,
+	
+	//11 : SVCall. Support provided by a module;
+	&no_isr,
+	
+	//12 : Reserved;
+	&no_isr,
+	
+	//13 : Reserved;
+	&no_isr,
+	
+	//14 : PendSV. Support provided by a module;
+	&no_isr,
+	
+	//15 : SysTick. Support provided by a module;
+	&no_isr,
+	
+	//All interrupts not handled;
+	[16 ... NB_INTERRUPTS - 1] = &no_isr,
+
+};
+
+//-------------------------------------------------- NVIC static base --------------------------------------------------
+
+
+
+//If the vtable must not be generated (relocated after, smaller executable) :
+#ifdef NOVTABLE
+
+/*
+ * In order to start the processor properly, we define here the vector table, that is hard-copied in the firmware
+ * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
+ */
+
+static void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
+	
+	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
+	&_ram_highest,
+	
+	//1 : Reset : call the program's entry point;
+	&__entry_point,
+	
+	//In order to avoid writing 254 times the function name, we will use macros that will write it for us;
+#define channel(i) &no_isr,
+
+//Redirect all isrs to the empty one;
+#include "nvic_channel_list.h"
+
+#undef channel
+	
+	//Adding another "&no_isr" will cause a compiler warning "excess array initializer. Try it, it is funny !
+	
+};
+
+
+//If the vtable must be generated
+#else //NOVTABLE
+
+
+/**
+ * isr_generic_handler : in order to support handler update, all functions of the in-flash vector table will
+ * 	lead to this function, that executes the appropriate function;
+ *
+ * @param i : the interrupt channel. 0 to 240;
+ */
+
+static void isr_generic_flash_handler(uint8_t i) {
+	
+	//Execute the handler;
+	(*kernel_vtable[i])();
+	
+}
+
+
+/*
+ * Generate an ISR for each interrupt channel; Done using XMacro;
+ */
+
+//The handler link : a function that calls the handler link with a specific value;
+#define channel(i) static void isr_##i() {isr_generic_flash_handler(i);}
+
+//Define all isrs;
+#include "nvic_channel_list.h"
+
+#undef channel
+
+
+/*
+ * In order to start the processor properly, we define here the vector table, that is hard-copied in the firmware
+ * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
+ */
+
+static void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
+	
+	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
+	&_ram_highest,
+	
+	//1 : Reset : call the program's entry point;
+	&__entry_point,
+	
+	
+	//2->255 : empty handler (240 times, 240 = 3 * 8 * 10);
+	
+	//In order to avoid writing 254 times the function name, we will use macros that will write it for us;
+#define channel(i) &isr_##i,
+
+//Redirect all isrs to the empty one;
+#include "nvic_channel_list.h"
+
+#undef channel
+	
+	//Adding another "&empty_isr" will cause a compiler warning "excess array initializer. Try it, it is funny !
+	
+};
+
+
+#endif //NOVTABLE

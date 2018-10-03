@@ -10,6 +10,8 @@
 #include <stdint.h>
 
 
+//----------------------------------------------------- Priorities -----------------------------------------------------
+
 /*
  * General interrupt priorities;
  */
@@ -55,6 +57,12 @@ extern const uint8_t ic_priority_7;
 //The systick has the highest priority level, so that ticks are never missed;
 #define KERNEL_SYSTICK_PRIORITY ic_priority_6
 
+//----------------------------------------------- Vector table management ----------------------------------------------
+
+void ic_relocate_vector_table();
+
+
+//-------------------------------------------------- Interrupt Control -------------------------------------------------
 
 /*
  * In order to use non system interrupts, general functions are implemented by the core module;

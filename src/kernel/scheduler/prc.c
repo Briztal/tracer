@@ -23,7 +23,7 @@
 #include <kernel/krnl.h>
 
 #include <string.h>
-#include <kernel/ic.h>
+#include <kernel/async/interrupt.h>
 #include <kernel/panic.h>
 #include <kernel/log.h>
 #include <kernel/debug/debug.h>
