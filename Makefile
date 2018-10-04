@@ -126,7 +126,7 @@ MODULES_OBJS = $(wildcard build/mod/*.o)
 
 elf: build_dirs hard modules kernel util
 	@echo "[LD]\ttracer.elf"
-	@$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(MODULES_OBJS) $(UTIL_OBJS) -o $(NAME).elf
+	$(CC) $(LDFLAGS)  $(HARD_OBJS)  $(KERNEL_OBJS) $(MODULES_OBJS) $(UTIL_OBJS) -o $(NAME).elf
 
 
 

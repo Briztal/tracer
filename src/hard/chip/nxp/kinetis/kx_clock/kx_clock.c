@@ -334,10 +334,13 @@ static bool kx_clock_init() {
 	//Configure the clock, and update kernel clocks;
 	clock_tune(&initial_config, sizeof(struct kx_clock_config));
 	
+	//Complete;
+	return true;
+	
 }
 
 
-KERNEL_EMBED_MODULE(CORE_MODULE, kx_clock, kx_clock_init);
+KERNEL_EMBED_MODULE(PROC_MODULE, kx_clock, kx_clock_init);
 
 
 //TODO KERNEL MODULE INTEGRATION

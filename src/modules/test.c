@@ -154,8 +154,8 @@ static bool servo_check() {
 	//fs_close(fd);
 
 	kernel_log_("Starting channel servo");
-
-	ic_enable_interrupts();
+	
+	exceptions_enable();
 
 	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
 	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
@@ -240,8 +240,8 @@ static bool pwm_check() {
 	//fs_close(fd);
 
 	kernel_log_("Starting channel pwm");
-
-	ic_enable_interrupts();
+	
+	exceptions_enable();
 
 	while(1) {
 
@@ -313,8 +313,8 @@ static bool pwm_check_4() {
 	//fs_close(fd);
 
 	kernel_log_("Starting channel pwm");
-
-	ic_enable_interrupts();
+	
+	exceptions_enable();
 
 	while(1) {
 

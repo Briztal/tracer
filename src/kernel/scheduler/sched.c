@@ -72,13 +72,13 @@ static void sched_delete_element(struct sched_element *element);
 static void sched_delete_element(struct sched_element *element) {
 
 	//Access to the process list is critical;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Remove the element from the main list;
 	elist_remove(struct sched_element, main_head, element);
 
 	//Access to the process list is critical;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 	//Delete the process;
 	prc_delete(element->process);
@@ -320,13 +320,13 @@ void sched_add_prc(struct sched_data *const sched, struct sched_element *const e
 	shared_fifo_push(&sched->to_activate, (struct list_head *) element);
 
 	//Access to the main list is critical;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Concatenate the element at the end of the main list;
 	elist_concat(struct sched_element, main_head, element, sched->main_list);
 
 	//Access to the main list is critical;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 
 }

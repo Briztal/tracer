@@ -19,42 +19,55 @@
 */
 
 #include <kernel/scheduler/prc.h>
+#include <kernel/panic.h>
+#include <kernel/log.h>
 #include "sysclock.h"
 #include "kernel/async/interrupt.h"
-#include "log.h"
 
 
-//------------------------------------------------------- Systick ------------------------------------------------------
+//---------------------------------------------------- System timer ----------------------------------------------------
 
-/*
- * The core library provides a system timer, with basic functions.
+//The system timer. Initialised to 0;
+static struct sys_timer *system_timer = 0;
+
+
+/**
+ * sysclock_init_timer : initialises the system timer. If already initialised, triggers a kernel panic;
+ * @param timer : the new system timer;
  */
 
-//Start the core timer;
-extern void systimer_start();
-
-//Stop the core timer;
-extern void systimer_stop();
-
-//Enable the core interrupt;
-extern void systimer_int_enable();
-
-//Disable the core interrupt;
-extern void systimer_int_disable();
-
-
-//Set the core timer interrupt frequency. The core frequency must be known;
-extern void systimer_int_set_frequency(uint32_t frequency);
-
-//Set the core timer interrupt priority;
-extern void systimer_int_set_priority(uint8_t priority);
-
-//Set the core timer interrupt handler;
-extern void systimer_int_set_handler(void (*handler)());
+void sysclock_init_timer(struct sys_timer *const timer) {
+	
+	//If the system time is already initialised :
+	if (system_timer) {
+		
+		//Kernel panic. System timer can't be initialised twice;
+		kernel_panic("sysclock_init_timer : attempted to initialise the timer twice;");
+		
+	}
+	
+	//Initialise the system timer;
+	system_timer = timer;
+	
+}
 
 
-//---------------------- System tick ----------------------
+/**
+ * sysclock_timer_initialised :
+ * @return return true if the system timer is not null;
+ */
 
+bool sysclock_timer_initialised() {
+	
+	//Return true if the system timer is not null;
+	return (bool) system_timer;
+	
+}
+
+
+/*
+ * System clock operation. Any call with system timer not initialised generates a kernel panic;
+ */
 
 //The sysclock_milliseconds reference;
 volatile uint32_t systick_half_millis = 0;
@@ -65,24 +78,37 @@ volatile uint32_t task_duration = 0;
 
 
 void sysclock_init() {
-
+	
+	//Cache the system timer;
+	struct sys_timer *const timer = system_timer;
+	
+	//If the system timer is null :
+	if (!timer) {
+		
+		//Panic, can't use the sysclock without system timer;
+		kernel_panic("sysclock_init : system timer uninitialised;");
+		
+	}
+	
+	
 	//No preemption for instance;
 	sysclock_set_process_duration(0);
+	
 
 	//2KHz systick, 2 per millisecond, to be 1ms accurate;
-	systimer_int_set_frequency(2000);
+	(*timer->int_set_frequency)(2000);
 
 	//Systick has its own priority;
-	systimer_int_set_priority(KERNEL_SYSTICK_PRIORITY);
+	(*timer->int_set_priority)(KERNEL_SYSTICK_PRIORITY);
 
 	//Set the core timer to trigger systick function;
-	systimer_int_set_handler(&sysclock_tick);
+	(*timer->int_set_handler)(&sysclock_tick);
 
 	//Enable the interrupt;
-	systimer_int_enable();
+	(*timer->int_enable)();
 
 	//Start the core timer;
-	systimer_start();
+	(*timer->start)();
 
 	//Log;
 	kernel_log_("system clock initialised");
@@ -123,8 +149,7 @@ void sysclock_tick() {
 }
 
 
-//---------------------- Context Switch ----------------------
-
+//---------------------- Process preemption ----------------------
 
 /*
  * setTaskDuration : sets the current task's activity_time :
@@ -147,6 +172,16 @@ void sysclock_set_process_duration(uint16_t ms) {
  */
 
 uint32_t sysclock_milliseconds() {
+	
+	//If the system timer is null :
+	if (!system_timer) {
+		
+		//Panic, can't use the sysclock without system timer;
+		kernel_panic("sysclock_milliseconds : system timer uninitialised;");
+		
+	}
+	
+	//Return the current time value;
     return systick_half_millis >> 1;
 }
 
@@ -156,13 +191,19 @@ uint32_t sysclock_milliseconds() {
  */
 
 void systick_wait(uint16_t ms_delay) {
+	
+	//If the system timer is null :
+	if (!system_timer) {
+		
+		//Panic, can't use the sysclock without system timer;
+		kernel_panic("sysclock_milliseconds : system timer uninitialised;");
+		
+	}
 
     //Determine the limit;
     volatile uint32_t limit = systick_half_millis + (((uint32_t) ms_delay) << 1);
 
     //Sleep till the limit;
-    while ((volatile uint32_t) systick_half_millis < limit) {
-    };
-
+    while ((volatile uint32_t) systick_half_millis < limit);
 
 }

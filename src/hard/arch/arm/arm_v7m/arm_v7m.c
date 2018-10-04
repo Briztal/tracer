@@ -48,6 +48,7 @@
 #include <kernel/panic.h>
 #include <kernel/proc/proc.h>
 #include <kernel/async/fault.h>
+#include "arm_v7m.h"
 
 
 //------------------------------------------------ Arch and proc globals -----------------------------------------------
@@ -152,7 +153,7 @@ void *proc_stack_align(void *stack_reset) {
 void proc_enter_thread_mode(struct proc_stack **exception_stacks) {
 	
 	//Disable all interrupts;
-	ic_disable_interrupts();
+	exceptions_disable();
 	
 	//A static var will insure that the function is called at most once;
 	static bool entered = false;
@@ -169,7 +170,7 @@ void proc_enter_thread_mode(struct proc_stack **exception_stacks) {
 	entered = true;
 	
 	//If we are in handler mode, ignore the request;
-	if (ic_in_handler_mode()) {//TODO
+	if (irq_in_handler_mode()) {//TODO
 		
 		//Error, this function can't be executed in handler mode;
 		kernel_panic("proc_enter_thread_mode : in handler mode;");
@@ -223,7 +224,7 @@ void proc_enter_thread_mode(struct proc_stack **exception_stacks) {
 	preemption_set_pending();
 	
 	//Enable interrupts;
-	ic_enable_interrupts();
+	exceptions_enable();
 	
 	kernel_panic("NO_PREEMPTION");
 	
@@ -350,8 +351,8 @@ extern uint32_t _ram_highest;
 //Define an empty ISR handler
 void no_isr() {};
 
-//We need the address of the kernel vector table;
-void (*kernel_vtable[NB_INTERRUPTS])(void) = {
+//Define the kernel vtable, and align it on 512 bytes.
+void (*kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
 	
 	//0 : not assigned;
 	&no_isr,
@@ -406,19 +407,251 @@ void (*kernel_vtable[NB_INTERRUPTS])(void) = {
 
 };
 
+//-------------------------------------------------- Interrupt priorities --------------------------------------------------
+
+/*
+ * The ARMV7 NVIC support 8 bit priorities. The number of bits evaluated depends on the implementation, but there
+ * 	are at least 3 bits evaluated, which allows the library to implement all core priority levels;
+ */
+
+//The lowest priority level;
+const uint8_t ic_priority_0 = 0xE0;
+const uint8_t ic_priority_1 = 0xC0;
+const uint8_t ic_priority_2 = 0xA0;
+const uint8_t ic_priority_3 = 0x80;
+const uint8_t ic_priority_4 = 0x60;
+const uint8_t ic_priority_5 = 0x40;
+const uint8_t ic_priority_6 = 0x20;
+const uint8_t ic_priority_7 = 0x00;
+
+
+//----------------------------------------------- IC standard interrupts -----------------------------------------------
+
+/**
+ * ic_enable_interrupts : enables the interrupt control;
+ */
+
+void exceptions_enable() {
+	__asm__ volatile("cpsie i":::"memory");
+}
+
+
+/**
+ * ic_disable_interrupts : enables the interrupt control;
+ */
+
+void exceptions_disable() {
+	__asm__ volatile("cpsid i":::"memory");
+}
+
+
+
+/**
+ * irq_enable : enables the required irq channel;
+ * @param channel : the channel to enable;
+ */
+
+void irq_enable(uint16_t channel) {
+	armv7m_nvic_enable_interrupt(channel);
+}
+
+/**
+ * irq_disable : disables the required irq channel;
+ * @param channel : the channel to disable;
+ */
+
+void irq_disable(uint16_t channel){
+	armv7m_nvic_disable_interrupt(channel);
+}
+
+
+/**
+ * irq_set_pending : sets the required irq in the pending state;
+ * @param channel : the channel to set in the pending state;
+ */
+
+void irq_set_pending(uint16_t channel) {
+	armv7m_nvic_set_interrupt_pending(channel);
+}
+
+
+
+/**
+ * irq_clear_pending : sets the required irq in the not-pending state;
+ * @param channel : the channel to set in the not-pending state;
+ */
+
+void irq_clear_pending(uint16_t channel) {
+	armv7m_nvic_clear_interrupt_pending(channel);
+}
+
+/**
+ * irq_is_pending : sets the required irq in the not-pending state;
+ * @param channel : the channel to set in the not-pending state;
+ */
+
+void irq_is_pending(uint16_t channel) {
+	armv7m_nvic_clear_interrupt_pending(channel);
+}
+
+
+/**
+ * irq_set_priority : applies the provided priority to the required non-system interupt channel;
+ *
+ * @param channel : the channel to apply the priority;
+ * @param priority : the priority to apply
+ */
+
+void irq_set_priority(uint16_t channel, uint8_t priority) {
+	armv7m_nvic_set_priority(channel, priority);
+}
+
+/**
+ * irq_get_priority : applies the provided priority to the required non-system interupt channel;
+ *
+ * @param channel : the channel to apply the priority;
+ * @param priority : the priority to apply
+ */
+
+uint8_t irq_get_priority(uint16_t channel, uint8_t priority) {
+	return armv7m_nvic_get_priority(channel);
+}
+
+
+
+/**
+ * irq_reset_interrupt_handler : resets the handler of the required channel to 0, isr will return immediately;
+ * @param channel : the interrupt channel to update;
+ */
+
+void irq_reset_interrupt_handler(uint16_t channel) {
+	irq_set_handler(channel, &no_isr);
+}
+
+
+/**
+ * irq_in_handler_mode :
+ *
+ * @return true is a handler is curently in execution;
+ */
+bool irq_in_handler_mode() {
+	return (bool) armv7m_get_exception_number();
+}
+
+
+/**
+ * irq_set_handler : updates the required irq handler;
+ *
+ * @param non_system_channel : the channel to update. must be inferior to 240;
+ *
+ * @param handler : the handler. Can be null if interrupt must be disabled;
+ */
+
+void irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
+	
+	//Translate to exception channel;
+	irq_channel += 16;
+	
+	//If the channel is invalid :
+	if (irq_channel >= NB_INTERRUPTS) {
+		
+		//Do nothing, errors can't be triggered from here; TODO USAGE FAULT;
+		return;
+		
+	}
+	
+	//If the handler is null, save the empty handler; If not, save the handler;
+	kernel_vtable[irq_channel] = (handler) ? handler : no_isr;
+	
+}
+
+
+void exception_set_handler(uint16_t channel, void (*handler)()) {
+	
+	//If the channel is invalid :
+	if (channel >= 16) {
+		
+		//Do nothing;
+		return;
+		
+	}
+	
+	//If the handler is null, save the empty handler; If not, save the handler;
+	kernel_vtable[channel] = (handler) ? handler : no_isr;
+	
+}
+
+
+
+
+//----------------------------------------------------- Preemption -----------------------------------------------------
+
+//Set the handler of the preemption exception;
+void preemption_set_handler(void (*handler)(void)) {
+	exception_set_handler(NVIC_PENDSV, handler);
+	
+	
+	
+}
+
+//Set the priority of the preemption exception;
+void preemption_set_priority(uint8_t priority) {
+	armv7m_set_pendsv_priority(priority);
+}
+
+//Enable the preemption exception;
+void preemption_enable() {
+	//PendSV is always enabled;
+}
+
+//Set the preemption exception pending;
+void preemption_set_pending() {
+	armv7m_set_pendsv_pending();
+}
+
+//Set the preemption exception not pending;
+void preemption_clear_pending() {
+	armv7m_clr_pendsv_pending();
+}
+
+
+
+//----------------------------------------------------- Syscall -----------------------------------------------------
+
+//Set the handler of the syscall exception;
+void syscall_set_handler(void (*handler)(void)) {
+	exception_set_handler(NVIC_SVC, handler);
+}
+
+//Set the priority of the syscall exception;
+void syscall_set_priority(uint8_t priority) {
+	armv7m_set_svcall_priority(priority);
+}
+
+//Enable the syscall exception;
+void syscall_enable() {
+	//Always enabled;
+}
+
+//Trigger the syscall;
+void syscall_trigger() {
+	__asm__ __volatile ("");//TODO SVC ??? NOT WORKING...
+}
+
+
+
 //-------------------------------------------------- NVIC static base --------------------------------------------------
 
 
-
 //If the vtable must not be generated (relocated after, smaller executable) :
-#ifdef NOVTABLE
+#ifdef NO_VTABLE
 
 /*
  * In order to start the processor properly, we define here the vector table, that is hard-copied in the firmware
  * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
  */
 
-static void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
+void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 	
 	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
 	&_ram_highest,
@@ -476,7 +709,7 @@ static void isr_generic_flash_handler(uint8_t i) {
  * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
  */
 
-static void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
+void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 	
 	//0 : Initial SP Value; In ARM Architecture, the stack pointer decreases;
 	&_ram_highest,

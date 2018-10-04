@@ -586,5 +586,5 @@ static bool pwm_init() {
 }
 
 //Embed the module in the executable;
-KERNEL_EMBED_MODULE(SYSTEM_MODULE, MODULE_NAME, &pwm_init);
+KERNEL_EMBED_MODULE(KERNEL_MODULE, MODULE_NAME, &pwm_init);
 

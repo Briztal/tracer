@@ -198,7 +198,7 @@ static void start() {
 static void stop() {
 
 	//Enter a critical section;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Reset the timer;
 	timer_reset(&pwm_timer, 1000000);
@@ -207,7 +207,7 @@ static void stop() {
 	started = false;
 
 	//Leave the critical section;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 }
 

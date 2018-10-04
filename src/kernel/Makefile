@@ -7,8 +7,14 @@ KERNEL_PRIV_DIR += $(KERNEL_DIR)
 
 #The syscall source file can be linked to exernal libs;
 
+KERNEL_SRCS += $(KERNEL_DIR)/async/fault.c
+KERNEL_SRCS += $(KERNEL_DIR)/async/interrupt.c
+
+
 #Add the clock lib;
 KERNEL_SRCS +=  $(KERNEL_DIR)/clock/clock.c
+KERNEL_SRCS += $(KERNEL_DIR)/clock/sysclock.c
+
 
 #Add the communication protocol;
 KERNEL_SRCS +=  $(KERNEL_DIR)/debug/probe.c
@@ -46,11 +52,9 @@ KERNEL_SRCS += $(KERNEL_DIR)/struct/shared_fifo.c
 
 
 #Add all files of the kernel dir;
-KERNEL_SRCS += $(KERNEL_DIR)/ic.c
 KERNEL_SRCS += $(KERNEL_DIR)/krnl.c
 KERNEL_SRCS += $(KERNEL_DIR)/log.c
 KERNEL_SRCS += $(KERNEL_DIR)/panic.c
-KERNEL_SRCS += $(KERNEL_DIR)/sysclock.c
 
 KERNEL_PUB_SRCS += $(KERNEL_DIR)/syscall.c
 

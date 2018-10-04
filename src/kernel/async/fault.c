@@ -51,7 +51,7 @@ void fault_init_analyser(bool (*analyser)(uint32_t type)) {
 void kernel_handle_fault(uint32_t type) {
 	
 	//Enter a critical section;
-	ic_enter_critical_section();
+	critical_section_enter();
 	
 	//Log;
 	kernel_log("Fault of type %d detected !", type);

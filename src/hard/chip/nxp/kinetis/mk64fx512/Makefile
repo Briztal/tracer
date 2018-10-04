@@ -1,18 +1,21 @@
 
+
+#---------------------------------------------- Proc and arch inclusion ----------------------------------------------
+
+#The k64fx512 comprises 256 interrupts
+NVIC_NB_INTERRUPTS = 256
+
+include src/hard/proc/cortex_m4f/Makefile
+
+
 #Set the memory map script;
 LDSCRIPT_MMAP_DIR := src/hard/chip/nxp/kinetis/mk64fx512/
-
-
 
 #add both directories to the core include path;
 CORE_INC += -Isrc/hard/chip/nxp/kinetis
 
 #define the current dir here;
 K_DIR	:=  hard/chip/nxp/kinetis
-
-
-include src/hard/proc/cortex_m4f/Makefile
-
 
 #Macros to abbreviate;
 SK_DIR	:=  src/hard/chip/nxp/kinetis

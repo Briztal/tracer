@@ -24,7 +24,7 @@
 
 #include <string.h>
 
-#include <kernel/sysclock.h>
+#include <kernel/clock/sysclock.h>
 
 #include <kernel/mem/ram.h>
 
@@ -108,7 +108,7 @@ static void kernel_init() {
 	kernel_log_("Entering kernel initialisation sequence;\n")
 
 	//Disable interrupt management:
-	ic_disable_interrupts();
+	exceptions_disable();
 
 	//Initialise the RAM manager;
 	ram_init();
@@ -297,7 +297,7 @@ static void kernel_start_execution() {
 
 
 	//Disable all interrupts;
-	ic_disable_interrupts();
+	exceptions_disable();
 
 	/*
 	 * Thread count;

@@ -193,8 +193,6 @@ static inline uint16_t armv7m_get_exception_number() {
 
 #define ARMV7_VTOR ((volatile uint32_t *) 0xE000ED08)
 
-//Relocate the vector table; Asserts if relocation succeeded;
-bool arm_v7_relocate_vector_table(bool in_ram, uint32_t offset);
 
 
 //----------------- AIRCR - RW : Application Interrupt / Reset Control Register, page 498 -----------------
@@ -753,6 +751,42 @@ static inline bool armv7m_systick_noref() {
 /*
  * ------------------------------------------------------ NVIC ------------------------------------------------------
  */
+
+
+
+/*
+ * This enum presents all system interrupts that can be parametrised;
+ */
+
+enum nvic_exception {
+	
+	//Channel 2 : The Non Maskable Interrupt;
+		NVIC_NMI = 2,
+	
+	//Channel 3 : The Hardware Fault Interrupt;
+		NVIC_HARD_FAULT = 3,
+	
+	//Channel 4 : The Memory Fault Interrupt;
+		NVIC_MEM_FAULT = 4,
+	
+	//Channel 5 : The Bus Fault Interrupt;
+		NVIC_BUS_FAULT = 5,
+	
+	//Channel 6 : The Usage Fault Interrupt;
+		NVIC_USAGE_FAULT = 6,
+	
+	//Channel 11 : The Supervisor Call Interrupt;
+		NVIC_SVC = 11,
+	
+	//Channel 14 : The PensSV Interrupt;
+		NVIC_PENDSV = 14,
+	
+	//Channel 15 : The Systick Interrupt;
+		NVIC_SYSTICK = 15,
+	
+};
+
+
 
 //----------------- ISER - RW : Interrupt Set Enable Registers. 16 4-byte long registers -----------------
 

@@ -149,7 +149,7 @@ void clock_auto_tune(uint32_t target_frequency) {
 bool clock_register(const char *const name, const uint32_t value) {
 	
 	//Add the clock;
-	nlist_add(&clocks_list, name, (void *) value);
+	return nlist_add(&clocks_list, name, (void *) value);
 	
 }
 
@@ -159,6 +159,15 @@ void clock_set(const char *name, uint32_t value) {
 	
 	//Set the clock;
 	nlist_set(&clocks_list, name, (void *) value);
+	
+}
+
+
+//Update the value of a clock in the clock reference
+uint32_t clock_get(const char *name) {
+	
+	//Get the clock frequency;
+	return (uint32_t) nlist_get(&clocks_list, name);
 	
 }
 

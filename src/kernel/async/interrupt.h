@@ -57,64 +57,68 @@ extern const uint8_t ic_priority_7;
 //The systick has the highest priority level, so that ticks are never missed;
 #define KERNEL_SYSTICK_PRIORITY ic_priority_6
 
-//----------------------------------------------- Vector table management ----------------------------------------------
-
-void ic_relocate_vector_table();
 
 
-//-------------------------------------------------- Interrupt Control -------------------------------------------------
+//-------------------------------------------------- Exceptions -------------------------------------------------
 
 /*
  * In order to use non system interrupts, general functions are implemented by the core module;
  */
 
 //Enable the interrupt control;
-extern void ic_enable_interrupts();
+extern void exceptions_enable();
 
 //Disables the interrupt control;
-extern void ic_disable_interrupts();
+extern void exceptions_disable();
+
+//Sets the handler of the required exception;
+extern void exception_set_handler(uint16_t channel, void (*handler)());
+
+
+//-------------------------------------------------- Interrupt ReQuest -------------------------------------------------
+
 
 //Enables the required interrupt channel;
-extern void ic_enable_interrupt(uint16_t channel);
+extern void irq_enable(uint16_t channel);
 
 //Disables the required interrupt channel;
-extern void ic_disable_interrupt(uint16_t channel);
+extern void irq_disable(uint16_t channel);
 
 //Sets the required non-system interrupt in the pending state;
-extern void ic_set_interrupt_pending(uint16_t channel);
+extern void irq_set_pending(uint16_t channel);
 
 //Sets the required non-system interrupt in the not-pending state;
-extern void ic_clear_interrupt_pending(uint16_t channel);
+extern void irq_clear_pending(uint16_t channel);
 
 //Sets the required non-system interrupt in the not-pending state;
-extern void ic_is_interrupt_pending(uint16_t channel);
+extern void irq_is_pending(uint16_t channel);
 
 //Applies the provided priority to the required non-system interupt channel;
-extern void ic_set_interrupt_priority(uint16_t channel, uint8_t priority);
+extern void irq_set_priority(uint16_t channel, uint8_t priority);
 
 //Returns the priority to the required non-system interupt channel;
-extern uint8_t ic_get_interrupt_priority(uint16_t channel, uint8_t priority);
+extern uint8_t irq_get_priority(uint16_t channel, uint8_t priority);
 
-//Sets the handler of the required channel to 0, isr will return immediately;
-extern void ic_set_interrupt_handler(uint16_t channel, void (*handler)(void));
+//Update the handler of the required irq;
+extern void irq_set_handler(uint16_t channel, void (*handler)());
 
 //Resets the handler of the required channel to 0, isr will return immediately;
-extern void ic_reset_interrupt_handler(uint16_t channel);
+extern void irq_reset_interrupt_handler(uint16_t channel);
 
 //Assert if a handler is currently in execution;
-extern bool ic_in_handler_mode();
+extern bool irq_in_handler_mode();
 
 
 //-------------------------------------------------- Critical sections -------------------------------------------------
 
 //Enter a critical section;
-void ic_enter_critical_section();
+void critical_section_enter();
 
 //Leave a critical section;
-void ic_leave_critical_section();
+void critical_section_leave();
 
 //Force leaving a critical section. Unsafe, must be executed by the kernel only;
-void ic_force_critical_section_exit();
+void critical_section_force_exit();
 
 
 

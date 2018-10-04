@@ -32,7 +32,7 @@
 void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head) {
 
 	//Enter in a critical section;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Cache the fifo's list;
 	struct list_head *const list = fifo->list;
@@ -55,7 +55,7 @@ void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head)
 	}
 
 	//Leave the critical section;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 }
 
@@ -69,7 +69,7 @@ void shared_fifo_push(volatile struct shared_fifo *fifo, struct list_head *head)
 struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo) {
 
 	//Enter in a critical section;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Cache the fifo's head. We will return this value :
 	struct list_head *const head = fifo->list;
@@ -99,7 +99,7 @@ struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo) {
 	}
 
 	//Leave the critical section;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 	//Return the removed value;
 	return head;
@@ -115,7 +115,7 @@ struct list_head *shared_fifo_pull(volatile struct shared_fifo *fifo) {
 struct list_head *shared_fifo_get_all(volatile struct shared_fifo *fifo) {
 
 	//Enter in a critical section;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Cache the fifo's head;
 	struct list_head *head = fifo->list;
@@ -124,7 +124,7 @@ struct list_head *shared_fifo_get_all(volatile struct shared_fifo *fifo) {
 	fifo->list = 0;
 
 	//Leave the critical section;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 	//Return the linked list head;
 	return head;

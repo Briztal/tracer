@@ -139,6 +139,15 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 }
 
 
+
+/**
+ * load_x_modules
+ */
+void load_proc_modules() {
+
+}
+
+
 /**
  * mod_autoload : loads all modules placed in the embedded modules area;
  *

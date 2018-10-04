@@ -14,10 +14,10 @@ static uint32_t critical_section_counter = 0;
  * ic_enter_critical_section : called whenever any part of the code must execute a critical section;
  */
 
-void ic_enter_critical_section() {
+void critical_section_enter() {
 
 	//Disable interrupts;
-	ic_disable_interrupts();
+	exceptions_disable();
 
 	//Increment the section counter;
 	critical_section_counter++;
@@ -29,10 +29,10 @@ void ic_enter_critical_section() {
  * ic_leave_critical_section : called whenever any part of the code leaves a critical section;
  */
 
-void ic_leave_critical_section() {
+void critical_section_leave() {
 
 	//To safely detect any code error, disable interrupts;
-	ic_disable_interrupts();
+	exceptions_disable();
 
 	//If there was a code error (more leave called than enter);
 	if (!critical_section_counter) {
@@ -45,7 +45,7 @@ void ic_leave_critical_section() {
 	if (!(--critical_section_counter)) {
 
 		//Enable interrupts;
-		ic_enable_interrupts();
+		exceptions_enable();
 
 	}
 
@@ -57,13 +57,12 @@ void ic_leave_critical_section() {
  * 	Highly unsafe, only the kernel must execute this function;
  */
 
-void ic_force_critical_section_exit() {
+void critical_section_force_exit() {
 
 	//Reset the critical section counter;
 	critical_section_counter = 0;
 
 	//Enable all interrupts;
-	ic_enable_interrupts();
+	exceptions_enable();
 
 }
-

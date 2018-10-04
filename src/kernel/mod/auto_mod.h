@@ -45,11 +45,13 @@ struct auto_mod {
 };
 
 
-#define CORE_MODULE ".kernel_core_modules"
+#define PROC_MODULE ".kernel_proc_modules"
+
+#define SYSTEM_MODULE ".kernel_system_modules"
 
 #define PERIPHERAL_MODULE ".kernel_peripheral_modules"
 
-#define SYSTEM_MODULE ".kernel_system_modules"
+#define KERNEL_MODULE ".kernel_kernel_modules"
 
 #define USER_MODULE ".kernel_user_modules"
 
@@ -58,7 +60,7 @@ struct auto_mod {
 
 #define KERNEL_EMBED_MODULE(module_type, name_l,  init_f)\
 	static struct auto_mod name_l __attribute__((section (module_type), used)) = \
-	{.name = MOD_ST(name_l), .init = (init_f)};
+	{.name = MOD_ST(name_l), .init = (init_f),};
 
 
 #endif //TRACER_AUTO_MOD_H

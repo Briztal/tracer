@@ -67,6 +67,9 @@ bool clock_register(const char *name, uint32_t value);
 //Update the value of a clock in the clock reference
 void clock_set(const char *name, uint32_t value);
 
+//Update the value of a clock in the clock reference
+uint32_t clock_get(const char *name);
+
 //Remove a clock in the clock reference;
 void clock_remove(const char *name);
 

@@ -168,7 +168,7 @@ static void start() {
 static void stop() {
 
 	//Enter a critical section;
-	ic_enter_critical_section();
+	critical_section_enter();
 
 	//Reset the timer;
 	timer_reset(&pwm_timer, 1000000);
@@ -180,7 +180,7 @@ static void stop() {
 	active_channels = 0;
 
 	//Leave the critical section;
-	ic_leave_critical_section();
+	critical_section_leave();
 
 }
 
@@ -539,7 +539,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 			//If the channel is the only member of the list, we can stop the manager;
 			// a modification of the list will happen.
 			// Disable interrupts, to prevent the pwm irq to happen;
-			ic_enter_critical_section();
+			critical_section_enter();
 
 			//If the list is a singleton :
 			if (channel->head.next == channel) {
@@ -568,7 +568,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 			}
 
 			//Leave the critical section;
-			ic_leave_critical_section();
+			critical_section_leave();
 
 		}
 
@@ -582,7 +582,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 
 			//If the channel must be activated, a modification of the list will happen.
 			// Disable interrupts, to prevent the pwm irq to happen;
-			ic_enter_critical_section();
+			critical_section_enter();
 
 			//Reset the channel's delay;
 			channel->toogle_delay = 0;
@@ -610,7 +610,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 			channel->inactive = false;
 
 			//Leave the critical section;
-			ic_leave_critical_section();
+			critical_section_leave();
 
 		}
 

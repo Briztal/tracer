@@ -42,7 +42,7 @@
 void _kernel_panic(const char *tmp_str, const void **args, size_t args_size);
 
 //Use panic with log;
-#define kernel_panic(msg) _kernel_panic(msg, 0, 0);
+#define kernel_panic(msg) {_kernel_panic(msg, 0, 0);while(1);}
 
 #define kernel_panic_(msg, ...) {\
 	const void *__klog_args__[] = VARIADIC_PACKAGE(__VA_ARGS__);\

@@ -31,8 +31,8 @@ static void (*log_output) = &debug_print_char;
 
 
 void _kernel_panic(const char *str, const void **args, size_t args_size)  {
-
-	ic_disable_interrupts();
+	
+	exceptions_disable();
 
 	while (1) {
 

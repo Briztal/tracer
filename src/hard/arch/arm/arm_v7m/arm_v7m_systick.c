@@ -19,62 +19,103 @@
 */
 
 
-/*
- * All functions from arm_v7m.h are static inline. This file makes proper definitions;
- */
-
 #include <stdint.h>
-
-#include "arm_v7m_nvic.h"
+#include <kernel/clock/clock.h>
+#include <kernel/mod/auto_mod.h>
+#include <kernel/clock/sysclock.h>
+#include <kernel/panic.h>
+#include <kernel/async/interrupt.h>
 
 #include "arm_v7m.h"
 
 
 //Start the core timer;
-void systimer_start() {
+static void t_start() {
 	armv7m_systick_select_core_clock();
 	armv7m_systick_enable();
 }
 
+
 //Stop the core timer;
-void systimer_stop() {
+void t_stop() {
 	armv7m_systick_disable();
 }
 
+
 //Enable the core interrupt;
-void systimer_int_enable() {
+static void t_int_enable() {
 	armv7m_systick_int_enable();
 }
 
+
 //Disable the core interrupt;
-void systimer_int_disable() {
+static void t_int_disable() {
 	armv7m_systick_int_disable();
 }
 
 
 //Set the core timer interrupt frequency. The core frequency must be available
-void systimer_int_set_frequency(uint32_t frequency) {
+static void t_int_set_frequency(uint32_t frequency) {
 
-	//TODO. FOR INSTANCE, ONLY THE 10MS IS LOADED;
-	armv7m_systick_set_reload(8000);
+	//Get the core clock value;
+	uint32_t core_freq = clock_get("core");
+	
+	//If the core frequency is null :
+	if (!core_freq) {
+		
+		//Panic. The core clock is not registered;
+		kernel_panic("systick_set_frequency : core frequency not registered;");
+		
+	}
+	
+	//Compute the reload;
+	uint32_t reload = core_freq / frequency;
+	
+	//Update the reload;
+	armv7m_systick_set_reload(reload);
 
 }
 
 
 //Set the core timer interrupt priority;
-extern void systimer_int_set_priority(uint8_t priority) {
+static void t_int_set_priority(uint8_t priority) {
 
 	armv7m_set_systick_priority(priority);
-
-
+	
 }
 
 
 //Set the core timer interrupt handler;
-void systimer_int_set_handler(void (*handler)()) {
+static void t_int_set_handler(void (*handler)()) {
 
-	//TODO ERROR or log if null;
-
-	nvic_set_exception_handler(NVIC_SYSTICK, handler);
+	exception_set_handler(NVIC_SYSTICK, handler);
 
 }
+
+static struct sys_timer stick = {
+	
+	.int_enable = &t_int_enable,
+	.int_disable = &t_int_disable,
+	
+	.int_set_handler = &t_int_set_handler,
+	.int_set_priority = &t_int_set_priority,
+	.int_set_frequency = &t_int_set_frequency,
+	
+	.start = &t_start,
+	.stop = &t_stop,
+	
+};
+
+
+static bool systick_init() {
+	
+	//Register the system timer;
+	sysclock_init_timer(&stick);
+	
+	//Complete;
+	return true;
+	
+}
+
+
+KERNEL_EMBED_MODULE(PROC_MODULE, systick, &systick_init);

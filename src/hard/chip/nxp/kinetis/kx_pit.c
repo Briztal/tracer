@@ -201,13 +201,13 @@ static void channel_init(uint8_t channel_index) {
 	const uint16_t int_channel = channel->interrupt_channel;
 
 	//Register the pit handler;
-	ic_set_interrupt_handler(int_channel, channel->handler);
+	irq_set_handler(int_channel, channel->handler);
 
 	//Set the channel int priority;
-	ic_set_interrupt_priority(int_channel, KERNEL_DRIVER_STATUS_PRIORITY);
+	irq_set_priority(int_channel, KERNEL_DRIVER_STATUS_PRIORITY);
 
 	//Enable the channel interrupt;
-	ic_enable_interrupt(int_channel);
+	irq_enable(int_channel);
 
 }
 
