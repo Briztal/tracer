@@ -141,47 +141,76 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 
 
 /**
- * load_x_modules
+ * load_x_modules : declare the modules struct bounds, and load all modules inside;
  */
-void load_proc_modules() {
 
+void load_proc_modules() {
+	
+	//The start and end address of modules structs in FLASH;
+	extern const uint8_t _prmod_start, _prmod_end;
+	
+	//Log;
+	kernel_log_("Loading proc modules ...");
+	
+	//Load peripheral modules;
+	load_modules(&_prmod_start, &_prmod_end);
+	
+}
+
+void load_system_modules() {
+	
+	//The start and end address of modules structs in FLASH;
+	extern const uint8_t _smod_start, _smod_end;
+	
+	//Log;
+	kernel_log_("Loading system modules ...");
+	
+	//Load peripheral modules;
+	load_modules(&_smod_start, &_smod_end);
+	
 }
 
 
-/**
- * mod_autoload : loads all modules placed in the embedded modules area;
- *
- * 	This section is defined in the unified link script and resides in flash;
- */
+void load_peripheral_modules() {
+	
+	//The start and end address of modules structs in FLASH;
+	extern const uint8_t _pemod_start, _pemod_end;
+	
+	//Log;
+	kernel_log_("Loading peripheral modules ...");
+	
+	//Load peripheral modules;
+	load_modules(&_pemod_start, &_pemod_end);
+	
+}
 
-void mod_autoload() {
+
+void load_kernel_modules() {
 	
-	//The start and end address of kernel peripheral, system and user modules structs in FLASH;
-	extern const uint8_t _cmod_start, _cmod_end, _pmod_start, _pmod_end, _smod_start, _smod_end, _umod_start, _umod_end;
+	//The start and end address of modules structs in FLASH;
+	extern const uint8_t _kmod_start, _kmod_end;
 	
 	//Log;
-	kernel_log_("detecting core modules ...");
+	kernel_log_("Loading kernel modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_cmod_start, &_cmod_end);
+	load_modules(&_kmod_start, &_kmod_end);
+	
+}
+
+
+void load_user_modules() {
+	
+	//The start and end address of modules structs in FLASH;
+	extern const uint8_t _umod_start, _umod_end;
 	
 	//Log;
-	kernel_log_("detecting peripheral modules ...");
+	kernel_log_("Loading user modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_pmod_start, &_pmod_end);
-	
-	//Log;
-	kernel_log_("detecting system modules ...");
-	
-	//Load system modules;
-	load_modules(&_smod_start, &_smod_end);
-	
-	//Log;
-	kernel_log_("detecting user modules ...");
-	
-	//Load user modules;
 	load_modules(&_umod_start, &_umod_end);
 	
 }
+
+
 

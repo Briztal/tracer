@@ -79,17 +79,17 @@ SECTIONS {
     .kernel_modules : {
 
         . = ALIGN(4);
-        _pmod_start = .;
+        _prmod_start = .;
         KEEP(*(.kernel_proc_modules))
-        _pmod_end = .;
+        _prmod_end = .;
 
         _smod_start = .;
         KEEP(*(.kernel_system_modules))
         _smod_end = .;
 
-        _pmod_start = .;
+        _pemod_start = .;
         KEEP(*(.kernel_peripheral_modules))
-        _pmod_end = .;
+        _pemod_end = .;
 
         _kmod_start = .;
         KEEP(*(.kernel_kernel_modules))

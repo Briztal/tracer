@@ -19,7 +19,7 @@
  * @return true if the fault is minor, false if no recover can be done;
  */
 
-static bool (*fault_analyser)(uint32_t type) = 0;
+static enum fault_type (*fault_analyser)(uint32_t type) = 0;
 
 //------------------------------------------------ Fault handling config -----------------------------------------------
 
@@ -29,7 +29,7 @@ static bool (*fault_analyser)(uint32_t type) = 0;
  * @param analyser : the new fault analysis function;
  */
 
-void fault_init_analyser(bool (*analyser)(uint32_t type)) {
+void kernel_init_fault_analyser(enum fault_type (*analyser)(uint32_t type)) {
 	
 	//If the analyser is already initialised :
 	if (fault_analyser) {
@@ -57,10 +57,13 @@ void kernel_handle_fault(uint32_t type) {
 	kernel_log("Fault of type %d detected !", type);
 	
 	//Cache the fault analyser;
-	bool (*analyser)(uint32_t) = fault_analyser;
+	enum fault_type (*analyser)(uint32_t) = fault_analyser;
 	
 	//If the analyser is null :
 	if (!analyser) {
+		
+		kernel_log_("No analyser.");
+		return;
 		
 		//Panic;
 		kernel_panic_("A fault of type %d has occurred, the fault analyser is not initialised. ", type);

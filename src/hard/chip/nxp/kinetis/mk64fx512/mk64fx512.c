@@ -190,10 +190,10 @@ const uint8_t flashconfigbytes[16] = {
 };
 
 
-extern void __program_start();
+extern void __kernel_init();
 
 
-void __entry_point(void) {
+void __proc_init(void) {
 
 	/*
 	 * First, disable the watchdog;
@@ -210,8 +210,8 @@ void __entry_point(void) {
 	sim_enable_PORTE_clock_gating();
 
 	startup_initialise_globals();
-
-	__program_start();
+	
+	__kernel_init();
 
 }
 

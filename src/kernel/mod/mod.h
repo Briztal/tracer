@@ -28,8 +28,20 @@ void mod_add(const char *name, void (*init)());
 //Remove a module from the kernel;
 void mod_remove(const char *name);
 
-//Load all automatically loadable modules;
-void mod_autoload();
+
+/*
+ * Modules loading
+ */
+
+void load_proc_modules();
+
+void load_system_modules();
+
+void load_peripheral_modules();
+
+void load_kernel_modules();
+
+void load_user_modules();
 
 
 #endif //TRACER_MOD_H

@@ -78,3 +78,19 @@ MODULES += arm_v7m_systick
 endif
 
 
+
+#The fault module;
+arm_v7m_fault :
+
+	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_fault.o -c $(V7M_DIR)/arm_v7m_fault.c
+
+
+#If the systick module must be added :
+ifndef NO_FAULT
+
+#Add the systick rule to the module dependencies list;
+MODULES += arm_v7m_fault
+
+endif
+
+

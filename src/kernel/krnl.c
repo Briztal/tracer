@@ -115,20 +115,32 @@ static void kernel_init() {
 
 	//Initialise the kernel program memory;
 	kernel_memory_init();
-
+	
+	//Load all proc modules;
+	load_proc_modules();
+	
+	//Load all system modules;
+	load_system_modules();
+	
+	//TODO INIT FILE SYSTEM;
+	
+	//Load all kernel modules;
+	load_peripheral_modules();
+	
+	//Load all kernel modules;
+	load_kernel_modules();
+	
+	
+	
 	//Initialise the system clock;
 	sysclock_init();
 
-	//TODO INIT FILE SYSTEM;
-
-	//TODO INIT DRIVER MGR;
-
 	//Initialise the kernel scheduler;
 	kernel_scheduler_init();
-
-	//Initialise embedded drivers;
-	mod_autoload();
-
+	
+	
+	//Load all user modules;
+	load_user_modules();
 
 	//Start the process execution;
 	kernel_start_execution();
@@ -161,7 +173,7 @@ static void kernel_init() {
  * __program_start : the function called by the core library after init;
  */
 
-void __program_start() {
+void __kernel_init() {
 
 	//Call the kernel initialisation;
 	kernel_init();
@@ -364,7 +376,7 @@ static void kernel_start_execution() {
 /**
  * kernel_get_new_stack : called by threads to get a new stack pointer, providing the current one, and the index of the
  * 	thread;
- *
+ *https://genius.com/A-f-r-o-another-man-gone-lyrics
  * @param thread_id : the thread's index;
  * @param sp : the previous stack pointer;
  * @return the the new stack pointer;
@@ -394,10 +406,11 @@ void *kernel_switch_thread_stack(const volatile uint8_t thread_id, void *volatil
 		kernel_panic("krnl.c : kernel_switch_thread_stack : more entries than existing threads;");
 
 	}
-
+	
 	//If no more threads have to stop :
 	if (!nb_active_threads) {
-
+		
+		
 		//TODO
 		//TODO IN SYSCALL;
 		if (prc_process_terminated) {
@@ -409,16 +422,20 @@ void *kernel_switch_thread_stack(const volatile uint8_t thread_id, void *volatil
 			prc_process_terminated = false;
 
 		}
-
+		
+		
 		//Commit changes to the scheduler;
 		scheduler_commit(kernel_scheduler);
-
+		
+		
 		//Get the first process;
 		current_process = sched_get(kernel_scheduler);
-
+		
+		
 		//Update the duration until next preemption;
 		sysclock_set_process_duration(current_process->desc.activity_time);
-
+		
+		
 		//Update the number of active threads;
 		nb_active_threads = proc_nb_threads;
 
@@ -426,7 +443,8 @@ void *kernel_switch_thread_stack(const volatile uint8_t thread_id, void *volatil
 		process_updated = true;
 
 	}
-
+	
+	
 	//Unlock TODO MULTITHREAD PATCH;
 	//spin_unlock();
 

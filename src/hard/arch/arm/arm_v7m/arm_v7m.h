@@ -52,10 +52,10 @@
  */
 
 static inline uint16_t armv7m_get_nb_interrupts() {
-
+	
 	//Cache the 4 LSB of ICTR and multiply by 32, by shifting left 5 times;
-	return (uint16_t) ((uint16_t)(*ARMV7_ICTR) & (uint16_t) ARMV7_ICTR_INTLINESNUM_MASK) << 5;
-
+	return (uint16_t) ((uint16_t) (*ARMV7_ICTR) & (uint16_t) ARMV7_ICTR_INTLINESNUM_MASK) << 5;
+	
 }
 
 
@@ -136,7 +136,7 @@ static inline void armv7m_set_pendsv_pending() {
  */
 
 static inline bool armv7m_is_pendsv_pending() {
-	return (bool)(*ARMV7_ICSR & ARMV7_ICSR_PENDSVSET);
+	return (bool) (*ARMV7_ICSR & ARMV7_ICSR_PENDSVSET);
 }
 
 
@@ -163,7 +163,7 @@ static inline void armv7m_set_systick_pending() {
  */
 
 static inline bool armv7m_is_systick_pending() {
-	return (bool)(*ARMV7_ICSR & ARMV7_ICSR_PENDSTSET);
+	return (bool) (*ARMV7_ICSR & ARMV7_ICSR_PENDSTSET);
 }
 
 
@@ -322,7 +322,6 @@ static inline void armv7m_set_pendsv_priority(uint8_t priority) {
 }
 
 
-
 /**
  * armv7m_set_systick_priority : Updates SHPR2 set the priority of the systick system exception;
  *
@@ -354,7 +353,6 @@ static inline void armv7m_set_systick_priority(uint8_t priority) {
 #define ARMV7_SHCSR_MEMFAULTACT ((uint32_t) (1 << 0))
 
 
-
 /**
  * armv7m_enable_usage_fault : enables the usage fault exception;
  */
@@ -369,7 +367,7 @@ static inline void armv7m_enable_usage_fault() {
  */
 
 static inline bool armv7m_is_usage_fault_enabled() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTENA);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTENA);
 }
 
 
@@ -396,7 +394,7 @@ static inline void armv7m_enable_bus_fault() {
  */
 
 static inline bool armv7m_is_bus_fault_enabled() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTENA);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTENA);
 }
 
 
@@ -407,7 +405,6 @@ static inline bool armv7m_is_bus_fault_enabled() {
 static inline void armv7m_disable_bus_fault() {
 	*ARMV7_SHCSR |= ARMV7_SHCSR_BUSFAULTENA;
 }
-
 
 
 /**
@@ -424,7 +421,7 @@ static inline void armv7m_enable_mem_fault() {
  */
 
 static inline bool armv7m_is_mem_fault_enabled() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTENA);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTENA);
 }
 
 
@@ -443,7 +440,7 @@ static inline void armv7m_disable_mem_fault() {
  */
 
 static inline bool armv7m_is_svc_pending() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_SVCALLPENDED);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_SVCALLPENDED);
 }
 
 
@@ -453,7 +450,7 @@ static inline bool armv7m_is_svc_pending() {
  */
 
 static inline bool armv7m_is_bus_fault_pending() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTPENDED);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTPENDED);
 }
 
 
@@ -463,7 +460,7 @@ static inline bool armv7m_is_bus_fault_pending() {
  */
 
 static inline bool armv7m_is_mem_fault_pending() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTPENDED);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTPENDED);
 }
 
 
@@ -473,7 +470,7 @@ static inline bool armv7m_is_mem_fault_pending() {
  */
 
 static inline bool armv7m_is_usage_fault_pending() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTPENDED);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTPENDED);
 }
 
 
@@ -483,7 +480,7 @@ static inline bool armv7m_is_usage_fault_pending() {
  */
 
 static inline bool armv7m_is_systick_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_SYSTICKACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_SYSTICKACT);
 }
 
 
@@ -493,7 +490,7 @@ static inline bool armv7m_is_systick_active() {
  */
 
 static inline bool armv7m_is_pendsv_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_PENDSVACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_PENDSVACT);
 }
 
 
@@ -503,7 +500,7 @@ static inline bool armv7m_is_pendsv_active() {
  */
 
 static inline bool armv7m_is_monitor_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MONITORACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_MONITORACT);
 }
 
 
@@ -513,7 +510,7 @@ static inline bool armv7m_is_monitor_active() {
  */
 
 static inline bool armv7m_is_svc_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_SVCALLACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_SVCALLACT);
 }
 
 
@@ -523,7 +520,7 @@ static inline bool armv7m_is_svc_active() {
  */
 
 static inline bool armv7m_is_usage_fault_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_USGFAULTACT);
 }
 
 
@@ -533,7 +530,7 @@ static inline bool armv7m_is_usage_fault_active() {
  */
 
 static inline bool armv7m_is_bus_fault_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_BUSFAULTACT);
 }
 
 
@@ -543,7 +540,7 @@ static inline bool armv7m_is_bus_fault_active() {
  */
 
 static inline bool armv7m_is_mem_fault_active() {
-	return (bool)(*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTACT);
+	return (bool) (*ARMV7_SHCSR & ARMV7_SHCSR_MEMFAULTACT);
 }
 
 
@@ -553,12 +550,60 @@ static inline bool armv7m_is_mem_fault_active() {
 
 #define ARMV7_CFSR (volatile uint32_t *) 0xE000ED28
 
-//TODO LIB
+
+#define ARMV7_MMFSR (volatile uint8_t *) 0xE000ED28
+
+#define MMFSR_IACCVIOL ((uint32_t) (1 << 0))
+
+#define MMFSR_DACCVIOL ((uint32_t) (1 << 1))
+
+#define MMFSR_MUNSTKERR ((uint32_t) (1 << 3))
+
+#define MMFSR_MSTKERR ((uint32_t) (1 << 4))
+
+#define MMFSR_MMARKVALID ((uint32_t) (1 << 7))
+
+
+#define ARMV7_BFSR (volatile uint8_t *) 0xE000ED29
+
+#define BFSR_IBUSERR ((uint32_t) (1 << 0))
+
+#define BFSR_PRECISERR ((uint32_t) (1 << 1))
+
+#define BFSR_IMPRECISERR ((uint32_t) (1 << 2))
+
+#define BFSR_UNSTKERR ((uint32_t) (1 << 3))
+
+#define BFSR_STKERR ((uint32_t) (1 << 4))
+
+#define BFSR_BFARVALID ((uint32_t) (1 << 7))
+
+
+#define ARMV7_UFSR (volatile uint16_t *) 0xE000ED2A
+
+#define UFSR_UNDEFINSTR ((uint32_t) (1 << 0))
+
+#define UFSR_INVSTATE ((uint32_t) (1 << 1))
+
+#define UFSR_INVPC ((uint32_t) (1 << 2))
+
+#define UFSR_NOCP ((uint32_t) (1 << 3))
+
+#define UFSR_UNALIGNED ((uint32_t) (1 << 8))
+
+#define UFSR_DIVBYZERO ((uint32_t) (1 << 9))
 
 
 //----------------- HFSR - RW : Hard Fault Status Register -----------------
 
-#define ARMV7_HFSR (volatile uint32_t *) 0xE000ED2C)
+#define ARMV7_HFSR ((volatile uint32_t *) 0xE000ED2C)
+
+#define HFSR_VECTTBL ((uint32_t) (1 << 1))
+
+#define HFSR_FORCED ((uint32_t) (1 << 30))
+
+#define HFSR_DEBUGEVT ((uint32_t) (1 << 31))
+
 
 
 //----------------- DFSR - RW : Debug Fault Status Register -----------------
@@ -609,15 +654,15 @@ static inline bool armv7m_is_mem_fault_active() {
  */
 
 static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) {
-
+	
 	//If the required interrutp number is greater than the id mask, do nothing;
 	if (interrupt_number > ARMV7_STIR_INTID) {
 		return;
 	}
-
+	
 	//Trigger the required software interrupt;
-	*ARMV7_STIR = (uint32_t)interrupt_number;
-
+	*ARMV7_STIR = (uint32_t) interrupt_number;
+	
 }
 
 
@@ -662,11 +707,9 @@ static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) 
 #define ARMV7_SYST_CSR_ENABLE ((uint32_t) (1 << 0))
 
 
-
-
 static inline void armv7m_systick_enable() {
 	*ARMV7_SYST_CSR |= ARMV7_SYST_CSR_ENABLE;
-
+	
 }
 
 static inline void armv7m_systick_disable() {
@@ -709,7 +752,7 @@ static inline void armv7m_systick_set_reload(uint32_t reload24b) {
 
 //----------------- CVR - RW : Systick Current Value Register -----------------
 
-#define ARMV7_SYST_CVR 	((volatile uint32_t *) 0xE000E018)
+#define ARMV7_SYST_CVR    ((volatile uint32_t *) 0xE000E018)
 
 
 static inline void armv7m_systick_clear_countflag() {
@@ -730,7 +773,6 @@ static inline uint32_t armv7m_systick_get_count() {
 #define ARMV7_SYST_CALIB_NOREF ((uint32_t) (1 << 31))
 #define ARMV7_SYST_CALIB_SKEW  ((uint32_t) (1 << 30))
 #define ARMV7_SYST_CALIB_TENMS_MASK ((uint32_t) 0x00FFFFFF)
-
 
 
 static inline uint32_t armv7m_systick_get_10ms_reload() {
@@ -798,13 +840,13 @@ enum nvic_exception {
  */
 
 static inline void armv7m_nvic_enable_interrupt(uint16_t interrupt_channel) {
-
+	
 	//Cache the address of the related ISER register by dividing the interrupt channel by 32;
 	volatile uint32_t *ISER_register = ARMV7_NVIC_ISER + (interrupt_channel >> 5);
-
+	
 	//Determine the bit mask using the remain of the interrupt channel by 32
 	*ISER_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
-
+	
 }
 
 
@@ -818,13 +860,13 @@ static inline void armv7m_nvic_enable_interrupt(uint16_t interrupt_channel) {
  */
 
 static inline void armv7m_nvic_disable_interrupt(uint16_t interrupt_channel) {
-
+	
 	//Cache the address of the related ICER register by dividing the interrupt channel by 32;
 	volatile uint32_t *ICER_register = ARMV7_NVIC_ICER + (interrupt_channel >> 5);
-
+	
 	//Determine the bit mask using the remain of the interrupt channel by 32
 	*ICER_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
-
+	
 }
 
 
@@ -838,13 +880,13 @@ static inline void armv7m_nvic_disable_interrupt(uint16_t interrupt_channel) {
  */
 
 static inline void armv7m_nvic_set_interrupt_pending(uint16_t interrupt_channel) {
-
+	
 	//Cache the address of the related ISPR register by dividing the interrupt channel by 32;
 	volatile uint32_t *ISPR_register = ARMV7_NVIC_ISPR + (interrupt_channel >> 5);
-
+	
 	//Determine the bit mask using the remain of the interrupt channel by 32
 	*ISPR_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
-
+	
 }
 
 
@@ -858,13 +900,13 @@ static inline void armv7m_nvic_set_interrupt_pending(uint16_t interrupt_channel)
  */
 
 static inline void armv7m_nvic_clear_interrupt_pending(uint16_t interrupt_channel) {
-
+	
 	//Cache the address of the related ICPR register by dividing the interrupt channel by 32;
 	volatile uint32_t *ICPR_register = ARMV7_NVIC_ICPR + (interrupt_channel >> 5);
-
+	
 	//Determine the bit mask using the remain of the interrupt channel by 32
 	*ICPR_register = (uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F);
-
+	
 }
 
 //----------------- ISPR - RW : Interrupt Active Bit Registers. 16 4-byte long registers -----------------
@@ -877,13 +919,13 @@ static inline void armv7m_nvic_clear_interrupt_pending(uint16_t interrupt_channe
  */
 
 static inline bool armv7m_nvic_is_interrupt_enabled(uint16_t interrupt_channel) {
-
+	
 	//Cache the address of the related ICPR register by dividing the interrupt channel by 32;
 	volatile uint32_t *IABR_register = ARMV7_NVIC_IABR + (interrupt_channel >> 5);
-
+	
 	//Determine the bit mask using the remain of the interrupt channel by 32, assert if bit is set;
 	return (bool) (*IABR_register & ((uint32_t) 1 << (interrupt_channel & (uint16_t) 0x1F)));
-
+	
 }
 
 
@@ -899,10 +941,10 @@ static inline bool armv7m_nvic_is_interrupt_enabled(uint16_t interrupt_channel) 
  */
 
 static inline void armv7m_nvic_set_priority(uint16_t interrupt_channel, uint8_t priority) {
-
+	
 	//Determine the address of the byte to update, and save the priority in it;
-	*((uint8_t *)ARMV7_NVIC_IPR + interrupt_channel) = priority;
-
+	*((uint8_t *) ARMV7_NVIC_IPR + interrupt_channel) = priority;
+	
 }
 
 
@@ -913,12 +955,11 @@ static inline void armv7m_nvic_set_priority(uint16_t interrupt_channel, uint8_t 
  */
 
 static inline uint8_t armv7m_nvic_get_priority(uint16_t interrupt_channel) {
-
+	
 	//Determine the address of the byte to update, and save the priority in it;
-	return *((uint8_t *)ARMV7_NVIC_IPR + interrupt_channel);
-
+	return *((uint8_t *) ARMV7_NVIC_IPR + interrupt_channel);
+	
 }
-
 
 
 #endif //TRACER_ARM_V7_H

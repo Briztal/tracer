@@ -26,7 +26,7 @@ The kernel implements __program_start, its entry function.
 It calls __create_drivers, the standard driver creation function;
 
 In case where the kernel shouldn't be included (for debug purposes), another library will be compiled, implementing
-a dummy __program_start;
+a dummy __kernel_init;
 
 The kernel contains two set of files, KERNEL_PUB and KERNEL_PRIV. KERNEL_PUB contains sources that can be accessed by
 other libraries (std drivers, processes). KERNEL_PRIV contains kernel internal libraries;

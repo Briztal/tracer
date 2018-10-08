@@ -5,6 +5,8 @@
 #The k64fx512 comprises 256 interrupts
 NVIC_NB_INTERRUPTS = 256
 
+NO_NVIC_RELOCATION = 1
+
 include src/hard/proc/cortex_m4f/Makefile
 
 

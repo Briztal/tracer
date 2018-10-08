@@ -24,6 +24,7 @@
 #include <string.h>
 #include <kernel/panic.h>
 #include <kernel/async/interrupt.h>
+#include <kernel/log.h>
 
 
 /**
@@ -44,7 +45,15 @@ extern void scheduler_sort_active_list(struct sched_data *sched, struct sched_el
  */
 
 void scheduler_sort_active_list(struct sched_data *sched, struct sched_element *new_elements) {
-
+	
+	//If no elements are to insert :
+	if (!new_elements) {
+		
+		//Do nothing, the list is not sorted;
+		return;
+		
+	}
+	
 	//Simply concatenate new elements and active list;
 	list_concat((struct list_head *) new_elements, (struct list_head *) sched->active_list);
 
@@ -242,7 +251,7 @@ static struct sched_element *sched_active_remove_first(struct sched_data *sched)
  */
 
 void scheduler_commit(struct sched_data *sched) {
-
+	
 	//If the termination flag is set :
 	if (sched->termination_required) {
 
@@ -271,13 +280,14 @@ void scheduler_commit(struct sched_data *sched) {
 		removed->active = false;
 
 	}
+	
 
 	//Get the list of elements to activate; They have been marked active at their insertion in the shared fifo;
 	struct sched_element *to_activate = (struct sched_element *) shared_fifo_get_all(&sched->to_activate);
-
+	
 	//Insert elements and sort the active list;
 	scheduler_sort_active_list(sched, to_activate);
-
+	
 }
 
 

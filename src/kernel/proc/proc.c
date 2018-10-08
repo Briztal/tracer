@@ -45,6 +45,9 @@ bool register_stack_header_creator(void (*new_creator)(struct proc_stack *)) {
 	//Register the stack creator;
 	stack_header_creator = new_creator;
 	
+	//Complete;
+	return true;
+	
 }
 
 

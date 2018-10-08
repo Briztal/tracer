@@ -48,7 +48,33 @@
 #include <kernel/panic.h>
 #include <kernel/proc/proc.h>
 #include <kernel/async/fault.h>
+#include <kernel/debug/debug.h>
+#include <kernel/log.h>
 #include "arm_v7m.h"
+
+
+//---------------------------------------------------- ARM_V7M Init ----------------------------------------------------
+
+
+extern void __proc_init();
+
+static void __arm_v7m_init() {
+	
+	//Enable all faults;
+	/*
+	armv7m_enable_bus_fault();
+	armv7m_enable_usage_fault();
+	armv7m_enable_mem_fault();
+	
+	armv7m_set_mem_fault_priority(0);
+	armv7m_set_bus_fault_priority(0);
+	armv7m_set_usage_fault_priority(0);
+	*/
+	//Call the proc init function;
+	__proc_init();
+	
+	
+}
 
 
 //------------------------------------------------ Arch and proc globals -----------------------------------------------
@@ -216,15 +242,24 @@ void proc_enter_thread_mode(struct proc_stack **exception_stacks) {
         "msr control, r4\n\t":: :"r4", "cc", "memory"
 	);
 	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-	
 	
 	//Execute the preemption call;
 	preemption_set_pending();
 	
+	
+	
+	//Execute an ISB;
+	__asm__ __volatile__ ("DMB");
+	
+	//Execute an ISB;
+	__asm__ __volatile__ ("DSB");
+	
+	//Execute an ISB;
+	__asm__ __volatile__ ("ISB");
+	
+	
 	//Enable interrupts;
-	exceptions_enable();
+	__asm__ __volatile__("cpsie i");
 	
 	kernel_panic("NO_PREEMPTION");
 	
@@ -263,6 +298,7 @@ void proc_context_switcher() {
 	__asm__ __volatile__("cpsid i");
 	
 	
+	
 	//As R0 is already saved in memory, we can use it;
 	__asm__ __volatile__ (\
             "mrs r0, psp \n\t"\
@@ -281,13 +317,14 @@ void proc_context_switcher() {
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
 	
-	//Enable interrupts;
-	__asm__ __volatile__("cpsie i");
 	
+	
+	//Enable interrupts;
+	
+	__asm__ __volatile__("cpsie i");
 	
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
 	psp = kernel_switch_thread_stack(0, psp);
-	
 	
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");
@@ -308,6 +345,7 @@ void proc_context_switcher() {
 	//Execute an ISB;
 	__asm__ __volatile__ ("ISB");
 	
+	
 	//Enable interrupts;
 	__asm__ __volatile__("cpsie i");
 	
@@ -320,13 +358,16 @@ static void arm_v7m_hard_fault_handler() {
 	kernel_handle_fault(0);
 }
 
-static void arm_v7m_mem_fault_handler() {
-	kernel_handle_fault(2);
-}
 
 static void arm_v7m_bus_fault_handler() {
 	kernel_handle_fault(1);
 }
+
+
+static void arm_v7m_mem_fault_handler() {
+	kernel_handle_fault(2);
+}
+
 
 
 static void arm_v7m_usg_fault_handler() {
@@ -342,10 +383,8 @@ static void arm_v7m_usg_fault_handler() {
  * 	- The first function to execute, defined in another piece of code;
  */
 
-extern void __entry_point();
 
 extern uint32_t _ram_highest;
-
 
 
 //Define an empty ISR handler
@@ -358,7 +397,7 @@ void (*kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
 	&no_isr,
 	
 	//1 : reset; Effectively used when NVIC is relocated;
-	&__entry_point,
+	&__arm_v7m_init,
 	
 	//2 : NMI. Not supported for instance;
 	&no_isr,
@@ -404,7 +443,7 @@ void (*kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
 	
 	//All interrupts not handled;
 	[16 ... NB_INTERRUPTS - 1] = &no_isr,
-
+	
 };
 
 //-------------------------------------------------- Interrupt priorities --------------------------------------------------
@@ -432,7 +471,7 @@ const uint8_t ic_priority_7 = 0x00;
  */
 
 void exceptions_enable() {
-	__asm__ volatile("cpsie i":::"memory");
+	__asm__ volatile("cpsie i":: :"memory");
 }
 
 
@@ -441,9 +480,8 @@ void exceptions_enable() {
  */
 
 void exceptions_disable() {
-	__asm__ volatile("cpsid i":::"memory");
+	__asm__ volatile("cpsid i":: :"memory");
 }
-
 
 
 /**
@@ -460,7 +498,7 @@ void irq_enable(uint16_t channel) {
  * @param channel : the channel to disable;
  */
 
-void irq_disable(uint16_t channel){
+void irq_disable(uint16_t channel) {
 	armv7m_nvic_disable_interrupt(channel);
 }
 
@@ -473,7 +511,6 @@ void irq_disable(uint16_t channel){
 void irq_set_pending(uint16_t channel) {
 	armv7m_nvic_set_interrupt_pending(channel);
 }
-
 
 
 /**
@@ -516,7 +553,6 @@ void irq_set_priority(uint16_t channel, uint8_t priority) {
 uint8_t irq_get_priority(uint16_t channel, uint8_t priority) {
 	return armv7m_nvic_get_priority(channel);
 }
-
 
 
 /**
@@ -591,7 +627,6 @@ void preemption_set_handler(void (*handler)(void)) {
 	exception_set_handler(NVIC_PENDSV, handler);
 	
 	
-	
 }
 
 //Set the priority of the preemption exception;
@@ -657,7 +692,7 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 	&_ram_highest,
 	
 	//1 : Reset : call the program's entry point;
-	&__entry_point,
+	&__arm_v7m_init,
 	
 	//In order to avoid writing 254 times the function name, we will use macros that will write it for us;
 #define channel(i) &no_isr,
@@ -715,7 +750,7 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 	&_ram_highest,
 	
 	//1 : Reset : call the program's entry point;
-	&__entry_point,
+	&__arm_v7m_init,
 	
 	
 	//2->255 : empty handler (240 times, 240 = 3 * 8 * 10);

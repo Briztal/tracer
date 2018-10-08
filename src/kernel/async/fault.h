@@ -22,11 +22,26 @@
  * 	return true or false, depending on if the fault is minor or major;
  */
 
+//------------------------------------------------ Fault types -----------------------------------------------
+
+enum fault_type {
+	
+	NO_FAULT = 2,
+	
+	RECOVERABLE_FAULT = 1,
+	
+	NON_RECOVERABLE_FAULT = 0,
+	
+};
+
+#define FAULT_ESCALATE(var ,f) {if ((var) < (f)) (var) = (f);}
+
+
 //------------------------------------------------ Fault handling config -----------------------------------------------
 
 //Update the fault analyser; Takes the fault code in parameter (indicative data),
 // and returns true if the fault is minor, or false if the fault is major;
-void fault_init_analyser(bool (*analyser)(uint32_t type));
+void kernel_init_fault_analyser(enum fault_type (*analyser)(uint32_t type));
 
 
 //--------------------------------------------------- Fault handling ---------------------------------------------------
