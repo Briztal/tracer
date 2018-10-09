@@ -69,40 +69,16 @@ bool register_stack_header_creator(void (*new_creator)(struct proc_stack *));
 void reset_stack_header_creator();
 
 
+
 //-------------------------------------------------- Execution control -------------------------------------------------
 
-/**
- * proc_enter_thread_mode : this function initialises threads in a safe state. It never returns.
- * 	The preemption environment must have been initialised before;
- *
- * 	- initialises all threads in their lowest privilege state;
- * 	- updates exception stacks;
- * 	- calls the provided function, that should trigger the preemption;
- * 	- make all threads run an infinite loop;
- * 	- execute the preemption call;
- * 	- enable interrupts;
- * 	- loop;
- *
- * @param exception_stacks : processor stacks that must be used in case of interrupt;
- */
 
-extern void proc_enter_thread_mode(struct proc_stack **exception_stacks);
-
+//Stars the execution of the first process;
+void proc_start_execution();
 
 //Get the initial arg;
 extern void *proc_get_init_arg();
 
-//The context switcher; Should be set as the preemption handler for a preemption to occur;
-extern void proc_context_switcher();
 
-
-//-------------------------------------------- Coprocessor context switching -------------------------------------------
-
-//A module can register a special context switcher for a coprocessor, (ex : FPU);
-// Context will be located on top of the stack;
-bool register_coprocessor_context_switcher(void (*store_context)(struct proc_stack *), void (*load_context)(struct proc_stack *));
-
-//Reset a previously registered stack header creator;
-void reset_coprocessor_context_switcher();
 
 #endif //TRACER_CORE_H

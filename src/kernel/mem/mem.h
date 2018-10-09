@@ -60,7 +60,7 @@ struct prog_mem {
 
 
 //Create a process memory struct, containing only a heap;
-struct prog_mem *prog_mem_create(size_t ram_size, bool self_referenced);
+struct prog_mem *prog_mem_create(size_t ram_size);
 
 //Initialise the process memory : reset the heap, and create as many stacks as required;
 void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stack_size);

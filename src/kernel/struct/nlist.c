@@ -18,7 +18,7 @@
 
 */
 
-#include <kernel/krnl.h>
+#include <kernel/kinit.h>
 
 #include <util/string.h>
 

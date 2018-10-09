@@ -43,7 +43,7 @@
 //------------------------------------------------ Includes -----------------------------------------------
 
 #include <stdint.h>
-#include <kernel/krnl.h>
+#include <kernel/kinit.h>
 #include <kernel/async/interrupt.h>
 #include <kernel/panic.h>
 #include <kernel/proc/proc.h>

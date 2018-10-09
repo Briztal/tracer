@@ -122,21 +122,6 @@ void critical_section_force_exit();
 
 
 
-//Set the handler of the preemption exception;
-extern void preemption_set_handler(void (*)(void));
-
-//Set the priority of the preemption exception;
-extern void preemption_set_priority(uint8_t priority);
-
-//Enable the preemption exception;
-extern void preemption_enable();
-
-//Set the preemption exception pending;
-extern void preemption_set_pending();
-
-//Set the preemption exception not pending;
-extern void preemption_clear_pending();
-
 
 
 //Set the handler of the syscall exception;

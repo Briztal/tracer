@@ -20,13 +20,11 @@
 
 #include "prc.h"
 
-#include <kernel/krnl.h>
 
 #include <string.h>
-#include <kernel/async/interrupt.h>
 #include <kernel/panic.h>
-#include <kernel/log.h>
-#include <kernel/debug/debug.h>
+#include <kernel/kdmem.h>
+#include <kernel/async/preempt.h>
 
 bool prc_process_terminated = false;
 
@@ -80,7 +78,7 @@ struct prc *prc_create(const struct prc_desc *const desc) {
 	struct prc *prc = kmalloc(sizeof(struct prc));
 
 	//Create the program memory, referenced in the kernel heap;
-	struct prog_mem *mem = prog_mem_create(desc->ram_size, false);
+	struct prog_mem *mem = prog_mem_create(desc->ram_size);
 
 	//Create stacks;
 	prog_mem_create_stacks(mem, desc->nb_threads, desc->stack_size);

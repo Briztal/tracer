@@ -56,53 +56,26 @@
 #include <kernel/struct/shared_fifo.h>
 
 
-struct sched_element {
+//Pre-declare the scheduler element struct, only used in source;
+struct sched_elmt;
 
-	//The status head. Used by the active list, or by shared fifos;
-	struct list_head status_head;
+//A constant flag, set if the scheduler is compiled and supported;
+extern const bool scheduler_supported;
 
-	//The main head. Used to reference all processes in their add order; Access is critical;
-	struct list_head main_head;
+//---------------------------------------------------- Sched policy ----------------------------------------------------
 
-	//The process itself. Its form is not specified;
-	struct prc *process;
+//A scheduling policy is a function that sorts a list of scheduler elements, and inserts new elements in it;
+typedef void (*scheduling_policy)(struct sched_elmt **list_ref, struct sched_elmt *new_elements);
 
-	//TODO ENABLE ONLY FOR DEBUG;
-	//The activity state; Set if the element is active;
-	bool active;
-
-};
-
-
-struct sched_data {
-
-	//The first process; Leads to the process list;
-	struct sched_element *const main_list;
-
-	//The first available process; Can be null. The linked list is sorted;
-	struct sched_element *active_list;
-
-	//The shared fifo, that contains processes to activate;
-	struct shared_fifo to_activate;
-
-	//If set the current process will be terminated at next @select call;
-	bool termination_required;
-
-	//If set the current process will be stopped at next @select call;
-	bool stop_required;
-
-};
+//Update the scheduling policy;
+void sched_set_scheduling_policy(scheduling_policy policy);
 
 
 
-//------------------------------------------------- Creation - Deletion ------------------------------------------------
+//------------------------------------------------- Initialisation ------------------------------------------------
 
-//Create a scheduler in the kernel heap;
-struct sched_data *sched_create(struct prc *init);
-
-//Delete a scheduler;
-void sched_delete(struct sched_data *);
-
+//initialises the first process of the scheduler;
+void sched_init(struct prc *first_process);
 
 //----------------------------------------------------- Scheduling -----------------------------------------------------
 
@@ -112,33 +85,33 @@ void sched_delete(struct sched_data *);
  * 									!!!!
  * This function must be called at the lowest interrupt priority level;
  * 									!!!!
- *
  */
 
-void scheduler_commit(struct sched_data *);
+void sched_commit();
 
 //Get the current process;
-struct prc *sched_get(struct sched_data *);
+struct prc *sched_get();
+
+
+//----------------------------------------------------- Creation -----------------------------------------------------
+
+//Create a scheduler element referencing the given process, and reference it in the scheduler;
+void sched_create_element(struct prc *);
 
 
 //----------------------------------------------------- Activation -----------------------------------------------------
 
-//Add the provided process;
-void sched_add_prc(struct sched_data *, struct sched_element *);
-
 //Resume the provided process;
-void sched_resume_prc(struct sched_data *, struct sched_element *);
+void sched_resume_prc(struct sched_elmt *);
 
 
 //---------------------------------------------------- Deactivation ----------------------------------------------------
 
 //Set the current process in the stopped state, and return its ref;
-struct sched_element *sched_stop_prc(struct sched_data *);
+struct sched_elmt *sched_stop_prc();
 
 //Terminate the current process; Will be to_delete at next select call;
-void sched_terminate_prc(struct sched_data *);
-
-
+void sched_terminate_prc();
 
 
 #endif //TRACER_SCHEDULER_H
