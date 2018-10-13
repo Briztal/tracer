@@ -14,4 +14,4 @@ LDFLAGS +=
 
 cortex_m4f : arm_v7m
 	@echo "compiling CORTEX_M4F module\n"
-#@$(CC) $(CFLAGS) $(INC) -o build/hard/cortex_m4f.o -c src/hard/run/cortex_m4f/cortex_m4f.c
+#@$(CC) $(CFLAGS) $(INC) -o build/hard/cortex_m4f.o -c src/hard/sched/cortex_m4f/cortex_m4f.c

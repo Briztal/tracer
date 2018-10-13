@@ -20,14 +20,14 @@
 
 
 #include <stdint.h>
+
 #include <kernel/panic.h>
-#include <kernel/log.h>
+
+#include <kernel/debug/log.h>
 
 #include "ram.h"
 
 #include "heap.h"
-
-#include "kernel/proc/proc.h"
 
 
 //------------------------------------------------------- Externs ------------------------------------------------------

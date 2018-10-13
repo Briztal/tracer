@@ -20,10 +20,12 @@
 
 #include <stdio.h>
 
-#include <kernel/kinit.h>
 #include <string.h>
+
 #include <kernel/panic.h>
+
 #include <kernel/struct/nlist.h>
+
 #include "inode.h"
 
 

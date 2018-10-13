@@ -22,9 +22,8 @@
 
 #include "kernel/mem/ram.h"
 
-#include <kernel/panic.h>
-
 #include <util/string.h>
+#include <kernel/hard.h>
 
 
 //------------------------------------------------------ prc_mem ------------------------------------------------------
@@ -94,7 +93,7 @@ void prc_mem_reset(struct prc_mem *mem, size_t stacks_size) {
 	void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
 	
 	//Correct the stack's highest address for proper alignment;
-	stack_reset = proc_stack_align(stack_reset);
+	stack_reset = __proc_stack_align(stack_reset);
 	
 	//Create the proc_stack initializer;
 	struct proc_stack ps_init = {

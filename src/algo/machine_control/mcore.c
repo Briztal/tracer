@@ -20,7 +20,7 @@
 
 #include "mcore.h"
 
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 
 //------------------------------------------------- Computation stages -------------------------------------------------

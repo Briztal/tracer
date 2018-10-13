@@ -22,10 +22,9 @@
 
 #include <kernel/struct/nlist.h>
 
-#include <kernel/proc/proc.h>
 #include <kernel/panic.h>
-#include <kernel/debug/debug.h>
-#include <kernel/log.h>
+
+#include <kernel/debug/log.h>
 
 
 //--------------------------------------------------- Modules globals --------------------------------------------------
@@ -150,7 +149,7 @@ void load_proc_modules() {
 	extern const uint8_t _prmod_start, _prmod_end;
 	
 	//Log;
-	kernel_log_("Loading run modules ...");
+	kernel_log_("Loading sched modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&_prmod_start, &_prmod_end);

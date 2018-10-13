@@ -1,5 +1,5 @@
 /*
-  krnl.c Part of TRACER
+  kinit.c Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
@@ -20,7 +20,8 @@
 
 #include "panic.h"
 
-#include "kdmem.h"
+#include "kernel/mem/kdmem.h"
+#include "kernel/debug/log.h"
 
 #include <kernel/async/interrupt.h>
 
@@ -29,9 +30,8 @@
 #include <kernel/mem/ram.h>
 
 #include <kernel/mod/mod.h>
+#include <kernel/sched/proc.h>
 
-#include <kernel/log.h>
-#include <kernel/run/proc.h>
 
 
 
@@ -62,7 +62,7 @@ static void kernel_start();
  * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
-void kernel_init() {
+void __kernel_init() {
 	
 	//Create an OTP flag;
 	static bool reentrance = false;
@@ -90,7 +90,7 @@ void kernel_init() {
 	//Initialise the kernel dynamic memory;
 	kdmem_init();
 	
-	//Load all run modules;
+	//Load all sched modules;
 	load_proc_modules();
 	
 	
@@ -127,7 +127,7 @@ void kernel_init() {
 
 
 //If the kernel was compiled for loop mode :
-#ifdef LOOP_MODE
+#ifdef KERNEL_LOOP_MODE
 
 //Declare the kernel first function;
 extern void __kernel_first_function();

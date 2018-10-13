@@ -20,13 +20,13 @@
 
 //--------------------------------------------------- Make Parameters --------------------------------------------------
 
-//The memory library required NB_THREADS to be provided by the makefile;
-#if !defined(EXCEPTION_STACKS_SIZE)
+//The memory library required the exception stack size to be provided by the makefile;
+#if !defined(KEX_STACK_SIZE)
 
 //COmpilation fail;
 #error "Error, one make parameter not provided, check your makefile"
 
-#define EXCEPTION_STACKS_SIZE 1000
+#define KEX_STACK_SIZE 1000
 
 #endif
 
@@ -34,11 +34,12 @@
 
 #include <kernel/async/interrupt.h>
 #include <kernel/async/preempt.h>
-#include <kernel/log.h>
-#include <kernel/run/sched.h>
+#include <kernel/debug/log.h>
+#include <kernel/sched/sched.h>
 #include <kernel/clock/sysclock.h>
 #include <kernel/mem/ram.h>
 #include <util/string.h>
+#include "proc.h"
 
 
 //--------------------------------------------- Vars --------------------------------------------
@@ -56,33 +57,6 @@ static void (*stack_header_creator)(struct proc_stack *stack);
 
 //------------------------------------------------- Proc requirements --------------------------------------------------
 
-//The hardware library must provide a function to create the general stack context;
-extern void proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg);
-
-//The context switcher; Should be set as the preemption handler for a preemption to occur;
-extern void proc_context_switcher();
-
-
-/**
- * proc_enter_thread_mode : this function initialises threads in a safe state. It never returns.
- * 	The preemption environment must have been initialised before;
- *
- * 	- initialises all threads in their lowest privilege state;
- * 	- updates exception stacks;
- * 	- calls the provided function, that should trigger the preemption;
- * 	- make all threads run an infinite loop;
- * 	- execute the preemption call;
- * 	- enable interrupts;
- * 	- loop;
- *
- * @param exception_stacks : processor stacks that must be used in case of interrupt;
- */
-
-extern void proc_enter_thread_mode(struct proc_stack *exception_stacks);
-
-
-//------------------------------------------------- Proc requirements --------------------------------------------------
-
 //Initialise the stack context for future execution;
 void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg) {
 	
@@ -94,7 +68,7 @@ void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_lo
 	//create_stack_header(stack);
 	
 	//Create the stack context;
-	proc_create_stack_context(stack, function, end_loop, init_arg);
+	__proc_create_stack_context(stack, function, end_loop, init_arg);
 	
 }
 
@@ -106,13 +80,13 @@ void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_lo
 void init_exception_stack() {
 	
 	//Allocate some memory for the thread's stack in the newly created heap;
-	void *thread_stack = ram_alloc(EXCEPTION_STACKS_SIZE);
+	void *thread_stack = ram_alloc(KEX_STACK_SIZE);
 	
 	//Determine the stack's highest address;
-	void *stack_reset = (void *) ((uint8_t *) thread_stack + EXCEPTION_STACKS_SIZE);
+	void *stack_reset = (void *) ((uint8_t *) thread_stack + KEX_STACK_SIZE);
 	
 	//Correct the stack's highest address for proper alignment;
-	stack_reset = proc_stack_align(stack_reset);
+	stack_reset = __proc_stack_align(stack_reset);
 	
 	//Create the proc_stack initializer;
 	struct proc_stack cs_init = {
@@ -147,7 +121,7 @@ void proc_start_execution() {
 	init_exception_stack();
 	
 	//Initialise the preemption;
-	preemption_init(&proc_context_switcher, KERNEL_PREMPTION_PRIORITY);
+	preemption_init(&__proc_context_switcher, KERNEL_PREMPTION_PRIORITY);
 	
 	//Log;
 	kernel_log_("preemption initialised");
@@ -179,7 +153,7 @@ void proc_start_execution() {
 	
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
 	//Interrupts will be enabled at the end of the function;
-	proc_enter_thread_mode(&exception_stack);
+	__proc_enter_thread_mode(&exception_stack);
 	
 }
 
@@ -194,7 +168,7 @@ void proc_start_execution() {
  * @return the the new stack pointer;
  */
 
-void *proc_switch_context(void *volatile sp) {
+void *kernel_switch_context(void *volatile sp) {
 	
 	//Save process stack pointer;
 	sched_set_prc_sp(sp);

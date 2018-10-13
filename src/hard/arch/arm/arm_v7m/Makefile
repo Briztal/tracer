@@ -44,15 +44,15 @@ arm_v7m :
 	@echo "compiling ARM_V7M module\n"
 
 #Compile the armv7 base;
-	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o build/hard/arm_v7m_base.o -c $(V7M_DIR)/arm_v7m_base.c
+	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o build/hard/arm_v7m.o -c $(V7M_DIR)/arm_v7m.c
 
 #if the preemption base must be compiled :
-ifndef KERNEL_LOOP_MODE
+ifdef KERNEL_SCHED_MODE
 
 #Compile the preemption base;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_adv.o -c $(V7M_DIR)/arm_v7m_adv.c
+	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_sched.o -c $(V7M_DIR)/arm_v7m_sched.c
 
-endif #KERNEL_LOOP_MODE
+endif #KERNEL_SCHED_MODE
 
 
 

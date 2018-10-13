@@ -9,36 +9,21 @@
 
 #include <stdint.h>
 
+#include <kernel/hard.h>
 
-//----------------------------------------------------- Priorities -----------------------------------------------------
 
-/*
- * General interrupt priorities;
- */
+//-------------------------------------------- General interrupt priorities --------------------------------------------
 
 //The lowest priority level;
-extern const uint8_t ic_priority_0;
-
-//Priority 1;
-extern const uint8_t ic_priority_1;
-
-//Priority 2;
-extern const uint8_t ic_priority_2;
-
-//Priority 3;
-extern const uint8_t ic_priority_3;
-
-//Priority 4;
-extern const uint8_t ic_priority_4;
-
-//Priority 5;
-extern const uint8_t ic_priority_5;
-
-//Priority 6;
-extern const uint8_t ic_priority_6;
-
+#define ic_priority_0 __ic_priority_0
+#define ic_priority_1 __ic_priority_1
+#define ic_priority_2 __ic_priority_2
+#define ic_priority_3 __ic_priority_3
+#define ic_priority_4 __ic_priority_4
+#define ic_priority_5 __ic_priority_5
+#define ic_priority_6 __ic_priority_6
+#define ic_priority_7 __ic_priority_7
 //The highest priority level;
-extern const uint8_t ic_priority_7;
 
 
 /*
@@ -58,7 +43,6 @@ extern const uint8_t ic_priority_7;
 #define KERNEL_SYSTICK_PRIORITY ic_priority_6
 
 
-
 //-------------------------------------------------- Exceptions -------------------------------------------------
 
 /*
@@ -66,47 +50,46 @@ extern const uint8_t ic_priority_7;
  */
 
 //Enable the interrupt control;
-extern void exceptions_enable();
+#define exceptions_enable() __exceptions_enable()
 
 //Disables the interrupt control;
-extern void exceptions_disable();
+#define exceptions_disable() __exceptions_disable()
 
 //Sets the handler of the required exception;
-extern void exception_set_handler(uint16_t channel, void (*handler)());
+#define exception_set_handler(channel, handler) __exception_set_handler(channel, handler)
 
 
 //-------------------------------------------------- Interrupt ReQuest -------------------------------------------------
 
-
 //Enables the required interrupt channel;
-extern void irq_enable(uint16_t channel);
+#define irq_enable(channel) __irq_enable(channel)
 
 //Disables the required interrupt channel;
-extern void irq_disable(uint16_t channel);
+#define irq_disable(channel) __irq_disable(channel)
 
 //Sets the required non-system interrupt in the pending state;
-extern void irq_set_pending(uint16_t channel);
+#define irq_set_pending(channel) __irq_set_pending(channel)
 
 //Sets the required non-system interrupt in the not-pending state;
-extern void irq_clear_pending(uint16_t channel);
+#define irq_clear_pending(channel) __irq_clear_pending(channel)
 
 //Sets the required non-system interrupt in the not-pending state;
-extern void irq_is_pending(uint16_t channel);
+#define irq_is_pending(channel) __irq_is_pending(channel)
 
 //Applies the provided priority to the required non-system interupt channel;
-extern void irq_set_priority(uint16_t channel, uint8_t priority);
+#define irq_set_priority(channel, priority) __irq_set_priority(channel, priority)
 
 //Returns the priority to the required non-system interupt channel;
-extern uint8_t irq_get_priority(uint16_t channel, uint8_t priority);
+#define irq_get_priority(channel, priority) __irq_get_priority(channel, priority)
 
 //Update the handler of the required irq;
-extern void irq_set_handler(uint16_t channel, void (*handler)());
+#define irq_set_handler(channel, handler) __irq_set_handler(channel, handler)
 
 //Resets the handler of the required channel to 0, isr will return immediately;
-extern void irq_reset_interrupt_handler(uint16_t channel);
+#define irq_reset_interrupt_handler(channel) __irq_reset_interrupt_handler(channel)
 
 //Assert if a handler is currently in execution;
-extern bool irq_in_handler_mode();
+#define irq_in_handler_mode() __irq_in_handler_mode()
 
 
 //-------------------------------------------------- Critical sections -------------------------------------------------
@@ -120,21 +103,6 @@ void critical_section_leave();
 //Force leaving a critical section. Unsafe, must be executed by the kernel only;
 void critical_section_force_exit();
 
-
-
-
-
-//Set the handler of the syscall exception;
-extern void syscall_set_handler(void (*)(void));
-
-//Set the priority of the syscall exception;
-extern void syscall_set_priority(uint8_t priority);
-
-//Enable the syscall exception;
-extern void syscall_enable();
-
-//Trigger the syscall;
-extern void syscall_trigger();
 
 
 

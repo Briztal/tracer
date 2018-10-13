@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include <kernel/mod/module_channel.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 #include "multi_servo_n.h"
 
 

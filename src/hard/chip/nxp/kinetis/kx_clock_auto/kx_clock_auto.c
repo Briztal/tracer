@@ -22,7 +22,7 @@
 #include <kernel/panic.h>
 #include <kernel/clock/clock.h>
 #include <kernel/debug/debug.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 #include "kx_clock_auto.h"
 

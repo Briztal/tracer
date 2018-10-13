@@ -1,97 +1,38 @@
-//
-// Created by root on 10/10/18.
-//
+/*
+  preempt.c Part of TRACER
 
-#include <kernel/panic.h>
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include "preempt.h"
-
-
-//The kernel preemption manager;
-static struct preemption_mgr *mgr = 0;
-
-//---------------------------------------------------- Registration ----------------------------------------------------
-
-//Register the preemption manager;
-void preemption_register(struct preemption_mgr *manager) {
-	
-	//If the manager is already initialised :
-	if (mgr) {
-		
-		//Panic. The preemption manager can only be registered once;
-		kernel_panic("preemption_register : already registered;");
-		
-	}
-	
-	//Initialise the manager;
-	mgr = manager;
-	
-}
-
-
-//Is the preemption manager registered;
-bool preemption_is_registered() {
-	
-	return (bool) mgr;
-	
-}
-
-
-//---------------------------------------------------- Setup ----------------------------------------------------
 
 
 //Initialise the preemption; Will update the handler, set the priority, and enable;
 void preemption_init(void (*handler)(void), uint8_t priority) {
 	
-	//If the manager is not registered :
-	if (!mgr) {
-		
-		//Panic. The preemption manager must be registered;
-		kernel_panic("preemption_init : not registered;");
-		
-	}
-	
 	//Update the handler;
-	(*mgr->set_handler)(handler);
+	__preemption_set_handler(handler);
 	
 	//Update the priority;
-	(*mgr->set_priority)(priority);
+	__preemption_set_priority(priority);
 	
 	//Update the handler;
-	(*mgr->enable)();
+	__preemption_enable();
 	
 }
 
-
-//Set the preemption exception pending;
-void preemption_set_pending() {
-	
-	//Cache the manager;
-	struct preemption_mgr *manager = mgr;
-	
-	//If the manager is not null :
-	if (manager) {
-		
-		//Set the manager pending;
-		(*manager->set_pending)();
-		
-	}
-	
-}
-
-
-//Set the preemption exception not pending;
-void preemption_clear_pending() {
-	
-	//Cache the manager;
-	struct preemption_mgr *manager = mgr;
-	
-	//If the manager is not null :
-	if (manager) {
-		
-		//Clear the manager pending;
-		(*manager->clear_pending)();
-		
-	}
-	
-}
 

@@ -27,7 +27,7 @@
 #include <hard/chip/nxp/kinetis/kx_sim.h>
 
 #include <kernel/panic.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 #include <kernel/debug/debug.h>
 
 
@@ -173,7 +173,7 @@ KINETIS_UART_DEFINE(5, 0x400EB000, F_BUS, 1, 1, IRQ_UART5_STATUS, IRQ_UART5_ERRO
 // requests from Arduino. Pressing the program button will cause a full chip
 // erase to gain access, because the bootloader chip is locked out.  Normally,
 // erase occurs when uploading begins, so if you press the Program button
-// accidentally, simply power cycling will run your program again.  When
+// accidentally, simply power cycling will sched your program again.  When
 // security is locked, any Program button press causes immediate full erase.
 // Special care must be used with the Program button, because it must be made
 // accessible to initiate reprogramming, but it must not be accidentally

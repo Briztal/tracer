@@ -20,7 +20,7 @@
 
 
 #include <kernel/panic.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 #include <kernel/debug/debug.h>
 
 #include "kx_mcg.h"

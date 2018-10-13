@@ -50,10 +50,7 @@ struct proc_stack {
 
 //--------------------------------------------------- Stack creation ---------------------------------------------------
 
-//Determine the closest inferior address, that would respect alignment requirements;
-extern void *proc_stack_align(void *stack_reset);
-
-//Initialise the stack for initialisation. Implemented by the run lib;
+//Initialise the stack for initialisation. Implemented by the sched lib;
 void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //A module can register a special function that adds a stack context header, for an FPU for ex;
@@ -68,8 +65,6 @@ void reset_stack_header_creator();
 //Stars the execution of the first process;
 void proc_start_execution();
 
-//Get the initial arg;
-extern void *proc_get_init_arg();
 
 
 

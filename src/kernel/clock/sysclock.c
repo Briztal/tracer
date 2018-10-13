@@ -22,7 +22,7 @@
 
 #include <kernel/panic.h>
 
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 #include <kernel/async/preempt.h>
 

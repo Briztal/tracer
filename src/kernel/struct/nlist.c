@@ -18,13 +18,11 @@
 
 */
 
-#include <kernel/kinit.h>
 
 #include <util/string.h>
 
-#include <kernel/log.h>
-#include <kernel/debug/debug.h>
-#include <kernel/run/sched.h>
+#include <kernel/debug/log.h>
+#include <kernel/mem/kdmem.h>
 
 #include "nlist.h"
 

@@ -20,7 +20,7 @@
 
 #include "time_interval.h"
 
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 const struct time_interval time_interval_largest = {
 	.min = 0,

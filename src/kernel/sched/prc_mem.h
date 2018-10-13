@@ -30,9 +30,9 @@
 
 #include <stddef.h>
 
-#include <kernel/run/proc.h>
+#include <kernel/sched/proc.h>
 
-#include "kernel/mem/heap.h"
+#include <kernel/mem/heap.h>
 
 //--------------------------------------------------- Make Parameters --------------------------------------------------
 

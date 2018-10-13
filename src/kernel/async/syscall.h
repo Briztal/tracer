@@ -24,19 +24,6 @@
 
 #include <stddef.h>
 
-//------------------------------------------- Heap management -------------------------------------------
-
-//The malloc function to use across the code;
-void *syscall_malloc(size_t size);
-
-//A shortcut to allocate and copy from a memory zone;
-void *syscall_ialloc(size_t size, const void *initialiser);
-
-//The realloc function to use across the code;
-void *syscall_realloc(void *, size_t size);
-
-//The free function to use across the code;
-void syscall_free(void *);
 
 
 #endif //TRACER_KERNEL_H

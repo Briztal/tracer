@@ -1,9 +1,3 @@
-#include <kernel/debug/debug.h>
-#include <util/stdout.h>
-#include "kernel/proc/proc.h"
-#include "kernel/async/interrupt.h"
-#include "log.h"
-
 /*
   panic.c Part of TRACER
 
@@ -26,6 +20,10 @@
 
 #include "panic.h"
 
+
+#include <kernel/debug/debug.h>
+#include <util/stdout.h>
+#include "kernel/async/interrupt.h"
 
 static void (*log_output) = &debug_print_char;
 

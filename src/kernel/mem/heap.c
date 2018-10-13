@@ -26,12 +26,14 @@
 #include <string.h>
 
 #include "heap.h"
-#include "kernel/proc/proc.h"
+
+
+#include <kernel/panic.h>
+
+#include <kernel/debug/log.h>
 
 #include <util/type.h>
-#include <kernel/panic.h>
-#include <kernel/debug/debug.h>
-#include <kernel/log.h>
+
 
 
 #define alignment_size (sizeof(size_t))

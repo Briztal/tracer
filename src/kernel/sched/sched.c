@@ -21,16 +21,16 @@
 //--------------------------------------------------- Make Parameters --------------------------------------------------
 
 //The memory library required NB_THREADS to be provided by the makefile;
-#if !defined(FPRC_RAM_SIZE) || !defined(FPRC_STACK_SIZE) || !defined(FPRC_ACTIVITY_TIME)
+#if !defined(KFP_RAM_SIZE) || !defined(KFP_STACK_SIZE) || !defined(KFP_ACTIVITY_TIME)
 
 //COmpilation fail;
 #error "Error, one make parameter not provided, check your makefile"
 
-#define FPRC_RAM_SIZE 2048
+#define KFP_RAM_SIZE 2048
 
-#define FPRC_STACK_SIZE 1024
+#define KFP_STACK_SIZE 1024
 
-#define FPRC_ACTIVITY_TIME 3000
+#define KFP_ACTIVITY_TIME 3000
 
 #endif
 
@@ -39,13 +39,13 @@
 
 #include "sched.h"
 
+#include "proc.h"
+
 #include <string.h>
 #include <kernel/panic.h>
 #include <kernel/async/interrupt.h>
-#include <kernel/kdmem.h>
+#include <kernel/mem/kdmem.h>
 #include <kernel/async/preempt.h>
-
-
 
 
 //------------------------------------------------- Process execution --------------------------------------------------
@@ -59,10 +59,10 @@
 static void prc_exec() {
 	
 	//Cache the execution data, saved in the stack;
-	volatile struct prc_exec_env *volatile exec_data = proc_get_init_arg();
+	volatile struct prc_desc *volatile desc = __proc_get_init_arg();
 	
 	//Execute the function, passing args;
-	(*(exec_data->function))((void *) exec_data->args);
+	(*(desc->function))((void *) desc->args, (size_t) desc->args_size);
 	
 }
 
@@ -94,6 +94,13 @@ static void prc_exit() {
 	kernel_panic("process.c : post preempt state reached. That should never happen.");
 	
 }
+
+
+
+//----------------------------------------------- First process function -----------------------------------------------
+
+//The kernel's first process function;
+extern void __kernel_first_function(void *args, size_t args_size);
 
 
 //--------------------------------------------------- Scheduler data ---------------------------------------------------
@@ -133,9 +140,9 @@ struct sched_elmt first_element = {
 	
 	//Fist process not initialised;
 	.req = {
-		.ram_size = FPRC_RAM_SIZE,
-		.stack_size = FPRC_STACK_SIZE,
-		.activity_time = FPRC_ACTIVITY_TIME,
+		.ram_size = KFP_RAM_SIZE,
+		.stack_size = KFP_STACK_SIZE,
+		.activity_time = KFP_ACTIVITY_TIME,
 	},
 	
 	.desc = {
@@ -172,12 +179,6 @@ struct sched_data scheduler = {
 	.stop_required = false,
 	
 };
-
-//----------------------------------------------- First process function -----------------------------------------------
-
-//The kernel's first process function;
-extern void __kernel_first_function(void *unused);
-
 
 //-------------------------------------------------- Default policy --------------------------------------------------
 
@@ -237,32 +238,15 @@ void sched_set_scheduling_policy(scheduling_policy new_policy) {
 }
 
 
+
 //------------------------------------------------- Initialisation ------------------------------------------------
 
 /**
- * sched_init : initialises the scheduler, by initialising its first element;
+ * sched_init_prc_mem : initialises the process memory of the provided element, and initialises its
+ * 	stack, by copying its descriptor;
  *
- * 	The first element has all its data except its program memory initialised;
- *
- * 	This function creates its heap, its stack, and marks it activated;
+ * @param elmt : the scheduler element to initialise;
  */
-
-void sched_init() {
-	
-	//Create the heap of the first process;
-	prc_mem_create_heap(&first_element.prc_mem, FPRC_RAM_SIZE);
-	
-	//Create the stack of the first process;
-	prc_mem_reset(&first_element.prc_mem, FPRC_STACK_SIZE);
-
-	//The first process is active;
-	first_element.active = true;
-
-}
-
-
-//----------------------------------------------------- Operations -----------------------------------------------------
-
 
 static void sched_init_prc_mem(struct sched_elmt *elmt) {
 	
@@ -283,6 +267,26 @@ static void sched_init_prc_mem(struct sched_elmt *elmt) {
 	
 }
 
+
+/**
+ * sched_init : initialises the scheduler, by initialising its first element;
+ *
+ * 	The first element has all its data except its program memory initialised;
+ *
+ * 	This function creates its heap, its stack, and marks it activated;
+ */
+
+void sched_init() {
+	
+	sched_init_prc_mem(&first_element);
+	
+	//The first process is active;
+	first_element.active = true;
+	
+}
+
+
+//----------------------------------------------------- Operations -----------------------------------------------------
 
 /**
  * sched_add_prc : adds the process in the scheduler;
@@ -327,15 +331,12 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 		
 	};
 	
-	//Initialise a program memory;
-	prc_mem_create_heap(&init.prc_mem, req->ram_size);
-	
-	//Reset the prog mem;
-	prc_mem_reset(&init.prc_mem, req->stack_size);
 	
 	//Initialise the element;
 	memcpy(elmt, &init, sizeof(struct sched_elmt));
 	
+	//Initialise the element's process memory and execution stack;
+	sched_init_prc_mem(elmt);
 	
 	//Push the element in the add shared fifo;
 	shared_fifo_push(&scheduler.to_activate, (struct list_head *) elmt);

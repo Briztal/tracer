@@ -53,7 +53,7 @@
 #include <util/type.h>
 
 #include <kernel/struct/shared_fifo.h>
-#include <kernel/run/prc_mem.h>
+#include "prc_mem.h"
 
 
 /**
@@ -81,7 +81,7 @@ struct prc_req {
 struct prc_desc {
 	
 	//The process function;
-	void (*function)(void *args);
+	void (*function)(void *args, size_t args_size);
 	
 	//The function's arguments;
 	const void *args;

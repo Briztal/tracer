@@ -55,7 +55,7 @@
 
 extern void __proc_init();
 
-static void __arm_v7m_init() {
+static void arm_v7m_init() {
 	
 	//Enable all faults;
 	
@@ -67,7 +67,7 @@ static void __arm_v7m_init() {
 	armv7m_set_bus_fault_priority(0);
 	armv7m_set_usage_fault_priority(0);
 	
-	//Call the run init function;
+	//Call the sched init function;
 	__proc_init();
 	
 	
@@ -110,16 +110,16 @@ extern uint32_t _ram_highest;
 
 
 //Define an empty ISR handler
-void no_isr() {};
+static void no_isr() {};
 
 //Define the kernel vtable, and align it on 512 bytes.
-void (*kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
+void (*__kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
 	
 	//0 : not assigned;
 	&no_isr,
 	
 	//1 : reset; Effectively used when NVIC is relocated;
-	&__arm_v7m_init,
+	&arm_v7m_init,
 	
 	//2 : NMI. Not supported for instance;
 	&no_isr,
@@ -176,14 +176,14 @@ void (*kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
  */
 
 //The lowest priority level;
-const uint8_t ic_priority_0 = 0xE0;
-const uint8_t ic_priority_1 = 0xC0;
-const uint8_t ic_priority_2 = 0xA0;
-const uint8_t ic_priority_3 = 0x80;
-const uint8_t ic_priority_4 = 0x60;
-const uint8_t ic_priority_5 = 0x40;
-const uint8_t ic_priority_6 = 0x20;
-const uint8_t ic_priority_7 = 0x00;
+const uint8_t __ic_priority_0 = 0xE0;
+const uint8_t __ic_priority_1 = 0xC0;
+const uint8_t __ic_priority_2 = 0xA0;
+const uint8_t __ic_priority_3 = 0x80;
+const uint8_t __ic_priority_4 = 0x60;
+const uint8_t __ic_priority_5 = 0x40;
+const uint8_t __ic_priority_6 = 0x20;
+const uint8_t __ic_priority_7 = 0x00;
 
 
 //----------------------------------------------- IC standard interrupts -----------------------------------------------
@@ -192,7 +192,7 @@ const uint8_t ic_priority_7 = 0x00;
  * ic_enable_interrupts : enables the interrupt control;
  */
 
-void exceptions_enable() {
+void __exceptions_enable() {
 	__asm__ volatile("cpsie i":: :"memory");
 }
 
@@ -201,7 +201,7 @@ void exceptions_enable() {
  * ic_disable_interrupts : enables the interrupt control;
  */
 
-void exceptions_disable() {
+void __exceptions_disable() {
 	__asm__ volatile("cpsid i":: :"memory");
 }
 
@@ -211,7 +211,7 @@ void exceptions_disable() {
  * @param channel : the channel to enable;
  */
 
-void irq_enable(uint16_t channel) {
+void __irq_enable(uint16_t channel) {
 	armv7m_nvic_enable_interrupt(channel);
 }
 
@@ -220,7 +220,7 @@ void irq_enable(uint16_t channel) {
  * @param channel : the channel to disable;
  */
 
-void irq_disable(uint16_t channel) {
+void __irq_disable(uint16_t channel) {
 	armv7m_nvic_disable_interrupt(channel);
 }
 
@@ -230,7 +230,7 @@ void irq_disable(uint16_t channel) {
  * @param channel : the channel to set in the pending state;
  */
 
-void irq_set_pending(uint16_t channel) {
+void __irq_set_pending(uint16_t channel) {
 	armv7m_nvic_set_interrupt_pending(channel);
 }
 
@@ -240,7 +240,7 @@ void irq_set_pending(uint16_t channel) {
  * @param channel : the channel to set in the not-pending state;
  */
 
-void irq_clear_pending(uint16_t channel) {
+void __irq_clear_pending(uint16_t channel) {
 	armv7m_nvic_clear_interrupt_pending(channel);
 }
 
@@ -249,7 +249,7 @@ void irq_clear_pending(uint16_t channel) {
  * @param channel : the channel to set in the not-pending state;
  */
 
-void irq_is_pending(uint16_t channel) {
+void __irq_is_pending(uint16_t channel) {
 	armv7m_nvic_clear_interrupt_pending(channel);
 }
 
@@ -261,7 +261,7 @@ void irq_is_pending(uint16_t channel) {
  * @param priority : the priority to apply
  */
 
-void irq_set_priority(uint16_t channel, uint8_t priority) {
+void __irq_set_priority(uint16_t channel, uint8_t priority) {
 	armv7m_nvic_set_priority(channel, priority);
 }
 
@@ -272,7 +272,7 @@ void irq_set_priority(uint16_t channel, uint8_t priority) {
  * @param priority : the priority to apply
  */
 
-uint8_t irq_get_priority(uint16_t channel, uint8_t priority) {
+uint8_t __irq_get_priority(uint16_t channel, uint8_t priority) {
 	return armv7m_nvic_get_priority(channel);
 }
 
@@ -282,8 +282,8 @@ uint8_t irq_get_priority(uint16_t channel, uint8_t priority) {
  * @param channel : the interrupt channel to update;
  */
 
-void irq_reset_interrupt_handler(uint16_t channel) {
-	irq_set_handler(channel, &no_isr);
+void __irq_reset_interrupt_handler(uint16_t channel) {
+	__irq_set_handler(channel, &no_isr);
 }
 
 
@@ -292,7 +292,7 @@ void irq_reset_interrupt_handler(uint16_t channel) {
  *
  * @return true is a handler is curently in execution;
  */
-bool irq_in_handler_mode() {
+bool __irq_in_handler_mode() {
 	return (bool) armv7m_get_exception_number();
 }
 
@@ -305,7 +305,7 @@ bool irq_in_handler_mode() {
  * @param handler : the handler. Can be null if interrupt must be disabled;
  */
 
-void irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
+void __irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
 	
 	//Translate to exception channel;
 	irq_channel += 16;
@@ -319,12 +319,12 @@ void irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
 	}
 	
 	//If the handler is null, save the empty handler; If not, save the handler;
-	kernel_vtable[irq_channel] = (handler) ? handler : no_isr;
+	__kernel_vtable[irq_channel] = (handler) ? handler : no_isr;
 	
 }
 
 
-void exception_set_handler(uint16_t channel, void (*handler)()) {
+void __exception_set_handler(uint16_t channel, void (*handler)()) {
 	
 	//If the channel is invalid :
 	if (channel >= 16) {
@@ -335,7 +335,7 @@ void exception_set_handler(uint16_t channel, void (*handler)()) {
 	}
 	
 	//If the handler is null, save the empty handler; If not, save the handler;
-	kernel_vtable[channel] = (handler) ? handler : no_isr;
+	__kernel_vtable[channel] = (handler) ? handler : no_isr;
 	
 }
 
@@ -386,7 +386,7 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 static void isr_generic_flash_handler(uint8_t i) {
 	
 	//Execute the handler;
-	(*kernel_vtable[i])();
+	(*__kernel_vtable[i])();
 	
 }
 
@@ -415,7 +415,7 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 	&_ram_highest,
 	
 	//1 : Reset : call the program's entry point;
-	&__arm_v7m_init,
+	&arm_v7m_init,
 	
 	
 	//2->255 : empty handler (240 times, 240 = 3 * 8 * 10);

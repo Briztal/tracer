@@ -20,7 +20,7 @@
 
 #include "mcontroller.h"
 
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 
 //--------------------------------------------------- Update ---------------------------------------------------

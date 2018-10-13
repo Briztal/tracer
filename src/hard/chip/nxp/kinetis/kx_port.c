@@ -86,7 +86,7 @@
 #include <util/macro/incr_call.h>
 
 #include <util/string.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 
 #include "kx_sim.h"

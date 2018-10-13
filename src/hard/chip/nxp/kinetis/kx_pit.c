@@ -54,7 +54,7 @@
 
 #include <util/string.h>
 #include <kernel/mod/module_array.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 
 #include "kx_sim.h"

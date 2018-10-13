@@ -36,29 +36,29 @@
 //----------------------------------------------------- Preemption -----------------------------------------------------
 
 //Set the handler of the preemption exception;
-void preemption_set_handler(void (*handler)(void)) {
+void __preemption_set_handler(void (*handler)(void)) {
 	exception_set_handler(NVIC_PENDSV, handler);
 	
 	
 }
 
 //Set the priority of the preemption exception;
-void preemption_set_priority(uint8_t priority) {
+void __preemption_set_priority(uint8_t priority) {
 	armv7m_set_pendsv_priority(priority);
 }
 
 //Enable the preemption exception;
-void preemption_enable() {
+void __preemption_enable() {
 	//PendSV is always enabled;
 }
 
 //Set the preemption exception pending;
-void preemption_set_pending() {
+void __preemption_set_pending() {
 	armv7m_set_pendsv_pending();
 }
 
 //Set the preemption exception not pending;
-void preemption_clear_pending() {
+void __preemption_clear_pending() {
 	armv7m_clr_pendsv_pending();
 }
 
@@ -67,22 +67,22 @@ void preemption_clear_pending() {
 //----------------------------------------------------- Syscall -----------------------------------------------------
 
 //Set the handler of the syscall exception;
-void syscall_set_handler(void (*handler)(void)) {
+void __syscall_set_handler(void (*handler)(void)) {
 	exception_set_handler(NVIC_SVC, handler);
 }
 
 //Set the priority of the syscall exception;
-void syscall_set_priority(uint8_t priority) {
+void __syscall_set_priority(uint8_t priority) {
 	armv7m_set_svcall_priority(priority);
 }
 
 //Enable the syscall exception;
-void syscall_enable() {
+void __syscall_enable() {
 	//Always enabled;
 }
 
 //Trigger the syscall;
-void syscall_trigger() {
+void __syscall_trigger() {
 	__asm__ __volatile ("");//TODO SVC ??? NOT WORKING...
 }
 
@@ -117,7 +117,7 @@ void syscall_trigger() {
  *  Finally, it leaves space for empty stack frame and saves the stack pointer;
  */
 
-void proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg) {
+void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg) {
 	
 	//Cache the current stack pointer;
 	uint32_t *sp4 = stack->sp;
@@ -148,7 +148,7 @@ void proc_create_stack_context(struct proc_stack *stack, void (*function)(), voi
  *  it will be equal to the previous function's arg;
  */
 
-void *proc_get_init_arg() {
+void *__proc_get_init_arg() {
 	uint32_t arg = 0;
 	__asm__ __volatile__("mov %0, r12": "=r" (arg):);
 	return (void *) arg;
@@ -156,7 +156,7 @@ void *proc_get_init_arg() {
 
 
 //Determine the closest inferior address, that would respect alignment requirements;
-void *proc_stack_align(void *stack_reset) {
+void *__proc_stack_align(void *stack_reset) {
 	
 	//@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;
 	return (void *) ((((size_t) stack_reset) & ~((size_t) 7)));
@@ -179,7 +179,7 @@ void *proc_stack_align(void *stack_reset) {
  * @param preemption_call : the function to execute in the executing thread when all other threads are idle;
  */
 
-void proc_enter_thread_mode(struct proc_stack *exception_stacks) {
+void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 	
 	//Disable all interrupts;
 	exceptions_disable();
@@ -247,7 +247,7 @@ void proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 	
 	
 	//Execute the preemption call;
-	preemption_set_pending();
+	__preemption_set_pending();
 	
 	
 	//Execute an ISB;
@@ -272,6 +272,9 @@ void proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 
 //----------------------------------------------------- Preemption -----------------------------------------------------
 
+//The kernel context switcher;
+extern void *kernel_switch_context(void *volatile sp);
+
 
 /*
  * The context switcher :
@@ -280,11 +283,8 @@ void proc_enter_thread_mode(struct proc_stack *exception_stacks) {
  *  - calls the scheduler;
  *  - loads the new thread context;
  */
-void *proc_switch_context(void *volatile sp);
 
-//TODO MAKE ANOTHER ONE FOR NO FPU SAVE;
-
-void proc_context_switcher() {
+void __proc_context_switcher() {
 	
 	//TODO ONLY IN HANDLER MODE;
 	
@@ -326,7 +326,7 @@ void proc_context_switcher() {
 	__asm__ __volatile__("cpsie i");
 	
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
-	psp = proc_switch_context(psp);
+	psp = kernel_switch_context(psp);
 	
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");

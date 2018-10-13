@@ -557,7 +557,7 @@ void cnetwork_activate(cnetwork_t *const cnetwork, cmp_node_t *node, const void 
  *
  * 	If if doesn't find one, it inserts the provided node at the end of the list;
  *
- * 	This function does not support concurrency. Active list must be locked at run time;
+ * 	This function does not support concurrency. Active list must be locked at sched time;
  */
 
 void cnetwork_insert_node(cnetwork_t *const cnetwork, cmp_node_t *const new_node) {

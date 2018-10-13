@@ -20,7 +20,7 @@
 
 #include <kernel/struct/nlist.h>
 #include <kernel/panic.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 
 #include "clock.h"
 

@@ -20,13 +20,15 @@
 
 
 #include <stdbool.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 #include <kernel/mod/auto_mod.h>
 
 #include "arm_v7m.h"
 
 //Declare the kernel vtable;
-extern void (*kernel_vtable[])(void);
+extern void (*__kernel_vtable[])(void);
+
+//TODO KERNEL_VTABLE IN HARD.H
 
 
 /**
@@ -37,7 +39,7 @@ extern void (*kernel_vtable[])(void);
 bool nvic_relocation() {
 	
 	//Check that the kernel vtable is properly aligned; If not :
-	if ((uint32_t)kernel_vtable & 511) {
+	if ((uint32_t)__kernel_vtable & 511) {
 		
 		//Log;
 		kernel_log_("nvic_relocation : the kernel vtable is not properly aligned. Aborting.");
@@ -48,7 +50,7 @@ bool nvic_relocation() {
 	}
 
 	//Relocate the vector table;
-	*ARMV7_VTOR = (uint32_t) kernel_vtable;
+	*ARMV7_VTOR = (uint32_t) __kernel_vtable;
 	
 	//Complete;
 	return true;

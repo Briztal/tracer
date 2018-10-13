@@ -5,7 +5,7 @@
 
 
 #include <stdbool.h>
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 #include <kernel/fs/inode.h>
 #include <kernel/mod/auto_mod.h>
 #include <kernel/interface/timer.h>

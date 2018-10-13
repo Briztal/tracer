@@ -22,7 +22,7 @@
 
 */
 
-#include <kernel/log.h>
+#include <kernel/debug/log.h>
 #include "cbuffer.h"
 
 #define CBUFFER_ELEMENT_POINTER(buffer, element_index)\

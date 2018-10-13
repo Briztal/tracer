@@ -2,23 +2,26 @@
 // Created by root on 10/10/18.
 //
 
-#include <kernel/run/prc_mem.h>
-#include <kernel/mem/ram.h>
+
 #include "kdmem.h"
-#include "panic.h"
-#include "log.h"
+
+
+#include <kernel/mem/ram.h>
+#include <kernel/panic.h>
+#include <kernel/debug/log.h>
+
 
 
 //--------------------------------------------------- Make Parameters --------------------------------------------------
 
 //The memory library required NB_THREADS to be provided by the makefile;
-#if !defined(KERNEL_RAM_SIZE)
+#if !defined(KDM_SIZE)
 
 //COmpilation fail;
 #error "Error, one make parameter not provided, check your makefile"
 
 //Define the macro, allows debugging on an IDE;
-#define KERNEL_RAM_SIZE 700
+#define KDM_SIZE 700
 
 #endif
 
@@ -48,10 +51,10 @@ void kdmem_init() {
 	}
 	
 	//Allocate some memory in the RAM to contain the heap;
-	void *ram_block = ram_alloc(KERNEL_RAM_SIZE);
+	void *ram_block = ram_alloc(KDM_SIZE);
 	
 	//Create a heap owning the whole RAM block;
-	kernel_heap = heap_create(ram_block, KERNEL_RAM_SIZE, &heap_fifo_insertion);//TODO SORTED INSERTION;
+	kernel_heap = heap_create(ram_block, KDM_SIZE, &heap_fifo_insertion);//TODO SORTED INSERTION;
 	
 	//Log;
 	kernel_log_("kernel dynamic memory initialised");
