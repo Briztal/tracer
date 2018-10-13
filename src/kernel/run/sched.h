@@ -49,18 +49,73 @@
  * 		Those processes will still be inactive, until they are read and scheduled by the select function;
  */
 
-#include "prc.h"
 
 #include <util/type.h>
 
 #include <kernel/struct/shared_fifo.h>
+#include <kernel/run/prc_mem.h>
 
 
-//Pre-declare the scheduler element struct, only used in source;
-struct sched_elmt;
+/**
+ * prc_desc : contains the process hardware requirements;
+ */
 
-//A constant flag, set if the scheduler is compiled and supported;
-extern const bool scheduler_supported;
+struct prc_req {
+	
+	//The required ram size;
+	size_t ram_size;
+	
+	//The size available for each stack;
+	size_t stack_size;
+	
+	//The required period between two preemptions;
+	uint16_t activity_time;
+	
+};
+
+
+/**
+ * prc_desc : contains the process's runtime data;
+ */
+
+struct prc_desc {
+	
+	//The process function;
+	void (*function)(void *args);
+	
+	//The function's arguments;
+	const void *args;
+	
+	//The arguments size;
+	size_t args_size;
+	
+};
+
+
+
+struct sched_elmt {
+	
+	//The status head. Used by the active list, or by shared fifos;
+	struct list_head status_head;
+	
+	//The main head. Used to reference all processes in their add order; Access is critical;
+	struct list_head main_head;
+	
+	//The process descriptor;
+	struct prc_req req;
+	
+	//The process data;
+	struct prc_desc desc;
+	
+	//The program memory;
+	struct prc_mem prc_mem;
+	
+	//TODO ENABLE ONLY FOR DEBUG;
+	//The activity state; Set if the element is active;
+	bool active;
+	
+};
+
 
 //---------------------------------------------------- Sched policy ----------------------------------------------------
 
@@ -71,13 +126,31 @@ typedef void (*scheduling_policy)(struct sched_elmt **list_ref, struct sched_elm
 void sched_set_scheduling_policy(scheduling_policy policy);
 
 
-
 //------------------------------------------------- Initialisation ------------------------------------------------
 
 //initialises the first process of the scheduler;
-void sched_init(struct prc *first_process);
+void sched_init();
 
-//----------------------------------------------------- Scheduling -----------------------------------------------------
+
+//----------------------------------------------------- Operations -----------------------------------------------------
+
+//Create a scheduler element referencing the given process, and reference it in the scheduler;
+void sched_create_prc(struct prc_desc *data, struct prc_req *desc);
+
+//Set the stack pointer of one thread of the current process;
+void sched_set_prc_sp(void *);
+
+//Set the current process in the stopped state, and return its ref;
+struct sched_elmt *sched_stop_prc();
+
+//Resume the provided process;
+void sched_resume_prc(struct sched_elmt *);
+
+//Terminate the current process; Will be to_delete at next select call;
+void sched_terminate_prc();
+
+
+//----------------------------------------------------- Commit -----------------------------------------------------
 
 /*
  * Commit changes in the scheduler internal environment. This must be done after any manipulation;
@@ -89,29 +162,13 @@ void sched_init(struct prc *first_process);
 
 void sched_commit();
 
+
+//----------------------------------------------------- Query -----------------------------------------------------
+
 //Get the current process;
-struct prc *sched_get();
+struct prc_req *sched_get_req();
 
-
-//----------------------------------------------------- Creation -----------------------------------------------------
-
-//Create a scheduler element referencing the given process, and reference it in the scheduler;
-void sched_create_element(struct prc *);
-
-
-//----------------------------------------------------- Activation -----------------------------------------------------
-
-//Resume the provided process;
-void sched_resume_prc(struct sched_elmt *);
-
-
-//---------------------------------------------------- Deactivation ----------------------------------------------------
-
-//Set the current process in the stopped state, and return its ref;
-struct sched_elmt *sched_stop_prc();
-
-//Terminate the current process; Will be to_delete at next select call;
-void sched_terminate_prc();
-
+//Get the stack pointer of one thread of the current process;
+void *sched_get_sp();
 
 #endif //TRACER_SCHEDULER_H

@@ -1,21 +1,57 @@
-//
-// Created by root on 9/26/18.
-//
+/*
+  proc.c Part of TRACER
+
+  Copyright (c) 2018 Raphaël Outhier
+
+  TRACER is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  TRACER is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+//--------------------------------------------------- Make Parameters --------------------------------------------------
+
+//The memory library required NB_THREADS to be provided by the makefile;
+#if !defined(EXCEPTION_STACKS_SIZE)
+
+//COmpilation fail;
+#error "Error, one make parameter not provided, check your makefile"
+
+#define EXCEPTION_STACKS_SIZE 1000
+
+#endif
+
+//--------------------------------------------- Includes --------------------------------------------
 
 #include <kernel/async/interrupt.h>
 #include <kernel/async/preempt.h>
 #include <kernel/log.h>
-#include "proc.h"
+#include <kernel/run/sched.h>
+#include <kernel/clock/sysclock.h>
+#include <kernel/mem/ram.h>
+#include <util/string.h>
 
 
-//--------------------------------------------- Context switching variables --------------------------------------------
+//--------------------------------------------- Vars --------------------------------------------
 
-//The current process in execution;
-static struct prc *current_process = 0;
 
-//The remaining number of threads that must stop before the next process gets executed; protected by the spinlock below;
-static uint8_t nb_active_threads;
+//A flag set if the current process must be terminated during teh next preemption;
+bool prc_process_terminated;
 
+//The stacks array; Will reference interrupt stacks;
+static struct proc_stack exception_stack;
+
+//If required, a module can provide a function to create a stack header before the stack context. Used for ex for FPU;
+static void (*stack_header_creator)(struct proc_stack *stack);
 
 
 //------------------------------------------------- Proc requirements --------------------------------------------------
@@ -42,17 +78,10 @@ extern void proc_context_switcher();
  * @param exception_stacks : processor stacks that must be used in case of interrupt;
  */
 
-extern void proc_enter_thread_mode(struct proc_stack **exception_stacks);
-
-//------------------------------------------------- Variables --------------------------------------------------
-
-//If required, a module can provide a function to create a stack header before the stack context. Used for ex for FPU;
-static void (*stack_header_creator)(struct proc_stack *stack);
-
+extern void proc_enter_thread_mode(struct proc_stack *exception_stacks);
 
 
 //------------------------------------------------- Proc requirements --------------------------------------------------
-
 
 //Initialise the stack context for future execution;
 void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg) {
@@ -61,7 +90,8 @@ void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_lo
 	stack->sp = stack->sp_reset;
 	
 	//Create the stack header;
-	create_stack_header(stack);
+	//TODO PATCH
+	//create_stack_header(stack);
 	
 	//Create the stack context;
 	proc_create_stack_context(stack, function, end_loop, init_arg);
@@ -69,9 +99,38 @@ void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_lo
 }
 
 
-static struct prc **proc_create_init_stacks() {
+/**
+ * init_exception_stacks : initialises the exception stacks array;
+ */
+
+void init_exception_stack() {
 	
-	//TODO KERNEL COMPILATION FLAGS WITH NUMBER OF THREADS, MONOTASK FLAG, AND OTHER COMPILATION SETTINGS;
+	//Allocate some memory for the thread's stack in the newly created heap;
+	void *thread_stack = ram_alloc(EXCEPTION_STACKS_SIZE);
+	
+	//Determine the stack's highest address;
+	void *stack_reset = (void *) ((uint8_t *) thread_stack + EXCEPTION_STACKS_SIZE);
+	
+	//Correct the stack's highest address for proper alignment;
+	stack_reset = proc_stack_align(stack_reset);
+	
+	//Create the proc_stack initializer;
+	struct proc_stack cs_init = {
+		
+		//The stack bound, not corrected;
+		.stack_limit = thread_stack,
+		
+		//The stack pointer, set to its reset value;
+		.sp = stack_reset,
+		
+		//The stack reset value, corrected by the core lib;
+		.sp_reset = stack_reset,
+		
+	};
+	
+	//Initialise the exception stack;
+	memcpy(&exception_stack, &cs_init, sizeof(struct proc_stack));
+	
 }
 
 
@@ -84,10 +143,8 @@ void proc_start_execution() {
 	//Disable all interrupts;
 	exceptions_disable();
 	
-	
-	
-	//Initialise the number of active threads;
-	nb_active_threads = proc_nb_threads;
+	//Initialise the exception stacks array;
+	init_exception_stack();
 	
 	//Initialise the preemption;
 	preemption_init(&proc_context_switcher, KERNEL_PREMPTION_PRIORITY);
@@ -122,7 +179,7 @@ void proc_start_execution() {
 	
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
 	//Interrupts will be enabled at the end of the function;
-	proc_enter_thread_mode(kernel_memory->stacks);
+	proc_enter_thread_mode(&exception_stack);
 	
 }
 
@@ -137,86 +194,34 @@ void proc_start_execution() {
  * @return the the new stack pointer;
  */
 
-//TODO SYSCALL
-extern bool prc_process_terminated;
-
-
-void *proc_switch_context(const volatile uint8_t thread_id, void *volatile sp) {
+void *proc_switch_context(void *volatile sp) {
 	
-	//In order to know when new stack pointers can be safely queried, a static variable will be used;
-	static volatile bool process_updated;
+	//Save process stack pointer;
+	sched_set_prc_sp(sp);
 	
-	//As the process can be updated when all threads are stopped, the flag can be cleared when a thread enters;
-	process_updated = false;
+	//TODO
+	//TODO IN SYSCALL;
 	
-	//Cache the current process;
-	struct prc *crp = current_process;
-	
-	//If the current process is not null :
-	if (crp) {
+	//If the process is terminated :
+	if (prc_process_terminated) {
 		
-		//Save the stack pointer;
-		crp->prog_mem->stacks[thread_id]->sp = sp;
-	}
-	
-	//Lock TODO MULTITHREAD PATCH;
-	//spin_lock(sp);
-	
-	//Decrement the active threads counter; if it was null before :
-	if (!(nb_active_threads--)) {
+		//Terminate the current process;
+		sched_terminate_prc();
 		
-		//Error;
-		kernel_panic("krnl.c : proc_switch_context : more entries than existing threads;");
+		//Clear termination flag;
+		prc_process_terminated = false;
 		
 	}
 	
-	//If no more threads have to stop :
-	if (!nb_active_threads) {
-		
-		//TODO
-		//TODO IN SYSCALL;
-		
-		if (prc_process_terminated) {
-			
-			//Terminate the current process;
-			sched_terminate_prc();
-			
-			//Clear termination flag;
-			prc_process_terminated = false;
-			
-		}
-		
-		//Commit changes to the scheduler;
-		sched_commit();
-		
-		//Get the first process;
-		current_process = sched_get();
-		
-		//Update the duration until next preemption;
-		sysclock_set_process_duration(current_process->desc.activity_time);
-		
-		//Update the number of active threads;
-		nb_active_threads = proc_nb_threads;
-		
-		//Update the flag;
-		process_updated = true;
-		
-	}
+	//Commit changes to the scheduler;
+	sched_commit();
 	
+	//Update the duration until next preemption;
+	sysclock_set_process_duration(sched_get_req()->activity_time);
 	
-	//Unlock TODO MULTITHREAD PATCH;
-	//spin_unlock();
-	
-	
-	/*
-	 * The stop position. All threads except the last will enter and loop here, until the last updates the current
-	 * process;
-	 */
-	
-	while (!process_updated);
 	
 	//Return the appropriate stack pointer;
-	return current_process->prog_mem->stacks[thread_id]->sp;
+	return sched_get_sp();
 	
 }
 

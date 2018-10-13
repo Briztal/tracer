@@ -11,7 +11,7 @@
 
 
 //Initialise the kernel memory;
-void kmem_init(uint32_t ram_size);
+void kdmem_init();
 
 //Allocate some data in the kernel heap;
 void *kmalloc(size_t);

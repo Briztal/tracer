@@ -18,11 +18,15 @@
 
 */
 
-#include <kernel/scheduler/prc.h>
-#include <kernel/panic.h>
-#include <kernel/log.h>
 #include "sysclock.h"
-#include "kernel/async/interrupt.h"
+
+#include <kernel/panic.h>
+
+#include <kernel/log.h>
+
+#include <kernel/async/preempt.h>
+
+#include <kernel/async/interrupt.h>
 
 
 //---------------------------------------------------- System timer ----------------------------------------------------
@@ -36,13 +40,13 @@ static struct sys_timer *system_timer = 0;
  * @param timer : the new system timer;
  */
 
-void sysclock_init_timer(struct sys_timer *const timer) {
+void sysclock_init(struct sys_timer *const timer) {
 	
 	//If the system time is already initialised :
 	if (system_timer) {
 		
 		//Kernel panic. System timer can't be initialised twice;
-		kernel_panic("sysclock_init_timer : attempted to initialise the timer twice;");
+		kernel_panic("sysclock_init : attempted to initialise the timer twice;");
 		
 	}
 	
@@ -53,20 +57,21 @@ void sysclock_init_timer(struct sys_timer *const timer) {
 
 
 /**
- * sysclock_timer_initialised :
+ * sysclock_initialised :
  * @return return true if the system timer is not null;
  */
 
-bool sysclock_timer_initialised() {
+bool sysclock_initialised() {
 	
 	//Return true if the system timer is not null;
 	return (bool) system_timer;
 	
 }
 
+//---------------------------------------------------- Operations ----------------------------------------------------
 
 /*
- * System clock operation. Any call with system timer not initialised generates a kernel panic;
+ * System clock operations. Any call with system timer not initialised generates a kernel panic;
  */
 
 //The sysclock_milliseconds reference;
@@ -77,7 +82,7 @@ volatile uint32_t task_duration = 0;
 
 
 
-void sysclock_init() {
+void sysclock_start() {
 	
 	//Cache the system timer;
 	struct sys_timer *const timer = system_timer;
@@ -86,7 +91,7 @@ void sysclock_init() {
 	if (!timer) {
 		
 		//Panic, can't use the sysclock without system timer;
-		kernel_panic("sysclock_init : system timer uninitialised;");
+		kernel_panic("sysclock_start : system timer uninitialised;");
 		
 	}
 	
@@ -111,7 +116,7 @@ void sysclock_init() {
 	(*timer->start)();
 
 	//Log;
-	kernel_log_("system clock initialised");
+	kernel_log_("system clock started");
 
 }
 //---------------------- System tick ----------------------

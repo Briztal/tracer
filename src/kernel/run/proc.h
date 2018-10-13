@@ -48,18 +48,12 @@ struct proc_stack {
 };
 
 
-//---------------------------------------------------- Proc globals ----------------------------------------------------
-
-//The number of threads;
-extern const uint8_t proc_nb_threads;
-
-
 //--------------------------------------------------- Stack creation ---------------------------------------------------
 
 //Determine the closest inferior address, that would respect alignment requirements;
 extern void *proc_stack_align(void *stack_reset);
 
-//Initialise the stack for initialisation. Implemented by the proc lib;
+//Initialise the stack for initialisation. Implemented by the run lib;
 void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //A module can register a special function that adds a stack context header, for an FPU for ex;
@@ -69,9 +63,7 @@ bool register_stack_header_creator(void (*new_creator)(struct proc_stack *));
 void reset_stack_header_creator();
 
 
-
 //-------------------------------------------------- Execution control -------------------------------------------------
-
 
 //Stars the execution of the first process;
 void proc_start_execution();

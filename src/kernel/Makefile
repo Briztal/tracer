@@ -1,6 +1,11 @@
 
 #----------------------------------------------------- Kernel Flags ----------------------------------------------------
 
+#The kernel requires the following set of flags to be initialised by the hardware lib :
+#HARD_NB_THREADS : the number of hardware threads;
+ifdef HARD_NB_THREADS
+
+
 
 #----------------------------------------------------- Kernel Flags ----------------------------------------------------
 
@@ -41,7 +46,7 @@ KERNEL_SRCS += $(KERNEL_DIR)/mem/heap.c
 KERNEL_SRCS += $(KERNEL_DIR)/mem/mem.c
 
 
-#Add the proc folder
+#Add the run folder
 KERNEL_SRCS += $(KERNEL_DIR)/proc/proc.c
 
 #Mod sources;

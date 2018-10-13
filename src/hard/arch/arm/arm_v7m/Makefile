@@ -17,7 +17,6 @@ include src/hard/arch/arm/Makefile
 V7M_DIR :=  src/hard/arch/arm/arm_v7m
 
 
-#TODO NO_VECTOR_TABLE
 
 v7m_args :=
 
@@ -45,7 +44,15 @@ arm_v7m :
 	@echo "compiling ARM_V7M module\n"
 
 #Compile the armv7 base;
-	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o build/hard/arm_v7m.o -c $(V7M_DIR)/arm_v7m.c
+	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o build/hard/arm_v7m_base.o -c $(V7M_DIR)/arm_v7m_base.c
+
+#if the preemption base must be compiled :
+ifndef KERNEL_LOOP_MODE
+
+#Compile the preemption base;
+	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_adv.o -c $(V7M_DIR)/arm_v7m_adv.c
+
+endif #KERNEL_LOOP_MODE
 
 
 

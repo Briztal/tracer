@@ -24,7 +24,7 @@
 
 #include <kernel/log.h>
 #include <kernel/debug/debug.h>
-#include <kernel/scheduler/sched.h>
+#include <kernel/run/sched.h>
 
 #include "nlist.h"
 

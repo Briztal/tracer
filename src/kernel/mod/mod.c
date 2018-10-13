@@ -150,7 +150,7 @@ void load_proc_modules() {
 	extern const uint8_t _prmod_start, _prmod_end;
 	
 	//Log;
-	kernel_log_("Loading proc modules ...");
+	kernel_log_("Loading run modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&_prmod_start, &_prmod_end);

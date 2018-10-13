@@ -18,20 +18,16 @@
 
 */
 
+#include "prc_mem.h"
 
-
-#include "mem.h"
-
-#include "ram.h"
-
-#include <kernel/kinit.h>
+#include "kernel/mem/ram.h"
 
 #include <kernel/panic.h>
-#include <kernel/log.h>
-#include <kernel/debug/debug.h>
-#include <kernel/kdmem.h>
 
-//------------------------------------------------------ prog_mem ------------------------------------------------------
+#include <util/string.h>
+
+
+//------------------------------------------------------ prc_mem ------------------------------------------------------
 
 /**
  * prog_mem_create_special : creates and initialises a program memory struct in the kernel heap;
@@ -47,7 +43,7 @@
  * @return a ref to the initialised struct, located in the kernel heap;
  */
 
-struct prog_mem *prog_mem_create(size_t ram_size) {
+void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size) {
 	
 	//Allocate some memory in the RAM to contain the heap;
 	void *ram_block = ram_alloc(ram_size);
@@ -55,8 +51,8 @@ struct prog_mem *prog_mem_create(size_t ram_size) {
 	//Create a heap owning the whole RAM block;
 	struct heap_head *heap = heap_create(ram_block, ram_size, heap_fifo_insertion);//TODO SORTED INSERTION;
 	
-	//Create the initializer for the prog_mem;
-	struct prog_mem progm_init = {
+	//Create the initializer for the prc_mem;
+	struct prc_mem progm_init = {
 		
 		//Transfer the ownership of the RAM block, for later free;
 		.ram_start = ram_block,
@@ -64,14 +60,10 @@ struct prog_mem *prog_mem_create(size_t ram_size) {
 		//Transfer the heap ownership;
 		.heap = heap,
 		
-		//Save the number of stacks;
-		.nb_stacks = 0,
-		
 	};
 	
-	
-	//Create, initialise and return the program memory struct;
-	return kialloc(sizeof(struct prog_mem), &progm_init);
+	//Initialise the program memory;
+	memcpy(mem, &progm_init, sizeof(struct prc_mem));
 	
 }
 
@@ -90,59 +82,36 @@ struct prog_mem *prog_mem_create(size_t ram_size) {
  * @return a ref to the initialised struct, located in the kernel heap;
  */
 
-
-void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stacks_size) {
-	
-	//Major the number of stacks by its maximum;
-	if (nb_stacks > NB_THREADS)
-		nb_stacks = NB_THREADS;
-	
-	
-	//If the process already has stacks initialised :
-	if (mem->nb_stacks) {
-		
-		//Error,
-		kernel_panic("mem.c : prog_mem_create_stacks : stacks already created;");
-		
-	}
-	
-	//Save the number of stacks;
-	mem->nb_stacks = nb_stacks;
-	
+void prc_mem_reset(struct prc_mem *mem, size_t stacks_size) {
 	
 	//Reset the heap;
 	heap_reset(mem->heap);
 	
-	//For each stack to create :
-	for (size_t stack_id = nb_stacks; stack_id--;) {
+	//Allocate some memory for the thread's stack in the heap;
+	void *thread_stack = heap_malloc(mem->heap, stacks_size);
+	
+	//Determine the stack's highest address;
+	void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
+	
+	//Correct the stack's highest address for proper alignment;
+	stack_reset = proc_stack_align(stack_reset);
+	
+	//Create the proc_stack initializer;
+	struct proc_stack ps_init = {
 		
-		//Allocate some memory for the thread's stack in the newly created heap;
-		void *thread_stack = heap_malloc(mem->heap, stacks_size);
+		//The stack bound, not corrected;
+		.stack_limit = thread_stack,
 		
-		//Determine the stack's highest address;
-		void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
+		//The stack pointer, set to its reset value;
+		.sp = stack_reset,
 		
-		//Correct the stack's highest address for proper alignment;
-		stack_reset = proc_stack_align(stack_reset);
+		//The stack reset value, corrected by the core lib;
+		.sp_reset = stack_reset,
 		
-		//Create the proc_stack initializer;
-		struct proc_stack cs_init = {
-			
-			//The stack bound, not corrected;
-			.stack_limit = thread_stack,
-			
-			//The stack pointer, set to its reset value;
-			.sp = stack_reset,
-			
-			//The stack reset value, corrected by the core lib;
-			.sp_reset = stack_reset,
-			
-		};
-		
-		//Allocate, initialise and save the struct in the heap;
-		mem->stacks[stack_id] = kialloc(sizeof(struct proc_stack), &cs_init);
-		
-	}
+	};
+	
+	//Initialise the stack;
+	memcpy(&mem->stack, &ps_init, sizeof(struct proc_stack));
 	
 }
 
@@ -153,20 +122,9 @@ void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stac
  * @param mem : the program memory struct to delete;
  */
 
-void prog_mem_delete_from_kernel_heap(struct prog_mem *mem) {
-	
-	//For each allocated stack :
-	for (uint8_t stack_id = mem->nb_stacks; stack_id--;) {
-		
-		//Free the proc_stack struct;
-		kfree(mem->stacks[stack_id]);
-		
-	}
+void prc_mem_clean(struct prc_mem *mem) {
 	
 	//Free the RAM block;
 	ram_free(mem->ram_start);
-	
-	//Free the prog_mem struct;
-	kfree(mem);
 	
 }

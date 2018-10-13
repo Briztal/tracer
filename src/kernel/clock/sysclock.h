@@ -58,10 +58,10 @@ struct sys_timer {
  */
 
 //Initialise the system timer;
-void sysclock_init_timer(struct sys_timer *timer);
+void sysclock_init(struct sys_timer *const timer);
 
 //Is the sysclock timer initialised ?
-bool sysclock_timer_initialised();
+bool sysclock_initialised();
 
 
 /*
@@ -69,7 +69,7 @@ bool sysclock_timer_initialised();
  */
 
 //Initialise the system clock;
-void sysclock_init();
+void sysclock_start();
 
 //Receive a system systick;
 void sysclock_tick();

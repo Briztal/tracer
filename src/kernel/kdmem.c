@@ -2,11 +2,25 @@
 // Created by root on 10/10/18.
 //
 
-#include <kernel/mem/mem.h>
+#include <kernel/run/prc_mem.h>
 #include <kernel/mem/ram.h>
 #include "kdmem.h"
 #include "panic.h"
 #include "log.h"
+
+
+//--------------------------------------------------- Make Parameters --------------------------------------------------
+
+//The memory library required NB_THREADS to be provided by the makefile;
+#if !defined(KERNEL_RAM_SIZE)
+
+//COmpilation fail;
+#error "Error, one make parameter not provided, check your makefile"
+
+//Define the macro, allows debugging on an IDE;
+#define KERNEL_RAM_SIZE 700
+
+#endif
 
 
 //---------------------------------------------------- Kernel heap -----------------------------------------------------
@@ -23,7 +37,7 @@ static struct heap_head *kernel_heap;
  * 	Requires the RAM manager to be initialised;
  */
 
-void kdmem_init(uint32_t ram_size) {
+void kdmem_init() {
 	
 	//If the kernel memory is already initialised :
 	if (kernel_heap) {
@@ -34,10 +48,10 @@ void kdmem_init(uint32_t ram_size) {
 	}
 	
 	//Allocate some memory in the RAM to contain the heap;
-	void *ram_block = ram_alloc(ram_size);
+	void *ram_block = ram_alloc(KERNEL_RAM_SIZE);
 	
 	//Create a heap owning the whole RAM block;
-	kernel_heap = heap_create(ram_block, ram_size, &heap_fifo_insertion);//TODO SORTED INSERTION;
+	kernel_heap = heap_create(ram_block, KERNEL_RAM_SIZE, &heap_fifo_insertion);//TODO SORTED INSERTION;
 	
 	//Log;
 	kernel_log_("kernel dynamic memory initialised");

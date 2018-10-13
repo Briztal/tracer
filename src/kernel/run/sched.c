@@ -18,18 +18,85 @@
 
 */
 
-#include "sched.h"
+//--------------------------------------------------- Make Parameters --------------------------------------------------
 
-#include "sched_elmt.h"
+//The memory library required NB_THREADS to be provided by the makefile;
+#if !defined(FPRC_RAM_SIZE) || !defined(FPRC_STACK_SIZE) || !defined(FPRC_ACTIVITY_TIME)
+
+//COmpilation fail;
+#error "Error, one make parameter not provided, check your makefile"
+
+#define FPRC_RAM_SIZE 2048
+
+#define FPRC_STACK_SIZE 1024
+
+#define FPRC_ACTIVITY_TIME 3000
+
+#endif
+
+
+//--------------------------------------------- Includes --------------------------------------------
+
+#include "sched.h"
 
 #include <string.h>
 #include <kernel/panic.h>
 #include <kernel/async/interrupt.h>
-#include <kernel/kinit.h>
+#include <kernel/kdmem.h>
+#include <kernel/async/preempt.h>
+
+
+
+
+//------------------------------------------------- Process execution --------------------------------------------------
+
+/*
+ * prc_exec : the process execution function. ;
+ *
+ * 	Executes the process function, with the process args, and returns;
+ */
+
+static void prc_exec() {
+	
+	//Cache the execution data, saved in the stack;
+	volatile struct prc_exec_env *volatile exec_data = proc_get_init_arg();
+	
+	//Execute the function, passing args;
+	(*(exec_data->function))((void *) exec_data->args);
+	
+}
+
+
+/**
+ * prc_exit : the process exit function. Called automatically when prc_entry returns;
+ *
+ * 	Marks the process terminated and triggers the preemption;
+ *
+ * 	If preemption fails, an internal error has occurred, and a kernel panic is generated;
+ */
+
+extern bool prc_process_terminated;
+
+static void prc_exit() {
+	
+	//TODO SYSCALL;
+	//TODO SYSCALL AND PREEMPTION TRIGGER;
+	
+	//Mark the process terminated;
+	prc_process_terminated = true;
+	
+	//TODO SYSCALL KERNEL PREEMPT
+	
+	//Require a context switch, process will be to_delete;
+	preemption_set_pending();
+	
+	//Panic, preemption failed;
+	kernel_panic("process.c : post preempt state reached. That should never happen.");
+	
+}
 
 
 //--------------------------------------------------- Scheduler data ---------------------------------------------------
-
 
 struct sched_data {
 	
@@ -65,7 +132,20 @@ struct sched_elmt first_element = {
 	},
 	
 	//Fist process not initialised;
-	.process = 0,
+	.req = {
+		.ram_size = FPRC_RAM_SIZE,
+		.stack_size = FPRC_STACK_SIZE,
+		.activity_time = FPRC_ACTIVITY_TIME,
+	},
+	
+	.desc = {
+		.function = __kernel_first_function,
+		.args = 0,
+		.args_size = 0,
+	},
+	
+	//Program memory, initialised at runtime;
+	.prc_mem = {},
 	
 	//First process not active;
 	.active = false,
@@ -93,13 +173,18 @@ struct sched_data scheduler = {
 	
 };
 
+//----------------------------------------------- First process function -----------------------------------------------
+
+//The kernel's first process function;
+extern void __kernel_first_function(void *unused);
+
 
 //-------------------------------------------------- Default policy --------------------------------------------------
-
 
 /*
  * A simple round robin implementation;
  */
+
 static void round_robin_policy(struct sched_elmt **list_ref, struct sched_elmt *new_elements) {
 	
 	//If no elements are to insert :
@@ -155,26 +240,20 @@ void sched_set_scheduling_policy(scheduling_policy new_policy) {
 //------------------------------------------------- Initialisation ------------------------------------------------
 
 /**
- * sched_init : initialises the first process of the scheduler;
+ * sched_init : initialises the scheduler, by initialising its first element;
  *
- * 	The first process to execute must be provided, as well as the sort function;
- * 	
- * @param first_process : the first process to execute;
+ * 	The first element has all its data except its program memory initialised;
+ *
+ * 	This function creates its heap, its stack, and marks it activated;
  */
 
-void sched_init(struct prc *first_process) {
-
-	//If the first process is null :
-	if (!first_process) {
-
-		//Error, must not happen;
-		kernel_panic("sched.c : sched_create : first process is null;");
-
-	}
-
+void sched_init() {
 	
-	//Transfer the ownership of the first process;
-	first_element.process = first_process;
+	//Create the heap of the first process;
+	prc_mem_create_heap(&first_element.prc_mem, FPRC_RAM_SIZE);
+	
+	//Create the stack of the first process;
+	prc_mem_reset(&first_element.prc_mem, FPRC_STACK_SIZE);
 
 	//The first process is active;
 	first_element.active = true;
@@ -182,9 +261,27 @@ void sched_init(struct prc *first_process) {
 }
 
 
+//----------------------------------------------------- Operations -----------------------------------------------------
 
 
-//------------------------------------------------- Creation - Deletion ------------------------------------------------
+static void sched_init_prc_mem(struct sched_elmt *elmt) {
+	
+	//Cache the processor memory ref;
+	struct prc_mem *mem = &elmt->prc_mem;
+	
+	//Initialise a program memory;
+	prc_mem_create_heap(mem, elmt->req.ram_size);
+	
+	//Reset the prog mem and allocate the stack;
+	prc_mem_reset(mem, elmt->req.stack_size);
+	
+	//The process descriptor is located in the kernel heap. We must copy it in the process heap;
+	struct prc_desc *desc_copy = heap_ialloc(mem->heap, sizeof(struct prc_desc), &elmt->desc);
+	
+	//Initialise the stack and pass the execution environment;
+	proc_init_stack(&mem->stack, &prc_exec, &prc_exit, desc_copy);
+	
+}
 
 
 /**
@@ -193,13 +290,14 @@ void sched_init(struct prc *first_process) {
  * @param element : the process;
  */
 
-void sched_create_element(struct prc *const process) {
+void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 	
 	//If the element is active :
-	if (!process) {
+	if ((!desc) || (!req)) {
 		
 		//Error, can't insert an active element;
 		kernel_panic("sched_create_element : a null process was provided;");
+		
 	}
 	
 	//Allocate memory for the new element;
@@ -217,14 +315,27 @@ void sched_create_element(struct prc *const process) {
 			.prev = &elmt,
 		},
 		
-		.process = process,
+		//Copy process structures;
+		.req = *req,
+		.desc = *desc,
 		
+		//Program memory not initialised for instance;
+		.prc_mem = {},
+		
+		//Process active;
 		.active = true,
 		
 	};
 	
+	//Initialise a program memory;
+	prc_mem_create_heap(&init.prc_mem, req->ram_size);
+	
+	//Reset the prog mem;
+	prc_mem_reset(&init.prc_mem, req->stack_size);
+	
 	//Initialise the element;
 	memcpy(elmt, &init, sizeof(struct sched_elmt));
+	
 	
 	//Push the element in the add shared fifo;
 	shared_fifo_push(&scheduler.to_activate, (struct list_head *) elmt);
@@ -237,7 +348,6 @@ void sched_create_element(struct prc *const process) {
 	
 	//Access to the main list is critical;
 	critical_section_leave();
-	
 	
 }
 
@@ -264,7 +374,7 @@ static void sched_delete_element(struct sched_elmt *element) {
 	critical_section_leave();
 	
 	//Delete the process;
-	prc_delete(element->process);
+	prc_mem_clean(&element->prc_mem);
 	
 	//Delete the element;
 	kfree(element);
@@ -272,7 +382,34 @@ static void sched_delete_element(struct sched_elmt *element) {
 }
 
 
-//----------------------------------------------------- Activation -----------------------------------------------------
+//Set the stack pointer of one thread of the current process;
+void sched_set_prc_sp(void *sp) {
+	
+	//Update the stack pointer of the first process;
+	scheduler.active_list->prc_mem.stack.sp = sp;
+	
+}
+
+
+/**
+ * sched_stop_prc : sets the stop flag in the provided scheduler;
+ *
+ * 	The current element will be stopped during next commit;
+ *
+ * @param sched : the scheduler whose current process must be stopped;
+ * @return the element containing the process that will be stopped;
+ */
+
+struct sched_elmt *sched_stop_prc() {
+	
+	//Mark the stop required;
+	scheduler.stop_required = true;
+	
+	//Return the first active element;
+	return scheduler.active_list;
+	
+}
+
 
 /**
  * sched_add_prc : activates the process belonging to the scheduler;
@@ -295,28 +432,6 @@ void sched_resume_prc(struct sched_elmt *const element) {
 	
 	//Push the element in the activation shared fifo;
 	shared_fifo_push(&scheduler.to_activate, (struct list_head *) element);
-	
-}
-
-
-//---------------------------------------------------- Deactivation ----------------------------------------------------
-
-/**
- * sched_stop_prc : sets the stop flag in the provided scheduler;
- *
- * 	The current element will be stopped during next commit;
- *
- * @param sched : the scheduler whose current process must be stopped;
- * @return the element containing the process that will be stopped;
- */
-
-struct sched_elmt *sched_stop_prc() {
-	
-	//Mark the stop required;
-	scheduler.stop_required = true;
-	
-	//Return the first active element;
-	return scheduler.active_list;
 	
 }
 
@@ -426,17 +541,24 @@ void sched_commit() {
 }
 
 
-/**
- * sched_get : return the current process;
- *
- * @param sched : the scheduler data to get the process from;
- * @return the process of the most prioritary (first) active element;
- */
+//----------------------------------------------------- Query -----------------------------------------------------
 
-struct prc *sched_get() {
-
-	//Return the process of the first active element;
-	return scheduler.active_list->process;
-
+//Get the current process hardware requirements;
+struct prc_req *sched_get_req() {
+	
+	//Return the first process hardware requirements;
+	return &scheduler.active_list->req;
+	
 }
+
+
+//Get the stack pointer of one thread of the current process;
+void *sched_get_sp() {
+	
+	//Return the first process hardware requirements;
+	return scheduler.active_list->prc_mem.stack.sp;
+	
+}
+
+
 

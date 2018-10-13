@@ -19,48 +19,41 @@
 */
 
 #include "panic.h"
-#include "kernel/async/interrupt.h"
 
-#include <string.h>
+#include "kdmem.h"
+
+#include <kernel/async/interrupt.h>
 
 #include <kernel/clock/sysclock.h>
 
 #include <kernel/mem/ram.h>
 
-#include <kernel/scheduler/sched.h>
-
-#include <kernel/proc/proc.h>
-
 #include <kernel/mod/mod.h>
-#include <kernel/debug/debug.h>
-#include <kernel/fs/inode.h>
+
 #include <kernel/log.h>
-
-#include <kernel/async/preempt.h>
-
-
-#define KERNEL_RAM_SIZE 7000
-#define KERNEL_STACK_SIZE 1000
+#include <kernel/run/proc.h>
 
 
-//--------------------------------------------------- First function ---------------------------------------------------
 
-//The kernel's first process function;
-extern void __kernel_first_function(void *unused) {
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
+//TODO KERNEL HALT FOR PANIC
 
-	fs_list();
 
-	while(1) {
-
-	}
-
-}
-
-
-//------------------------------------------------------- Private ------------------------------------------------------
-
-//Initialise the kernel scheduler;
-static void kernel_scheduler_init();
+//Start the kernel. Different modes can be entered, depending on compilation settings;
+static void kernel_start();
 
 
 //----------------------------------------------------- Kernel init ----------------------------------------------------
@@ -69,22 +62,37 @@ static void kernel_scheduler_init();
  * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
-static void kernel_init() {
-
+void kernel_init() {
+	
+	//Create an OTP flag;
+	static bool reentrance = false;
+	
+	//If we enter for the second time :
+	if (reentrance) {
+		
+		//Panic; Kernel must be initialised only once;
+		kernel_panic("kernel_init : attempted to initialise a second time;");
+		
+	}
+	
+	//Set the OTP;
+	reentrance = true;
+	
 	//Log.
 	kernel_log_("Entering kernel initialisation sequence;\n")
-
+	
 	//Disable interrupt management:
 	exceptions_disable();
-
+	
 	//Initialise the RAM manager;
 	ram_init();
-
-	//Initialise the kernel program memory;
-	kernel_memory_init();
 	
-	//Load all proc modules;
+	//Initialise the kernel dynamic memory;
+	kdmem_init();
+	
+	//Load all run modules;
 	load_proc_modules();
+	
 	
 	//Load all system modules;
 	load_system_modules();
@@ -97,98 +105,70 @@ static void kernel_init() {
 	//Load all kernel modules;
 	load_kernel_modules();
 	
-	
-	//Initialise the system clock;
-	sysclock_init();
-
-	//Initialise the kernel scheduler;
-	kernel_scheduler_init();
-	
-	
 	//Load all user modules;
 	load_user_modules();
-
-	//Start the process execution;
-	proc_sta();
-
+	
+	
+	//If the system clock is initialised :
+	if (sysclock_initialised()) {
+		
+		//Start the system clock;
+		sysclock_start();
+		
+	}
+	
+	//Start the execution;
+	kernel_start();
+	
 	//This point should never be reached;
 	kernel_panic("kernel_init : execution not started;");
-
-
-}
-
-
-
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-
-/**
- * __program_start : the function called by the core library after init;
- */
-
-void __kernel_init() {
-
-	//Call the kernel initialisation;
-	kernel_init();
-
-}
-
-
-
-
-//----------------------------------------------------- Kernel Init ----------------------------------------------------
-
-
-/**
- * TODO;
- */
-
-static void kernel_scheduler_init() {
-
-	//Create the first process descriptor;
-	struct prc_desc dsc = {
-
-		//kernel first function;
-		.function = &__kernel_first_function,
-
-		//No arguments;
-		.args = 0,
-		.args_size = 0,
-
-		//2KiB memory available;
-		.ram_size = 2048,
-
-		//One thread;
-		.nb_threads = 1,
-
-		//1KiB stack available;
-		.stack_size = 1024,
-
-		//10ms activity;TODO
-		.activity_time = 3000,
-
-	};
-
-	//Create the first process;
-	struct prc *first_process = prc_create(&dsc);
-
-
-	//Initialise the scheduler providing the first process;
-	sched_init(first_process);
 	
+}
 
 
+//If the kernel was compiled for loop mode :
+#ifdef LOOP_MODE
+
+//Declare the kernel first function;
+extern void __kernel_first_function();
+
+/**
+ * enter_loop_mode : the loop mode function. Eternally calls the kernel first function;
+ */
+static void enter_loop_mode() {
+	
+	//Eternally  :
+	while(1) {
+		
+		//Call the kernel first function;
+		__kernel_first_function();
+		
+	}
+	
+}
+
+
+#endif
+
+
+/**
+ * kernel_start : determines the mode to enter, and enters in it;
+ */
+
+static void kernel_start() {
+	
+	//If the kernel was compiled for loop mode :
+	#ifdef LOOP_MODE
+	
+	//Enter in loop mode;
+	enter_loop_mode();
+	
+	//If the kernel's scheduling module was compiled :
+	#else
+	
+	//Start the execution of the scheduler's first process, via the processor library;
+	proc_start_execution();
+	
+	#endif
+	
 }

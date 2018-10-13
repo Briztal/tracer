@@ -11,6 +11,7 @@
 
 static void (*log_output) = &debug_print_char;
 
+
 /**
  * _kernel_log : decodes and displays the provided formatted string over the log output;
  *

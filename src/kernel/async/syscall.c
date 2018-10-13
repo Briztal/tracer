@@ -23,7 +23,7 @@
 
 #include <string.h>
 
-#include <kernel/scheduler/sched.h>
+#include <kernel/run/sched.h>
 
 
 

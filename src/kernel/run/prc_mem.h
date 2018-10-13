@@ -21,15 +21,20 @@
 #ifndef TRACER_MEMORY_H
 #define TRACER_MEMORY_H
 
+
+//--------------------------------------------------- Includes --------------------------------------------------
+
 #include <stdbool.h>
 
 #include <stdint.h>
 
 #include <stddef.h>
 
-#include <kernel/proc/proc.h>
+#include <kernel/run/proc.h>
 
-#include "heap.h"
+#include "kernel/mem/heap.h"
+
+//--------------------------------------------------- Make Parameters --------------------------------------------------
 
 
 /*
@@ -39,10 +44,8 @@
  * 	From this heap, several stacks can be allocated, their references will be saved in the @stacks array;
  */
 
-//TODO MULTITHREADING PATCH, DEFINE IN ARCH MAKEFILE;
-#define NB_THREADS 1
 
-struct prog_mem {
+struct prc_mem {
 
 	//The lowest address of the block (for memory free purposes);
 	void *const ram_start;
@@ -50,23 +53,20 @@ struct prog_mem {
 	//The heap reference;
 	struct heap_head *heap;
 
-	//The number of stacks available for the program;
-	uint8_t nb_stacks;
-
 	//The stack references array;
-	struct proc_stack *stacks[NB_THREADS];
+	struct proc_stack stack;
 
 };
 
 
 //Create a process memory struct, containing only a heap;
-struct prog_mem *prog_mem_create(size_t ram_size);
+void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size);
 
 //Initialise the process memory : reset the heap, and create as many stacks as required;
-void prog_mem_create_stacks(struct prog_mem *mem, uint8_t nb_stacks, size_t stack_size);
+void prc_mem_reset(struct prc_mem *mem, size_t stacks_size);
 
 //Delete the process memory. All references must be contained in the kernel heap;
-void prog_mem_delete_from_kernel_heap(struct prog_mem *);
+void prc_mem_clean(struct prc_mem *mem);
 
 
 

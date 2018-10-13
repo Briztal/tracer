@@ -110,7 +110,7 @@ static struct sys_timer stick = {
 static bool systick_init() {
 	
 	//Register the system timer;
-	sysclock_init_timer(&stick);
+	sysclock_init(&stick);
 	
 	//Complete;
 	return true;
