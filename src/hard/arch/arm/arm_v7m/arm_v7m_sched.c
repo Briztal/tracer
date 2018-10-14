@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <kernel/async/interrupt.h>
 #include <kernel/panic.h>
+#include <kernel/debug/log.h>
 #include "arm_v7m.h"
 
 
@@ -273,7 +274,7 @@ void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 //----------------------------------------------------- Preemption -----------------------------------------------------
 
 //The kernel context switcher;
-extern void *kernel_switch_context(void *volatile sp);
+extern void *proc_switch_context(void *volatile sp);
 
 
 /*
@@ -284,7 +285,7 @@ extern void *kernel_switch_context(void *volatile sp);
  *  - loads the new thread context;
  */
 
-void __proc_context_switcher() {
+void __proc_preemption_handler() {
 	
 	//TODO ONLY IN HANDLER MODE;
 	
@@ -298,8 +299,6 @@ void __proc_context_switcher() {
 	
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");
-	
-	
 	
 	//As R0 is already saved in memory, we can use it;
 	__asm__ __volatile__ (\
@@ -326,7 +325,7 @@ void __proc_context_switcher() {
 	__asm__ __volatile__("cpsie i");
 	
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
-	psp = kernel_switch_context(psp);
+	psp = proc_switch_context(psp);
 	
 	//Disable all interrupts during context switching;
 	__asm__ __volatile__("cpsid i");

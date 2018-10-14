@@ -46,7 +46,7 @@
 
 
 //A flag set if the current process must be terminated during teh next preemption;
-bool prc_process_terminated;
+bool prc_process_terminated = false;
 
 //The stacks array; Will reference interrupt stacks;
 static struct proc_stack exception_stack;
@@ -114,6 +114,9 @@ void init_exception_stack() {
 
 void proc_start_execution() {
 	
+	//Initialise the scheduler;
+	sched_init();
+	
 	//Disable all interrupts;
 	exceptions_disable();
 	
@@ -121,7 +124,7 @@ void proc_start_execution() {
 	init_exception_stack();
 	
 	//Initialise the preemption;
-	preemption_init(&__proc_context_switcher, KERNEL_PREMPTION_PRIORITY);
+	preemption_init(&__proc_preemption_handler, KERNEL_PREMPTION_PRIORITY);
 	
 	//Log;
 	kernel_log_("preemption initialised");
@@ -168,10 +171,23 @@ void proc_start_execution() {
  * @return the the new stack pointer;
  */
 
-void *kernel_switch_context(void *volatile sp) {
+void *proc_switch_context(void *volatile sp) {
 	
-	//Save process stack pointer;
-	sched_set_prc_sp(sp);
+	//The first context switch must not save the stack pointer;
+	static bool update_allowed = false;
+	
+	//If the sp update is allowed :
+	if (update_allowed) {
+		
+		//Save process stack pointer;
+		sched_set_prc_sp(sp);
+		
+	} else {
+		
+		//Allow update;
+		update_allowed = true;
+		
+	}
 	
 	//TODO
 	//TODO IN SYSCALL;

@@ -45,6 +45,7 @@ static struct heap_head *ram_heap = 0;
 void ram_print() {
 	heap_print(ram_heap);
 }
+
 //------------------------------------------------------- RAM mgt ------------------------------------------------------
 
 /**
@@ -63,6 +64,7 @@ void ram_init() {
 	kernel_log_("RAM manager initialised");
 
 }
+
 
 /**
  * ram_alloc : allocate a memory block in the RAM;
@@ -93,6 +95,7 @@ void *ram_alloc(size_t size) {
 
 
 	return ptr;
+	
 }
 
 

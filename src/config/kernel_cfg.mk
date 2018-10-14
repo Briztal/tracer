@@ -2,7 +2,7 @@
 #------------------------------------------------- Dynamic memory size -------------------------------------------------
 
 #The size allocated to the kernel dynamic memory;
-KDM_SIZE = 1024
+KDM_SIZE = 4000
 
 #-------------------------------------------------- Run mode selection -------------------------------------------------
 
@@ -20,4 +20,4 @@ KEX_STACK_SIZE = 1024
 #The kernel first process parameters;
 KFP_RAM_SIZE = 2048
 KFP_STACK_SIZE = 1024
-KFP_ACTIVITY_TIME = 2048
+KFP_ACTIVITY_TIME = 2000

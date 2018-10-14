@@ -124,7 +124,7 @@ extern void *__proc_get_init_arg();
 extern void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg);
 
 //The context switcher; Should be set as the preemption handler for a preemption to occur;
-extern void __proc_context_switcher();
+extern void __proc_preemption_handler();
 
 
 /**
