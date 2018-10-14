@@ -171,7 +171,7 @@ void proc_start_execution() {
  * @return the the new stack pointer;
  */
 
-void *proc_switch_context(void *volatile sp) {
+void *proc_switch_context(void *sp) {
 	
 	//The first context switch must not save the stack pointer;
 	static bool update_allowed = false;

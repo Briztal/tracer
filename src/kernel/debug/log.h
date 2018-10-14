@@ -22,7 +22,7 @@
 //----------------------------------------------------- Kernel log -----------------------------------------------------
 
 //Display a message in the log interface;
-void _kernel_log(const char *str, const void **args, size_t args_size);
+void _kernel_log(const char * str, const void ** args,  size_t args_size);
 
 
 //------------------------------------------------------- Macros -------------------------------------------------------
@@ -32,7 +32,7 @@ void _kernel_log(const char *str, const void **args, size_t args_size);
 
 
 #define kernel_log(msg, ...) {\
-		const void *__klog_args__[] = VARIADIC_PACKAGE(__VA_ARGS__);\
+		const void * __klog_args__ [] = VARIADIC_PACKAGE(__VA_ARGS__);\
 		_kernel_log(msg, __klog_args__, VARIADIC_COUNT(__VA_ARGS__));\
 	}
 

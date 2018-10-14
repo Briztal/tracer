@@ -27,6 +27,7 @@
 
 #include <stddef.h>
 
+#include <kernel/hard.h>
 
 
 /*
@@ -34,10 +35,10 @@
  */
 
 //Light the debug led high; Implemented by the hardware;
-extern void debug_led_high();
+#define debug_led_high() __debug_led_high();
 
 //Turn off the debug led; Implemented by the hardware;
-extern void debug_led_low();
+#define debug_led_low() __debug_led_low();
 
 
 //Blink the debug led indefinitely, waiting @ms_counter between each toggle;
@@ -58,48 +59,18 @@ void debug_led_dump(uint8_t c);
  */
 
 //Wait for a certain number of milliseconds. Not accurate or reliable; Implemented by the hardware;
-extern void debug_delay_ms(uint32_t ms);
+#define debug_delay_ms(ms) __debug_delay_ms(ms);
 
-//Wait for a certain number of microsoconds. Not accurate or reliable; Implemented by the hardware;
-extern void debug_delay_us(uint32_t ms);
+//Wait for a certain number of microseconds. Not accurate or reliable; Implemented by the hardware;
+#define debug_delay_us(ms) __debug_delay_us(ms);
 
-
-/*
- * ----------------------------------------------------- Log Debug -----------------------------------------------------
- */
 
 /*
  * ----------------------------------------------------- Log Debug -----------------------------------------------------
  */
-
 
 //Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
-void debug_print_char(char);
-
-
-//Send a string over the debug interface, encoded by the log protocol. Implemented by the log protocol;
-void debug_log(const char *msg);
-
-//Convert an integer to its string expression in the required base, and send it;
-void debug_log_base(uint32_t integer, uint8_t base);
-
-//Convert an integer to its binary string expression and send it;
-#define debug_log_bin(i) {debug_log_base(i, 2);}
-
-//Convert an integer to its octal string expression and send it;
-#define debug_log_oct(i) {debug_log_base(i, 8);}
-
-//Convert an integer to its decimal string expression and send it;
-#define debug_log_int(i) {debug_log_base(i, 10);}
-
-//Convert an integer to its hexadecimal string expression and send it;
-#define debug_log_hex(i) {debug_log_base(i, 16);}
-
-//Break + msg : sends break concatenated with the message, and waits for one second;
-#define DEBUG_BREAK(i) {core_log("break"#i);core_delay_ms(300);}
-
-//Break_wait + msg + time : sends break concatenated with the message, and waits for one second;
-#define DEBUG_BREAK_WAIT(i, time) {core_log("break"#i); core_delay_ms(time);}
+#define debug_print_char(c) __debug_print_char(c);
 
 
 /*

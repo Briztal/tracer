@@ -149,22 +149,5 @@ void debug_led_dump(const uint8_t c) {
 
 
 
-//----------------------------------------------------- Execution ------------------------------------------------------
-
-/*
-//Convert an integer to its string expression in the required base, and send it;
-void debug_log_base(uint32_t integer, uint8_t base) {
-
-	//Cache an array of the appropriate length;
-	char t[32];
-
-	//Convert the integer;
-	char *str = itoa(integer, t, 32, base);
-
-	//Log the value;
-	debug_log(str);
-}
-*/
-
 
 

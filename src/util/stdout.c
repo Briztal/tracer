@@ -41,7 +41,7 @@ void stdout_int(void (*print)(char), uint32_t integer, uint8_t base) {
 }
 
 
-void stdout(void (*print)(char), const char *str, const void **args, size_t args_size) {
+void stdout(void (*print)(char), const char * str, const void ** args,   size_t args_size) {
 
 	//The current char;
 	char c;

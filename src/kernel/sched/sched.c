@@ -46,6 +46,7 @@
 #include <kernel/async/interrupt.h>
 #include <kernel/mem/kdmem.h>
 #include <kernel/async/preempt.h>
+#include <kernel/debug/log.h>
 
 
 //------------------------------------------------- Process execution --------------------------------------------------
@@ -188,17 +189,19 @@ struct sched_data scheduler = {
 
 static void round_robin_policy(struct sched_elmt **list_ref, struct sched_elmt *new_elements) {
 	
+	//Cache the current element;
+	struct sched_elmt *current = *list_ref;
+	
 	//If no elements are to insert :
-	if (!new_elements) {
+	if (new_elements) {
 		
-		//Do nothing, the list is not sorted;
-		return;
+		//Simply concatenate new elements and active list;
+		list_concat((struct list_head *) new_elements, (struct list_head *) current);
 		
 	}
 	
-	//Simply concatenate new elements and active list;
-	list_concat((struct list_head *) new_elements, (struct list_head *) *list_ref);
-
+	*list_ref = current->status_head.next;
+	
 }
 
 
@@ -307,16 +310,16 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 	//Allocate memory for the new element;
 	struct sched_elmt *elmt = kmalloc(sizeof(struct sched_elmt));
 	
-	
 	struct sched_elmt init = {
-		.main_head = {
-			.next = &elmt,
-			.prev = &elmt,
-		},
 		
 		.status_head = {
-			.next = &elmt,
-			.prev = &elmt,
+			.next = elmt,
+			.prev = elmt,
+		},
+		
+		.main_head = {
+			.next = elmt,
+			.prev = elmt,
 		},
 		
 		//Copy process structures;
@@ -340,6 +343,8 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 	
 	//Push the element in the add shared fifo;
 	shared_fifo_push(&scheduler.to_activate, (struct list_head *) elmt);
+	
+	kernel_log_("pushed");
 	
 	//Access to the main list is critical;
 	critical_section_enter();
@@ -384,7 +389,7 @@ static void sched_delete_element(struct sched_elmt *element) {
 
 
 //Set the stack pointer of one thread of the current process;
-void sched_set_prc_sp(void *sp) {
+void sched_set_prc_sp(void * sp) {
 	
 	//Update the stack pointer of the first process;
 	scheduler.active_list->prc_mem.stack.sp = sp;
@@ -554,7 +559,7 @@ struct prc_req *sched_get_req() {
 
 
 //Get the stack pointer of one thread of the current process;
-void *sched_get_sp() {
+void * sched_get_sp() {
 	
 	//Return the first process hardware requirements;
 	return scheduler.active_list->prc_mem.stack.sp;

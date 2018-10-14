@@ -135,7 +135,7 @@ void sched_init();
 //----------------------------------------------------- Operations -----------------------------------------------------
 
 //Create a scheduler element referencing the given process, and reference it in the scheduler;
-void sched_create_prc(struct prc_desc *data, struct prc_req *desc);
+void sched_create_prc(struct prc_desc *desc, struct prc_req *req);
 
 //Set the stack pointer of one thread of the current process;
 void sched_set_prc_sp(void *);
@@ -169,6 +169,6 @@ void sched_commit();
 struct prc_req *sched_get_req();
 
 //Get the stack pointer of one thread of the current process;
-void *sched_get_sp();
+void * sched_get_sp();
 
 #endif //TRACER_SCHEDULER_H

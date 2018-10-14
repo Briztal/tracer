@@ -41,12 +41,34 @@
  * ---------------------------------------------------------------------------------------------------------------------
  */
 
+//----------------------------------------------------- Debug ----------------------------------------------------
+
+
+//Light the debug led high; Implemented by the hardware;
+extern void __debug_led_high();
+
+//Turn off the debug led; Implemented by the hardware;
+extern void __debug_led_low();
+
+//Wait for a certain number of milliseconds. Not accurate or reliable; Implemented by the hardware;
+extern void __debug_delay_ms(uint32_t ms);
+
+//Wait for a certain number of microsoconds. Not accurate or reliable; Implemented by the hardware;
+extern void __debug_delay_us(uint32_t ms);
+
+//Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
+extern void __debug_print_char(char);
+
+//Print the content of all registers, and the content of the stack;
+extern void __debug_print_stack_trace(bool software_context_saved, uint32_t stack_depth);
+
+//----------------------------------------------------- Vector table ---------------------------------------------------
+
 //The kernel interrupt vector table;
 extern void (*__kernel_vtable[])(void);
 
 
 //------------------------------------------- General interrupt priorities -------------------------------------------
-
 
 //The lowest priority level;
 extern const uint8_t __ic_priority_0;

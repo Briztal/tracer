@@ -12,7 +12,7 @@
 #include <stddef.h>
 
 
-void stdout(void (*print)(char), const char *str, const void **args, size_t args_size);
+void stdout(void (*print)(char), const char * str, const void ** args,  size_t args_size);
 
 
 #endif //TRACER_TMP_OUT_H

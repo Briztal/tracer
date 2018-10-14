@@ -135,8 +135,8 @@ void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), v
 	//Store the arg in R12 cache;
 	*(sp4 - 4) = (uint32_t) (arg);
 	
-	//Update the stack pointer; Hits the future R0 reload address;
-	sp4 -= 8;
+	//Update the stack pointer; Hits the future R4 reload address;
+	sp4 -= 16;
 	
 	//Return the stack pointer;
 	stack->sp = sp4;
@@ -219,26 +219,11 @@ void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 	//Save the current main stack pointer in psp's cache;
 	__asm__ __volatile__ ("mrs %0, msp" : "=r" (psp):);
 	
-	//Execute an ISB;
-	__asm__ __volatile__ ("DMB");
-	
 	//Update the main stack pointer so that exceptions occur in the exception stack;
-	__asm__ __volatile__ (\
-            "msr msp, %0\n\t"::"r" (msp):"memory"
-	);
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-	
+	__asm__ __volatile__ ("msr msp, %0\n\t"::"r" (msp):"memory");
 	
 	//Update the process stack pointer;
-	__asm__ __volatile__ (\
-            "msr psp, %0\n\t"::"r" (psp):"memory"
-	);
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-	
+	__asm__ __volatile__ ("msr psp, %0\n\t"::"r" (psp):"memory");
 	
 	//Update the control register to use PSP;//TODO UNPRIVILLEGE
 	__asm__ __volatile__(\
@@ -250,15 +235,6 @@ void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 	//Execute the preemption call;
 	__preemption_set_pending();
 	
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("DMB");
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("DSB");
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
 	
 	//Enable interrupts;
 	__asm__ __volatile__("cpsie i");
@@ -274,7 +250,7 @@ void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 //----------------------------------------------------- Preemption -----------------------------------------------------
 
 //The kernel context switcher;
-extern void *proc_switch_context(void *volatile sp);
+extern void *proc_switch_context(void *sp);
 
 
 /*
@@ -287,67 +263,43 @@ extern void *proc_switch_context(void *volatile sp);
 
 void __proc_preemption_handler() {
 	
-	//TODO ONLY IN HANDLER MODE;
+	//A static variable will contain the temporary psp_cache that we transmit to the stack provider;
+	static void *volatile psp_cache;
 	
-	//A static variable will contain the temporary psp that we transmit to the stack provider;
-	static void *volatile psp;
-	
-	/*
-	 * This function happens in an interrupt basis. Will not happen during a critical section.
-	 * Ints can be safely disabled;
-	 */
-	
-	//Disable all interrupts during context switching;
-	__asm__ __volatile__("cpsid i");
 	
 	//As R0 is already saved in memory, we can use it;
 	__asm__ __volatile__ (\
-            "mrs r0, psp \n\t"\
-            "stmdb r0!, {r4 - r11}\n\t"\
-            /*"vstmdb r0!, {s16 - s31}"\*/
+        "cpsid i \n\t"
+		"mrs r0, psp \n\t"
+		"sub r0, #32\n\t"
+		"stmia r0, {r4 - r11}\n\t"
+		"mov %0, r0 \n\t"
+		"ISB\n\t"
+		"cpsie i\n\t"
+	: "=r" (psp_cache) : : "cc", "memory"
 	);
 	
 	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-	
-	
-	//Save the current process_t's stack pointer, while the process_t hasn't been terminated;
-	__asm__ __volatile__ ("mrs %0, psp" : "=r" (psp):);
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-	
-	
-	
-	//Enable interrupts;
-	
-	__asm__ __volatile__("cpsie i");
+	//__debug_print_stack_trace(true, 24);
 	
 	//Provide the old stack and get a new one; There is only one thread, with the index 0;
-	psp = proc_switch_context(psp);
+	psp_cache = proc_switch_context(psp_cache);
 	
-	//Disable all interrupts during context switching;
-	__asm__ __volatile__("cpsid i");
+	//Unstack the context from the new stack; R0 will be updated at interrupt prempt, we can use it;
+	//__asm__ __volatile__ ("msr psp, %0 \n\t"::"r" (psp_cache):"cc", "memory");
+	//__debug_print_stack_trace(true, 24);
 	
-	//Update the PSP;
-	__asm__ __volatile__ ("msr psp, %0"::"r" (psp));
-	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
 	
 	//Unstack the context from the new stack; R0 will be updated at interrupt prempt, we can use it;
 	__asm__ __volatile__ (\
-            "mrs r0, psp \n\t"\
-            "ldmdb r0!, {r4 - r11} \n\t"\
-            /*"vldmdb r0!, {s16 - s31} "\*/
+        "cpsid i \n\t"
+		"mov r0, %0 \n\t"
+		"ldmia r0!, {r4 - r11} \n\t"
+		"msr psp, r0 \n\t"
+		"ISB\n\t"
+		"cpsie i\n\t"
+	::"r" (psp_cache):"cc", "memory"
 	);
 	
-	//Execute an ISB;
-	__asm__ __volatile__ ("ISB");
-	
-	
-	//Enable interrupts;
-	__asm__ __volatile__("cpsie i");
 	
 }

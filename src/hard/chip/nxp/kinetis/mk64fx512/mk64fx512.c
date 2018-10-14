@@ -38,7 +38,7 @@
  * core_led_high : hardware code for turning on the led;
  */
 
-void debug_led_high() {
+void __debug_led_high() {
 
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
@@ -55,7 +55,7 @@ void debug_led_high() {
  * core_led_low : hardware code for turning off the led;
  */
 
-void debug_led_low() {
+void __debug_led_low() {
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
 
@@ -71,7 +71,7 @@ void debug_led_low() {
  * core_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-void debug_delay_ms(uint32_t ms_counter) {
+void __debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
 		//Count to;
@@ -88,7 +88,7 @@ void debug_delay_ms(uint32_t ms_counter) {
  * core_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-void debug_delay_us(uint32_t us_counter) {
+void __debug_delay_us(uint32_t us_counter) {
 
 	while (us_counter--) {
 		//Count to;

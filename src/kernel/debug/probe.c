@@ -43,7 +43,7 @@
  * @param c : the char to encode
  */
 
-void debug_print_char(char c) {
+void __debug_print_char(char c) {
 
 	//Turn off the led;
 	debug_led_low();
