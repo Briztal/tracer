@@ -34,12 +34,12 @@
  * ----------------------------------------------------- Led Debug -----------------------------------------------------
  */
 
-//Light the debug led high; Implemented by the hardware;
+//Light the debug.txt led high; Implemented by the hardware;
 #define debug_led_high() __debug_led_high();
 
-//Turn off the debug led; Implemented by the hardware;
+//Turn off the debug.txt led; Implemented by the hardware;
 #define debug_led_low() __debug_led_low();
-//Blink the debug led indefinitely, waiting @ms_counter between each toggle;
+//Blink the debug.txt led indefinitely, waiting @ms_counter between each toggle;
 void debug_led_blink(uint32_t ms_counter);
 
 //Blink @count times, wait, and re-iterate;
@@ -53,7 +53,7 @@ void debug_led_dump(uint8_t c);
 
 
 /*
- * ---------------------------------------------------- Tempo debug ----------------------------------------------------
+ * ---------------------------------------------------- Tempo debug.txt ----------------------------------------------------
  */
 
 //Wait for a certain number of milliseconds. Not accurate or reliable; Implemented by the hardware;
@@ -67,7 +67,7 @@ void debug_led_dump(uint8_t c);
  * ----------------------------------------------------- Log Debug -----------------------------------------------------
  */
 
-//Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
+//Send a char over the debug.txt interface, encoded by the log protocol. Implemented by the log protocol;
 #define debug_print_char(c) __debug_print_char(c);
 
 
@@ -75,7 +75,7 @@ void debug_led_dump(uint8_t c);
  * ----------------------------------------------------- Log vars -----------------------------------------------------
  */
 
-//A flag, to use for debug purposes;
+//A flag, to use for debug.txt purposes;
 extern bool debug_flag;
 
 

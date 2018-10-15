@@ -16,8 +16,6 @@ include src/hard/arch/arm/Makefile
 
 V7M_DIR :=  src/hard/arch/arm/arm_v7m
 
-
-
 v7m_args :=
 
 
@@ -31,7 +29,7 @@ endif
 
 
 #If nvic relocation is enabled :
-ifndef NO_NVIC_RELOCATION
+ifdef NVIC_RELOCATION
 
 #Compile the kernel_base with an inactive flash vector table;
 v7m_args += -DNO_VTABLE

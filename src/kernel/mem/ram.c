@@ -82,7 +82,7 @@ void *ram_alloc(size_t size) {
 	//If the heap hasn't been initialised :
 	if (!heap) {
 
-		//Core debug;
+		//Core debug.txt;
 		kernel_panic("ram.c : ram_alloc : ram heap not initialised;");
 		return 0;
 

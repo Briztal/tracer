@@ -39,13 +39,13 @@
  */
 
 void __debug_led_high() {
-
+	
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
-
+	
 	//ALT 1
 	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
-
+	
 	//Set
 	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
 }
@@ -58,10 +58,10 @@ void __debug_led_high() {
 void __debug_led_low() {
 	//Output
 	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
-
+	
 	//ALT 1
 	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
-
+	
 	//Clear
 	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
 }
@@ -71,17 +71,15 @@ void __debug_led_low() {
  * core_delay : hardware code for waiting a certain number of milliseconds;
  */
 
-void __debug_delay_ms(uint32_t ms_counter) {
-
+__attribute__ ((optimize("O0"))) void __debug_delay_ms(uint32_t ms_counter) {
+	
 	while (ms_counter--) {
 		//Count to;
 		//for (volatile uint32_t i = 15000; i--;);
 		for (volatile uint32_t i = 3000; i--;);
 	}
-
+	
 }
-
-
 
 
 /**
@@ -89,12 +87,12 @@ void __debug_delay_ms(uint32_t ms_counter) {
  */
 
 void __debug_delay_us(uint32_t us_counter) {
-
+	
 	while (us_counter--) {
 		//Count to;
 		for (volatile uint32_t i = 3; i--;);
 	}
-
+	
 }
 
 
@@ -194,72 +192,23 @@ extern void __kernel_init();
 
 
 void __proc_init(void) {
-
+	
 	/*
 	 * First, disable the watchdog;
 	 */
-
+	
 	//Disable the watchdog;
 	k64_wdog_disable();
-
+	
 	//Enable gating for all ports;
 	sim_enable_PORTA_clock_gating();
 	sim_enable_PORTB_clock_gating();
 	sim_enable_PORTC_clock_gating();
 	sim_enable_PORTD_clock_gating();
 	sim_enable_PORTE_clock_gating();
-
+	
 	startup_initialise_globals();
 	
 	__kernel_init();
-
-}
-
-//---------------------------------------- Hardware Initialisation ---------------------------------------
-
-void mk64fx512_hardware_init() {
-
-	/*
-
-	//Enable PORT clock gating;
-	SIM_SCGC5 |= (SIM_SCGC5_PORTA | SIM_SCGC5_PORTB | SIM_SCGC5_PORTC | SIM_SCGC5_PORTD | SIM_SCGC5_PORTE);
-
-	//Define the PORT interface;
-	PORT = kinetis_PORT_create(PORT_A_REGISTERS, GPIO_A_REGISTERS, 5, 0x1000, 0x40);
-
-	//Create the int channels array;
-	uint8_t int_channels[4] = {IRQ_PIT_CH0, IRQ_PIT_CH1, IRQ_PIT_CH2, IRQ_PIT_CH3};
-
-	//Create the specs types;
-	types kinetis_PIT_specs PIT_specs = {
-		.MCR = PIT_MCR_REG,
-		.nb_PITs = PIT_NB_TIMERS,
-		.first_area = PIT_REGISTERS,
-		.spacing = PIT_SPACING,
-		.int_channels = int_channels,
-		.clock_frequency = F_BUS,
-	};
-
-	//Define PIT chip;
-	PIT = (types kinetis_PIT_driver *) kinetis_PIT_create(&PIT_specs);
-
-
-	//Declare the K64 UART hardware config;
-	types kinetis_UART_hw uart0_hw = {
-		.registers =  (types kinetis_UART_registers *const) UART0_REGISTERS,
-		.clock_frequency = F_CPU,
-		.status_int_channel = IRQ_UART0_STATUS,
-		.error_int_channel = IRQ_UART0_ERROR,
-		.status_link = &UART0_status_link,
-		.error_link = &UART0_error_link
-	};
-
-	//Turn on the UART0 clock;
-	SIM_SCGC4 |= SIM_SCGC4_UART0;
-
-	//Create the UART;
-	UART0 = kinetis_UART_create(&uart0_hw);
-
-	 */
-
+	
 }

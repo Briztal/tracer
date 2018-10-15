@@ -117,9 +117,6 @@ void proc_start_execution() {
 	//Initialise the scheduler;
 	sched_init();
 	
-	
-	kernel_log("preem %h, syst %h", KERNEL_PREEMPTION_PRIORITY, KERNEL_SYSTICK_PRIORITY);
-	
 	//Disable all interrupts;
 	exceptions_disable();
 	

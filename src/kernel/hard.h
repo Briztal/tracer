@@ -34,15 +34,27 @@
 #include <stdint.h>
 #include <kernel/sched/proc.h>
 
+/*
+ * ---------------------------------------------------------------------------------------------------------------------
+ * ---------------------------------------------------- Kernel Hooks ---------------------------------------------------
+ * ---------------------------------------------------------------------------------------------------------------------
+ */
+
+/*
+ * The hardware library has access to the following kernel functions, that it can hook to ISRs to allow the kernel
+ * 	to work properly;
+ */
+
+
+
 
 /*
  * ---------------------------------------------------------------------------------------------------------------------
- * ----------------------------------------------- Mandatory declarations ----------------------------------------------
+ * ----------------------------------------- Mandatory Hardware implementation -----------------------------------------
  * ---------------------------------------------------------------------------------------------------------------------
  */
 
 //----------------------------------------------------- Debug ----------------------------------------------------
-
 
 //Light the debug led high; Implemented by the hardware;
 extern void __debug_led_high();
@@ -90,9 +102,6 @@ extern void __exceptions_enable();
 //Disables the interrupt control;
 extern void __exceptions_disable();
 
-//Sets the handler of the required exception;
-extern void __exception_set_handler(uint16_t channel, void (*handler)());
-
 
 //-------------------------------------------------- Interrupt ReQuest -------------------------------------------------
 
@@ -125,6 +134,33 @@ extern void __irq_reset_interrupt_handler(uint16_t channel);
 
 //Assert if a handler is currently in execution;
 extern bool __irq_in_handler_mode();
+
+
+//-------------------------------------------------- System clock -------------------------------------------------
+
+//Configure the frequency and the priority of the system clock interrupt
+void __sclk_configure_int(uint32_t tick_frequency, uint8_t int_prio);
+
+//Start the system clock;
+void __sclk_start();
+
+//Stop the system clock;
+void __sclk_stop();
+
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
 
 
 /*
@@ -178,6 +214,24 @@ extern void __preemption_enable();
 extern void __preemption_set_pending();
 
 extern void __preemption_clear_pending();
+
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+//TODO NO PREEMPTION HANDLER SETTINGS
+
 
 
 #endif //TRACER_HARD_H

@@ -51,6 +51,13 @@
 #include "arm_v7m.h"
 
 
+//---------------------------------------------------- Kernel hooks ----------------------------------------------------
+
+
+void proc_context_switcher();
+
+
+
 //---------------------------------------------------- ARM_V7M Init ----------------------------------------------------
 
 
@@ -167,6 +174,7 @@ void (*__kernel_vtable[NB_INTERRUPTS])(void) __attribute__ ((aligned (512))) = {
 	[16 ... NB_INTERRUPTS - 1] = &no_isr,
 	
 };
+
 
 //-------------------------------------------------- Interrupt priorities --------------------------------------------------
 
@@ -324,24 +332,34 @@ void __irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
 }
 
 
-void __exception_set_handler(uint16_t channel, void (*handler)()) {
-	
-	//If the channel is invalid :
-	if (channel >= 16) {
-		
-		//Do nothing;
-		return;
-		
-	}
-	
-	//If the handler is null, save the empty handler; If not, save the handler;
-	__kernel_vtable[channel] = (handler) ? handler : no_isr;
-	
-}
-
 
 //-------------------------------------------------- NVIC static base --------------------------------------------------
 
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
+//TODO NVIC RELOCATION
 
 //If the vtable must not be generated (relocated after, smaller executable) :
 #ifdef NO_VTABLE
@@ -372,7 +390,7 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 };
 
 
-//If the vtable must be generated
+//If the vtable must be generated in flash :
 #else //NOVTABLE
 
 
@@ -383,7 +401,7 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
  * @param i : the interrupt channel. 0 to 240;
  */
 
-static void isr_generic_flash_handler(uint8_t i) {
+__attribute__ ((optimize("O0"))) static void isr_generic_flash_handler(uint8_t i) {
 	
 	//Execute the handler;
 	(*__kernel_vtable[i])();
@@ -417,9 +435,6 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 	//1 : Reset : call the program's entry point;
 	&arm_v7m_init,
 	
-	
-	//2->255 : empty handler (240 times, 240 = 3 * 8 * 10);
-	
 	//In order to avoid writing 254 times the function name, we will use macros that will write it for us;
 #define channel(i) &isr_##i,
 
@@ -434,73 +449,4 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
 
 
 #endif //NOVTABLE
-
-
-//-------------------------------------------------- Forensics --------------------------------------------------
-
-
-
-
-/**
- * Debug forensics : will display
- */
-
-void __debug_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth) {
-	
-	kernel_log("psp : %h", psp);
-	
-	
-	//If the software context (r4-r11) was saved :
-	if (software_context_saved) {
-		
-		
-		kernel_log("r8 : %h", *psp);
-		psp++;
-		kernel_log("r9 : %h", *psp);
-		psp++;
-		kernel_log("r10 : %h", *psp);
-		psp++;
-		kernel_log("r11 : %h", *psp);
-		psp++;
-		
-		kernel_log("r4 : %h", *psp);
-		psp++;
-		kernel_log("r5 : %h", *psp);
-		psp++;
-		kernel_log("r6 : %h", *psp);
-		psp++;
-		kernel_log("r7 : %h", *psp);
-		psp++;
-		
-	}
-	
-	kernel_log("r0 : %h", *psp);
-	psp++;
-	kernel_log("r1 : %h", *psp);
-	psp++;
-	kernel_log("r2 : %h", *psp);
-	psp++;
-	kernel_log("r3 : %h", *psp);
-	psp++;
-	
-	kernel_log("r12 : %h", *psp);
-	psp++;
-	kernel_log("lr : %h", *psp);
-	psp++;
-	kernel_log("pc : %h", *psp);
-	psp++;
-	kernel_log("psr : %h", *psp);
-	psp++;
-	
-	
-	kernel_log_("Stack trace : ");
-	for (uint32_t i = 0; i < stack_depth; i++) {
-		
-		kernel_log("%d : %h", i, *psp);
-		psp++;
-		
-	}
-	
-	
-}
 

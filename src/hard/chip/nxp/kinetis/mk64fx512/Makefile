@@ -5,8 +5,6 @@
 #The k64fx512 comprises 256 interrupts
 NVIC_NB_INTERRUPTS = 256
 
-NO_NVIC_RELOCATION = 1
-
 include src/hard/proc/cortex_m4f/Makefile
 
 
@@ -38,7 +36,7 @@ mk64fx512: cortex_m4f
 	@echo "compiling mk64fx512 module\n"
 
 #Compile the init source;
-	@$(CC) $(CFLAGS)  $(INC) -o build/hard/mk64fx512.o -c $(SK_DIR)/mk64fx512/mk64fx512.c
+	@$(CC) $(CFLAGS) $(INC) -o build/hard/mk64fx512.o -c $(SK_DIR)/mk64fx512/mk64fx512.c
 
 #Init function must stop watchdog at init. Compile it;
 	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_wdog.o -c $(SK_DIR)/kx_wdog.c

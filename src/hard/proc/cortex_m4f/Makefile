@@ -1,6 +1,3 @@
-#The cortex M4 is based on the armv7 architecture;
-include src/hard/arch/arm/arm_v7m/Makefile
-
 
 #Proc compiler options;
 CFLAGS += -mcpu=cortex-m4
@@ -9,6 +6,14 @@ CFLAGS += -mcpu=cortex-m4
 #Proc linker options
 LDFLAGS += --specs=nano.specs
 #-mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs
+
+#NVIC relocation is possible on the cortex M4F
+#NVIC_RELOCATION = 1
+
+
+#The cortex M4 is based on the armv7 architecture;
+include src/hard/arch/arm/arm_v7m/Makefile
+
 
 
 cortex_m4f : arm_v7m

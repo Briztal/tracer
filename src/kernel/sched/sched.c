@@ -166,7 +166,7 @@ struct sched_elmt first_element = {
 //The kernel scheduler;
 struct sched_data scheduler = {
 	
-	//Save the first process. If it gets terminated, a kernel debug will be thrown;
+	//Save the first process. If it gets terminated, a kernel debug.txt will be thrown;
 	.main_list = &first_element,
 	
 	//The first process is available for selection;
@@ -477,7 +477,7 @@ static struct sched_elmt *remove_first() {
 	//If @v is the only element of the list :
 	if (elmt == next) {
 
-		//Kernel debug, total deadlock;
+		//Kernel debug.txt, total deadlock;
 		kernel_panic("sched.c : total deadlock, all processes are stopped;");
 
 	} else {
@@ -519,7 +519,7 @@ void sched_commit() {
 		//If we removed the first element;
 		if (removed == scheduler.main_list) {
 
-			//Kernel debug. The first process must never terminate or be terminated;
+			//Kernel debug.txt. The first process must never terminate or be terminated;
 			kernel_panic("sched.c : scheduler_select : attempted to terminate the first process;");
 
 		}

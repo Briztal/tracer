@@ -121,7 +121,7 @@ void *vlarray_get_element(const vlarray_t *const vlarray, const size_t index) {
 	//If the index is invalid :
 	if (index >= vlarray->length) {
 
-		//Kernel debug;TODO KERNEL PANIC
+		//Kernel debug.txt;TODO KERNEL PANIC
 		return 0;
 
 	}
@@ -141,7 +141,7 @@ void vlarray_set_element(vlarray_t *const vlarray, const size_t index, const voi
 	//If the index is invalid :
 	if (index >= vlarray->length) {
 
-		//Kernel debug;TODO KERNEL PANIC
+		//Kernel debug.txt;TODO KERNEL PANIC
 		return;
 
 	}
@@ -167,7 +167,7 @@ void vlarray_remove_element(vlarray_t *const vlarray, const size_t index) {
 	//If the index is invalid :
 	if (index >= vlarray->length) {
 
-		//Kernel debug;TODO KERNEL PANIC
+		//Kernel debug.txt;TODO KERNEL PANIC
 		return;
 
 	}
@@ -250,7 +250,7 @@ void vlarray_resize(vlarray_t *const vlarray, const size_t new_length) {
 	//If the size was not zero, and the resulting pointer is null (reallocation failure);
 	if (new_size && !new_array) {
 
-		//Kernel debug; TODO ERROR;
+		//Kernel debug.txt; TODO ERROR;
 		return;
 
 	}
