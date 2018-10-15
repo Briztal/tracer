@@ -445,17 +445,23 @@ void *vtable[NB_INTERRUPTS] __attribute__ ((section(".vectors"))) = {
  * Debug forensics : will display
  */
 
-void __debug_print_stack_trace(bool software_context_saved, uint32_t stack_depth) {
-	
-	uint32_t *psp;
-	
-	__asm__ __volatile__ ("mrs %0, psp": "=r" (psp):);
+void __debug_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth) {
 	
 	kernel_log("psp : %h", psp);
 	
 	
 	//If the software context (r4-r11) was saved :
 	if (software_context_saved) {
+		
+		
+		kernel_log("r8 : %h", *psp);
+		psp++;
+		kernel_log("r9 : %h", *psp);
+		psp++;
+		kernel_log("r10 : %h", *psp);
+		psp++;
+		kernel_log("r11 : %h", *psp);
+		psp++;
 		
 		kernel_log("r4 : %h", *psp);
 		psp++;
@@ -464,14 +470,6 @@ void __debug_print_stack_trace(bool software_context_saved, uint32_t stack_depth
 		kernel_log("r6 : %h", *psp);
 		psp++;
 		kernel_log("r7 : %h", *psp);
-		psp++;
-		kernel_log("r8 : %h", *psp);
-		psp++;
-		kernel_log("r9 : %h", *psp);
-		psp++;
-		kernel_log("r10 : %h", *psp);
-		psp++;
-		kernel_log("r11 : %h", *psp);
 		psp++;
 		
 	}
@@ -484,6 +482,7 @@ void __debug_print_stack_trace(bool software_context_saved, uint32_t stack_depth
 	psp++;
 	kernel_log("r3 : %h", *psp);
 	psp++;
+	
 	kernel_log("r12 : %h", *psp);
 	psp++;
 	kernel_log("lr : %h", *psp);

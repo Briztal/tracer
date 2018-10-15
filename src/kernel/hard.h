@@ -60,7 +60,7 @@ extern void __debug_delay_us(uint32_t ms);
 extern void __debug_print_char(char);
 
 //Print the content of all registers, and the content of the stack;
-extern void __debug_print_stack_trace(bool software_context_saved, uint32_t stack_depth);
+extern void __debug_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth);
 
 //----------------------------------------------------- Vector table ---------------------------------------------------
 

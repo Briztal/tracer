@@ -10,7 +10,7 @@
 #define SEPARATOR '%'
 
 
-void stdout_str(void (*print)(char), const char *msg) {
+static void stdout_str(void (*print)(char), const char *msg) {
 
 	//Cache the current char;
 	char c;
@@ -27,7 +27,7 @@ void stdout_str(void (*print)(char), const char *msg) {
 
 
 //Convert an integer to its string expression in the required base, and send it;
-void stdout_int(void (*print)(char), uint32_t integer, uint8_t base) {
+static void stdout_int(void (*print)(char), uint32_t integer, uint8_t base) {
 
 	//Cache an array of the appropriate length;
 	char t[33];

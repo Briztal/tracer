@@ -31,7 +31,7 @@
  */
 
 //The preemption has the lowest priority level, so that a context switch never occurs over an interrupt;
-#define KERNEL_PREMPTION_PRIORITY ic_priority_0
+#define KERNEL_PREEMPTION_PRIORITY ic_priority_0
 
 //A interface status interrupt has a low priority;
 #define KERNEL_DRIVER_STATUS_PRIORITY ic_priority_2

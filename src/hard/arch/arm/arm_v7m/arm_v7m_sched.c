@@ -31,6 +31,8 @@
 #include <kernel/async/interrupt.h>
 #include <kernel/panic.h>
 #include <kernel/debug/log.h>
+#include <kernel/debug/debug.h>
+#include <kernel/clock/sysclock.h>
 #include "arm_v7m.h"
 
 
@@ -39,9 +41,8 @@
 //Set the handler of the preemption exception;
 void __preemption_set_handler(void (*handler)(void)) {
 	exception_set_handler(NVIC_PENDSV, handler);
-	
-	
 }
+
 
 //Set the priority of the preemption exception;
 void __preemption_set_priority(uint8_t priority) {
@@ -96,7 +97,7 @@ void __syscall_trigger() {
  *
  *  arm v7m minimal stack frame :
  *
- *      ----------- <- pre irq / stack frame header end;
+ *      	----------- <- pre irq / stack frame header end;
  *      XPSR
  *      PC
  *      LR
@@ -104,7 +105,15 @@ void __syscall_trigger() {
  *      R3
  *      R2
  *      R1
- *      R0--------- <- post irq
+ *      R0	--------- <- hw context save PSP EXCEPTION
+ *      R7
+ *      R6
+ *      R5
+ *      R4
+ *      R11
+ *      R10
+ *      R9
+ *      R8	--------- <- sw context save
  */
 
 /*
@@ -180,41 +189,13 @@ void *__proc_stack_align(void *stack_reset) {
  * @param preemption_call : the function to execute in the executing thread when all other threads are idle;
  */
 
-void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
-	
-	//Disable all interrupts;
-	exceptions_disable();
-	
-	//A static var will insure that the function is called at most once;
-	static bool entered = false;
-	
-	//If the flag has already been set, the function is called for the second time.
-	if (entered) {
-		
-		//Error, must not happen;
-		kernel_panic("proc_enter_thread_mode : called a second time;");
-		
-	}
-	
-	//Mark the function called;
-	entered = true;
-	
-	//If we are in handler mode, ignore the request;
-	if (irq_in_handler_mode()) {//TODO
-		
-		//Error, this function can't be executed in handler mode;
-		kernel_panic("proc_enter_thread_mode : in handler mode;");
-		
-		//Never reached;
-		return;
-		
-	}
+void __proc_enter_thread_mode(struct proc_stack *exception_stack) {
 	
 	static volatile void *volatile msp;
 	static volatile void *volatile psp;
 	
 	//Save the exception stack value in msp;
-	msp = exception_stacks[0].sp;
+	msp = exception_stack->sp;
 	
 	//Save the current main stack pointer in psp's cache;
 	__asm__ __volatile__ ("mrs %0, msp" : "=r" (psp):);
@@ -227,22 +208,21 @@ void __proc_enter_thread_mode(struct proc_stack *exception_stacks) {
 	
 	//Update the control register to use PSP;//TODO UNPRIVILLEGE
 	__asm__ __volatile__(\
-        "mov r4, #2 \n\t"\
-        "msr control, r4\n\t":: :"r4", "cc", "memory"
+        "mov r0, #2 \n\t"\
+        "msr control, r0\n\t":: :"r0", "cc", "memory"
 	);
 	
 	
 	//Execute the preemption call;
 	__preemption_set_pending();
 	
-	
 	//Enable interrupts;
+	__asm__ __volatile__("cpsie f");
 	__asm__ __volatile__("cpsie i");
+	
 	
 	kernel_panic("NO_PREEMPTION");
 	
-	//Wait eternally for the preemption to be triggered;
-	while (1);
 	
 }
 
@@ -261,45 +241,154 @@ extern void *proc_switch_context(void *sp);
  *  - loads the new thread context;
  */
 
-void __proc_preemption_handler() {
+__attribute__ ((naked)) void __proc_preemption_handler() {
 	
-	//A static variable will contain the temporary psp_cache that we transmit to the stack provider;
-	static void *volatile psp_cache;
-	
-	
-	//As R0 is already saved in memory, we can use it;
+	/*
 	__asm__ __volatile__ (\
-        "cpsid i \n\t"
-		"mrs r0, psp \n\t"
-		"sub r0, #32\n\t"
-		"stmia r0, {r4 - r11}\n\t"
-		"mov %0, r0 \n\t"
-		"ISB\n\t"
-		"cpsie i\n\t"
-	: "=r" (psp_cache) : : "cc", "memory"
-	);
-	
-	
-	//__debug_print_stack_trace(true, 24);
-	
-	//Provide the old stack and get a new one; There is only one thread, with the index 0;
-	psp_cache = proc_switch_context(psp_cache);
-	
-	//Unstack the context from the new stack; R0 will be updated at interrupt prempt, we can use it;
-	//__asm__ __volatile__ ("msr psp, %0 \n\t"::"r" (psp_cache):"cc", "memory");
-	//__debug_print_stack_trace(true, 24);
-	
-	
-	//Unstack the context from the new stack; R0 will be updated at interrupt prempt, we can use it;
-	__asm__ __volatile__ (\
-        "cpsid i \n\t"
-		"mov r0, %0 \n\t"
-		"ldmia r0!, {r4 - r11} \n\t"
+        "cpsid 	i \n\t"
+		
+		"mrs 	r0, 	psp \n\t"
+		
+		//"stmdb 	r0, 	{r4 - r11}\n\t"
+		
+		//"mrs 	r0, 	psp \n\t"
+		
+		"bl 	proc_switch_context\n\t"
+		
+		//"mov 	r1, 	r0\n\t"
+		
+		//"ldmdb r1, {r4 - r11} \n\t"
+		
 		"msr psp, r0 \n\t"
-		"ISB\n\t"
+		
 		"cpsie i\n\t"
-	::"r" (psp_cache):"cc", "memory"
+		
+		"ldr r0, =0xFFFFFFFD\n\t"
+		
+		"bx r0\n\t"
+		
 	);
+	*/
 	
 	
+	__asm__ __volatile__ (\
+        "cpsid 	i \n\t"
+		
+		
+		"mrs	r0, psp \n\t"
+		"subs	r0, #16 \n\t"
+		"stmia	r0!,{r4-r7} \n\t"
+		"mov	r4, r8 \n\t"
+		"mov	r5, r9 \n\t"
+		"mov	r6, r10 \n\t"
+		"mov	r7, r11 \n\t"
+		"subs	r0, #32 \n\t"
+		"stmia	r0!,{r4-r7} \n\t"
+		"subs	r0, #16 \n\t"
+		//"mov 	r0,	lr\n\t"
+		
+		"bl 	proc_switch_context\n\t"
+		
+		
+		"ldmia	r0!,{r4-r7} \n\t"
+		"mov	r8, r4 \n\t"
+		"mov	r9, r5 \n\t"
+		"mov	r10, r6 \n\t"
+		"mov	r11, r7 \n\t"
+		"ldmia	r0!,{r4-r7} \n\t"
+		"msr	psp, r0 \n\t"
+		
+		"ldr r0, =0xFFFFFFFD \n\t"
+		"cpsie	i \n\t"
+		"bx r0 \n\t"
+	
+	);
 }
+
+/*
+__asm__ __volatile__ (\
+	"cpsid 	i \n\t"
+	
+	"mrs 	r0, 	psp \n\t"
+	
+	"subs 	r0, 	#16 \n\t"
+	
+	"stmia 	r0!, 	{r4 - r7}\n\t"
+	
+	"mov	r4, 	r8\n\t"
+	"mov	r5,		r9\n\t"
+	"mov	r6, 	r10\n\t"
+	"mov	r7,		r11\n\t"
+	
+	"subs 	r0, 	#32 \n\t"
+	
+	"stmia 	r0!, 	{r4 - r7}\n\t"
+	
+	"subs 	r0, 	#16 \n\t"
+	
+	"mov 	%0, 	r0 \n\t"
+	
+	"cpsie i\n\t"
+
+: "=r" (psp_cache) : : "cc", "memory"
+);*/
+
+
+//: "=r" (psp_cache)::);
+
+//__debug_print_stack_trace(true, 24);
+//kernel_log("opsp : %h", psp_cache);
+
+//Provide the old stack and get a new one;
+//psp_cache = proc_switch_context(psp_cache);
+
+//kernel_log("npsp : %h", psp_cache);
+
+//Unstack the context from the new stack; R0 will be updated at interrupt prempt, we can use it;
+//__asm__ __volatile__ ("msr psp, %0 \n\t"::"r" (psp_cache):"cc", "memory");
+//__debug_print_stack_trace(true, 24);
+
+/*
+__asm__ __volatile__ (\
+	"cpsid i \n\t"
+	
+	"mov r0, %0 \n\t"
+	
+	"ldmia r0!, {r4, r5, r6, r7} \n\t"
+	
+	"mov	r8, 	r4\n\t"
+	"mov	r9,		r5\n\t"
+	"mov	r10, 	r6\n\t"
+	"mov	r11,	r7\n\t"
+	
+	"ldmia r0!, {r4, r5, r6, r7} \n\t"
+	
+	"msr psp, r0 \n\t"
+	
+	"cpsie i\n\t"
+	
+	"ldr r0, =0xFFFFFFFD\n\t"
+	
+	"bx r0\n\t"
+
+::"r" (psp_cache):"cc", "memory"
+);*/
+
+/*__asm__ __volatile__ (\
+	"cpsid i \n\t"
+	
+	"mov r0, %0 \n\t"
+	
+	"ldmia r0!, {r4 - r11} \n\t"
+
+	"msr psp, r0 \n\t"
+	
+	"cpsie i\n\t"
+	
+	"ldr r0, =0xFFFFFFFD\n\t"
+	
+	"bx r0\n\t"
+
+::"r" (psp_cache):);*/
+
+//kernel_log_("SUUS");

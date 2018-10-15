@@ -3,13 +3,12 @@ include src/hard/arch/arm/arm_v7m/Makefile
 
 
 #Proc compiler options;
-CFLAGS += -mthumb -mcpu=cortex-m4
+CFLAGS += -mcpu=cortex-m4
 #-mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 #Proc linker options
-LDFLAGS +=  --specs=nano.specs -mthumb
-LDFLAGS +=
-#-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+LDFLAGS += --specs=nano.specs
+#-mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs
 
 
 cortex_m4f : arm_v7m

@@ -39,8 +39,6 @@
 
 //Turn off the debug led; Implemented by the hardware;
 #define debug_led_low() __debug_led_low();
-
-
 //Blink the debug led indefinitely, waiting @ms_counter between each toggle;
 void debug_led_blink(uint32_t ms_counter);
 

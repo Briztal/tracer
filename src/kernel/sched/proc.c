@@ -117,6 +117,9 @@ void proc_start_execution() {
 	//Initialise the scheduler;
 	sched_init();
 	
+	
+	kernel_log("preem %h, syst %h", KERNEL_PREEMPTION_PRIORITY, KERNEL_SYSTICK_PRIORITY);
+	
 	//Disable all interrupts;
 	exceptions_disable();
 	
@@ -124,7 +127,7 @@ void proc_start_execution() {
 	init_exception_stack();
 	
 	//Initialise the preemption;
-	preemption_init(&__proc_preemption_handler, KERNEL_PREMPTION_PRIORITY);
+	preemption_init(&__proc_preemption_handler, KERNEL_PREEMPTION_PRIORITY);
 	
 	//Log;
 	kernel_log_("preemption initialised");
@@ -139,7 +142,7 @@ void proc_start_execution() {
 	syscall_set_handler(kernel_syscall_handler);
 
 	//Set the syscall exception priority to the lowest possible;
-	syscall_set_priority(KERNEL_PREMPTION_PRIORITY);
+	syscall_set_priority(KERNEL_PREEMPTION_PRIORITY);
 
 	//Enable the syscall exception;
 	syscall_enable();
@@ -172,6 +175,26 @@ void proc_start_execution() {
  */
 
 void *proc_switch_context(void *sp) {
+	
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	//TODO MONITOR STACK OVERFLOW
+	
+	
+	kernel_log("sp : %h", sp);
+	
+	//__debug_print_stack_trace(sp, false, 0);
+	
 	
 	//The first context switch must not save the stack pointer;
 	static bool update_allowed = false;
@@ -209,9 +232,14 @@ void *proc_switch_context(void *sp) {
 	//Update the duration until next preemption;
 	sysclock_set_process_duration(sched_get_req()->activity_time);
 	
+	sp = sched_get_sp();
+	
+	//__debug_print_stack_trace(sp, false, 0);
+	
+	kernel_log("nsp : %h", sp);
 	
 	//Return the appropriate stack pointer;
-	return sched_get_sp();
+	return sp;
 	
 }
 

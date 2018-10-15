@@ -67,13 +67,14 @@ SECTIONS {
         KEEP(*(.flashconfig))
     } > FLASH
 
-
+    .=ALIGN(4);
     /*The text section contains the program itself;*/
     .text : {
         . = ALIGN(4);
         *(.text)
     } > FLASH
 
+    .=ALIGN(4);
 
     /*The embedded modules section contains kernel modules to load at init;*/
     .kernel_modules : {
@@ -102,6 +103,7 @@ SECTIONS {
      } > FLASH
 
 
+    .=ALIGN(4);
 
     /*The rodata section contains constant data (const, strings, ...);*/
     .rodata : {
@@ -109,6 +111,7 @@ SECTIONS {
         *(.rodata*)
     } > FLASH
 
+    .=ALIGN(4);
 
     /*The libc init section. Junk crap LOL;*/
     .cinit : {
@@ -116,6 +119,8 @@ SECTIONS {
         *(.init*)
         *(.fini*)
     } > FLASH
+
+    .=ALIGN(4);
 
     /*The lma of the data section, after all previous sections;*/
     _data_lma = .;

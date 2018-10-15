@@ -59,6 +59,8 @@
 
 static void prc_exec() {
 	
+	kernel_log_("Entering");
+	
 	//Cache the execution data, saved in the stack;
 	volatile struct prc_desc *volatile desc = __proc_get_init_arg();
 	

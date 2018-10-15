@@ -7,9 +7,10 @@
 #include "kernel/debug/debug.h"
 
 #include <util/stdout.h>
+#include <kernel/async/interrupt.h>
 
 
-static void (*log_output) = &__debug_print_char;
+//static void (*log_output) = &__debug_print_char;
 
 
 /**
@@ -21,8 +22,12 @@ static void (*log_output) = &__debug_print_char;
  */
 
 void _kernel_log(const char * str, const void ** args,  size_t args_size) {
-
 	
-	stdout(log_output, str, args, args_size);
-
+	critical_section_enter();
+	
+	stdout(&__debug_print_char, str, args, args_size);
+	
+	critical_section_leave();
+	
+	
 }
