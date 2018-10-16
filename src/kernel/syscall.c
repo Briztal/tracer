@@ -1,5 +1,5 @@
 /*
-  syscall.h Part of TRACER
+  syscall.c Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
@@ -18,12 +18,18 @@
 
 */
 
-#ifndef TRACER_KERNEL_H
-#define TRACER_KERNEL_H
 
-
-#include <stddef.h>
+#include <kernel/debug/log.h>
 
 
 
-#endif //TRACER_KERNEL_H
+extern uint32_t __krnl_syscall_handler(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2) {
+	
+	kernel_log("syscall %h : %h, %h; %h", syscall_id, arg0, arg1, arg2);
+	
+	return 5;
+	
+}
+
+
+

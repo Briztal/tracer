@@ -18,6 +18,7 @@ CFLAGS += -DKEX_STACK_SIZE=$(KEX_STACK_SIZE)
 #Add first process hardware requirements;
 CFLAGS += -DKFP_RAM_SIZE=$(KFP_RAM_SIZE) -DKFP_STACK_SIZE=$(KFP_STACK_SIZE) -DKFP_ACTIVITY_TIME=$(KFP_ACTIVITY_TIME)
 
+
 #----------------------------------------------------- Files ----------------------------------------------------
 
 #Cache the current directory;
@@ -26,7 +27,7 @@ KERNEL_DIR := kernel
 #The syscall source file can be linked to exernal libs;
 
 KERNEL_SRCS += $(KERNEL_DIR)/async/fault.c
-KERNEL_SRCS += $(KERNEL_DIR)/async/interrupt.c
+KERNEL_SRCS += $(KERNEL_DIR)/async/except.c
 
 
 #Add the clock lib;
@@ -42,6 +43,7 @@ KERNEL_SRCS += $(KERNEL_DIR)/debug/log.c
 
 #Add the communication protocol;
 KERNEL_SRCS += $(KERNEL_DIR)/fs/inode.c
+
 
 #Add timer structs
 KERNEL_SRCS += $(KERNEL_DIR)/interface/cmd.c
@@ -62,10 +64,10 @@ KERNEL_SRCS += $(KERNEL_DIR)/mod/mod.c
 #if the kernel execution level is not zero :
 ifneq (KERNEL_EXEC_MODE, 0)
 
-#Add the sched folder
-KERNEL_SRCS += $(KERNEL_DIR)/sched/prc_mem.c
-KERNEL_SRCS += $(KERNEL_DIR)/sched/proc.c
-KERNEL_SRCS += $(KERNEL_DIR)/sched/sched.c
+#Add the run folder
+KERNEL_SRCS += $(KERNEL_DIR)/run/pmem.c
+KERNEL_SRCS += $(KERNEL_DIR)/run/proc.c
+KERNEL_SRCS += $(KERNEL_DIR)/run/sched.c
 
 endif #(KERNEL_EXEC_MODE, 0)
 
@@ -77,6 +79,8 @@ KERNEL_SRCS += $(KERNEL_DIR)/struct/shared_fifo.c
 #Add all files of the kernel dir;
 KERNEL_SRCS += $(KERNEL_DIR)/kinit.c
 KERNEL_SRCS += $(KERNEL_DIR)/panic.c
+KERNEL_SRCS += $(KERNEL_DIR)/syscall.c
+
 
 KERNEL_PUB_SRCS += $(KERNEL_DIR)/syscall.c
 

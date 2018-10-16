@@ -21,7 +21,7 @@
 #include "kx_uart.h"
 
 
-#include <kernel/async/syscall.h>
+#include <kernel/syscall.h>
 
 #include <string.h>
 
@@ -582,7 +582,7 @@ configure_transmission_layer(const struct K64_UART_hw *const hw_specs, const str
 //----------------------------------------------------- Init - prempt ----------------------------------------------------
 
 /*
- * K64_UART_start : configures the transmission stack, creates streams, and starts the UART;
+ * K64_UART_start : configures the transmission stack_data, creates streams, and starts the UART;
  */
 
 void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_config_t *config) {

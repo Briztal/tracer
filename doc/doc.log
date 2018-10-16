@@ -279,8 +279,8 @@ Package: pgfcore 2010/04/11 v3.0.1a (rcs-revision 1.7)
 \pgfmath@count=\count101
 \pgfmath@box=\box30
 \pgfmath@toks=\toks26
-\pgfmath@stack@operand=\toks27
-\pgfmath@stack@operation=\toks28
+\pgfmath@stack_data@operand=\toks27
+\pgfmath@stack_data@operation=\toks28
 )
 (/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex
 (/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code
@@ -419,7 +419,7 @@ Package: pgffor 2013/12/13 v3.0.1a (rcs-revision 1.25)
 (/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)
 \pgffor@iter=\dimen164
 \pgffor@skip=\dimen165
-\pgffor@stack=\toks29
+\pgffor@stack_data=\toks29
 \pgffor@toks=\toks30
 ))
 (/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
@@ -629,7 +629,7 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
 \@envbody=\toks38
 \multlinegap=\skip44
 \multlinetaggap=\skip45
-\mathdisplay@stack=\toks39
+\mathdisplay@stack_data=\toks39
 LaTeX Info: Redefining \[ on input line 2817.
 LaTeX Info: Redefining \] on input line 2818.
 )
@@ -936,7 +936,7 @@ Here is how much of TeX's memory you used:
  27160 multiletter control sequences out of 15000+600000
  9957 words of font info for 39 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 75i,8n,98p,719b,609s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,8n,98p,719b,609s stack_data positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx
 12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb

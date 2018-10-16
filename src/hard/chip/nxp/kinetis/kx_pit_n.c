@@ -69,7 +69,7 @@
 #include <stdint.h>
 
 #include <stdbool.h>
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 
 #include "kx_pit_n.h"
 

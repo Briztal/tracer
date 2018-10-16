@@ -53,7 +53,7 @@
 #include <util/type.h>
 
 #include <kernel/struct/shared_fifo.h>
-#include "prc_mem.h"
+#include "pmem.h"
 
 
 /**
@@ -65,7 +65,7 @@ struct prc_req {
 	//The required ram size;
 	size_t ram_size;
 	
-	//The size available for each stack;
+	//The size available for each stack_data;
 	size_t stack_size;
 	
 	//The required period between two preemptions;
@@ -107,7 +107,7 @@ struct sched_elmt {
 	struct prc_desc desc;
 	
 	//The program memory;
-	struct prc_mem prc_mem;
+	struct pmem prc_mem;
 	
 	//TODO ENABLE ONLY FOR DEBUG;
 	//The activity state; Set if the element is active;
@@ -136,7 +136,7 @@ void sched_init();
 //Create a scheduler element referencing the given process, and reference it in the scheduler;
 void sched_create_prc(struct prc_desc *desc, struct prc_req *req);
 
-//Set the stack pointer of one thread of the current process;
+//Set the stack_data pointer of one thread of the current process;
 void sched_set_prc_sp(void *);
 
 //Set the current process in the stopped state, and return its ref;
@@ -167,7 +167,7 @@ void sched_commit();
 //Get the current process;
 struct prc_req *sched_get_req();
 
-//Get the stack pointer of one thread of the current process;
+//Get the stack_data pointer of one thread of the current process;
 void * sched_get_sp();
 
 #endif //TRACER_SCHEDULER_H

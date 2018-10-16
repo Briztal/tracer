@@ -30,9 +30,9 @@
 
 #include <stddef.h>
 
-#include <kernel/sched/proc.h>
-
 #include <kernel/mem/heap.h>
+
+#include <kernel/mem/stack_data.h>
 
 //--------------------------------------------------- Make Parameters --------------------------------------------------
 
@@ -45,7 +45,7 @@
  */
 
 
-struct prc_mem {
+struct pmem {
 
 	//The lowest address of the block (for memory free purposes);
 	void *const ram_start;
@@ -53,20 +53,20 @@ struct prc_mem {
 	//The heap reference;
 	struct heap_head *heap;
 
-	//The stack references array;
-	struct proc_stack stack;
+	//The stack_data references array;
+	struct stack_data stack;
 
 };
 
 
 //Create a process memory struct, containing only a heap;
-void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size);
+void prc_mem_create_heap(struct pmem *mem, size_t ram_size);
 
 //Initialise the process memory : reset the heap, and create as many stacks as required;
-void prc_mem_reset(struct prc_mem *mem, size_t stacks_size);
+void prc_mem_reset(struct pmem *mem, size_t stacks_size);
 
 //Delete the process memory. All references must be contained in the kernel heap;
-void prc_mem_clean(struct prc_mem *mem);
+void prc_mem_clean(struct pmem *mem);
 
 
 

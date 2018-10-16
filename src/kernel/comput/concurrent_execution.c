@@ -21,7 +21,7 @@
 
 #include "concurrent_execution.h"
 
-#include <kernel/async/syscall.h>
+#include <kernel/syscall.h>
 
 //------------------------------------------------------ Creation ------------------------------------------------------
 

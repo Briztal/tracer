@@ -23,7 +23,7 @@
 
 #include <kernel/debug/debug.h>
 #include <util/stdout.h>
-#include "kernel/async/interrupt.h"
+#include "kernel/async/except.h"
 
 static void (*log_output)(char) = &__dbg_print_char;
 

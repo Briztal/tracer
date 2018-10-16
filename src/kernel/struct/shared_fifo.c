@@ -20,7 +20,7 @@
 
 #include "shared_fifo.h"
 
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 
 
 /**

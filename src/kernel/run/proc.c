@@ -20,7 +20,7 @@
 
 //--------------------------------------------------- Make Parameters --------------------------------------------------
 
-//The memory library required the exception stack size to be provided by the makefile;
+//The memory library required the exception stack_data size to be provided by the makefile;
 #if !defined(KEX_STACK_SIZE)
 
 //COmpilation fail;
@@ -32,12 +32,14 @@
 
 //--------------------------------------------- Includes --------------------------------------------
 
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 #include <kernel/debug/log.h>
-#include <kernel/sched/sched.h>
+#include <kernel/run/sched.h>
 #include <kernel/clock/sysclock.h>
 #include <kernel/mem/ram.h>
 #include <util/string.h>
+
+#include <kernel/mem/stack_data.h>
 #include "proc.h"
 
 
@@ -48,25 +50,25 @@
 bool prc_process_terminated = false;
 
 //The stacks array; Will reference interrupt stacks;
-static struct proc_stack exception_stack;
+static struct stack_data exception_stack;
 
-//If required, a module can provide a function to create a stack header before the stack context. Used for ex for FPU;
-static void (*stack_header_creator)(struct proc_stack *stack);
+//If required, a module can provide a function to create a stack_data header before the stack_data context. Used for ex for FPU;
+static void (*stack_header_creator)(struct stack_data *stack);
 
 
 //------------------------------------------------- Proc requirements --------------------------------------------------
 
-//Initialise the stack context for future execution;
-void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg) {
+//Initialise the stack_data context for future execution;
+void proc_init_stack(struct stack_data *stack, void (*function)(), void (*end_loop)(), void *init_arg) {
 	
-	//Reset the stack pointer;
+	//Reset the stack_data pointer;
 	stack->sp = stack->sp_reset;
 	
-	//Create the stack header;
+	//Create the stack_data header;
 	//TODO PATCH
-	//create_stack_header(stack);
+	//create_stack_header(stack_data);
 	
-	//Create the stack context;
+	//Create the stack_data context;
 	__proc_create_stack_context(stack, function, end_loop, init_arg);
 	
 }
@@ -78,31 +80,31 @@ void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_lo
 
 void init_exception_stack() {
 	
-	//Allocate some memory for the thread's stack in the newly created heap;
+	//Allocate some memory for the thread's stack_data in the newly created heap;
 	void *thread_stack = ram_alloc(KEX_STACK_SIZE);
 	
-	//Determine the stack's highest address;
+	//Determine the stack_data's highest address;
 	void *stack_reset = (void *) ((uint8_t *) thread_stack + KEX_STACK_SIZE);
 	
-	//Correct the stack's highest address for proper alignment;
+	//Correct the stack_data's highest address for proper alignment;
 	stack_reset = __proc_stack_align(stack_reset);
 	
-	//Create the proc_stack initializer;
-	struct proc_stack cs_init = {
+	//Create the stack_data initializer;
+	struct stack_data cs_init = {
 		
-		//The stack bound, not corrected;
+		//The stack_data bound, not corrected;
 		.stack_limit = thread_stack,
 		
-		//The stack pointer, set to its reset value;
+		//The stack_data pointer, set to its reset value;
 		.sp = stack_reset,
 		
-		//The stack reset value, corrected by the core lib;
+		//The stack_data reset value, corrected by the core lib;
 		.sp_reset = stack_reset,
 		
 	};
 	
-	//Initialise the exception stack;
-	memcpy(&exception_stack, &cs_init, sizeof(struct proc_stack));
+	//Initialise the exception stack_data;
+	memcpy(&exception_stack, &cs_init, sizeof(struct stack_data));
 	
 }
 
@@ -133,17 +135,9 @@ void proc_start_execution() {
 	 * Syscalls;
 	 */
 	
-	/*
-	//Set the syscall handler; Same prio as preemption;
-	syscall_set_handler(kernel_syscall_handler);
+	//Set the syscall handler; Same prio as preemption, won't preempt each other;
+	__syscl_configure(KERNEL_PREEMPTION_PRIORITY);
 
-	//Set the syscall exception priority to the lowest possible;
-	syscall_set_priority(KERNEL_PREEMPTION_PRIORITY);
-
-	//Enable the syscall exception;
-	syscall_enable();
-	 */
-	
 	
 	/*
 	 * Start execution;
@@ -154,7 +148,7 @@ void proc_start_execution() {
 	
 	kernel_log("target: %h", exception_stack.sp);
 	
-	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
+	//Enter thread mode and un-privilege, provide the kernel stack_data for interrupt handling;
 	//Interrupts will be enabled at the end of the function;
 	__proc_enter_thread_mode(&exception_stack);
 	
@@ -187,13 +181,13 @@ void *__krnl_switch_context(void *sp) {
 	//TODO MONITOR STACK OVERFLOW
 	//TODO MONITOR STACK OVERFLOW
 	
-	//The first context switch must not save the stack pointer;
+	//The first context switch must not save the stack_data pointer;
 	static bool update_allowed = false;
 	
 	//If the sp update is allowed :
 	if (update_allowed) {
 		
-		//Save process stack pointer;
+		//Save process stack_data pointer;
 		sched_set_prc_sp(sp);
 		
 	} else {
@@ -223,7 +217,7 @@ void *__krnl_switch_context(void *sp) {
 	//Update the duration until next preemption;
 	sysclock_set_process_duration(sched_get_req()->activity_time);
 	
-	//Return the appropriate stack pointer;
+	//Return the appropriate stack_data pointer;
 	return sched_get_sp();
 	
 }
@@ -240,7 +234,7 @@ void *__krnl_switch_context(void *sp) {
  * @return true if registration completed;
  */
 
-bool register_stack_header_creator(void (*new_creator)(struct proc_stack *)) {
+bool register_stack_header_creator(void (*new_creator)(struct stack_data *)) {
 	
 	//If the creator is already registered :
 	if (stack_header_creator) {
@@ -253,7 +247,7 @@ bool register_stack_header_creator(void (*new_creator)(struct proc_stack *)) {
 		
 	}
 	
-	//Register the stack creator;
+	//Register the stack_data creator;
 	stack_header_creator = new_creator;
 	
 	//Complete;
@@ -278,10 +272,10 @@ void reset_stack_header_creator() {
  * create_stack_header : if non-null, calls the stack header creator;
  */
 
-static void create_stack_header(struct proc_stack *stack) {
+static void create_stack_header(struct stack_data *stack) {
 	
 	//Cache the function;
-	void (*creator)(struct proc_stack *) = stack_header_creator;
+	void (*creator)(struct stack_data *) = stack_header_creator;
 	
 	//If it is not null :
 	if (creator) {

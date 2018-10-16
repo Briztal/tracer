@@ -26,37 +26,20 @@
 #include <stdint.h>
 
 #include <stddef.h>
+#include <kernel/mem/stack_data.h>
 
 
-//-------------------------------------------------------- Stack -------------------------------------------------------
-
-/**
- * The proc stack provides the two pointers that define a descending stack;
- */
-
-struct proc_stack {
-	
-	//The current stack pointer, mutable;
-	void *sp;
-
-	//The lowest bound of the stack pointer, also used to free the stack, constant;
-	void *const stack_limit;
-	
-	//The highest value the stack pointer can take, constant;
-	void *const sp_reset;
-
-};
 
 
 //--------------------------------------------------- Stack creation ---------------------------------------------------
 
-//Initialise the stack for initialisation. Implemented by the sched lib;
-void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
+//Initialise the stack_data for initialisation. Implemented by the run lib;
+void proc_init_stack(struct stack_data *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
-//A module can register a special function that adds a stack context header, for an FPU for ex;
-bool register_stack_header_creator(void (*new_creator)(struct proc_stack *));
+//A module can register a special function that adds a stack_data context header, for an FPU for ex;
+bool register_stack_header_creator(void (*new_creator)(struct stack_data *));
 
-//Reset a previously registered stack header creator;
+//Reset a previously registered stack_data header creator;
 void reset_stack_header_creator();
 
 

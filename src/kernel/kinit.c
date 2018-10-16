@@ -23,14 +23,14 @@
 #include "kernel/mem/kdmem.h"
 #include "kernel/debug/log.h"
 
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 
 #include <kernel/clock/sysclock.h>
 
 #include <kernel/mem/ram.h>
 
 #include <kernel/mod/mod.h>
-#include <kernel/sched/proc.h>
+
 
 
 //TODO KERNEL HALT FOR PANIC
@@ -89,7 +89,7 @@ void __krnl_init() {
 	//Initialise the kernel dynamic memory;
 	kdmem_init();
 	
-	//Load all sched modules;
+	//Load all run modules;
 	load_proc_modules();
 	
 	//Load all system modules;

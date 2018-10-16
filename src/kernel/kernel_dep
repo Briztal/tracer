@@ -24,10 +24,10 @@ extern const uint32_t proc_stack_alignment;
  * @param exception_stacks : processor stacks that must be used in case of interrupt;
  */
 
-extern void proc_enter_thread_mode(struct proc_stack **exception_stacks, void (*preemption_call)());
+extern void proc_enter_thread_mode(struct kstack **exception_stacks, void (*preemption_call)());
 
-//Initialise the stack for initialisation. Implemented by the proc lib;
-extern void proc_init_stack(struct proc_stack *stack, void (*function)(), void (*end_loop)(), void *init_arg);
+//Initialise the stack_data for initialisation. Implemented by the proc lib;
+extern void proc_init_stack(struct kstack *stack_data, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //Get the initial arg;
 extern void *proc_get_init_arg();

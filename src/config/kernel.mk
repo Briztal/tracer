@@ -14,7 +14,7 @@ KERNEL_EXECUTION_LEVEL= 1
 
 #Following lines are used only if the scheduler mode is enabled;
 
-#The kernel exception stack size;
+#The kernel exception stack_data size;
 KEX_STACK_SIZE = 2048
 
 #The kernel first process parameters;

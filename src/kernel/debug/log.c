@@ -6,7 +6,7 @@
 
 
 #include <util/stdout.h>
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 
 
 //static void (*log_output) = &__debug_print_char;

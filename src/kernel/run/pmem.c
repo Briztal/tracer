@@ -18,7 +18,7 @@
 
 */
 
-#include "prc_mem.h"
+#include "pmem.h"
 
 #include "kernel/mem/ram.h"
 
@@ -26,7 +26,7 @@
 #include <kernel/hard.h>
 
 
-//------------------------------------------------------ prc_mem ------------------------------------------------------
+//------------------------------------------------------ pmem ------------------------------------------------------
 
 /**
  * prog_mem_create_special : creates and initialises a program memory struct in the kernel heap;
@@ -42,7 +42,7 @@
  * @return a ref to the initialised struct, located in the kernel heap;
  */
 
-void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size) {
+void prc_mem_create_heap(struct pmem *mem, size_t ram_size) {
 	
 	//Allocate some memory in the RAM to contain the heap;
 	void *ram_block = ram_alloc(ram_size);
@@ -50,8 +50,8 @@ void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size) {
 	//Create a heap owning the whole RAM block;
 	struct heap_head *heap = heap_create(ram_block, ram_size, heap_fifo_insertion);//TODO SORTED INSERTION;
 	
-	//Create the initializer for the prc_mem;
-	struct prc_mem progm_init = {
+	//Create the initializer for the pmem;
+	struct pmem progm_init = {
 		
 		//Transfer the ownership of the RAM block, for later free;
 		.ram_start = ram_block,
@@ -62,7 +62,7 @@ void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size) {
 	};
 	
 	//Initialise the program memory;
-	memcpy(mem, &progm_init, sizeof(struct prc_mem));
+	memcpy(mem, &progm_init, sizeof(struct pmem));
 	
 }
 
@@ -81,36 +81,36 @@ void prc_mem_create_heap(struct prc_mem *mem, size_t ram_size) {
  * @return a ref to the initialised struct, located in the kernel heap;
  */
 
-void prc_mem_reset(struct prc_mem *mem, size_t stacks_size) {
+void prc_mem_reset(struct pmem *mem, size_t stacks_size) {
 	
 	//Reset the heap;
 	heap_reset(mem->heap);
 	
-	//Allocate some memory for the thread's stack in the heap;
+	//Allocate some memory for the thread's stack_data in the heap;
 	void *thread_stack = heap_malloc(mem->heap, stacks_size);
 	
-	//Determine the stack's highest address;
+	//Determine the stack_data's highest address;
 	void *stack_reset = (void *) ((uint8_t *) thread_stack + stacks_size);
 	
-	//Correct the stack's highest address for proper alignment;
+	//Correct the stack_data's highest address for proper alignment;
 	stack_reset = __proc_stack_align(stack_reset);
 	
-	//Create the proc_stack initializer;
-	struct proc_stack ps_init = {
+	//Create the stack_data initializer;
+	struct stack_data ps_init = {
 		
-		//The stack bound, not corrected;
+		//The stack_data bound, not corrected;
 		.stack_limit = thread_stack,
 		
-		//The stack pointer, set to its reset value;
+		//The stack_data pointer, set to its reset value;
 		.sp = stack_reset,
 		
-		//The stack reset value, corrected by the core lib;
+		//The stack_data reset value, corrected by the core lib;
 		.sp_reset = stack_reset,
 		
 	};
 	
-	//Initialise the stack;
-	memcpy(&mem->stack, &ps_init, sizeof(struct proc_stack));
+	//Initialise the stack_data;
+	memcpy(&mem->stack, &ps_init, sizeof(struct stack_data));
 	
 }
 
@@ -121,7 +121,7 @@ void prc_mem_reset(struct prc_mem *mem, size_t stacks_size) {
  * @param mem : the program memory struct to delete;
  */
 
-void prc_mem_clean(struct prc_mem *mem) {
+void prc_mem_clean(struct pmem *mem) {
 	
 	//Free the RAM block;
 	ram_free(mem->ram_start);

@@ -11,5 +11,5 @@
  *
  * 	FPU context saver registration;
  *
- * 	FPU stack provider registration;
+ * 	FPU stack_data provider registration;
  */

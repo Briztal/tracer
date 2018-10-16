@@ -43,7 +43,7 @@
 
 #include <string.h>
 #include <kernel/panic.h>
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 #include <kernel/mem/kdmem.h>
 #include <kernel/debug/log.h>
 
@@ -60,7 +60,7 @@ static void prc_exec() {
 	
 	kernel_log_("Entering");
 	
-	//Cache the execution data, saved in the stack;
+	//Cache the execution data, saved in the stack_data;
 	volatile struct prc_desc *volatile desc = __proc_get_init_arg();
 	
 	//Execute the function, passing args;
@@ -255,18 +255,18 @@ void sched_set_scheduling_policy(scheduling_policy new_policy) {
 static void sched_init_prc_mem(struct sched_elmt *elmt) {
 	
 	//Cache the processor memory ref;
-	struct prc_mem *mem = &elmt->prc_mem;
+	struct pmem *mem = &elmt->prc_mem;
 	
 	//Initialise a program memory;
 	prc_mem_create_heap(mem, elmt->req.ram_size);
 	
-	//Reset the prog mem and allocate the stack;
+	//Reset the prog mem and allocate the stack_data;
 	prc_mem_reset(mem, elmt->req.stack_size);
 	
 	//The process descriptor is located in the kernel heap. We must copy it in the process heap;
 	struct prc_desc *desc_copy = heap_ialloc(mem->heap, sizeof(struct prc_desc), &elmt->desc);
 	
-	//Initialise the stack and pass the execution environment;
+	//Initialise the stack_data and pass the execution environment;
 	proc_init_stack(&mem->stack, &prc_exec, &prc_exit, desc_copy);
 	
 }
@@ -339,7 +339,7 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 	//Initialise the element;
 	memcpy(elmt, &init, sizeof(struct sched_elmt));
 	
-	//Initialise the element's process memory and execution stack;
+	//Initialise the element's process memory and execution stack_data;
 	sched_init_prc_mem(elmt);
 	
 	//Push the element in the add shared fifo;
@@ -389,10 +389,10 @@ static void sched_delete_element(struct sched_elmt *element) {
 }
 
 
-//Set the stack pointer of one thread of the current process;
+//Set the stack_data pointer of one thread of the current process;
 void sched_set_prc_sp(void * sp) {
 	
-	//Update the stack pointer of the first process;
+	//Update the stack_data pointer of the first process;
 	scheduler.active_list->prc_mem.stack.sp = sp;
 	
 }
@@ -430,7 +430,7 @@ void sched_resume_prc(struct sched_elmt *const element) {
 	if (element->active) {
 		
 		//Error, can't insert an active element;
-		kernel_panic("sched.c : attempted to resume an active element;");
+		kernel_panic("run.c : attempted to resume an active element;");
 		
 	}
 	
@@ -477,7 +477,7 @@ static struct sched_elmt *remove_first() {
 	if (elmt == next) {
 
 		//Kernel debug.txt, total deadlock;
-		kernel_panic("sched.c : total deadlock, all processes are stopped;");
+		kernel_panic("run.c : total deadlock, all processes are stopped;");
 
 	} else {
 		//If @elmt has a successor :
@@ -519,7 +519,7 @@ void sched_commit() {
 		if (removed == scheduler.main_list) {
 
 			//Kernel debug.txt. The first process must never terminate or be terminated;
-			kernel_panic("sched.c : scheduler_select : attempted to terminate the first process;");
+			kernel_panic("run.c : scheduler_select : attempted to terminate the first process;");
 
 		}
 
@@ -559,7 +559,7 @@ struct prc_req *sched_get_req() {
 }
 
 
-//Get the stack pointer of one thread of the current process;
+//Get the stack_data pointer of one thread of the current process;
 void * sched_get_sp() {
 	
 	//Return the first process hardware requirements;

@@ -19,7 +19,7 @@
 */
 
 #ifdef channel
-//Channel 0 is the initial stack pointer;
+//Channel 0 is the initial stack_data pointer;
 //Channel 1 to 15 are system exceptions, implemented directly;
 
 #if (NB_EXCEPTIONS > 16)

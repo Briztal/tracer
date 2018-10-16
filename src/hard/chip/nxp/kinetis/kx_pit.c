@@ -47,7 +47,7 @@
 
 #include <kernel/fs/inode.h>
 
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 
 
 #include <util/macro/incr_call.h>

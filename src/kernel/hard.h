@@ -31,8 +31,11 @@
 #ifndef TRACER_HARD_H
 #define TRACER_HARD_H
 
+#include <stdbool.h>
+
 #include <stdint.h>
-#include <kernel/sched/proc.h>
+
+#include <kernel/mem/stack_data.h>
 
 /*
  * ---------------------------------------------------------------------------------------------------------------------
@@ -52,7 +55,7 @@ extern void __krnl_init();
 //Place the kernel in a safe state, call the fault analyser, and recover, if possible. If not, panic;
 extern void __krnl_handle_fault(uint32_t type);
 
-//The kernel context switcher; received a stack pointer and returns the new one;
+//The kernel context switcher; received a stack_data pointer and returns the new one;
 extern void *__krnl_switch_context(void *sp);
 
 //The kernel syscall handler;
@@ -95,7 +98,7 @@ extern void __dbg_delay_us(uint32_t ms);
 //Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
 extern void __dbg_print_char(char);
 
-//Print the content of all registers, and the content of the stack;
+//Print the content of all registers, and the content of the stack_data;
 extern void __dbg_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth);
 
 //----------------------------------------------------- Vector table ---------------------------------------------------
@@ -215,8 +218,8 @@ extern void *__proc_stack_align(void *stack_reset);
 //Get the initial arg;
 extern void *__proc_get_init_arg();
 
-//The hardware library must provide a function to create the general stack context;
-extern void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg);
+//The hardware library must provide a function to create the general stack_data context;
+extern void __proc_create_stack_context(struct stack_data *stack, void (*function)(), void (*exit_loop)(), void *arg);
 
 
 /**
@@ -234,17 +237,25 @@ extern void __proc_create_stack_context(struct proc_stack *stack, void (*functio
  * @param exception_stacks : processor stacks that must be used in case of interrupt;
  */
 
-extern void __proc_enter_thread_mode(struct proc_stack *exception_stacks);
+extern void __proc_enter_thread_mode(struct stack_data *exception_stacks);
 
 
-//-------------------------------------------------- Preemption functions -------------------------------------------------
+//------------------------------------------------ Preemption functions ------------------------------------------------
 
 //Configure the priority of the preemption interruption, and enable it;
 extern void __prmpt_configure(uint8_t int_prio);
 
+//Set the preemption pending;
 extern void __prmpt_set_pending();
 
-extern void __prmpt_clear_pending();
+
+//------------------------------------------------------- Syscall ------------------------------------------------------
+
+//Set the priority of the syscall exception and enable it;
+extern void __syscl_configure(uint8_t priority);
+
+//Call the kernel;
+extern uint32_t __syscall_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
 
 
 #endif //TRACER_HARD_H

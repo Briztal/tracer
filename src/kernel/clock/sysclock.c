@@ -24,7 +24,7 @@
 
 #include <kernel/debug/log.h>
 
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 
 
 //---------------------------------------------------- Operations ----------------------------------------------------

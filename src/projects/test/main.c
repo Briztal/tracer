@@ -4,7 +4,7 @@
 
 #include <kernel/debug/log.h>
 #include <kernel/debug/debug.h>
-#include <kernel/sched/sched.h>
+#include <kernel/syscall.h>
 
 
 void kernel_second_process(void *args, size_t args_size){
@@ -25,7 +25,7 @@ void kernel_second_process(void *args, size_t args_size){
 
 
 void __kernel_first_function(void *args, size_t args_size) {
-	
+	/*
 	struct prc_desc desc = {
 		.function = &kernel_second_process,
 		.args_size = 0,
@@ -36,21 +36,17 @@ void __kernel_first_function(void *args, size_t args_size) {
 		.stack_size = 2048,
 		.activity_time = 3000,
 		.ram_size = 4096
-	};
+	};*/
 	
-	sched_create_prc(&desc, &req);
+	//sched_create_prc(&desc, &req);
 	
 	while(1) {
 		
+		uint32_t a = kernel_syscall(10, 314, 269, 93);
 		
-		uint32_t a = 500;
+		kernel_log("result : %h", a);
 		
-		const char *st = "SUUS %h";
-		
-		kernel_log(st, a);
-		
-		debug_delay_ms(a);
-		//__prmpt_set_pending();
+		debug_delay_ms(1000);
 		
 		
 	}

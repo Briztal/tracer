@@ -51,9 +51,10 @@
 //------------------------------------------------ Includes -----------------------------------------------
 
 #include <stdint.h>
-#include <kernel/async/interrupt.h>
+#include <kernel/async/except.h>
 #include <kernel/clock/clock.h>
 #include <kernel/panic.h>
+#include <kernel/mem/stack_data.h>
 #include "arm_v7m.h"
 
 
@@ -71,7 +72,7 @@ static void __arm_v7m_init() {
 	armv7m_set_bus_fault_priority(0);
 	armv7m_set_usage_fault_priority(0);
 	
-	//Call the sched init function;
+	//Call the run init function;
 	__proc_init();
 	
 }
@@ -120,19 +121,11 @@ void __prmpt_clear_pending() {
 
 //----------------------------------------------------- Syscall -----------------------------------------------------
 
-//Set the handler of the syscall exception;
-void __syscall_set_handler(void (*handler)(void)) {
-}
-
-//Set the priority of the syscall exception;
-void __syscall_set_priority(uint8_t priority) {
+//Set the priority of the syscall exception and enable it;
+void __syscl_configure(uint8_t priority) {
 	armv7m_set_svcall_priority(priority);
 }
 
-//Enable the syscall exception;
-void __syscall_enable() {
-	//Always enabled;
-}
 
 /**
  * __syscall_trigger : triggers the syscall exception;
@@ -165,20 +158,18 @@ __attribute__ ((naked)) uint32_t __syscall_trigger(uint32_t syscall_id, uint32_t
 __attribute__ ((naked)) static void __arm_v7m_syscall_handler() {
 	__asm__ __volatile__ (""
 		
-		//Save LR in R4, as BL overwrites it;
-		"mov 	r4,		lr 	\n\r"
+		"push 	{lr} 	\n\r"
 		
 		//R0-R3 have not been altered. We can directly call the kernel syscall handler;
 		"bl 	__krnl_syscall_handler\n\r"
 		
-		//Restore LR;
-		"mov 	lr, 	r4	\n\r"
+		"pop 	{lr} 	\n\r"
 		
 		//Cache PSP in R5;
-		"mrs	r5, 	psp	\n\r"
+		"mrs	r1, 	psp	\n\r"
 		
 		//Save R0 in the psp; The psp points to the stacked version of R0;
-		"str	r0, 	[r5]\n\r"
+		"str	r0, 	[r1]\n\r"
 		
 		//Exit from exception;
 		"bx 	lr			\n\r"
@@ -212,9 +203,9 @@ __attribute__ ((naked)) static void __arm_v7m_syscall_handler() {
  * Notice :
  *
  *
- *  arm v7m minimal stack frame :
+ *  arm v7m minimal stack_data frame :
  *
- *      	----------- <- pre irq / stack frame header end;
+ *      	----------- <- pre irq / stack_data frame header end;
  *      XPSR
  *      PC
  *      LR
@@ -237,16 +228,16 @@ __attribute__ ((naked)) static void __arm_v7m_syscall_handler() {
  * proc_init_stack : this function initialises the unstacking environment, so that the given function will
  *  be executed at context switch time;
  *
- *  It starts by caching the process_t stack pointer, and stacks the process functions pointers, and the PSR.
+ *  It starts by caching the process_t stack_data pointer, and stacks the process functions pointers, and the PSR.
  *
  *  Then, it saves the process index in R12 (next word);
  *
- *  Finally, it leaves space for empty stack frame and saves the stack pointer;
+ *  Finally, it leaves space for empty stack_data frame and saves the stack_data pointer;
  */
 
-void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg) {
+void __proc_create_stack_context(struct stack_data *stack, void (*function)(), void (*exit_loop)(), void *arg) {
 	
-	//Cache the current stack pointer;
+	//Cache the current stack_data pointer;
 	uint32_t *sp4 = stack->sp;
 	
 	//Store the PSR. Contains the execution mode; //TODO DOC
@@ -261,10 +252,10 @@ void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), v
 	//Store the arg in R12 cache;
 	*(sp4 - 4) = (uint32_t) (arg);
 	
-	//Update the stack pointer; Hits the future R4 reload address;
+	//Update the stack_data pointer; Hits the future R4 reload address;
 	sp4 -= 16;
 	
-	//Return the stack pointer;
+	//Return the stack_data pointer;
 	stack->sp = sp4;
 	
 }
@@ -307,14 +298,14 @@ void *__proc_stack_align(void *stack_reset) {
  * @param exception_stack : the stack where exceptions should happen;
  */
 
-__attribute__ ((naked)) void __proc_enter_thread_mode(struct proc_stack *exception_stack) {
+__attribute__ ((naked)) void __proc_enter_thread_mode(struct stack_data *exception_stack) {
 	
 	__asm__ __volatile__ (\
 
 	//Disable interrupts;
 	"cpsid 	i \n\t"
 		
-		//Load the value of the stack pointer (exception_stack located in R0, arm calling convention);
+		//Load the value of the stack_data pointer (exception_stack located in R0, arm calling convention);
 		"ldr 	r0, 	[r0]	\n\t"
 		
 		//Save msp in R1;
@@ -329,7 +320,7 @@ __attribute__ ((naked)) void __proc_enter_thread_mode(struct proc_stack *excepti
 		//Update the value of control, to use psp;
 		"msr 	control, r2		\n\t"
 		
-		//Update the main stack pointer, so that exceptions use the exception stack;
+		//Update the main stack_data pointer, so that exceptions use the exception stack_data;
 		"msr 	msp,  r0		\n\t"
 		
 		//Save LR in R4, as bl will overwrite it;
@@ -410,7 +401,7 @@ __attribute__ ((naked)) static void __arm_v7m_context_switcher() {
 
 /*
  * Some data is required to start the processor properly. Namely :
- * 	- The initial stack pointer, provided by the linker;
+ * 	- The initial stack_data pointer, provided by the linker;
  * 	- The first function to execute, defined in another piece of code;
  */
 
@@ -454,8 +445,8 @@ void (*__kernel_vtable[NB_EXCEPTIONS])(void) __attribute__ ((aligned (512))) = {
 	//10 : Reserved;
 	&no_isr,
 	
-	//11 : SVCall, kernel hook;TODO
-	&no_isr,
+	//11 : SVCall, syscall handler, hooking the kernel;
+	&__arm_v7m_syscall_handler,
 	
 	//12 : Reserved;
 	&no_isr,
@@ -726,8 +717,8 @@ void (*vtable[NB_EXCEPTIONS])(void) __attribute__ ((section(".vectors"))) = {
 	//10 : Reserved;
 	&no_isr,
 	
-	//11 : SVCall, kernel hook;TODO
-	&no_isr,
+	//11 : SVCall, syscall handler, hooking the kernel;
+	&__arm_v7m_syscall_handler,
 	
 	//12 : Reserved;
 	&no_isr,
@@ -825,8 +816,8 @@ void (*vtable[NB_EXCEPTIONS])(void)  __attribute__ ((section(".vectors"))) = {
 	//10 : Reserved;
 	&no_isr,
 	
-	//11 : SVCall, kernel hook;TODO
-	&no_isr,
+	//11 : SVCall, syscall handler, hooking the kernel;
+	&__arm_v7m_syscall_handler,
 	
 	//12 : Reserved;
 	&no_isr,
