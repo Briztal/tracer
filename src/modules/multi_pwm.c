@@ -100,7 +100,7 @@ struct channel_data {
 	struct gpio_if gpio;
 
 	//The ref of the struct interfaced with the channel;
-	struct command_if *iface_ref;
+	struct cmd_if *iface_ref;
 
 };
 
@@ -651,7 +651,7 @@ static struct channel_inode inodes[NB_CHANNELS];
 static bool channel_interface(
 
 	const struct channel_inode *const node,
-	struct command_if *const if_struct,
+	struct cmd_if *const if_struct,
 	const size_t size
 
 ) {

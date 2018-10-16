@@ -113,7 +113,9 @@ void inode_execute(file_descriptor fd, size_t function_id, const void *args, siz
 	void (*execute)(struct inode *, size_t, const void *, size_t) = ((struct inode *) fd)->ops->execute;
 
 	//If the function is not null, call it;
-	if (execute) { return (*execute)(((struct inode *) fd), function_id, args, args_size); }
+	if (execute) {
+		(*execute)(((struct inode *) fd), function_id, args, args_size);
+	}
 
 }
 

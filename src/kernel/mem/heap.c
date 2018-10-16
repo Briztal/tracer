@@ -136,7 +136,7 @@ void heap_print(struct heap_head *head) {
 
 		do {
 
-			kernel_log("block %d at %h, to %h ", i, b,(void *) b + b->block_size);
+			kernel_log("block %d at %h, to %h ", i, b,(uint8_t *) b + b->block_size);
 			kernel_log("size : %h - %d", b->block_size, b->block_size);
 			i++;
 
@@ -172,7 +172,7 @@ void heap_print(struct heap_head *head) {
 
 		do {
 
-			kernel_log("block %d at %h, to %h ", i, b,(void *) b + b->block_size);
+			kernel_log("block %d at %h, to %h ", i, b,(uint8_t *) b + b->block_size);
 			kernel_log("size : %h - %d", b->block_size, b->block_size);
 
 

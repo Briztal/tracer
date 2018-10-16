@@ -248,4 +248,4 @@ static bool armv7_fault_init() {
 	
 }
 
-KERNEL_EMBED_MODULE(PROC_MODULE, armv7_fault, &armv7_fault_init);
+KERNEL_EMBED_MODULE(PROC_MODULE, armv7_fault, &armv7_fault_init)

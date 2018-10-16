@@ -144,5 +144,5 @@ static struct channel_specs channel = {
 
 
 //Reference the channel;
-MODULE_REFERENCE_CHANNEL(channel);
+MODULE_REFERENCE_CHANNEL(channel)
 

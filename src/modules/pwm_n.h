@@ -22,13 +22,13 @@
 #define TRACER_PWM_X_H
 
 #include <stdint.h>
-#include <kernel/interface/command.h>
+#include <kernel/interface/cmd.h>
 
 
 struct channel_specs {
 
 	//The command interface,
-	const struct command_if iface;
+	const struct cmd_if iface;
 
 	//The isr handler;
 	void (*const isr_handler)(void);

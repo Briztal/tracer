@@ -8,13 +8,13 @@
 
 #include <kernel/fs/inode.h>
 #include <kernel/interface/gpio.h>
-#include <kernel/interface/command.h>
+#include <kernel/interface/cmd.h>
 
 
 struct channel_specs {
 
 	//The command interface ref struct;
-	const struct command_if iface;
+	const struct cmd_if iface;
 
 	//The name of the gpio file;
 	const char *gpio_name;

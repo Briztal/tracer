@@ -154,7 +154,7 @@ struct sched_elmt first_element = {
 	},
 	
 	//Program memory, initialised at runtime;
-	.prc_mem = {},
+	.prc_mem = {0},
 	
 	//First process not active;
 	.active = false,
@@ -328,7 +328,7 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 		.desc = *desc,
 		
 		//Program memory not initialised for instance;
-		.prc_mem = {},
+		.prc_mem = {0},
 		
 		//Process active;
 		.active = true,

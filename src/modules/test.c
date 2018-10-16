@@ -12,7 +12,7 @@
 #include <kernel/panic.h>
 #include <kernel/interface/gpio.h>
 #include <kernel/debug/debug.h>
-#include <kernel/interface/command.h>
+#include <kernel/interface/cmd.h>
 #include <kernel/async/interrupt.h>
 
 
@@ -139,7 +139,7 @@ static bool servo_check() {
 
 	kernel_log_("Interfacing with servo : ");
 
-	struct command_if iface;
+	struct cmd_if iface;
 
 	bool success = inode_interface(fd, &iface, sizeof(iface));
 
@@ -171,20 +171,20 @@ static bool servo_check() {
 	//TODO TEST SERVO DEACTIVATION !!!!!!!!!!
 
 	while(1) {
-
-		command_set(&iface, 5000);
-
-		debug_delay_ms(1000);
-
-		command_set(&iface, 10000);
+		
+		cmd_set(&iface, 5000);
 
 		debug_delay_ms(1000);
-
-		command_set(&iface, 15000);
+		
+		cmd_set(&iface, 10000);
 
 		debug_delay_ms(1000);
+		
+		cmd_set(&iface, 15000);
 
-		command_set(&iface, 20000);
+		debug_delay_ms(1000);
+		
+		cmd_set(&iface, 20000);
 
 		debug_delay_ms(1000);
 
@@ -193,7 +193,7 @@ static bool servo_check() {
 		//TODO TEST!!!!!!!!!!
 		//TODO TEST!!!!!!!!!!
 		//TODO TEST!!!!!!!!!!
-		command_set(&iface, 0);
+		cmd_set(&iface, 0);
 
 		debug_delay_ms(1000);
 
@@ -225,7 +225,7 @@ static bool pwm_check() {
 
 	kernel_log_("Interfacing with pwm : ");
 
-	struct command_if iface;
+	struct cmd_if iface;
 
 	bool success = inode_interface(fd, &iface, sizeof(iface));
 
@@ -244,24 +244,24 @@ static bool pwm_check() {
 	exceptions_enable();
 
 	while(1) {
-
-		command_set(&iface, 120000);
-
-		debug_delay_ms(1000);
-
-		command_set(&iface, 240000);
+		
+		cmd_set(&iface, 120000);
 
 		debug_delay_ms(1000);
-
-		command_set(&iface, 360000);
-
-		debug_delay_ms(1000);
-
-		command_set(&iface, 480000);
+		
+		cmd_set(&iface, 240000);
 
 		debug_delay_ms(1000);
+		
+		cmd_set(&iface, 360000);
 
-		command_set(&iface, 0);
+		debug_delay_ms(1000);
+		
+		cmd_set(&iface, 480000);
+
+		debug_delay_ms(1000);
+		
+		cmd_set(&iface, 0);
 
 		debug_delay_ms(1000);
 
@@ -292,10 +292,10 @@ static bool pwm_check_4() {
 
 	kernel_log_("Interfacing with pwms : ");
 
-	struct command_if iface0;
-	struct command_if iface1;
-	struct command_if iface2;
-	struct command_if iface3;
+	struct cmd_if iface0;
+	struct cmd_if iface1;
+	struct cmd_if iface2;
+	struct cmd_if iface3;
 
 	bool success0 = inode_interface(fd0, &iface0, sizeof(iface0));
 	bool success1 = inode_interface(fd1, &iface1, sizeof(iface1));
@@ -317,35 +317,35 @@ static bool pwm_check_4() {
 	exceptions_enable();
 
 	while(1) {
-
-		command_set(&iface0, 120000);
-		command_set(&iface1, 240000);
-		command_set(&iface2, 360000);
-		command_set(&iface3, 480000);
-
-		debug_delay_ms(1000);
-
-		command_set(&iface0, 480000);
-		command_set(&iface1, 120000);
-		command_set(&iface2, 240000);
-		command_set(&iface3, 360000);
-
+		
+		cmd_set(&iface0, 120000);
+		cmd_set(&iface1, 240000);
+		cmd_set(&iface2, 360000);
+		cmd_set(&iface3, 480000);
 
 		debug_delay_ms(1000);
+		
+		cmd_set(&iface0, 480000);
+		cmd_set(&iface1, 120000);
+		cmd_set(&iface2, 240000);
+		cmd_set(&iface3, 360000);
 
-
-		command_set(&iface0, 360000);
-		command_set(&iface1, 480000);
-		command_set(&iface2, 120000);
-		command_set(&iface3, 240000);
 
 		debug_delay_ms(1000);
+		
+		
+		cmd_set(&iface0, 360000);
+		cmd_set(&iface1, 480000);
+		cmd_set(&iface2, 120000);
+		cmd_set(&iface3, 240000);
 
-
-		command_set(&iface0, 240000);
-		command_set(&iface1, 360000);
-		command_set(&iface2, 480000);
-		command_set(&iface3, 120000);
+		debug_delay_ms(1000);
+		
+		
+		cmd_set(&iface0, 240000);
+		cmd_set(&iface1, 360000);
+		cmd_set(&iface2, 480000);
+		cmd_set(&iface3, 120000);
 
 		debug_delay_ms(1000);
 
@@ -353,7 +353,7 @@ static bool pwm_check_4() {
 		command_disable(&iface0);
 		command_disable(&iface1);
 		command_disable(&iface2);
-		command_disable(&iface3);
+		cmd_disable(&iface3);
 
 		debug_delay_ms(1000);
 		*/

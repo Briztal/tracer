@@ -57,17 +57,17 @@ extern const struct gpio_if neutral_gpio_interface;
 
 
 //Static inline shortcut generator;
-#define GPIO_SHORTCUT(name, type)\
+#define GPIO_SHORTCUT(name, type, end)\
 static inline type gpio_##name(const struct gpio_if *gpio, size_t mask) {\
-	return (*(gpio->operations->name))(mask);\
+	end (*(gpio->operations->name))(mask);\
 }
 
 
-GPIO_SHORTCUT(set, void);
-GPIO_SHORTCUT(clear, void);
-GPIO_SHORTCUT(toggle, void);
-GPIO_SHORTCUT(write, void);
-GPIO_SHORTCUT(read, size_t);
+GPIO_SHORTCUT(set, void,)
+GPIO_SHORTCUT(clear, void,)
+GPIO_SHORTCUT(toggle, void,)
+GPIO_SHORTCUT(write, void,)
+GPIO_SHORTCUT(read, size_t, return)
 
 
 #undef GPIO_SHORTCUT

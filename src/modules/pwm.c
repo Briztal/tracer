@@ -42,7 +42,7 @@
 
 //------------------------------------------------- Channels const data ------------------------------------------------
 
-MODULE_CREATE_SPECS_ARRAY(channels_specs);
+MODULE_CREATE_SPECS_ARRAY(channels_specs)
 
 
 //------------------------------------------------------- Structs ------------------------------------------------------
@@ -64,7 +64,7 @@ struct channel_data {
 	struct gpio_if gpio;
 
 	//The ref of the struct interfaced with the channel;
-	struct command_if *iface_ref;
+	struct cmd_if *iface_ref;
 
 
 	//---------------- IRQ data ----------------
@@ -317,7 +317,7 @@ static struct channel_inode inodes[NB_CHANNELS];
 static bool channel_interface(
 
 	const struct channel_inode *const node,
-	struct command_if *const if_struct,
+	struct cmd_if *const if_struct,
 	const size_t size
 
 ) {
@@ -336,7 +336,7 @@ static bool channel_interface(
 	}
 
 	//Allow interfacing. Size check is taken in charge.
-	return command_if_interface(if_struct, &channels_specs[channel_id]->iface, &dynamic_data[channel_id].iface_ref, size);
+	return cmd_if_interface(if_struct, &channels_specs[channel_id]->iface, &dynamic_data[channel_id].iface_ref, size);
 
 }
 
@@ -364,7 +364,7 @@ static void channel_close(const struct channel_inode *const node) {
 	}
 
 	//Neutralise the interface, if interfaced;
-	command_if_neutralise(&dynamic_data[channel_id].iface_ref);
+	cmd_if_neutralise(&dynamic_data[channel_id].iface_ref);
 
 }
 
@@ -483,13 +483,13 @@ static bool init_channel(size_t channel_id) {
 		.gpio_fd = gpio_fd,
 
 		//Initialised right after;
-		.gpio = {},
+		.gpio = {0},
 
 		//Save the file descriptor;
 		.timer_fd = gpio_fd,
 
 		//Initialised right after;
-		.timer = {},
+		.timer = {0},
 
 		//Not interfaced for instance;
 		.iface_ref = 0,
@@ -586,5 +586,5 @@ static bool pwm_init() {
 }
 
 //Embed the module in the executable;
-KERNEL_EMBED_MODULE(KERNEL_MODULE, MODULE_NAME, &pwm_init);
+KERNEL_EMBED_MODULE(KERNEL_MODULE, MODULE_NAME, &pwm_init)
 

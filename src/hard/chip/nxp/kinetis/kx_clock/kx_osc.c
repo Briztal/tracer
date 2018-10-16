@@ -289,7 +289,7 @@ void kx_osc_stop() {
 	//Reset C2 OSC bits. External clock selected, low power, low freq;
 	*MCG_C2 &= ~(C2_EREFS | C2_HGO | C2_RANGE);
 	
-};
+}
 
 
 /**

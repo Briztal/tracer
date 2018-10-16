@@ -25,7 +25,7 @@
 #include <util/stdout.h>
 #include "kernel/async/interrupt.h"
 
-static void (*log_output) = &__dbg_print_char;
+static void (*log_output)(char) = &__dbg_print_char;
 
 
 void _kernel_panic(const char *str, const void **args, size_t args_size)  {

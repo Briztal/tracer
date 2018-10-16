@@ -59,4 +59,4 @@ bool nvic_relocation() {
 
 
 //Register the nvic relocation module;
-KERNEL_EMBED_MODULE(PROC_MODULE, nvic_reloc, &nvic_relocation);
+KERNEL_EMBED_MODULE(PROC_MODULE, nvic_reloc, &nvic_relocation)

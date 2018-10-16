@@ -8,8 +8,8 @@
 /*
  * We must define blank functions to define the neutral gpio interface;
  */
-static void nm(size_t s) {};
-static size_t nr(){return 0;};
+static void nm(size_t s) {}
+static size_t nr(){return 0;}
 
 
 /*

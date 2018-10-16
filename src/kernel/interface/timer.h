@@ -123,9 +123,9 @@ void timer_reset(const struct t_if *);
 
 
 //A macro to generate a static inline for a timer member function that takes no special args
-#define t_if_inline(name, ret_type)\
+#define t_if_inline(name, ret_type, end)\
 static inline ret_type timer_##name(const struct t_if *timer) {\
-    return (*(timer->name))();\
+    end (*(timer->name))();\
 }
 
 //A macro to generate a static inline for a timer member function that takes one argument;
@@ -141,29 +141,29 @@ static inline void timer_##name(const struct t_if *timer, arg_type __timer_arg__
  * 	arguments;
  */
 
-t_if_inline(start, void)
+t_if_inline(start, void,)
 
-t_if_inline(stop, void)
+t_if_inline(stop, void,)
 
-t_if_inline(started, bool)
+t_if_inline(started, bool, return)
 
 t_if_inline_a(set_count, uint32_t)
 
-t_if_inline(get_count, uint32_t)
+t_if_inline(get_count, uint32_t, return)
 
 t_if_inline_a(set_int_period, uint32_t)
 
-t_if_inline(get_int_period, uint32_t)
+t_if_inline(get_int_period, uint32_t, return)
 
-t_if_inline(enable_int, void)
+t_if_inline(enable_int, void,)
 
-t_if_inline(disable_int, void)
+t_if_inline(disable_int, void,)
 
-t_if_inline(int_enabled, bool)
+t_if_inline(int_enabled, bool, return)
 
-t_if_inline(flag_is_set, bool)
+t_if_inline(flag_is_set, bool, return)
 
-t_if_inline(flag_clr, void)
+t_if_inline(flag_clr, void,)
 
 
 //Get the timer frequency and save the value in the struct;

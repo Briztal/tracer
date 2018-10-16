@@ -95,18 +95,18 @@ void timer_reset(const struct timer_if *timer) {
 }
 
 //Implement interface capabilities;
-DEFINE_INTERFACE(timer_if);
+DEFINE_INTERFACE(timer_if)
 
 //----------------------------------------------- Neutral timer interface ----------------------------------------------
 
 
 //Dumb functions;
-void n_sbf(uint32_t u){};
-uint32_t gbf(){return 1;};
-uint32_t n_g(){return 0;};
-void n_st() {};
-bool n_stt() {return false;};
-void n_uh(void (*h)()) {};
+void n_sbf(uint32_t u){}
+uint32_t gbf(){return 1;}
+uint32_t n_g(){return 0;}
+void n_st() {}
+bool n_stt() {return false;}
+void n_uh(void (*h)()) {}
 
 
 /*

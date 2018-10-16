@@ -44,7 +44,7 @@ KERNEL_SRCS += $(KERNEL_DIR)/debug/log.c
 KERNEL_SRCS += $(KERNEL_DIR)/fs/inode.c
 
 #Add timer structs
-KERNEL_SRCS += $(KERNEL_DIR)/interface/command.c
+KERNEL_SRCS += $(KERNEL_DIR)/interface/cmd.c
 KERNEL_SRCS += $(KERNEL_DIR)/interface/gpio.c
 KERNEL_SRCS += $(KERNEL_DIR)/interface/timer.c
 

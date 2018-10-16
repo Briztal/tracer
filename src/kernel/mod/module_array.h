@@ -55,7 +55,7 @@
 
 //Create an array of channel_specs pointers, initialised with all channels references;
 #define MODULE_CREATE_SPECS_ARRAY(name)\
-INCR_CALL(NB_CHANNELS, _DECLARE_CHANNEL);\
+INCR_CALL(NB_CHANNELS, _DECLARE_CHANNEL)\
 static const struct channel_specs *name[NB_CHANNELS] = {INCR_CALL(NB_CHANNELS, _REFERENCE_CHANNEL)};
 
 

@@ -13,7 +13,7 @@
 
 
 //The command interface references a single value that can be adjusted;
-struct command_if {
+struct cmd_if {
 
 	/*
 	 * Constants;
@@ -44,18 +44,18 @@ struct command_if {
 };
 
 //Declare interfacing and neutralisation functions;
-DECLARE_INTERFACE(command_if);
+DECLARE_INTERFACE(cmd_if)
 
 //The neutral command interface. Does nothing;
-extern struct command_if neutral_command_if;
+extern struct cmd_if neutral_cmd_if;
 
 
-static inline void command_set(const struct command_if *iface, uint32_t value) {
+static inline void cmd_set(const struct cmd_if *iface, uint32_t value) {
 	(*(iface->sett))(value);
 }
 
 
-static inline void command_disable(const struct command_if *iface) {
+static inline void cmd_disable(const struct cmd_if *iface) {
 	(*(iface->disable))();
 }
 

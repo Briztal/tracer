@@ -56,7 +56,7 @@ static uint8_t sim_dividers_build_usage_mask(struct sim_dividers_config *config)
 	
 	return mask;
 	
-};
+}
 
 
 /**
@@ -337,7 +337,7 @@ static bool kx_clock_init() {
 }
 
 
-KERNEL_EMBED_MODULE(PROC_MODULE, kx_clock, kx_clock_init);
+KERNEL_EMBED_MODULE(PROC_MODULE, kx_clock, kx_clock_init)
 
 
 //TODO KERNEL MODULE INTEGRATION

@@ -70,7 +70,7 @@
 
 //------------------------------------------------- Specs declarations -------------------------------------------------
 
-MODULE_CREATE_SPECS_ARRAY(channels);
+MODULE_CREATE_SPECS_ARRAY(channels)
 
 
 //----------------------------------------- Channels dynamic data declarations -----------------------------------------
@@ -240,4 +240,4 @@ static bool pit_init() {
 
 
 //Embed the PIT module in the executable;
-KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, pit, &pit_init);
+KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, pit, &pit_init)

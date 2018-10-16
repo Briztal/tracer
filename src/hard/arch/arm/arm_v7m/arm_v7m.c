@@ -350,7 +350,7 @@ __attribute__ ((naked)) static void __arm_v7m_context_switcher() {
 
 
 //Define an empty ISR handler
-static void no_isr() {};
+static void no_isr() {}
 
 //Define the kernel vtable, and align it on 512 bytes.
 void (*__kernel_vtable[NB_EXCEPTIONS])(void) __attribute__ ((aligned (512))) = {
@@ -403,8 +403,14 @@ void (*__kernel_vtable[NB_EXCEPTIONS])(void) __attribute__ ((aligned (512))) = {
 	//15 : SysTick, kernel hook;
 	&__krnl_tick,
 	
-	//All interrupts not handled;
-	[16 ... NB_EXCEPTIONS - 1] = &no_isr,
+	
+	//In order to avoid writing 254 times the function name, we will use macros that will write it for us;
+#define channel(i) &no_isr,
+
+//Redirect all isrs to the empty one;
+#include "nvic_channel_list.h"
+
+#undef channel
 	
 };
 
@@ -645,10 +651,10 @@ extern void __sclk_stop() {
  * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
  */
 
-const void *vtable[NB_EXCEPTIONS] __attribute__ ((section(".vectors"))) = {
+void (*vtable[NB_EXCEPTIONS])(void) __attribute__ ((section(".vectors"))) = {
 	
 	//0 : not assigned;
-	&__ram_max,
+	(void (*)(void)) &__ram_max,
 	
 	//1 : reset; Effectively used when NVIC is relocated;
 	&__arm_v7m_init,
@@ -744,7 +750,7 @@ static void isr_generic_flash_handler(uint8_t i) {
  * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
  */
 
-const void *vtable[NB_EXCEPTIONS] __attribute__ ((section(".vectors"))) = {
+void (*vtable[NB_EXCEPTIONS])(void)  __attribute__ ((section(".vectors"))) = {
 	
 	//0 : not assigned;
 	&_ram_highest,

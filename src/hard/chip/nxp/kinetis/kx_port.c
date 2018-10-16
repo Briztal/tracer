@@ -194,7 +194,7 @@ static const struct port_ptrs port_areas[NB_PORTS] = {INCR_CALL(NB_PORTS, INIT_A
     static size_t read_##i() {return (size_t)(((struct gpio_memory *) (GPIO_REG + (i) * GPIO_SPACING))->PDIR);}\
 
 //Declare each channel;
-INCR_CALL(NB_PORTS, GPIO_DEFINE);
+INCR_CALL(NB_PORTS, GPIO_DEFINE)
 
 //Macro not used anymore;
 #undef GPIO_DEFINE
@@ -483,7 +483,7 @@ struct pin_inode {
  */
 
 //PIN will add an inode initializer;
-#define PIN(name, port, bit) {},
+#define PIN(name, port, bit) {{0}},
 
 //Declare the inodes array and let initializers determine the size;
 static struct pin_inode inodes[] = {
@@ -666,4 +666,4 @@ static bool kx_port_init() {
 
 
 //Embed the module in the executable;
-KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, port, &kx_port_init);
+KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, port, &kx_port_init)
