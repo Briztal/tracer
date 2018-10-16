@@ -45,7 +45,6 @@
 #include <kernel/panic.h>
 #include <kernel/async/interrupt.h>
 #include <kernel/mem/kdmem.h>
-#include <kernel/async/preempt.h>
 #include <kernel/debug/log.h>
 
 
@@ -91,7 +90,7 @@ static void prc_exit() {
 	//TODO SYSCALL KERNEL PREEMPT
 	
 	//Require a context switch, process will be to_delete;
-	preemption_set_pending();
+	__prmpt_set_pending();
 	
 	//Panic, preemption failed;
 	kernel_panic("process.c : post preempt state reached. That should never happen.");

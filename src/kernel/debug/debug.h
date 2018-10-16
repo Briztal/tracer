@@ -35,10 +35,10 @@
  */
 
 //Light the debug.txt led high; Implemented by the hardware;
-#define debug_led_high() __debug_led_high();
+#define debug_led_high() __dbg_led_high();
 
 //Turn off the debug.txt led; Implemented by the hardware;
-#define debug_led_low() __debug_led_low();
+#define debug_led_low() __dbg_led_low();
 //Blink the debug.txt led indefinitely, waiting @ms_counter between each toggle;
 void debug_led_blink(uint32_t ms_counter);
 
@@ -57,10 +57,10 @@ void debug_led_dump(uint8_t c);
  */
 
 //Wait for a certain number of milliseconds. Not accurate or reliable; Implemented by the hardware;
-#define debug_delay_ms(ms) __debug_delay_ms(ms);
+#define debug_delay_ms(ms) __dbg_delay_ms(ms);
 
 //Wait for a certain number of microseconds. Not accurate or reliable; Implemented by the hardware;
-#define debug_delay_us(ms) __debug_delay_us(ms);
+#define debug_delay_us(ms) __dbg_delay_us(ms);
 
 
 /*
@@ -68,7 +68,7 @@ void debug_led_dump(uint8_t c);
  */
 
 //Send a char over the debug.txt interface, encoded by the log protocol. Implemented by the log protocol;
-#define debug_print_char(c) __debug_print_char(c);
+#define debug_print_char(c) __dbg_print_char(c);
 
 
 /*

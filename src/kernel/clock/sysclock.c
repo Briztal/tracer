@@ -24,49 +24,8 @@
 
 #include <kernel/debug/log.h>
 
-#include <kernel/async/preempt.h>
-
 #include <kernel/async/interrupt.h>
 
-
-//---------------------------------------------------- System timer ----------------------------------------------------
-
-//The system timer. Initialised to 0;
-static struct sys_timer *system_timer = 0;
-
-
-/**
- * sysclock_init_timer : initialises the system timer. If already initialised, triggers a kernel panic;
- * @param timer : the new system timer;
- */
-
-void sysclock_init(struct sys_timer *const timer) {
-	
-	//If the system time is already initialised :
-	if (system_timer) {
-		
-		//Kernel panic. System timer can't be initialised twice;
-		kernel_panic("sysclock_init : attempted to initialise the timer twice;");
-		
-	}
-	
-	//Initialise the system timer;
-	system_timer = timer;
-	
-}
-
-
-/**
- * sysclock_initialised :
- * @return return true if the system timer is not null;
- */
-
-bool sysclock_initialised() {
-	
-	//Return true if the system timer is not null;
-	return (bool) system_timer;
-	
-}
 
 //---------------------------------------------------- Operations ----------------------------------------------------
 
@@ -84,41 +43,18 @@ volatile uint32_t task_duration = 0;
 
 void sysclock_start() {
 	
-	//Cache the system timer;
-	struct sys_timer *const timer = system_timer;
-	
-	//If the system timer is null :
-	if (!timer) {
-		
-		//Panic, can't use the sysclock without system timer;
-		kernel_panic("sysclock_start : system timer uninitialised;");
-		
-	}
-	
-	
 	//No preemption for instance;
 	sysclock_set_process_duration(0);
 	
+	//Configure the system clock;
+	__sclk_configure(2000, KERNEL_SYSTICK_PRIORITY);
 
-	//2KHz systick, 2 per millisecond, to be 1ms accurate;
-	(*timer->int_set_frequency)(2000);
-
-	//Systick has its own priority;
-	(*timer->int_set_priority)(KERNEL_SYSTICK_PRIORITY);
-
-	//Set the core timer to trigger systick function;
-	(*timer->int_set_handler)(&sysclock_tick);
-
-	//Enable the interrupt;
-	(*timer->int_enable)();
-
-	//Start the core timer;
-	(*timer->start)();
-
-	//Log;
-	kernel_log_("system clock started");
+	//Start the system clock;
+	__sclk_start();
 
 }
+
+
 //---------------------- System tick ----------------------
 
 /*
@@ -131,7 +67,7 @@ void sysclock_start() {
  */
 
 
-void sysclock_tick() {
+void __krnl_tick() {
 
     //Increment the ms/2 counter;
     systick_half_millis++;
@@ -142,12 +78,9 @@ void sysclock_tick() {
         //If it must be preempted :
         if (!--task_duration) {
 
-			kernel_log_("triggering");
             //Trigger the preemption;
-			preemption_set_pending();
+			__prmpt_set_pending();
 	
-			kernel_log_("triggered");
-			
 			//Task activity_time becomes 0, preemption won't be called anymore;
 
         }
@@ -181,16 +114,9 @@ void sysclock_set_process_duration(uint16_t ms) {
 
 uint32_t sysclock_milliseconds() {
 	
-	//If the system timer is null :
-	if (!system_timer) {
-		
-		//Panic, can't use the sysclock without system timer;
-		kernel_panic("sysclock_milliseconds : system timer uninitialised;");
-		
-	}
-	
 	//Return the current time value;
     return systick_half_millis >> 1;
+	
 }
 
 
@@ -200,14 +126,6 @@ uint32_t sysclock_milliseconds() {
 
 void systick_wait(uint16_t ms_delay) {
 	
-	//If the system timer is null :
-	if (!system_timer) {
-		
-		//Panic, can't use the sysclock without system timer;
-		kernel_panic("sysclock_milliseconds : system timer uninitialised;");
-		
-	}
-
     //Determine the limit;
     volatile uint32_t limit = systick_half_millis + (((uint32_t) ms_delay) << 1);
 

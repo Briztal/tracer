@@ -48,7 +48,7 @@ void kernel_init_fault_analyser(enum fault_type (*analyser)(uint32_t type)) {
 //--------------------------------------------------- Fault handling ---------------------------------------------------
 
 //Place the kernel in a safe state, call the fault analyser, and recover, if possible. If not, panic;
-void kernel_handle_fault(uint32_t type) {
+void __krnl_handle_fault(uint32_t type) {
 	
 	//Enter a critical section;
 	critical_section_enter();

@@ -38,27 +38,19 @@ void __kernel_first_function(void *args, size_t args_size) {
 		.ram_size = 4096
 	};
 	
-	//sched_create_prc(&desc, &req);
+	sched_create_prc(&desc, &req);
 	
 	while(1) {
 		
-		uint32_t msp;
-		uint32_t psp;
-		uint32_t sp;
-		uint32_t psr;
-		uint32_t ctrl;
 		
-		__asm__ __volatile__ ("mrs %0, msp" : "=r" (msp):);
-		__asm__ __volatile__ ("mrs %0, psp" : "=r" (psp):);
-		__asm__ __volatile__ ("mov %0, r13" : "=r" (sp):);
-		__asm__ __volatile__ ("mrs %0, psr" : "=r" (psr):);
-		__asm__ __volatile__ ("mrs %0, control" : "=r" (ctrl):);
+		uint32_t a = 500;
 		
-		kernel_log("msp : %h , psp : %h, sp : %h, psr : %h, ctrl : %h", msp, psp, sp, psr, ctrl);
+		const char *st = "SUUS %h";
 		
-		debug_delay_ms(1000);
+		kernel_log(st, a);
 		
-		//__preemption_set_pending();
+		debug_delay_ms(a);
+		//__prmpt_set_pending();
 		
 		
 	}

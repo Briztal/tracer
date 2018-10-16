@@ -25,15 +25,12 @@
 
 #include <kernel/debug/log.h>
 
+#include <kernel/hard.h>
+
 #include "ram.h"
 
 #include "heap.h"
 
-
-//------------------------------------------------------- Externs ------------------------------------------------------
-
-extern uint32_t _ram_lowest;
-extern uint32_t _ram_highest;
 
 
 //------------------------------------------------------- Globals ------------------------------------------------------
@@ -59,7 +56,7 @@ void ram_print() {
 void ram_init() {
 
 	//Initialise the heap;
-	ram_heap = heap_create(&_ram_lowest, &_ram_highest - &_ram_lowest, &heap_fifo_insertion);
+	ram_heap = heap_create(&__ram_min, &__ram_max - &__ram_min, &heap_fifo_insertion);
 
 	kernel_log_("RAM manager initialised");
 

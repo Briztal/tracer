@@ -21,32 +21,25 @@
 #ifndef TRACER_STARTUP_H
 #define TRACER_STARTUP_H
 
-#include <stdint.h>
-
-const extern uint8_t _data_lma;
-extern uint8_t _data_vma;
-extern uint8_t _end_data;
-extern uint8_t _bss_vma;
-extern uint8_t _end_bss;
+#include "hard.h"
 
 
 static inline void startup_initialise_globals() {
-
-
+	
 	//Cache start addresses of rodata and data,
-	const uint8_t *data_src = &_data_lma;
-	uint8_t *data_dst = &_data_vma;
+	const uint8_t *data_src = &__data_lma_min;
+	uint8_t *data_dst = &__data_vma_min;
 
 	//Copy rodata in data;
-	while (data_dst < &_end_data) {
+	while (data_dst < &__data_vma_max) {
 		*(data_dst++) = (*data_src++);
 	}
 
 	//Cache the start address of the bss region;
-	uint8_t *bss_ptr = &_bss_vma;
+	uint8_t *bss_ptr = &__bss_vma_min;
 
 	//Null set bss;
-	while(bss_ptr < &_end_bss) {
+	while(bss_ptr < &__bss_vma_max) {
 		*(bss_ptr++) = 0;
 	}
 

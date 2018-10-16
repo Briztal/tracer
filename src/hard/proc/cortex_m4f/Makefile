@@ -8,7 +8,7 @@ LDFLAGS += --specs=nano.specs
 #-mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs
 
 #NVIC relocation is possible on the cortex M4F
-#NVIC_RELOCATION = 1
+NVIC_RELOCATION = 1
 
 
 #The cortex M4 is based on the armv7 architecture;

@@ -33,8 +33,6 @@
 #include <kernel/sched/proc.h>
 
 
-
-
 //TODO KERNEL HALT FOR PANIC
 //TODO KERNEL HALT FOR PANIC
 //TODO KERNEL HALT FOR PANIC
@@ -62,7 +60,7 @@ static void kernel_start();
  * kernel_init : this function is called once, by the core initialisation only. It is the project's entry point.
  */
 
-void __kernel_init() {
+void __krnl_init() {
 	
 	//Create an OTP flag;
 	static bool reentrance = false;
@@ -84,6 +82,7 @@ void __kernel_init() {
 	//Disable interrupt management:
 	exceptions_disable();
 	
+	
 	//Initialise the RAM manager;
 	ram_init();
 	
@@ -92,7 +91,6 @@ void __kernel_init() {
 	
 	//Load all sched modules;
 	load_proc_modules();
-	
 	
 	//Load all system modules;
 	load_system_modules();
@@ -109,13 +107,8 @@ void __kernel_init() {
 	load_user_modules();
 	
 	
-	//If the system clock is initialised :
-	if (sysclock_initialised()) {
-		
-		//Start the system clock;
-		sysclock_start();
-		
-	}
+	//Start the system clock;
+	sysclock_start();
 	
 	//Start the execution;
 	kernel_start();
@@ -170,5 +163,7 @@ static void kernel_start() {
 	proc_start_execution();
 	
 	#endif
+	
+	kernel_panic("execution mode failed to execute or returned;");
 	
 }

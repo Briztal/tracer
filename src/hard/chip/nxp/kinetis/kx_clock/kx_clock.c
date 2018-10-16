@@ -265,13 +265,10 @@ static bool kx_clock_init() {
 	clock_register_tuner((void (*)(void *, size_t)) &kx_clock_configure);
 	
 	//Register all four clocks;
-	clock_register("core", 0);
-	clock_register("bus", 0);
-	
-	//TODO NO REGISTRATION WITH MACRO PARAMETER.
-	clock_register("flexbus", 0);
-	
-	clock_register("flash", 0);
+	clock_register("core", 20480000);
+	clock_register("bus", 20480000);
+	clock_register("flexbus", 20480000);
+	clock_register("flash", 20480000);
 	
 	//At init, will be configured to FEI;
 	struct kx_clock_config initial_config = {

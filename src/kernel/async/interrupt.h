@@ -15,14 +15,14 @@
 //-------------------------------------------- General interrupt priorities --------------------------------------------
 
 //The lowest priority level;
-#define ic_priority_0 __ic_priority_0
-#define ic_priority_1 __ic_priority_1
-#define ic_priority_2 __ic_priority_2
-#define ic_priority_3 __ic_priority_3
-#define ic_priority_4 __ic_priority_4
-#define ic_priority_5 __ic_priority_5
-#define ic_priority_6 __ic_priority_6
-#define ic_priority_7 __ic_priority_7
+#define xcpt_priority_0 __xcpt_priority_0
+#define xcpt_priority_1 __xcpt_priority_1
+#define xcpt_priority_2 __xcpt_priority_2
+#define xcpt_priority_3 __xcpt_priority_3
+#define xcpt_priority_4 __xcpt_priority_4
+#define xcpt_priority_5 __xcpt_priority_5
+#define xcpt_priority_6 __xcpt_priority_6
+#define xcpt_priority_7 __xcpt_priority_7
 //The highest priority level;
 
 
@@ -31,16 +31,16 @@
  */
 
 //The preemption has the lowest priority level, so that a context switch never occurs over an interrupt;
-#define KERNEL_PREEMPTION_PRIORITY ic_priority_0
+#define KERNEL_PREEMPTION_PRIORITY xcpt_priority_0
 
 //A interface status interrupt has a low priority;
-#define KERNEL_DRIVER_STATUS_PRIORITY ic_priority_2
+#define KERNEL_DRIVER_STATUS_PRIORITY xcpt_priority_2
 
 //A interface error must be caught, and so has a higher priority;
-#define KERNEL_DRIVER_ERROR_PRIORITY ic_priority_4
+#define KERNEL_DRIVER_ERROR_PRIORITY xcpt_priority_4
 
 //The systick has the highest priority level, so that ticks are never missed;
-#define KERNEL_SYSTICK_PRIORITY ic_priority_6
+#define KERNEL_SYSTICK_PRIORITY xcpt_priority_6
 
 
 //-------------------------------------------------- Exceptions -------------------------------------------------
@@ -50,10 +50,10 @@
  */
 
 //Enable the interrupt control;
-#define exceptions_enable() __exceptions_enable()
+#define exceptions_enable() __xcpt_enable()
 
 //Disables the interrupt control;
-#define exceptions_disable() __exceptions_disable()
+#define exceptions_disable() __xcpt_disable()
 
 //Sets the handler of the required exception;
 #define exception_set_handler(channel, handler) __exception_set_handler(channel, handler)

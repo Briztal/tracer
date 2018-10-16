@@ -33,7 +33,6 @@
 //--------------------------------------------- Includes --------------------------------------------
 
 #include <kernel/async/interrupt.h>
-#include <kernel/async/preempt.h>
 #include <kernel/debug/log.h>
 #include <kernel/sched/sched.h>
 #include <kernel/clock/sysclock.h>
@@ -124,7 +123,7 @@ void proc_start_execution() {
 	init_exception_stack();
 	
 	//Initialise the preemption;
-	preemption_init(&__proc_preemption_handler, KERNEL_PREEMPTION_PRIORITY);
+	__prmpt_configure(KERNEL_PREEMPTION_PRIORITY);
 	
 	//Log;
 	kernel_log_("preemption initialised");
@@ -153,6 +152,7 @@ void proc_start_execution() {
 	//Log;
 	kernel_log_("\nKernel initialisation sequence complete. Entering thread mode ...\n");
 	
+	kernel_log("target: %h", exception_stack.sp);
 	
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
 	//Interrupts will be enabled at the end of the function;
@@ -171,7 +171,7 @@ void proc_start_execution() {
  * @return the the new stack pointer;
  */
 
-void *proc_switch_context(void *sp) {
+void *__krnl_switch_context(void *sp) {
 	
 	//TODO MONITOR STACK OVERFLOW
 	//TODO MONITOR STACK OVERFLOW
@@ -186,12 +186,6 @@ void *proc_switch_context(void *sp) {
 	//TODO MONITOR STACK OVERFLOW
 	//TODO MONITOR STACK OVERFLOW
 	//TODO MONITOR STACK OVERFLOW
-	
-	
-	kernel_log("sp : %h", sp);
-	
-	//__debug_print_stack_trace(sp, false, 0);
-	
 	
 	//The first context switch must not save the stack pointer;
 	static bool update_allowed = false;
@@ -229,14 +223,8 @@ void *proc_switch_context(void *sp) {
 	//Update the duration until next preemption;
 	sysclock_set_process_duration(sched_get_req()->activity_time);
 	
-	sp = sched_get_sp();
-	
-	//__debug_print_stack_trace(sp, false, 0);
-	
-	kernel_log("nsp : %h", sp);
-	
 	//Return the appropriate stack pointer;
-	return sp;
+	return sched_get_sp();
 	
 }
 

@@ -4,7 +4,6 @@
 
 #include "log.h"
 
-#include "kernel/debug/debug.h"
 
 #include <util/stdout.h>
 #include <kernel/async/interrupt.h>
@@ -25,7 +24,7 @@ void _kernel_log(const char * str, const void ** args,  size_t args_size) {
 	
 	critical_section_enter();
 	
-	stdout(&__debug_print_char, str, args, args_size);
+	stdout(&__dbg_print_char, str, args, args_size);
 	
 	critical_section_leave();
 	

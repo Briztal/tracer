@@ -2,10 +2,10 @@
 #----------------------------------------------- Kernel compilation flags ----------------------------------------------
 
 #if the kernel is not compiled in scheduling mode :
-ifndef KERNEL_SCHED_MODE
+ifdef KERNEL_EXECUTION_LEVEL
 
 #Add the loop flag to the compilation flags set;
-CFLAGS += -DKERNEL_LOOP_MODE
+CFLAGS += -DEXEC_LEVEL=$(KERNEL_EXECUTION_LEVEL)
 
 endif #KERNEL_SCHED_MODE
 
@@ -27,7 +27,6 @@ KERNEL_DIR := kernel
 
 KERNEL_SRCS += $(KERNEL_DIR)/async/fault.c
 KERNEL_SRCS += $(KERNEL_DIR)/async/interrupt.c
-KERNEL_SRCS += $(KERNEL_DIR)/async/preempt.c
 
 
 #Add the clock lib;
@@ -60,15 +59,15 @@ KERNEL_SRCS += $(KERNEL_DIR)/mem/ram.c
 KERNEL_SRCS += $(KERNEL_DIR)/mod/mod.c
 
 
-#if the kernel is compiled in scheduling mode :
-ifdef KERNEL_SCHED_MODE
+#if the kernel execution level is not zero :
+ifneq (KERNEL_EXEC_MODE, 0)
 
 #Add the sched folder
 KERNEL_SRCS += $(KERNEL_DIR)/sched/prc_mem.c
 KERNEL_SRCS += $(KERNEL_DIR)/sched/proc.c
 KERNEL_SRCS += $(KERNEL_DIR)/sched/sched.c
 
-endif #KERNEL_SCHED_MODE
+endif #(KERNEL_EXEC_MODE, 0)
 
 #Struct sources;
 KERNEL_SRCS += $(KERNEL_DIR)/struct/nlist.c

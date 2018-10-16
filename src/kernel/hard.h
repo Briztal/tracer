@@ -45,7 +45,18 @@
  * 	to work properly;
  */
 
+//The kernel initialisation function;
+extern void __krnl_init();
 
+
+//Place the kernel in a safe state, call the fault analyser, and recover, if possible. If not, panic;
+extern void __krnl_handle_fault(uint32_t type);
+
+//The kernel context switcher; received a stack pointer and returns the new one;
+extern void *__krnl_switch_context(void *sp);
+
+//The kernel tick function; Should be called by the system timer ISR;
+extern void __krnl_tick();
 
 
 /*
@@ -54,25 +65,35 @@
  * ---------------------------------------------------------------------------------------------------------------------
  */
 
+//--------------------------------------------------- Initialisation ---------------------------------------------------
+
+//The processor initialisation function;
+extern void __proc_init();
+
+//The chip initialisation function; Called by __proc_init;
+extern void __chip_init();
+
+
+
 //----------------------------------------------------- Debug ----------------------------------------------------
 
 //Light the debug led high; Implemented by the hardware;
-extern void __debug_led_high();
+extern void __dbg_led_high();
 
 //Turn off the debug led; Implemented by the hardware;
-extern void __debug_led_low();
+extern void __dbg_led_low();
 
 //Wait for a certain number of milliseconds. Not accurate or reliable; Implemented by the hardware;
-extern void __debug_delay_ms(uint32_t ms);
+extern void __dbg_delay_ms(uint32_t ms);
 
 //Wait for a certain number of microsoconds. Not accurate or reliable; Implemented by the hardware;
-extern void __debug_delay_us(uint32_t ms);
+extern void __dbg_delay_us(uint32_t ms);
 
 //Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
-extern void __debug_print_char(char);
+extern void __dbg_print_char(char);
 
 //Print the content of all registers, and the content of the stack;
-extern void __debug_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth);
+extern void __dbg_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth);
 
 //----------------------------------------------------- Vector table ---------------------------------------------------
 
@@ -80,27 +101,27 @@ extern void __debug_print_stack_trace(uint32_t *psp, bool software_context_saved
 extern void (*__kernel_vtable[])(void);
 
 
-//------------------------------------------- General interrupt priorities -------------------------------------------
+//------------------------------------------- General exception priorities -------------------------------------------
 
 //The lowest priority level;
-extern const uint8_t __ic_priority_0;
-extern const uint8_t __ic_priority_1;
-extern const uint8_t __ic_priority_2;
-extern const uint8_t __ic_priority_3;
-extern const uint8_t __ic_priority_4;
-extern const uint8_t __ic_priority_5;
-extern const uint8_t __ic_priority_6;
-extern const uint8_t __ic_priority_7;
+extern const uint8_t __xcpt_priority_0;
+extern const uint8_t __xcpt_priority_1;
+extern const uint8_t __xcpt_priority_2;
+extern const uint8_t __xcpt_priority_3;
+extern const uint8_t __xcpt_priority_4;
+extern const uint8_t __xcpt_priority_5;
+extern const uint8_t __xcpt_priority_6;
+extern const uint8_t __xcpt_priority_7;
 //The highest priority level;
 
 
 //-------------------------------------------------- Exceptions -------------------------------------------------
 
 //Enable the interrupt control;
-extern void __exceptions_enable();
+extern void __xcpt_enable();
 
 //Disables the interrupt control;
-extern void __exceptions_disable();
+extern void __xcpt_disable();
 
 
 //-------------------------------------------------- Interrupt ReQuest -------------------------------------------------
@@ -139,28 +160,42 @@ extern bool __irq_in_handler_mode();
 //-------------------------------------------------- System clock -------------------------------------------------
 
 //Configure the frequency and the priority of the system clock interrupt
-void __sclk_configure_int(uint32_t tick_frequency, uint8_t int_prio);
+extern void __sclk_configure(uint32_t tick_frequency, uint8_t int_prio);
 
 //Start the system clock;
-void __sclk_start();
+extern void __sclk_start();
 
 //Stop the system clock;
-void __sclk_stop();
+extern void __sclk_stop();
 
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
-//TODO IMPLEMENT PREEMPTION AND SYSTEM CLOCK
+
+//------------------------------------------------------ Link vars -----------------------------------------------------
+
+
+//The available RAM bounds;
+extern uint8_t __ram_min, __ram_max;
+
+//Load and virtual min and max addresses of data section (resp) in FLASH, RAM and RAM;
+extern uint8_t __data_lma_min, __data_vma_min, __data_vma_max;
+
+//virtual min and max addresses of bss section in RAM;
+extern uint8_t __bss_vma_min,  __bss_vma_max;
+
+
+//The min and max address of proc modules structs in FLASH;
+extern const uint8_t __prmod_min, __prmod_max;
+
+//The min and max address of system modules structs in FLASH;
+extern const uint8_t __smod_min, __smod_max;
+
+//The min and max address of periph modules structs in FLASH;
+extern const uint8_t __pemod_min, __pemod_max;
+
+//The min and max address of kernel modules structs in FLASH;
+extern const uint8_t __kmod_min, __kmod_max;
+
+//The min and max address of user modules structs in FLASH;
+extern const uint8_t __umod_min, __umod_max;
 
 
 /*
@@ -177,12 +212,8 @@ extern void *__proc_stack_align(void *stack_reset);
 //Get the initial arg;
 extern void *__proc_get_init_arg();
 
-
 //The hardware library must provide a function to create the general stack context;
 extern void __proc_create_stack_context(struct proc_stack *stack, void (*function)(), void (*exit_loop)(), void *arg);
-
-//The context switcher; Should be set as the preemption handler for a preemption to occur;
-extern void __proc_preemption_handler();
 
 
 /**
@@ -205,33 +236,12 @@ extern void __proc_enter_thread_mode(struct proc_stack *exception_stacks);
 
 //-------------------------------------------------- Preemption functions -------------------------------------------------
 
-extern void __preemption_set_handler(void (*)(void));
+//Configure the priority of the preemption interruption, and enable it;
+extern void __prmpt_configure(uint8_t int_prio);
 
-extern void __preemption_set_priority(uint8_t);
+extern void __prmpt_set_pending();
 
-extern void __preemption_enable();
-
-extern void __preemption_set_pending();
-
-extern void __preemption_clear_pending();
-
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-//TODO NO PREEMPTION HANDLER SETTINGS
-
+extern void __prmpt_clear_pending();
 
 
 #endif //TRACER_HARD_H

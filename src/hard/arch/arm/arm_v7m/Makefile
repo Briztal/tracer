@@ -20,10 +20,10 @@ v7m_args :=
 
 
 #If the number of interrupts is provided :
-ifdef NVIC_NB_INTERRUPTS
+ifdef NVIC_NB_EXCEPTIONS
 
 #Provide the number of interrupts to the source;
-v7m_args += -DNB_INTERRUPTS=$(NVIC_NB_INTERRUPTS)
+v7m_args += -DNB_EXCEPTIONS=$(NVIC_NB_EXCEPTIONS)
 
 endif
 
@@ -32,7 +32,7 @@ endif
 ifdef NVIC_RELOCATION
 
 #Compile the kernel_base with an inactive flash vector table;
-v7m_args += -DNO_VTABLE
+v7m_args += -DNVIC_RELOC=$(NVIC_RELOCATION)
 
 endif
 
@@ -67,20 +67,6 @@ MODULES += arm_v7m_nvic_reloc
 
 endif
 
-
-#The systick module;
-arm_v7m_systick :
-
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_systick.o -c $(V7M_DIR)/arm_v7m_systick.c
-
-
-#If the systick module must be added :
-ifndef NO_SYSTICK
-
-#Add the systick rule to the module dependencies list;
-MODULES += arm_v7m_systick
-
-endif
 
 
 

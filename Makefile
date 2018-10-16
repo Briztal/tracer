@@ -18,7 +18,7 @@ LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 INC = -Isrc
 
 #Include the kernel configuration file;
-include src/config/kernel_cfg.mk
+include src/config/kernel.mk
 
 
 #--------------------------------------------------- Build arbo init ---------------------------------------------------

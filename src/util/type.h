@@ -178,8 +178,8 @@ void list_remove_ref_prev(struct list_head *head, struct list_head **ref);
  *
  */
 
-#define __elist_prev(l, off) (((struct list_head *)((void *)(l) + (off)))->prev)
-#define __elist_next(l, off) (((struct list_head *)((void *)(l) + (off)))->next)
+#define __elist_prev(l, off) (((struct list_head *)((void *)((uint8_t *)(l) + (off))))->prev)
+#define __elist_next(l, off) (((struct list_head *)((void *)((uint8_t *)(l) + (off))))->next)
 
 //Link the couple of list heads;
 #define __elist_link(p, n, off) {\

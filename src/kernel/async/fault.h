@@ -30,7 +30,7 @@ enum fault_type {
 	
 	RECOVERABLE_FAULT = 1,
 	
-	NON_RECOVERABLE_FAULT = 0,
+	UNRECOVERABLE_FAULT = 0,
 	
 };
 
@@ -43,11 +43,6 @@ enum fault_type {
 // and returns true if the fault is minor, or false if the fault is major;
 void kernel_init_fault_analyser(enum fault_type (*analyser)(uint32_t type));
 
-
-//--------------------------------------------------- Fault handling ---------------------------------------------------
-
-//Place the kernel in a safe state, call the fault analyser, and recover, if possible. If not, panic;
-void kernel_handle_fault(uint32_t type);
 
 
 #endif //TRACER_FAULT_H

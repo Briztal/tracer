@@ -28,51 +28,11 @@
 
 
 /*
- * The system clock is the reference clock for the kernel;
- *
- * The library receives ticks, supposedly every half millisecond, and updates its internal counter;
- *
- * Every time its receives a systick, it verifies if it must trigger the context switch, and does it if so;
- */
-
-struct sys_timer {
-	
-	//Setup;
-	void (*const int_set_frequency)(uint32_t);
-	void (*const int_set_priority)(uint8_t);
-	void (*const int_set_handler)(void (*)());
-	
-	//Start - stop
-	void (*const start)();
-	void (*const stop)();
-	
-	//Int mgt
-	void (*const int_enable)();
-	void (*const int_disable)();
-	
-};
-
-
-/*
- * System clock timer initialisation;
- */
-
-//Initialise the system timer;
-void sysclock_init(struct sys_timer *const timer);
-
-//Is the sysclock timer initialised ?
-bool sysclock_initialised();
-
-
-/*
  * System clock operation. Any call with system timer not initialised generates a kernel panic;
  */
 
 //Initialise the system clock;
 void sysclock_start();
-
-//Receive a system systick;
-void sysclock_tick();
 
 //Update the current task's activity_time;
 void sysclock_set_process_duration(uint16_t ms);

@@ -92,7 +92,6 @@ struct prc_desc {
 };
 
 
-
 struct sched_elmt {
 	
 	//The status head. Used by the active list, or by shared fifos;

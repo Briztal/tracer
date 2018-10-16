@@ -20,11 +20,15 @@
 
 #include "auto_mod.h"
 
+#include <kernel/hard.h>
+
 #include <kernel/struct/nlist.h>
 
 #include <kernel/panic.h>
 
 #include <kernel/debug/log.h>
+
+
 
 
 //--------------------------------------------------- Modules globals --------------------------------------------------
@@ -145,69 +149,54 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 
 void load_proc_modules() {
 	
-	//The start and end address of modules structs in FLASH;
-	extern const uint8_t _prmod_start, _prmod_end;
-	
 	//Log;
 	kernel_log_("Loading proc modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_prmod_start, &_prmod_end);
+	load_modules(&__prmod_min, &__prmod_max);
 	
 }
 
 void load_system_modules() {
 	
-	//The start and end address of modules structs in FLASH;
-	extern const uint8_t _smod_start, _smod_end;
-	
 	//Log;
 	kernel_log_("Loading system modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_smod_start, &_smod_end);
+	load_modules(&__smod_min, &__smod_max);
 	
 }
 
 
 void load_peripheral_modules() {
 	
-	//The start and end address of modules structs in FLASH;
-	extern const uint8_t _pemod_start, _pemod_end;
-	
 	//Log;
 	kernel_log_("Loading peripheral modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_pemod_start, &_pemod_end);
+	load_modules(&__pemod_min, &__pemod_max);
 	
 }
 
 
 void load_kernel_modules() {
 	
-	//The start and end address of modules structs in FLASH;
-	extern const uint8_t _kmod_start, _kmod_end;
-	
 	//Log;
 	kernel_log_("Loading kernel modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_kmod_start, &_kmod_end);
+	load_modules(&__kmod_min, &__kmod_max);
 	
 }
 
 
 void load_user_modules() {
 	
-	//The start and end address of modules structs in FLASH;
-	extern const uint8_t _umod_start, _umod_end;
-	
 	//Log;
 	kernel_log_("Loading user modules ...");
 	
 	//Load peripheral modules;
-	load_modules(&_umod_start, &_umod_end);
+	load_modules(&__umod_min, &__umod_max);
 	
 }
 

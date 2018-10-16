@@ -1,6 +1,10 @@
 
 //----------------------------- Prioritary -----------------------------
 
+//tODO REMOVE INIT AND FINI FROM LINKER SCRIPT
+
+//TODO REMOVE ALIGN(4) FROM LINK SCRIPT
+
 //TODO FPU CODE.
 
 //TODO CORE CLOCK MANAGER

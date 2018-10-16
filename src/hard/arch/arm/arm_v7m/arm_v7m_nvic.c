@@ -20,15 +20,15 @@
 
 
 #include <stdbool.h>
+
 #include <kernel/debug/log.h>
+
 #include <kernel/mod/auto_mod.h>
+
+#include <kernel/hard.h>
 
 #include "arm_v7m.h"
 
-//Declare the kernel vtable;
-extern void (*__kernel_vtable[])(void);
-
-//TODO KERNEL_VTABLE IN HARD.H
 
 
 /**

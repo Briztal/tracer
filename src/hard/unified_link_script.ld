@@ -18,39 +18,18 @@
 
 */
 
+/*
+ * Linking constants are listed and described in kernel/hard.h:
+ */
+
 
 /* Include memory link script. It will be searched in -L paths. */
 INCLUDE memory_map.ld
-
-/*
- * The linking script will provide the following constants :
-
- * Kernel modules :
- *  - _pmod_start   :   the start address of proc modules structs in FLASH;
- *  - _pmod_end     :   the end address of proc modules structs in FLASH;
- *  - _smod_start   :   the start address of system modules structs in FLASH;
- *  - _smod_end     :   the end address of system modules structs in FLASH;
- *  - _pmod_start   :   the start address of peripheral kernel modules structs in FLASH;
- *  - _pmod_end     :   the end address of peripheral kernel modules structs in FLASH;
- *  - _kmod_start   :   the start address of kernel modules structs in FLASH;
- *  - _kmod_end     :   the end address of kernel modules structs in FLASH;
- *  - _umod_start   :   the start address of user modules structs in FLASH;
- *  - _umod_end     :   the end address of user modules structs in FLASH;
- *
- *  - _data_lma     :   the load address of the data region, in FLASH
- *  - _data_vma     :   the lowest address of the data region in RAM;
- *  - _end_data     :   the highest address of the data region in RAM;
- *  - _bss_vma      :   the lowest address of the bss region in RAM;
- *  - _end_bss      :   the highest address of the bss region in RAM;
- *  - _ram_lowest   :   the lowest bound of the ram's available zone;
- *  - _ram_highest  :   the highest bound of the ram's available zone;
- */
 
 
 SECTIONS {
 
     . = 0;
-
 
     .vectors : {
         KEEP(*(.vectors))
@@ -68,7 +47,7 @@ SECTIONS {
     } > FLASH
 
     .=ALIGN(4);
-    /*The text section contains the program itself;*/
+    /*Declare the program section in the flash;;*/
     .text : {
         . = ALIGN(4);
         *(.text)
@@ -80,25 +59,25 @@ SECTIONS {
     .kernel_modules : {
 
         . = ALIGN(4);
-        _prmod_start = .;
+        __prmod_min = .;
         KEEP(*(.kernel_proc_modules))
-        _prmod_end = .;
+        __prmod_max = .;
 
-        _smod_start = .;
+        __smod_min = .;
         KEEP(*(.kernel_system_modules))
-        _smod_end = .;
+        __smod_max = .;
 
-        _pemod_start = .;
+        __pemod_min = .;
         KEEP(*(.kernel_peripheral_modules))
-        _pemod_end = .;
+        __pemod_max = .;
 
-        _kmod_start = .;
+        __kmod_min = .;
         KEEP(*(.kernel_kernel_modules))
-        _kmod_end = .;
+        __kmod_max = .;
 
-        _umod_start = .;
+        __umod_min = .;
         KEEP(*(.kernel_user_modules))
-        _umod_end = .;
+        __umod_max = .;
 
      } > FLASH
 
@@ -113,42 +92,32 @@ SECTIONS {
 
     .=ALIGN(4);
 
-    /*The libc init section. Junk crap LOL;*/
-    .cinit : {
+    /*The min lma of the data section, after all previous sections;*/
+    __data_lma_min = .;
+
+    /*The data section contains globals that we must initialise. Its LMA will be at __data_lma;*/
+    .data : AT (__data_lma_min) {
         . = ALIGN(4);
-        *(.init*)
-        *(.fini*)
-    } > FLASH
-
-    .=ALIGN(4);
-
-    /*The lma of the data section, after all previous sections;*/
-    _data_lma = .;
-
-
-    /*The data section contains globals that we must initialise. Its LMA will be at _data_lma;*/
-    .data : AT (_data_lma) {
-        . = ALIGN(4);
-        _data_vma = .;
+        __data_vma_min = .;
         *(.data*)
-        _end_data = .;
+        __data_vma_max = .;
     } > RAM
 
 
     /*The bss section contains globals that must be initialised to 0 at init*/
     .bss : {
         . = ALIGN(4);
-        _bss_vma = .;
+        __bss_vma_min = .;
         *(.bss*)
-        _end_bss = .;
+        __bss_vma_max = .;
     } > RAM
 
 
     . = ALIGN(4);
 
     /*The lowest accessible RAM address;*/
-    _ram_lowest = .;
+    __ram_min = .;
 
     /*The highest accessible RAM address;*/
-    PROVIDE(_ram_highest = ORIGIN(RAM) + LENGTH(RAM));
+    PROVIDE(__ram_max = ORIGIN(RAM) + LENGTH(RAM));
 }

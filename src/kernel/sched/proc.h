@@ -35,13 +35,13 @@
  */
 
 struct proc_stack {
-
-	//The lowest bound of the stack pointer, also used to free the stack, constant;
-	void *const stack_limit;
-
+	
 	//The current stack pointer, mutable;
 	void *sp;
 
+	//The lowest bound of the stack pointer, also used to free the stack, constant;
+	void *const stack_limit;
+	
 	//The highest value the stack pointer can take, constant;
 	void *const sp_reset;
 

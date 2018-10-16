@@ -6,8 +6,8 @@ KDM_SIZE = 8000
 
 #-------------------------------------------------- Run mode selection -------------------------------------------------
 
-#Comment this line to disable the scheduler mode;
-KERNEL_SCHED_MODE = 1
+#The kernel execution level : 0 for a simple infinite loop, 1 for preemmtive multitasking with scheduler;
+KERNEL_EXECUTION_LEVEL= 1
 
 
 #------------------------------------------------- Scheduler lib config ------------------------------------------------
