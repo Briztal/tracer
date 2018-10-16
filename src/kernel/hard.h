@@ -55,6 +55,9 @@ extern void __krnl_handle_fault(uint32_t type);
 //The kernel context switcher; received a stack pointer and returns the new one;
 extern void *__krnl_switch_context(void *sp);
 
+//The kernel syscall handler;
+extern uint32_t __krnl_syscall_handler(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
+
 //The kernel tick function; Should be called by the system timer ISR;
 extern void __krnl_tick();
 

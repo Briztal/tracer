@@ -134,10 +134,76 @@ void __syscall_enable() {
 	//Always enabled;
 }
 
-//Trigger the syscall;
-void __syscall_trigger() {
-	__asm__ __volatile ("");//TODO SVC ??? NOT WORKING...
+/**
+ * __syscall_trigger : triggers the syscall exception;
+ *
+ * 	This function is pure assembly, and follows the ARM Calling Convention;
+ *
+ * @param syscall_id : the identifier of the system call to execute. Will be located on R0 at handler entry;
+ */
+
+__attribute__ ((naked)) uint32_t __syscall_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2) {
+	__asm__ __volatile (\
+
+	//Trigger the supervisor call; Arguments are already placed in R0, R1, R2 and R3;
+	"SVC #0\n\t"
+		
+		//The supervisor call handler will have placed the return value in R0. We can return now;
+		"bx lr\n\t"
+	);
 }
+
+
+/**
+ * __arm_v7m_syscall_handler : this function handles the SVC exception. It performs the following operations :
+ * 	- preparing syscall arguments, namely syscall_id, arg0, arg1 and arg2 for the kernel syscall handler;
+ * 	- calling kernel_syscall_handler;
+ * 	- Modifying the stacked version of R0 so that the kernel syscall handler's return value
+ * 		arrives to __syscall_trigger;
+ */
+
+__attribute__ ((naked)) static void __arm_v7m_syscall_handler() {
+	__asm__ __volatile__ (""
+		
+		//Save LR in R4, as BL overwrites it;
+		"mov 	r4,		lr 	\n\r"
+		
+		//R0-R3 have not been altered. We can directly call the kernel syscall handler;
+		"bl 	__krnl_syscall_handler\n\r"
+		
+		//Restore LR;
+		"mov 	lr, 	r4	\n\r"
+		
+		//Cache PSP in R5;
+		"mrs	r5, 	psp	\n\r"
+		
+		//Save R0 in the psp; The psp points to the stacked version of R0;
+		"str	r0, 	[r5]\n\r"
+		
+		//Exit from exception;
+		"bx 	lr			\n\r"
+	
+	);
+}
+
+
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+//TODO KERNEL SYSCALL HANDLER;
+
+
 
 
 //-------------------------------------------------- Stack management  -------------------------------------------------
@@ -616,32 +682,6 @@ extern void __sclk_stop() {
 
 
 //-------------------------------------------------- NVIC static base --------------------------------------------------
-
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
-//TODO NVIC RELOCATION
 
 //If the vtable will be relocated, it must not be generated. This gives a smaller executable:
 #if (NVIC_RELOC > 0)

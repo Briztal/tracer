@@ -66,13 +66,6 @@ include src/config/board.mk
 #Now that the hardware lib has updated link files, add appropriate options to the link flags;
 LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
-
-#Build the objects set from sources and reroute to build dir;
-#HARD_OBJS := $(foreach src, $(HARD_SRCS:.c=.o), build/$(src))
-
-#The hardware lib, depends on all selected hardware sources;
-#hard : $(HARD_OBJS)
-
 #---------------------------------------------------- Kernel lib ----------------------------------------------------
 
 #The kernel lib public sources, available to processes and modules;
