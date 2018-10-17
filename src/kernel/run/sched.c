@@ -90,7 +90,7 @@ static void prc_exit() {
 	//TODO SYSCALL KERNEL PREEMPT
 	
 	//Require a context switch, process will be to_delete;
-	__prmpt_set_pending();
+	__prmpt_trigger();
 	
 	//Panic, preemption failed;
 	kernel_panic("process.c : post preempt state reached. That should never happen.");

@@ -636,6 +636,37 @@ static inline bool armv7m_is_mem_fault_active() {
 
 #define ARMV7_CPACR ((volatile uint32_t *) 0xE000ED88)
 
+#define ARMV7_CPACR_ACCESS_DENIED    ((uint32_t) 0x00)
+#define ARMV7_CPACR_PRIV_ACCESS    ((uint32_t) 0x001
+#define ARMV7_CPACR_FULL_ACCESS    ((uint32_t) 0x03)
+
+
+static inline void arm_v7m_set_coprocessor_access_priv(uint8_t coproc_id, uint8_t access_priv) {
+	
+	//If the coprocessor id is invalid, fail;
+	if (coproc_id > 15)
+		return;
+	
+	//If acces priv is expressed on more that 2 bits, fail;
+	if (access_priv > 3)
+		return;
+	
+	//Determine the shift count by multiplying the coproc id by 2;
+	coproc_id <<= 1;
+	
+	//Cache the Coprocessor access register;
+	uint32_t CPACR = *ARMV7_CPACR;
+	
+	//Reset access bits;
+	CPACR &= ~(((uint32_t) 3) << coproc_id);
+	
+	//Set bits;
+	CPACR |= access_priv << coproc_id;
+	
+	//Write back;
+	*ARMV7_CPACR = CPACR;
+	
+}
 
 
 //----------------- STIR - WO : Software Trigger Interrupt Register -----------------
@@ -664,6 +695,36 @@ static inline void armv7m_software_trigger_interrupt(uint16_t interrupt_number) 
 	*ARMV7_STIR = (uint32_t) interrupt_number;
 	
 }
+
+//----------------- FPCCR - RW : Floating Point Context Control Register -----------------
+
+
+#define ARMV7_FPCCR ((volatile uint32_t *) 0xE000EF34)
+
+#define FPCCR_LSPACT ((uint32_t) (1 << 0))
+#define FPCCR_USER ((uint32_t) (1 << 1))
+#define FPCCR_THREAD ((uint32_t) (1 << 3))
+#define FPCCR_HFRDY ((uint32_t) (1 << 4))
+#define FPCCR_MMRDY ((uint32_t) (1 << 5))
+#define FPCCR_BFRDY ((uint32_t) (1 << 6))
+#define FPCCR_MONRDY ((uint32_t) (1 << 7))
+#define FPCCR_LSPEN ((uint32_t) (1 << 30))
+#define FPCCR_ASPEN ((uint32_t) (1 << 31))
+
+
+
+//----------------- FPCAR - RW : Floating Point Context Address Register -----------------
+
+
+#define ARMV7_FPCAR ((volatile uint32_t *) 0xE000EF38)
+
+
+
+//----------------- FPCCR - RW : Floating Point Default Status Control Register -----------------
+
+
+#define ARMV7_FPDSCR ((volatile uint32_t *) 0xE000EF3C)
+
 
 
 

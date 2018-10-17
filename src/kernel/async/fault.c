@@ -21,6 +21,7 @@
 
 static enum fault_type (*fault_analyser)(uint32_t type) = 0;
 
+
 //------------------------------------------------ Fault handling config -----------------------------------------------
 
 /**

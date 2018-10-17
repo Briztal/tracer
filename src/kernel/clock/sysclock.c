@@ -79,7 +79,7 @@ void __krnl_tick() {
         if (!--task_duration) {
 
             //Trigger the preemption;
-			__prmpt_set_pending();
+			__prmpt_trigger();
 	
 			//Task activity_time becomes 0, preemption won't be called anymore;
 

@@ -240,6 +240,7 @@ static enum fault_type fault_handler(uint32_t type) {
 	
 }
 
+
 static bool armv7_fault_init() {
 	
 	kernel_init_fault_analyser(&fault_handler);

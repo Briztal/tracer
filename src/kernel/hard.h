@@ -98,9 +98,6 @@ extern void __dbg_delay_us(uint32_t ms);
 //Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
 extern void __dbg_print_char(char);
 
-//Print the content of all registers, and the content of the stack_data;
-extern void __dbg_print_stack_trace(uint32_t *psp, bool software_context_saved, uint32_t stack_depth);
-
 //----------------------------------------------------- Vector table ---------------------------------------------------
 
 //The kernel interrupt vector table;
@@ -246,7 +243,7 @@ extern void __proc_enter_thread_mode(struct stack_data *exception_stacks);
 extern void __prmpt_configure(uint8_t int_prio);
 
 //Set the preemption pending;
-extern void __prmpt_set_pending();
+extern void __prmpt_trigger();
 
 
 //------------------------------------------------------- Syscall ------------------------------------------------------
@@ -255,7 +252,7 @@ extern void __prmpt_set_pending();
 extern void __syscl_configure(uint8_t priority);
 
 //Call the kernel;
-extern uint32_t __syscall_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
+extern uint32_t __syscl_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
 
 
 #endif //TRACER_HARD_H
