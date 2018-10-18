@@ -44,6 +44,11 @@
 //------------------------------------------------------- Headers ------------------------------------------------------
 
 
+#include <list.h>
+
+#include <mem.h>
+
+
 #include <kernel/debug/debug.h>
 #include <kernel/debug/log.h>
 #include <kernel/mod/auto_mod.h>
@@ -54,7 +59,7 @@
 #include <kernel/interface/gpio.h>
 #include <kernel/fs/inode.h>
 
-#include <util/string.h>
+#include <string.h>
 
 #include "multi_pwm_n.h"
 

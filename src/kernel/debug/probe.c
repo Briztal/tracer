@@ -85,25 +85,3 @@ void __dbg_print_char(char c) {
 	debug_delay_us(600);
 
 }
-
-/*
-
-void debug_log(const char *msg) {
-
-	//Cache the current char;
-	char c;
-
-	//While the current char is not null;
-	while ((c = *(msg++))) {
-
-		//Send it;
-		debug_print_char(c);
-
-	}
-
-	//Send a new line and a carriage return;
-	debug_print_char('\n');
-	debug_print_char('\r');
-
-}
- */

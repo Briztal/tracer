@@ -25,17 +25,16 @@
 
 //------------------------------------------------------- Headers ------------------------------------------------------
 
-#include <stdbool.h>
+#include <type.h>
 
-#include <stdint.h>
+#include <mem.h>
 
 #include <kernel/fs/inode.h>
 #include <kernel/interface/gpio.h>
 #include <kernel/interface/timer.h>
-#include <kernel/debug/log.h>
-#include <util/string.h>
 #include <kernel/mod/auto_mod.h>
 #include <kernel/interface/port.h>
+#include <kernel/debug/log.h>
 
 #include "pwm_n.h"
 

@@ -34,10 +34,10 @@
  */
 
 //The sysclock_milliseconds reference;
-volatile uint32_t systick_half_millis = 0;
+static volatile uint32_t systick_half_millis = 0;
 
 //The current task's activity_time. At init, preemption disabled;
-volatile uint32_t task_duration = 0;
+static volatile uint32_t task_duration = 0;
 
 
 

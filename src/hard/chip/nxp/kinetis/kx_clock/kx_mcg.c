@@ -603,7 +603,7 @@ static void mcg_return_FBI() {
  * 	appropriate path to enter the required mode;
  */
 
-void enter_mode(const enum mcg_mode mode) {
+static void enter_mode(const enum mcg_mode mode) {
 	
 	/*
 	 * If the mode can't be entered directly, we must execute transitions;

@@ -46,19 +46,15 @@ SECTIONS {
         KEEP(*(.flashconfig))
     } > FLASH
 
-    .=ALIGN(4);
     /*Declare the program section in the flash;;*/
     .text : {
-        . = ALIGN(4);
         *(.text)
     } > FLASH
 
-    .=ALIGN(4);
 
     /*The embedded modules section contains kernel modules to load at init;*/
     .kernel_modules : {
 
-        . = ALIGN(4);
         __prmod_min = .;
         KEEP(*(.kernel_proc_modules))
         __prmod_max = .;
@@ -82,22 +78,17 @@ SECTIONS {
      } > FLASH
 
 
-    .=ALIGN(4);
-
     /*The rodata section contains constant data (const, strings, ...);*/
     .rodata : {
-        . = ALIGN(4);
         *(.rodata*)
     } > FLASH
 
-    .=ALIGN(4);
 
     /*The min lma of the data section, after all previous sections;*/
     __data_lma_min = .;
 
     /*The data section contains globals that we must initialise. Its LMA will be at __data_lma;*/
     .data : AT (__data_lma_min) {
-        . = ALIGN(4);
         __data_vma_min = .;
         *(.data*)
         __data_vma_max = .;
@@ -106,7 +97,6 @@ SECTIONS {
 
     /*The bss section contains globals that must be initialised to 0 at init*/
     .bss : {
-        . = ALIGN(4);
         __bss_vma_min = .;
         *(.bss*)
         __bss_vma_max = .;

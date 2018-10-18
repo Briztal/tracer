@@ -77,7 +77,7 @@ MODULE_CREATE_SPECS_ARRAY(channels)
  * Channels dynamic data simply consist on interface references;
  */
 
-struct timer_if *if_refs[NB_CHANNELS] = {0};
+static struct timer_if *if_refs[NB_CHANNELS] = {0};
 
 
 

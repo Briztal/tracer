@@ -110,7 +110,7 @@ static const struct morse_char morse_numbers[10] = {
  * @param dash : true for a dash, false for a dot;
  */
 
-void morse_send_bit(bool dash) {
+static void morse_send_bit(bool dash) {
 
 	//Light the led;
 	debug_led_high();
@@ -136,7 +136,7 @@ void morse_send_bit(bool dash) {
  * @param c : the morse char to send;
  */
 
-void morse_send_char(struct morse_char c) {
+static void morse_send_char(struct morse_char c) {
 
 	//While the code is not finished :
 	while (c.mask & (uint8_t) 1) {
@@ -182,7 +182,7 @@ inline void morse_word_space() {
  * @return true if the char was sent;
  */
 
-bool morse_send_if(const char lower, const char higher, const struct morse_char *const symbols, const char c) {
+static bool morse_send_if(const char lower, const char higher, const struct morse_char *const symbols, const char c) {
 
 	//If the char is between @lower and @higher:
 	if ((c <= higher) && (c >= lower)) {
@@ -201,7 +201,7 @@ bool morse_send_if(const char lower, const char higher, const struct morse_char 
 
 
 //TODO
-void debug_echo(const char *log) {
+static void debug_echo(const char *log) {
 
 	//Turn off the led;
 	debug_led_low();
