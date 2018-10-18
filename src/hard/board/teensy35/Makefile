@@ -1,9 +1,6 @@
 
 #include the chip makefile;
-include src/hard/chip/nxp/kinetis/mk64fx512/Makefile
-
-#define the hardware rule. Depends on the mk64fx512 rule;
-hard: mk64fx512
+include src/hard/chip/kinetis/chips/mk64fx512/mk64fx512.mk
 
 
 #Define the tools path for flashing;

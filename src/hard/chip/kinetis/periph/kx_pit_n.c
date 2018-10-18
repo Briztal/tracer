@@ -25,7 +25,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide, in addition to channel parameters :
+ * mk64fx512.mk must provide, in addition to channel parameters :
  * 	- REFERENCE_SYMBOL : name of the channel;
  * 	- INT_CHANNEL : interrupt channel;
  * 	- REG : start of the channel's registers area;

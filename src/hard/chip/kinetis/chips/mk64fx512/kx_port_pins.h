@@ -1,6 +1,3 @@
-//
-// Created by root on 9/14/18.
-//
 
 
 // Pin				Arduino

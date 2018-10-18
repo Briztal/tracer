@@ -1,14 +1,13 @@
 
 //----------------------------- Prioritary -----------------------------
 
-//TODO K64 Flash Config
+//TODO COPROCESSOR LIB AND BUILD;
 
 //TODO FPU CODE.
 
-//TODO REMOVE ALIGN(4) FROM LINK SCRIPT
+//TODO MATH LIB;
 
 //TODO RAM PAGES ALLOC;
-
 
 //TODO CHECK THAT KINETIS UART DRIVER NOT LAREADY INITALISED
 

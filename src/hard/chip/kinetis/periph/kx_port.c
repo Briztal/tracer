@@ -23,7 +23,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide :
+ * mk64fx512.mk must provide :
  * 	- NB_PORTS : 		number of ports;
  * 	- PORT_REG : 		start of the port register area;
  * 	- PORT_SPACING : 	spacing between two port register areas
@@ -243,7 +243,7 @@ struct pin_data {
 static struct pin_data pins[] = {
 
 //Initialise all pins;
-#include "kx_port_pins.h"
+#include "hard/chip/kinetis/chips/mk64fx512/kx_port_pins.h"
 
 };
 
@@ -489,7 +489,7 @@ struct pin_inode {
 static struct pin_inode inodes[] = {
 
 //Add all initializers;
-#include "kx_port_pins.h"
+#include "hard/chip/kinetis/chips/mk64fx512/kx_port_pins.h"
 
 };
 
@@ -653,7 +653,7 @@ static bool kx_port_init() {
 	#define PIN(name, port, bit) register_pin(#name, pin_id++);
 
 	//Register all pins
-	#include "kx_port_pins.h"
+	#include "hard/chip/kinetis/chips/mk64fx512/kx_port_pins.h"
 
 	//Macro not used anymore;
 	#undef PIN

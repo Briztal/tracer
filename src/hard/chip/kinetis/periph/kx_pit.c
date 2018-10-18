@@ -22,7 +22,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide :
+ * mk64fx512.mk must provide :
  * 	- MCR_REG : address of the MCR register;
  * 	- NB_CHANNELS : number of channels;
  */

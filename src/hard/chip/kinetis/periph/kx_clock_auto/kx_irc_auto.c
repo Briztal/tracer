@@ -3,7 +3,7 @@
 //
 
 
-#include <hard/chip/nxp/kinetis/kx_clock/kx_mcg.h>
+#include <hard/chip/nxp/kinetis/periph/kx_clock/kx_mcg.h>
 
 #define U32_DIST(a, b) (((a) < (b)) ? ((b) - (a)) : ((a) - (b)))
 

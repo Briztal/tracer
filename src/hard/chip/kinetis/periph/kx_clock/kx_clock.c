@@ -21,7 +21,7 @@
 
 #include <stddef.h>
 #include <kernel/debug/log.h>
-#include <hard/chip/nxp/kinetis/kx_sim.h>
+#include <kx_sim.h>
 #include <kernel/clock/clock.h>
 #include <kernel/mod/auto_mod.h>
 #include <kernel/debug/debug.h>

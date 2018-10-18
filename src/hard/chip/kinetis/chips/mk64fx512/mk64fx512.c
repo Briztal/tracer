@@ -19,18 +19,10 @@
 */
 
 
-//#include "kinetis.h"
-
 #include <kernel/startup.h>
 
-#include <hard/chip/nxp/kinetis/kx_wdog.h>
-#include <hard/chip/nxp/kinetis/kx_sim.h>
-
-#include <kernel/panic.h>
-#include <kernel/debug/log.h>
-#include <kernel/debug/debug.h>
-#include <kernel/clock/clock.h>
-
+#include "kx_wdog.h"
+#include "kx_sim.h"
 
 
 //------------------------------------------------------- Debug --------------------------------------------------------
@@ -97,29 +89,6 @@ void __dbg_delay_us(uint32_t us_counter) {
 }
 
 
-// Flash Security Setting. On Teensy 3.2, you can lock the MK20 chip to prevent
-// anyone from reading your code.  You CAN still reprogram your Teensy while
-// security is set, but the bootloader will be unable to respond to auto-reboot
-// requests from Arduino. Pressing the program button will cause a full chip
-// erase to gain access, because the bootloader chip is locked out.  Normally,
-// erase occurs when uploading begins, so if you press the Program button
-// accidentally, simply power cycling will run your program again.  When
-// security is locked, any Program button press causes immediate full erase.
-// Special care must be used with the Program button, because it must be made
-// accessible to initiate reprogramming, but it must not be accidentally
-// pressed when Teensy Loader is not being used to reprogram.  To set lock the
-// security change this to 0xDC.  Teensy 3.0 and 3.1 do not support security lock.
-#define FSEC 0xDE
-
-// Flash Options
-#define FOPT 0xF9
-__attribute__ ((section(".flashconfig"), used))
-const uint8_t flashconfigbytes[16] = {
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, FSEC, FOPT, 0xFF, 0xFF
-};
-
-
 
 void __proc_init(void) {
 	
@@ -138,14 +107,6 @@ void __proc_init(void) {
 	sim_enable_PORTE_clock_gating();
 	
 	startup_initialise_globals();
-	
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
-	//TODO FLASH CONFIGURATION TO DETERMINE INITIAL CONFIGURATION
 	
 	__krnl_init();
 	

@@ -18,6 +18,7 @@ add_definitions(-D'USB_SERIAL')
 add_definitions(-D'ARDUINO=10805')
 add_definitions(-D'TEENSYDUINO=141')
 
+include_directories("$ENV{HOME}/Projects/TRACER/src/hard/chip/kinetis/periph")
 include_directories("$ENV{HOME}/Projects/TRACER/src/std")
 include_directories("$ENV{HOME}/Projects/TRACER/src")
 
