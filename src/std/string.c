@@ -20,11 +20,7 @@
 
 #include "string.h"
 
-#include <kernel/debug/debug.h>
-
-
-
-
+#include "mem.h"
 
 
 /* Copyright (C) 1991-2018 Free Software Foundation, Inc.

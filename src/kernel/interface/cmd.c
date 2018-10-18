@@ -4,7 +4,7 @@
 
 #include "cmd.h"
 
-#include <util/string.h>
+#include <mem.h>
 
 
 //Define interfacing and neutralisation functions;

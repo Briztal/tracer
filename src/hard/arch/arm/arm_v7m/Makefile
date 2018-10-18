@@ -18,6 +18,8 @@ V7M_D :=  src/hard/arch/arm/arm_v7m
 
 v7m_args :=
 
+V7M_CC = @$(CC) $(CFLAGS) $(INC) $(v7m_args)
+
 
 #If the number of interrupts is provided :
 ifdef NVIC_NB_EXCEPTIONS
@@ -37,36 +39,30 @@ v7m_args += -DNVIC_RELOC=$(NVIC_RELOCATION)
 endif
 
 
-#The kernel base for arm_v7m
-arm_v7m :
+#-------------------------------------------------- Compilation Rules --------------------------------------------------
+
+arm_v7m_kernel_base :
 	@echo "compiling ARM_V7M module\n"
 
 #Compile the armv7 base;
-	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o $(KRNL_D)/arm_v7m.o -c $(V7M_D)/arm_v7m.c
+	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_boot.o -c $(V7M_D)/arm_v7m_boot.c
 
-#if the preemption base must be compiled :
-ifdef KERNEL_SCHED_MODE
+#Compile the nvic lib;
+	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
 
-#Compile the preemption base;
-	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_sched.o -c $(V7M_D)/arm_v7m_sched.c
+#Compile the exceptions lib;
+	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_xcpt.o -c $(V7M_D)/arm_v7m_xcpt.c
 
-endif #KERNEL_SCHED_MODE
+#Compile the processor lib;
+	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_proc.o -c $(V7M_D)/arm_v7m_proc.c
 
+#Compile the systick lib;
+	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_syst.o -c $(V7M_D)/arm_v7m_syst.c
 
 
 #The nvic relocation module;
 arm_v7m_nvic_reloc :
 	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
-
-
-#If the nvic relocation module must be added :
-ifndef NO_NVIC_RELOCATION
-
-#Add the nvic relocation rule to the module dependencies list;
-MODULES += arm_v7m_nvic_reloc
-
-endif
-
 
 
 
@@ -76,11 +72,26 @@ arm_v7m_fault :
 	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_fault.o -c $(V7M_D)/arm_v7m_fault.c
 
 
+#-------------------------------------------------- Components config --------------------------------------------------
+
+#Add the kernel base to the kernel rules;
+KRNL_RULES += arm_v7m_kernel_base
+
+
+#If the nvic relocation module must be added :
+ifndef NO_NVIC_RELOCATION
+
+#Add the nvic relocation rule to the modules list;
+MODS_RULES += arm_v7m_nvic_reloc
+
+endif
+
+
 #If the systick module must be added :
 ifndef NO_FAULT
 
-#Add the systick rule to the module dependencies list;
-MODULES += arm_v7m_fault
+#Add the systick rule to the modules list;
+MODS_RULES += arm_v7m_fault
 
 endif
 

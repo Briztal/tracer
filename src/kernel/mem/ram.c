@@ -86,12 +86,7 @@ void *ram_alloc(size_t size) {
 	}
 
 	//Allocate and return some data in the heap;
-	void *ptr =  heap_malloc(heap, size);
-
-	kernel_log("ram : %h %h", ptr, size);
-
-
-	return ptr;
+	return heap_malloc(heap, size);
 	
 }
 

@@ -18,8 +18,6 @@
 
 */
 
-#include <stdio.h>
-
 #include <string.h>
 
 #include <kernel/panic.h>

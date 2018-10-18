@@ -25,10 +25,9 @@
 #include <stddef.h>
 
 //Call the kernel;
-uint32_t __syscall_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
+uint32_t __syscl_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
 
-
-#define kernel_syscall(a, b, c, d) __syscall_trigger(a, b, c, d);
+#define kernel_syscall(a, b, c, d) __syscl_trigger(a, b, c, d);
 
 
 #endif //TRACER_KERNEL_H

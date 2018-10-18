@@ -32,15 +32,18 @@
 
 //--------------------------------------------- Includes --------------------------------------------
 
+#include "proc.h"
+
 #include <kernel/async/except.h>
 #include <kernel/debug/log.h>
 #include <kernel/run/sched.h>
 #include <kernel/clock/sysclock.h>
 #include <kernel/mem/ram.h>
-#include <util/string.h>
 
 #include <kernel/mem/stack_data.h>
-#include "proc.h"
+
+#include <mem.h>
+
 
 
 //--------------------------------------------- Vars --------------------------------------------
@@ -137,7 +140,7 @@ void proc_start_execution() {
 	
 	//Set the syscall handler; Same prio as preemption, won't preempt each other;
 	__syscl_configure(KERNEL_PREEMPTION_PRIORITY);
-
+	
 	
 	/*
 	 * Start execution;

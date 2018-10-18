@@ -1,5 +1,6 @@
 
-#----------------------------------------------- Kernel compilation flags ----------------------------------------------
+
+#------------------------------------------- Components configuration flags --------------------------------------------
 
 #if the kernel is not compiled in scheduling mode :
 ifdef KERNEL_EXECUTION_LEVEL
@@ -7,101 +8,67 @@ ifdef KERNEL_EXECUTION_LEVEL
 #Add the loop flag to the compilation flags set;
 CFLAGS += -DEXEC_LEVEL=$(KERNEL_EXECUTION_LEVEL)
 
-endif #KERNEL_SCHED_MODE
+endif #KERNEL_EXECUTION_LEVEL
 
-#Add the dynamic memory size;
-CFLAGS += -DKDM_SIZE=$(KDM_SIZE)
+#-------------------------------------------------- Compilation rules --------------------------------------------------
+
+KS := src/kernel
+KB := build/krnl
 
 #Add the exception stacks size requirements;
-CFLAGS += -DKEX_STACK_SIZE=$(KEX_STACK_SIZE)
+run_flags += -DKEX_STACK_SIZE=$(KEX_STACK_SIZE)
 
 #Add first process hardware requirements;
-CFLAGS += -DKFP_RAM_SIZE=$(KFP_RAM_SIZE) -DKFP_STACK_SIZE=$(KFP_STACK_SIZE) -DKFP_ACTIVITY_TIME=$(KFP_ACTIVITY_TIME)
+run_flags += -DKFP_RAM_SIZE=$(KFP_RAM_SIZE) -DKFP_STACK_SIZE=$(KFP_STACK_SIZE) -DKFP_ACTIVITY_TIME=$(KFP_ACTIVITY_TIME)
 
 
-#----------------------------------------------------- Files ----------------------------------------------------
+kernel_std : 
 
+	@$(_CC) -o $(KB)/fault.o -c $(KS)/async/fault.c
+	@$(_CC) -o $(KB)/except.o -c $(KS)/async/except.c
 
-#-------------------------------------------------- Implicit make rule -------------------------------------------------
+	@$(_CC) -o $(KB)/clock.o -c $(KS)/clock/clock.c
+	@$(_CC) -o $(KB)/sysclock.o -c $(KS)/clock/sysclock.c
 
-#TODO NO IMPLICIT RULE
+	@$(_CC) -o $(KB)/probe.o -c $(KS)/debug/probe.c
+	@$(_CC) -o $(KB)/debug.o -c $(KS)/debug/debug.c
+	@$(_CC) -o $(KB)/log.o -c $(KS)/debug/log.c
 
-#The general compilation rule. Compiles a source file in src/, saves the output in the corresponding path in build/;
-#Requires the compiler (CC) to be up to date, and all C flags to be appropriately set;
-build/%.o: src/%.c
+	@$(_CC) -o $(KB)/inode.o -c $(KS)/fs/inode.c
 
-#Create a dir if necessary;TODO NOPE, TAKES WAY TOO MUCH TIME !
-	@mkdir -p "$(dir $@)"
+	@$(_CC) -o $(KB)/cmd.o -c $(KS)/interface/cmd.c
+	@$(_CC) -o $(KB)/gpio.o -c $(KS)/interface/gpio.c
+	@$(_CC) -o $(KB)/timer.o -c $(KS)/interface/timer.c
 
-#Display the name of the source we compile;
-	@echo "[CC]\t$@"
+	@$(_CC) -o $(KB)/heap.o -c $(KS)/mem/heap.c
+	@$(_CC) -o $(KB)/kdmem.o -c $(KS)/mem/kdmem.c -DKDM_SIZE=$(KDM_SIZE)
+	@$(_CC) -o $(KB)/ram.o -c $(KS)/mem/ram.c
 
-#Compile, providing only src in include path, and all C flags;
-	@$(CC) $(CFLAGS) $(INC) -o $@ -c $<
+	@$(_CC) -o $(KB)/mod.o -c $(KS)/mod/mod.c
 
-
-
-
-#Cache the current directory;
-KERNEL_DIR := kernel
-
-#The syscall source file can be linked to exernal libs;
-
-KERNEL_SRCS += $(KERNEL_DIR)/async/fault.c
-KERNEL_SRCS += $(KERNEL_DIR)/async/except.c
-
-
-#Add the clock lib;
-KERNEL_SRCS += $(KERNEL_DIR)/clock/clock.c
-KERNEL_SRCS += $(KERNEL_DIR)/clock/sysclock.c
-
-
-#Add the communication protocol;
-KERNEL_SRCS += $(KERNEL_DIR)/debug/probe.c
-KERNEL_SRCS += $(KERNEL_DIR)/debug/debug.c
-KERNEL_SRCS += $(KERNEL_DIR)/debug/log.c
-
-
-#Add the communication protocol;
-KERNEL_SRCS += $(KERNEL_DIR)/fs/inode.c
-
-
-#Add timer structs
-KERNEL_SRCS += $(KERNEL_DIR)/interface/cmd.c
-KERNEL_SRCS += $(KERNEL_DIR)/interface/gpio.c
-KERNEL_SRCS += $(KERNEL_DIR)/interface/timer.c
-
-
-#Add memory management sources;
-KERNEL_SRCS += $(KERNEL_DIR)/mem/heap.c
-KERNEL_SRCS += $(KERNEL_DIR)/mem/kdmem.c
-KERNEL_SRCS += $(KERNEL_DIR)/mem/ram.c
-
-
-#Mod sources;
-KERNEL_SRCS += $(KERNEL_DIR)/mod/mod.c
+	@$(_CC) -o $(KB)/syscall.o -c $(KS)/public/syscall.c
 
 
 #if the kernel execution level is not zero :
 ifneq (KERNEL_EXEC_MODE, 0)
 
 #Add the run folder
-KERNEL_SRCS += $(KERNEL_DIR)/run/pmem.c
-KERNEL_SRCS += $(KERNEL_DIR)/run/proc.c
-KERNEL_SRCS += $(KERNEL_DIR)/run/sched.c
+	@$(_CC) -o $(KB)/pmem.o -c $(KS)/run/pmem.c $(run_flags)
+	@$(_CC) -o $(KB)/proc.o -c $(KS)/run/proc.c $(run_flags)
+	@$(_CC) -o $(KB)/sched.o -c $(KS)/run/sched.c $(run_flags)
 
 endif #(KERNEL_EXEC_MODE, 0)
 
 #Struct sources;
-KERNEL_SRCS += $(KERNEL_DIR)/struct/nlist.c
-KERNEL_SRCS += $(KERNEL_DIR)/struct/shared_fifo.c
+	@$(_CC) -o $(KB)/nlist.o -c $(KS)/struct/nlist.c
+	@$(_CC) -o $(KB)/shared_fifo.o -c $(KS)/struct/shared_fifo.c
 
 
 #Add all files of the kernel dir;
-KERNEL_SRCS += $(KERNEL_DIR)/kinit.c
-KERNEL_SRCS += $(KERNEL_DIR)/panic.c
-KERNEL_SRCS += $(KERNEL_DIR)/syscall.c
+	@$(_CC) -o $(KB)/kinit.o -c $(KS)/kinit.c
+	@$(_CC) -o $(KB)/panic.o -c $(KS)/panic.c
 
 
-KERNEL_PUB_SRCS += $(KERNEL_DIR)/syscall.c
+#-------------------------------------------------- Components Config --------------------------------------------------
 
+KRNL_RULES += kernel_std

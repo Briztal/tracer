@@ -18,21 +18,18 @@
 
 */
 
-
-#include <stdbool.h>
-
-#include <stdint.h>
-
-#include <string.h>
-
 #include "heap.h"
 
+
+#include <list.h>
+
+#include <mem.h>
 
 #include <kernel/panic.h>
 
 #include <kernel/debug/log.h>
 
-#include <util/type.h>
+
 
 
 

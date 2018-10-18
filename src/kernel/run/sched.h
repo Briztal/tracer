@@ -50,10 +50,13 @@
  */
 
 
-#include <util/type.h>
+#include <type.h>
+
+#include <list.h>
+
+#include "pmem.h"
 
 #include <kernel/struct/shared_fifo.h>
-#include "pmem.h"
 
 
 /**

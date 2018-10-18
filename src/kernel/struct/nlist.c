@@ -19,7 +19,11 @@
 */
 
 
-#include <util/string.h>
+#include <mem.h>
+
+#include <list.h>
+
+#include <string.h>
 
 #include <kernel/debug/log.h>
 #include <kernel/mem/kdmem.h>

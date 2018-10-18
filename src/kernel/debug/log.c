@@ -5,7 +5,8 @@
 #include "log.h"
 
 
-#include <util/stdout.h>
+#include <stdout.h>
+
 #include <kernel/async/except.h>
 
 

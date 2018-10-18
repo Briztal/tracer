@@ -49,13 +49,11 @@
 
 #include <kernel/async/except.h>
 
+#include <macro/incr_call.h>
 
-#include <util/macro/incr_call.h>
+#include <mem.h>
 
-#include <util/string.h>
 #include <kernel/mod/module_array.h>
-#include <kernel/debug/log.h>
-
 
 #include "kx_sim.h"
 

@@ -20,8 +20,9 @@
 
 #include "panic.h"
 
-#include "kernel/mem/kdmem.h"
-#include "kernel/debug/log.h"
+#include <kernel/mem/kdmem.h>
+
+#include <kernel/debug/log.h>
 
 #include <kernel/async/except.h>
 
@@ -30,6 +31,8 @@
 #include <kernel/mem/ram.h>
 
 #include <kernel/mod/mod.h>
+
+#include <kernel/run/proc.h>
 
 
 

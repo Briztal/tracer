@@ -20,7 +20,7 @@
 
 #include "debug.h"
 
-#include <util/string.h>
+#include <string.h>
 
 //The debug flag, initialised to false;
 bool debug_flag = false;

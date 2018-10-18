@@ -22,7 +22,7 @@
 #define TRACER_DFS_H
 
 
-#include <util/type.h>
+#include <type.h>
 
 
 //Declare the inode ops structure;

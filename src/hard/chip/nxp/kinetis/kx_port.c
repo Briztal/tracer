@@ -83,11 +83,11 @@
 #include <kernel/mod/auto_mod.h>
 
 
-#include <util/macro/incr_call.h>
+#include <macro/incr_call.h>
 
-#include <util/string.h>
+#include <std/mem.h>
+
 #include <kernel/debug/log.h>
-
 
 #include "kx_sim.h"
 

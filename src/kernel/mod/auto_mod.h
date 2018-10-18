@@ -23,7 +23,7 @@
 
 #include <stdbool.h>
 
-#include <util/type.h>
+#include <type.h>
 
 
 /*

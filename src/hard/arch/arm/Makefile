@@ -2,8 +2,7 @@
 COMPILERPATH ?= /usr/bin
 
 # names for the compiler programs
-CC = $(abspath $(COMPILERPATH))/arm-none-eabi-gcc
-AS = $(abspath $(COMPILERPATH))/arm-none-eabi-gcc-as
-AR = $(abspath $(COMPILERPATH))/arm-none-eabi-gcc-ar
-OBJCOPY = $(abspath $(COMPILERPATH))/arm-none-eabi-objcopy
-SIZE = $(abspath $(COMPILERPATH))/arm-none-eabi-size
+CC = /usr/bin/arm-none-eabi-gcc
+AR = /usr/bin/arm-none-eabi-gcc-ar
+OBJCOPY = /usr/bin/arm-none-eabi-objcopy
+SIZE = /usr/bin/arm-none-eabi-size

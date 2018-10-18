@@ -20,7 +20,7 @@
 
 #include "timer.h"
 
-#include <util/string.h>
+#include <mem.h>
 
 /**
  * timer_init :

@@ -41,7 +41,8 @@
 
 #include "proc.h"
 
-#include <string.h>
+#include <mem.h>
+
 #include <kernel/panic.h>
 #include <kernel/async/except.h>
 #include <kernel/mem/kdmem.h>

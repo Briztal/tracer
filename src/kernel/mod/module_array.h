@@ -5,7 +5,7 @@
 #ifndef TRACER_CH_NAME_H
 #define TRACER_CH_NAME_H
 
-#include <util/macro/incr_call.h>
+#include <macro/incr_call.h>
 
 /*
  * This file must be included in the source file of a channel module, whose purpose is to be compiled once

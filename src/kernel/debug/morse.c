@@ -21,8 +21,6 @@
 
 #include "kernel/debug/debug.h"
 
-#include <stdbool.h>
-
 
 /**
  * A morse char has a variable length. We must store the binary code and its mask;

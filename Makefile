@@ -42,25 +42,6 @@
 #
 
 
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-#TODO ADD TO COMPONENTS RULES
-
-
 #---------------------------------------------------- Naming ---------------------------------------------------
 
 #Project name;
@@ -69,6 +50,21 @@ PROJECT_NAME := tracer
 #Elf - hex names;
 NAME := build/$(PROJECT_NAME)
 
+#------------------------------------------------------ Toolchain ------------------------------------------------------
+
+#Several programs are available during the executable generation. The hardware make unit must define them;
+
+#The preprocessor, compiler, assembler, and linker;
+CC =
+
+#The archiver;
+AR :=
+
+#The loader;
+OBJCOPY :=
+
+#The analyser;
+SIZE :=
 
 #---------------------------------------------------- Initialisation ---------------------------------------------------
 
@@ -77,12 +73,12 @@ CFLAGS := -Wall -Os -g -std=c99 -ffreestanding
 LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 
 #Include path only contains src and std dir;
-INC = -Isrc
-INC = -Isrc/std
+INC := -Isrc
+INC += -Isrc/std
 
 
 #The hardware module selects the memory map link script;
-_LDSCRIPT_MMAP_DIR :=
+LDSCRIPT_MMAP_DIR :=
 
 
 #Rules lists reference all rules that a component depends on;
@@ -122,8 +118,11 @@ include src/std/Makefile
 
 #----------------------------------------------------- Finalisation ----------------------------------------------------
 
+#Abreviation for compiling with standard C flags and include paths;
+_CC := $(CC) $(CFLAGS) $(INC)
+
 #Now that the hardware lib has updated link files, add appropriate options to the link flags;
-LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(_LDSCRIPT_MMAP_DIRmake)
+LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 
 
 #-------------------------------------------- Objects list (late expanding) --------------------------------------------
@@ -138,7 +137,7 @@ STDL_O = $(wildcard $(STDL_D)/*.o)
 #--------------------------------------------------- Build arbo init ---------------------------------------------------
 
 #Create a directory for each libs
-build_dirs:
+dtree:
 	@mkdir build
 	@mkdir $(KRNL_D)
 	@mkdir $(MODS_D)
@@ -152,18 +151,22 @@ build_dirs:
 krnl : $(KRNL_RULES)
 mods : $(MODS_RULES)
 apps : $(APPS_RULES)
+
+#The standard lib is different. We must archive all objetcs;
 stdl : $(STDL_RULES)
-#TODO STDL BECOMES AN ARCHIVE, CODE WILL BE LIGHTER;
+
+#Create an archive with all objects;
+	@$(AR) cr build/stdlib.a $(STDL_O)
+
 
 
 #----------------------------------------------- Linking rule ----------------------------------------------
 
-elf: build_dirs krnl mods stdl apps
+elf: dtree krnl mods stdl apps
 	@echo "[LD]\ttracer.elf"
 
-#TODO STDL BECOMES AN ARCHIVE, CODE WILL BE LIGHTER;
+	@$(CC) $(LDFLAGS) $(KRNL_O) $(MODS_O) $(APPS_O) build/stdlib.a -o $(NAME).elf
 
-	@$(CC) $(LDFLAGS)  $(KRNL_O) $(MOD_O) $(APP_O)  $(STDL_O)-o $(NAME).elf
 	@$(SIZE) -A -t -x $(NAME).elf
 
 

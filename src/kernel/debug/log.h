@@ -12,7 +12,7 @@
 
 #include <stddef.h>
 
-#include <util/macro/variadic.h>
+#include <macro/variadic.h>
 
 //------------------------------------------------------- Config -------------------------------------------------------
 
