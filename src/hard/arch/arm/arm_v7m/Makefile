@@ -14,7 +14,7 @@
 #The armv7m uses the general ARM acrhitecture build;
 include src/hard/arch/arm/Makefile
 
-V7M_DIR :=  src/hard/arch/arm/arm_v7m
+V7M_D :=  src/hard/arch/arm/arm_v7m
 
 v7m_args :=
 
@@ -42,13 +42,13 @@ arm_v7m :
 	@echo "compiling ARM_V7M module\n"
 
 #Compile the armv7 base;
-	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o build/hard/arm_v7m.o -c $(V7M_DIR)/arm_v7m.c
+	@$(CC) $(CFLAGS) $(INC) $(v7m_args) -o $(KRNL_D)/arm_v7m.o -c $(V7M_D)/arm_v7m.c
 
 #if the preemption base must be compiled :
 ifdef KERNEL_SCHED_MODE
 
 #Compile the preemption base;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_sched.o -c $(V7M_DIR)/arm_v7m_sched.c
+	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_sched.o -c $(V7M_D)/arm_v7m_sched.c
 
 endif #KERNEL_SCHED_MODE
 
@@ -56,7 +56,7 @@ endif #KERNEL_SCHED_MODE
 
 #The nvic relocation module;
 arm_v7m_nvic_reloc :
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_nvic.o -c $(V7M_DIR)/arm_v7m_nvic.c
+	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
 
 
 #If the nvic relocation module must be added :
@@ -73,7 +73,7 @@ endif
 #The fault module;
 arm_v7m_fault :
 
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/arm_v7m_fault.o -c $(V7M_DIR)/arm_v7m_fault.c
+	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_fault.o -c $(V7M_D)/arm_v7m_fault.c
 
 
 #If the systick module must be added :

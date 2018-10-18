@@ -36,10 +36,10 @@ mk64fx512: cortex_m4f
 	@echo "compiling mk64fx512 module\n"
 
 #Compile the init source;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/mk64fx512.o -c $(SK_DIR)/mk64fx512/mk64fx512.c
+	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/mk64fx512.o -c $(SK_DIR)/mk64fx512/mk64fx512.c
 
 #Init function must stop watchdog at init. Compile it;
-	@$(CC) $(CFLAGS) $(INC) -o build/hard/kx_wdog.o -c $(SK_DIR)/kx_wdog.c
+	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/kx_wdog.o -c $(SK_DIR)/kx_wdog.c
 
 
 
@@ -51,22 +51,22 @@ mk64fx512: cortex_m4f
 clock:
 
 #compile the IRC;
-	@$(CC) $(CFLAGS) $(INC) -o build/mod/kx_irc.o -c $(SK_DIR)/kx_clock/kx_irc.c
+	@$(CC) $(CFLAGS) $(INC) -o $(MODS_D)/kx_irc.o -c $(SK_DIR)/kx_clock/kx_irc.c
 
 #compile the OSC;
-	@$(CC) $(CFLAGS) $(INC) $(osc_gp_args) $(osc_crystal_args) -o build/mod/kx_osc.o -c $(SK_DIR)/kx_clock/kx_osc.c
+	@$(CC) $(CFLAGS) $(INC) $(osc_gp_args) $(osc_crystal_args) -o $(MODS_D)/kx_osc.o -c $(SK_DIR)/kx_clock/kx_osc.c
 
 #compile the FLL;
-	@$(CC) $(CFLAGS) $(INC) -o build/mod/kx_fll.o -c $(SK_DIR)/kx_clock/kx_fll.c
+	@$(CC) $(CFLAGS) $(INC) -o $(MODS_D)/kx_fll.o -c $(SK_DIR)/kx_clock/kx_fll.c
 
 #compile the PLL;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/mod/kx_pll.o -c $(SK_DIR)/kx_clock/kx_pll.c
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o $(MODS_D)/kx_pll.o -c $(SK_DIR)/kx_clock/kx_pll.c
 
 #Compile the MCG;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/mod/kx_mcg.o -c $(SK_DIR)/kx_clock/kx_mcg.c
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o $(MODS_D)/kx_mcg.o -c $(SK_DIR)/kx_clock/kx_mcg.c
 
 #Compile the clock module;
-	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o build/mod/kc_clock.o -c $(SK_DIR)/kx_clock/kx_clock.c
+	@$(CC) $(CFLAGS) $(INC) $(pll_args) -o $(MODS_D)/kc_clock.o -c $(SK_DIR)/kx_clock/kx_clock.c
 
 #Add the port rule to the module dependencies list;
 MODULES += clock
@@ -83,7 +83,7 @@ port:
 	@echo "[CC]\t$(SK_DIR)/kx_port.c"
 
 #Compile the pit manager;
-	@$(CC) $(CFLAGS) $(INC) $(port_args) -o build/mod/kx_port.o -c $(SK_DIR)/kx_port.c
+	@$(CC) $(CFLAGS) $(INC) $(port_args) -o $(MODS_D)/kx_port.o -c $(SK_DIR)/kx_port.c
 
 
 #Add the port rule to the module dependencies list;
@@ -113,16 +113,16 @@ pit:
 	@echo "[CC]\t$(SK_DIR)/kx_pit_n.c"
 
 #Compile all 4 channels with their respective args;
-	@$(CC) $(CFLAGS) $(INC) $(pit0_args) -o build/mod/pit0.o -c $(SK_DIR)/kx_pit_n.c
-	@$(CC) $(CFLAGS) $(INC) $(pit1_args) -o build/mod/pit1.o -c $(SK_DIR)/kx_pit_n.c
-	@$(CC) $(CFLAGS) $(INC) $(pit2_args) -o build/mod/pit2.o -c $(SK_DIR)/kx_pit_n.c
-	@$(CC) $(CFLAGS) $(INC) $(pit3_args) -o build/mod/pit3.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit0_args) -o $(MODS_D)/pit0.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit1_args) -o $(MODS_D)/pit1.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit2_args) -o $(MODS_D)/pit2.o -c $(SK_DIR)/kx_pit_n.c
+	@$(CC) $(CFLAGS) $(INC) $(pit3_args) -o $(MODS_D)/pit3.o -c $(SK_DIR)/kx_pit_n.c
 
 #Log the compilation of the manager;
 	@echo "[CC]\t$(SK_DIR)/kx_pit.c"
 
 #Compile the pit manager; It takes two arguments, the mcr address and the number of channels;
-	@$(CC) $(CFLAGS) $(INC) $(pit_args) -o build/mod/pit.o -c $(SK_DIR)/kx_pit.c
+	@$(CC) $(CFLAGS) $(INC) $(pit_args) -o $(MODS_D)/pit.o -c $(SK_DIR)/kx_pit.c
 
 
 

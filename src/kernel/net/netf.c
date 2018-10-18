@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include <kernel/syscall.h>
+#include <kernel/public/syscall.h>
 
 
 

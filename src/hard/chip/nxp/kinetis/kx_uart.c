@@ -21,7 +21,7 @@
 #include "kx_uart.h"
 
 
-#include <kernel/syscall.h>
+#include <kernel/public/syscall.h>
 
 #include <string.h>
 

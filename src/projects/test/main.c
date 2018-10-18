@@ -4,7 +4,7 @@
 
 #include <kernel/debug/log.h>
 #include <kernel/debug/debug.h>
-#include <kernel/syscall.h>
+#include <kernel/public/syscall.h>
 
 
 void kernel_second_process(void *args, size_t args_size){

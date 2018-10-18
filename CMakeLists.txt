@@ -19,6 +19,7 @@ add_definitions(-D'ARDUINO=10805')
 add_definitions(-D'TEENSYDUINO=141')
 
 include_directories("$ENV{HOME}/Projects/TRACER/src")
+include_directories("$ENV{HOME}/Projects/TRACER/src/util")
 
 #include_directories("$ENV{HOME}/.platformio/packages/framework-arduinoteensy/cores/teensy3")
 #include_directories("$ENV{HOME}/.platformio/packages/framework-arduinoteensy/libraries/ADC")

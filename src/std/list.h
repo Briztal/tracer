@@ -1,41 +1,21 @@
-/*
-  type.h Part of TRACER
-
-  Copyright (c) 2018 Raphaël Outhier
-
-  TRACER is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  TRACER is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  aint32_t with TRACER.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+//
+// Created by root on 10/17/18.
+//
 
 #ifndef TRACER_LIST_H
 #define TRACER_LIST_H
 
-#include <stdbool.h>
-
-#include <stdint.h>
-
-#include <stddef.h>
+#include "type.h"
 
 
 //---------------------------------------------------- Simple lists ----------------------------------------------------
 
 //A list head contains two pointers to list heads;
 struct list_head {
-
+	
 	//Pointers to previous and next elements;
 	void *prev, *next;
-
+	
 };
 
 
@@ -69,10 +49,10 @@ __list_link(new, next);
  */
 
 static inline bool list_empty(struct list_head *head) {
-
+	
 	//Compare if head's successor is head.
 	return head->next == head;
-
+	
 }
 
 
@@ -82,17 +62,17 @@ static inline bool list_empty(struct list_head *head) {
  * links h0 and h1, and t1
  */
 static inline void list_add(struct list_head *h0, struct list_head *h1) {
-
+	
 	//Cache ends of src and dst;
 	struct list_head *t0 = h0->next;
 	struct list_head *t1 = h1->prev;
-
+	
 	//Link the end of dst to the head of src;
 	__list_link(h0, h1);
-
+	
 	//Link the end of src to the head of dst;
 	__list_link(t1, t0);
-
+	
 }
 
 
@@ -104,17 +84,17 @@ static inline void list_add(struct list_head *h0, struct list_head *h1) {
  */
 
 static inline void list_concat(struct list_head *h0, struct list_head *h1) {
-
+	
 	//Cache ends of src and dst;
 	struct list_head *t0 = h0->prev;
 	struct list_head *t1 = h1->prev;
-
+	
 	//Link the end of dst to the head of src;
 	__list_link(t1, h0);
-
+	
 	//Link the end of src to the head of dst;
 	__list_link(t0, h1);
-
+	
 }
 
 
@@ -122,16 +102,16 @@ static inline void list_concat(struct list_head *h0, struct list_head *h1) {
  * list_remove : Remove the list head from the rest of the list; head will be linked to itself;
  */
 static inline void list_remove(struct list_head *head) {
-
+	
 	//First, cache the list neighbors;
 	struct list_head *prev = head->prev, *next = head->next;
-
+	
 	//Link prev and next;
 	__list_link(prev, next);
-
+	
 	//Link l with itself;
 	__list_link(head, head);
-
+	
 }
 
 
@@ -193,17 +173,17 @@ void list_remove_ref_prev(struct list_head *head, struct list_head **ref);
  * list_add : concatenates the end of s0 and the head of l1
  */
 static inline void __elist_concat(void *h0, void *h1, size_t head_offset) {
-
+	
 	//Cache ends of src and dst;
 	void *t0 = __elist_prev(h0, head_offset);
 	void *t1 = __elist_prev(h1, head_offset);
-
+	
 	//Link the end of dst to the head of src;
 	__elist_link(t1, h0, head_offset);
-
+	
 	//Link the end of src to the head of dst;
 	__elist_link(t0, h1, head_offset);
-
+	
 }
 
 #define elist_concat(struct_name, field_name, src, dst)\
@@ -215,20 +195,21 @@ static inline void __elist_concat(void *h0, void *h1, size_t head_offset) {
  */
 
 static inline void __elist_remove(void *l, size_t head_offset) {
-
+	
 	//First, cache the list neighbors;
 	void *prev = __elist_prev(l, head_offset), *next = __elist_next(l, head_offset);
-
+	
 	//Link prev and next;
 	__elist_link(prev, next, head_offset);
-
+	
 	//Link l with itself;
 	__elist_link(l, l, head_offset);
-
-
+	
+	
 }
 
 #define elist_remove(struct_name, field_name, instance_name)\
 	__elist_remove((instance_name), offsetof(struct_name, field_name));
+
 
 #endif //TRACER_LIST_H

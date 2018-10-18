@@ -23,38 +23,8 @@
 #include <kernel/debug/debug.h>
 
 
-//Copy @num bytes from src to dst;
-void memcpy(void *_dst, const void *_src, size_t num) {
-	
-	//Convert;
-	uint8_t *dst = _dst;
-	const uint8_t *src = _src;
-	
-	//For each byte to copy :
-	while(num--) {
 
-		//Copy a byte from src to dst;
-		*(dst++) = *(src++);
 
-	}
-
-}
-
-//Initialise a memory block to a value;
-void memset(void *_dst, uint8_t value, size_t num) {
-
-	//Convert;
-	uint8_t *dst = _dst;
-	
-	//For each byte to copy :
-	while(num--) {
-
-		//Copy a byte from src to dst;
-		*(dst++) = value;
-
-	}
-
-}
 
 
 /* Copyright (C) 1991-2018 Free Software Foundation, Inc.

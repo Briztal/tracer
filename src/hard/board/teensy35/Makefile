@@ -11,11 +11,10 @@ TOOLSPATH := $(abspath $(CURDIR)/src/hard/board/teensy35/tool-teensy)
 
 hex: elf
 	@echo "[HEX]\tracer.hex"
-	@$(SIZE) -A -t -x $(NAME).elf
 	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).elf $(NAME).hex
 
 upload: hex
-	@$(abspath $(TOOLSPATH))/teensy_loader_cli -mmcu=mk64fx512 -w -v "$(abspath build/tracer.hex)"
+	@$(abspath $(TOOLSPATH))/teensy_loader_cli -mmcu=mk64fx512 -w -v "$(abspath $(NAME).hex)"
 
 reboot:
 	@-$(abspath $(TOOLSPATH))/teensy_reboot

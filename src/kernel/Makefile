@@ -21,6 +21,27 @@ CFLAGS += -DKFP_RAM_SIZE=$(KFP_RAM_SIZE) -DKFP_STACK_SIZE=$(KFP_STACK_SIZE) -DKF
 
 #----------------------------------------------------- Files ----------------------------------------------------
 
+
+#-------------------------------------------------- Implicit make rule -------------------------------------------------
+
+#TODO NO IMPLICIT RULE
+
+#The general compilation rule. Compiles a source file in src/, saves the output in the corresponding path in build/;
+#Requires the compiler (CC) to be up to date, and all C flags to be appropriately set;
+build/%.o: src/%.c
+
+#Create a dir if necessary;TODO NOPE, TAKES WAY TOO MUCH TIME !
+	@mkdir -p "$(dir $@)"
+
+#Display the name of the source we compile;
+	@echo "[CC]\t$@"
+
+#Compile, providing only src in include path, and all C flags;
+	@$(CC) $(CFLAGS) $(INC) -o $@ -c $<
+
+
+
+
 #Cache the current directory;
 KERNEL_DIR := kernel
 

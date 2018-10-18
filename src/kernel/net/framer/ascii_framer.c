@@ -19,7 +19,7 @@
 */
 
 #include <kernel/net/netf.h>
-#include <kernel/syscall.h>
+#include <kernel/public/syscall.h>
 #include "framer.h"
 
 /*
