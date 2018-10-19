@@ -1,20 +1,14 @@
 
 //----------------------------- Prioritary -----------------------------
 
-//TODO COPROCESSOR LIB AND BUILD;
-
-//TODO FPU CODE.
-
-//TODO MATH LIB;
+//TODO FLOAT MATH LIB;
 
 //TODO RAM PAGES ALLOC;
 
 //TODO CHECK THAT KINETIS UART DRIVER NOT LAREADY INITALISED
 
 
-
-/*
- *------------------------------------- Kernel tasks -------------------------------------
+/*------------------------------------- Kernel tasks -------------------------------------
 
 
 

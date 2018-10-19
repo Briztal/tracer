@@ -51,6 +51,7 @@
 //--------------------------------------------- Vars --------------------------------------------
 
 
+//TODO SYSCALL + FUNCTION IN PROC LIB;
 //A flag set if the current process must be terminated during teh next preemption;
 bool prc_process_terminated = false;
 
@@ -64,7 +65,7 @@ static struct stck exception_stack;
 void proc_init_stack(struct stck *stack, void (*function)(), void (*end_loop)(), void *init_arg) {
 	
 	//Create the stack context;
-	stack->sp =__proc_create_stack_context(stack->sp_reset, function, end_loop, init_arg);
+	stack->sp = __proc_create_stack_context(stack->sp_reset, function, end_loop, init_arg);
 	
 }
 
@@ -160,8 +161,17 @@ void proc_start_execution() {
 
 
 /**
- * kernel_get_new_stack : called by threads to get a new stack pointer, providing the current one, and the index of the
- * 	thread;
+ * kernel_get_new_stack : receives the current stack pointer, and provides a new one.
+ *
+ * 	The provided stack pointer may be invalid, if the function is called for the first time, when no process is
+ * 	currently in execution;
+ *
+ * 	Several steps must be executing, before commiting changes to the scheduler :
+ * 	- if valid sp : checking that no stack overflow has occurred.
+ * 	- if valid sp :  :saving the context of all coprocessors;
+ * 	- if process to terminate : terminate the process;
+ *
+ *
  * @param thread_id : the thread's index;
  * @param sp : the previous stack pointer;
  * @return the the new stack pointer;
@@ -169,48 +179,65 @@ void proc_start_execution() {
 
 void *__krnl_switch_context(void *sp) {
 	
+	//The current process memory;
+	struct pmem *mem;
+	
 	/*
 	 * First call check
 	 */
 	
 	//The first context switch must not save the stack pointer;
-	static bool first_call = true;
+	static bool valid_sp = false;
 	
 	//If the sp update is allowed :
-	if (first_call) {
+	if (valid_sp) {
 		
-		//Allow update;
-		first_call = false;
+		/*
+		 * Stack overflow monitoring;
+		 */
 		
-		//Skip termination and context saving;
-		goto commit;
+		//Cache the current process's memory;
+		mem = sched_get_pmem();
+		
+		//If a stack overflow has occurred :
+		if (sp < mem->stack.stack_limit) {
+			
+			//Panic.
+			kernel_panic("Stack overflow");
+			
+		}
+		
+		
+		/*
+		 * Context Saving
+		 */
+		
+		//Save coprocessors contexts;
+		coprocs_save_contexts(&mem->contexts);
+		
+		//Save process stack pointer;
+		mem->stack.sp = sp;
+		
+		
+	} else {
+		
+		//If it is the first call : Reset the first call flag;
+		valid_sp = true;
 		
 	}
 	
-	/*
-	 * Stack overflow monitoring;
-	 */
 	
-	//Cache the current process's memory;
-	struct pmem *mem = sched_get_pmem();
-	
-	//If a stack overflow has occurred : 
-	if (sp < mem->stack.stack_limit) {
-		
-		//Panic.
-		kernel_panic("Stack overflow");
-		
-	}
-	
-	
-	/*
-	 * Termination
-	 */
 	//TODO
 	//TODO IN SYSCALL;
 	
 	//If the process is terminated :
 	if (prc_process_terminated) {
+		
+		/*
+		 * Termination
+		 */
+		
+		kernel_log_("TERMINATING");
 		
 		//Terminate the current process;
 		sched_terminate_prc();
@@ -218,28 +245,9 @@ void *__krnl_switch_context(void *sp) {
 		//Clear termination flag;
 		prc_process_terminated = false;
 		
-		//Skip context saving;
-		goto commit;
-		
 	}
 	
 	
-	/*
-	 * Context Saving
-	 */
-	
-	//Save coprocessors contexts;
-	coprocs_save_contexts(&mem->contexts);
-	
-	//Save process stack pointer;
-	mem->stack.sp = sp;
-	
-	
-	/*
-	 * Scheduler commit
-	 */
-	
-	commit:
 	
 	//Commit changes to the scheduler;
 	sched_commit();

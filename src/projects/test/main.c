@@ -25,8 +25,8 @@ void kernel_second_process(void *args, size_t args_size){
 
 
 void __kernel_first_function(void *args, size_t args_size) {
-	/*
-	struct prc_desc desc = {
+	
+	/*struct prc_desc desc = {
 		.function = &kernel_second_process,
 		.args_size = 0,
 		.args = 0,
@@ -40,7 +40,7 @@ void __kernel_first_function(void *args, size_t args_size) {
 	
 	//sched_create_prc(&desc, &req);
 	
-	while(1) {
+	/*while(1) {
 		
 		uint32_t a = kernel_syscall(10, 314, 269, 93);
 		
@@ -49,6 +49,6 @@ void __kernel_first_function(void *args, size_t args_size) {
 		debug_delay_ms(1000);
 		
 		
-	}
+	}*/
 	
 }
