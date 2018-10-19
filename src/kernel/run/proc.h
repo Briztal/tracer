@@ -26,22 +26,13 @@
 #include <stdint.h>
 
 #include <stddef.h>
-#include <kernel/mem/stack_data.h>
-
-
+#include <kernel/mem/stck.h>
 
 
 //--------------------------------------------------- Stack creation ---------------------------------------------------
 
 //Initialise the stack_data for initialisation. Implemented by the run lib;
-void proc_init_stack(struct stack_data *stack, void (*function)(), void (*end_loop)(), void *init_arg);
-
-//A module can register a special function that adds a stack_data context header, for an FPU for ex;
-bool register_stack_header_creator(void (*new_creator)(struct stack_data *));
-
-//Reset a previously registered stack_data header creator;
-void reset_stack_header_creator();
-
+void proc_init_stack(struct stck *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
 //-------------------------------------------------- Execution control -------------------------------------------------
 

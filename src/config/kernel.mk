@@ -1,8 +1,21 @@
 
+#------------------------------------------------- Kernel Flags -------------------------------------------------
+
+#A special set of flags, to configure the kernel's behaviour.
+KFLAGS :=
+
+
+#------------------------------------------------- Coprocessors -------------------------------------------------
+
+#The number of coprocessors. Likely to be changed by the hardware lib;
+KERNEL_NB_COPROCESSORS = 0
+
+
 #------------------------------------------------- Dynamic memory size -------------------------------------------------
 
 #The size allocated to the kernel dynamic memory;
 KDM_SIZE = 8000
+
 
 #-------------------------------------------------- Run mode selection -------------------------------------------------
 

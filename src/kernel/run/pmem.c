@@ -97,7 +97,7 @@ void prc_mem_reset(struct pmem *mem, size_t stacks_size) {
 	stack_reset = __proc_stack_align(stack_reset);
 	
 	//Create the stack_data initializer;
-	struct stack_data ps_init = {
+	struct stck ps_init = {
 		
 		//The stack_data bound, not corrected;
 		.stack_limit = thread_stack,
@@ -111,7 +111,7 @@ void prc_mem_reset(struct pmem *mem, size_t stacks_size) {
 	};
 	
 	//Initialise the stack_data;
-	memcpy(&mem->stack, &ps_init, sizeof(struct stack_data));
+	memcpy(&mem->stack, &ps_init, sizeof(struct stck));
 	
 }
 

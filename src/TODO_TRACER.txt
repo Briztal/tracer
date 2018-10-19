@@ -40,17 +40,10 @@
 
 //---------- PORT DRIVER ----------
 
-PINS ABSTRACTION
-
-PORT MULTIPLEXING MACROS
-
 TEST ALL PORTS AND ALL FUNCTIONNALITIES
 
 
 //TODO POLLING INTERRUPT FUNCTION IN KINETIS PORT;
-
-//TODO ERRORS IN DRIVERS MISCONFIGURATIONS;
-
 
 /*
  *------------------------------------- Datastructures tasks -------------------------------------

@@ -119,10 +119,13 @@ include src/std/Makefile
 #----------------------------------------------------- Finalisation ----------------------------------------------------
 
 #Abreviation for compiling with standard C flags and include paths;
+KCC = $(CC) $(CFLAGS) $(KFLAGS) $(INC)
+
+#Abreviation for compiling with standard C flags and include paths;
 _CC = $(CC) $(CFLAGS) $(INC)
 
 #Abreviation proper to each make unit;
-__CC :=
+__CC =
 
 #Now that the hardware lib has updated link files, add appropriate options to the link flags;
 LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)

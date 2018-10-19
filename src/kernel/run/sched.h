@@ -68,7 +68,7 @@ struct prc_req {
 	//The required ram size;
 	size_t ram_size;
 	
-	//The size available for each stack_data;
+	//The size available for each stack;
 	size_t stack_size;
 	
 	//The required period between two preemptions;
@@ -139,9 +139,6 @@ void sched_init();
 //Create a scheduler element referencing the given process, and reference it in the scheduler;
 void sched_create_prc(struct prc_desc *desc, struct prc_req *req);
 
-//Set the stack_data pointer of one thread of the current process;
-void sched_set_prc_sp(void *);
-
 //Set the current process in the stopped state, and return its ref;
 struct sched_elmt *sched_stop_prc();
 
@@ -170,7 +167,7 @@ void sched_commit();
 //Get the current process;
 struct prc_req *sched_get_req();
 
-//Get the stack_data pointer of one thread of the current process;
-void * sched_get_sp();
+//Get the stack pointer of one thread of the current process;
+struct pmem *sched_get_pmem();
 
 #endif //TRACER_SCHEDULER_H

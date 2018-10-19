@@ -31,7 +31,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide :
+ * cortex_m4f.mk must provide :
  * 	- NB_AXIS : the number of axis the machine core aims to control;
  */
 

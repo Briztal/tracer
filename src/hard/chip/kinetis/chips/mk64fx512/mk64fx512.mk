@@ -12,7 +12,7 @@ LDSCRIPT_MMAP_DIR := src/hard/chip/kinetis/chips/mk64fx512/
 
 #---------------------------------------------------- Proc make unit ---------------------------------------------------
 
-include src/hard/proc/cortex_m4f/Makefile
+include src/hard/proc/cortex_m4f/cortex_m4f.mk
 
 
 #----------------------------------------------------- Abreviations ----------------------------------------------------
@@ -24,7 +24,8 @@ K_DIR := src/hard/chip/kinetis/periph
 KC_DIR := src/hard/chip/kinetis/chips/mk64fx512
 
 #Use this to compile with the kinetis periph folder included;
-_CC_ = $(CC) $(CFLAGS) $(INC) -I$(K_DIR)
+MKCC = $(CC) $(CFLAGS) $(INC) -I$(K_DIR)
+
 
 #---------------------------------------------------- Configuration ----------------------------------------------------
 
@@ -38,10 +39,10 @@ include $(KC_DIR)/mk64fx512_config.mk
 mk64fx512:
 
 #Compile the init source;
-	@$(_CC_) -o $(KRNL_D)/mk64fx512.o -c $(KC_DIR)/mk64fx512.c
+	@$(MKCC) -o $(KRNL_D)/mk64fx512.o -c $(KC_DIR)/mk64fx512.c
 
 #Init function must stop watchdog at init. Compile it;
-	@$(_CC_) -o $(KRNL_D)/kx_wdog.o -c $(K_DIR)/kx_wdog.c
+	@$(MKCC) -o $(KRNL_D)/kx_wdog.o -c $(K_DIR)/kx_wdog.c
 
 
 #----------------------------------------------------- Flash config ----------------------------------------------------
@@ -51,7 +52,7 @@ fcfg_flags += -DF_OPT=$(FLASH_CFG_FLASH_OPTIONS)
 fcfg_flags += -DF_SEC=$(FLASH_CFG_FLASH_SECURITY)
 
 flash_cfg:
-	@$(_CC_) -o $(KRNL_D)/kx_flash_cfg.o -c $(K_DIR)/kx_flash_cfg.c $(fcfg_flags)
+	@$(MKCC) -o $(KRNL_D)/kx_flash_cfg.o -c $(K_DIR)/kx_flash_cfg.c $(fcfg_flags)
 
 
 #------------------------------------------------------ MCG module -----------------------------------------------------
@@ -61,7 +62,10 @@ osc_args += -DOSC0_FREQUENCY=$(OSC0_FREQUENCY)
 osc_args += -DSTOP_MODE_EN=$(OSC0_STOP_MODE_ENABLE)
 osc_args += -DLOC0_RESET=$(OSC0_LOC_RESET)
 osc_args += -DLOW_POWER=$(OSC0_CRYSTAL_LOW_POWER)
+
+ifneq ($(OSC0_CONNECTION_ID), 0)
 osc_args += -DCAPACITORS=$(OSC0_CAPACITORS)
+endif
 
 pll_args := -DSTOP_MODE_EN=$(PLL_STOP_MODE_ENABLE)
 pll_args += -DLOL0_INT=$(PLL_LOL_INT)
@@ -69,12 +73,12 @@ pll_args += -DLOL0_RESET=$(PLL_LOL_RESET)
 
 clock:
 
-	@$(_CC_) -o $(MODS_D)/kx_irc.o -c $(K_DIR)/kx_clock/kx_irc.c
-	@$(_CC_) -o $(MODS_D)/kx_osc.o -c $(K_DIR)/kx_clock/kx_osc.c $(osc_args)
-	@$(_CC_) -o $(MODS_D)/kx_fll.o -c $(K_DIR)/kx_clock/kx_fll.c
-	@$(_CC_) -o $(MODS_D)/kx_pll.o -c $(K_DIR)/kx_clock/kx_pll.c $(pll_args)
-	@$(_CC_) -o $(MODS_D)/kx_mcg.o -c $(K_DIR)/kx_clock/kx_mcg.c $(pll_args)
-	@$(_CC_) -o $(MODS_D)/kc_clock.o -c $(K_DIR)/kx_clock/kx_clock.c $(pll_args)
+	@$(MKCC) -o $(MODS_D)/kx_irc.o -c $(K_DIR)/kx_clock/kx_irc.c
+	@$(MKCC) -o $(MODS_D)/kx_osc.o -c $(K_DIR)/kx_clock/kx_osc.c $(osc_args)
+	@$(MKCC) -o $(MODS_D)/kx_fll.o -c $(K_DIR)/kx_clock/kx_fll.c
+	@$(MKCC) -o $(MODS_D)/kx_pll.o -c $(K_DIR)/kx_clock/kx_pll.c $(pll_args)
+	@$(MKCC) -o $(MODS_D)/kx_mcg.o -c $(K_DIR)/kx_clock/kx_mcg.c $(pll_args)
+	@$(MKCC) -o $(MODS_D)/kc_clock.o -c $(K_DIR)/kx_clock/kx_clock.c $(pll_args)
 
 
 #--------------------------------------------------- PORT GPIO module --------------------------------------------------
@@ -85,7 +89,7 @@ port_args := -DPORT_REG=0x40049000 -DPORT_SPACING=0x1000 -DGPIO_REG=0x400FF000 -
 port:
 
 #The port object is compiled providing the chip directory, so that appropriate pins get generated;
-	@$(_CC_) -o $(MODS_D)/kx_port.o -c $(K_DIR)/kx_port.c $(port_args) -I$(KC_DIR)
+	@$(MKCC) -o $(MODS_D)/kx_port.o -c $(K_DIR)/kx_port.c $(port_args) -I$(KC_DIR)
 
 
 #----------------------------------------------------- PITs module -----------------------------------------------------
@@ -106,13 +110,13 @@ pit3_args := $(call pitx_args,3,pit_3,51,0x40037130)
 pit:
 
 #Compile all 4 channels with their respective args;
-	@$(_CC_) -o $(MODS_D)/pit0.o -c $(K_DIR)/kx_pit_n.c $(pit0_args)
-	@$(_CC_) -o $(MODS_D)/pit1.o -c $(K_DIR)/kx_pit_n.c $(pit1_args)
-	@$(_CC_) -o $(MODS_D)/pit2.o -c $(K_DIR)/kx_pit_n.c $(pit2_args)
-	@$(_CC_) -o $(MODS_D)/pit3.o -c $(K_DIR)/kx_pit_n.c $(pit3_args)
+	@$(MKCC) -o $(MODS_D)/pit0.o -c $(K_DIR)/kx_pit_n.c $(pit0_args)
+	@$(MKCC) -o $(MODS_D)/pit1.o -c $(K_DIR)/kx_pit_n.c $(pit1_args)
+	@$(MKCC) -o $(MODS_D)/pit2.o -c $(K_DIR)/kx_pit_n.c $(pit2_args)
+	@$(MKCC) -o $(MODS_D)/pit3.o -c $(K_DIR)/kx_pit_n.c $(pit3_args)
 
 #Compile the pit manager; It takes two arguments, the mcr address and the number of channels;
-	@$(_CC_) -o $(MODS_D)/pit.o -c $(K_DIR)/kx_pit.c $(pit_args)
+	@$(MKCC) -o $(MODS_D)/pit.o -c $(K_DIR)/kx_pit.c $(pit_args)
 
 
 #-------------------------------------------------- Components Config --------------------------------------------------

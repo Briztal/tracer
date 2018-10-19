@@ -1,5 +1,5 @@
 
-# ARMV7M Makefile. Including this makefile will result in the compilation of the kernel base for
+# ARMV7M cortex_m4f.mk. Including this makefile will result in the compilation of the kernel base for
 #	the ARMV7M architecture.
 #
 #	Two modules are also added to the modules list, the systick and the NVIC relocation module;
@@ -42,7 +42,6 @@ endif
 #-------------------------------------------------- Compilation Rules --------------------------------------------------
 
 arm_v7m_kernel_base :
-	@echo "compiling ARM_V7M module\n"
 
 #Compile the armv7 base;
 	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_boot.o -c $(V7M_D)/arm_v7m_boot.c
@@ -63,7 +62,6 @@ arm_v7m_kernel_base :
 #The nvic relocation module;
 arm_v7m_nvic_reloc :
 	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
-
 
 
 #The fault module;

@@ -35,7 +35,7 @@
 #endif
 
 
-//--------------------------------------------- Includes --------------------------------------------
+//------------------------------------------------------ Includes ------------------------------------------------------
 
 #include "sched.h"
 
@@ -52,7 +52,7 @@
 //------------------------------------------------- Process execution --------------------------------------------------
 
 /*
- * prc_exec : the process execution function. ;
+ * prc_exec : the process execution function;
  *
  * 	Executes the process function, with the process args, and returns;
  */
@@ -61,7 +61,7 @@ static void prc_exec() {
 	
 	kernel_log_("Entering");
 	
-	//Cache the execution data, saved in the stack_data;
+	//Cache the execution data, saved in the stack;
 	volatile struct prc_desc *volatile desc = __proc_get_init_arg();
 	
 	//Execute the function, passing args;
@@ -261,13 +261,13 @@ static void sched_init_prc_mem(struct sched_elmt *elmt) {
 	//Initialise a program memory;
 	prc_mem_create_heap(mem, elmt->req.ram_size);
 	
-	//Reset the prog mem and allocate the stack_data;
+	//Reset the prog mem and allocate the stack;
 	prc_mem_reset(mem, elmt->req.stack_size);
 	
 	//The process descriptor is located in the kernel heap. We must copy it in the process heap;
 	struct prc_desc *desc_copy = heap_ialloc(mem->heap, sizeof(struct prc_desc), &elmt->desc);
 	
-	//Initialise the stack_data and pass the execution environment;
+	//Initialise the stack and pass the execution environment;
 	proc_init_stack(&mem->stack, &prc_exec, &prc_exit, desc_copy);
 	
 }
@@ -340,7 +340,7 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 	//Initialise the element;
 	memcpy(elmt, &init, sizeof(struct sched_elmt));
 	
-	//Initialise the element's process memory and execution stack_data;
+	//Initialise the element's process memory and execution stack;
 	sched_init_prc_mem(elmt);
 	
 	//Push the element in the add shared fifo;
@@ -386,15 +386,6 @@ static void sched_delete_element(struct sched_elmt *element) {
 	
 	//Delete the element;
 	kfree(element);
-	
-}
-
-
-//Set the stack_data pointer of one thread of the current process;
-void sched_set_prc_sp(void * sp) {
-	
-	//Update the stack_data pointer of the first process;
-	scheduler.active_list->prc_mem.stack.sp = sp;
 	
 }
 
@@ -560,11 +551,11 @@ struct prc_req *sched_get_req() {
 }
 
 
-//Get the stack_data pointer of one thread of the current process;
-void * sched_get_sp() {
+//Get the stack pointer of one thread of the current process;
+struct pmem *sched_get_pmem() {
 	
 	//Return the first process hardware requirements;
-	return scheduler.active_list->prc_mem.stack.sp;
+	return &scheduler.active_list->prc_mem;
 	
 }
 

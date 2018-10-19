@@ -22,16 +22,15 @@
 #include <stdint.h>
 
 #include <stddef.h>
-#include <kernel/mem/stack_data.h>
 
 
 /*
  * Notice :
  *
  *
- *  arm v7m minimal stack_data frame :
+ *  arm v7m minimal stack frame :
  *
- *      	----------- <- pre irq / stack_data frame header end;
+ *      	----------- <- pre irq / stack frame header end;
  *      XPSR
  *      PC
  *      LR
@@ -55,17 +54,17 @@
  * proc_init_stack : this function initialises the unstacking environment, so that the given function will
  *  be executed at context switch time;
  *
- *  It starts by caching the process_t stack_data pointer, and stacks the process functions pointers, and the PSR.
+ *  It starts by caching the process_t stack pointer, and stacks the process functions pointers, and the PSR.
  *
  *  Then, it saves the process index in R12 (next word);
  *
- *  Finally, it leaves space for empty stack_data frame and saves the stack_data pointer;
+ *  Finally, it leaves space for empty stack frame and saves the stack pointer;
  */
 
-void __proc_create_stack_context(struct stack_data *stack, void (*function)(), void (*exit_loop)(), void *arg) {
+void *__proc_create_stack_context(void *sp_reset, void (*function)(), void (*exit_loop)(), void *arg) {
 	
-	//Cache the current stack_data pointer;
-	uint32_t *sp4 = stack->sp;
+	//Cache the current stack pointer;
+	uint32_t *sp4 = sp_reset;
 	
 	//Store the PSR. Contains the execution mode; //TODO DOC
 	*(sp4 - 1) = 0x01000000;
@@ -79,11 +78,11 @@ void __proc_create_stack_context(struct stack_data *stack, void (*function)(), v
 	//Store the arg in R12 cache;
 	*(sp4 - 4) = (uint32_t) (arg);
 	
-	//Update the stack_data pointer; Hits the future R4 reload address;
+	//Update the stack pointer; Hits the future R4 reload address;
 	sp4 -= 16;
 	
-	//Return the stack_data pointer;
-	stack->sp = sp4;
+	//Return the stack pointer;
+	return sp4;
 	
 }
 
@@ -123,15 +122,12 @@ void *__proc_stack_align(void *stack_reset) {
  * @param exception_stack : the stack where exceptions should happen;
  */
 
-__attribute__ ((naked)) void __proc_enter_thread_mode(struct stack_data *exception_stack) {
+__attribute__ ((naked)) void __proc_enter_thread_mode(void *exception_sp) {
 	
 	__asm__ __volatile__ (\
 
 	//Disable interrupts;
 	"cpsid 	i \n\t"
-		
-		//Load the value of the stack_data pointer (exception_stack located in R0, arm calling convention);
-		"ldr 	r0, 	[r0]	\n\t"
 		
 		//Save msp in R1;
 		"mrs 	r1,  	msp		\n\t"
@@ -145,7 +141,7 @@ __attribute__ ((naked)) void __proc_enter_thread_mode(struct stack_data *excepti
 		//Update the value of control, to use psp;
 		"msr 	control, r2		\n\t"
 		
-		//Update the main stack_data pointer, so that exceptions use the exception stack_data;
+		//Update the main stack pointer, so that exceptions use the exception stack;
 		"msr 	msp,  r0		\n\t"
 		
 		//Save LR in R4, as bl will overwrite it;

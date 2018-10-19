@@ -21,7 +21,7 @@
 //------------------------------------------------ Make parameters -----------------------------------------------
 
 /*
- * Makefile must provide :
+ * cortex_m4f.mk must provide :
  * 	- NB_EXCEPTIONS : the number of interrupts supported by the chip.
  * 	- NVIC_RELOCATION : 1 or 0, depending on if the nvic vector table will be relocated or not;
  * 	- EXEC_LEVEL : the level of execution of the kernel;

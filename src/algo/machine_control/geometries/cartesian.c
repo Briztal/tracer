@@ -6,7 +6,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide :
+ * cortex_m4f.mk must provide :
  * 	- NB_AXIS : the number of axis in the geometry
  * 	- NB_AXIS : the geometry struct's required name;
  */

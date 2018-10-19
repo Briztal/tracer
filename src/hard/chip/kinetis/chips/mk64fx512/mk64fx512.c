@@ -22,6 +22,7 @@
 #include <kernel/startup.h>
 
 #include "kx_wdog.h"
+
 #include "kx_sim.h"
 
 

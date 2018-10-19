@@ -31,7 +31,7 @@ FLASH_CFG_FLASH_SECURITY = 0xDE
 #------------------------------------------ Multipurpose Clock Generator OSC0 ------------------------------------------
 
 #The idendifier of the connection for the OSC0. 0 for extenal clocking, and 1, 2 or 3 for different internal modes;
-OSC0_CONNECTION_ID := 0
+OSC0_CONNECTION_ID := 1
 
 #The frequency of the OSC0 signal, crystal, or external reference;
 OSC0_FREQUENCY := 16000000

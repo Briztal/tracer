@@ -35,7 +35,6 @@
 
 #include <stdint.h>
 
-#include <kernel/mem/stack_data.h>
 
 /*
  * ---------------------------------------------------------------------------------------------------------------------
@@ -55,7 +54,7 @@ extern void __krnl_init();
 //Place the kernel in a safe state, call the fault analyser, and recover, if possible. If not, panic;
 extern void __krnl_handle_fault(uint32_t type);
 
-//The kernel context switcher; received a stack_data pointer and returns the new one;
+//The kernel context switcher; received a stack pointer and returns the new one;
 extern void *__krnl_switch_context(void *sp);
 
 //The kernel syscall handler;
@@ -215,8 +214,8 @@ extern void *__proc_stack_align(void *stack_reset);
 //Get the initial arg;
 extern void *__proc_get_init_arg();
 
-//The hardware library must provide a function to create the general stack_data context;
-extern void __proc_create_stack_context(struct stack_data *stack, void (*function)(), void (*exit_loop)(), void *arg);
+//The hardware library must provide a function to create the general stack context;
+extern void * __proc_create_stack_context(void *sp_reset, void (*function)(), void (*exit_loop)(), void *arg);
 
 
 /**
@@ -234,7 +233,7 @@ extern void __proc_create_stack_context(struct stack_data *stack, void (*functio
  * @param exception_stacks : processor stacks that must be used in case of interrupt;
  */
 
-extern void __proc_enter_thread_mode(struct stack_data *exception_stacks);
+extern void __proc_enter_thread_mode(void *exception_sp);
 
 
 //------------------------------------------------ Preemption functions ------------------------------------------------

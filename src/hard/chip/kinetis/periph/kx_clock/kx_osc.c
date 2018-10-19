@@ -21,7 +21,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide :
+ * cortex_m4f.mk must provide :
  *  - OSC0_CONN_ID : the resonator connection configuration. 0 for external clock, and 1, 2 or 3 for
  *  	related internal configurations.
  * 	- OSC0_FREQUENCY : the OSC resonator frequency;

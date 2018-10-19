@@ -21,7 +21,7 @@
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
 /*
- * Makefile must provide :
+ * cortex_m4f.mk must provide :
  * 	- STOP_MODE_EN : if set, the PLL stays enabled in stop mode;
  * 	- LOL0_INT : if set, an interrupt is triggered if the PLL lock is lost;
  * 	- LOL0_RESET : if set, a reset is triggered if the PLL lock is lost;

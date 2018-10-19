@@ -22,7 +22,7 @@
 #define TRACER_MEMORY_H
 
 
-//--------------------------------------------------- Includes --------------------------------------------------
+//------------------------------------------------------- Includes ------------------------------------------------------
 
 #include <stdbool.h>
 
@@ -32,10 +32,13 @@
 
 #include <kernel/mem/heap.h>
 
-#include <kernel/mem/stack_data.h>
+#include <kernel/mem/stck.h>
 
-//--------------------------------------------------- Make Parameters --------------------------------------------------
+#include <macro/incr_call.h>
+#include "coproc.h"
 
+
+//------------------------------------------------- Make Parameters ----------------------------------------------------
 
 /*
  * The program memory environment reflects the memory structure a program can access. It is a contiguous memory block
@@ -43,7 +46,6 @@
  *
  * 	From this heap, several stacks can be allocated, their references will be saved in the @stacks array;
  */
-
 
 struct pmem {
 
@@ -53,8 +55,11 @@ struct pmem {
 	//The heap reference;
 	struct heap_head *heap;
 
-	//The stack_data references array;
-	struct stack_data stack;
+	//The stack references array;
+	struct stck stack;
+
+	//The struct to contain coprocessors contexts;
+	struct coprocs_contexts contexts;
 
 };
 
