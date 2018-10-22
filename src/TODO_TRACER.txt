@@ -1,7 +1,11 @@
 
 //----------------------------- Prioritary -----------------------------
 
-//TODO FLOAT MATH LIB;
+//TODO STDOUT
+
+//TODO MACHINE CONTROL UN-DYNAMISE
+
+//TODO VFP MATH LIB;
 
 //TODO RAM PAGES ALLOC;
 
