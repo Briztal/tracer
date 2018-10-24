@@ -146,14 +146,13 @@ static void machine_states_accept(struct mstates *states);
 
 void mcore_initialise(
 	struct mcore *core,
-	struct mcontroller *controller,
 	struct mstate *s0,
 	struct mstate *s1,
 	void *controller_computation_data
 ) {
 	
 	//Cache the core dimension;
-	const uint8_t dimension = core->dimension;
+	const uint8_t dimension = core->nb_axis;
 	
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
@@ -173,20 +172,9 @@ void mcore_initialise(
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
 	//TODO ASSIGN CONTROLLER BUILDER AND STATE
 	
-	//If controller dimensions are incompatible :
-	if (dimension != controller->dimension) {
-		
-		//Log;
-		kernel_log_("mcore_initialise : incompatible controller dimensions");
-		
-		//Fail;
-		return;
-		
-	}
 	
 	//Cache the first state dimension;
 	uint8_t s0_dimension = s0->dimension;
-	
 	
 	//If states are incompatible :
 	if (s0_dimension != s1->dimension) {
@@ -211,9 +199,6 @@ void mcore_initialise(
 		
 	}
 	
-	//Update the machine controller;
-	core->controller = controller;
-	
 	//Provide access to states;
 	core->states.s0 = core->states.current_state = s0;
 	core->states.s1 = core->states.next_state = s0;
@@ -221,9 +206,6 @@ void mcore_initialise(
 	
 	//Provide access to controller computation data;
 	core->cmp_data.controller_data = controller_computation_data;
-	
-	//Signal the core registered;
-	core->ready = true;
 	
 }
 
@@ -277,6 +259,22 @@ bool mcore_compute_movement(struct mcore *const core) {
 	int16_t *const mv_distances = mvmt->actuation_distances;
 	
 	
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	//TODO REMOVE THE CONTROLLER
+	
 	//Cache the movement controller;
 	struct mcontroller *ctrl = core->controller;
 	
@@ -321,7 +319,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 	
 	
 	//Cache the dimension;
-	const uint8_t dimension = core->dimension;
+	const uint8_t dimension = core->nb_axis;
 	
 	//Cache the current state and the next state;
 	const struct mstate *const cur_state = core->states.current_state;
@@ -647,31 +645,27 @@ static void compute_next_position(
 }
 
 
+//--------------------------------------------------- Initialisation ---------------------------------------------------
+
+
+
 /*
  * compute_state : updates the controller state, by executing each enabled builder computations;
  *
  * //TODO COMMENT;
  */
 
-static void compute_builder(const struct mcontroller *const controller,
-							const struct mstate *const current_state,
-							const struct mstate *const new_state,
-							void *const controller_data) {
-	
-	//Cache the computations array;
-	void (**cpts)(const struct mstate *, const struct mstate *, void *) = controller->builder_cpts;
-	
-	//Cache the number of computations;
-	uint8_t nb_cpts = controller->nb_builder_cpts;
+static void compute_builder(
+	const struct mstate *const current_state,
+	const struct mstate *const new_state,
+	void *const controller_data
+) {
 	
 	//For each computation :
-	while (nb_cpts--) {
+	for (uint8_t cpt_id = 0; cpt_id < NB_BUILDER_CPTS; cpt_id++) {
 		
 		//Execute the computation;
-		(*(*cpts))(current_state, new_state, controller_data);
-		
-		//Update the computation pointer;
-		cpts++;
+		(*(builder_computations[cpt_id]))(current_state, new_state, controller_data);
 		
 	}
 	
@@ -685,10 +679,10 @@ static void compute_builder(const struct mcontroller *const controller,
  */
 
 
-static void reduce_interval(const struct mcontroller *controller,
-							const struct mstate *current_state,
-							const void *controller_data,
-							struct time_interval *duration_window) {
+static void reduce_interval(
+	const struct mstate *current_state,
+	const void *controller_data,
+	struct time_interval *duration_window) {
 	
 	//Create a cached copy of the provided time interval;
 	struct time_interval final_interval = *(duration_window);
@@ -710,22 +704,13 @@ static void reduce_interval(const struct mcontroller *controller,
 	}
 	
 	//Create a time interval that we will give to kinematic constraints; They will initialise it;
-	struct time_interval constraint_interval = {};
-	
-	
-	//Cache the constraints array;
-	void (**constraints)
-		(const struct mstate *, const void *, struct time_interval *) = controller->kinematic_cnsts;
-	
-	//Cache the number of constraints;
-	uint8_t nb_constraints = controller->nb_kinematic_cnsts;
-	
+	struct time_interval constraint_interval = {0};
 	
 	//For each computation to realise :
-	while (nb_constraints--) {
+	for (uint8_t cnst_id = 0; cnst_id < NB_KINEMATIC_CSTRS; cnst_id++) {
 		
 		//Determine the constraint's required duration window; constraint_interval will be re-initialised;
-		(*(*constraints))(current_state, controller_data, &final_interval);
+		(*(constraints[cnst_id]))(current_state, controller_data, &final_interval);
 		
 		//The constraint updates the provided interval to a non empty valid one;
 		
@@ -740,9 +725,6 @@ static void reduce_interval(const struct mcontroller *controller,
 			
 		}
 		
-		//Update the constraint;
-		constraints++;
-		
 	}
 	
 	//Now that the duration window is reduced to its minimal width, save it;
@@ -756,26 +738,17 @@ static void reduce_interval(const struct mcontroller *controller,
  * //TODO COMMENT;
  */
 
-static void compute_state(const struct mcontroller *const controller,
-						  const struct mstate *const current_state,
-						  const struct computation_data *const cmp_data,
-						  struct mstate *const new_state) {
+static void compute_state(
+	const struct mstate *const current_state,
+	const struct computation_data *const cmp_data,
+	struct mstate *const new_state) {
 	
-	//Cache the computations array;
-	void (**cpts)(const struct mstate *const, const struct computation_data *const,
-				  struct mstate *const) = controller->state_cpts;
-	
-	//Cache the number of computations;
-	uint8_t nb_cpts = controller->nb_state_cpts;
 	
 	//For each computation :
-	while (nb_cpts--) {
+	for (uint8_t cpt_id = 0; cpt_id < NB_STATE_CPTS; cpt_id++) {
 		
 		//Execute the computation;
-		(*(*cpts))(current_state, cmp_data, new_state);
-		
-		//Update the computation pointer;
-		cpts++;
+		(*(state_computations[cpt_id]))(current_state, cmp_data, new_state);
 		
 	}
 	

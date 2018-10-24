@@ -30,6 +30,8 @@
 #include "time_interval.h"
 
 #include "mcontroller.h"
+#include "geometry.h"
+#include "actuation.h"
 
 
 
@@ -61,7 +63,7 @@ struct movement {
 
 struct mstate {
 	
-	//States are created independently from any core or controller. Their dimension must be check at init;
+	//States are created independently from any core. Their dimension must be check at init;
 	const uint8_t dimension;
 	
 	//The status of the computation; Each bit marks one computation stage realised; Bit 31 is reserved;
@@ -136,6 +138,88 @@ struct computation_data {
 };
 
 
+
+//---------------------------------------------- Distance computation ----------------------------------------------
+
+/*
+ * The controller comprises a data structure whose goal is to provide the distance target for the next
+ * 	movement.
+ *
+ * 	During this computation, it has access to the current state, that it can't alter, and to the current state,
+ * 	that it can modify, to pre-compute some data, computations that it will signal in the state's status;
+ *
+ * 	It also has access to the array where distances must be stored;
+ */
+
+struct distance_computer {
+	
+	//The function that will compute movement distances;
+	bool (*compute_distances)(
+		struct distance_computer *,
+		const struct mstate *current_state,
+		struct mstate *new_state,
+		int16_t *distances);
+	
+};
+
+
+//------------------------------------------------ Builder computations ------------------------------------------------
+
+/*
+ * Extra computations may be required, depending on the controller's complexity level.
+ *
+ * 	A controller comput is a function that takes current and new states (consts), makes calculations, and
+ * 	saves them in the controller part of the movement builder;
+ *
+ * 	The controller part of the movement builder is not defined, and completely depends on the implementation;
+ *
+ * 	Computations can be disabled.
+ */
+
+typedef void (*builder_cpt)(const struct mstate *const current_state,
+							const struct mstate *const new_state,
+							void *const const_builder);
+
+
+//------------------------------------------------ Kinematic constraints -----------------------------------------------
+
+/*
+ * Kinematic constraints are functions that restrict the duration interval of a movement;
+ *
+ *	They are stored in link lists, and can be disabled, by clearing their flag.
+ *
+ *	They are composed of a function, that takes the machine's current state, and custom movement data, and returns
+ *	an indicative time window for the movement.
+ *
+ *	Constraints are indicative, if the duration window they provide does not intersect with the mandatory time window,
+ *	determined by the actuation layer and all more prioritary constraints, the appropriate bound of the mandatory time
+ *	window is selected.
+ */
+
+typedef void (*kinematic_cnst)(const struct mstate *current_state,
+							   const void *controller_data,
+							   struct time_interval *duration_window);
+
+
+//---------------------------------------------------- State updates ---------------------------------------------------
+
+/*
+ * Extra state fields may be required, depending on the controller's complexity level.
+ *
+ * 	A controller state comput is a function that takes current and new states (consts), makes calculations, and
+ * 	saves them in the controller part of the movement builder;
+ *
+ * 	The controller part of the movement builder is not defined, and completely depends on the implementation;
+ *
+ * 	Computations can be disabled.TODO
+ */
+
+typedef void (*state_cpt)(const struct mstate *const current_state,
+						  const struct computation_data *const const_builder,
+						  struct mstate *const new_state);
+
+
+
 //------------------------------------------------- Machine core -------------------------------------------------
 
 /*
@@ -144,46 +228,58 @@ struct computation_data {
 
 struct mcore {
 	
+	
 	/*
 	 * Constants
 	 */
 	
-	//The machine dimension, constant;
-	const uint8_t dimension;
+	//The machine dimension. Constant;
+	const uint8_t nb_axis;
+	
+	//The number of controller builder computations;
+	const uint8_t nb_builder_cpts;
+	
+	//The number of kinematic constraints;
+	const uint8_t nb_kinematic_cnsts;
+	
+	//The number of controller state computations;
+	const uint8_t nb_state_cpts;
+	
 	
 	
 	/*
-	 * External control;
+	 * Computation model
 	 */
 	
-	//The machine's controller, owned, mutable;
-	struct mcontroller *controller;
+	//The distances computer; Mutable.
+	struct distance_computer *dist_computer;
+	
+	//The machine's geometric_model, constant ref;
+	struct geometric_model *const geometry;
+	
+	//The actuation physics array, mutable ref;
+	struct actuator_model **const actuators_models;
+	
+	//The array of builder computations;
+	builder_cpt *const builder_cpts;
+	
+	//The array of kinematic constraints;
+	kinematic_cnst *const kinematic_cnsts;
+	
+	//The array of state computations;
+	state_cpt  *const state_cpts;
+	
 	
 	
 	/*
-	 * Machine states;
+	 * Computation data;
 	 */
 	
 	//Machine states, owned, mutable;
 	struct mstates states;
 	
-	
-	/*
-	 * Computation;
-	 */
-	
 	//The movement builder, owned, mutable;
 	struct computation_data cmp_data;
-	
-	/*
-	 * State;
-	 */
-	
-	bool ready;
-	
-	/*
-	 * Result;
-	 */
 	
 	//The movement that we currently compute; References the distances array and the duration;
 	struct movement *movement;
@@ -195,7 +291,6 @@ struct mcore {
 //Initialise a machine core, providing a machine controller, two states, and a ref to the controller computation struct;
 void mcore_initialise(
 	struct mcore *core,
-	struct mcontroller *controller,
 	struct mstate *s0,
 	struct mstate *s1,
 	void *controller_computation_data

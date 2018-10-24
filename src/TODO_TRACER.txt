@@ -1,6 +1,10 @@
 
 //----------------------------- Prioritary -----------------------------
 
+//TODO PORT ON ARDUINO
+
+//TODO TEST MACHINE CONTROLLER
+
 //TODO STDOUT
 
 //TODO MACHINE CONTROL UN-DYNAMISE
