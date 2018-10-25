@@ -42,9 +42,7 @@
  * 		Each actuator's physical model computes the duration interval for each axis;
  */
 
-static void compute_durations(uint8_t dimension, struct actuator_model **actuators,
-							  const int16_t *distances, const struct mstate *current_state,
-							  struct time_interval *dst);
+static void compute_durations(struct mcore *core, struct movement *mvmt);
 
 
 /*
@@ -53,7 +51,7 @@ static void compute_durations(uint8_t dimension, struct actuator_model **actuato
  * 		If authorised, will activate the distance correction node for all required actuators;
  */
 
-static bool merge_intervals(uint8_t dimension, struct time_interval *intervals, struct time_interval *dst_interval);
+static bool merge_intervals(struct mcore *core);
 
 
 /*
@@ -61,15 +59,14 @@ static bool merge_intervals(uint8_t dimension, struct time_interval *intervals, 
  * 		for each axis, determines the closest distance from the original distance, that matches actuation constraints;
  * 		returns true if a distance is modified;
  */
-static bool correct_distances(uint8_t dimension, struct actuator_model **actuators,
-							  const struct time_interval *intervals, float duration, int16_t *distances);
+static bool correct_distances(struct mcore *core, struct movement *mvmt);
 
 /*
  *  4 - next position computation :
  * 		determines the next actuation position, given the current state, and the distances array.
  */
 
-static void compute_next_position(uint8_t dimension, const int32_t *position, const int16_t *dists, int32_t *dests);
+static void compute_next_position(struct mcore *core, struct movement *mvmt);;
 
 
 /*
@@ -86,10 +83,8 @@ static void compute_next_position(uint8_t dimension, const int32_t *position, co
  *		the controller computes its part of the movement builder; It may realise any computation it requires for
  *		next stages;
  */
-static void compute_builder(const struct mcontroller *controller,
-							const struct mstate *current_state,
-							const struct mstate *new_state,
-							void *controller_data);
+
+static void compute_builder(struct mcore *core);
 
 
 /*
@@ -101,10 +96,8 @@ static void compute_builder(const struct mcontroller *controller,
  *		is selected;
  */
 
-static void reduce_interval(const struct mcontroller *controller,
-							const struct mstate *current_state,
-							const void *controller_data,
-							struct time_interval *duration_window);
+static void reduce_interval(struct mcore *core);
+
 
 /*
  *	8 - controller state computation :
@@ -112,11 +105,7 @@ static void reduce_interval(const struct mcontroller *controller,
  *		the next movement;
  */
 
-
-static void compute_state(const struct mcontroller *controller,
-						  const struct mstate *current_state,
-						  const struct computation_data *cmp_data,
-						  struct mstate *new_state);
+static void compute_state(struct mcore *core);
 
 
 //------------------------------------------------- Private utilities --------------------------------------------------
@@ -145,33 +134,14 @@ static void machine_states_accept(struct mstates *states);
  */
 
 void mcore_initialise(
-	struct mcore *core,
-	struct mstate *s0,
-	struct mstate *s1,
-	void *controller_computation_data
+	struct mcore *const core,
+	struct mstate *const s0,
+	struct mstate *const s1,
+	void *const controller_computation_data
 ) {
 	
 	//Cache the core dimension;
 	const uint8_t dimension = core->nb_axis;
-	
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	//TODO ASSIGN CONTROLLER BUILDER AND STATE
-	
 	
 	//Cache the first state dimension;
 	uint8_t s0_dimension = s0->dimension;
@@ -200,31 +170,16 @@ void mcore_initialise(
 	}
 	
 	//Provide access to states;
-	core->states.s0 = core->states.current_state = s0;
-	core->states.s1 = core->states.next_state = s0;
+	core->states.s0 = s0;
+	core->states.current_state = s0;
+	core->states.s1  = s1;
+	core->states.next_state = s1;
 	core->states.current_is_s0 = true;
 	
 	//Provide access to controller computation data;
 	core->cmp_data.controller_data = controller_computation_data;
 	
 }
-
-
-/*
- * Set the location where the computed movement should be stored;
- *
- * @param core : the movement core to update;
- * @param mvmt : the new movement struct; Can be null;
- */
-
-void mcore_set_movement_dst(struct mcore *core, struct movement *mvmt) {
-	
-	//Update the computation destination; A null check will be made at execution time;
-	core->movement = mvmt;
-	
-}
-
-
 
 
 //------------------------------------------------- Computation stages -------------------------------------------------
@@ -235,120 +190,40 @@ void mcore_set_movement_dst(struct mcore *core, struct movement *mvmt) {
  * @param core : the machine core;
  */
 
-bool mcore_compute_movement(struct mcore *const core) {
-	
-	/*
-	 * Variables init and check stage;
-	 */
-	
-	//Cache the movement container;
-	struct movement *mvmt = core->movement;
-	
-	//If the movement container is null :
-	if (!(mvmt)) {
-		
-		//Log;
-		kernel_log_("mcore_compute_movement : movement output not provided");
-		
-		//Fail;
-		return false;
-		
-	}
-	
-	//Cache the distances array;
-	int16_t *const mv_distances = mvmt->actuation_distances;
+bool mcore_compute_movement(struct mcore *const core, struct movement *mvmt) {
 	
 	
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	//TODO REMOVE THE CONTROLLER
-	
-	//Cache the movement controller;
-	struct mcontroller *ctrl = core->controller;
-	
-	//If the controller is nor initialised :
-	if (!ctrl) {
-		
-		//Log;
-		kernel_log_("mcore_compute_movement : controller not initialised");
-		
-		//Fail;
-		return false;
-		
-	}
+	//Cache the distanes computer;
+	distances_cpt distance_computation = core->dist_computer;
 	
 	//If the controller is not ready :
-	if (!(ctrl->ready)) {
+	if (!(distance_computation)) {
 		
-		//If one part of the controller is not initialised :
-		if ((!(ctrl->geometry)) ||
-			(!(ctrl->dist_computer)) ||
-			ctrl->nb_uninitialised_actuators ||
-			ctrl->nb_uninitialised_builder_cpts ||
-			ctrl->nb_uninitialised_kinematic_cnsts ||
-			ctrl->nb_uninitialised_state_cpts) {
-			
-			//Log;
-			kernel_log_("mcore_compute_movement : controller not ready");
-			
-			//Fail;
-			return false;
-			
-		} else {
-			//If the controller is initialised but not marked ready yet :
-			
-			//Mark it ready and keep on;
-			ctrl->ready = true;
-			
-		}
+		//Log;
+		kernel_log_("mcore_compute_movement : controller not ready");
 		
+		//Fail;
+		return false;
 		
 	}
-	
-	
-	//Cache the dimension;
-	const uint8_t dimension = core->nb_axis;
-	
-	//Cache the current state and the next state;
-	const struct mstate *const cur_state = core->states.current_state;
-	struct mstate *const next_state = core->states.next_state;
-	
-	//Cache the next actuation position;
-	int32_t *const next_actuation_pos = next_state->actuation_positions;
-	
-	//Cache the actuators model arrays;
-	struct actuator_model **actuators_models = ctrl->actuators_models;
-	
-	//Cache the movement builder; All temp fields are copied;
-	struct computation_data cmp_data = core->cmp_data;
 	
 	
 	/*
 	 * Init;
 	 */
-	
+	const struct mstate *const cur_state = core->states.current_state;
+	struct mstate *const next_state = core->states.next_state;
+
 	//Reset the next state's status;
 	next_state->status = 0;
-	
-	
+
+
 	/*
 	 * Stage 0 : movement distances computation;
 	 */
 	
 	//Compute movement distances;
-	(*(ctrl->compute_distances))(cur_state, next_state, mv_distances);
+	(*distance_computation)(cur_state, next_state, mvmt->actuation_distances);
 	
 	//The distances computation has updates the state's status;
 	uint32_t status = next_state->status;
@@ -364,7 +239,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 	 * 	Each actuator's physical model computes the admissible duration interval for each axis;
 	 */
 	
-	compute_durations(dimension, ctrl->actuators_models, mv_distances, cur_state, cmp_data.interval_array);
+	compute_durations(core, mvmt);
 	
 	
 	/*
@@ -375,7 +250,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 	 * 	If the interval can be reduced with other rules, true will be returned;
 	 */
 	
-	bool reducing_enabled = merge_intervals(dimension, cmp_data.interval_array, cmp_data.final_interval);
+	bool reducing_enabled = merge_intervals(core);
 	
 	
 	/*
@@ -384,8 +259,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 	 * 		returns true if a distance is modified;
 	 */
 	
-	bool distances_corrected = correct_distances(dimension, actuators_models, cmp_data.interval_array,
-												 cmp_data.final_interval->min, mv_distances);
+	bool distances_corrected = correct_distances(core, mvmt);
 	
 	
 	//If distances are corrected, invalidate the whole state;
@@ -401,7 +275,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 		 * 		determines the next actuation position, given the current state, and the distances array.
 		 */
 		
-		compute_next_position(dimension, cur_state->actuation_positions, mv_distances, next_actuation_pos);
+		compute_next_position(core, mvmt);
 		
 	}
 	
@@ -414,7 +288,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 		 *		positions.
 		 */
 		
-		(*(ctrl->geometry->actuation_to_control))(next_actuation_pos, next_state->control_positions);
+		(*(core->geometry->actuation_to_control))(next_state->actuation_positions, next_state->control_positions);
 		
 		
 	}
@@ -432,7 +306,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 	 *		next stages;
 	 */
 	
-	compute_builder(ctrl, cur_state, next_state, cmp_data.controller_data);
+	compute_builder(core);
 	
 	
 	//If the duration interval can be reduced :
@@ -447,12 +321,12 @@ bool mcore_compute_movement(struct mcore *const core) {
 		 *		is selected;
 		 */
 		
-		reduce_interval(ctrl, cur_state, cmp_data.controller_data, cmp_data.final_interval);
+		reduce_interval(core);
 		
 	}
 	
 	//Update the movement time;
-	mvmt->time_to_dest = cmp_data.final_interval->min;
+	mvmt->time_to_dest = core->cmp_data.final_interval.min;
 	
 	
 	/*
@@ -461,7 +335,7 @@ bool mcore_compute_movement(struct mcore *const core) {
 	 *		the next movement;
 	 */
 	
-	compute_state(ctrl, cur_state, cmp_data.controller_data, next_state);
+	compute_state(core);
 	
 	//Update the current state;
 	machine_states_accept(&core->states);
@@ -485,37 +359,43 @@ bool mcore_compute_movement(struct mcore *const core) {
  * @param dst : the time interval array to update;
  */
 
-static void compute_durations(
-	uint8_t dimension,
-	struct actuator_model **actuators,
-	const int16_t *distances, const struct mstate *const current_state,
-	struct time_interval *dst) {
+static void compute_durations(struct mcore *core, struct movement *mvmt) {
+	
+	//Cache call parameters;
+	const int32_t distances[] = mvmt->actuation_distances;
+	const struct mstate *const current_state = core->states.current_state;
+	struct time_interval intervals[] = core->cmp_data.interval_array;
+	
+	
+	//Cache traversal parameters;
+	uint8_t nb_actuators = core->nb_axis;
+	struct actuator_model *actuators[] = core->actuators_models;
 	
 	//For each actuator :
-	while (dimension--) {
-		
-		//Cache the actuator;
-		struct actuator_model *instance = *actuators;
+	for (uint8_t actuator_id = 0; actuator_id < nb_actuators; actuator_id++) {
 		
 		//Cache the computation function;
-		void (*const computation)(struct actuator_model *, int16_t, const struct mstate *,
-								  struct time_interval *const) = instance->compute_duration_interval;
+		const actuation_duration_cmp computation = (actuators[actuator_id])->compute_duration_interval;
+		
+		//Create a local to contain the duration interval;
+		struct time_interval iv;
 		
 		//If the actuator has physical limitations :
 		if (computation) {
 			
 			//Compute the duration interval;
-			(*computation)(instance, *distances, current_state, dst);
+			(*computation)(*distances, current_state, &iv);
 			
 		} else {
 			//If the actuator has no physical limitations :
 			
 			//Simply set the destination interval to the largest one;
-			*dst = time_interval_largest;
+			iv = time_interval_largest;
+			
 		}
 		
-		//Update all pointers;
-		distances++, dst++, actuators++;
+		//Store the new interval;
+		intervals[actuator_id] = iv;
 		
 	}
 	
@@ -533,10 +413,13 @@ static void compute_durations(
  * @return true if the interval is valid;
  */
 
-static bool merge_intervals(
-	const uint8_t dimension,
-	struct time_interval *const intervals,
-	struct time_interval *const dst_interval) {
+static bool merge_intervals(struct mcore *core) {
+	
+	//Cache merge parameters;
+	const uint8_t dimension = core->nb_axis;
+	
+	//
+	struct time_interval intervals[] = core->cmp_data.interval_array;
 	
 	//Regroup intervals in a single one;
 	struct time_interval final_interval = timer_interval_merge(dimension, intervals);
@@ -547,8 +430,11 @@ static bool merge_intervals(
 	//If the required movement didn't match with actuation physical limitations :
 	if (!valid) {
 		
+		//Cache the previous duration;
+		float prev_duration = core->cmp_data.final_interval.min;
+		
 		//Choose arbitrarily a duration, eventually the previous movement's duration;
-		choose_duration(&final_interval, dst_interval->min);
+		choose_duration(&final_interval, prev_duration);
 		
 		//Activate distance correction for relevant actuators;
 		activate_corrections(dimension, final_interval.min, intervals);
@@ -556,7 +442,7 @@ static bool merge_intervals(
 	}
 	
 	//Save the time interval;
-	*dst_interval = final_interval;
+	core->cmp_data.final_interval = final_interval;
 	
 	//Return true if the interval is valid;
 	return valid;
@@ -574,40 +460,39 @@ static bool merge_intervals(
  * @param builder
  */
 
-static bool correct_distances(
-	uint8_t dimension,
-	struct actuator_model **actuators,
-	const struct time_interval *intervals,
-	const float duration,
-	int16_t *distances) {
+static bool correct_distances(struct mcore *core, struct movement *mvmt) {
+	
+	//Cache the array of intervals;
+	const struct time_interval intervals[] = core->cmp_data.interval_array;
+	
+	//Cache call parameters;
+	const float duration = core->cmp_data.final_interval.min;
+	int32_t distances[] = mvmt->actuation_distances;
 	
 	//The correction flag, set if almost one distance correction has been done;
 	bool corrected = false;
 	
+	//Cache traversal parameters;
+	const uint8_t dimension = core->nb_axis;
+	struct actuator_model *actuators[] = core->actuators_models;
+	
+	
 	//For each axis :
-	while (dimension--) {
-		
-		//Cache the actuator;
-		struct actuator_model *instance = *actuators;
+	for (uint8_t actuator_id = 0; actuator_id < dimension; actuator_id++) {
 		
 		//Cache the correction function;
-		void (*const correction)
-			(struct actuator_model *, const float, int16_t *const)=instance->compute_minimal_distance;
+		actuation_min_distance_cmp cmp = actuators[actuator_id]->compute_minimal_distance;
 		
 		//If the duration is invalid and the actuator supports distance adjustment :
-		if ((!(intervals->valid)) && (correction)) {
+		if ((!(intervals->valid)) && (cmp)) {
 			
 			//Set the correction flag;
 			corrected = true;
 			
-			
 			//Recalculate the distance;
-			(*correction)(instance, duration, distances);
+			(*cmp)(duration, distances);
 			
 		}
-		
-		//Update pointers;
-		intervals++, actuators++, distances++;
 		
 	}
 	
@@ -628,17 +513,20 @@ static bool correct_distances(
  * @param dests : the array of destinations;
  */
 
-static void compute_next_position(
-	uint8_t dimension,
-	const int32_t *position,
-	const int16_t *dists,
-	int32_t *dests) {
+static void compute_next_position(struct mcore *core, struct movement *mvmt) {
+	
+	const int32_t *position = core->states.current_state->actuation_positions;
+	const int32_t *dists = mvmt->actuation_distances;
+	int32_t *dests = core->states.next_state->actuation_positions;
+	
+	//Cache the dimension;
+	uint8_t dimension = core->nb_axis;
 	
 	//For each actuator :
 	while (dimension--) {
 		
 		//Set the destination to the sum of the current position and converted distance; Update pointers btw;
-		*(dests++) = *(position++) + (int32_t) *(dists++);
+		*(dests++) = *(position++) + *(dists++);
 		
 	}
 	
@@ -655,17 +543,24 @@ static void compute_next_position(
  * //TODO COMMENT;
  */
 
-static void compute_builder(
-	const struct mstate *const current_state,
-	const struct mstate *const new_state,
-	void *const controller_data
-) {
+static void compute_builder(struct mcore *core) {
+	
+	//Cache args
+	const struct mstate *const current_state = core->states.current_state;
+	const struct mstate *const new_state = core->states.next_state;
+	void *const controller_data = core->cmp_data.controller_data;
+	
+	//Cache pointers array;
+	builder_cpt cpts[] = core->builder_cpts;
+	
+	//Cache the number of computation stages;
+	const uint8_t nb_builder_cpts = core->nb_builder_cpts;
 	
 	//For each computation :
-	for (uint8_t cpt_id = 0; cpt_id < NB_BUILDER_CPTS; cpt_id++) {
+	for (uint8_t cpt_id = 0; cpt_id < nb_builder_cpts; cpt_id++) {
 		
 		//Execute the computation;
-		(*(builder_computations[cpt_id]))(current_state, new_state, controller_data);
+		(*(cpts[cpt_id]))(current_state, new_state, controller_data);
 		
 	}
 	
@@ -679,13 +574,12 @@ static void compute_builder(
  */
 
 
-static void reduce_interval(
-	const struct mstate *current_state,
-	const void *controller_data,
-	struct time_interval *duration_window) {
+static void reduce_interval(struct mcore *core) {
 	
-	//Create a cached copy of the provided time interval;
-	struct time_interval final_interval = *(duration_window);
+	//Cache parameters;
+	const struct mstate *current_state = core->states.current_state;
+	const void *controller_data = core->cmp_data.controller_data;
+	struct time_interval final_interval = core->cmp_data.final_interval;
 	
 	//If the final interval is invalid :
 	if (!final_interval.valid) {
@@ -703,14 +597,18 @@ static void reduce_interval(
 		
 	}
 	
-	//Create a time interval that we will give to kinematic constraints; They will initialise it;
-	struct time_interval constraint_interval = {0};
+	//Cache traversal parameters;
+	const uint8_t nb_cst = core->nb_kinematic_cnsts;
+	kinematic_cnst constraints[] = core->kinematic_cnsts;
 	
 	//For each computation to realise :
-	for (uint8_t cnst_id = 0; cnst_id < NB_KINEMATIC_CSTRS; cnst_id++) {
+	for (uint8_t cnst_id = 0; cnst_id < nb_cst; cnst_id++) {
+		
+		//Declare a temporary interval;
+		struct time_interval constraint_interval = {0};
 		
 		//Determine the constraint's required duration window; constraint_interval will be re-initialised;
-		(*(constraints[cnst_id]))(current_state, controller_data, &final_interval);
+		(*(constraints[cnst_id]))(current_state, controller_data, &constraint_interval);
 		
 		//The constraint updates the provided interval to a non empty valid one;
 		
@@ -728,7 +626,7 @@ static void reduce_interval(
 	}
 	
 	//Now that the duration window is reduced to its minimal width, save it;
-	*duration_window = final_interval;
+	core->cmp_data.final_interval = final_interval;
 	
 }
 
@@ -738,17 +636,21 @@ static void reduce_interval(
  * //TODO COMMENT;
  */
 
-static void compute_state(
-	const struct mstate *const current_state,
-	const struct computation_data *const cmp_data,
-	struct mstate *const new_state) {
+static void compute_state(struct mcore *core) {
 	
+	const struct mstate *const current_state = core->states.current_state;
+	const struct computation_data *const cmp_data = &core->cmp_data;
+	struct mstate *const new_state = core->states.next_state;
+	
+	//Cache traversal parameters;
+	const uint8_t nb_state_cpts = core->nb_builder_cpts;
+	state_cpt cpts[] = core->state_cpts;
 	
 	//For each computation :
-	for (uint8_t cpt_id = 0; cpt_id < NB_STATE_CPTS; cpt_id++) {
+	for (uint8_t cpt_id = 0; cpt_id < nb_state_cpts; cpt_id++) {
 		
 		//Execute the computation;
-		(*(state_computations[cpt_id]))(current_state, cmp_data, new_state);
+		(*(cpts[cpt_id]))(current_state, cmp_data, new_state);
 		
 	}
 	
@@ -841,23 +743,33 @@ static void activate_corrections(
 
 static void machine_states_accept(struct mstates *const states) {
 	
+	//Local
+	struct mstate *cur, *next;
+	
+	//Load
+	struct mstate *s0 = states->s0,  *s1 = states->s1;
+	bool flag = states->current_is_s0;
+	
 	//If the candidate state is s0 :
-	if (states->current_is_s0) {
+	if (flag) {
 		
 		//Assign s1 to the current, and s0 to the candidate;
-		states->current_state = &(states->s1);
-		states->next_state = &(states->s0);
-		states->current_is_s0 = false;
+		cur = s1;
+		next = s0;
 		
 	} else {
 		//If the candidate state is s1 :
 		
 		//Assign s0 to the current, and s1 to the candidate;
-		states->current_state = &(states->s0);
-		states->next_state = &(states->s1);
-		states->current_is_s0 = true;
+		cur = s0;
+		next = s1;
 		
 	}
+	
+	//Store;
+	states->current_state = cur, states->next_state = next;
+	states->current_is_s0 = !flag;
+	
 	
 }
 

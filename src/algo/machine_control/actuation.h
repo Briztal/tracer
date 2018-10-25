@@ -20,35 +20,43 @@
  *  	physical limitations;
  */
 
+
+typedef void (*actuation_duration_cmp)(
+	
+	//The actuator's movement distance;
+	int32_t distance,
+	
+	//The machine's current state, constant;
+	const struct mstate *current_state,
+	
+	//The location where to store the duration window, mutable;
+	struct time_interval *const duration_window);
+
+
+typedef void (*actuation_min_distance_cmp)(
+	
+	//The movement's duration, constant;
+	const float movement_duration,
+	
+	//The pointer referencing the distance target. Must be updated with the calculated distance, mutable;
+	int32_t *const distance_target);
+
+
+
 struct actuator_model {
 	
 	/*
 	 * The function to compute the time interval; takes following arguments;
 	 * 	This function pointer can be null; If so, the duration interval will be set to its maximum;
 	 */
-	void (*const compute_duration_interval)(
-		
-		//The actuator's movement distance;
-		int16_t distance,
-		
-		//The machine's current state, constant;
-		const struct mstate *current_state,
-		
-		//The location where to store the duration window, mutable;
-		struct time_interval *const duration_window);
+	const actuation_duration_cmp compute_duration_interval;
 	
 	
 	/*
 	 * The function to compute the minimal distance to fit duration requirements;
 	 * 	This function pointer can be null; If so, no distance correction will happen;
 	 */
-	void (*const compute_minimal_distance)(
-		
-		//The movement's duration, constant;
-		const float movement_duration,
-		
-		//The pointer referencing the distance target. Must be updated with the calculated distance, mutable;
-		int16_t *const distance_target);
+	const actuation_min_distance_cmp compute_minimal_distance;
 	
 };
 

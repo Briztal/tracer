@@ -216,10 +216,6 @@ static state_cpt state_computations[NB_STATE_CPTS] = {
 //The array of time intervals;
 static struct time_interval intervals[NB_AXIS];
 
-//The time interval to merge the previous array in;
-static struct time_interval final_interval;
-
-
 //---------------------------------------------------- Machine core ----------------------------------------------------
 
 /*
@@ -266,6 +262,7 @@ static struct mcore core = {
 		
 	},
 	
+	
 	//Movement builder;
 	.cmp_data = {
 		
@@ -273,7 +270,7 @@ static struct mcore core = {
 		.interval_array = intervals,
 		
 		//Initialise the duration interval to the largest width:
-		.final_interval = &final_interval,
+		.final_interval = {0},
 		
 		//No controller is registered for instance;
 		.controller_data = 0,

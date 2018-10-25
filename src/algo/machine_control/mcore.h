@@ -44,7 +44,7 @@
 struct movement {
 	
 	//The distances coordinates array;
-	int16_t *const actuation_distances;
+	int32_t actuation_distances[];
 	
 	//The number of microseconds till position must be reached;
 	float time_to_dest;
@@ -70,10 +70,10 @@ struct mstate {
 	uint32_t status;
 	
 	//Actuation positions. Actuators commanded on an integer base;
-	int32_t *const actuation_positions;
+	int32_t actuation_positions[];
 	
 	//Control positions. Expressed in float;
-	float *const control_positions;
+	float control_positions[];
 	
 };
 
@@ -100,10 +100,10 @@ struct mstate {
 struct mstates {
 	
 	//The current machine state;
-	const void *current_state;
+	const struct mstate *current_state;
 	
 	//The machine state in comput;
-	void *next_state;
+	struct mstate *next_state;
 	
 	//The machine state identifier; set when "*next_state == s0";
 	bool current_is_s0;
@@ -127,10 +127,10 @@ struct mstates {
 struct computation_data {
 	
 	//The time interval array, containing the duration window for each actuator during the comput;
-	struct time_interval *const interval_array;
+	struct time_interval interval_array[];
 	
 	//The duration interval that satisfies all constraints;
-	struct time_interval *final_interval;
+	struct time_interval final_interval;
 	
 	//The controller builder. Can contain whatever the controller decides;
 	void *controller_data;
@@ -145,22 +145,13 @@ struct computation_data {
  * The controller comprises a data structure whose goal is to provide the distance target for the next
  * 	movement.
  *
- * 	During this computation, it has access to the current state, that it can't alter, and to the current state,
+ * 	During this computation, it has access to the current state, that it can't alter, and to the new state,
  * 	that it can modify, to pre-compute some data, computations that it will signal in the state's status;
  *
  * 	It also has access to the array where distances must be stored;
  */
 
-struct distance_computer {
-	
-	//The function that will compute movement distances;
-	bool (*compute_distances)(
-		struct distance_computer *,
-		const struct mstate *current_state,
-		struct mstate *new_state,
-		int16_t *distances);
-	
-};
+typedef bool (*distances_cpt)(const struct mstate *current_state, struct mstate *new_state, int32_t distances[]);
 
 
 //------------------------------------------------ Builder computations ------------------------------------------------
@@ -252,22 +243,22 @@ struct mcore {
 	 */
 	
 	//The distances computer; Mutable.
-	struct distance_computer *dist_computer;
+	distances_cpt dist_computer;
 	
-	//The machine's geometric_model, constant ref;
+	//The machine's geometric_model, immutable ref
 	struct geometric_model *const geometry;
 	
-	//The actuation physics array, mutable ref;
-	struct actuator_model **const actuators_models;
+	//The array of actuation physics ref;
+	struct actuator_model *actuators_models[];
 	
 	//The array of builder computations;
-	builder_cpt *const builder_cpts;
+	builder_cpt builder_cpts[];
 	
 	//The array of kinematic constraints;
-	kinematic_cnst *const kinematic_cnsts;
+	kinematic_cnst kinematic_cnsts[];
 	
 	//The array of state computations;
-	state_cpt  *const state_cpts;
+	state_cpt state_cpts[];
 	
 	
 	
@@ -281,10 +272,6 @@ struct mcore {
 	//The movement builder, owned, mutable;
 	struct computation_data cmp_data;
 	
-	//The movement that we currently compute; References the distances array and the duration;
-	struct movement *movement;
-	
-	
 };
 
 
@@ -296,11 +283,8 @@ void mcore_initialise(
 	void *controller_computation_data
 );
 
-//Set the location where the computed movement should be stored;
-void mcore_set_movement_dst(struct mcore *, struct movement *);
-
 //Compute the movement;
-bool mcore_compute_movement(struct mcore *);
+bool mcore_compute_movement(struct mcore *, struct movement *);
 
 
 #endif //TRACER_MACHINE_CORE_H
