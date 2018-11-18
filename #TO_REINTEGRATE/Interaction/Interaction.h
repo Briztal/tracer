@@ -23,8 +23,8 @@
 
 
 /*
- * This files simplifies the interface manipulation : it includes the correct files, and defines a macro for the main
- *  interface.
+ * This files simplifies the if manipulation : it includes the correct files, and defines a macro for the main
+ *  if.
  */
 
 #include <Config/control_config.h>

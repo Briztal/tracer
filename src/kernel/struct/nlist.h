@@ -21,7 +21,11 @@
 #ifndef TRACER_NLIST_H
 #define TRACER_NLIST_H
 
-#include <type.h>
+#include <stdbool.h>
+
+#include <stdint.h>
+
+#include <stddef.h>
 
 
 struct nlist_elmt;

@@ -20,11 +20,11 @@
 
 #include "pmem.h"
 
-#include <mem.h>
+#include <stdmem.h>
 
-#include <kernel/hard.h>
+#include <hard.h>
 
-#include <kernel/mem/ram.h>
+#include <mem/ram.h>
 
 
 //------------------------------------------------------ pmem ------------------------------------------------------

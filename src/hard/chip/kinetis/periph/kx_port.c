@@ -74,20 +74,20 @@
 //------------------------------------------------------ Includes ------------------------------------------------------
 
 
-#include <kernel/interface/port.h>
+#include <if/port.h>
 
-#include <kernel/interface/gpio.h>
+#include <if/gpio.h>
 
-#include <kernel/fs/inode.h>
+#include <fs/inode.h>
 
-#include <kernel/mod/auto_mod.h>
+#include <mod/mod_hook>
 
 
 #include <macro/incr_call.h>
 
-#include <std/mem.h>
+#include <stdmem.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
 #include "kx_sim.h"
 
@@ -351,11 +351,11 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 
 	}
 
-	//kernel_log("port : %d - %h, pin %d, alt %d", port_id, port, bit, config->mux_channel);
+	//printkf("port : %d - %h, pin %d, alt %d", port_id, port, bit, config->mux_channel);
 
 	//Set the multiplexer channel;
 	config_register |= (PORT_PCR_TO_MUX(config->mux_channel));
-
+	
 	//If the data is received :
 	if (config->direction == PIN_INPUT) {
 
@@ -457,7 +457,8 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 
 	//Write the configuration register;
 	port->PCR[bit] = config_register;
-
+	
+	
 }
 
 
@@ -476,6 +477,7 @@ struct pin_inode {
 	const size_t pin_index;
 
 };
+
 
 /*
  * There is a fixed number of declared pins, that is decided at compile time;
@@ -498,10 +500,10 @@ static struct pin_inode inodes[] = {
 
 
 /*
- * A port pin supports configuration, interface and close;
+ * A port pin supports configuration, if and close;
  */
 
-static bool fs_pin_config(const struct pin_inode *const node, const void *const config, const size_t config_size) {
+static bool fs_pin_init(const struct pin_inode *const node, const void *const config, const size_t config_size) {
 
 	//If the configuration struct is not valid
 	if (config_size != sizeof(struct port_pin_config)) {
@@ -510,7 +512,7 @@ static bool fs_pin_config(const struct pin_inode *const node, const void *const 
 		return false;
 
 	}
-
+	
 	//Configure the pin, providing the proper pin data struct reference;
 	pin_configuration(&pins[node->pin_index], config);
 
@@ -549,7 +551,7 @@ static bool fs_pin_interface(const struct pin_inode *const node, void *const gpi
 	//Cache the port register;
 	struct port_memory *port_area = port_areas[port_id].port;
 
-	//Create the gpio interface initializer;
+	//Create the gpio if initializer;
 	struct gpio_if init = {
 
 		//Provide the address of the port area; It is unique;
@@ -563,7 +565,7 @@ static bool fs_pin_interface(const struct pin_inode *const node, void *const gpi
 
 	};
 
-	//Keep track of the interface struct for eventual neutralisation;
+	//Keep track of the if struct for eventual neutralisation;
 	pins[pin_index].interface = gpio_iface;
 
 	//Interface the struct;
@@ -581,7 +583,7 @@ static void fs_pin_close(const struct pin_inode *const node) {
 	//Cache the pin index;
 	size_t pin_index = node->pin_index;
 
-	//Cache the location of the reference of the eventual interface struct;
+	//Cache the location of the reference of the eventual if struct;
 	struct gpio_if *iface = pins[pin_index].interface;
 
 	//If the pin is interfaced :
@@ -590,7 +592,7 @@ static void fs_pin_close(const struct pin_inode *const node) {
 		//Neutralise the struct;
 		memcpy(iface, &neutral_gpio_interface, sizeof(struct gpio_if));
 
-		//Reset the interface pointer;
+		//Reset the if pointer;
 		pins[pin_index].interface = 0;
 
 	}
@@ -602,9 +604,33 @@ static void fs_pin_close(const struct pin_inode *const node) {
  * 	A safe up-case is made to cast pin_inode * into inode *;
  */
 static const struct inode_ops port_pin_file_ops = {
-	.configure = (bool (*)(struct inode *, const void *, size_t)) &fs_pin_config,
+	.init = (bool (*)(struct inode *, const void *, size_t)) &fs_pin_init,
 	.interface = (bool (*)(struct inode *, void *, size_t)) &fs_pin_interface,
 	.close = (void (*)(struct inode *)) &fs_pin_close,
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
+	//TODO IMPLEMENT A RESET OPERATION
 };
 
 
@@ -666,4 +692,4 @@ static bool kx_port_init() {
 
 
 //Embed the module in the executable;
-KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, port, &kx_port_init)
+KERNEL_HOOK_MODULE(PERIPHERAL_MODULE, port, &kx_port_init)

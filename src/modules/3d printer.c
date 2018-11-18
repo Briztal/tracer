@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 
-#include <kernel/mod/auto_mod.h>
+#include <mod/mod_hook>
 
 
 #include <algo/machine_control/mcore_instance.h>
@@ -98,4 +98,4 @@ bool mtest_init() {
 }
 
 
-KERNEL_EMBED_MODULE(USER_MODULE, mtest, &mtest_init);
+KERNEL_HOOK_MODULE(USER_MODULE, mtest, &mtest_init);

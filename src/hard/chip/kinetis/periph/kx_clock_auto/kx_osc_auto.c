@@ -4,7 +4,7 @@
 
 
 #include <hard/chip/nxp/kinetis/periph/kx_clock/kx_mcg.h>
-#include <kernel/panic.h>
+#include <panic.h>
 #include "kx_clock_auto.h"
 
 

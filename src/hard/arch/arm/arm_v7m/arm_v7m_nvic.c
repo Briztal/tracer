@@ -21,11 +21,11 @@
 
 #include <stdbool.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
-#include <kernel/mod/auto_mod.h>
+#include <mod/mod_hook>
 
-#include <kernel/hard.h>
+#include <hard.h>
 
 #include "arm_v7m.h"
 
@@ -42,7 +42,7 @@ bool nvic_relocation() {
 	if ((uint32_t)__kernel_vtable & 511) {
 		
 		//Log;
-		kernel_log_("nvic_relocation : the kernel vtable is not properly aligned. Aborting.");
+		printk("nvic_relocation : the kernel vtable is not properly aligned. Aborting.");
 		
 		//Complete;
 		return true;
@@ -59,4 +59,4 @@ bool nvic_relocation() {
 
 
 //Register the nvic relocation module;
-KERNEL_EMBED_MODULE(PROC_MODULE, nvic_reloc, &nvic_relocation)
+KERNEL_HOOK_MODULE(PROC_MODULE, nvic_reloc, &nvic_relocation)

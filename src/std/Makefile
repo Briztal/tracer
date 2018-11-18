@@ -2,20 +2,6 @@
 SS = src/std
 SB = build/stdl
 
-
-#------------------------------------------- General stdlib compilation rule -------------------------------------------
-
-stdlib :
-
-	@$(_CC) -o $(SB)/list.o -c $(SS)/list.c
-	@$(_CC) -o $(SB)/mem.o -c $(SS)/mem.c
-	@$(_CC) -o $(SB)/stdout.o -c $(SS)/stdout.c
-	@$(_CC) -o $(SB)/string.o -c $(SS)/string.c
-
-STDL_RULES += stdlib
-
-
-
 #------------------------------------------- Math compilation rule -------------------------------------------
 
 
@@ -25,7 +11,7 @@ STDL_RULES += stdlib
 
 ifndef STD_MATH_DIR
 
-STD_MATH_DIR = src/std/math/generic
+STD_MATH_DIR = src/std/_generic
 
 endif
 
@@ -33,7 +19,7 @@ endif
 CFLAGS += -I$(STD_MATH_DIR)
 
 std_math:
-	@$(_CC) -o $(SB)/math.o -c $(STD_MATH_DIR)/math.c
+	$(_CC) -o $(SB)/math.o -c $(STD_MATH_DIR)/math.c
 
 
 STDL_RULES += std_math

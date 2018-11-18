@@ -18,9 +18,9 @@
 
 */
 
-#include <kernel/struct/nlist.h>
-#include <kernel/panic.h>
-#include <kernel/debug/log.h>
+#include <struct/nlist.h>
+#include <panic.h>
+#include <debug/printk.h>
 
 #include "clock.h"
 
@@ -117,7 +117,7 @@ void clock_tune(void *config, size_t size) {
 	} else {
 		
 		//If no tuner is registered, log;
-		kernel_log_("clock_tune : no tuner is registered;");
+		printk("clock_tune : no tuner is registered;");
 	}
 	
 }
@@ -137,7 +137,7 @@ void clock_auto_tune(uint32_t target_frequency) {
 	} else {
 		
 		//If no tuner is registered, log;
-		kernel_log_("clock_auto_tune : no auto_tuner is registered;");
+		printk("clock_auto_tune : no auto_tuner is registered;");
 	}
 	
 }

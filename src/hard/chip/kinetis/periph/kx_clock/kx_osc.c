@@ -242,7 +242,7 @@
 
 //------------------------------------------------------ Headers -------------------------------------------------------
 
-#include <kernel/panic.h>
+#include <panic.h>
 #include "kx_mcg.h"
 
 //TODO RTC LOSS OF CLOCK

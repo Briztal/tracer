@@ -215,9 +215,9 @@ public:
 public:
 
     /*
-     * The coordinate interface sequences_initialised structure :
+     * The coordinate if sequences_initialised structure :
      *
-     *  This struct will be used to modify coordinate interface variables.
+     *  This struct will be used to modify coordinate if variables.
      *
      *  It will contain flags and data for every piece of data declared in your configuration file;
      */
@@ -287,7 +287,7 @@ private:
 //------------------------------------------------------ Command System ------------------------------------------------
 
     /*
-     * The coordinate interface data structure;
+     * The coordinate if data structure;
      */
 
     struct coordinate_interfaces_data_t{

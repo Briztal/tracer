@@ -6,9 +6,9 @@
 #include "kdmem.h"
 
 
-#include <kernel/mem/ram.h>
-#include <kernel/panic.h>
-#include <kernel/debug/log.h>
+#include <mem/ram.h>
+#include <panic.h>
+#include <debug/printk.h>
 
 
 
@@ -57,7 +57,7 @@ void kdmem_init() {
 	kernel_heap = heap_create(ram_block, KDM_SIZE, &heap_fifo_insertion);//TODO SORTED INSERTION;
 	
 	//Log;
-	kernel_log_("kernel dynamic memory initialised");
+	printk("kernel dynamic memory initialised");
 	
 }
 

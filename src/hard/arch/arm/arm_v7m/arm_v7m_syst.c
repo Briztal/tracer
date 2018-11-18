@@ -21,9 +21,9 @@
 
 #include "arm_v7m.h"
 
-#include <kernel/clock/clock.h>
+#include <clock/clock.h>
 
-#include <kernel/panic.h>
+#include <panic.h>
 
 
 //Configure the frequency and the priority of the system clock interrupt

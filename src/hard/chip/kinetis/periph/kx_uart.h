@@ -25,12 +25,12 @@
 #ifndef TRACER_KINETIS_UART_H
 #define TRACER_KINETIS_UART_H
 
-#include <kernel/arch/drivers/uart.h>
+#include <arch/drivers/uart.h>
 
-#include <kernel/memory/memory_stream.h>
+#include <memory/memory_stream.h>
 
-#include <kernel/memory/interrupt_pipe.h>
-#include <kernel/net/netf.h>
+#include <memory/interrupt_pipe.h>
+#include <net/netf.h>
 
 //----------------------------------------------------- Memory Map -----------------------------------------------------
 
@@ -125,12 +125,12 @@ struct K64_UART_hw {
 
 
 /*
- * The K64 UART interface : complements the netf21 with interrupt config registers;
+ * The K64 UART if : complements the netf21 with interrupt config registers;
  */
 
 struct K64_UART_net21 {
 
-	//The OSI layer 1-2 interface;
+	//The OSI layer 1-2 if;
 	struct netf21 iface;
 
 	//The address of C2, for interrupt management;
@@ -143,7 +143,7 @@ struct K64_UART_net21 {
 
 
 /*
- * Kinetis UART interface : contains a hardware specs set and a reference to an interface;
+ * Kinetis UART if : contains a hardware specs set and a reference to an if;
  */
 
 struct K64_UART_driver_t {
@@ -151,7 +151,7 @@ struct K64_UART_driver_t {
 	//Hardware specs;
 	const struct K64_UART_hw hw_specs;
 	
-	//The network interface attached. Null if not initialised;
+	//The network if attached. Null if not initialised;
 	struct K64_UART_net21 *iface;
 
 };
@@ -208,19 +208,19 @@ types K64_UART_stream_t {
 
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
-//Create an instance of a K64 UART interface from hardware specs;
+//Create an instance of a K64 UART if from hardware specs;
 struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *);
 
-//Delete an instance of a K64 UART interface;
+//Delete an instance of a K64 UART if;
 void K64_UART_delete(struct K64_UART_driver_t *);
 
 
 //---------------------------------------------------- Start - Stop ----------------------------------------------------
 
-//Initialise the UART; The internal network interface is created;
+//Initialise the UART; The internal network if is created;
 void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_config_t *config);
 
-//De-initialise the UART; The internal network interface is to_delete;
+//De-initialise the UART; The internal network if is to_delete;
 void K64_UART_stop(const struct K64_UART_driver_t *driver_data);
 
 

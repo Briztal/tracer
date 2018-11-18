@@ -28,7 +28,7 @@
 
 #include "arm_v7m.h"
 
-#include <kernel/run/coproc.h>
+#include <run/coproc.h>
 
 
 //--------------------------------------------------- Implementation ---------------------------------------------------

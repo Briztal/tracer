@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 
-#include <kernel/mod/auto_mod.h>
+#include <mod/mod_hook>
 
 
 //--------------------------------------------------- Test --------------------------------------------------

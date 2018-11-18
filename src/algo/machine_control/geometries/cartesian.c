@@ -29,6 +29,7 @@
 //--------------------------------------------------- Includes --------------------------------------------------
 
 #include <util/macro/incr_call.h>
+#include <stdio.h>
 #include "cartesian.h"
 
 
@@ -74,7 +75,7 @@ struct cartesian_geometry NAME = {
 //--------------------------------------------------- Functions --------------------------------------------------
 
 
-
+FILE
 /**
  * cartesian_geometry_update_conversion_factor : checks that the index is valid, resets the conversion factor to 1
  * 	if it is null, and updates the conversion factor in the array;

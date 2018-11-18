@@ -2,10 +2,7 @@
 // Created by root on 10/18/18.
 //
 
-#include "kx_flash_cfg.h"
-
-#include <type.h>
-
+#include <stdint.h>
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 

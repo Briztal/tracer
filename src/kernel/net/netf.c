@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include <kernel/public/syscall.h>
+#include "../../std/syscall.h"
 
 
 
@@ -105,7 +105,7 @@ void data_block_copy(const struct data_block *const src, struct data_block *cons
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
 
-//Initalise a layer 2 interface : create and fill fifos, assign function pointers;
+//Initalise a layer 2 if : create and fill fifos, assign function pointers;
 void netf2_init(
 	struct netf2 *const iface,
 	size_t nb_frames,
@@ -157,14 +157,14 @@ void netf2_init(
 
 	}
 
-	//Initialise the interface;
+	//Initialise the if;
 	memcpy(iface, &iface_init, sizeof(struct netf2));
 
 
 }
 
 
-//Destruct the interface : delete fifos and their content;TODO
+//Destruct the if : delete fifos and their content;TODO
 void netf2_delete(struct netf2 *iface) {
 
 	//Call the implementation's deleter;
@@ -185,7 +185,7 @@ void netf2_delete(struct netf2 *iface) {
 	//Undef the macro;
 #undef CLEAR_FIFO
 
-	//Free the interface;
+	//Free the if;
 	kernel_free(iface);
 
 }
@@ -420,7 +420,7 @@ bool netf_21_decode_byte(struct netf21 *iface, uint8_t data) {
 	if (!framer->decoding_block) {
 
 		/*
-		 * This should not have happened, and witnesses a flaw in the program that uses the interface.
+		 * This should not have happened, and witnesses a flaw in the program that uses the if.
 		 */
 
 		//Return false, to disable future transmission; byte will be lost;
@@ -468,7 +468,7 @@ bool netf_21_get_encoded_byte(struct netf21 *iface, uint8_t *data) {
 	if (!framer->encoding_block) {
 
 		/*
-		 * This should not have happened, and witnesses a flaw in the program that uses the interface.
+		 * This should not have happened, and witnesses a flaw in the program that uses the if.
 		 */
 
 		//Return false, to disable future transmission; byte will be lost;

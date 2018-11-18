@@ -43,17 +43,17 @@
 
 //------------------------------------------------------ Includes ------------------------------------------------------
 
-#include <kernel/mod/auto_mod.h>
+#include <mod/mod_hook>
 
-#include <kernel/fs/inode.h>
+#include <fs/inode.h>
 
-#include <kernel/async/except.h>
+#include <async/except.h>
 
 #include <macro/incr_call.h>
 
-#include <mem.h>
+#include <stdmem.h>
 
-#include <kernel/mod/module_array.h>
+#include <mod/module_array.h>
 
 #include "kx_sim.h"
 
@@ -74,7 +74,7 @@ MODULE_CREATE_SPECS_ARRAY(channels)
 //----------------------------------------- Channels dynamic data declarations -----------------------------------------
 
 /*
- * Channels dynamic data simply consist on interface references;
+ * Channels dynamic data simply consist on if references;
  */
 
 static struct timer_if *if_refs[NB_CHANNELS] = {0};
@@ -104,37 +104,37 @@ static struct channel_inode inodes[NB_CHANNELS];
  * All variables and methods in this section are private. No one can access them outside this translation unit;
  */
 
-//Transmit the timer interface;
+//Transmit the timer if;
 static bool channel_interface(const struct channel_inode *const node, void *const iface, const size_t iface_size) {
 
 	//Cache the channel index,
 	uint8_t channel_index = node->channel_index;
 
-	//kernel_log("interfacing with %d ", channel_index);
+	//printkf("interfacing with %d ", channel_index);
 
 	//Cache the channel specs ref;
 	const struct channel_specs *channel = channels[node->channel_index];
 
-	//Cache the interface ref ref;
+	//Cache the if ref ref;
 	struct timer_if **if_ref = (if_refs + channel_index);
-
-	//Eventually interface with the channel;
-	return timer_if_interface(iface, &channel->iface, if_ref , iface_size);
+	
+	//Eventually if with the channel;
+	return iface_connect(iface, &channel->iface, if_ref);
 
 }
 
 
-//Close the timer resource : will neutralise the interface;
+//Close the timer resource : will neutralise the if;
 static void channel_close(const struct channel_inode *const node) {
 
-	//Neutralise the eventual interface;
-	timer_if_neutralise(if_refs + node->channel_index);
+	//Neutralise the eventual if;
+	iface_disconnect(if_refs + node->channel_index, &neutral_timer_if);
 
 }
 
 
 /*
- * The file operations for a pit channel are limited to interface, and close that neutralises the interface;
+ * The file operations for a pit channel are limited to if, and close that neutralises the if;
  */
 
 static struct inode_ops channel_ops = {
@@ -238,4 +238,4 @@ static bool pit_init() {
 
 
 //Embed the PIT module in the executable;
-KERNEL_EMBED_MODULE(PERIPHERAL_MODULE, pit, &pit_init)
+KERNEL_HOOK_MODULE(PERIPHERAL_MODULE, pit, &pit_init)

@@ -20,7 +20,7 @@
 
 //-------------------------------------------------- Module array head -------------------------------------------------
 
-#include <kernel/mod/module_array.h>
+#include <mod/module_array.h>
 
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
@@ -46,18 +46,18 @@
 
 #include <list.h>
 
-#include <mem.h>
+#include "../dmz/kmem.h"
 
 
-#include <kernel/debug/debug.h>
-#include <kernel/debug/log.h>
-#include <kernel/mod/auto_mod.h>
+#include <debug/debug.h>
+#include <debug/printk.h>
+#include <mod/mod_hook>
 
-#include <kernel/async/except.h>
+#include <async/except.h>
 
-#include <kernel/interface/timer.h>
-#include <kernel/interface/gpio.h>
-#include <kernel/fs/inode.h>
+#include <interface/timer.h>
+#include <interface/gpio.h>
+#include <fs/inode.h>
 
 #include <string.h>
 
@@ -101,7 +101,7 @@ struct channel_data {
 	//The gpio file descriptor;
 	file_descriptor gpio_fd;
 
-	//The gpio interface; Non IRQ can access only in a critical section;
+	//The gpio if; Non IRQ can access only in a critical section;
 	struct gpio_if gpio;
 
 	//The ref of the struct interfaced with the channel;
@@ -116,7 +116,7 @@ struct channel_data {
 struct channel_data *active_channels;
 
 //The channels array;
-struct channel_data dynamic_data[NB_CHANNELS];
+struct channel_data channels_data[NB_CHANNELS];
 
 //The status flag. Set when the IRQ routine is enabled.
 bool started;
@@ -124,7 +124,7 @@ bool started;
 //The timer file descriptor;
 file_descriptor timer_fd;
 
-//The timer interface;
+//The timer if;
 struct timer_if pwm_timer;
 
 
@@ -321,7 +321,7 @@ static void pwm_isr() {
 
 static void toggle_channel(struct channel_data *channel) {
 
-	//Cache the GPIO interface;
+	//Cache the GPIO if;
 	struct gpio_if *gpio = &channel->gpio;
 
 	//Declare the next duration;
@@ -496,7 +496,7 @@ static bool channel_setup(uint8_t channel_id, uint32_t high_duration) {
 	}
 
 	//Cache the channel ref :
-	struct channel_data *const channel = dynamic_data + channel_id;
+	struct channel_data *const channel = channels_data + channel_id;
 
 	//Update parameters;
 	channel->high_duration = high_duration, channel->low_duration = low_duration;
@@ -521,7 +521,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 	bool deactivation = channel_setup(channel_id, high_duration);
 
 	//Cache the channel ref :
-	struct channel_data *const channel = dynamic_data + channel_id;
+	struct channel_data *const channel = channels_data + channel_id;
 
 	/*pwm_exit
 	 * Changing durations is sufficient in the following cases :
@@ -552,7 +552,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 				//Mark the channel inactive;
 				channel->inactive = true;
 
-				//Cache the gpio iface;
+				//Cache the gpio if;
 				struct gpio_if *gpio = &channel->gpio;
 
 				//Turn the GPIO down;
@@ -564,7 +564,7 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 			} else {
 				//If other channels are present, simply clear the gpio, to keep timing consistent;
 
-				//Cache the GPIO interface;
+				//Cache the GPIO if;
 				struct gpio_if *gpio = &channel->gpio;
 
 				//Clear the GPIO;
@@ -661,21 +661,21 @@ static bool channel_interface(
 
 ) {
 
-	//The channel inode contains the identifier of the channel to interface;
+	//The channel inode contains the identifier of the channel to if;
 	const size_t channel_id = node->channel_index;
 
 	//If the channel id is invalid :
 	if ((channel_id >= NB_CHANNELS)) {
 
 		//Log;
-		kernel_log_("pwm : channel_interface : invalid index provided;");
+		printk("pwm : channel_interface : invalid index provided;");
 
 		//Fail;
 		return false;
 	}
 
 	//Allow interfacing. Size check is taken in charge.
-	return command_if_interface(if_struct, &specs[channel_id]->iface, &dynamic_data[channel_id].iface_ref, size);
+	return command_if_interface(if_struct, &specs[channel_id]->iface, &channels_data[channel_id].iface_ref, size);
 
 }
 
@@ -688,22 +688,22 @@ static bool channel_interface(
 
 static void channel_close(const struct channel_inode *const node) {
 
-	//The channel inode contains the identifier of the channel to interface;
+	//The channel inode contains the identifier of the channel to if;
 	const size_t channel_id = node->channel_index;
 
 	//If the channel id is invalid :
 	if ((!channel_id) || (channel_id > NB_CHANNELS)) {
 
 		//Log;
-		kernel_log_("pwm : chanel_close : invalid index provided;")
+		printk("pwm : chanel_close : invalid index provided;")
 
 		//Fail;
 		return;
 
 	}
 
-	//Neutralise the interface, if interfaced;
-	command_if_neutralise(&dynamic_data[channel_id].iface_ref);
+	//Neutralise the if, if interfaced;
+	command_if_neutralise(&channels_data[channel_id].iface_ref);
 
 }
 
@@ -774,7 +774,7 @@ static bool init_channel(size_t channel_id) {
 	if (!gpio_fd) {
 
 		//Log;
-		kernel_log("pwm : %s gpio file not found.", gpio_name);
+		printkf("pwm : %s gpio file not found.", gpio_name);
 
 		//Fail;
 		return false;
@@ -782,7 +782,7 @@ static bool init_channel(size_t channel_id) {
 	}
 
 	//Cache the channel data struct;
-	struct channel_data *channel = dynamic_data + channel_id;
+	struct channel_data *channel = channels_data + channel_id;
 
 	//Create the initializer for the channel;
 	struct channel_data init = {
@@ -811,7 +811,7 @@ static bool init_channel(size_t channel_id) {
 	};
 
 	//Interface with the gpio;
-	bool success = inode_interface(gpio_fd, &init.gpio, sizeof(struct gpio_if));
+	bool success = iop_interface(gpio_fd, &init.gpio, sizeof(struct gpio_if));
 
 	//If the interfacing failed :
 	if (!success) {
@@ -820,7 +820,7 @@ static bool init_channel(size_t channel_id) {
 		fs_close(gpio_fd);
 
 		//Log;
-		kernel_log("pwm : %s gpio interfacing failed.", gpio_name);
+		printkf("pwm : %s gpio interfacing failed.", gpio_name);
 
 		//Fail;
 		return false;
@@ -828,7 +828,7 @@ static bool init_channel(size_t channel_id) {
 	}
 
 	//Initialise the channel;
-	memcpy(channel, &init, sizeof(dynamic_data));
+	memcpy(channel, &init, sizeof(channels_data));
 
 	//If the interfacing succeeded, complete;
 	return true;
@@ -851,7 +851,7 @@ static bool pwm_init() {
 	if (!fd) {
 
 		//Log;
-		kernel_log_("pwm : timer file not found.");
+		printk("pwm : timer file not found.");
 
 		//Fail;
 		return false;
@@ -859,7 +859,7 @@ static bool pwm_init() {
 	}
 
 	//Interface with the timer;
-	bool success = inode_interface(fd, &pwm_timer, sizeof(struct timer_if));
+	bool success = iop_interface(fd, &pwm_timer, sizeof(struct timer_if));
 
 
 	//If the interfacing failed :
@@ -869,7 +869,7 @@ static bool pwm_init() {
 		fs_close(fd);
 
 		//Log;
-		kernel_log_("pwm : timer interfacing failed.");
+		printk("pwm : timer interfacing failed.");
 
 		//Fail;
 		return false;

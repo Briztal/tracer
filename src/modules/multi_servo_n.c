@@ -20,8 +20,8 @@
 
 #include <stdint.h>
 
-#include <kernel/mod/module_channel.h>
-#include <kernel/debug/log.h>
+#include <mod/module_channel.h>
+#include <debug/printk.h>
 #include "multi_servo_n.h"
 
 
@@ -42,7 +42,7 @@
 #endif
 
 
-//-------------------------------------------------- Command interface -------------------------------------------------
+//-------------------------------------------------- Command if -------------------------------------------------
 
 //Declare the duration update function;
 void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration) (uint32_t *dst, uint32_t duration);
@@ -64,10 +64,10 @@ static void channel_update(uint32_t duration) {
  * channels interfaces are stored in an array, and accessed by index during interfacing;
  */
 
-//Initialise the interface struct for a channel;
+//Initialise the if struct for a channel;
 static struct channel_specs channel = {
 
-	//Initialise the command interface;
+	//Initialise the command if;
 	.iface = {
 
 		//Update the set function;

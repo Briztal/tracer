@@ -11,7 +11,7 @@
  * Actuators have physical limitations, that we must absolutely respect, otherwise, actuators or the machine could
  * 	be damaged;
  *
- * 	An actuator physics model is an interface, containing two functions :
+ * 	An actuator physics model is an if, containing two functions :
  * 	- one to compute the largest acceptable duration interval for a movement of a given distance, given
  * 		the current state of the machine;
  * 	- one to compute a distance that matches physical limitation, for a movement of a given time, given the current

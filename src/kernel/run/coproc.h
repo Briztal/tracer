@@ -12,7 +12,7 @@
 #if !defined(NB_COPROCESSORS)
 
 //Compilation fail;
-#error "Error, one make parameter not provided, check your makefile"
+#error "Error, number of coprocessors not provided, check your makefile"
 
 #define NB_COPROCESSORS 2
 

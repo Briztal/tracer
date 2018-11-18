@@ -19,14 +19,14 @@
 */
 
 
-#include <mem.h>
+#include <stdmem.h>
 
 #include <list.h>
 
 #include <string.h>
 
-#include <kernel/debug/log.h>
-#include <kernel/mem/kdmem.h>
+#include <debug/printk.h>
+#include <mem/kdmem.h>
 
 #include "nlist.h"
 
@@ -103,7 +103,7 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	//If another element has this name :
 	if (nlist_find(list, name)) {
 		
-		kernel_log("\nWarning : nlist_add : file with name [%s] already exists;", name);
+		printkf("\nWarning : nlist_add : file with name [%s] already exists;", name);
 		
 		//Do nothing;
 		return false;
@@ -293,14 +293,14 @@ void nlist_list(struct nlist *list) {
 	
 	//If there are no files :
 	if (!file) {
-		kernel_log_("no files");
+		printk("no files");
 		return;
 	}
 	
 	//For each file :
 	do {
 		
-		kernel_log_(file->name);
+		printk(file->name);
 		
 		
 		//If not, focus on the next file;

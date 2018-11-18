@@ -51,7 +51,7 @@ class Program {
 
 public :
 
-    //Initialise the interface
+    //Initialise the if
     static void init();
 
     //Initialise the command aliases

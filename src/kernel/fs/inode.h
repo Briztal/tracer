@@ -22,7 +22,9 @@
 #define TRACER_DFS_H
 
 
-#include <type.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
 
 
 //Declare the inode ops structure;
@@ -51,21 +53,27 @@ struct inode {
 
 struct inode_ops {
 
-	//Open the resource;
+	//General operations;
+	
+	//Open the inode;
 	void (*const open)(struct inode *node);
-
-	//Execute a function of the resource;
-	void (*const execute)(struct inode *node, size_t function_id, const void *args, size_t args_size);
-
-	//Configure the resource.
-	bool (*const configure)(struct inode *node, const void *config, size_t config_size);
-
-	//Get a copy of the resource's internal structure.
-	bool (*const interface)(struct inode *node, void *iface_struct, size_t size);
-
-	//Close the resource;
+	
+	//Close the inode;
 	void (*const close)(struct inode *node);
-
+	
+	
+	//Device operations;
+	
+	//Initialise the resource.
+	bool (*const init)(struct inode *node, const void *config, size_t config_size);
+	
+	//Interface with the resource;
+	bool (*const interface)(struct inode *node, void *iface_struct, size_t size);
+	
+	//Reset the resource.
+	void (*const reset)(struct inode *node);
+	
+	
 	//The deletion function;
 	void (*const deleter)(struct inode *);
 	
@@ -76,13 +84,26 @@ struct inode_ops {
 typedef size_t file_descriptor;
 
 
+//A device file implements device operations, and can be in one of the following states;
+enum dev_status {
+	
+	DEV_RESET,
+	
+	DEV_INITIALISED,
+	
+	DEV_INTERFACED,
+	
+};
+
+
 //-------------------------------------------------- Inodes operations -------------------------------------------------
 
-bool inode_configure(file_descriptor fd, void *data, size_t size);
+bool iop_init(file_descriptor fd, const void *cfg, size_t size);
 
-void inode_execute(file_descriptor fd, size_t function_id, const void *args, size_t args_size);
+bool iop_interface(file_descriptor fd, void *data, size_t size);
 
-bool inode_interface(file_descriptor fd, void *data, size_t size);
+void iop_reset(file_descriptor fd);
+
 
 
 //----------------------------------------------- File system operations -----------------------------------------------

@@ -18,15 +18,15 @@
 
 */
 
-#include "auto_mod.h"
+#include "mod_hook"
 
-#include <kernel/hard.h>
+#include <hard.h>
 
-#include <kernel/struct/nlist.h>
+#include <struct/nlist.h>
 
-#include <kernel/panic.h>
+#include <panic.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
 
 
@@ -106,8 +106,8 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 	//Determine the byte length of the module array;
 	const size_t module_array_size = mod_end - mod_start;
 	
-	//The module array should contain only auto_mod structs. If size validity check fails :
-	if (module_array_size % sizeof(struct auto_mod)) {
+	//The module array should contain only mod_hook structs. If size validity check fails :
+	if (module_array_size % sizeof(struct mod_hook)) {
 		
 		//Kernel panic, invalid module array size, probably caused by poor linking;
 		kernel_panic("mod.c : mod_autoload : embedded modules array bounds invalid;");
@@ -115,13 +115,13 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 	}
 	
 	//Cache the array to the right type;
-	const struct auto_mod *auto_module = (const struct auto_mod *) mod_start;
+	const struct mod_hook *auto_module = (const struct mod_hook *) mod_start;
 	
 	//If no modules are to load :
 	if ((size_t) auto_module >= (size_t) mod_end) {
 		
 		//Log;
-		kernel_log_("\tNo modules to load");
+		printk("\tNo modules to load");
 		
 	}
 	
@@ -132,7 +132,7 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 		mod_add(auto_module->name, auto_module->init);
 		
 		//Log;
-		kernel_log("\t%s module loaded", auto_module->name);
+		printkf("\t%s module loaded", auto_module->name);
 		
 		//Focus on the next module;
 		auto_module++;
@@ -150,7 +150,7 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 void load_proc_modules() {
 	
 	//Log;
-	kernel_log_("Loading proc modules ...");
+	printk("Loading proc modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&__prmod_min, &__prmod_max);
@@ -160,7 +160,7 @@ void load_proc_modules() {
 void load_system_modules() {
 	
 	//Log;
-	kernel_log_("Loading system modules ...");
+	printk("Loading system modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&__smod_min, &__smod_max);
@@ -171,7 +171,7 @@ void load_system_modules() {
 void load_peripheral_modules() {
 	
 	//Log;
-	kernel_log_("Loading peripheral modules ...");
+	printk("Loading peripheral modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&__pemod_min, &__pemod_max);
@@ -182,7 +182,7 @@ void load_peripheral_modules() {
 void load_kernel_modules() {
 	
 	//Log;
-	kernel_log_("Loading kernel modules ...");
+	printk("Loading kernel modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&__kmod_min, &__kmod_max);
@@ -193,7 +193,7 @@ void load_kernel_modules() {
 void load_user_modules() {
 	
 	//Log;
-	kernel_log_("Loading user modules ...");
+	printk("Loading user modules ...");
 	
 	//Load peripheral modules;
 	load_modules(&__umod_min, &__umod_max);

@@ -27,7 +27,7 @@
 
 #include <stddef.h>
 
-#include <kernel/hard.h>
+#include <hard.h>
 
 
 /*
@@ -67,7 +67,7 @@ void debug_led_dump(uint8_t c);
  * ----------------------------------------------------- Log Debug -----------------------------------------------------
  */
 
-//Send a char over the debug.txt interface, encoded by the log protocol. Implemented by the log protocol;
+//Send a char over the debug.txt if, encoded by the log protocol. Implemented by the log protocol;
 #define debug_print_char(c) __dbg_print_char(c);
 
 

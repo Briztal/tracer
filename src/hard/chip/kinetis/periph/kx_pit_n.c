@@ -20,7 +20,7 @@
 
 //------------------------------------------------ Module channel header -----------------------------------------------
 
-#include <kernel/mod/module_channel.h>
+#include <mod/module_channel.h>
 
 //--------------------------------------------------- Make parameters --------------------------------------------------
 
@@ -69,7 +69,8 @@
 #include <stdint.h>
 
 #include <stdbool.h>
-#include <kernel/async/except.h>
+
+#include <async/except.h>
 
 #include "kx_pit_n.h"
 
@@ -256,7 +257,7 @@ static void set_handler(void (*handler)()) {
 
 
 /*
- * The timer interface;
+ * The timer if;
  */
 
 //struct kx_pit_channel_data NM(kx_pit_channel) = {
@@ -265,7 +266,7 @@ static void set_handler(void (*handler)()) {
 
 static struct channel_specs channel = {
 
-	//Initialise the interface;
+	//Initialise the if;
 	.iface = {
 
 		.maximum = (uint32_t) -1,

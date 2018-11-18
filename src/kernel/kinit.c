@@ -20,19 +20,19 @@
 
 #include "panic.h"
 
-#include <kernel/mem/kdmem.h>
+#include <mem/kdmem.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
-#include <kernel/async/except.h>
+#include <async/except.h>
 
-#include <kernel/clock/sysclock.h>
+#include <clock/sysclock.h>
 
-#include <kernel/mem/ram.h>
+#include <mem/ram.h>
 
-#include <kernel/mod/mod.h>
+#include <mod/mod.h>
 
-#include <kernel/run/proc.h>
+#include <run/proc.h>
 
 
 
@@ -49,8 +49,7 @@
 //TODO KERNEL HALT FOR PANIC
 //TODO KERNEL HALT FOR PANIC
 //TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
-//TODO KERNEL HALT FOR PANIC
+
 
 
 //Start the kernel. Different modes can be entered, depending on compilation settings;
@@ -80,7 +79,7 @@ void __krnl_init() {
 	reentrance = true;
 	
 	//Log.
-	kernel_log_("Entering kernel initialisation sequence;\n")
+	printk("Entering kernel initialisation sequence;\n")
 	
 	//Disable interrupt management:
 	exceptions_disable();
@@ -122,30 +121,6 @@ void __krnl_init() {
 }
 
 
-//If the kernel was compiled for loop mode :
-#ifdef KERNEL_LOOP_MODE
-
-//Declare the kernel first function;
-extern void __kernel_first_function();
-
-/**
- * enter_loop_mode : the loop mode function. Eternally calls the kernel first function;
- */
-static void enter_loop_mode() {
-	
-	//Eternally  :
-	while(1) {
-		
-		//Call the kernel first function;
-		__kernel_first_function();
-		
-	}
-	
-}
-
-
-#endif
-
 
 /**
  * kernel_start : determines the mode to enter, and enters in it;
@@ -153,19 +128,8 @@ static void enter_loop_mode() {
 
 static void kernel_start() {
 	
-	//If the kernel was compiled for loop mode :
-	#ifdef LOOP_MODE
-	
-	//Enter in loop mode;
-	enter_loop_mode();
-	
-	//If the kernel's scheduling module was compiled :
-	#else
-	
 	//Start the execution of the scheduler's first process, via the processor library;
 	proc_start_execution();
-	
-	#endif
 	
 	kernel_panic("execution mode failed to execute or returned;");
 	

@@ -26,7 +26,7 @@
 #include <stdint.h>
 
 #include <stddef.h>
-#include <kernel/mem/stck.h>
+#include <mem/stck.h>
 
 
 //--------------------------------------------------- Stack creation ---------------------------------------------------

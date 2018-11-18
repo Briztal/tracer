@@ -493,7 +493,7 @@ void PI::reset_input_data() {
 /*
  * send_tree_structure : This function send the command structure to the listener.
  *
- *  This interface connects with a program that must adapt its behaviour to the command structure.
+ *  This if connects with a program that must adapt its behaviour to the command structure.
  *
  *  We use a basic delimiter (commands listed below) to make him acknowledge the command structure.
  *

@@ -5,10 +5,7 @@
 #ifndef TRACER_FLOAT_H
 #define TRACER_FLOAT_H
 
-#include "type.h"
-
-#include <math_types.h>
-
+#include <type.h>
 
 /*
  * Hardware vector operations are made on blocks of a certain length, and sizes of arrays used in vector operations

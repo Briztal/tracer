@@ -34,16 +34,8 @@
 
 
 
-/**
- * sw_uart_send : send the char over the serial;
- *
- * 	A low start bit, no parity bit, and two high stop bits are added;
- *
- * @param bit_time : the time of a bit;
- * @param c : the char to encode
- */
 
-void __dbg_print_char(char c) {
+static void print_char(const char c) {
 
 	//Turn off the led;
 	debug_led_low();
@@ -84,4 +76,24 @@ void __dbg_print_char(char c) {
 	//Wait three millisecond time;
 	debug_delay_us(600);
 
+}
+
+
+/**
+ * sw_uart_send : send the char over the serial;
+ *
+ * 	A low start bit, no parity bit, and two high stop bits are added;
+ *
+ * @param bit_time : the time of a bit;
+ * @param c : the char to encode
+ */
+
+void __dbg_print_block(void *arg, const char *block, size_t bsize) {
+	
+	while (bsize--) {
+		
+		print_char(*(block++));
+		
+	}
+	
 }

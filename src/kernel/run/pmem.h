@@ -30,11 +30,12 @@
 
 #include <stddef.h>
 
-#include <kernel/mem/heap.h>
+#include <mem/heap.h>
 
-#include <kernel/mem/stck.h>
+#include <mem/stck.h>
 
 #include <macro/incr_call.h>
+
 #include "coproc.h"
 
 

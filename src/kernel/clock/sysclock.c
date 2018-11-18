@@ -20,11 +20,11 @@
 
 #include "sysclock.h"
 
-#include <kernel/panic.h>
+#include <panic.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
-#include <kernel/async/except.h>
+#include <async/except.h>
 
 
 //---------------------------------------------------- Operations ----------------------------------------------------

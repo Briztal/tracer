@@ -48,7 +48,6 @@ fpu_flags += -DLAZY_STACKING=$(CM4F_FPU_LAZY_STACKING)
 
 
 cortex_m4f :
-#@$(_CC) -o build/hard/cortex_m4f.o -c src/hard/run/cortex_m4f/cortex_m4f.c
 	@$(KCC) -o $(KRNL_D)/arm_v7m_vfp.o -c src/hard/arch/arm/arm_v7m/arm_v7m_vfp.c $(fpu_flags)
 
 KRNL_RULES += cortex_m4f

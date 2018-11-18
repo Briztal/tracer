@@ -28,15 +28,13 @@
  */
 
 
-#if !defined(NB_EXCEPTIONS) || !defined(NVIC_RELOC) || !defined(EXEC_LEVEL)
+#if !defined(NB_EXCEPTIONS) || !defined(NVIC_RELOC)
 
-#error "The number of interrupts was not provided. Check your makefile;"
+#error "The number of exceptions, or the nvic relocation flag was not provided. Check your makefile;"
 
 #define NB_EXCEPTIONS 256
 
 #define NVIC_RELOC 1
-
-#define EXEC_LEVEL 1
 
 #endif
 
@@ -44,7 +42,7 @@
 //------------------------------------------------------ Includes ------------------------------------------------------
 
 #include <stdint.h>
-#include <kernel/async/except.h>
+#include <async/except.h>
 #include "arm_v7m.h"
 
 
@@ -107,7 +105,7 @@ void __syscl_configure(uint8_t priority) {
  * @param syscall_id : the identifier of the system call to execute. Will be located on R0 at handler entry;
  */
 
-__attribute__ ((naked)) uint32_t __syscl_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2) {
+__attribute__ ((naked)) size_t __syscl_trigger(size_t arg0, size_t arg1, size_t arg2, size_t syscall_id) {
 	__asm__ __volatile (\
 
 	//Trigger the supervisor call; Arguments are already placed in R0, R1, R2 and R3;

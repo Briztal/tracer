@@ -53,7 +53,7 @@ SECTIONS {
 
 
     /*The embedded modules section contains kernel modules to load at init;*/
-    .kernel_modules : {
+    .hooks : {
 
         __prmod_min = .;
         KEEP(*(.kernel_proc_modules))
@@ -74,6 +74,10 @@ SECTIONS {
         __umod_min = .;
         KEEP(*(.kernel_user_modules))
         __umod_max = .;
+
+        __apps_min = .;
+        KEEP(*(.kernel_apps))
+        __apps_max = .;
 
      } > FLASH
 

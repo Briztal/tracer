@@ -19,10 +19,10 @@
 */
 
 
-#include <kernel/panic.h>
-#include <kernel/clock/clock.h>
-#include <kernel/debug/debug.h>
-#include <kernel/debug/log.h>
+#include <panic.h>
+#include <clock/clock.h>
+#include <debug/debug.h>
+#include <debug/printk.h>
 
 #include "kx_clock_auto.h"
 
@@ -95,7 +95,7 @@ void kx_clock_autotune(const uint32_t frequency_target) {
 	
 	debug_delay_ms(1000);
 	
-	kernel_log_("Evaluating ...");
+	printk("Evaluating ...");
 	
 	//For each configuration finder :
 	for (uint8_t finder_id = 0; finder_id < NB_CONFIGURATION_FINDER; finder_id++) {
@@ -115,7 +115,7 @@ void kx_clock_autotune(const uint32_t frequency_target) {
 	}
 	
 	
-	kernel_log_("Done. Calling kernel clock config.");
+	printk("Done. Calling kernel clock config.");
 	
 	//Call the kernel clock tuning function;
 	clock_tune(&config, sizeof(struct kx_mcg_config));

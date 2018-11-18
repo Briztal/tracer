@@ -49,11 +49,11 @@ static SORT_T *MERGE_NAME(SORT_T *A, SORT_T *B) {
 	
 	//If A_0 < B_0, A must be inserted before B;
 	if (VAL(A) < VAL(B)) {
-		kernel_log("l0 A %d", VAL(A));
+		printkf("l0 A %d", VAL(A));
 		L0 = A;
 		goto insert_A;
 	} else {
-		kernel_log("l0 B %d", VAL(B));
+		printkf("l0 B %d", VAL(B));
 		L0 = B;
 		goto insert_B;
 	}
@@ -202,12 +202,12 @@ static SORT_T *MERGE_NAME(SORT_T *A, SORT_T *B) {
 
 	end :
 
-	kernel_log("LL0 %d", VAL(L0));
+	printkf("LL0 %d", VAL(L0));
 
 	//Close L;
 	L->head.next = L0, L0->head.prev = L;
 
-	kernel_log("LL0 %d", VAL(L0));
+	printkf("LL0 %d", VAL(L0));
 
 	//Return the first element of L;
 	return L0;

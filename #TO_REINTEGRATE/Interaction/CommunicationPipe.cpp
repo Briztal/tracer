@@ -66,7 +66,7 @@ void CommunicationPipe::send(tstring &message, uint8_t type) {
 
 
 /*
- * read : this function will readall the hardware interface until no char is available anymore;
+ * read : this function will readall the hardware if until no char is available anymore;
  */
 
 void CommunicationPipe::readall() {

@@ -18,12 +18,13 @@ add_definitions(-D'USB_SERIAL')
 add_definitions(-D'ARDUINO=10805')
 add_definitions(-D'TEENSYDUINO=141')
 
-include_directories("$ENV{HOME}/Projects/tracer/src/hard/chip/kinetis/periph")
-include_directories("$ENV{HOME}/Projects/tracer/src/std")
 include_directories("$ENV{HOME}/Projects/tracer/src")
+include_directories("$ENV{HOME}/Projects/tracer/src/hard/chip/kinetis/periph")
+include_directories("$ENV{HOME}/Projects/tracer/src/kernel/mem")
+include_directories("$ENV{HOME}/Projects/tracer/src/kernel")
+include_directories("$ENV{HOME}/Projects/tracer/src/dmz")
 
 FILE(GLOB_RECURSE SRC_LIST "/root/Projects/tracer/src/*.*")
-
 
 add_custom_target(
     PLATFORMIO_BUILD ALL

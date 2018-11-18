@@ -28,22 +28,21 @@
  */
 
 
-#if !defined(NB_EXCEPTIONS) || !defined(NVIC_RELOC) || !defined(EXEC_LEVEL)
+#if !defined(NB_EXCEPTIONS) || !defined(NVIC_RELOC)
 
-#error "The number of interrupts was not provided. Check your makefile;"
+#error "The number of interrupts or the nvic relocation flag was not provided. Check your makefile;"
 
 #define NB_EXCEPTIONS 256
 
 #define NVIC_RELOC 1
 
-#define EXEC_LEVEL 1
 
 #endif
 
 
 //------------------------------------------------ Includes -----------------------------------------------
 
-#include <kernel/hard.h>
+#include <hard.h>
 #include "arm_v7m.h"
 
 

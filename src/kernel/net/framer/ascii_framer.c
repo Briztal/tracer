@@ -18,8 +18,8 @@
 
 */
 
-#include <kernel/net/netf.h>
-#include <kernel/public/syscall.h>
+#include <net/netf.h>
+#include "../../../std/syscall.h"
 #include "framer.h"
 
 /*

@@ -20,7 +20,7 @@
 
 #include "mcore.h"
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
 
 //------------------------------------------------- Computation stages -------------------------------------------------
@@ -150,7 +150,7 @@ void mcore_initialise(
 	if (s0_dimension != s1->dimension) {
 		
 		//Log;
-		kernel_log_("mcore_initialise : state have different dimensions");
+		printk("mcore_initialise : state have different dimensions");
 		
 		//Fail;
 		return;
@@ -162,7 +162,7 @@ void mcore_initialise(
 	if (dimension != s0_dimension) {
 		
 		//Log;
-		kernel_log_("mcore_initialise : incompatible state dimensions");
+		printk("mcore_initialise : incompatible state dimensions");
 		
 		//Fail;
 		return;
@@ -196,11 +196,11 @@ bool mcore_compute_movement(struct mcore *const core, struct movement *mvmt) {
 	//Cache the distanes computer;
 	distances_cpt distance_computation = core->dist_computer;
 	
-	//If the controller is not ready :
+	//If the controller is not initialised :
 	if (!(distance_computation)) {
 		
 		//Log;
-		kernel_log_("mcore_compute_movement : controller not ready");
+		printk("mcore_compute_movement : controller not initialised");
 		
 		//Fail;
 		return false;
@@ -585,7 +585,7 @@ static void reduce_interval(struct mcore *core) {
 	if (!final_interval.valid) {
 		
 		//Error, not supposed to happen;
-		kernel_log_("machine_controller.c : mcontroller_correct_duration_window : the final interval is invalid;");
+		printk("machine_controller.c : mcontroller_correct_duration_window : the final interval is invalid;");
 		
 	}
 	

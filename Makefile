@@ -29,7 +29,7 @@
 #	Four make units are included. In the order :
 #
 # 		- hard : contains standard components hardware dependent code. Its aim is to provide the most complete standard
-#			interface for the whole projects. Non standard components (applications and projects mainly) are free to
+#			if for the whole projects. Non standard components (applications and projects mainly) are free to
 #			include hardware specific code.
 #			It configures the kernel, adds kernel rules to generate the kernel's hardware dependent parts, adds
 #			device driver modules, and generate hardware code for the standard lib (ex for math).
@@ -72,9 +72,22 @@ SIZE :=
 CFLAGS := -Wall -Os -g -std=c99 -ffreestanding
 LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 
-#Include path only contains src and std dir;
+
+#FLags proper to the kernel;
+KFLAGS :=
+
+
 INC := -Isrc
+INC += -Isrc/dmz
 INC += -Isrc/std
+
+#Include path only contains src and std dir;
+#INC += -Isrc/std
+
+KINC := -Isrc
+KINC += -Isrc/dmz
+KINC += -Isrc/kernel
+KINC += -Isrc/kernel/mem
 
 
 #The hardware module selects the memory map link script;
@@ -91,7 +104,9 @@ STDL_RULES :=
 #Components objects must be generated in their build directories;
 KRNL_D := build/krnl
 MODS_D := build/mods
+MODC_D := build/modc
 APPS_D := build/apps
+APPC_D := build/appc
 STDL_D := build/stdl
 
 
@@ -109,17 +124,19 @@ include src/config/board.mk
 #Include the kernel makefile
 include src/kernel/Makefile
 
+#Include the dmz makefile
+include src/dmz/Makefile
+
 #include the project makefile
 include src/config/project.mk
 
 #include the standard lib makefile
 include src/std/Makefile
 
-
 #----------------------------------------------------- Finalisation ----------------------------------------------------
 
-#Abreviation for compiling with standard C flags and include paths;
-KCC = $(CC) $(CFLAGS) $(KFLAGS) $(INC)
+#Kernel sources are compiled from multiple make units. This abreviation eases their work;
+KCC = $(CC) $(CFLAGS) $(KFLAGS) $(KINC)
 
 #Abreviation for compiling with standard C flags and include paths;
 _CC = $(CC) $(CFLAGS) $(INC)
@@ -134,10 +151,17 @@ LDFLAGS += -Tsrc/hard/unified_link_script.ld -L$(LDSCRIPT_MMAP_DIR)
 #-------------------------------------------- Objects list (late expanding) --------------------------------------------
 
 #Components objects are generated in their build directories;
-KRNL_O = $(wildcard $(KRNL_D)/*.o) 
-MODS_O = $(wildcard $(MODS_D)/*.o)
-APPS_O = $(wildcard $(APPS_D)/*.o)
+KRNL_O = $(wildcard $(KRNL_D)/*.o)
 STDL_O = $(wildcard $(STDL_D)/*.o)
+
+#Each module must be packed and mangled
+MODS_PACKERS = $(addsuffix _mod_pack,$(MODS_RULES))
+MODS_O = $(wildcard $(MODC_D)/*.o)
+
+
+#Each application must be packed and mangled
+APPS_PACKERS = $(addsuffix _app_pack,$(APPS_RULES))
+APPS_O = $(wildcard $(APPC_D)/*.o)
 
 
 #--------------------------------------------------- Build arbo init ---------------------------------------------------
@@ -147,31 +171,70 @@ dtree:
 	@mkdir build
 	@mkdir $(KRNL_D)
 	@mkdir $(MODS_D)
-	@mkdir $(APPS_D)
+	@mkdir $(MODC_D)
 	@mkdir $(STDL_D)
+	@mkdir $(APPS_D)
+	@mkdir $(APPC_D)
 
 
 #-------------------------------------------------- Components rules ---------------------------------------------------
 
+#ELF translate : prefix,input,output
+elf_translate = ./elf_mangle -p $(1) -i $(2) -o $(3)
+
+#ELF mangle : translation_file,object_file
+elf_mangle = $(OBJCOPY) --redefine-syms=$(1) $(2)
+
+
 #components all depend on the content of their rules list;
-krnl : $(KRNL_RULES)
-mods : $(MODS_RULES)
-apps : $(APPS_RULES)
+krnl_pack : $(KRNL_RULES)
+	@$(LD) -r -o build/krnl.o $(KRNL_O)
+	@$(call elf_translate,kernel,build/krnl.o,build/krnl_trsl)
+	@$(call elf_mangle,build/krnl_trsl,build/krnl.o)
+
+
+%_mod_pack : %
+	@$(LD) -r -o $(MODC_D)/$<.o $(addprefix $(MODS_D)/,$($<_f))
+
+	@$(call elf_translate,$<,$(MODC_D)/$<.o,$(MODC_D)/$<_trsl)
+	@$(call elf_mangle,$(MODC_D)/$<_trsl,$(MODC_D)/$<.o)
+	@$(call elf_mangle,build/krnl_trsl,$(MODC_D)/$<.o)
+
+
+
+#Each module comprises multiple files that must be packed in one single file;
+mods_pack : $(MODS_PACKERS)
+
 
 #The standard lib is different. We must archive all objetcs;
-stdl : $(STDL_RULES)
+stdl_pack : $(STDL_RULES)
 
-#Create an archive with all objects;
 	@$(AR) cr build/stdlib.a $(STDL_O)
+	@$(call elf_translate,stdl,build/stdlib.a,build/stdl_trsl)
+	@$(call elf_mangle,build/stdl_trsl,build/stdlib.a)
+
+
+
+%_app_pack : %
+	@$(LD) -r -o $(APPC_D)/$<.o $(addprefix $(APPS_D)/,$($<_f))
+
+	@$(call elf_translate,$<,$(APPC_D)/$<.o,$(APPC_D)/$<_trsl)
+	@$(call elf_mangle,$(APPC_D)/$<_trsl,$(APPC_D)/$<.o)
+	@$(call elf_mangle,build/stdl_trsl,$(APPC_D)/$<.o)
+
+
+
+apps_pack : $(APPS_PACKERS)
+
 
 
 
 #----------------------------------------------- Linking rule ----------------------------------------------
 
-elf: dtree krnl mods stdl apps
+elf: dtree krnl_pack mods_pack stdl_pack apps_pack
 	@echo "[LD]\ttracer.elf"
 
-	@$(CC) $(LDFLAGS) $(KRNL_O) $(MODS_O) $(APPS_O) build/stdlib.a -o $(NAME).elf
+	$(CC) $(LDFLAGS) build/krnl.o $(MODS_O) $(APPS_O) build/stdlib.a -o $(NAME).elf
 
 	@$(SIZE) -A -t -x $(NAME).elf
 

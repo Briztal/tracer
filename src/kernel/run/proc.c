@@ -23,7 +23,7 @@
 //The memory library required the exception stack size to be provided by the makefile;
 #if !defined(KEX_STACK_SIZE)
 
-//COmpilation fail;
+//Compilation fail;
 #error "Error, one make parameter not provided, check your makefile"
 
 #define KEX_STACK_SIZE 1000
@@ -35,25 +35,21 @@
 #include "proc.h"
 #include "coproc.h"
 
-#include <kernel/async/except.h>
-#include <kernel/debug/log.h>
-#include <kernel/run/sched.h>
-#include <kernel/clock/sysclock.h>
-#include <kernel/mem/ram.h>
+#include <async/except.h>
+#include <debug/printk.h>
+#include <run/sched.h>
+#include <clock/sysclock.h>
+#include <mem/ram.h>
 
-#include <kernel/mem/stck.h>
+#include <mem/stck.h>
 
-#include <mem.h>
-#include <kernel/panic.h>
+#include <stdmem.h>
+#include <panic.h>
 
 
 
 //--------------------------------------------- Vars --------------------------------------------
 
-
-//TODO SYSCALL + FUNCTION IN PROC LIB;
-//A flag set if the current process must be terminated during teh next preemption;
-bool prc_process_terminated = false;
 
 //The stacks array; Will reference interrupt stacks;
 static struct stck exception_stack;
@@ -131,9 +127,9 @@ void proc_start_execution() {
 	
 	
 	//Log;
-	kernel_log_("\nKernel initialisation sequence complete. Entering thread mode ...\n");
+	printk("\nKernel initialisation sequence complete. Entering thread mode ...\n");
 	
-	kernel_log("target: %h", exception_stack.sp);
+	printkf("target: %h", exception_stack.sp);
 	
 	//Enter thread mode and un-privilege, provide the kernel stack for interrupt handling;
 	//Interrupts will be enabled at the end of the function;
@@ -225,28 +221,6 @@ void *__krnl_switch_context(void *sp) {
 		valid_sp = true;
 		
 	}
-	
-	
-	//TODO
-	//TODO IN SYSCALL;
-	
-	//If the process is terminated :
-	if (prc_process_terminated) {
-		
-		/*
-		 * Termination
-		 */
-		
-		kernel_log_("TERMINATING");
-		
-		//Terminate the current process;
-		sched_terminate_prc();
-		
-		//Clear termination flag;
-		prc_process_terminated = false;
-		
-	}
-	
 	
 	
 	//Commit changes to the scheduler;

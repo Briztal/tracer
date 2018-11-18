@@ -26,47 +26,9 @@
 #include <macro/variadic.h>
 
 
-//------------------------------------------------------- Config -------------------------------------------------------
-
-//Uncomment to disable kernel panic log;
-//#define DISABLE_PANIC_LOG
-
-
-//-------------------------------------------------------- Panic -------------------------------------------------------
-
-//If panic logs are enabled :
-#ifndef DISABLE_PANIC_LOG
-
-
 //Declare the function that will trigger a kernel panic, and displaying a message related to the error;
-void _kernel_panic(const char *tmp_str, const void **args, size_t args_size);
+void kernel_panic(const char *tmp_str);
 
-//Use panic with log;
-#define kernel_panic(msg) {_kernel_panic(msg, 0, 0);while(1);}
-
-#define kernel_panic_(msg, ...) {\
-	const void *__klog_args__[] = VARIADIC_PACKAGE(__VA_ARGS__);\
-	_kernel_panic(msg, __klog_args__, VARIADIC_COUNT(__VA_ARGS__));\
-	while(1);\
-}
-
-
-
-//If panic logs are disabled :
-#else
-
-
-//Declare a special function that will trigger a kernel panic, displaying a default message;
-void _kernel_panic_nolog();
-
-//Use panic with no logs;
-#define kernel_panic(msg) _kernel_panic_nolog()
-
-//Use panic with no logs;
-#define kernel_panic_(msg, ...) _kernel_panic_nolog()
-
-
-#endif
 
 
 #endif //TRACER_ERROR_H

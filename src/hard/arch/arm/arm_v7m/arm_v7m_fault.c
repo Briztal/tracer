@@ -5,17 +5,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <kernel/async/fault.h>
+#include <async/fault.h>
 
-#include <kernel/debug/log.h>
-#include <kernel/mod/auto_mod.h>
+#include <debug/printk.h>
+#include <mod/mod_hook>
 
 #include "arm_v7m.h"
 
 
 #define DETECT_FAULT(var, mask, msg, f_type) {\
 	if ((var) & (mask)) {\
-    	kernel_log_(msg);\
+    	printk(msg);\
 		FAULT_ESCALATE(fault, f_type);\
 	}\
 }
@@ -85,12 +85,12 @@ static enum fault_type check_MMFSR() {
 			uint32_t MMFAR = *ARMV7_MMFAR;
 			
 			//Log;
-			kernel_log("Data access violation : %h", MMFAR);
+			printkf("Data access violation : %h", MMFAR);
 			
 		} else {
 			
 			//MMFAR has invalid content, log;
-			kernel_log_("Data access violation, invalid memory indicator");
+			printk("Data access violation, invalid memory indicator");
 			
 		}
 		
@@ -139,13 +139,13 @@ static enum fault_type check_BFSR() {
 			uint32_t BFAR = *ARMV7_BFAR;
 			
 			//Log;
-			kernel_log("Bus precise data access error : %h", BFAR);
+			printkf("Bus precise data access error : %h", BFAR);
 			
 			
 		} else {
 			
 			//MMFAR has invalid content, log;
-			kernel_log_("Bus precise data error, invalid memory indicator");
+			printk("Bus precise data error, invalid memory indicator");
 			
 		}
 		
@@ -249,4 +249,4 @@ static bool armv7_fault_init() {
 	
 }
 
-KERNEL_EMBED_MODULE(PROC_MODULE, armv7_fault, &armv7_fault_init)
+KERNEL_HOOK_MODULE(PROC_MODULE, armv7_fault, &armv7_fault_init)

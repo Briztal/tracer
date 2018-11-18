@@ -20,8 +20,8 @@
 
 #include "kx_mcg.h"
 
-#include <kernel/panic.h>
-#include <kernel/debug/debug.h>
+#include <panic.h>
+#include <debug/debug.h>
 
 
 /*

@@ -29,7 +29,7 @@
 #include <stddef.h>
 
 #include <data_structures/containers/concurrent/shared_fifo.h>
-#include <kernel/net/framer/framer.h>
+#include <net/framer/framer.h>
 
 
 
@@ -65,7 +65,7 @@ void data_block_delete(struct data_block *block);
 void data_block_copy(const struct data_block *src, struct data_block *dst);
 
 /*
- * ------------------------------------------- OSI layer 2 network interface -------------------------------------------
+ * ------------------------------------------- OSI layer 2 network if -------------------------------------------
  */
 
 /*
@@ -74,7 +74,7 @@ void data_block_copy(const struct data_block *src, struct data_block *dst);
 
 struct netf2 {
 
-	//The protocol interface;
+	//The protocol if;
 	//TODO struct protocol_t protocol;
 
 	//The quadruplet of shared fifos, to transmit frame containers between hw_specs and sw irq
@@ -91,7 +91,7 @@ struct netf2 {
 
 //----------------------------------------------------- Init - Exit ----------------------------------------------------
 
-//Initalise a layer 2 interface : create and fill fifos, assign function pointers;
+//Initalise a layer 2 if : create and fill fifos, assign function pointers;
 void netf2_init(
 	struct netf2 *iface,
 	size_t nb_frames,
@@ -102,7 +102,7 @@ void netf2_init(
 );
 
 
-//Destruct the interface : delete fifos and their content;
+//Destruct the if : delete fifos and their content;
 void netf2_delete(struct netf2 *iface);
 
 
@@ -138,7 +138,7 @@ static inline bool netf2_message_available(struct netf2 *iface) {
 }
 
 /*
- * ------------------------------------------- OSI layer 1 TODO NOP, LAYER 2 BASIC network interface -------------------------------------------
+ * ------------------------------------------- OSI layer 1 TODO NOP, LAYER 2 BASIC network if -------------------------------------------
  */
 
 /*
@@ -147,7 +147,7 @@ static inline bool netf2_message_available(struct netf2 *iface) {
 
 struct netf21 {
 
-	//The layer 2 interface we adapt;
+	//The layer 2 if we adapt;
 	struct netf2 iface;
 
 	//The framer we use;

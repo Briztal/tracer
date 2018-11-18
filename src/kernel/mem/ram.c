@@ -21,11 +21,11 @@
 
 #include <stdint.h>
 
-#include <kernel/panic.h>
+#include <panic.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
-#include <kernel/hard.h>
+#include <hard.h>
 
 #include "ram.h"
 
@@ -58,7 +58,7 @@ void ram_init() {
 	//Initialise the heap;
 	ram_heap = heap_create(&__ram_min, &__ram_max - &__ram_min, &heap_fifo_insertion);
 
-	kernel_log_("RAM manager initialised");
+	printk("RAM manager initialised");
 
 }
 

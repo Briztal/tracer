@@ -24,7 +24,7 @@ K_DIR := src/hard/chip/kinetis/periph
 KC_DIR := src/hard/chip/kinetis/chips/mk64fx512
 
 #Use this to compile with the kinetis periph folder included;
-MKCC = $(CC) $(CFLAGS) $(INC) -I$(K_DIR)
+MKCC = $(KCC) -I$(K_DIR)
 
 
 #---------------------------------------------------- Configuration ----------------------------------------------------
@@ -44,6 +44,7 @@ mk64fx512:
 #Init function must stop watchdog at init. Compile it;
 	@$(MKCC) -o $(KRNL_D)/kx_wdog.o -c $(K_DIR)/kx_wdog.c
 
+KRNL_RULES += mk64fx512 flash_cfg
 
 #----------------------------------------------------- Flash config ----------------------------------------------------
 
@@ -80,6 +81,9 @@ clock:
 	@$(MKCC) -o $(MODS_D)/kx_mcg.o -c $(K_DIR)/kx_clock/kx_mcg.c $(pll_args)
 	@$(MKCC) -o $(MODS_D)/kc_clock.o -c $(K_DIR)/kx_clock/kx_clock.c $(pll_args)
 
+clock_f := kx_irc.o kx_osc.o kx_fll.o kx_pll.o kx_mcg.o kc_clock.o
+
+MODS_RULES += clock
 
 #--------------------------------------------------- PORT GPIO module --------------------------------------------------
 
@@ -91,6 +95,9 @@ port:
 #The port object is compiled providing the chip directory, so that appropriate pins get generated;
 	@$(MKCC) -o $(MODS_D)/kx_port.o -c $(K_DIR)/kx_port.c $(port_args) -I$(KC_DIR)
 
+port_f := kx_port.o
+
+MODS_RULES += port
 
 #----------------------------------------------------- PITs module -----------------------------------------------------
 
@@ -118,13 +125,6 @@ pit:
 #Compile the pit manager; It takes two arguments, the mcr address and the number of channels;
 	@$(MKCC) -o $(MODS_D)/pit.o -c $(K_DIR)/kx_pit.c $(pit_args)
 
+pit_f := pit.o pit0.o pit1.o pit2.o pit3.o
 
-#-------------------------------------------------- Components Config --------------------------------------------------
-
-#Add the chip rule and the flash config rule to the kernel list;
-KRNL_RULES += mk64fx512 flash_cfg
-
-#Add peripheral rules to the modules list;
-MODS_RULES += clock
-MODS_RULES += port
 MODS_RULES += pit

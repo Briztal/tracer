@@ -19,9 +19,9 @@
 */
 
 
-#include <kernel/panic.h>
-#include <kernel/debug/log.h>
-#include <kernel/debug/debug.h>
+#include <panic.h>
+#include <debug/printk.h>
+#include <debug/debug.h>
 
 #include "kx_mcg.h"
 

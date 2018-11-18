@@ -20,7 +20,7 @@
 
 #include "time_interval.h"
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
 const struct time_interval time_interval_largest = {
 	.min = 0,
@@ -52,7 +52,7 @@ bool time_interval_intersect(struct time_interval *const dst, const struct time_
 	if (!bound.valid) {
 		
 		//Error, the constraint must provide a valid interval;
-		kernel_log_("machine_controller.c : mcontroller_correct_duration_window : the constraint "
+		printk("machine_controller.c : mcontroller_correct_duration_window : the constraint "
 						"interval is invalid;");
 		
 	}

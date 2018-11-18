@@ -1,24 +1,26 @@
 
 //----------------------------- Prioritary -----------------------------
 
-//TODO PORT ON ARDUINO
+//TODO PROPER PRINTK FUNCTIONS, WITH FILES;
+
+//TODO Standard output / input / error procedures;
 
 //TODO TEST MACHINE CONTROLLER
 
-//TODO STDOUT
-
-//TODO MACHINE CONTROL UN-DYNAMISE
-
 //TODO VFP MATH LIB;
+
+
+
+//TODO PORT ON ARDUINO
+
+
+//TODO BOOST
 
 //TODO RAM PAGES ALLOC;
 
 //TODO CHECK THAT KINETIS UART DRIVER NOT LAREADY INITALISED
 
-
 /*------------------------------------- Kernel tasks -------------------------------------
-
-
 
 //LONG TERM :
 

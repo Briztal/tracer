@@ -22,7 +22,7 @@
 
 */
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 #include "cbuffer.h"
 
 #define CBUFFER_ELEMENT_POINTER(buffer, element_index)\
@@ -58,7 +58,7 @@ void cbuffer_validate_input(struct cbuffer *const buffer) {
 	if (!buffer->nb_spaces) {
 		
 		//Error. Do nothing
-		kernel_log_("circular_buffer.c : cbuffer_validate_input : no space available;");
+		printk("circular_buffer.c : cbuffer_validate_input : no space available;");
 		return;
 	}
 	
@@ -90,7 +90,7 @@ void *cbuffer_get_input(const struct cbuffer *const buffer, const size_t offset)
 	if (offset > buffer->nb_elements) {
 		
 		//Error. Do nothing
-		kernel_log_("circular_buffer.c : cbuffer_read_input : offset is greater than the number of elements;;");
+		printk("circular_buffer.c : cbuffer_read_input : offset is greater than the number of elements;;");
 		return 0;
 		
 	}
@@ -119,7 +119,7 @@ void cbuffer_discard_output(struct cbuffer *const buffer) {
 	if (!buffer->nb_elements) {
 		
 		//Error;
-		kernel_log_("circular_buffer.c : cbuffer_discard_output : the buffer is empty;");
+		printk("circular_buffer.c : cbuffer_discard_output : the buffer is empty;");
 		
 		//Fail. Never reached;
 		return;
@@ -154,7 +154,7 @@ void *cbuffer_read_output(struct cbuffer *const buffer, const size_t offset) {
 	if (offset >= buffer->nb_elements) {
 		
 		//Error;
-		kernel_log_("circular_buffer.c : cbuffer_read_output : offset is greater or equal"
+		printk("circular_buffer.c : cbuffer_read_output : offset is greater or equal"
 						 " than the number of elements;");
 		
 		//Fail. Never reached;

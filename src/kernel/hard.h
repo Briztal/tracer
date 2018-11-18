@@ -35,6 +35,8 @@
 
 #include <stdint.h>
 
+#include <stddef.h>
+
 
 /*
  * ---------------------------------------------------------------------------------------------------------------------
@@ -58,7 +60,7 @@ extern void __krnl_handle_fault(uint32_t type);
 extern void *__krnl_switch_context(void *sp);
 
 //The kernel syscall handler;
-extern uint32_t __krnl_syscall_handler(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
+extern size_t __krnl_syscall_handler(size_t syscall_id, size_t arg0, size_t arg1, size_t arg2);
 
 //The kernel tick function; Should be called by the system timer ISR;
 extern void __krnl_tick();
@@ -79,7 +81,6 @@ extern void __proc_init();
 extern void __chip_init();
 
 
-
 //----------------------------------------------------- Debug ----------------------------------------------------
 
 //Light the debug led high; Implemented by the hardware;
@@ -94,8 +95,8 @@ extern void __dbg_delay_ms(uint32_t ms);
 //Wait for a certain number of microsoconds. Not accurate or reliable; Implemented by the hardware;
 extern void __dbg_delay_us(uint32_t ms);
 
-//Send a char over the debug interface, encoded by the log protocol. Implemented by the log protocol;
-extern void __dbg_print_char(char);
+//Send a char over the debug if, encoded by the log protocol. Implemented by the log protocol;
+extern void __dbg_print_block(void *, const char *, size_t);
 
 //----------------------------------------------------- Vector table ---------------------------------------------------
 
@@ -251,7 +252,7 @@ extern void __prmpt_trigger();
 extern void __syscl_configure(uint8_t priority);
 
 //Call the kernel;
-extern uint32_t __syscl_trigger(uint32_t syscall_id, uint32_t arg0, uint32_t arg1, uint32_t arg2);
+extern size_t __syscl_trigger(size_t arg0, size_t arg1, size_t arg2, size_t syscall_id);
 
 
 #endif //TRACER_HARD_H

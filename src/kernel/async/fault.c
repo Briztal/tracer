@@ -2,8 +2,8 @@
 // Created by root on 10/3/18.
 //
 
-#include <kernel/panic.h>
-#include <kernel/debug/log.h>
+#include <panic.h>
+#include <debug/printk.h>
 #include "fault.h"
 #include "except.h"
 
@@ -55,7 +55,7 @@ void __krnl_handle_fault(uint32_t type) {
 	critical_section_enter();
 	
 	//Log;
-	kernel_log("Fault of type %d detected !", type);
+	printkf("Fault of type %d detected !", type);
 	
 	//Cache the fault analyser;
 	enum fault_type (*analyser)(uint32_t) = fault_analyser;
@@ -63,18 +63,16 @@ void __krnl_handle_fault(uint32_t type) {
 	//If the analyser is null :
 	if (!analyser) {
 		
-		kernel_log_("No analyser.");
-		return;
+		printk("No analyser.");
 		
-		//Panic;
-		kernel_panic_("A fault of type %d has occurred, the fault analyser is not initialised. ", type);
+		return;
 		
 	}
 	
 	//The analyser is initialised;
 	
 	//Log;
-	kernel_log_("Executing the fault analyser ...");
+	printk("Executing the fault analyser ...");
 	
 	//Execute the fault analyser;
 	bool minor_fault = (*analyser)(type);
@@ -83,13 +81,13 @@ void __krnl_handle_fault(uint32_t type) {
 	if (minor_fault) {
 		
 		//Log;
-		kernel_log_("Minor fault detected. Attempting to recover ...");
-		kernel_log_("No recovery procedure implemented. Goodbye.");
+		printk("Minor fault detected. Attempting to recover ...");
+		printk("No recovery procedure implemented. Goodbye.");
 		
 	} else {
 		
 		//If the fault is major :
-		kernel_log_("Major fault detected. No possible recovery. Goodbye.");
+		printk("Major fault detected. No possible recovery. Goodbye.");
 		
 	}
 	

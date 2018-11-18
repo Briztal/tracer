@@ -19,7 +19,7 @@
 */
 
 
-#include <kernel/startup.h>
+#include <startup.h>
 
 #include "kx_wdog.h"
 

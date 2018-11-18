@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 
-#include <kernel/mem/heap.h>
+#include <mem/heap.h>
 
 
 //Initialise the kernel memory;

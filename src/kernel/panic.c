@@ -20,24 +20,20 @@
 
 #include "panic.h"
 
-#include <stdout.h>
+#include <debug/debug.h>
 
-#include <kernel/debug/debug.h>
-
-#include <kernel/async/except.h>
-
-
-static void (*log_output)(char) = &__dbg_print_char;
+#include <async/except.h>
+#include <debug/printk.h>
 
 
-void _kernel_panic(const char *str, const void **args, size_t args_size)  {
+void kernel_panic(const char *str)  {
 	
 	exceptions_disable();
 
 	while (1) {
 
 		//Transmit the message;;
-		stdout(log_output, str, args, args_size);
+		printk(str);
 		
 		//Wait for one second;
 		debug_delay_ms((uint32_t) 1000);
@@ -45,19 +41,3 @@ void _kernel_panic(const char *str, const void **args, size_t args_size)  {
 	}
 
 }
-
-
-//If panic logs are disabled :
-#ifdef DISABLE_PANIC_LOG
-
-//Trigger a kernel panic, displaying a default message;
-void _kernel_panic_nolog() {
-
-	//Display the default error message;
-	_kernel_panic("A kernel panic has occurred. As log has been disabled at compile time, you are fucked.\n"
-					  "Try to re-enable them, recompile and reproduce error conditions.\n"
-					  "Good luck pal !");
-
-}
-
-#endif

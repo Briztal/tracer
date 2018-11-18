@@ -23,11 +23,11 @@
 
 #include <list.h>
 
-#include <mem.h>
+#include <stdmem.h>
 
-#include <kernel/panic.h>
+#include <panic.h>
 
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 
 
 
@@ -118,13 +118,13 @@ struct heap_block {
 void heap_print(struct heap_head *head) {
 
 	
-	kernel_log_("heap print : ");
+	printk("heap print : ");
 
-	kernel_log("head : %h, block : %h", sizeof(struct heap_head), sizeof(struct heap_block));
+	printkf("head : %h, block : %h", sizeof(struct heap_head), sizeof(struct heap_block));
 
 	{
 
-		kernel_log_("block list : ");
+		printk("block list : ");
 
 		//Cache the first block;
 		struct heap_block *const blk = head->first_block, *b = blk;
@@ -133,20 +133,20 @@ void heap_print(struct heap_head *head) {
 
 		do {
 
-			kernel_log("block %d at %h, to %h ", i, b,(uint8_t *) b + b->block_size);
-			kernel_log("size : %h - %d", b->block_size, b->block_size);
+			printkf("block %d at %h, to %h ", i, b,(uint8_t *) b + b->block_size);
+			printkf("size : %h - %d", b->block_size, b->block_size);
 			i++;
 
 			if (b->status == HEAP_FREE_STATUS) {
-				kernel_log_("\tfree");
+				printk("\tfree");
 			} else if (b->status == HEAP_ALLOCATED_STATUS) {
-				kernel_log_("\tallocated;");
+				printk("\tallocated;");
 			} else {
-				kernel_log_("\tinvalid;");
+				printk("\tinvalid;");
 			}
 
 
-			kernel_log_("");
+			printk("");
 
 			//Update the next block
 			b = b->head.next;
@@ -155,13 +155,13 @@ void heap_print(struct heap_head *head) {
 	}
 	{
 
-		kernel_log_("av blocks print : ");
+		printk("av blocks print : ");
 
 		//Cache the first block;
 		struct heap_block *const blk = head->first_available_block, *b = blk;
 
 		if (!blk) {
-			kernel_log_("No  available blocks");
+			printk("No  available blocks");
 			return;
 		}
 
@@ -169,19 +169,19 @@ void heap_print(struct heap_head *head) {
 
 		do {
 
-			kernel_log("block %d at %h, to %h ", i, b,(uint8_t *) b + b->block_size);
-			kernel_log("size : %h - %d", b->block_size, b->block_size);
+			printkf("block %d at %h, to %h ", i, b,(uint8_t *) b + b->block_size);
+			printkf("size : %h - %d", b->block_size, b->block_size);
 
 
 			if (b->status == HEAP_FREE_STATUS) {
-				kernel_log_("\tfree");
+				printk("\tfree");
 			} else if (b->status == HEAP_ALLOCATED_STATUS) {
-				kernel_log_("\tallocated;");
+				printk("\tallocated;");
 			} else {
-				kernel_log_("\tinvalid;");
+				printk("\tinvalid;");
 			}
 
-			kernel_log_("");
+			printk("");
 
 			//Update the next block
 			b = b->available_head.next;

@@ -20,11 +20,11 @@
 
 
 #include <stddef.h>
-#include <kernel/debug/log.h>
+#include <debug/printk.h>
 #include <kx_sim.h>
-#include <kernel/clock/clock.h>
-#include <kernel/mod/auto_mod.h>
-#include <kernel/debug/debug.h>
+#include <clock/clock.h>
+#include <mod/mod_hook>
+#include <debug/debug.h>
 
 #include "kx_clock.h"
 
@@ -222,7 +222,7 @@ static void kx_clock_configure(struct kx_clock_config *config, size_t config_siz
 	//First, verify that the size is correct;
 	if (config_size != sizeof(struct kx_clock_config)) {
 		
-		kernel_log_("kx_clock_configure : error, bad size");
+		printk("kx_clock_configure : error, bad size");
 		
 	}
 	
@@ -337,7 +337,7 @@ static bool kx_clock_init() {
 }
 
 
-KERNEL_EMBED_MODULE(PROC_MODULE, kx_clock, kx_clock_init)
+KERNEL_HOOK_MODULE(PROC_MODULE, kx_clock, kx_clock_init)
 
 
 //TODO KERNEL MODULE INTEGRATION

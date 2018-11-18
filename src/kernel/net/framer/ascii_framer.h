@@ -29,7 +29,7 @@
 /*
  * The ascii framer delimits messages according to the nature of a character.
  *
- * 	This framer is unsafe (sending one frame can result in multiple frames read) and is for human interface only.
+ * 	This framer is unsafe (sending one frame can result in multiple frames read) and is for human if only.
  *
  * 	Decoding :
  *

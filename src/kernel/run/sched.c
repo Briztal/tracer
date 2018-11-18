@@ -40,13 +40,16 @@
 #include "sched.h"
 
 #include "proc.h"
+#include "apps.h"
 
-#include <mem.h>
+#include <stdmem.h>
 
-#include <kernel/panic.h>
-#include <kernel/async/except.h>
-#include <kernel/mem/kdmem.h>
-#include <kernel/debug/log.h>
+#include <syscall.h>
+
+#include <panic.h>
+#include <async/except.h>
+#include <mem/kdmem.h>
+#include <debug/printk.h>
 
 
 //------------------------------------------------- Process execution --------------------------------------------------
@@ -58,8 +61,6 @@
  */
 
 static void prc_exec() {
-	
-	kernel_log_("Entering");
 	
 	//Cache the execution data, saved in the stack;
 	volatile struct prc_desc *volatile desc = __proc_get_init_arg();
@@ -78,32 +79,16 @@ static void prc_exec() {
  * 	If preemption fails, an internal error has occurred, and a kernel panic is generated;
  */
 
-extern bool prc_process_terminated;
 
 static void prc_exit() {
 	
-	//TODO SYSCALL;
-	//TODO SYSCALL AND PREEMPTION TRIGGER;
+	sys_exit();
 	
-	//Mark the process terminated;
-	prc_process_terminated = true;
-	
-	//TODO SYSCALL KERNEL PREEMPT
-	
-	//Require a context switch, process will be to_delete;
-	__prmpt_trigger();
-	
-	//Panic, preemption failed;
-	kernel_panic("process.c : post preempt state reached. That should never happen.");
+	//Wait indefinately;
+	while(1);
 	
 }
 
-
-
-//----------------------------------------------- First process function -----------------------------------------------
-
-//The kernel's first process function;
-extern void __kernel_first_function(void *args, size_t args_size);
 
 
 //--------------------------------------------------- Scheduler data ---------------------------------------------------
@@ -149,7 +134,7 @@ struct sched_elmt first_element = {
 	},
 	
 	.desc = {
-		.function = __kernel_first_function,
+		.function = load_applications,
 		.args = 0,
 		.args_size = 0,
 	},
@@ -346,8 +331,6 @@ void sched_create_prc(struct prc_desc *desc, struct prc_req *req) {
 	//Push the element in the add shared fifo;
 	shared_fifo_push(&scheduler.to_activate, (struct list_head *) elmt);
 	
-	kernel_log_("pushed");
-	
 	//Access to the main list is critical;
 	critical_section_enter();
 	
@@ -508,15 +491,18 @@ void sched_commit() {
 		struct sched_elmt *removed = remove_first();
 
 		//If we removed the first element;
-		if (removed == scheduler.main_list) {
+		if (removed->main_head.next == removed) {
 
 			//Kernel debug.txt. The first process must never terminate or be terminated;
-			kernel_panic("run.c : scheduler_select : attempted to terminate the first process;");
+			kernel_panic("run.c : scheduler_commit : attempted to terminate the last process;");
 
 		}
 
 		//If the removed element can be to_delete safely, delete it;
 		sched_delete_element(removed);
+		
+		//Cleanup;
+		scheduler.termination_required = false;
 
 	} else if (scheduler.stop_required) {
 
@@ -527,6 +513,9 @@ void sched_commit() {
 
 		//Mark the element inactive;
 		removed->active = false;
+		
+		//Cleanup;
+		scheduler.stop_required = false;
 
 	}
 	

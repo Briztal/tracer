@@ -21,7 +21,7 @@
 #include "kx_uart.h"
 
 
-#include <kernel/public/syscall.h>
+#include "../../../../std/syscall.h"
 
 #include <string.h>
 
@@ -314,7 +314,7 @@ void stop_peripheral(const struct K64_UART_hw *driver_data) {
 //------------------------------------------------- Creation - Deletion ------------------------------------------------
 
 /*
- * K64_UART_create : creates an instance of a K64 UART interface from hardware interface specs;
+ * K64_UART_create : creates an instance of a K64 UART if from hardware if specs;
  */
 
 struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *const specs) {
@@ -322,18 +322,18 @@ struct K64_UART_driver_t *K64_UART_create(struct K64_UART_hw *const specs) {
 	//Initialise the peripheral;
 	initialise_peripheral(specs);
 
-	//Create the interface struct initializer;
+	//Create the if struct initializer;
 	struct K64_UART_driver_t init = {
 
 		//Copy the hardware data set;
 		.hw_specs = *specs,
 
-		//The interface will be created at startup;
+		//The if will be created at startup;
 		.iface = 0,
 
 	};
 
-	//Allocate, initialise and return the interface data structure;
+	//Allocate, initialise and return the if data structure;
 	return kernel_malloc_copy(sizeof(struct K64_UART_driver_t), &init);
 
 }
@@ -348,7 +348,7 @@ void K64_UART_delete(struct K64_UART_driver_t *driver_data) {
 	//Reset the peripheral;
 	stop_peripheral(&driver_data->hw_specs);
 
-	//Delete the interface data structure;
+	//Delete the if data structure;
 	kernel_free(driver_data);
 
 }
@@ -617,7 +617,7 @@ void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_con
 		//Initialise the l2 adapter
 		.iface = {
 
-			//The l2 interface will be initialised right after;
+			//The l2 if will be initialised right after;
 			.iface = {},
 
 			//Transfer the ownership of the framer;
@@ -632,7 +632,7 @@ void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_con
 
 	};
 
-	//Initialise the layer 2 interface;
+	//Initialise the layer 2 if;
 	netf2_init(
 		&interface_init.iface.iface,
 		config->nb_frames,
@@ -642,7 +642,7 @@ void K64_UART_start(struct K64_UART_driver_t *driver_data, const struct UART_con
 		(void (*)(struct netf2 *)) netf21_destruct
 	);
 
-	//Allocate and initialise the interface;
+	//Allocate and initialise the if;
 	driver_data->iface = kernel_malloc_copy(sizeof(struct K64_UART_net21), &interface_init);
 
 	//Initialise the hardware in a safe state;
@@ -664,7 +664,7 @@ void K64_UART_stop(const struct K64_UART_driver_t *driver_data) {
 	//Cache the hardware struct;
 	const struct K64_UART_hw *hw_specs = &driver_data->hw_specs;
 
-	//Delete the interface, calling the superclass deleter;
+	//Delete the if, calling the superclass deleter;
 	netf2_delete((struct netf2 *) driver_data->iface);
 
 	//Reset the hardware in a safe state;
@@ -678,7 +678,7 @@ void K64_UART_stop(const struct K64_UART_driver_t *driver_data) {
 //Enable the rx trigger;
 static void enable_rx_interrupt(struct K64_UART_net21 *const iface) {
 
-	//Initialise the net21 interface decoding;
+	//Initialise the net21 if decoding;
 	bool decoding_authorised = netf21_init_decoding(&iface->iface);
 
 	//If the decoding is not authorised :
@@ -701,7 +701,7 @@ static void enable_rx_interrupt(struct K64_UART_net21 *const iface) {
 //Enable the tx trigger;
 static void enable_tx_interrupt(struct K64_UART_net21 *const iface) {
 
-	//Initialise the net21 interface encoding;
+	//Initialise the net21 if encoding;
 	bool encoding_authorised = netf21_init_encoding(&iface->iface);//TODO ERROR HERE
 
 	//If the decoding is not authorised :
@@ -848,7 +848,7 @@ void K64_UART_error_interrupt(const struct K64_UART_driver_t *driver_data) {
 
 void K64_UART_tx_write(const struct K64_UART_driver_t *const driver) {
 
-	//Cache the net21 interface;
+	//Cache the net21 if;
 	struct K64_UART_net21 *iface = driver->iface;
 
 	//Cache the hardware specs struct;
@@ -895,7 +895,7 @@ void K64_UART_tx_write(const struct K64_UART_driver_t *const driver) {
 
 void K64_UART_rx_read(const struct K64_UART_driver_t *const driver) {
 
-	//Cache the net21 interface;
+	//Cache the net21 if;
 	struct K64_UART_net21 *iface = driver->iface;
 
 	//Cache the hardware specs struct;

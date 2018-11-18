@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 
-#include <kernel/hard.h>
+#include <hard.h>
 
 
 //-------------------------------------------- General interrupt priorities --------------------------------------------
@@ -49,10 +49,10 @@
 //The preemption has the lowest priority level, so that a context switch never occurs over an interrupt;
 #define KERNEL_PREEMPTION_PRIORITY xcpt_priority_0
 
-//A interface status interrupt has a low priority;
+//A if status interrupt has a low priority;
 #define KERNEL_DRIVER_STATUS_PRIORITY xcpt_priority_2
 
-//A interface error must be caught, and so has a higher priority;
+//A if error must be caught, and so has a higher priority;
 #define KERNEL_DRIVER_ERROR_PRIORITY xcpt_priority_4
 
 //The systick has the highest priority level, so that ticks are never missed;

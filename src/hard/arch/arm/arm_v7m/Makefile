@@ -18,7 +18,7 @@ V7M_D :=  src/hard/arch/arm/arm_v7m
 
 v7m_args :=
 
-V7M_CC = @$(CC) $(CFLAGS) $(INC) $(v7m_args)
+V7M_CC = $(KCC) $(v7m_args)
 
 
 #If the number of interrupts is provided :
@@ -60,14 +60,14 @@ arm_v7m_kernel_base :
 
 
 #The nvic relocation module;
-arm_v7m_nvic_reloc :
-	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
+arm_v7m_nvic :
+	@$(V7M_CC) $(CFLAGS) $(INC) -o $(MODS_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
 
 
 #The fault module;
 arm_v7m_fault :
 
-	@$(CC) $(CFLAGS) $(INC) -o $(KRNL_D)/arm_v7m_fault.o -c $(V7M_D)/arm_v7m_fault.c
+	@$(V7M_CC) $(CFLAGS) $(INC) -o $(MODS_D)/arm_v7m_fault.o -c $(V7M_D)/arm_v7m_fault.c
 
 
 #-------------------------------------------------- Components config --------------------------------------------------
@@ -80,7 +80,9 @@ KRNL_RULES += arm_v7m_kernel_base
 ifndef NO_NVIC_RELOCATION
 
 #Add the nvic relocation rule to the modules list;
-MODS_RULES += arm_v7m_nvic_reloc
+MODS_RULES += arm_v7m_nvic
+
+arm_v7m_nvic_f := arm_v7m_nvic.o
 
 endif
 
@@ -90,6 +92,8 @@ ifndef NO_FAULT
 
 #Add the systick rule to the modules list;
 MODS_RULES += arm_v7m_fault
+
+arm_v7m_fault_f := arm_v7m_fault.o
 
 endif
 
