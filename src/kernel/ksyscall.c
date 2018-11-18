@@ -22,9 +22,11 @@
 
 #include "hard.h"
 
-#include <syscall.h>
+#include <std/syscall.h>
 
 #include <run/sched.h>
+#include <kernel/debug/printk.h>
+#include <kernel/debug/debug.h>
 
 
 /**
@@ -53,7 +55,9 @@ size_t sysh_read(size_t fd, void *buffer, size_t size) {
 
 size_t sysh_write(size_t fd, const void *buffer, size_t size){
 	
-	return 0;//TODO
+	printk("WRITE\n\r");
+	
+	debug_delay_ms(1000);
 	
 }
 

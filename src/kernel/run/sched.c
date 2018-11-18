@@ -44,51 +44,14 @@
 
 #include <stdmem.h>
 
-#include <syscall.h>
+#include <std/syscall.h>
 
 #include <panic.h>
 #include <async/except.h>
 #include <mem/kdmem.h>
 #include <debug/printk.h>
 
-
-//------------------------------------------------- Process execution --------------------------------------------------
-
-/*
- * prc_exec : the process execution function;
- *
- * 	Executes the process function, with the process args, and returns;
- */
-
-static void prc_exec() {
-	
-	//Cache the execution data, saved in the stack;
-	volatile struct prc_desc *volatile desc = __proc_get_init_arg();
-	
-	//Execute the function, passing args;
-	(*(desc->function))((void *) desc->args, (size_t) desc->args_size);
-	
-}
-
-
-/**
- * prc_exit : the process exit function. Called automatically when prc_entry returns;
- *
- * 	Marks the process terminated and triggers the preemption;
- *
- * 	If preemption fails, an internal error has occurred, and a kernel panic is generated;
- */
-
-
-static void prc_exit() {
-	
-	sys_exit();
-	
-	//Wait indefinately;
-	while(1);
-	
-}
-
+#include <std/run.h>
 
 
 //--------------------------------------------------- Scheduler data ---------------------------------------------------
@@ -96,7 +59,7 @@ static void prc_exit() {
 struct sched_data {
 	
 	//The first process; Leads to the process list;
-	struct sched_elmt *const main_list;
+	struct sched_elmt *main_list;
 	
 	//The first available process; Can be null. The linked list is sorted;
 	struct sched_elmt *active_list;
@@ -113,49 +76,15 @@ struct sched_data {
 };
 
 
-//The first process;
-struct sched_elmt first_element = {
-	
-	.main_head = {
-		.prev = &first_element,
-		.next = &first_element,
-	},
-	
-	.status_head = {
-		.prev = &first_element,
-		.next = &first_element,
-	},
-	
-	//Fist process not initialised;
-	.req = {
-		.ram_size = KFP_RAM_SIZE,
-		.stack_size = KFP_STACK_SIZE,
-		.activity_time = KFP_ACTIVITY_TIME,
-	},
-	
-	.desc = {
-		.function = load_applications,
-		.args = 0,
-		.args_size = 0,
-	},
-	
-	//Program memory, initialised at runtime;
-	.prc_mem = {0},
-	
-	//First process not active;
-	.active = false,
-	
-};
-
 
 //The kernel scheduler;
 struct sched_data scheduler = {
 	
 	//Save the first process. If it gets terminated, a kernel debug.txt will be thrown;
-	.main_list = &first_element,
+	.main_list = 0,
 	
 	//The first process is available for selection;
-	.active_list = &first_element,
+	.active_list = 0,
 	
 	//Initialise the shared fifo empty;
 	.to_activate = {
@@ -253,7 +182,7 @@ static void sched_init_prc_mem(struct sched_elmt *elmt) {
 	struct prc_desc *desc_copy = heap_ialloc(mem->heap, sizeof(struct prc_desc), &elmt->desc);
 	
 	//Initialise the stack and pass the execution environment;
-	proc_init_stack(&mem->stack, &prc_exec, &prc_exit, desc_copy);
+	proc_init_stack(&mem->stack, &run_exec, &run_exit, desc_copy);
 	
 }
 
@@ -268,10 +197,61 @@ static void sched_init_prc_mem(struct sched_elmt *elmt) {
 
 void sched_init() {
 	
-	sched_init_prc_mem(&first_element);
 	
-	//The first process is active;
-	first_element.active = true;
+	//Allocate memory for the new element;
+	struct sched_elmt *elmt = kmalloc(sizeof(struct sched_elmt));
+	
+	//The first process;
+	struct sched_elmt first_element = {
+		
+		.main_head = {
+			.prev = elmt,
+			.next = elmt,
+		},
+		
+		.status_head = {
+			.prev = elmt,
+			.next = elmt,
+		},
+		
+		//Fist process not initialised;
+		.req = {
+			.ram_size = KFP_RAM_SIZE,
+			.stack_size = KFP_STACK_SIZE,
+			.activity_time = KFP_ACTIVITY_TIME,
+		},
+		
+		.desc = {
+			.function = load_applications,
+			.args = 0,
+			.args_size = 0,
+		},
+		
+		//Program memory not initialised for instance;
+		.prc_mem = {0},
+		
+		//First process not active;
+		.active = false,
+		
+	};
+	
+	
+	//Initialise the element;
+	memcpy(elmt, &first_element, sizeof(struct sched_elmt));
+	
+	//Initialise the element's process memory and execution stack;
+	sched_init_prc_mem(elmt);
+	
+	
+	//Access to the main list is critical;
+	critical_section_enter();
+	
+	//Initialise lists;
+	scheduler.main_list = elmt;
+	scheduler.active_list = elmt;
+	
+	//Access to the main list is critical;
+	critical_section_leave();
 	
 }
 
@@ -440,11 +420,8 @@ void sched_terminate_prc() {
  * sched_active_remove_first : removes first element of the active list, and returns it;
  */
 
-static struct sched_elmt *remove_first() {
-
-	//Cache the first available element;
-	struct sched_elmt *elmt = scheduler.active_list;
-
+static void remove_process(struct sched_elmt *elmt) {
+	
 	//Cache its successor;
 	struct sched_elmt *next = elmt->status_head.next;
 
@@ -465,9 +442,6 @@ static struct sched_elmt *remove_first() {
 	//Remove @elmt from the active list;
 	list_remove((struct list_head *)elmt);
 
-	//Return the removed element;
-	return elmt;
-
 }
 
 
@@ -484,47 +458,49 @@ static struct sched_elmt *remove_first() {
 
 void sched_commit() {
 	
-	//If the termination flag is set :
-	if (scheduler.termination_required) {
-
-		//Remove the first element of the active list;
-		struct sched_elmt *removed = remove_first();
-
-		//If we removed the first element;
-		if (removed->main_head.next == removed) {
-
-			//Kernel debug.txt. The first process must never terminate or be terminated;
-			kernel_panic("run.c : scheduler_commit : attempted to terminate the last process;");
-
-		}
-
-		//If the removed element can be to_delete safely, delete it;
-		sched_delete_element(removed);
-		
-		//Cleanup;
-		scheduler.termination_required = false;
-
-	} else if (scheduler.stop_required) {
-
-		//If the current process must be stopped :
-
-		//Remove the first element of the active list;
-		struct sched_elmt *removed = remove_first();
-
-		//Mark the element inactive;
-		removed->active = false;
-		
-		//Cleanup;
-		scheduler.stop_required = false;
-
-	}
+	//Cache the first process;
+	struct sched_elmt *current = scheduler.active_list;
 	
-
 	//Get the list of elements to activate; They have been marked active at their insertion in the shared fifo;
 	struct sched_elmt *to_activate = (struct sched_elmt *) shared_fifo_get_all(&scheduler.to_activate);
 	
 	//Insert elements and sort the active list;
 	(*policy)(&scheduler.active_list, to_activate);
+	
+	//If the termination flag is set :
+	if (scheduler.termination_required) {
+		
+		//Remove the first element of the active list;
+		remove_process(current);
+		
+		//If we removed the last element;
+		if (current->main_head.next == current) {
+
+			//Kernel debug.txt. The first process must never terminate or be terminated;
+			kernel_panic("run.c : scheduler_commit : attempted to terminate the last process;");
+
+		}
+		
+		//If the current element can be deleted safely, delete it;
+		sched_delete_element(current);
+		
+		//Cleanup;
+		scheduler.termination_required = false;
+
+	} else if (scheduler.stop_required) {
+		
+		//If the current process must be stopped :
+
+		//Remove the first element of the active list;
+		remove_process(current);
+
+		//Mark the element inactive;
+		current->active = false;
+		
+		//Cleanup;
+		scheduler.stop_required = false;
+
+	}
 	
 }
 

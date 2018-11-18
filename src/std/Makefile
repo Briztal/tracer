@@ -1,6 +1,13 @@
 
-SS = src/std
-SB = build/stdl
+STD_F = src/std
+STD_B = build/stdl
+
+std_base :
+	@$(_CC) -o $(STD_B)/syscall.o 	-c $(STD_F)/syscall.c
+	@$(_CC) -o $(STD_B)/run.o 	-c $(STD_F)/run.c
+
+
+STDL_RULES += std_base
 
 #------------------------------------------- Math compilation rule -------------------------------------------
 

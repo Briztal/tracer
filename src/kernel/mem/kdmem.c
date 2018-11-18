@@ -57,7 +57,7 @@ void kdmem_init() {
 	kernel_heap = heap_create(ram_block, KDM_SIZE, &heap_fifo_insertion);//TODO SORTED INSERTION;
 	
 	//Log;
-	printk("kernel dynamic memory initialised");
+	printk("kernel dynamic memory initialised\n\r");
 	
 }
 

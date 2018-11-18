@@ -33,6 +33,7 @@
 #include <mod/mod.h>
 
 #include <run/proc.h>
+#include <kernel/debug/debug.h>
 
 
 
@@ -78,11 +79,14 @@ void __krnl_init() {
 	//Set the OTP;
 	reentrance = true;
 	
+	debug_delay_ms(500);
+	
 	//Log.
 	printk("Entering kernel initialisation sequence;\n")
 	
 	//Disable interrupt management:
 	exceptions_disable();
+	
 	
 	
 	//Initialise the RAM manager;
@@ -91,11 +95,13 @@ void __krnl_init() {
 	//Initialise the kernel dynamic memory;
 	kdmem_init();
 	
+	
 	//Load all run modules;
 	load_proc_modules();
 	
 	//Load all system modules;
 	load_system_modules();
+	
 	
 	//TODO INIT FILE SYSTEM;
 	
@@ -107,7 +113,6 @@ void __krnl_init() {
 	
 	//Load all user modules;
 	load_user_modules();
-	
 	
 	//Start the system clock;
 	sysclock_start();

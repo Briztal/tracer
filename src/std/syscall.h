@@ -23,7 +23,7 @@
 
 #include <stddef.h>
 
-#include "../dmz/prc.h"
+#include "dmz/prc.h"
 
 #define NB_SYSCALLS 7
 

@@ -81,7 +81,7 @@ clock:
 	@$(MKCC) -o $(MODS_D)/kx_mcg.o -c $(K_DIR)/kx_clock/kx_mcg.c $(pll_args)
 	@$(MKCC) -o $(MODS_D)/kc_clock.o -c $(K_DIR)/kx_clock/kx_clock.c $(pll_args)
 
-clock_f := kx_irc.o kx_osc.o kx_fll.o kx_pll.o kx_mcg.o kc_clock.o
+clock := kx_irc.o kx_osc.o kx_fll.o kx_pll.o kx_mcg.o kc_clock.o
 
 MODS_RULES += clock
 
@@ -95,7 +95,7 @@ port:
 #The port object is compiled providing the chip directory, so that appropriate pins get generated;
 	@$(MKCC) -o $(MODS_D)/kx_port.o -c $(K_DIR)/kx_port.c $(port_args) -I$(KC_DIR)
 
-port_f := kx_port.o
+port := kx_port.o
 
 MODS_RULES += port
 
@@ -125,6 +125,6 @@ pit:
 #Compile the pit manager; It takes two arguments, the mcr address and the number of channels;
 	@$(MKCC) -o $(MODS_D)/pit.o -c $(K_DIR)/kx_pit.c $(pit_args)
 
-pit_f := pit.o pit0.o pit1.o pit2.o pit3.o
+pit := pit.o pit0.o pit1.o pit2.o pit3.o
 
 MODS_RULES += pit

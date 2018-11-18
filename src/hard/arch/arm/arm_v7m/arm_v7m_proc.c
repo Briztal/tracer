@@ -87,19 +87,6 @@ void *__proc_create_stack_context(void *sp_reset, void (*function)(), void (*exi
 }
 
 
-/*
- * proc_get_init_arg : this function will return the value of r12. If called by the process init function,
- *  it will be equal to the previous function's arg;
- */
-
-__attribute__ ((naked)) void *__proc_get_init_arg() {
-	__asm__ __volatile__(\
-        "mov 	r0, 	r12 	\n\t"
-		"bx	 	lr 				\n\t"
-	);
-}
-
-
 //Determine the closest inferior address, that would respect alignment requirements;
 void *__proc_stack_align(void *stack_reset) {
 	

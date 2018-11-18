@@ -96,27 +96,6 @@ void __syscl_configure(uint8_t priority) {
 	armv7m_set_svcall_priority(priority);
 }
 
-
-/**
- * __syscall_trigger : triggers the syscall exception;
- *
- * 	This function is pure assembly, and follows the ARM Calling Convention;
- *
- * @param syscall_id : the identifier of the system call to execute. Will be located on R0 at handler entry;
- */
-
-__attribute__ ((naked)) size_t __syscl_trigger(size_t arg0, size_t arg1, size_t arg2, size_t syscall_id) {
-	__asm__ __volatile (\
-
-	//Trigger the supervisor call; Arguments are already placed in R0, R1, R2 and R3;
-	"SVC #0\n\t"
-		
-		//The supervisor call handler will have placed the return value in R0. We can return now;
-		"bx lr\n\t"
-	);
-}
-
-
 /**
  * syscl_handler : this function handles the SVC exception. It performs the following operations :
  * 	- preparing syscall arguments, namely syscall_id, arg0, arg1 and arg2 for the kernel syscall handler;

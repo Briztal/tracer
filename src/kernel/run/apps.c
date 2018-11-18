@@ -39,11 +39,16 @@ void load_applications(void *args, size_t size) {
 	
 	extern const uint8_t __apps_min, __apps_max;
 	
+	#define APPS_MIN &__apps_min
+	#define APPS_MAX &__apps_max
+	
+	printkf("apps bounds : %h %h\n\r", APPS_MAX, APPS_MIN)
+	
 	//Determine the byte length of the module array;
-	const size_t module_array_size = __apps_max - __apps_min;
+	const size_t apps_array_size = APPS_MAX - APPS_MIN;
 	
 	//The module array should contain only auto_mod structs. If size validity check fails :
-	if (module_array_size % sizeof(struct app_hook)) {
+	if (apps_array_size % sizeof(struct app_hook)) {
 		
 		//Kernel panic, invalid module array size, probably caused by poor linking;
 		kernel_panic("apps.c : load_applications : apps array bounds invalid;");
@@ -51,10 +56,10 @@ void load_applications(void *args, size_t size) {
 	}
 	
 	//Cache the array to the right type;
-	const struct app_hook *application = (const struct app_hook *) __apps_min;
+	const struct app_hook *application = (const struct app_hook *) APPS_MIN;
 	
 	//If no modules are to load :
-	if ((size_t) application >= (size_t) __apps_max) {
+	if ((size_t) application >= (size_t) APPS_MAX) {
 		
 		//Log;
 		kernel_panic("\tNo applications to load.");
@@ -62,13 +67,13 @@ void load_applications(void *args, size_t size) {
 	}
 	
 	//For each module :
-	while ((size_t) application < (size_t) __apps_max) {
+	while ((size_t) application < (size_t) APPS_MAX) {
 		
 		//Create the application's first process;
 		sched_create_prc(application->desc, application->req);
 		
 		//Log;
-		printkf("\tapp %s loaded", application->name);
+		printkf("\tapp %s loaded\n\r", application->name);
 		
 		//Focus on the next module;
 		application++;

@@ -7,7 +7,7 @@ project:
 	@$(_CC) -o build/apps/main.o -c $(PROJECT_DIR)/main.c
 
 
-project_f = main.o
+project = main.o
 
 APPS_RULES += project
 
@@ -31,7 +31,7 @@ pwm:
 	@$(KCC) $(pwm_n_args) -o build/mods/pwm.o -c src/modules/pwm/pwm.c
 
 
-pwm_f = pwm_0.o pwm_1.o pwm_2.o pwm_3.o
+pwm = pwm_0.o pwm_1.o pwm_2.o pwm_3.o
 
 #Add the servo rule to the module dependencies list;
 MODS_RULES += pwm

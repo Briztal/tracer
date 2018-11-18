@@ -121,7 +121,7 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 	if ((size_t) auto_module >= (size_t) mod_end) {
 		
 		//Log;
-		printk("\tNo modules to load");
+		printk("No modules to load\n\r");
 		
 	}
 	
@@ -132,7 +132,7 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 		mod_add(auto_module->name, auto_module->init);
 		
 		//Log;
-		printkf("\t%s module loaded", auto_module->name);
+		printkf("%s module loaded\n\r", auto_module->name);
 		
 		//Focus on the next module;
 		auto_module++;
@@ -150,7 +150,7 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 void load_proc_modules() {
 	
 	//Log;
-	printk("Loading proc modules ...");
+	printk("Loading proc modules\n\r");
 	
 	//Load peripheral modules;
 	load_modules(&__prmod_min, &__prmod_max);
@@ -160,7 +160,7 @@ void load_proc_modules() {
 void load_system_modules() {
 	
 	//Log;
-	printk("Loading system modules ...");
+	printk("Loading system modules\n\r");
 	
 	//Load peripheral modules;
 	load_modules(&__smod_min, &__smod_max);
@@ -171,7 +171,7 @@ void load_system_modules() {
 void load_peripheral_modules() {
 	
 	//Log;
-	printk("Loading peripheral modules ...");
+	printk("Loading peripheral modules\n\r");
 	
 	//Load peripheral modules;
 	load_modules(&__pemod_min, &__pemod_max);
@@ -182,7 +182,7 @@ void load_peripheral_modules() {
 void load_kernel_modules() {
 	
 	//Log;
-	printk("Loading kernel modules ...");
+	printk("Loading kernel modules\n\r");
 	
 	//Load peripheral modules;
 	load_modules(&__kmod_min, &__kmod_max);
@@ -193,7 +193,7 @@ void load_kernel_modules() {
 void load_user_modules() {
 	
 	//Log;
-	printk("Loading user modules ...");
+	printk("Loading user modules\n\r");
 	
 	//Load peripheral modules;
 	load_modules(&__umod_min, &__umod_max);

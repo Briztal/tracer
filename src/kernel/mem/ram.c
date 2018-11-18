@@ -58,7 +58,7 @@ void ram_init() {
 	//Initialise the heap;
 	ram_heap = heap_create(&__ram_min, &__ram_max - &__ram_min, &heap_fifo_insertion);
 
-	printk("RAM manager initialised");
+	printk("RAM manager initialised\n\r");
 
 }
 

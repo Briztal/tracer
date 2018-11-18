@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <syscall.h>
+#include <std/syscall.h>
 #include <prc.h>
 #include <stdio.h>
 #include <if/gpio.h>
@@ -373,6 +373,7 @@ void kernel_second_process(void *args, size_t args_size){
 
 
 
+
 void main(void *args, size_t args_size) {
 	
 	//gpio_check();
@@ -393,11 +394,10 @@ void main(void *args, size_t args_size) {
 	
 	sys_exec(&desc, &req);
 	*/
+	
 	while(1) {
 		
-		//kernel__printkf("SUUS", 0, 0);
-		
-		//debug_delay_ms(1000);
+		sys_write(0, 0, 0);
 		
 	}
 	

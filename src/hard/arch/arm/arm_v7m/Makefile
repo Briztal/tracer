@@ -46,9 +46,6 @@ arm_v7m_kernel_base :
 #Compile the armv7 base;
 	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_boot.o -c $(V7M_D)/arm_v7m_boot.c
 
-#Compile the nvic lib;
-	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
-
 #Compile the exceptions lib;
 	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_xcpt.o -c $(V7M_D)/arm_v7m_xcpt.c
 
@@ -59,21 +56,25 @@ arm_v7m_kernel_base :
 	@$(V7M_CC) -o $(KRNL_D)/arm_v7m_syst.o -c $(V7M_D)/arm_v7m_syst.c
 
 
+#Add the kernel base to the kernel rules;
+KRNL_RULES += arm_v7m_kernel_base
+
+
+
+arm_v7m_syscl :
+
+#Compile the armv7 base;
+	@$(V7M_CC) -o $(STDL_D)/arm_v7m_syscl.o -c $(V7M_D)/arm_v7m_stdl.c
+
+
+#Add the kernel base to the kernel rules;
+STDL_RULES += arm_v7m_syscl
+
+
+
 #The nvic relocation module;
 arm_v7m_nvic :
 	@$(V7M_CC) $(CFLAGS) $(INC) -o $(MODS_D)/arm_v7m_nvic.o -c $(V7M_D)/arm_v7m_nvic.c
-
-
-#The fault module;
-arm_v7m_fault :
-
-	@$(V7M_CC) $(CFLAGS) $(INC) -o $(MODS_D)/arm_v7m_fault.o -c $(V7M_D)/arm_v7m_fault.c
-
-
-#-------------------------------------------------- Components config --------------------------------------------------
-
-#Add the kernel base to the kernel rules;
-KRNL_RULES += arm_v7m_kernel_base
 
 
 #If the nvic relocation module must be added :
@@ -82,9 +83,16 @@ ifndef NO_NVIC_RELOCATION
 #Add the nvic relocation rule to the modules list;
 MODS_RULES += arm_v7m_nvic
 
-arm_v7m_nvic_f := arm_v7m_nvic.o
+arm_v7m_nvic := arm_v7m_nvic.o
 
 endif
+
+
+
+#The fault module;
+arm_v7m_fault :
+
+	@$(V7M_CC) $(CFLAGS) $(INC) -o $(MODS_D)/arm_v7m_fault.o -c $(V7M_D)/arm_v7m_fault.c
 
 
 #If the systick module must be added :
@@ -93,7 +101,7 @@ ifndef NO_FAULT
 #Add the systick rule to the modules list;
 MODS_RULES += arm_v7m_fault
 
-arm_v7m_fault_f := arm_v7m_fault.o
+arm_v7m_fault := arm_v7m_fault.o
 
 endif
 

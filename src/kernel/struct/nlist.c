@@ -60,7 +60,9 @@ static struct nlist_elmt *nlist_find(const struct nlist *list, const char *const
 	
 	//If no elements are registered, stop here;
 	if (!first) {
+		
 		return 0;
+		
 	}
 	
 	//For each registered element :
@@ -103,7 +105,7 @@ bool nlist_add(struct nlist *list, const char *name, void *data) {
 	//If another element has this name :
 	if (nlist_find(list, name)) {
 		
-		printkf("\nWarning : nlist_add : file with name [%s] already exists;", name);
+		printkf("\nWarning : nlist_add : file with name [%s] already exists\n\r", name);
 		
 		//Do nothing;
 		return false;
