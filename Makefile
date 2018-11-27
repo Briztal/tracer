@@ -66,6 +66,10 @@
 #		This mechanism is only a safeguard, and doesn't fully prevent forbidden linking, as pre-using a mangled name
 #		is sufficient to overpass it.
 #
+#		With such mechanisms, kernel and stdlib are stand_alone, and modules (resp applications) can only use their
+#		symbols, and those of the kernel (resp stdlib).
+#		The only exception to this rule concerns two functions of the standard library, run_exec and run_exit, that are
+#		used by the kernel at a process's entry and exit points;
 #
 #
 #	In opposition to kernel and stdlib that are unique, modules and applications are many, and their amound is not

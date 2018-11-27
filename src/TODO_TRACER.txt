@@ -1,6 +1,8 @@
 
 //----------------------------- Prioritary -----------------------------
 
+//TODO DEFINE CLEARLY THE FILE SYSTEM STRUCTURE
+
 //TODO PROPER PRINTK FUNCTIONS, WITH FILES;
 
 //TODO Standard output / input / error procedures;

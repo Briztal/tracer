@@ -24,56 +24,6 @@
 void *__run_get_init_arg();
 
 
-
-
-/**
- * core_led_high : hardware code for turning on the led;
- */
-
-void __dbg_led_high() {
-	
-	//Output
-	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
-	
-	//ALT 1
-	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
-	
-	//Set
-	*(volatile uint32_t *) 0x400FF084 = 1 << 5;
-}
-
-
-/**
- * core_led_low : hardware code for turning off the led;
- */
-
-void __dbg_led_low() {
-	//Output
-	*(volatile uint32_t *) 0x400FF094 = 1 << 5;
-	
-	//ALT 1
-	*(volatile uint32_t *) 0x4004B014 |= 1 << 8;
-	
-	//Clear
-	*(volatile uint32_t *) 0x400FF088 = 1 << 5;
-}
-
-
-/**
- * core_delay : hardware code for waiting a certain number of milliseconds;
- */
-
-void __dbg_delay_ms(uint32_t ms_counter) {
-	
-	while (ms_counter--) {
-		//Count to;
-		//for (volatile uint32_t i = 15000; i--;);
-		for (volatile uint32_t i = 3000; i--;);
-	}
-	
-}
-
-
 /*
  * prc_exec : the process execution function;
  *

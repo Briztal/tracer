@@ -4,6 +4,8 @@
       <w>caracterise</w>
       <w>deinitialize</w>
       <w>deinitializes</w>
+      <w>dentries</w>
+      <w>dentry</w>
       <w>dereferenced</w>
       <w>gpio</w>
       <w>initializers</w>
@@ -12,7 +14,9 @@
       <w>prioritary</w>
       <w>privillege</w>
       <w>struct</w>
+      <w>superblock</w>
       <w>uninitialize</w>
+      <w>unmounts</w>
     </words>
   </dictionary>
 </component>

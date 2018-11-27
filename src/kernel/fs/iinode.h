@@ -27,11 +27,11 @@
 #include <stddef.h>
 
 
-//Declare the inode ops structure;
+//Declare the iinode ops structure;
 struct inode_ops;
 
-//The inode struct contains a status and a set of ops;
-struct inode {
+//The iinode struct contains a status and a set of ops;
+struct iinode {
 
 	//The status of the node;
 	bool open;
@@ -48,39 +48,38 @@ struct inode {
 
 
 /*
- * The inode ops structure contains a inode's accessible functions;
+ * The iinode ops structure contains a iinode's accessible functions;
  */
 
 struct inode_ops {
 
 	//General operations;
 	
-	//Open the inode;
-	void (*const open)(struct inode *node);
+	//Open the iinode;
+	void (*const open)(struct iinode *node);
 	
-	//Close the inode;
-	void (*const close)(struct inode *node);
-	
+	//Close the iinode;
+	void (*const close)(struct iinode *node);
 	
 	//Device operations;
 	
 	//Initialise the resource.
-	bool (*const init)(struct inode *node, const void *config, size_t config_size);
+	bool (*const init)(struct iinode *node, const void *config, size_t config_size);
 	
 	//Interface with the resource;
-	bool (*const interface)(struct inode *node, void *iface_struct, size_t size);
+	bool (*const interface)(struct iinode *node, void *iface_struct, size_t size);
 	
 	//Reset the resource.
-	void (*const reset)(struct inode *node);
+	void (*const reset)(struct iinode *node);
 	
 	
 	//The deletion function;
-	void (*const deleter)(struct inode *);
+	void (*const deleter)(struct iinode *);
 	
 };
 
 
-//A file descriptor is an inode pointer;
+//A file descriptor is an iinode pointer;
 typedef size_t file_descriptor;
 
 
@@ -109,7 +108,7 @@ void iop_reset(file_descriptor fd);
 //----------------------------------------------- File system operations -----------------------------------------------
 
 //Add a node in the file system;
-void fs_create(const char *name, struct inode *node);
+void fs_create(const char *name, struct iinode *node);
 
 //Remove a node; Will be deleted if node closed;
 bool fs_remove(const char *name);

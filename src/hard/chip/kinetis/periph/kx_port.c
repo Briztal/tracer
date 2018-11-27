@@ -78,7 +78,7 @@
 
 #include <if/gpio.h>
 
-#include <fs/inode.h>
+#include <fs/iinode.h>
 
 #include <mod/mod_hook>
 
@@ -465,13 +465,13 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 //--------------------------------------------------- File operations --------------------------------------------------
 
 /*
- * A pin inode contains only the index of the pin it references;
+ * A pin iinode contains only the index of the pin it references;
  */
 
 struct pin_inode {
 
-	//The inode base;
-	struct inode node;
+	//The iinode base;
+	struct iinode node;
 
 	//The pin index;
 	const size_t pin_index;
@@ -484,7 +484,7 @@ struct pin_inode {
  * 	The following struct keeps track of their data;
  */
 
-//PIN will add an inode initializer;
+//PIN will add an iinode initializer;
 #define PIN(name, port, bit) {{0}},
 
 //Declare the inodes array and let initializers determine the size;
@@ -601,12 +601,12 @@ static void fs_pin_close(const struct pin_inode *const node) {
 
 /*
  * The port pin file operation structure will be the same for all pins;
- * 	A safe up-case is made to cast pin_inode * into inode *;
+ * 	A safe up-case is made to cast pin_inode * into iinode *;
  */
 static const struct inode_ops port_pin_file_ops = {
-	.init = (bool (*)(struct inode *, const void *, size_t)) &fs_pin_init,
-	.interface = (bool (*)(struct inode *, void *, size_t)) &fs_pin_interface,
-	.close = (void (*)(struct inode *)) &fs_pin_close,
+	.init = (bool (*)(struct iinode *, const void *, size_t)) &fs_pin_init,
+	.interface = (bool (*)(struct iinode *, void *, size_t)) &fs_pin_interface,
+	.close = (void (*)(struct iinode *)) &fs_pin_close,
 	//TODO IMPLEMENT A RESET OPERATION
 	//TODO IMPLEMENT A RESET OPERATION
 	//TODO IMPLEMENT A RESET OPERATION
@@ -638,20 +638,20 @@ static const struct inode_ops port_pin_file_ops = {
 
 static void register_pin(const char *name, size_t pin_index) {
 
-	//Cache the pin inode;
+	//Cache the pin iinode;
 	struct pin_inode *inode = &inodes[pin_index];
 
-	//Create the inode initializer;
+	//Create the iinode initializer;
 	struct pin_inode init = {
 		.node = INODE(&port_pin_file_ops),
 		.pin_index = pin_index,
 	};
 
-	//Initialise the inode;
+	//Initialise the iinode;
 	memcpy(inode, &init, sizeof(struct pin_inode));
 
-	//Register the inode;
-	fs_create(name, (struct inode *) inode);
+	//Register the iinode;
+	fs_create(name, (struct iinode *) inode);
 
 }
 

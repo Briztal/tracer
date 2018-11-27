@@ -33,7 +33,7 @@
 
 #include "pwm.h"
 
-#include <fs/inode.h>
+#include <fs/iinode.h>
 #include <if/gpio.h>
 #include <if/timer.h>
 #include <mod/mod_hook>
@@ -296,13 +296,13 @@ void REFERENCE_SYMBOL(MODULE_NAME, update_channel_duration)(uint8_t channel_id, 
 //----------------------------------------------- File system interaction ----------------------------------------------
 
 /*
- * The channel inode is only used for interfacing. Only Interfacing data will be stored inside;
+ * The channel iinode is only used for interfacing. Only Interfacing data will be stored inside;
  */
 
 struct channel_inode {
 
-	//The inode base;
-	struct inode node;
+	//The iinode base;
+	struct iinode node;
 
 	//The channel index;
 	uint8_t channel_index;
@@ -519,7 +519,7 @@ static bool channel_interface(
 	if (size != sizeof(struct cmd_if))
 		return false;
 
-	//The channel inode contains the identifier of the channel to if;
+	//The channel iinode contains the identifier of the channel to if;
 	const uint8_t channel_id = node->channel_index;
 
 	//If the channel id is invalid :
@@ -607,9 +607,9 @@ static void channel_reset(const struct channel_inode *const node) {
  */
 
 static const struct inode_ops channel_ops = {
-	.init = (bool (*)(struct inode *, const void *, size_t)) &channel_init,
-	.interface = (bool (*)(struct inode *, void *, size_t)) &channel_interface,
-	.reset = (void (*)(struct inode *)) &channel_reset,
+	.init = (bool (*)(struct iinode *, const void *, size_t)) &channel_init,
+	.interface = (bool (*)(struct iinode *, void *, size_t)) &channel_interface,
+	.reset = (void (*)(struct iinode *)) &channel_reset,
 
 };
 
@@ -625,7 +625,7 @@ static const struct inode_ops channel_ops = {
 
 static void channel_register(const uint8_t channel_index) {
 
-	//Create the inode initializer;
+	//Create the iinode initializer;
 	struct channel_inode init = {
 
 		//Initialise the node base, providing channel operations;
@@ -636,14 +636,14 @@ static void channel_register(const uint8_t channel_index) {
 		
 	};
 	
-	//Cache the inode ref;
+	//Cache the iinode ref;
 	struct channel_inode *node = inodes + channel_index;
 
 	//Initialise the channel;
 	memcpy(node, &init, sizeof(struct channel_inode));
 
-	//Register the inode to the file system; Safe up-cast;
-	fs_create(channels_specs[channel_index]->channel_name, (struct inode *) node);
+	//Register the iinode to the file system; Safe up-cast;
+	fs_create(channels_specs[channel_index]->channel_name, (struct iinode *) node);
 
 }
 

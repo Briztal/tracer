@@ -45,7 +45,7 @@
 
 #include <mod/mod_hook>
 
-#include <fs/inode.h>
+#include <fs/iinode.h>
 
 #include <async/except.h>
 
@@ -84,12 +84,12 @@ static struct timer_if *if_refs[NB_CHANNELS] = {0};
 //--------------------------------------------------- File Operations --------------------------------------------------
 
 /*
- * The channel inode will only contain the channel index;
+ * The channel iinode will only contain the channel index;
  */
 struct channel_inode {
 
-	//The inode base;
-	struct inode node;
+	//The iinode base;
+	struct iinode node;
 
 	//The channel index;
 	uint8_t channel_index;
@@ -138,8 +138,8 @@ static void channel_close(const struct channel_inode *const node) {
  */
 
 static struct inode_ops channel_ops = {
-	.close =  (void (*)(struct inode *)) &channel_close,
-	.interface = (bool (*)(struct inode *, void *, size_t)) &channel_interface,
+	.close =  (void (*)(struct iinode *)) &channel_close,
+	.interface = (bool (*)(struct iinode *, void *, size_t)) &channel_interface,
 };
 
 
@@ -157,10 +157,10 @@ static void channel_init(uint8_t channel_index) {
 	 * Inode initialisation;
 	 */
 
-	//Cache the inode;
+	//Cache the iinode;
 	struct channel_inode *node = inodes + channel_index;
 
-	//Create the inode initializer;
+	//Create the iinode initializer;
 	struct channel_inode init = {
 
 		//Transmit operations;
@@ -171,7 +171,7 @@ static void channel_init(uint8_t channel_index) {
 
 	};
 
-	//Initialise the inode;
+	//Initialise the iinode;
 	memcpy(node, &init, sizeof(struct channel_inode));
 
 
@@ -180,7 +180,7 @@ static void channel_init(uint8_t channel_index) {
 	 */
 
 	//Register a file with no content leading to our operations;
-	fs_create(channel->name, (struct inode *) node);
+	fs_create(channel->name, (struct iinode *) node);
 
 
 	/*

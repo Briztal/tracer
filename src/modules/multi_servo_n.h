@@ -6,7 +6,7 @@
 #define TRACER_SERVO_CHANNEL_H
 
 
-#include <fs/inode.h>
+#include <fs/iinode.h>
 #include <interface/gpio.h>
 #include <interface/cmd.h>
 
