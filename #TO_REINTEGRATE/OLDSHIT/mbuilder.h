@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include <stddef.h>
+
 #include "modules/machine_control/movement.h"
 #include "modules/machine_control/geometry.h"
 #include "trajectory.h"

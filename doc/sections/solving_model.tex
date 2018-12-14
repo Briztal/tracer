@@ -1,0 +1,58 @@
+\section{Solving models}
+
+\subsection{Primary considerations}
+
+Suppose that we want to control a robot.
+We will take two examples of the stepper controlled CNC and a quadrirotor, both apparently having different control models.\newline
+
+Due to its stepper motors, and the supposition that no forces will interfere, the CNC can be controlled in a deterministic way, with no feedback.
+The drone, is submitted to the gravity and therefore, is controlled using feedback algorithms, to adjust motors powers in real time.\newline
+
+Beyond those differences, those robots have similarities
+\begin{itemize}
+    \item [.] They are represented by a state.
+    For the CNC, it can be the set of coordinates of its steppers, their speed, acceleration, etc\ldots
+    For the drone, it can be, is the set of powers of its motors, and angular positions, speeds, accelerations\ldots
+    \item[.] They are solved, ie, an algorithm is used to determine, knowing the current state, the target state.
+    For the CNC, it can be a trajectory tracer, for the drone, it can be a set of PIDs, coupled with a trajectory tracer;
+    \item[.] They are controllable, ie, the solving algorithm takes parameters that determine its behaviour.
+    For the CNC, it can be the acceleration / speed bounds of stepper motors, the number of steps per unit, etc\ldots
+    For the drone, it can be PID coefficients.\newline
+\end{itemize}
+
+We hereby see that behind those control problems, there are common elements.\newline
+
+An approach, when writing a control algorithm for one of these, can be to neglect those similarities, and build a specific control algorithm.
+Another approach that motivates this section, is to evaluate this range of problems in a more abstract way.\newline
+
+The idea here is not to search for similarities in solutions to those problems, but rather to start from an abstract
+model of solving system, of which those control problems are particular cases.
+
+%TODO FINISH THE INTRODUCTION, WHY ARE WE BUILDING THIS MATHEMATICA ABSTRACT ?
+
+
+\subsection{Solving system}
+
+Let $S, C$ be sets, $X : S \times C \rightarrow S$, the triplet $(S, C, X)$ is a solving system;
+
+S is the system's states set.
+C is the system's control set.
+X is the system's solver.
+
+$S \in S$ is a state.\newline
+$c \in C$ is a control element;
+
+A state $s \in S$ can be seen as one representation of a particular system, S being the set of all possible states.
+A state can be known, or not, and the aim of a solver will be to compute it.\newline
+A control element $c \in C$ can be seen as a set of parameters that will affect the computation of a state, during a solving process.
+All of these parameters are know, they do not intend to be determined by the solver, but to control is behaviour
+
+
+A state $s$ can represent a robot's physical state, (see behind), or the various variables of an equation system,
+generally, any set of variable that must be computed;
+A control element $c$ can contain acceleration bounds for the trajectory controller of the robot,
+or coefficients of the equation system.
+
+
+\subsection{Solving system}
+

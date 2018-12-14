@@ -1,5 +1,5 @@
 /*
-  vfs.h Part of TRACER
+  api.h Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
@@ -33,6 +33,8 @@
 #include <stdint.h>
 
 #include <stddef.h>
+
+#include "fs.h"
 
 
 typedef void FILE;
@@ -78,7 +80,7 @@ void vfs_delete(const char *path);
  * @return the descriptor of the resource for future manipulations;
  */
 
-FILE *vfs_open(const char *path);
+struct resrc *vfs_open(const char *path);
 
 
 /**
@@ -86,7 +88,7 @@ FILE *vfs_open(const char *path);
  * @param rd : the resource descriptor of the opened resource;
  */
 
-void vfs_close(FILE *rd);
+void vfs_close(struct resrc *rd);
 
 
 
