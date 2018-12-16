@@ -22,7 +22,6 @@
 #include "solver.h"
 
 
-
 //Actualise the state of a solving unit;
 void solver_iterate(struct solver *s) {
 	

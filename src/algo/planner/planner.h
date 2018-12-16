@@ -10,9 +10,6 @@
 
 #include <dmz/list.h>
 
-struct trajectory;
-struct planner;
-
 
 //----------------------------------------------------- Trajectory -----------------------------------------------------
 
@@ -34,11 +31,8 @@ struct planner;
 
 struct trajectory {
 	
-	//Trajectories are linked together;
-	struct list_head head;
-	
 	//The dimension of the trajectory;
-	const size_t dimension;
+	const size_t t_dim;
 	
 	//The start index, minimal value of the index;
 	const float t_imin;
@@ -47,7 +41,7 @@ struct trajectory {
 	const float t_imax;
 	
 	//An index increment that can cause significant increments on point coordinates;
-	const float t_default_incr;
+	const float t_dincr;
 	
 	//The trajectory function;
 	void (*const r_function)(float index, float *dst_array, size_t dst_size);
@@ -59,36 +53,37 @@ struct trajectory {
 void trajectory_evaluate(struct trajectory *traj, float index, float *dst_array, size_t dst_size);
 
 
+//----------------------------------------------------- Planner element -----------------------------------------------------
+
 /**
- * trajectory_find : search the trajectory, from a particular point/increment, for a point whose cost is close enough
- * 	to the cost target;
- *
- * 	The cost is given from a cost function, that is fed with distances from a reference point
- *
- * @param traj : the trajectory to search in;
- * @param index : the initial index;
- * @param increment : the initial increment;
- * @param ref_array : the coordinates of the reference point;
- * @param point_array : the array where to compute points. Will contain coordinates of the point at the return index
- * @param size : the size of arrays;
- * @param cost_f : the cost function, giving a cost from a float array;
- * @param cost_target : the target of the cost function;
- * @param cost_threshold : the threshold to determine if a point is close enough to the cost target;
- * @param nb_iterations : the maximum number of iterations;
- * @return the index of the found point;
+ * In order to facilitate the build and usage of complex trajectory objects, the planner doesn't receive trajectories
+ * 	(that can't be composed this way) but planner objects, that can be composed freely.
  */
 
-float trajectory_find(
-	struct trajectory *traj,
-	float index,
-	float *ref_array,
-	float *point_array,
-	size_t size,
-	float (*cost_f)(float *, size_t),
-	float cost_target,
-	float cost_threshold,
-	size_t nb_iterations
-);
+struct planner_elmt {
+	
+	//A list head, for list storage;
+	struct list_head pe_head;
+	
+	//The trajectory that the planner should follow;
+	struct trajectory *pe_traj;
+	
+};
+
+
+//----------------------------------------------------- Transition -----------------------------------------------------
+
+
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITION
+//TODO TRANSITIONs
 
 
 //------------------------------------------------------- Planner ------------------------------------------------------
@@ -114,13 +109,25 @@ struct planner {
 	const size_t p_size;
 
 	//The current trajectory;
-	struct trajectory *p_traj;
+	struct planner_object *p_objects;
+	
+	//The current transition;
+	struct transition *p_trans;
 	
 	//The current index in the current trajectory;
 	float p_index;
 
 	//The current increment in the current trajectory;
 	float p_incr;
+	
+	//The minimal distance bound;
+	const float p_dmin;
+	
+	//The target distance;
+	const float p_dtarget;
+	
+	//The maximal distance bound;
+	const float p_dmax;
 	
 };
 
