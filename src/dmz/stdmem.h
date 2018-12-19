@@ -27,11 +27,11 @@
 #include <stddef.h>
 
 
-//Copy @num bytes from src to dst;
-void memcpy(void *dst, const void *src, size_t num);
+//Copy @size bytes from src to dst;
+void memcpy(void *dst, const void *src, size_t size);
 
 //Initialise a memory block to a value;
-void memset(void *dst, uint8_t value, size_t num);
+void memset(void *dst, uint8_t value, size_t size);
 
 
 

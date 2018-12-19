@@ -1,5 +1,5 @@
 /*
-  solving.h Part of TRACER
+  solver.h Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 

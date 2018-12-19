@@ -1,5 +1,5 @@
 /*
-  solving.c Part of TRACER
+  solver.c Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
