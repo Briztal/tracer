@@ -27,7 +27,7 @@
  * 	Executes the process function, with the process args, and returns;
  */
 
-static void run_exec();
+void run_exec();
 
 
 /**
@@ -38,8 +38,8 @@ static void run_exec();
  * 	If preemption fails, an internal error has occurred, and a kernel panic is generated;
  */
 
-static void run_exit();
+void run_exit();
 
 
-#endif TRACER_RUN_H
+#endif//TRACER_RUN_H
 

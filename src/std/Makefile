@@ -26,7 +26,7 @@ endif
 CFLAGS += -I$(STD_MATH_DIR)
 
 std_math:
-	$(_CC) -o $(SB)/math.o -c $(STD_MATH_DIR)/math.c
+	@$(_CC) -o $(SB)/math.o -c $(STD_MATH_DIR)/math.c
 
 
 STDL_RULES += std_math

@@ -217,25 +217,25 @@ APPS_O = $(wildcard $(APPC_D)/*.o)
 dtree:
 
 #The build dir, root of the build tree;
-	@mkdir build
+	@mkdir -p build
 
 #The kernel dir, where kernel objects are stored;
-	@mkdir $(KRNL_D)
+	@mkdir -p $(KRNL_D)
 
 #The modules objects dir, where pre-packing module objects are stored;
-	@mkdir $(MODS_D)
+	@mkdir -p $(MODS_D)
 
 #The packed modules objects dir, where packed and manged module objects are stored;
-	@mkdir $(MODC_D)
+	@mkdir -p $(MODC_D)
 
 #The stdlib dir, where stdlib objects are stored;
-	@mkdir $(STDL_D)
+	@mkdir -p $(STDL_D)
 
 #The apps objects dir, where pre-packing app objects are stored;
-	@mkdir $(APPS_D)
+	@mkdir -p $(APPS_D)
 
 #The packed apps objects dir, where packed and manged app objects are stored;
-	@mkdir $(APPC_D)
+	@mkdir -p $(APPC_D)
 
 
 #---------------------------------------------------- Link barriers ----------------------------------------------------
@@ -290,7 +290,7 @@ krnl_pack : $(KRNL_RULES)
 %_mod_pack : %
 
 #Pack the module in a single object file;
-	$(LD) -r -o $(MODC_D)/$<.o $(addprefix $(MODS_D)/,$($<))
+	@$(LD) -r -o $(MODC_D)/$<.o $(addprefix $(MODS_D)/,$($<))
 
 #Generate the module's translation table;
 	@$(call elf_translate,$<,$(MODC_D)/$<.o,$(MODC_D)/$<_trsl)
@@ -340,7 +340,7 @@ stdl_pack : $(STDL_RULES)
 elf: dtree krnl_pack $(MODS_PACKERS) stdl_pack $(APPS_PACKERS)
 
 #Link all objects to form the executable;
-	$(CC) $(LDFLAGS) build/krnl.o $(MODS_O) $(APPS_O) build/stdlib.a -o $(NAME).elf
+	@$(CC) $(LDFLAGS) build/krnl.o $(MODS_O) $(APPS_O) build/stdlib.a -o $(NAME).elf
 
 #Display sections informations;
 	@$(SIZE) -A -t -x $(NAME).elf

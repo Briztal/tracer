@@ -30,7 +30,6 @@ void *__run_get_init_arg();
  * 	Executes the process function, with the process args, and returns;
  */
 
-#include <stdbool.h>
 
 void run_exec() {
 	

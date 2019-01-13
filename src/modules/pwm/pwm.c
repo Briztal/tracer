@@ -441,7 +441,7 @@ static bool channel_init(const struct channel_inode *const node, struct pwm_conf
 	
 	status |= !iop_interface(timer_fd, &init.timer, sizeof(struct timer_if));
 	
-	printkf("status : %d", status);
+	//printkf("status : %d", status);
 	
 	//If the interfacing failed :
 	if (status) {

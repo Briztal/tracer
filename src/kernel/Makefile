@@ -35,7 +35,7 @@ kernel :
 	@$(KCC) -o $(KR_BL)/printk.o 			-c $(KS)/debug/printk.c
 
 
-	@$(KCC) -o $(KR_BL)/inode.o 		-c $(KS)/fs/inode.c
+	@$(KCC) -o $(KR_BL)/iinode.o 		-c $(KS)/fs/iinode.c
 
 
 	@$(KCC) -o $(KR_BL)/heap.o 		-c $(KS)/mem/heap.c

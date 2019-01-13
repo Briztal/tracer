@@ -84,6 +84,7 @@ void list_remove_ref_next(struct list_head *head, struct list_head **ref) {
 
 }
 
+
 void list_remove_ref_prev(struct list_head *head, struct list_head **ref) {
 
 	//If @head is referenced, @head may be the only element of the list; :

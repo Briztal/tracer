@@ -7,7 +7,6 @@ include src/hard/chip/kinetis/chips/mk64fx512/mk64fx512.mk
 TOOLSPATH := $(abspath $(CURDIR)/src/hard/board/teensy35/tool-teensy)
 
 hex: elf
-	@echo "[HEX]\tracer.hex"
 	@$(OBJCOPY) -O ihex -R .eeprom $(NAME).elf $(NAME).hex
 
 upload: hex

@@ -19,6 +19,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include "cmd.h"
 
 static void ds(uint32_t u) {}

@@ -59,6 +59,8 @@ size_t sysh_write(size_t fd, const void *buffer, size_t size){
 	
 	debug_delay_ms(1000);
 	
+	return 0;
+	
 }
 
 
