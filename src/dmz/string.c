@@ -135,11 +135,11 @@ char *itoa(uint32_t value, char *buffer, size_t buffer_size, const uint8_t radix
 	char *dst = buffer + buffer_size;
 
 	//Null terminate;
-	*dst = 0;
+	*(--dst) = 0;
 
-	//If the buffer is empty, we can't avoid an error. Return the last case.
+	//If the buffer is empty, we can't avoid an error. Return the zeroed case.
 	if (!buffer_size) {
-		return dst;
+		return dst+1;
 	}
 
 	//Decrement the size;
@@ -153,9 +153,6 @@ char *itoa(uint32_t value, char *buffer, size_t buffer_size, const uint8_t radix
 
 	while (1) {
 
-		//Focus on the next char;
-		dst--;
-
 		//Cache the digits numeric value;
 		uint8_t r = (uint8_t) (value % (uint32_t)radix);
 
@@ -163,7 +160,7 @@ char *itoa(uint32_t value, char *buffer, size_t buffer_size, const uint8_t radix
 		value /= (uint32_t)radix;
 
 		//Update the buffer with the char value and focus on the next char;
-		*dst = alphabet[r];
+		*(--dst) = alphabet[r];
 
 		//Decrement the size;
 		buffer_size--;
