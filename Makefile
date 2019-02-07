@@ -111,7 +111,7 @@ SIZE :=
 #---------------------------------------------------- Initialisation ---------------------------------------------------
 
 #Initialise compilation and linking flags;
-CFLAGS := -Wall -Os -g -std=c89 -ffreestanding
+CFLAGS := -Wall -Os -g -std=c99 -ffreestanding
 LDFLAGS := -Wall -Wl,--gc-sections -Os -std=c99 -nostdlib
 
 

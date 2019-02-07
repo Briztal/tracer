@@ -1,0 +1,21 @@
+
+
+project parts :
+
+    kernel :
+        First piece of code to be executed;
+        stand alone. Linked alone;
+        Can export symbols, that will be accessible to modules;
+        Fully compiled and linked, with itself only;
+
+
+    modules : optional pieces of code, executed by the kernel.
+        Linked dynamically with exported kernel symbols;
+
+
+    standard library : library accessible to applications.
+        stand alone; Not accessible to kernel or modules;
+
+
+    applications : compiled statically, with the standard library.
+
