@@ -1,0 +1,62 @@
+
+//TODO SLAB -> MEMORY POOL;
+
+//TODO IMPLEMENT SLAB PROPERLY;
+
+//TODO POOL_MGR;
+
+//TODO SLAB_MGR;
+
+
+//----------------------------- Prioritary -----------------------------
+
+//TODO DEFINE CLEARLY THE FILE SYSTEM STRUCTURE
+
+//TODO PROPER PRINTK FUNCTIONS, WITH FILES;
+
+//TODO Standard output / input / error procedures;
+
+//TODO TEST MACHINE CONTROLLER
+
+//TODO VFP MATH LIB;
+
+
+
+//TODO PORT ON ARDUINO
+
+
+//TODO BOOST
+
+//TODO RAM PAGES ALLOC;
+
+//TODO CHECK THAT KINETIS UART DRIVER NOT LAREADY INITALISED
+
+/*------------------------------------- Kernel tasks -------------------------------------
+
+//LONG TERM :
+
+//TODO SIPLIFY KERNEL_ERROR WITH MAKEFILE MACROS FOR FILE AND FUNCTION NAME;
+
+//TODO TEST AND INTERGATE KERNEL_EXIT
+
+//INTEGRATE PRIORITY DATA IN THE TASK;
+
+/*
+ *------------------------------------- Driver tasks -------------------------------------
+ */
+
+//---------- UART DRIVER ----------
+
+//TODO TEST UART DRIVER;
+
+//---------- FLASH DRIVER ----------
+
+//TODO FLASH DRIVER
+
+//---------- PORT DRIVER ----------
+
+TEST ALL PORTS AND ALL FUNCTIONNALITIES
+
+
+//TODO POLLING INTERRUPT FUNCTION IN KINETIS PORT;
+
