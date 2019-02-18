@@ -1,5 +1,5 @@
 /*
-  fault.c Part of TRACER
+  khooks.h Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
@@ -18,12 +18,31 @@
 
 */
 
+/*
+ * This file declares all function that are accessible to the hardware implementation;
+ */
 
-#include <kernel/hard/except.h>
+#ifndef TRACER_HOOK_H
+#define TRACER_HOOK_H
 
-#include <kernel/res/printk.h>
+//TODO DOC
+//TODO DOC
+//TODO DOC
+//TODO DOC
+//TODO DOC
+//TODO DOC
 
-#include <kernel/hard/arch/flt.h>
+
+void __proc_init();
+
+
+void __chip_init();
+
+
+void __krnl_tick();
+
+
+void __krnl_switch_context(void *sp);
 
 
 /*
@@ -44,32 +63,12 @@
  * 	When a fault occurs, the kernel calls __flt_update_env and __flt_repair;
  *
  * 	If the repairing succeeds, it stops and let the execution continue; if not, it calls __flt_log and stalls
- * 	indefinately;
+ * 	indefinitely;
  */
 
-void kernel_fault_handler() {
+void kernel_fault_handler();
 
-    bool repaired;
 
-    //Enter a critical section;
-    critical_section_enter();
 
-    //Update the fault environment;
-    __flt_update_env();
 
-    //Attempt to repair the fault;
-    repaired = __flt_repair();
-
-    //If the fault is repaired, complete here;
-    if (repaired) return;
-
-    //If the fault is not repaired, log;
-    printk("Non recoverable fault detected. Executing the fault log function...");
-
-    //Execute the fault logger;
-    __flt_log();
-
-    //Stop here;
-    while (1);
-
-}
+#endif //TRACER_HOOK_H

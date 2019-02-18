@@ -1,0 +1,21 @@
+kernel run mode :
+
+    - standalone : the kernel is the only piece of code present. processor startup code must be generated;
+        -> kernel executable resides in ROM;
+        -> linker script concerns ROM and RAM;
+        -> vtable is pre-initialised, init can be re-done if it must be copied in RAM;
+        -> RAM exec available or not;
+
+    - ROM app : the kernel resides in FLASH and is executed by another program;
+        -> kernel executables resides in ROM;
+        -> linker script concerns ROM and RAM;
+        -> vtable is not initialised, init must be done, will reside in RAM;
+        -> RAM exec available or not;
+
+    - RAM app : the kernel is loaded in RAM  and executed by another program
+        -> kernel executable resides in RAM;
+        -> linker script concerns only RAM;
+        -> vtable is not initialised, init must be done, will reside in RAM;
+        -> RAM exec available;
+
+vtable initialisation in ROM : only in standalone mode;
