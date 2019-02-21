@@ -6,6 +6,7 @@ set(PLATFORMIO_CMD "/usr/local/bin/platformio")
 
 set(CMAKE_C_STANDARD 90)
 
+include_directories("arch")
 include_directories("include")
 include_directories("include/nostd")
 include_directories("arch/chip/kinetis/periph")

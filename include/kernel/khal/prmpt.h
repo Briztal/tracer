@@ -27,11 +27,11 @@
 
 #include <stdint.h>
 
-//Configure the priority of the preemption interruption, and enable it;
+/*Configure the priority of the preemption interruption, and enable it;*/
 extern void __prmpt_configure(uint8_t int_prio);
 
-//Set the preemption pending;
+/*Set the preemption pending;*/
 extern void __prmpt_trigger();
 
 
-#endif //TRACER_PRMPT_H
+#endif /*TRACER_PRMPT_H*/

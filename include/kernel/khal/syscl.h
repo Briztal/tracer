@@ -29,11 +29,11 @@
 
 #include <stddef.h>
 
-//Set the priority of the syscall exception and enable it;
+/*Set the priority of the syscall exception and enable it;*/
 extern void __syscl_configure(uint8_t priority);
 
-//Call the kernel;
+/*Call the kernel;*/
 extern size_t __syscl_trigger(size_t arg0, size_t arg1, size_t arg2, size_t syscall_id);
 
 
-#endif //TRACER_SYSCL_H
+#endif /*TRACER_SYSCL_H*/

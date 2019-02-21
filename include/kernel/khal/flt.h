@@ -27,13 +27,13 @@
 
 #include <stdbool.h>
 
-//Update the fault environment;
+/*Update the fault environment;*/
 extern void __flt_update_env();
 
-//Attempt to repair a fault, based on the fault environment, assert if success;
+/*Attempt to repair a fault, based on the fault environment, assert if success;*/
 extern bool __flt_repair();
 
-//If display a log message about the fault environment;
+/*If display a log message about the fault environment;*/
 extern void __flt_log();
 
-#endif //TRACER_FLT_H
+#endif /*TRACER_FLT_H*/

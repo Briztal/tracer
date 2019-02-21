@@ -27,22 +27,14 @@
 
 #include <stddef.h>
 
-//Print a string in the kernel log interface;
-#define printk(str) _printkf(str, 0, 0);
+/*Print a string in the kernel log interface;*/
+void printk(const char * str);
 
-//Display a formated string in the kernel log interface;
-void _printkf(const char * str, const void ** args,  size_t args_size);
+/*Display a formated string in the kernel log interface;*/
+void printkf(const char * fstr, const void ** args,  size_t args_size);
 
-
-//Packer for formated strings;
-#define printkf(msg, ...) {\
-		const void * __klog_args__ [] = VARIADIC_PACKAGE(__VA_ARGS__);\
-		_printkf(msg, __klog_args__, VARIADIC_COUNT(__VA_ARGS__));\
-	}
-
-
-//Display an error message and halt;
+/*Display an error message and halt;*/
 void kernel_panic(const char *tmp_str);
 
 
-#endif //TRACER_ERROR_H
+#endif /*TRACER_ERROR_H*/

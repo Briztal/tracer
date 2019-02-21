@@ -52,8 +52,11 @@ endif
 #The build environment allows the abstract manipulation of source, objects and executable files.
 # Architecture dependent variables are  updated by the arch make unit;
 
-#The preprocessor, compiler, assembler, and linker;
+#The preprocessor, compiler, assembler;
 CC =
+
+#The linker;
+LD =
 
 #The archiver;
 AR :=
@@ -103,6 +106,11 @@ include kernel/kernel.mk
 endif
 
 
+#------------------------------------------------------- cleanup -------------------------------------------------------
+
+
+clean :
+	rm -rf build
 
 
 

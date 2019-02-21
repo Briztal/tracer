@@ -1,6 +1,4 @@
-//
-// Created by root on 10/3/18.
-//
+
 
 #ifndef TRACER_VARIADIC_H
 #define TRACER_VARIADIC_H
@@ -11,7 +9,7 @@
 #define PACKAGE_RIGHT ARGS_PACKAGE_10, ARGS_PACKAGE_9, ARGS_PACKAGE_8, ARGS_PACKAGE_7, ARGS_PACKAGE_6, ARGS_PACKAGE_5, ARGS_PACKAGE_4, ARGS_PACKAGE_3, ARGS_PACKAGE_2, ARGS_PACKAGE_1, ARGS_PACKAGE_0
 #define COUNT_RIGHT 10,9,8,7,6,5,4,3,2,1,0,
 
-//const void * cast
+/*const void * cast*/
 #define CVC(x) (const void *)(x)
 #define ARGS_PACKAGE_0()
 #define ARGS_PACKAGE_1(a) 								{CVC(a)}
@@ -27,15 +25,15 @@
 
 #define _SELECT(...) SELECT(__VA_ARGS__)
 
-//Determine the appropriate packaging macro;
+/*Determine the appropriate packaging macro;*/
 #define VARIADIC_PACKAGE_F(...) 	_SELECT(__VA_ARGS__, PACKAGE_RIGHT)
 
-//Determine the number of arguments;
+/*Determine the number of arguments;*/
 #define VARIADIC_COUNT(...) 				_SELECT(__VA_ARGS__, COUNT_RIGHT)
 
 
-//Package a variable number of arguments; Determines the appropriate packager and calls it;
+/*Package a variable number of arguments; Determines the appropriate packager and calls it;*/
 #define VARIADIC_PACKAGE(...) VARIADIC_PACKAGE_F(__VA_ARGS__) (__VA_ARGS__)
 
 
-#endif //TRACER_VARIADIC_H
+#endif /*TRACER_VARIADIC_H*/

@@ -19,20 +19,20 @@
 
 ifdef BUILD_KHAL
 
-#The directory where to generate the khal object;
+#The directory where to generate the merges khal object file
 KHAL_BDIR = $(BDIR)
 
-#The directory where to generate khal temporary objects;
-KHAL_TMP_BDIR = $(BDIR)/khal_tmp
+#The directory where to generate khal object files;
+KHAL_OBJS_BDIR = $(BDIR)/khal_tmp
 
 #The list of rules that are required to build the khal correctly; sub make files must fill this list;
 KHAL_RULES :=
 
 #Compilation flags proper to the khal;
-KHAL_FLAGS :=
+KHAL_FLAGS := -DBOPS_EXECUTABLE_TYPE=$(BOPS_EXECUTABLE_TYPE)
 
 #The khal compilation shortcut;
-KHAL_CC = $(CC) -Iarch/ $(CFLAGS) $(KHAL_FLAGS)
+KHAL_CC = $(CC) -Iarch/ -Iinclude/ $(CFLAGS) $(KHAL_FLAGS)
 
 endif
 
@@ -69,14 +69,14 @@ khal_init :
 
 #Create the directoy tree;
 	mkdir -p $(KHAL_BDIR)
-	mkdir -p $(KHAL_TMP_BDIR)
+	mkdir -p $(KHAL_OBJS_BDIR)
 
 
 #arch_khal : in charge of merging all khal object files into one object file, and to modify the symbols table;
 khal : khal_init $(KHAL_RULES)
 
 #Merge all khal objects in one object;
-	$(LD)  $(wildcard $(KHAL_TMP_BDIR)/*.o) -o $(KHAL_BDIR)/khal.o
+	$(LD) -r $(wildcard $(KHAL_OBJS_BDIR)/*.o) -o $(KHAL_BDIR)/khal.o
 
 endif
 

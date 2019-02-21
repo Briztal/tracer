@@ -44,7 +44,7 @@ ifdef BUILD_KHAL
 kinetis_k_khal:
 
 #Compile the init source;
-	@$(KHAL_CC) -o $(KHAL_BDIR)/kx_kernel.o -c $(KX_DIR)/kx_khal.c
+	@$(KHAL_CC) -o $(KHAL_OBJS_BDIR)/kx_khal.o -c $(KX_DIR)/kx_khal.c
 
 #The kinetis k rule must be executed in all cases;
 KHAL_RULES += kinetis_k_khal

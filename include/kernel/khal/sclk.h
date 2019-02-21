@@ -27,13 +27,13 @@
 
 #include <stdint.h>
 
-//Configure the frequency and the priority of the system clock interrupt
+/*Configure the frequency and the priority of the system clock interrupt*/
 extern void __sclk_configure(uint32_t tick_frequency, uint8_t int_prio);
 
-//Start the system clock;
+/*Start the system clock;*/
 extern void __sclk_start();
 
-//Stop the system clock;
+/*Stop the system clock;*/
 extern void __sclk_stop();
 
-#endif //TRACER_SCLK_H
+#endif /*TRACER_SCLK_H*/

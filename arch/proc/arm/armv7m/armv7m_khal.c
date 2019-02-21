@@ -22,42 +22,39 @@
  * This file contains the kernel hardware base for the arm v7m architecture.
  */
 
-//------------------------------------------------ Make parameters -----------------------------------------------
+/*------------------------------------------------ Make parameters -----------------------------------------------*/
 
-#if !defined(RUN_MODE) || !defined(NB_EXCEPTIONS) || !defined(SUPPORT_NVIC_RELOC)
+#if !defined(BOPS_EXECUTABLE_TYPE) || !defined(NVIC_NB_EXCEPTIONS) || !defined(NVIC_SUPPORT_RELOC)
 
 #error "The run mode or the number of exceptions, or the relocation support state were not provided. Check your makefile;"
 
-#define SUPPORT_NVIC_RELOC 1
+#define NVIC_SUPPORT_RELOC 1
 
-#define RUN_MODE 0
+#define BOPS_EXECUTABLE_TYPE 0
 
-#define NB_EXCEPTIONS 256
+#define NVIC_NB_EXCEPTIONS 256
 
 #endif
 
 
-//------------------------------------------------------ Includes ------------------------------------------------------
+/*------------------------------------------------------ Includes ------------------------------------------------------*/
 
 #include <stdint.h>
 
-
-#include <kernel/hard/arch/lnk.h>
-#include <kernel/printk.h>
 #include <kernel/common.h>
-#include <kernel/arch/lnk.h>
-#include "../../../khooks.h"
+#include <kernel/khal/lnk.h>
+#include <khooks.h>
 
 #include "armv7m.h"
 
 
 
-//Define an empty ISR handler
+/*Define an empty ISR handler*/
 static void no_isr() {}
 
 static void __arm_v7m_init() {
 
-    //Enable all faults;
+    /*Enable all faults;*/
 
     armv7m_enable_bus_fault();
     armv7m_enable_usage_fault();
@@ -67,7 +64,7 @@ static void __arm_v7m_init() {
     armv7m_set_bus_fault_priority(0);
     armv7m_set_usage_fault_priority(0);
 
-    //Call the run init function;
+    /*Call the run init function;*/
     __proc_init();
 
 }
@@ -95,7 +92,7 @@ static void arm_v7m_usg_fault_handler() {
 
 /*------------------------------------------------------ syscall -----------------------------------------------------*/
 
-//Set the priority of the syscall exception and enable it;
+/*Set the priority of the syscall exception and enable it;*/
 void __syscl_configure(uint8_t priority) {
     armv7m_set_svcall_priority(priority);
 }
@@ -114,18 +111,18 @@ __attribute__ ((naked)) static void arm_v7m_syscl_handler() {
 
         "push 	{lr} 	\n\r"
 
-        //R0-R3 have not been altered. We can directly call the kernel syscall handler;
+        /*R0-R3 have not been altered. We can directly call the kernel syscall handler;*/
         "bl 	__krnl_syscall_handler\n\r"
 
         "pop 	{lr} 	\n\r"
 
-        //Cache PSP in R5;
+        /*Cache PSP in R5;*/
         "mrs	r1, 	psp	\n\r"
 
-        //Save R0 in the psp; The psp points to the stacked version of R0;
+        /*Save R0 in the psp; The psp points to the stacked version of R0;*/
         "str	r0, 	[r1]\n\r"
 
-        //Exit from exception;
+        /*Exit from exception;*/
         "bx 	lr			\n\r"
 
     );
@@ -135,12 +132,12 @@ __attribute__ ((naked)) static void arm_v7m_syscl_handler() {
 /*---------------------------------------------------- preemption ----------------------------------------------------*/
 
 
-//Set the priority of the preemption exception and enable it;
+/*Set the priority of the preemption exception and enable it;*/
 void __prmpt_configure(uint8_t priority) {
     armv7m_set_pendsv_priority(priority);
 }
 
-//Set the preemption exception pending;
+/*Set the preemption exception pending;*/
 void __prmpt_trigger() {
     armv7m_set_pendsv_pending();
 }
@@ -160,37 +157,37 @@ void __prmpt_trigger() {
 __attribute__ ((naked)) static void arm_v7m_prmpt_handler() {
 
     __asm__ __volatile__ (\
-    //Disable all interrupts;
+    /*Disable all interrupts;*/
     "cpsid 	i \n\t"
 
-        //Cache psp in R0. R0 has already been stacked;
+        /*Cache psp in R0. R0 has already been stacked;*/
         "mrs 	r0, 	psp 		\n\t"
 
-        //Stack {R4 - R11} range, and set R0 to the end of the software context;
+        /*Stack {R4 - R11} range, and set R0 to the end of the software context;*/
         "stmdb 	r0!, 	{r4 - r11}	\n\t"
 
-        //Save LR, as calling bl overwrites it; ARM calling conventions, R4 is not altered by call;
+        /*Save LR, as calling bl overwrites it; ARM calling conventions, R4 is not altered by call;*/
         "mov	r4, 	lr			\n\t"
 
-        //Call __krnl_switch_context to get a new sp. Arm calling conventions, old and new are located in R0;
+        /*Call __krnl_switch_context to get a new sp. Arm calling conventions, old and new are located in R0;*/
         "bl 	__krnl_switch_context\n\t"
 
-        //Restore LR;
+        /*Restore LR;*/
         "mov	lr, 	r4			\n\t"
 
-        //Update the provided sp to hit the beginning of the software context
+        /*Update the provided sp to hit the beginning of the software context*/
         "add 	r0, 	#32			\n\t"
 
-        //Unstack {R4 - R11}, to restore the previous context; R0 remains unchanged, points to the end of the hardware context
+        /*Unstack {R4 - R11}, to restore the previous context; R0 remains unchanged, points to the end of the hardware context*/
         "ldmdb 	r0, 	{r4 - r11} \n\t"
 
-        //Update psp, so that the new task's software context gets loaded;
+        /*Update psp, so that the new task's software context gets loaded;*/
         "msr 	psp, 	r0 			\n\t"
 
-        //Enable interrupts again;
+        /*Enable interrupts again;*/
         "cpsie 	i					\n\t"
 
-        //Complete;
+        /*Complete;*/
         "bx lr						\n\t"
 
     );
@@ -201,7 +198,7 @@ __attribute__ ((naked)) static void arm_v7m_prmpt_handler() {
 
 
 
-//--------------------------------------------------- dynamic vtable ---------------------------------------------------
+/*--------------------------------------------------- dynamic vtable ---------------------------------------------------*/
 
 /*
  * The dynamic vtable can replace the static vtable if nvic relocation is possible, and is queried by the static
@@ -210,18 +207,18 @@ __attribute__ ((naked)) static void arm_v7m_prmpt_handler() {
  *  It is initialised at runtime;
  */
 
-//Define the kernel vtable, and align it on 512 bytes.
-static void (*dynamic_vtable[NB_EXCEPTIONS])() __attribute__ ((aligned (512))) = {};
+/*Define the kernel vtable, and align it on 512 bytes.*/
+static void (*dynamic_vtable[NVIC_NB_EXCEPTIONS])() __attribute__ ((aligned (512)));
 
 
-//------------------------------------------------- boot - static vtable ------------------------------------------------
+/*------------------------------------------------- boot - static vtable ------------------------------------------------*/
 
 /*
  * If the kernel is standalone, it must handle the processor startup; This is made by embedding the vtable in the
  *  executable;
  */
 
-#if (RUN_MODE == 0)
+#if (BOPS_EXECUTABLE_TYPE == 0)
 
 /**
  * isr_generic_handler : in order to support handler update, all functions of the in-flash vector table will
@@ -232,7 +229,7 @@ static void (*dynamic_vtable[NB_EXCEPTIONS])() __attribute__ ((aligned (512))) =
 
 static void isr_generic_flash_handler(uint8_t i) {
 
-    //Execute the handler;
+    /*Execute the handler;*/
     (*dynamic_vtable[i])();
 
 }
@@ -242,10 +239,10 @@ static void isr_generic_flash_handler(uint8_t i) {
  * Generate an ISR for each interrupt channel; Done using XMacro;
  */
 
-//The handler link : a function that calls the handler link with a specific value;
+/*The handler link : a function that calls the handler link with a specific value;*/
 #define channel(i) static void isr_##i() {isr_generic_flash_handler(i);}
 
-//Define all isrs;
+/*Define all isrs;*/
 #include "static_vtable.h"
 
 #undef channel
@@ -255,65 +252,65 @@ static void isr_generic_flash_handler(uint8_t i) {
  * 	as it, at the link section .vector. This section can be found in the link script, and starts at address 0;
  */
 
-void (*static_vtable[NB_EXCEPTIONS])()  __attribute__ ((section(".vectors"))) = {
+void (*static_vtable[NVIC_NB_EXCEPTIONS])()  __attribute__ ((section(".vectors"))) = {
 
-    //0 : not assigned;
+    /*0 : not assigned;*/
     (void (*)()) &__ram_max,
 
-    //1 : reset; Effectively used when NVIC is relocated;
+    /*1 : reset; Effectively used when NVIC is relocated;*/
     &__arm_v7m_init,
 
-    //2 : NMI. Not supported for instance;
+    /*2 : NMI. Not supported for instance;*/
     &no_isr,
 
-    //3 : HardFault.
+    /*3 : HardFault.*/
     &arm_v7m_hard_fault_handler,
 
-    //4 : MemManage fault;
+    /*4 : MemManage fault;*/
     &arm_v7m_mem_fault_handler,
 
-    //5 : BusFault.
+    /*5 : BusFault.*/
     &arm_v7m_bus_fault_handler,
 
-    //6 : UsageFault;
+    /*6 : UsageFault;*/
     &arm_v7m_usg_fault_handler,
 
-    //7 : Reserved;
+    /*7 : Reserved;*/
     &no_isr,
 
-    //8 : Reserved;
+    /*8 : Reserved;*/
     &no_isr,
 
-    //9 : Reserved;
+    /*9 : Reserved;*/
     &no_isr,
 
-    //10 : Reserved;
+    /*10 : Reserved;*/
     &no_isr,
 
-    //11 : SVCall, syscall handler, hooking the kernel;
+    /*11 : SVCall, syscall handler, hooking the kernel;*/
     &arm_v7m_syscl_handler,
 
-    //12 : Reserved;
+    /*12 : Reserved;*/
     &no_isr,
 
-    //13 : Reserved;
+    /*13 : Reserved;*/
     &no_isr,
 
-    //14 : PendSV, context switcher, hooking the kernel;
+    /*14 : PendSV, context switcher, hooking the kernel;*/
     &arm_v7m_prmpt_handler,
 
-    //15 : SysTick, kernel hook;
+    /*15 : SysTick, kernel hook;*/
     &__krnl_tick,
 
-    //In order to avoid writing 254 times the function name, we will use macros that will write it for us;
+    /*In order to avoid writing 254 times the function name, we will use macros that will write it for us;*/
 #define channel(i) &isr_##i,
 
-//Redirect all isrs to the empty one;
+/*Redirect all isrs to the empty one;*/
 #include "static_vtable.h"
 
 #undef channel
 
-    //Adding another "&empty_isr" will cause a compiler warning "excess array initializer. Try it, it is funny !
+    /*Adding another "&empty_isr" will cause a compiler warning "excess array initializer. Try it, it is funny !*/
 
 };
 
@@ -323,15 +320,15 @@ void (*static_vtable[NB_EXCEPTIONS])()  __attribute__ ((section(".vectors"))) = 
  * executable;
  */
 
-#else //(RUN_MODE == 0)
+#else /*(BOPS_EXECUTABLE_TYPE == 0)*/
 
-//Create a function pointer referencing the entry point and embed it in the vector section;
+/*Create a function pointer referencing the entry point and embed it in the vector section;*/
 void (*entry_point()  __attribute__ ((section(".vectors"))) =  &__arm_v7m_init;
 
-#endif //(RUN_MODE == 0)
+#endif /*(BOPS_EXECUTABLE_TYPE == 0)*/
 
 
-//----------------------------------------------------- vtable init ----------------------------------------------------
+/*----------------------------------------------------- vtable init ----------------------------------------------------*/
 
 /**
  * dynamic_vtable_init : initializes the dynamic vector table;
@@ -341,69 +338,69 @@ void __xcpt_init() {
 
     uint16_t exception_id;
 
-    //If vector table relocation is enabled :
+    /*If vector table relocation is enabled :*/
     #if (SUPPORT_NVIC_RELOC == 1)
 
-    //Check that the kernel vtable is properly aligned; If not :
+    /*Check that the kernel vtable is properly aligned; If not :*/
     if ((uint32_t) dynamic_vtable & 511) {
 
-        //Log;
+        /*Log;*/
         printk("nvic_relocation : the kernel vtable is not properly aligned. Aborting.");
 
-        //Do not initialise system exception handlers;
+        /*Do not initialise system exception handlers;*/
 
     } else {
 
-        //Relocate the vector table;
+        /*Relocate the vector table;*/
         *ARMV7_VTOR = (uint32_t) dynamic_vtable;
 
         /*
          * Initialise system exception handlers;
          */
 
-        //1 : reset;
+        /*1 : reset;*/
         dynamic_vtable[1] = &__arm_v7m_init;
 
-        //2 : NMI. Not supported for instance;
+        /*2 : NMI. Not supported for instance;*/
         dynamic_vtable[2] = &no_isr;
 
-        //3 : HardFault.
+        /*3 : HardFault.*/
         dynamic_vtable[3] = &arm_v7m_hard_fault_handler;
 
-        //4 : MemManage fault;
+        /*4 : MemManage fault;*/
         dynamic_vtable[4] = &arm_v7m_mem_fault_handler;
 
-        //5 : BusFault.
+        /*5 : BusFault.*/
         dynamic_vtable[5] = &arm_v7m_bus_fault_handler;
 
-        //6 : UsageFault;
+        /*6 : UsageFault;*/
         dynamic_vtable[6] = &arm_v7m_usg_fault_handler;
 
-        //7 : Reserved;
+        /*7 : Reserved;*/
         dynamic_vtable[7] = &no_isr;
 
-        //8 : Reserved;
+        /*8 : Reserved;*/
         dynamic_vtable[8] = &no_isr;
 
-        //9 : Reserved;
+        /*9 : Reserved;*/
         dynamic_vtable[9] = &no_isr;
 
-        //10 : Reserved;
+        /*10 : Reserved;*/
         dynamic_vtable[10] = &no_isr;
 
-        //11 : SVCall; syscall handler; hooking the kernel;
+        /*11 : SVCall; syscall handler; hooking the kernel;*/
         dynamic_vtable[11] = &arm_v7m_syscl_handler;
 
-        //12 : Reserved;
+        /*12 : Reserved;*/
         dynamic_vtable[12] = &no_isr;
 
-        //13 : Reserved;
+        /*13 : Reserved;*/
         dynamic_vtable[13] = &no_isr;
 
-        //14 : PendSV; context switcher; hooking the kernel;
+        /*14 : PendSV; context switcher; hooking the kernel;*/
         dynamic_vtable[14] = &arm_v7m_prmpt_handler;
 
-        //15 : SysTick; kernel hook;
+        /*15 : SysTick; kernel hook;*/
         dynamic_vtable[15] = &__krnl_tick;
 
     }
@@ -415,7 +412,7 @@ void __xcpt_init() {
      * Initialise non-system exception handlers;
      */
 
-    for (exception_id = 16; exception_id < NB_EXCEPTIONS; exception_id++) {
+    for (exception_id = 16; exception_id < NVIC_NB_EXCEPTIONS; exception_id++) {
         dynamic_vtable[exception_id] = &no_isr;
     }
 
@@ -423,7 +420,7 @@ void __xcpt_init() {
 }
 
 
-//------------------------------------------------ Interrupt priorities ------------------------------------------------
+/*------------------------------------------------ Interrupt priorities ------------------------------------------------*/
 
 /*
  * The ARMV7 NVIC support 8 bit priorities. The number of bits evaluated depends on the implementation, but there
@@ -431,7 +428,7 @@ void __xcpt_init() {
  */
 
 
-//The lowest priority level;
+/*The lowest priority level;*/
 const uint8_t __xcpt_priority_0 = 0xE0;
 const uint8_t __xcpt_priority_1 = 0xC0;
 const uint8_t __xcpt_priority_2 = 0xA0;
@@ -442,7 +439,7 @@ const uint8_t __xcpt_priority_6 = 0x20;
 const uint8_t __xcpt_priority_7 = 0x00;
 
 
-//----------------------------------------------- IC standard interrupts -----------------------------------------------
+/*----------------------------------------------- IC standard interrupts -----------------------------------------------*/
 
 /**
  * ic_enable_interrupts : enables the interrupt control;
@@ -554,18 +551,18 @@ bool __irq_in_handler_mode() {
 
 void __irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
 
-    //Translate to exception channel;
+    /*Translate to exception channel;*/
     irq_channel += 16;
 
-    //If the channel is invalid :
-    if (irq_channel >= NB_EXCEPTIONS) {
+    /*If the channel is invalid :*/
+    if (irq_channel >= NVIC_NB_EXCEPTIONS) {
 
-        //Panic;
+        /*Panic;*/
         kernel_panic("arm_v7m.c : __irq_set_handler : invalid irq channel;");
 
     }
 
-    //If the handler is null, save the empty handler; If not, save the handler;
+    /*If the handler is null, save the empty handler; If not, save the handler;*/
     dynamic_vtable[irq_channel] = (handler) ? handler : no_isr;
 
 }
@@ -624,34 +621,34 @@ void __irq_reset_interrupt_handler(uint16_t channel) {
 
 void *__cpu_create_stack_context(void *sp_reset, void (*function)(), void (*exit_loop)(), void *arg) {
 
-    //Cache the current stack pointer;
+    /*Cache the current stack pointer;*/
     uint32_t *sp4 = sp_reset;
 
-    //Store the PSR. Contains the execution mode; //TODO DOC
+    /*Store the PSR. Contains the execution mode; //TODO DOC*/
     *(sp4 - 1) = 0x01000000;
 
-    //Store the function in PC cache
+    /*Store the function in PC cache*/
     *(sp4 - 2) = (uint32_t) (function);
 
-    //Store the return function in LR;
+    /*Store the return function in LR;*/
     *(sp4 - 3) = (uint32_t) (exit_loop);
 
-    //Store the arg in R12 cache;
+    /*Store the arg in R12 cache;*/
     *(sp4 - 4) = (uint32_t) (arg);
 
-    //Update the stack pointer; Hits the future R4 reload address;
+    /*Update the stack pointer; Hits the future R4 reload address;*/
     sp4 -= 16;
 
-    //Return the stack pointer;
+    /*Return the stack pointer;*/
     return sp4;
 
 }
 
 
-//Determine the closest inferior address, that would respect alignment requirements;
+/*Determine the closest inferior address, that would respect alignment requirements;*/
 void *__cpu_stack_align(void *stack_reset) {
 
-    //@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;
+    /*@core_stack_alignment is a power of 2, decrement and we obtain the mask of bits to reset;*/
     return (void *) ((((size_t) stack_reset) & ~((size_t) 7)));
 
 }
@@ -674,37 +671,37 @@ __attribute__ ((naked)) void __cpu_enter_thread_mode(void *exception_sp) {
 
     __asm__ __volatile__ (\
 
-    //Disable interrupts;
+    /*Disable interrupts;*/
     "cpsid 	i \n\t"
 
-        //Save msp in R1;
+        /*Save msp in R1;*/
         "mrs 	r1,  	msp		\n\t"
 
-        //Write psp with cached value of msp;
+        /*Write psp with cached value of msp;*/
         "msr 	psp,  	r1		\n\t"
 
-        //Prepare new control value. psp used, privileged;
+        /*Prepare new control value. psp used, privileged;*/
         "mov 	r2, 	#2 		\n\t"
 
-        //Update the value of control, to use psp;
+        /*Update the value of control, to use psp;*/
         "msr 	control, r2		\n\t"
 
-        //Update the main stack pointer, so that exceptions use the exception stack;
+        /*Update the main stack pointer, so that exceptions use the exception stack;*/
         "msr 	msp,  r0		\n\t"
 
-        //Save LR in R4, as bl will overwrite it;
+        /*Save LR in R4, as bl will overwrite it;*/
         "mov 	r4,		lr		\n\t"
 
-        //Set preemption pending;
+        /*Set preemption pending;*/
         "bl 	__prmpt_trigger\n\t"
 
-        //Enable all faults;
+        /*Enable all faults;*/
         "cpsie 	f				\n\t"
 
-        //Enable all interrupts; Preemption should happen;
+        /*Enable all interrupts; Preemption should happen;*/
         "cpsie 	i				\n\t"
 
-        //Return. That point should never be reached, if the preemption occurred correctly;
+        /*Return. That point should never be reached, if the preemption occurred correctly;*/
         "bx 	r4				\n\t"
 
     );
@@ -721,31 +718,31 @@ __attribute__ ((naked)) void __cpu_enter_thread_mode(void *exception_sp) {
 
 struct arm_v7m_fault_env {
 
-    //Memory management Fault Status Register;
+    /*Memory management Fault Status Register;*/
     uint8_t MMFSR;
 
-    //Bus Fault Status Register;
+    /*Bus Fault Status Register;*/
     uint8_t BFSR;
 
-    //Usage Fault Status Register;
+    /*Usage Fault Status Register;*/
     uint16_t UFSR;
 
-    //Hard fault Status Register;
+    /*Hard fault Status Register;*/
     uint32_t HFSR;
 
-    //Debug fault Status Register;
+    /*Debug fault Status Register;*/
     uint32_t DFSR;
 
-    //Memory Management Fault Address Register;
+    /*Memory Management Fault Address Register;*/
     uint32_t MMFAR;
 
-    //Bus Fault Address Register;
+    /*Bus Fault Address Register;*/
     uint32_t BFAR;
 
 };
 
 
-//The fault environment;
+/*The fault environment;*/
 static struct arm_v7m_fault_env fault_env;
 
 
@@ -755,10 +752,10 @@ static struct arm_v7m_fault_env fault_env;
 
 void __flt_update_env() {
 
-    //Cache the ref of the fault env;
+    /*Cache the ref of the fault env;*/
     struct arm_v7m_fault_env *env = &fault_env;
 
-    //Cache Status Registers;
+    /*Cache Status Registers;*/
     env->MMFSR = *ARMV7_MMFSR;
     env->BFSR = *ARMV7_BFSR;
     env->UFSR = *ARMV7_UFSR;
@@ -767,7 +764,7 @@ void __flt_update_env() {
     env->MMFAR = *ARMV7_MMFAR;
     env->BFAR = *ARMV7_BFAR;
 
-    //Clear Status Registers;
+    /*Clear Status Registers;*/
     *ARMV7_MMFSR = (uint8_t) -1;
     *ARMV7_BFSR = (uint8_t) -1;
     *ARMV7_UFSR = (uint16_t) -1;
@@ -784,7 +781,7 @@ void __flt_update_env() {
 
 bool __flt_repair() {
 
-    //TODO IMPLEMENT;
+    /*TODO IMPLEMENT;*/
     return false;
 
 }
@@ -803,31 +800,31 @@ bool __flt_repair() {
 
 static void log_MMFSR(const uint8_t MMFSR, const uint32_t MMFAR) {
 
-    //instruction access violation;
+    /*instruction access violation;*/
     LOG_FAULT(MMFSR, MMFSR_IACCVIOL, "Instruction access violation");
 
-    //Data access violation;
+    /*Data access violation;*/
     if (MMFSR & MMFSR_DACCVIOL) {
 
-        //the MMFAR has valid content :
+        /*the MMFAR has valid content :*/
         if (MMFSR & MMFSR_MMARKVALID) {
 
-            //Log;
-            printkf("Data access violation : %h", MMFAR);
+            /*Log;*/
+            printkf("Data access violation : %h",  (const void **) &MMFAR, 1);
 
         } else {
 
-            //MMFAR has invalid content, log;
+            /*MMFAR has invalid content, log;*/
             printk("Data access violation, invalid memory indicator");
 
         }
 
     }
 
-    //mem manage error on exception return;
+    /*mem manage error on exception return;*/
     LOG_FAULT(MMFSR, MMFSR_MUNSTKERR, "Derived MemManage fault on exception return");
 
-    //mem manage error on exception entry;
+    /*mem manage error on exception entry;*/
     LOG_FAULT(MMFSR, MMFSR_MSTKERR, "Derived MemManage fault on exception entry");
 
 }
@@ -839,35 +836,35 @@ static void log_MMFSR(const uint8_t MMFSR, const uint32_t MMFAR) {
 
 static void log_BFSR(const uint8_t BFSR, const uint32_t BFAR) {
 
-    //bus fault on instruction prefetch
+    /*bus fault on instruction prefetch*/
     LOG_FAULT(BFSR, BFSR_IBUSERR,"Bus fault on instruction prefetch");
 
-    //precise data access error :
+    /*precise data access error :*/
     if (BFSR & BFSR_PRECISERR) {
 
-        //the BFAR has valid content :
+        /*the BFAR has valid content :*/
         if (BFSR & MMFSR_MMARKVALID) {
 
-            //Log;
-            printkf("Bus precise data access error : %h", BFAR);
+            /*Log;*/
+            printkf("Bus precise data access error : %h", (const void **) BFAR, 1);
 
 
         } else {
 
-            //MMFAR has invalid content, log;
+            /*MMFAR has invalid content, log;*/
             printk("Bus precise data error, invalid memory indicator");
 
         }
 
     }
 
-    //imprecise data access error :
+    /*imprecise data access error :*/
     LOG_FAULT(BFSR, BFSR_IMPRECISERR,"Bus imprecise data access error");
 
-    //derived bus fault on exception return :
+    /*derived bus fault on exception return :*/
     LOG_FAULT(BFSR, BFSR_UNSTKERR, "Derived bus fault on exception return");
 
-    //derived bus fault on exception entry:
+    /*derived bus fault on exception entry:*/
     LOG_FAULT(BFSR, BFSR_STKERR, "Derived bus fault on exception entry");
 
 }
@@ -880,22 +877,22 @@ static void log_BFSR(const uint8_t BFSR, const uint32_t BFAR) {
 
 static void log_UFSR(const uint16_t UFSR) {
 
-    //an undefined instruction is found :
+    /*an undefined instruction is found :*/
     LOG_FAULT(UFSR, UFSR_UNDEFINSTR, "Undefined instruction");
 
-    //invalid EPSR.T bit or illegal EPSR.IT bits for executing instruction :
+    /*invalid EPSR.T bit or illegal EPSR.IT bits for executing instruction :*/
     LOG_FAULT(UFSR, UFSR_INVSTATE, "invalid EPSR.T bit or illegal EPSR.IT bits");
 
-    //integrity check error on EXEC_RETURN :
+    /*integrity check error on EXEC_RETURN :*/
     LOG_FAULT(UFSR, UFSR_INVPC, "integrity check error on EXEC_RETURN");
 
-    //coprocessor access error :
+    /*coprocessor access error :*/
     LOG_FAULT(UFSR, UFSR_NOCP, "coprocessor access error");
 
-    //unaligned access error :
+    /*unaligned access error :*/
     LOG_FAULT(UFSR, UFSR_UNALIGNED, "unaligned access error");
 
-    //Division by zero :
+    /*Division by zero :*/
     LOG_FAULT(UFSR, UFSR_DIVBYZERO, "Division by zero");
 
 }
@@ -907,13 +904,13 @@ static void log_UFSR(const uint16_t UFSR) {
 
 static void log_HFSR(const uint32_t HFSR) {
 
-    //vector table read error;
+    /*vector table read error;*/
     LOG_FAULT(HFSR, HFSR_VECTTBL, "error reading the vector table");
 
-    //vector table read error;
+    /*vector table read error;*/
     LOG_FAULT(HFSR, HFSR_FORCED, "Configurable fault disabled, escalated in hardfault");
 
-    //vector table read error;
+    /*vector table read error;*/
     LOG_FAULT(HFSR, HFSR_DEBUGEVT, "Debug event");
 
 }
@@ -930,19 +927,19 @@ void __flt_log() {
     uint8_t reg8;
     struct arm_v7m_fault_env *env;
 
-    //Cache the ref of the fault env;
+    /*Cache the ref of the fault env;*/
     env = &fault_env;
 
-    //If Memory Management fault, detailed log;
+    /*If Memory Management fault, detailed log;*/
     if ((reg8 =  env->MMFSR)) log_MMFSR(reg8, env->MMFAR);
 
-    //If Bus fault, detailed log;
+    /*If Bus fault, detailed log;*/
     if ((reg8 = env->BFSR)) log_BFSR(reg8, env->BFAR);
 
-    //If Usage fault, detailed log;
+    /*If Usage fault, detailed log;*/
     if ((reg16 = env->UFSR))log_UFSR(reg16);
 
-    //If Hard fault, detailed log;
+    /*If Hard fault, detailed log;*/
     if ((reg32 = env->HFSR)) log_HFSR(reg32);
 
 }

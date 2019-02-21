@@ -27,7 +27,7 @@
 
 #include <stddef.h>
 
-#include <kernel/arch/dbg.h>
+#include <kernel/khal/dbg.h>
 
 
 
@@ -53,6 +53,13 @@ void debug_led_cmp(size_t c);
 
 //Display bits of a byte, blink fast for 1, blink slow for 0;
 void debug_led_dump(uint8_t c);
+
+
+/*
+ * ----------------------------------------------------- print -----------------------------------------------------
+ */
+
+void debug_print_block(void *arg, const char *block, size_t bsize);
 
 
 /*

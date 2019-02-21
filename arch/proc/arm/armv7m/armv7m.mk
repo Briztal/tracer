@@ -12,10 +12,10 @@ ifdef BUILD_KHAL
 ARMV7M_SDIR :=  arch/proc/arm/armv7m
 
 #Provide the number of interrupts to the source;
-KHAL_FLAGS += -DNB_EXCEPTIONS=$(ARMV7M_NVIC_NB_EXCEPTIONS)
+KHAL_FLAGS += -DNVIC_NB_EXCEPTIONS=$(ARMV7M_NVIC_NB_EXCEPTIONS)
 
 #Compile the kernel_base with an inactive flash vector table;
-KHAL_FLAGS += -DNVIC_RELOC=$(ARMV7M_NVIC_RELOCATION)
+KHAL_FLAGS += -DNVIC_SUPPORT_RELOC=$(ARMV7M_NVIC_SUPPORT_RELOCATION)
 
 endif
 
@@ -35,10 +35,10 @@ ifdef BUILD_KHAL
 armv7m_khal :
 
 #Compile the armv7 base;
-	@$(KHAL_CC) -o $(KHAL_TMP_BDIR)/arm_v7m_khal.o -c $(ARMV7M_SDIR)/armv7m_khal.c
+	@$(KHAL_CC) -o $(KHAL_OBJS_BDIR)/arm_v7m_khal.o -c $(ARMV7M_SDIR)/armv7m_khal.c
 
 
-#Add the kernel base to the kernel rules;
+#Add the khal base to khal rules;
 KHAL_RULES += armv7m_khal
 
 

@@ -11,7 +11,7 @@ LDSCRIPT_MMAP_DIR ?= chip/kinetis/chips/mk64fx512/
 ifdef BUILD_KHAL
 
 #The mk64fx512 comprises 256 interrupts TODO WRONG !!
-NVIC_NB_EXCEPTIONS = 256
+ARMV7M_NVIC_NB_EXCEPTIONS := 256
 
 endif
 

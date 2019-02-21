@@ -30,11 +30,11 @@
 #include <stddef.h>
 
 
-//Light the debug led high; Implemented by the hardware;
+/*Light the debug led high; Implemented by the hardware;*/
 extern void __dbg_led_high();
 
-//Turn off the debug led; Implemented by the hardware;
+/*Turn off the debug led; Implemented by the hardware;*/
 extern void __dbg_led_low();
 
 
-#endif //TRACER_DBG_H
+#endif /*TRACER_DBG_H*/

@@ -25,13 +25,13 @@
 #ifndef TRACER_CPU_H
 #define TRACER_CPU_H
 
-//Determine the closest inferior address, that would respect alignment requirements;
+/*Determine the closest inferior address, that would respect alignment requirements;*/
 extern void *__cpu_stack_align(void *stack_reset);//TODO NO, JUST PROVIDE ALIGNMENT MAGNITUDE
 
-//Get the initial arg;
+/*Get the initial arg;*/
 extern void *__cpu_get_init_arg();
 
-//The hardware library must provide a function to create the general stack context;
+/*The hardware library must provide a function to create the general stack context;*/
 extern void * __cpu_create_stack_context(void *sp_reset, void (*function)(), void (*exit_loop)(), void *arg);
 
 
@@ -53,4 +53,4 @@ extern void * __cpu_create_stack_context(void *sp_reset, void (*function)(), voi
 extern void __cpu_enter_thread_mode(void *exception_sp);
 
 
-#endif //TRACER_CPU_H
+#endif /*TRACER_CPU_H*/

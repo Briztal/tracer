@@ -20,11 +20,11 @@
 
 
 
-#include <kernel/hard/except.h>
-#include <kernel/arch/xcpt.h>
 #include <kernel/common.h>
-#include <kernel/arch/dbg.h>
 #include <nostd/fstring.h>
+#include <kernel/khal/xcpt.h>
+#include <kernel/core/debug.h>
+#include <kernel/core/except.h>
 
 
 void kernel_panic(const char *str)  {
@@ -37,7 +37,7 @@ void kernel_panic(const char *str)  {
 		printk(str);
 		
 		//Wait for one second;
-		__dbg_delay_ms((uint32_t) 1000);
+		debug_delay_ms((uint32_t) 1000);
 
 	}
 
@@ -45,21 +45,39 @@ void kernel_panic(const char *str)  {
 
 
 /**
- * _printkf : decodes and displays the provided formatted string over the log output;
+ * printkf : decodes and displays the provided formatted string over the log output;
+ *
+ * @param str : the string to display;
+ */
+
+void printk(const char * str) {
+
+	critical_section_enter();
+
+	fdecode(&debug_print_block, 0, str, 0, 0);
+
+	critical_section_leave();
+
+
+}
+
+/**
+ * printkf : decodes and displays the provided formatted string over the log output;
  *
  * @param str : the formatted string;
  * @param args : the array of arguments;
  * @param args_size : the size of the array;
  */
 
-void _printkf(const char * str, const void ** args,  size_t args_size) {
+void printkf(const char * str, const void ** args,  size_t args_size) {
 
 	critical_section_enter();
 
-	fdecode(&__dbg_print_block, 0, str, args, args_size);
+	fdecode(&debug_print_block, 0, str, args, args_size);
 
 	critical_section_leave();
 
 
 }
+
 

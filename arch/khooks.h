@@ -25,13 +25,12 @@
 #ifndef TRACER_HOOK_H
 #define TRACER_HOOK_H
 
-//TODO DOC
-//TODO DOC
-//TODO DOC
-//TODO DOC
-//TODO DOC
-//TODO DOC
-
+/*TODO DOC*/
+/*TODO DOC*/
+/*TODO DOC*/
+/*TODO DOC*/
+/*TODO DOC*/
+/*TODO DOC*/
 
 void __proc_init();
 
@@ -72,4 +71,4 @@ void kernel_fault_handler();
 
 
 
-#endif //TRACER_HOOK_H
+#endif /*TRACER_HOOK_H*/

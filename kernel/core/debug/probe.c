@@ -89,8 +89,8 @@ static void print_char(const char c) {
  * @param c : the char to encode
  */
 
-void __dbg_print_block(void *arg, const char *block, size_t bsize) {
-	
+void debug_print_block(void *arg, const char *block, size_t bsize) {
+
 	while (bsize--) {
 		
 		print_char(*(block++));

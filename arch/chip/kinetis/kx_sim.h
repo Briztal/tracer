@@ -28,88 +28,88 @@
  * The System Interaction Module is always located at the same address;
  */
 
-//----------------- SOPT1 - RW : System Options Register 1 -----------------
+/*----------------- SOPT1 - RW : System Options Register 1 -----------------*/
 
 #define SIM_SOPT1        ((volatile uint32_t *)0x40047000)
 #define SIM_SOPT1CFG    ((volatile uint32_t *)0x40047004)
 
 
-//Enable The voltage regulator;
-//TODO static inline void sim_enable_usb_voltage_regulator();
+/*Enable The voltage regulator;*/
+/*TODO static __inline__ void sim_enable_usb_voltage_regulator();*/
 
-//TODO USB VOLTAGE REGULATOR STANDBY
+/*TODO USB VOLTAGE REGULATOR STANDBY*/
 
-//TODO LPTMR CLOCK SOURCE
+/*TODO LPTMR CLOCK SOURCE*/
 
-//TODO RAM SIZE
+/*TODO RAM SIZE*/
 
 
-//----------------- SOPT2 - RW : System Options Register 2 -----------------
+/*----------------- SOPT2 - RW : System Options Register 2 -----------------*/
 
 #define SIM_SOPT2        ((volatile uint32_t *)0x40048004)
 
-//TODO SDHC CLOCK
+/*TODO SDHC CLOCK*/
 
-//TODO IEE1588 TIMESTAMP CLOCK SOURCE
+/*TODO IEE1588 TIMESTAMP CLOCK SOURCE*/
 
-//RMII CLOCK SOURCE
+/*RMII CLOCK SOURCE*/
 
-//TODO USB CLOCK SOURCE
+/*TODO USB CLOCK SOURCE*/
 
-//TODO PLL FLL CLOCK SELECT
+/*TODO PLL FLL CLOCK SELECT*/
 
-//TODO DEBUG TRACE CLOCK SELECT
+/*TODO DEBUG TRACE CLOCK SELECT*/
 
-//TODO PTD7 PAD DRIVE STRENGTH
+/*TODO PTD7 PAD DRIVE STRENGTH*/
 
-//TODO FLEXBUS SECURITY
+/*TODO FLEXBUS SECURITY*/
 
-//TODO CLOKOUT CLOCK SELECT
+/*TODO CLOKOUT CLOCK SELECT*/
 
-//TODO RTC CLOKC OUT SELECT
+/*TODO RTC CLOKC OUT SELECT*/
 
 
-//----------------- SOPT3 - RW : System Options Register 3 -----------------
+/*----------------- SOPT3 - RW : System Options Register 3 -----------------*/
 
 #define SIM_SOPT3        ((volatile uint32_t *)0x40048008)
 
-//TODO LEGACY
+/*TODO LEGACY*/
 
-//----------------- SOPT4 - RW : System Options Register 4 -----------------
+/*----------------- SOPT4 - RW : System Options Register 4 -----------------*/
 
 #define SIM_SOPT4        ((volatile uint32_t *)0x4004800C)
 
-//TODO FLEXTIMER SETTINGS
+/*TODO FLEXTIMER SETTINGS*/
 
 
-//----------------- SOPT5 - RW : System Options Register 5 -----------------
+/*----------------- SOPT5 - RW : System Options Register 5 -----------------*/
 
 #define SIM_SOPT5        ((volatile uint32_t *)0x40048010)
 
-//TODO UART 0/1 RX/TX DATA SOURCE
+/*TODO UART 0/1 RX/TX DATA SOURCE*/
 
 
-//----------------- SOPT6 - RW : System Options Register 6 -----------------
+/*----------------- SOPT6 - RW : System Options Register 6 -----------------*/
 
 #define SIM_SOPT6        ((volatile uint32_t *)0x40048014)
 
 
-//----------------- SOPT7 - RW : System Options Register 7 -----------------
+/*----------------- SOPT7 - RW : System Options Register 7 -----------------*/
 
 #define SIM_SOPT7        ((volatile uint32_t *)0x40048018)
 
-//TODO ADC 0/1 SETTINGS
+/*TODO ADC 0/1 SETTINGS*/
 
 
-//----------------- SDID - RO : System Device Identification Register -----------------
+/*----------------- SDID - RO : System Device Identification Register -----------------*/
 
 #define SIM_SDID        ((volatile uint32_t *)0x40048024)
 
-//TODO FAMILY + SERED + REV  + DIEIE + PINCOUNT
+/*TODO FAMILY + SERED + REV  + DIEIE + PINCOUNT*/
 
 
 
-//---------------------------------------------------- Clock Gating ----------------------------------------------------
+/*---------------------------------------------------- Clock Gating ----------------------------------------------------*/
 
 /*
  * Clock gating enable / disable functions are all the same; In order to avoid redundancy,
@@ -122,17 +122,17 @@
 /**
  * Enable and disable the peripheral clock gating using macros;
  */\
-static inline void sim_enable_##peripheral##_clock_gating() {\
+static __inline__ void sim_enable_##peripheral##_clock_gating() {\
     *SIM_SCGC##reg_id |= ((uint32_t ) (1 << (bit)));\
 }\
 \
-static inline void sim_disable_##peripheral##_clock_gating() {\
+static __inline__ void sim_disable_##peripheral##_clock_gating() {\
     *SIM_SCGC##reg_id &= ~((uint32_t ) (1 << (bit)));\
 }\
 
 
 
-//----------------- SCGC1 - RW : System Clock Gating Control Register 1 -----------------
+/*----------------- SCGC1 - RW : System Clock Gating Control Register 1 -----------------*/
 
 #define SIM_SCGC1        ((volatile uint32_t *)0x40048028)
 
@@ -143,7 +143,7 @@ SIM_DEFINE_GATING(1, UART4, 10)
 SIM_DEFINE_GATING(1, UART5, 11)
 
 
-//----------------- SCGC2 - RW : System Clock Gating Control Register 2 -----------------
+/*----------------- SCGC2 - RW : System Clock Gating Control Register 2 -----------------*/
 
 #define SIM_SCGC2        ((volatile uint32_t *)0x4004802C)
 
@@ -153,7 +153,7 @@ SIM_DEFINE_GATING(2, DAC0_aips1, 12)
 
 SIM_DEFINE_GATING(2, DAC1, 13)
 
-//----------------- SCGC3 - RW : System Clock Gating Control Register 3 -----------------
+/*----------------- SCGC3 - RW : System Clock Gating Control Register 3 -----------------*/
 
 #define SIM_SCGC3        ((volatile uint32_t *)0x40048030)
 
@@ -170,7 +170,7 @@ SIM_DEFINE_GATING(3, FTM3, 25)
 SIM_DEFINE_GATING(3, ADC1, 27)
 
 
-//----------------- SCGC4 - RW : System Clock Gating Control Register 4 -----------------
+/*----------------- SCGC4 - RW : System Clock Gating Control Register 4 -----------------*/
 
 #define SIM_SCGC4        ((volatile uint32_t *)0x40048034)
 
@@ -197,7 +197,7 @@ SIM_DEFINE_GATING(4, CMP, 19)
 SIM_DEFINE_GATING(4, VREF, 20)
 
 
-//----------------- SCGC5 - RW : System Clock Gating Control Register 5 -----------------
+/*----------------- SCGC5 - RW : System Clock Gating Control Register 5 -----------------*/
 
 #define SIM_SCGC5        ((volatile uint32_t *)0x40048038)
 
@@ -214,7 +214,7 @@ SIM_DEFINE_GATING(5, PORTD, 12)
 SIM_DEFINE_GATING(5, PORTE, 13)
 
 
-//----------------- SCGC6 - RW : System Clock Gating Control Register 6 -----------------
+/*----------------- SCGC6 - RW : System Clock Gating Control Register 6 -----------------*/
 
 #define SIM_SCGC6        ((volatile uint32_t *)0x4004803C)
 
@@ -254,7 +254,7 @@ SIM_DEFINE_GATING(6, DAC0_aips0, 31)
 
 
 
-//----------------- SCGC7 - RW : System Clock Gating Control Register 7 -----------------
+/*----------------- SCGC7 - RW : System Clock Gating Control Register 7 -----------------*/
 
 #define SIM_SCGC7        ((volatile uint32_t *)0x40048040)
 
@@ -268,7 +268,7 @@ SIM_DEFINE_GATING(7, MPU, 2)
 #undef SIM_DEFINE_GATING
 
 
-//----------------- CLKDIV1 - RW : System Clock Divider Register 1 -----------------
+/*----------------- CLKDIV1 - RW : System Clock Divider Register 1 -----------------*/
 
 #define SIM_CLKDIV1        ((volatile uint32_t *)0x40048044)
 
@@ -278,67 +278,68 @@ SIM_DEFINE_GATING(7, MPU, 2)
  * @param clock_divider : the required clock divider;
  */
 
-//All functions are the same, at name except for divider offset. A macro will take care of this;
+/*All functions are the same, at name except for divider offset. A macro will take care of this;*/
 #define SIM_DEFINE_CLOCK_SETTER(name, offset)\
-static inline uint16_t sim_get_##name##_clock_divider(uint8_t clock_divider) {\
+static __inline__ uint16_t sim_get_##name##_clock_divider(uint8_t clock_divider) {\
     return (*SIM_CLKDIV1 & (((uint32_t) 0x0F) << (offset))) >> (offset);\
 }\
-static inline void sim_set_##name##_clock_divider(uint8_t clock_divider) {\
+static __inline__ void sim_set_##name##_clock_divider(uint8_t clock_divider) {\
+	uint32_t var;\
     /*If the clock divider is not between 0 and 15, stop here;*/\
     if ((clock_divider) & 0xF0) {\
         return;\
 	}\
-	uint32_t var = *SIM_CLKDIV1;\
+	var = *SIM_CLKDIV1;\
     var &= ~(((uint32_t) 0x0F) << (offset));\
     var |= (((uint32_t) (clock_divider)) << (offset));\
     *SIM_CLKDIV1 = var;\
 }
 
-//The core clock part starts at bit 28:
+/*The core clock part starts at bit 28:*/
 SIM_DEFINE_CLOCK_SETTER(core, 28)
 
-//The bus clock part starts at bit 24:
+/*The bus clock part starts at bit 24:*/
 SIM_DEFINE_CLOCK_SETTER(bus, 24)
 
-//The flexbus clock part starts at bit 20;
+/*The flexbus clock part starts at bit 20;*/
 SIM_DEFINE_CLOCK_SETTER(flexbus, 20)
 
-//The flash clock part starts at bit 16;
+/*The flash clock part starts at bit 16;*/
 SIM_DEFINE_CLOCK_SETTER(flash, 16)
 
 
 
-//----------------- CLKDIV2 - RW : System Clock Divider Register 2 -----------------
+/*----------------- CLKDIV2 - RW : System Clock Divider Register 2 -----------------*/
 
 #define SIM_CLKDIV2        ((volatile uint32_t *)0x40048048)
 
-//TODO USB CLOCK DIVIDER DIVISOR
+/*TODO USB CLOCK DIVIDER DIVISOR*/
 
-//TODO USB CLOCK DIVIDER FRACTION
+/*TODO USB CLOCK DIVIDER FRACTION*/
 
 
 
-//----------------- FCFG1 - RO : Flash Configuration Register 1 -----------------
+/*----------------- FCFG1 - RO : Flash Configuration Register 1 -----------------*/
 
 #define SIM_FCFG1        ((volatile uint32_t *)0x4004804C)
 
-//TODO GET FLEXNVM SIZE
+/*TODO GET FLEXNVM SIZE*/
 
-//TODO GET FLASH SIZE;
+/*TODO GET FLASH SIZE;*/
 
-//TODO GET EEPROM SIZE;
+/*TODO GET EEPROM SIZE;*/
 
-//TODO DISABLE FLAH
+/*TODO DISABLE FLAH*/
 
 
-//----------------- FCFG2 - RO : Flash Configuration Register 2 -----------------
+/*----------------- FCFG2 - RO : Flash Configuration Register 2 -----------------*/
 
 #define SIM_FCFG2        ((volatile uint32_t *)0x40048050)
 
 
 
 
-//----------------- UID - RO : Unique Identification Register -----------------
+/*----------------- UID - RO : Unique Identification Register -----------------*/
 
 #define SIM_UIDH        ((volatile uint32_t *)0x40048054)
 
@@ -349,7 +350,7 @@ SIM_DEFINE_CLOCK_SETTER(flash, 16)
 #define SIM_UIDL        ((volatile uint32_t *)0x40048060)
 
 
-//TODO GET UID
+/*TODO GET UID*/
 
 
 
@@ -358,28 +359,28 @@ SIM_DEFINE_CLOCK_SETTER(flash, 16)
 
 
 
-//TODO USB VOLTAGE STATUS IN LOW POWER MODES, AFTER PMGR
+/*TODO USB VOLTAGE STATUS IN LOW POWER MODES, AFTER PMGR*/
 
-//Different clock sources for the low power timers;
+/*Different clock sources for the low power timers;*/
 enum sim_lptmr_clk_src {
 
-	//System Oscillator, 32kHz
+	/*System Oscillator, 32kHz*/
 		LPTMR_SRC_SYSTEM_OSC,
 
-	//RTC, 32.768kHz
+	/*RTC, 32.768kHz*/
 		LPTMR_SRC_RTC,
 
-	//LPO, 1kHz;
-		LPTMR_SRC_LPO,
+	/*LPO, 1kHz;*/
+		LPTMR_SRC_LPO
 
 };
 
-//Select the Low Power Timer clock source;
+/*Select the Low Power Timer clock source;*/
 void sim_select_lptmr_clock_source(enum sim_lptmr_clk_src src);
 
 
-//Get the amount of system RAM available on the device;
+/*Get the amount of system RAM available on the device;*/
 uint32_t sim_get_system_ram_amount();
 
 
-#endif //TRACER_K64_SIM_H
+#endif /*TRACER_K64_SIM_H*/
