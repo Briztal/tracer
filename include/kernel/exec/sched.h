@@ -56,7 +56,7 @@
 
 #include "pmem.h"
 
-#include "kernel/prc.h"
+#include "prc.h"
 
 #include <struct/shared_fifo.h>
 

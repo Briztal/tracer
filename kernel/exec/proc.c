@@ -38,7 +38,7 @@
 #include <kernel/hard/except.h>
 #include <kernel/hard/debug/printk.h>
 #include <kernel/exec/sched.h>
-#include <kernel/hard/sysclock.h>
+#include <kernel/exec/sysclock.h>
 
 #include <panic.h>
 

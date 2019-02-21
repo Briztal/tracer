@@ -23,7 +23,7 @@
 
 #include <stddef.h>
 
-#include "kernel/prc.h"
+#include "kernel/exec/prc.h"
 
 #define NB_SYSCALLS 7
 

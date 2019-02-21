@@ -19,3 +19,26 @@ kernel run mode :
         -> RAM exec available;
 
 vtable initialisation in ROM : only in standalone mode;
+
+
+
+
+kernel build flow :
+
+    kernel composed of  :
+
+        - kernel_arch.o : all kernel mandatory architecture dependent code, modules not included;
+            contains startup code for the selected run mode;
+            contains implementation for arch specific kernel functions;
+            has only access common kernel functions;
+
+        - kernel_gen.o : kernel generic (arch independent) code;
+            has access to kernel arch dependent code;
+
+
+        - kernel_smod.o : all kernel static modules;
+            have access to kernel shared symbols;
+
+
+    -> merged into kernel.o, after eventual symbols hiding;
+

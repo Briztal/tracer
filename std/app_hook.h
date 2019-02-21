@@ -23,7 +23,7 @@
 #define TRACER_AUTO_APP_H
 
 #include <stdbool.h>
-#include <kernel/prc.h>
+#include <kernel/exec/prc.h>
 
 /*
  * There are different types of modules. Some may be loaded automatically by the kernel when it completed its

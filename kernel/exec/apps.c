@@ -28,7 +28,7 @@
 
 #include <std/app_hook.h>
 
-#include <kernel/panic.h>
+#include <kernel/common.h>
 
 #include <kernel/hard/debug/printk.h>
 
