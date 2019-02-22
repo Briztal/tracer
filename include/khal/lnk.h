@@ -32,25 +32,33 @@ extern uint8_t __ram_min;
 extern const uint8_t __ram_max;
 
 /*Load and virtual min and max addresses of data section (resp) in FLASH, RAM and RAM;*/
-extern const uint8_t __data_lma_min, __data_vma_min, __data_vma_max;
+extern const uint8_t __data_lma_min;
+extern const uint8_t __data_vma_min;
+extern const uint8_t __data_vma_max;
 
 /*virtual min and max addresses of bss section in RAM;*/
-extern const uint8_t __bss_vma_min,  __bss_vma_max;
+extern const uint8_t __bss_vma_min;
+extern const uint8_t __bss_vma_max;
 
 /*The min and max address of proc modules structs in FLASH;*/
-extern const uint8_t __prmod_min, __prmod_max;
+extern const uint8_t __prmod_min;
+extern const uint8_t __prmod_max;
 
 /*The min and max address of system modules structs in FLASH;*/
-extern const uint8_t __smod_min, __smod_max;
+extern const uint8_t __smod_min;
+extern const uint8_t __smod_max;
 
 /*The min and max address of periph modules structs in FLASH;*/
-extern const uint8_t __pemod_min, __pemod_max;
+extern const uint8_t __pemod_min;
+extern const uint8_t __pemod_max;
 
 /*The min and max address of kernel modules structs in FLASH;*/
-extern const uint8_t __kmod_min, __kmod_max;
+extern const uint8_t __kmod_min;
+extern const uint8_t __kmod_max;
 
 /*The min and max address of user modules structs in FLASH;*/
-extern const uint8_t __umod_min, __umod_max;
+extern const uint8_t __umod_min;
+extern const uint8_t __umod_max;
 
 
 #endif /*TRACER_LINK_H*/

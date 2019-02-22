@@ -38,22 +38,22 @@
 
 struct data_framer {
 
-	//The block where we save the result of the decoding;
+	/*The block where we save the result of the decoding;*/
 	struct data_block *decoding_block;
 
-	//The block that contains frames to encode;
+	/*The block that contains frames to encode;*/
 	struct data_block *encoding_block;
 
 
-	//Write a byte in the framer. Will assert if a frame has been entirely decoded;
+	/*Write a byte in the framer. Will assert if a frame has been entirely decoded;*/
 	bool (*const decode)(struct data_framer *, uint8_t data);
 
-	//Read (and discard) a byte from the current frame. Will assert if the frame has been entirely encoded;
+	/*Read (and discard) a byte from the current frame. Will assert if the frame has been entirely encoded;*/
 	bool (*const encode)(struct data_framer *, uint8_t *data);
 
-	//Delete the framer;
+	/*Delete the framer;*/
 	void (*deleter)(struct data_framer *);
 
 };
 
-#endif //TRACER_FRAMER_H
+#endif /*TRACER_FRAMER_H*/

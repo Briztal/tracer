@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-//--------------------------------------------------- types --------------------------------------------------
+/*--------------------------------------------------- types --------------------------------------------------*/
 
 /**
  * Fractional numbers are integers, that have a fractional part and an integer part.
@@ -33,20 +33,20 @@
  *  The value of the fractional number can only be determined along with the size of its integer part;
  */
 
-//Fractional number of 8 bits;
+/*Fractional number of 8 bits;*/
 typedef uint8_t frac8_t;
 
-//Fractional number of 16 bits;
+/*Fractional number of 16 bits;*/
 typedef uint16_t frac16_t;
 
-//Fractional number of 32 bits;
+/*Fractional number of 32 bits;*/
 typedef uint32_t frac32_t;
 
-//Fractional number of 64 bits;
+/*Fractional number of 64 bits;*/
 typedef uint64_t frac64_t;
 
 
-//--------------------------------------------------- Conversions --------------------------------------------------
+/*--------------------------------------------------- Conversions --------------------------------------------------*/
 
 #define FRAC_CONVERT_NOCHECK(receiver, value, frac_size) (receiver) = (typeof(receiver)) ((value) * (1 << (frac_size)))
 
@@ -94,7 +94,7 @@ typedef uint64_t frac64_t;
 
 
 
-//--------------------------------------------------- Conversions --------------------------------------------------
+/*--------------------------------------------------- Conversions --------------------------------------------------*/
 
 
-#endif //NOSTD_FRAC_H
+#endif /*NOSTD_FRAC_H*/

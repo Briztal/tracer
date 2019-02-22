@@ -30,7 +30,7 @@
 #include <stddef.h>
 
 
-//---------------------------------------------- Clock environment tuning ----------------------------------------------
+/*---------------------------------------------- Clock environment tuning ----------------------------------------------*/
 
 /*
  * Update the clock tuning environment;
@@ -50,29 +50,29 @@ void clock_release_tuner();
 void clock_release_auto_tuner();
 
 
-//---------------------------------------------------- Clock Tuning ----------------------------------------------------
+/*---------------------------------------------------- Clock Tuning ----------------------------------------------------*/
 
-//Tune the clock, providing a config struct and its size;
+/*Tune the clock, providing a config struct and its size;*/
 void clock_tune(void *config, size_t );
 
-//Find automatically the closest configuration for the clock;
+/*Find automatically the closest configuration for the clock;*/
 void clock_auto_tune(uint32_t);
 
 
-//-------------------------------------------------- Clock Reference ---------------------------------------------------
+/*-------------------------------------------------- Clock Reference ---------------------------------------------------*/
 
-//Register a clock in the clock reference;
+/*Register a clock in the clock reference;*/
 bool clock_register(const char *name, uint32_t value);
 
-//Update the value of a clock in the clock reference
+/*Update the value of a clock in the clock reference*/
 void clock_set(const char *name, uint32_t value);
 
-//Update the value of a clock in the clock reference
+/*Update the value of a clock in the clock reference*/
 uint32_t clock_get(const char *name);
 
-//Remove a clock in the clock reference;
+/*Remove a clock in the clock reference;*/
 void clock_remove(const char *name);
 
 
 
-#endif //TRACER_CLOCK_H
+#endif /*TRACER_CLOCK_H*/

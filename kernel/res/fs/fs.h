@@ -36,7 +36,7 @@ struct resrc;
 struct resrc_ops;
 
 
-//-------------------------------------------------- File system type --------------------------------------------------
+/*-------------------------------------------------- File system type --------------------------------------------------*/
 
 /**
  * A file system type structure contains a name, two function pointers, one responsible for providing a superblock,
@@ -47,14 +47,14 @@ struct resrc_ops;
 
 struct fs_type {
 	
-	//The name of the file system type;
+	/*The name of the file system type;*/
 	const char *name;
 	
-	//Provide a superblock from an existing file system; 0 is returned in case of failure;
-	struct superblock *(*get_sb);//TODO ARGS
+	/*Provide a superblock from an existing file system; 0 is returned in case of failure;*/
+	struct superblock *(*get_sb);/*TODO ARGS*/
 	
-	//Properly cleanup a superblock; 0 is returned in case of failure;
-	bool (*release_sb)(struct superblock *);//TODO ARGS
+	/*Properly cleanup a superblock; 0 is returned in case of failure;*/
+	bool (*release_sb)(struct superblock *);/*TODO ARGS*/
 	
 };
 
@@ -65,32 +65,32 @@ struct fs_type {
 
 struct fs_mnt {
 	
-	//A list head, for fs_mnt storage;
+	/*A list head, for fs_mnt storage;*/
 	struct list_head mnt_head;
 	
-	//The mount point name;
+	/*The mount point name;*/
 	const char *mnt_name;
 	
-	//The mounted fs's superblock;
+	/*The mounted fs's superblock;*/
 	struct superblock *mnt_sb;
 	
 };
 
 
-//----------------------------------------------------- Superblock -----------------------------------------------------
+/*----------------------------------------------------- Superblock -----------------------------------------------------*/
 
 struct superblock {
 	
-	//The first dentry of the superblock;
+	/*The first dentry of the superblock;*/
 	struct dentry *sb_root;
 	
-	//The file system type the superblock relates to;
+	/*The file system type the superblock relates to;*/
 	struct fs_type *sb_type;
 	
-	//The mount struct related to the superblock;
+	/*The mount struct related to the superblock;*/
 	struct fs_mnt *sb_mnt;
 	
-	//The superblock operations table;
+	/*The superblock operations table;*/
 	struct super_operations *sb_ops;
 	
 };
@@ -101,7 +101,7 @@ struct super_operations {
 };
 
 
-//------------------------------------------------------- Dentry -------------------------------------------------------
+/*------------------------------------------------------- Dentry -------------------------------------------------------*/
 
 /*
  * A dentry (for directory cache entry) contains the filesystem's structure elements.
@@ -114,25 +114,25 @@ struct super_operations {
 
 struct dentry {
 	
-	//The name of the dentry;
+	/*The name of the dentry;*/
 	const char *d_name;
 	
-	//The inode associated with the dentry;
+	/*The inode associated with the dentry;*/
 	struct inode *d_inode;
 	
-	//The parent of the dentry;
+	/*The parent of the dentry;*/
 	struct dentry *d_parent;
 	
-	//The first child of the dentry;
+	/*The first child of the dentry;*/
 	struct dentry *d_child;
 	
-	//The list of the dentry's siblings;
+	/*The list of the dentry's siblings;*/
 	struct list_head *d_siblings;
 	
-	//The superblock the dentry related to;
+	/*The superblock the dentry related to;*/
 	struct superblock *d_sb;
 	
-	//The set of dentry operations;
+	/*The set of dentry operations;*/
 	struct dentry_operations *d_ops;
 	
 };
@@ -144,20 +144,20 @@ struct dentry_operations {
 };
 
 
-//-------------------------------------------------------- Inode -------------------------------------------------------
+/*-------------------------------------------------------- Inode -------------------------------------------------------*/
 
 struct inode {
 	
-	//The mode of the inode;
+	/*The mode of the inode;*/
 	uint32_t i_mode;
 	
-	//The dentry related to the inode;
+	/*The dentry related to the inode;*/
 	struct dentry *i_dentry;
 	
-	//The superblock the inode relates to;
+	/*The superblock the inode relates to;*/
 	struct superblock *i_sb;
 	
-	//The set of inode operations;
+	/*The set of inode operations;*/
 	struct inode_operations *i_ops;
 	
 };
@@ -168,14 +168,14 @@ struct inode_operations {
 };
 
 
-//------------------------------------------------------ Resource ------------------------------------------------------
+/*------------------------------------------------------ Resource ------------------------------------------------------*/
 
 struct resrc {
 	
-	//The dentry associated to the resource;
+	/*The dentry associated to the resource;*/
 	struct dentry *res_dentry;
 	
-	//The set of inode operations;
+	/*The set of inode operations;*/
 	struct resrc_ops *i_ops;
 	
 };
@@ -188,4 +188,4 @@ struct resrc_ops {
 
 
 
-#endif //TRACER_FS_H
+#endif /*TRACER_FS_H*/

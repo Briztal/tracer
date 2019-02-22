@@ -38,25 +38,25 @@
 
 void timer_init(const struct timer_if *timer, uint32_t ovf_period, void (*handler)()) {
 
-	//Stop the timer;
+	/*Stop the timer;*/
 	timer_stop(timer);
 
-	//Disable the timer interrupt;
+	/*Disable the timer interrupt;*/
 	timer_disable_int(timer);
 
-	//Clear the interrupt flag;
+	/*Clear the interrupt flag;*/
 	timer_flag_clr(timer);
 
-	//Set the handler;
+	/*Set the handler;*/
 	timer_set_handler(timer, handler);
 
-	//Set the count and ovf to required values;
+	/*Set the count and ovf to required values;*/
 	timer_set_int_period(timer, ovf_period);
 
-	//Enable the timer interrupt;
+	/*Enable the timer interrupt;*/
 	timer_enable_int(timer);
 
-	//Start the timer;
+	/*Start the timer;*/
 	timer_start(timer);
 
 
@@ -77,27 +77,27 @@ void timer_init(const struct timer_if *timer, uint32_t ovf_period, void (*handle
 
 void timer_reset(const struct timer_if *timer) {
 
-	//Stop the timer;
+	/*Stop the timer;*/
 	timer_stop(timer);
 
-	//Disable the timer interrupt;
+	/*Disable the timer interrupt;*/
 	timer_disable_int(timer);
 
-	//Clear the interrupt flag;
+	/*Clear the interrupt flag;*/
 	timer_flag_clr(timer);
 
-	//Reset the handler to 0;
+	/*Reset the handler to 0;*/
 	timer_set_handler(timer, 0);
 
-	//Set the ovf to 1 period unit; count will be updated at the same time;
+	/*Set the ovf to 1 period unit; count will be updated at the same time;*/
 	timer_set_int_period(timer, 1);
 
 }
 
-//----------------------------------------------- Neutral timer if ----------------------------------------------
+/*----------------------------------------------- Neutral timer if ----------------------------------------------*/
 
 
-//Dumb functions;
+/*Dumb functions;*/
 void n_sbf(uint32_t u){}
 uint32_t gbf(){return 1;}
 uint32_t n_g(){return 0;}

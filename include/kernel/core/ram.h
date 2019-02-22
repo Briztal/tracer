@@ -30,20 +30,20 @@
 #include <stddef.h>
 
 
-//Initialise memory management values. Will invalidate all previously reserved memory;
+/*Initialise memory management values. Will invalidate all previously reserved memory;*/
 void ram_init();
 
-//Get the size of a frame;
+/*Get the size of a frame;*/
 size_t ram_frame_size();
 
-//Reserve a frame;
+/*Reserve a frame;*/
 void *ram_alloc_frame();
 
-//Release a reserved frame;
+/*Release a reserved frame;*/
 void ram_free_frame(void *frame);
 
-//Debug
-//TODO void ram_print();
+/*Debug*/
+/*TODO void ram_print();*/
 
 
-#endif //TRACER_RAM_H
+#endif /*TRACER_RAM_H*/

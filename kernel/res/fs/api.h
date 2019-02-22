@@ -92,4 +92,4 @@ void vfs_close(struct resrc *rd);
 
 
 
-#endif //TRACER_VFS_H
+#endif /*TRACER_VFS_H*/

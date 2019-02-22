@@ -20,10 +20,10 @@
 
 
 #include <stdint.h>
+
 #include "kx_sim.h"
 
-#include "../../khooks.h"
-
+#include <kernel_hooks.h>
 
 
 /*------------------------------------------------------- Debug --------------------------------------------------------*/
@@ -132,6 +132,6 @@ void __chip_init(void) {
 	sim_enable_PORTD_clock_gating();
 	sim_enable_PORTE_clock_gating();
 
-	__krnl_init();
+	__kernel_entry();
 	
 }

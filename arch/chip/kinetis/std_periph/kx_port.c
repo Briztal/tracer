@@ -351,7 +351,7 @@ static void pin_configuration(const struct pin_data *const pin, const struct por
 
 	}
 
-	//printkf("port : %d - %h, pin %d, alt %d", port_id, port, bit, config->mux_channel);
+	//__printkf("port : %d - %h, pin %d, alt %d", port_id, port, bit, config->mux_channel);
 
 	//Set the multiplexer channel;
 	config_register |= (PORT_PCR_TO_MUX(config->mux_channel));

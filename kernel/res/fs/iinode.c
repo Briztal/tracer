@@ -29,7 +29,7 @@
 #include "fs.h"
 
 
-//--------------------------------------------------- Global variable --------------------------------------------------
+/*--------------------------------------------------- Global variable --------------------------------------------------*/
 
 static struct nlist files = {
 	.elements = 0,
@@ -37,7 +37,7 @@ static struct nlist files = {
 };
 
 
-//----------------------------------------------- Private file operations ----------------------------------------------
+/*----------------------------------------------- Private file operations ----------------------------------------------*/
 
 /**
  * iop_open : Calls the open file operation on the given file.
@@ -49,10 +49,10 @@ static struct nlist files = {
 
 static void iop_open(file_descriptor fd) {
 
-	//Cache the function;
+	/*Cache the function;*/
 	void (*open)(struct iinode *) = ((struct iinode *) fd)->ops->open;
 
-	//If the function is not null, call it;
+	/*If the function is not null, call it;*/
 	if (open) {
 		(*open)(((struct iinode *) fd));
 	}
@@ -70,10 +70,10 @@ static void iop_open(file_descriptor fd) {
 
 static void iop_close(file_descriptor fd) {
 
-	//Cache the function;
+	/*Cache the function;*/
 	void (*close)(struct iinode *) = ((struct iinode *) fd)->ops->close;
 
-	//If the function is not null, call it;
+	/*If the function is not null, call it;*/
 	if (close) { (*close)(((struct iinode *) fd)); }
 
 }
@@ -98,18 +98,18 @@ static void iop_delete(file_descriptor fd) {
 }
 
 
-//----------------------------------------------- Public file operations -----------------------------------------------
+/*----------------------------------------------- Public file operations -----------------------------------------------*/
 
 
 bool iop_init(file_descriptor fd, const void *cfg, size_t size) {
 
-	//Cache the function;
+	/*Cache the function;*/
 	bool (*configure)(struct iinode *, const void *, size_t) = ((struct iinode *) fd)->ops->init;
 
-	//If the function is not null, call it;
+	/*If the function is not null, call it;*/
 	if (configure) { return (*configure)(((struct iinode *) fd), cfg, size); }
 
-	//If null pointer, complete;
+	/*If null pointer, complete;*/
 	return true;
 
 }
@@ -117,13 +117,13 @@ bool iop_init(file_descriptor fd, const void *cfg, size_t size) {
 
 bool iop_interface(file_descriptor fd, void *data, size_t size) {
 
-	//Cache the function;
+	/*Cache the function;*/
 	bool (*interface)(struct iinode *, void *, size_t) = ((struct iinode *) fd)->ops->interface;
 
-	//If the function is not null, call it;
+	/*If the function is not null, call it;*/
 	if (interface) { return (*interface)(((struct iinode *) fd), data, size); }
 
-	//If null pointer, complete;
+	/*If null pointer, complete;*/
 	return true;
 
 }
@@ -131,10 +131,10 @@ bool iop_interface(file_descriptor fd, void *data, size_t size) {
 
 void iop_reset(file_descriptor fd) {
 	
-	//Cache the function;
+	/*Cache the function;*/
 	void (*reset)(struct iinode *) = ((struct iinode *) fd)->ops->reset;
 	
-	//If the function is not null, call it;
+	/*If the function is not null, call it;*/
 	if (reset) {
 		(*reset)(((struct iinode *) fd));
 	}
@@ -143,18 +143,18 @@ void iop_reset(file_descriptor fd) {
 
 
 
-//---------------------------------------------------- File system -----------------------------------------------------
+/*---------------------------------------------------- File system -----------------------------------------------------*/
 
 
-//Add a file in the file system;
+/*Add a file in the file system;*/
 void fs_create(const char *name, struct iinode *const node) {
 
-	//Add to the files list;
+	/*Add to the files list;*/
 	nlist_add(&files, name, node);
 
 }
 
-//
+/**/
 static void fs_delete(struct iinode *node, const char *name) {
 	
 	iop_delete((file_descriptor) node);
@@ -168,23 +168,23 @@ static void fs_delete(struct iinode *node, const char *name) {
 }
 
 
-//Delete a file from the file system;
+/*Delete a file from the file system;*/
 bool fs_remove(const char *name) {
 
-	//Search for the required file;
+	/*Search for the required file;*/
 	struct iinode *file = nlist_get(&files, name);
 
-	//If the file doesn't exist, stop here;
+	/*If the file doesn't exist, stop here;*/
 	if (!file) return true;
 
-	//If the iinode is opened, fail;
+	/*If the iinode is opened, fail;*/
 	if (file->open) {
 
 		return false;
 
 	} else {
 
-		//If not, delete it;
+		/*If not, delete it;*/
 		fs_delete(file, name);
 		return true;
 
@@ -201,21 +201,21 @@ file_descriptor fs_open(const char *name) {
 		return 0;
 	}
 
-	//If the file is opened :
+	/*If the file is opened :*/
 	if (node->open) {
 
-		//Fail, no concurrent access;
+		/*Fail, no concurrent access;*/
 		return 0;
 
 	}
 
-	//Mark the file opened;
+	/*Mark the file opened;*/
 	node->open = true;
 
-	//Call the open operation;
+	/*Call the open operation;*/
 	iop_open((file_descriptor) node);
 
-	//Return the file;
+	/*Return the file;*/
 	return (file_descriptor) node;
 
 }
@@ -225,7 +225,7 @@ void fs_close(file_descriptor fd) {
 
 	struct iinode *node = (struct iinode *)fd;
 
-	//If the file is null :
+	/*If the file is null :*/
 	if (!node) {
 
 		kernel_panic("fs_close : null file provided;");
@@ -234,19 +234,19 @@ void fs_close(file_descriptor fd) {
 
 	}
 	
-	//Call the reset operation;
+	/*Call the reset operation;*/
 	iop_reset(fd);
 
-	//Call the close operation;
+	/*Call the close operation;*/
 	iop_close(fd);
 
-	//If not, mark it closed;
+	/*If not, mark it closed;*/
 	node->open = false;
 
 }
 
 
-//List all files;
+/*List all files;*/
 void fs_list() {
 
 	nlist_list(&files);

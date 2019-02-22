@@ -30,29 +30,29 @@
 #include <kernel/hard/arch/prmpt.h>
 
 
-//---------------------------------------------------- Operations ----------------------------------------------------
+/*---------------------------------------------------- Operations ----------------------------------------------------*/
 
 /*
  * System clock operations. Any call with system timer not initialised generates a kernel panic;
  */
 
-//The sysclock_milliseconds reference;
+/*The sysclock_milliseconds reference;*/
 static volatile uint32_t systick_half_millis = 0;
 
-//The current task's activity_time. At init, preemption disabled;
+/*The current task's activity_time. At init, preemption disabled;*/
 static volatile uint32_t task_duration = 0;
 
 
 
 void sysclock_start() {
 	
-	//No preemption for instance;
+	/*No preemption for instance;*/
 	sysclock_set_process_duration(0);
 	
-	//Configure the system clock;
+	/*Configure the system clock;*/
 	__sclk_configure(2000, KERNEL_SYSTICK_PRIORITY);
 
-	//Start the system clock;
+	/*Start the system clock;*/
 	__sclk_start();
 
 }
@@ -72,19 +72,19 @@ void sysclock_start() {
 
 void __krnl_tick() {
 
-    //Increment the ms/2 counter;
+    /*Increment the ms/2 counter;*/
     systick_half_millis++;
 
-    //If the current task can pe preempted :
+    /*If the current task can pe preempted :*/
     if (task_duration) {
 
-        //If it must be preempted :
+        /*If it must be preempted :*/
         if (!--task_duration) {
 
-            //Trigger the preemption;
+            /*Trigger the preemption;*/
 			__prmpt_trigger();
 	
-			//Task activity_time becomes 0, preemption won't be called anymore;
+			/*Task activity_time becomes 0, preemption won't be called anymore;*/
 
         }
 
@@ -103,13 +103,13 @@ void __krnl_tick() {
 
 void sysclock_set_process_duration(uint16_t ms) {
 
-    //Update the task's activity_time to the double of the provided activity_time;
+    /*Update the task's activity_time to the double of the provided activity_time;*/
     task_duration = ((uint32_t) ms) << 1;
 
 }
 
 
-//---------------------- Time reference ----------------------
+/*---------------------- Time reference ----------------------*/
 
 /*
  * milliseconds : returns the sysclock_milliseconds reference. It is obtained by dividing the ms/2 reference by 2;
@@ -117,7 +117,7 @@ void sysclock_set_process_duration(uint16_t ms) {
 
 uint32_t sysclock_milliseconds() {
 	
-	//Return the current time value;
+	/*Return the current time value;*/
     return systick_half_millis >> 1;
 	
 }
@@ -129,10 +129,10 @@ uint32_t sysclock_milliseconds() {
 
 void systick_wait(uint16_t ms_delay) {
 	
-    //Determine the limit;
+    /*Determine the limit;*/
     volatile uint32_t limit = systick_half_millis + (((uint32_t) ms_delay) << 1);
 
-    //Sleep till the limit;
+    /*Sleep till the limit;*/
     while ((volatile uint32_t) systick_half_millis < limit);
 
 }

@@ -71,7 +71,7 @@ struct scheduler {
 	/*The shared fifo, that contains tasks to activate;*/
 	struct shared_fifo to_activate;
 
-    //TODO STATUS;
+    /*TODO STATUS;*/
     
 	/*If set the current task will be terminated at next @select call;*/
 	bool termination_required;

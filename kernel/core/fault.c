@@ -19,12 +19,12 @@
 */
 
 
-#include <kernel/hard/except.h>
 
-#include <kernel/printk.h>
+#include <kernel/core/except.h>
 
-#include <kernel/hard/arch/flt.h>
+#include <khal/flt.h>
 
+#include <kernel/common.h>
 
 /*
  * The kernel can handle faults. A fault will place the kernel in a safe state, where it can analyse the fault,
@@ -51,25 +51,25 @@ void kernel_fault_handler() {
 
     bool repaired;
 
-    //Enter a critical section;
+    /*Enter a critical section;*/
     critical_section_enter();
 
-    //Update the fault environment;
+    /*Update the fault environment;*/
     __flt_update_env();
 
-    //Attempt to repair the fault;
+    /*Attempt to repair the fault;*/
     repaired = __flt_repair();
 
-    //If the fault is repaired, complete here;
+    /*If the fault is repaired, complete here;*/
     if (repaired) return;
 
-    //If the fault is not repaired, log;
-    printk("Non recoverable fault detected. Executing the fault log function...");
+    /*If the fault is not repaired, log;*/
+    __printk("Non recoverable fault detected. Executing the fault log function...");
 
-    //Execute the fault logger;
+    /*Execute the fault logger;*/
     __flt_log();
 
-    //Stop here;
+    /*Stop here;*/
     while (1);
 
 }

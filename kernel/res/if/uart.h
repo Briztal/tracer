@@ -69,39 +69,39 @@ typedef enum {
 struct UART_config_t {
 
 
-    //--------------------- L1 config ---------------------
+    /*--------------------- L1 config ---------------------*/
 
-    //The Number of data bits;
+    /*The Number of data bits;*/
     uint8_t nb_data_bits;
 
-    //Is the parity bit present ?
+    /*Is the parity bit present ?*/
     bool parity_bit_enabled;
 
-    //The type of the parity bit;
+    /*The type of the parity bit;*/
     parity_bit_t parity_type;
 
-    //RTS enabled;
+    /*RTS enabled;*/
     bool rts_enabled;
 
-    //CTS check before detection enabled;
+    /*CTS check before detection enabled;*/
     bool cts_enabled;
 
-    //The transmission sequences_initialised;
+    /*The transmission sequences_initialised;*/
     transmission_type_t transmission_type;
 
-    //The Baudrate;
+    /*The Baudrate;*/
     uint32_t baudrate;
 
 
-	//--------------------- L2 config ---------------------
+	/*--------------------- L2 config ---------------------*/
 
-	//The framer. Ownership transferred;
+	/*The framer. Ownership transferred;*/
 	struct data_framer *framer;
 
-	//The maximal size of all frames;
+	/*The maximal size of all frames;*/
 	size_t max_frame_size;
 
-	//The maximal number of frames stored by the if;
+	/*The maximal number of frames stored by the if;*/
 	size_t nb_frames;
 
 };
@@ -122,4 +122,4 @@ struct UART_config_t {
     	}
 
 
-#endif //TRACER_UARTDRIVER_H
+#endif /*TRACER_UARTDRIVER_H*/

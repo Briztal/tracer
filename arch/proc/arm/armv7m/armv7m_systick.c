@@ -38,7 +38,7 @@ extern void __sclk_configure(uint32_t tick_frequency, uint8_t int_prio) {
     if (!core_freq) {
 
         //Panic. The core clock is not registered;
-        kernel_panic("systick_set_frequency : core clock not registered;");
+        __kernel_panic("systick_set_frequency : core clock not registered;");
 
     }
 

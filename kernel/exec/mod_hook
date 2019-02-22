@@ -35,10 +35,10 @@
 
 struct mod_hook {
 
-	//The module's name;
+	/*The module's name;*/
 	const char *const name;
 
-	//The module's initialisation function;
+	/*The module's initialisation function;*/
 	bool (*const init)();
 
 
@@ -64,4 +64,4 @@ struct mod_hook {
 	{.name = MOD_ST(name_l), .init = (init_f),};
 
 
-#endif //TRACER_AUTO_MOD_H
+#endif /*TRACER_AUTO_MOD_H*/

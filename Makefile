@@ -41,9 +41,14 @@ ifeq ($(MAKECMDGOALS),arch_mods)
 BUILD_ARCH_MODS := 1
 endif
 
-#If the goal target is kernel, enable the inclusion of kernel build code;
+#If the goal target is the kernel builder, enable the inclusion of kernel build code;
 ifeq ($(MAKECMDGOALS),kernel)
 BUILD_KERNEL := 1
+endif
+
+#If the goal target is the kernel packer, enable the inclusion of kernel pack code;
+ifeq ($(MAKECMDGOALS),kernel_pack)
+PACK_KERNEL := 1
 endif
 
 
@@ -101,7 +106,7 @@ include arch/arch.mk
 #The kernel make unit is in charge of building the generic part of the kernel, if requied;
 
 #If the kernel must be built, include its build code;
-ifdef (BULD_KERNEL)
+ifdef BUILD_KERNEL
 include kernel/kernel.mk
 endif
 

@@ -21,29 +21,29 @@
 
 #include <stdint.h>
 
+#include <nostd/mem/pager.h>
 
-#include <kernel/hard/arch/lnk.h>
-
-#include <mem/pager.h>
 #include <bitwise.h>
-#include <kernel/printk.h>
+
 #include <kernel/common.h>
 
+#include <khal/lnk.h>
 
-//Frames will be of size 2 ^ 10 = 1024 bytes;
+
+/*Frames will be of size 2 ^ 10 = 1024 bytes;*/
 #define FRAME_MAGNITUDE 10
 
-//TODO CHECK ON THE FRAME VALUE, MUST BE LESSER THAN 32;
+/*TODO CHECK ON THE FRAME VALUE, MUST BE LESSER THAN 32;*/
 
 
-//------------------------------------------------------- Globals ------------------------------------------------------
+/*------------------------------------------------------- Globals ------------------------------------------------------*/
 
-//The heap that will manage the ram block;
-static struct page_allocator ram_allocator = {};
+/*The heap that will manage the ram block;*/
+static struct page_allocator ram_allocator;
 
 
 
-//------------------------------------------------------- RAM mgt ------------------------------------------------------
+/*------------------------------------------------------- RAM mgt ------------------------------------------------------*/
 
 /**
  * ram_init : resets the heap that manages the RAM block.
@@ -55,10 +55,10 @@ static struct page_allocator ram_allocator = {};
 
 void ram_init() {
 
-	//Initialise the ram allocator;
+	/*Initialise the ram allocator;*/
     pager_ctor(&ram_allocator, &__ram_min, &__ram_max - &__ram_min,  ALIGNMENT_SIZE(FRAME_MAGNITUDE), FRAME_MAGNITUDE);
 
-	printk("RAM manager initialised\n\r");
+    __printk("RAM manager initialised\n\r");
 
 }
 
@@ -75,18 +75,18 @@ void *ram_alloc_frame() {
 
     void *frame;
 
-	//Allocate a frame;
+	/*Allocate a frame;*/
 	frame = pager_alloc_page_safe(&ram_allocator);
 
-    //If the allocation fails :
+    /*If the allocation fails :*/
     if (!frame) {
 
-        //Kernel panic;
-        kernel_panic("RAM frame allocation failure;");
+        /*Kernel panic;*/
+        __kernel_panic("RAM frame allocation failure;");
 
     }
 
-    //Return the ref of the frame;
+    /*Return the ref of the frame;*/
     return frame;
 
 }
@@ -100,7 +100,7 @@ void *ram_alloc_frame() {
 
 void ram_free_frame(void *frame) {
 
-    //Allocate a frame;
+    /*Allocate a frame;*/
     pager_free_page_safe(&ram_allocator, frame);
 
 }

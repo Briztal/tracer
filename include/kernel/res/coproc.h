@@ -1,17 +1,17 @@
 //
-// Created by root on 10/17/18.
-//
+/* Created by root on 10/17/18.*/
+/**/
 
 #ifndef TRACER_COPROC_H
 #define TRACER_COPROC_H
 
 
-//--------------------------------------------------- Make Parameters --------------------------------------------------
+/*--------------------------------------------------- Make Parameters --------------------------------------------------*/
 
-//The coproc library requires the number of coprocessors to be provided by the makefile;
+/*The coproc library requires the number of coprocessors to be provided by the makefile;*/
 #if !defined(NB_COPROCESSORS)
 
-//Compilation fail;
+/*Compilation fail;*/
 #error "Error, number of coprocessors not provided, check your makefile"
 
 #define NB_COPROCESSORS 2
@@ -22,13 +22,13 @@
 
 #endif
 
-//------------------------------------------------------ Includes ------------------------------------------------------
+/*------------------------------------------------------ Includes ------------------------------------------------------*/
 
 #include <stdint.h>
 #include <macro/incr_call.h>
 
 
-//------------------------------------------------ Coprocs contex struct -----------------------------------------------
+/*------------------------------------------------ Coprocs contex struct -----------------------------------------------*/
 
 #define ALIGN(size) (((size) + (sizeof(void *) - 1)) &~((sizeof(void *) - 1)))
 
@@ -36,16 +36,16 @@
 	uint8_t coproc_##i##_context[ALIGN(COPROC_##i##_SIZE)];
 
 
-//Coproc context saving structure;
+/*Coproc context saving structure;*/
 struct coprocs_contexts {
 	
-	//Reserve a space for all coprocessors;
+	/*Reserve a space for all coprocessors;*/
 	INCR_CALL(NB_COPROCESSORS, REGISTER_COPROC_SPACE)
 	
 };
 
 
-//-------------------------------------------------- Generic headers ---------------------------------------------------
+/*-------------------------------------------------- Generic headers ---------------------------------------------------*/
 /*
  * A coprocessor defines three symbols :
  * 	- coproc_i_size : an integer, representing the size of its context to save;
@@ -60,18 +60,18 @@ struct coprocs_contexts {
 #define coproc_loader(i) coproc_name(i, loader)
 
 
-//--------------------------------------------------- Context switch ---------------------------------------------------
+/*--------------------------------------------------- Context switch ---------------------------------------------------*/
 
-//Init coprocessors;
+/*Init coprocessors;*/
 void coprocs_init();
 
-//Save contexts;
+/*Save contexts;*/
 void coprocs_save_contexts(struct coprocs_contexts *ctxts);
 
-//Load contexts;
+/*Load contexts;*/
 void coprocs_load_contexts(struct coprocs_contexts *ctxts);
 
 
 
 
-#endif //TRACER_COPROC_H
+#endif /*TRACER_COPROC_H*/

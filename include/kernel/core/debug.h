@@ -27,14 +27,12 @@
 
 #include <stddef.h>
 
-#include <kernel/khal/dbg.h>
 
 
-
-//hardware code for waiting a certain number of milliseconds;
+/*hardware code for waiting a certain number of milliseconds;*/
 void debug_delay_ms(uint32_t ms_counter);
 
-//debug_delay_us : hardware code for waiting a certain number of milliseconds;
+/*debug_delay_us : hardware code for waiting a certain number of milliseconds;*/
 void debug_delay_us(uint32_t us_counter);
 
 
@@ -42,16 +40,16 @@ void debug_delay_us(uint32_t us_counter);
  * ----------------------------------------------------- Led Debug -----------------------------------------------------
  */
 
-//Blink the debug.txt led indefinitely, waiting @ms_counter between each toggle;
+/*Blink the debug.txt led indefinitely, waiting @ms_counter between each toggle;*/
 void debug_led_blink(uint32_t ms_counter);
 
-//Blink @count times, wait, and re-iterate;
+/*Blink @count times, wait, and re-iterate;*/
 void debug_led_count(size_t count);
 
-//Blink at high frequency if c != 0, or at low frequency if c == 0;
+/*Blink at high frequency if c != 0, or at low frequency if c == 0;*/
 void debug_led_cmp(size_t c);
 
-//Display bits of a byte, blink fast for 1, blink slow for 0;
+/*Display bits of a byte, blink fast for 1, blink slow for 0;*/
 void debug_led_dump(uint8_t c);
 
 
@@ -66,8 +64,8 @@ void debug_print_block(void *arg, const char *block, size_t bsize);
  * ----------------------------------------------------- Log vars -----------------------------------------------------
  */
 
-//A flag, to use for debug.txt purposes;
+/*A flag, to use for debug.txt purposes;*/
 extern bool debug_flag;
 
 
-#endif //TRACER_DEBUG_H
+#endif /*TRACER_DEBUG_H*/

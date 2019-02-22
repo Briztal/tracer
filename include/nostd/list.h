@@ -68,7 +68,7 @@ struct list_head {
  * links h0 and h1, and t1
  */
 
-static __always_inline void list_concat(struct list_head *h0, struct list_head *h1) {
+static __inline__ void list_concat(struct list_head *h0, struct list_head *h1) {
 	
 	/*Cache ends of src and dst;*/
 	struct list_head *t0 = h0->prev;
@@ -86,7 +86,7 @@ static __always_inline void list_concat(struct list_head *h0, struct list_head *
 /**
  * list_remove : Remove the list head from the rest of the list; head will be linked to itself;
  */
-static __always_inline void list_remove(struct list_head *head) {
+static __inline__ void list_remove(struct list_head *head) {
 	
 	/*First, cache the list neighbors;*/
 	struct list_head *prev = head->prev, *next = head->next;
@@ -158,7 +158,7 @@ void list_remove_ref_prev(struct list_head *head, struct list_head **ref);
 /**
  * list_add : concatenates the end of s0 and the head of l1
  */
-static __always_inline void __elist_concat(void *h0, void *h1, size_t head_offset) {
+static __inline__ void __elist_concat(void *h0, void *h1, size_t head_offset) {
 	
 	/*Cache ends of src and dst;*/
 	void *t0 = __elist_prev(h0, head_offset);
@@ -180,7 +180,7 @@ static __always_inline void __elist_concat(void *h0, void *h1, size_t head_offse
  * list_remove : Remove the list head from the rest of the list; head will be linked to itself;
  */
 
-static __always_inline void __elist_remove(void *l, size_t head_offset) {
+static __inline__ void __elist_remove(void *l, size_t head_offset) {
 	
 	/*First, cache the list neighbors;*/
 	void *prev = __elist_prev(l, head_offset), *next = __elist_next(l, head_offset);

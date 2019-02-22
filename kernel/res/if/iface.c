@@ -23,7 +23,7 @@
 #include <stdmem.h>
 
 
-//----------------------------------------------- Interfacing functions ------------------------------------------------
+/*----------------------------------------------- Interfacing functions ------------------------------------------------*/
 
 /**
  * iface_connect : connects the client interface to the source interface, and update the reference.
@@ -38,21 +38,21 @@
 
 bool _iface_connect(void *const client, const void *const source, void **const ref, const size_t size) {
 	
-	//If the reference is not null :
+	/*If the reference is not null :*/
 	if (*ref) {
 		
-		//Double interfacing is not supported;
+		/*Double interfacing is not supported;*/
 		return false;
 		
 	}
 	
-	//Copy the if structure;
+	/*Copy the if structure;*/
 	memcpy(client, source, size);
 	
-	//Update the reference;
+	/*Update the reference;*/
 	*ref = client;
 	
-	//Confirm;
+	/*Confirm;*/
 	return true;
 	
 }
@@ -67,13 +67,13 @@ bool _iface_connect(void *const client, const void *const source, void **const r
 
 void _iface_disconnect(void **const ref, const void *const neutral_struct, const size_t size) {
 	
-	//If the reference is not null :
+	/*If the reference is not null :*/
 	if (*ref) {
 		
-		//Neutralise the if;
+		/*Neutralise the if;*/
 		memcpy(ref, neutral_struct, size);
 		
-		//Reset the reference;
+		/*Reset the reference;*/
 		*ref = 0;
 		
 	}

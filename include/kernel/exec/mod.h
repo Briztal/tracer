@@ -37,4 +37,4 @@ void load_kernel_modules();
 void load_user_modules();
 
 
-#endif //TRACER_MOD_H
+#endif /*TRACER_MOD_H*/

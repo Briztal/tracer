@@ -22,21 +22,21 @@
 
 #include <kernel/common.h>
 #include <nostd/fstring.h>
-#include <kernel/khal/xcpt.h>
 #include <kernel/core/debug.h>
 #include <kernel/core/except.h>
+#include <khal/xcpt.h>
 
 
-void kernel_panic(const char *str)  {
+void __kernel_panic(const char *str)  {
 	
 	__xcpt_disable();
 
 	while (1) {
 
-		//Transmit the message;;
-		printk(str);
+		/*Transmit the message;;*/
+		__printk(str);
 		
-		//Wait for one second;
+		/*Wait for one second;*/
 		debug_delay_ms((uint32_t) 1000);
 
 	}
@@ -50,7 +50,7 @@ void kernel_panic(const char *str)  {
  * @param str : the string to display;
  */
 
-void printk(const char * str) {
+void __printk(const char *str) {
 
 	critical_section_enter();
 
@@ -69,7 +69,7 @@ void printk(const char * str) {
  * @param args_size : the size of the array;
  */
 
-void printkf(const char * str, const void ** args,  size_t args_size) {
+void __printkf(const char *str, const void **args, size_t args_size) {
 
 	critical_section_enter();
 

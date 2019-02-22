@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-//--------------------------------------------------- Port pin config --------------------------------------------------
+/*--------------------------------------------------- Port pin config --------------------------------------------------*/
 
 /*
  * Below are listed common configuration options that port chip are free to use in their configuration structures;
@@ -35,31 +35,31 @@
 
 enum port_interrupt_t {
 
-	//No interruption enabled;
+	/*No interruption enabled;*/
 		PORT_NO_INTERRUPT,
 
-	//DMA request on rising edge;
+	/*DMA request on rising edge;*/
 		PORT_DMA_RISING_EDGE,
 
-	//DMA request on falling edge;
+	/*DMA request on falling edge;*/
 		PORT_DMA_FALLING_EDGE,
 
-	//DMA request on rising or falling edge;
+	/*DMA request on rising or falling edge;*/
 		PORT_DMA_EDGE,
 
-	//Interrupt request when logical 0;
+	/*Interrupt request when logical 0;*/
 		PORT_INTERRUPT_0,
 
-	//Interrupt request when logical 1;
+	/*Interrupt request when logical 1;*/
 		PORT_INTERRUPT_1,
 
-	//Interrupt request on rising edge;
+	/*Interrupt request on rising edge;*/
 		PORT_INTERRUPT_RISING_EDGE,
 
-	//Interrupt request on falling edge;
+	/*Interrupt request on falling edge;*/
 		PORT_INTERRUPT_FALLING_EDGE,
 
-	//Interrupt request on rising or falling edge;
+	/*Interrupt request on rising or falling edge;*/
 		PORT_INTERRUPT_EDGE,
 
 };
@@ -71,10 +71,10 @@ enum port_interrupt_t {
 
 enum port_pin_direction_t {
 
-	//Pin is used to collect data;
+	/*Pin is used to collect data;*/
 		PIN_INPUT,
 
-	//Pin is used to provide data;
+	/*Pin is used to provide data;*/
 		PIN_OUTPUT
 
 };
@@ -86,19 +86,19 @@ enum port_pin_direction_t {
 
 enum port_input_mode_t {
 
-	//High impedance configuration;
+	/*High impedance configuration;*/
 		PORT_HIGH_IMPEDANCE,
 
-	//Pull-up configuration;
+	/*Pull-up configuration;*/
 		PORT_PULL_UP,
 
-	//Pull-down configuration;
+	/*Pull-down configuration;*/
 		PORT_PULL_DOWN,
 
-	//Hysteresis configuration;
+	/*Hysteresis configuration;*/
 		PORT_HYSTERSIS,
 
-	//Repeater configuration;
+	/*Repeater configuration;*/
 		PORT_REPEATER,
 
 };
@@ -110,13 +110,13 @@ enum port_input_mode_t {
 
 enum port_output_mode_t {
 
-	//Open drain configuration;
+	/*Open drain configuration;*/
 		PORT_OPEN_DRAIN,
 
-	//Push-pull configuration;
+	/*Push-pull configuration;*/
 		PORT_PUSH_PULL,
 
-	//High current drive configuration;
+	/*High current drive configuration;*/
 		PORT_HIGH_DRIVE,
 
 };
@@ -128,10 +128,10 @@ enum port_output_mode_t {
 
 enum port_slew_rate_t {
 
-	//Low slew rate;
+	/*Low slew rate;*/
 		PORT_LOW_RATE,
 
-	//High slew rate;
+	/*High slew rate;*/
 		PORT_HIGH_RATE,
 
 };
@@ -147,10 +147,10 @@ struct port_pin_config {
 	 * Hardware configuration;
 	 */
 
-	//The enabled multiplexing channel;
+	/*The enabled multiplexing channel;*/
 	uint8_t mux_channel;
 
-	//The data direction;
+	/*The data direction;*/
 	enum port_pin_direction_t direction;
 
 
@@ -158,7 +158,7 @@ struct port_pin_config {
 	 * Input hardware configuration
 	 */
 
-	//The input mode;
+	/*The input mode;*/
 	enum port_input_mode_t input_mode;
 
 
@@ -166,10 +166,10 @@ struct port_pin_config {
 	 * Output hardware configuration
 	 */
 
-	//The output mode;
+	/*The output mode;*/
 	enum port_output_mode_t output_mode;
 
-	//The slew rate;
+	/*The slew rate;*/
 	enum port_slew_rate_t slew_rate;
 
 
@@ -177,13 +177,13 @@ struct port_pin_config {
 	 * Interruption;
 	 */
 
-	//The type of interruption;
+	/*The type of interruption;*/
 	enum port_interrupt_t interrupt_type;
 
-	//The function to call in case of interrupt selected;
+	/*The function to call in case of interrupt selected;*/
 	void (*interrupt_function)(void);
 
 };
 
 
-#endif //TRACER_PORT_H
+#endif /*TRACER_PORT_H*/

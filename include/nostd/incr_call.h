@@ -18,10 +18,10 @@
 
 */
 
-//Concatenates two parameters;
+/*Concatenates two parameters;*/
 #define CAT2(a, b) a##b
 
-//INCR_CALL_N(x) : generates a call for x for all integers below N
+/*INCR_CALL_N(x) : generates a call for x for all integers below N*/
 #define INCR_CALL_0(x)
 #define INCR_CALL_1(x) x(0)
 #define INCR_CALL_2(x) x(0) x(1)
@@ -34,5 +34,5 @@
 #define INCR_CALL_9(x) x(0) x(1) x(2) x(3) x(4) x(5) x(6) x(7) x(8)
 #define INCR_CALL_10(x) x(0) x(1) x(2) x(3) x(4) x(5) x(6) x(7) x(8) x(9)
 
-//INCR_CALL(n, x) : generates a call for x for all integers below n
+/*INCR_CALL(n, x) : generates a call for x for all integers below n*/
 #define INCR_CALL(i, x) CAT2(INCR_CALL_,i)(x)

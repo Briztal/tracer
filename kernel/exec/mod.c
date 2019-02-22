@@ -31,7 +31,7 @@
 
 
 
-//--------------------------------------------------- Modules globals --------------------------------------------------
+/*--------------------------------------------------- Modules globals --------------------------------------------------*/
 
 #define MOD_NAME_MAX_LENGTH 32
 
@@ -41,7 +41,7 @@ static struct nlist modules = {
 };
 
 
-//------------------------------------------------- Modules management -------------------------------------------------
+/*------------------------------------------------- Modules management -------------------------------------------------*/
 
 /**
  * mod_add : creates the module struct, copies the name, adds it to the module list, and executes @init;
@@ -53,15 +53,15 @@ static struct nlist modules = {
 
 void mod_add(const char *name, bool (*init)()) {
 	
-	//Call the initialisation function;
+	/*Call the initialisation function;*/
 	(*init)();
 	
-	//Add the exit function to the list;
-	bool success = nlist_add(&modules, name, 0);//TODO EXIT;
+	/*Add the exit function to the list;*/
+	bool success = nlist_add(&modules, name, 0);/*TODO EXIT;*/
 	
-	//If the add succeeded :
+	/*If the add succeeded :*/
 	if (!success) {
-		//TODO EXIT;
+		/*TODO EXIT;*/
 	}
 	
 }
@@ -75,23 +75,23 @@ void mod_add(const char *name, bool (*init)()) {
 
 void mod_remove(const char *const name) {
 	
-	//Remove the module from the list; TODO cache its exit function;
+	/*Remove the module from the list; TODO cache its exit function;*/
 	nlist_remove(&modules, name);
 	
 	/*
-	//If the module was found and removed, and has a valid exit function :
+	/*If the module was found and removed, and has a valid exit function :*/
 	if (exit) {
 
-		//Execute it;
+		/*Execute it;*/
 		bool cleanup = (*exit)();
 
-		//If the module didn't manage to clean all its resources :
+		/*If the module didn't manage to clean all its resources :*/
 		if (!cleanup) {
 
-			//Reinsert the module, as it is still active;
+			/*Reinsert the module, as it is still active;*/
 			nlist_add(&modules, name, exit);
 
-			//TODO LOG;
+			/*TODO LOG;*/
 
 		}
 
@@ -103,38 +103,38 @@ void mod_remove(const char *const name) {
 
 static void load_modules(const uint8_t *const mod_start, const uint8_t *const mod_end) {
 	
-	//Determine the byte length of the module array;
+	/*Determine the byte length of the module array;*/
 	const size_t module_array_size = mod_end - mod_start;
 	
-	//The module array should contain only mod_hook structs. If size validity check fails :
+	/*The module array should contain only mod_hook structs. If size validity check fails :*/
 	if (module_array_size % sizeof(struct mod_hook)) {
 		
-		//Kernel panic, invalid module array size, probably caused by poor linking;
+		/*Kernel panic, invalid module array size, probably caused by poor linking;*/
 		kernel_panic("mod.c : mod_autoload : embedded modules array bounds invalid;");
 		
 	}
 	
-	//Cache the array to the right type;
+	/*Cache the array to the right type;*/
 	const struct mod_hook *auto_module = (const struct mod_hook *) mod_start;
 	
-	//If no modules are to load :
+	/*If no modules are to load :*/
 	if ((size_t) auto_module >= (size_t) mod_end) {
 		
-		//Log;
+		/*Log;*/
 		printk("No modules to load\n\r");
 		
 	}
 	
-	//For each module :
+	/*For each module :*/
 	while ((size_t) auto_module < (size_t) mod_end) {
 		
-		//Load the module;
+		/*Load the module;*/
 		mod_add(auto_module->name, auto_module->init);
 		
-		//Log;
+		/*Log;*/
 		printkf("%s module loaded\n\r", auto_module->name);
 		
-		//Focus on the next module;
+		/*Focus on the next module;*/
 		auto_module++;
 		
 	}
@@ -149,20 +149,20 @@ static void load_modules(const uint8_t *const mod_start, const uint8_t *const mo
 
 void load_proc_modules() {
 	
-	//Log;
+	/*Log;*/
 	printk("Loading proc modules\n\r");
 	
-	//Load peripheral modules;
+	/*Load peripheral modules;*/
 	load_modules(&__prmod_min, &__prmod_max);
 	
 }
 
 void load_system_modules() {
 	
-	//Log;
+	/*Log;*/
 	printk("Loading system modules\n\r");
 	
-	//Load peripheral modules;
+	/*Load peripheral modules;*/
 	load_modules(&__smod_min, &__smod_max);
 	
 }
@@ -170,10 +170,10 @@ void load_system_modules() {
 
 void load_peripheral_modules() {
 	
-	//Log;
+	/*Log;*/
 	printk("Loading peripheral modules\n\r");
 	
-	//Load peripheral modules;
+	/*Load peripheral modules;*/
 	load_modules(&__pemod_min, &__pemod_max);
 	
 }
@@ -181,10 +181,10 @@ void load_peripheral_modules() {
 
 void load_kernel_modules() {
 	
-	//Log;
+	/*Log;*/
 	printk("Loading kernel modules\n\r");
 	
-	//Load peripheral modules;
+	/*Load peripheral modules;*/
 	load_modules(&__kmod_min, &__kmod_max);
 	
 }
@@ -192,10 +192,10 @@ void load_kernel_modules() {
 
 void load_user_modules() {
 	
-	//Log;
+	/*Log;*/
 	printk("Loading user modules\n\r");
 	
-	//Load peripheral modules;
+	/*Load peripheral modules;*/
 	load_modules(&__umod_min, &__umod_max);
 	
 }

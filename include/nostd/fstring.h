@@ -1,6 +1,3 @@
-//
-// Created by root on 11/17/18.
-//
 
 #ifndef TRACER_STDIO_H
 #define TRACER_STDIO_H
@@ -11,4 +8,4 @@
 void fdecode(void (*exec)(void *arg, const char *block, size_t size), void *arg, const char *str, const void **args, size_t args_size);
 
 
-#endif //TRACER_STDIO_H
+#endif /*TRACER_STDIO_H*/

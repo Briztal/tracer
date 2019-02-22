@@ -29,17 +29,17 @@
 #include <kernel/exec/stck.h>
 
 
-//--------------------------------------------------- Stack creation ---------------------------------------------------
+/*--------------------------------------------------- Stack creation ---------------------------------------------------*/
 
-//Initialise the stack_data for initialisation. Implemented by the run lib;
+/*Initialise the stack_data for initialisation. Implemented by the run lib;*/
 void proc_init_stack(struct stck *stack, void (*function)(), void (*end_loop)(), void *init_arg);
 
-//-------------------------------------------------- Execution control -------------------------------------------------
+/*-------------------------------------------------- Execution control -------------------------------------------------*/
 
-//Stars the execution of the first process;
+/*Stars the execution of the first process;*/
 void proc_start_execution();
 
 
 
 
-#endif //TRACER_CORE_H
+#endif /*TRACER_CORE_H*/

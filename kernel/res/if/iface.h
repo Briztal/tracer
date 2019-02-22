@@ -29,7 +29,7 @@
 #include <stddef.h>
 
 
-//----------------------------------------------- Interfacing functions ------------------------------------------------
+/*----------------------------------------------- Interfacing functions ------------------------------------------------*/
 
 /**
  * iface_connect : connects the client interface to the source interface, and update the reference.
@@ -55,13 +55,13 @@ bool _iface_connect(void *client, const void *source, void **ref, size_t size);
 void _iface_disconnect(void **ref, const void *neutral_struct, size_t size);
 
 
-//----------------------------------------------------- Shortcuts ------------------------------------------------------
+/*----------------------------------------------------- Shortcuts ------------------------------------------------------*/
 
-//Passing the size can be source of errors. Both macros determine the size automatically;
+/*Passing the size can be source of errors. Both macros determine the size automatically;*/
 
 #define iface_connect(client, source, ref) _iface_connect(client, source, (void **)(ref), sizeof(**(ref)))
 
 #define iface_disconnect(ref, neutral) _iface_disconnect((void **)(ref), (const void *)(neutral), sizeof(**(ref)))
 
 
-#endif //TRACER_IFACE_H
+#endif /*TRACER_IFACE_H*/

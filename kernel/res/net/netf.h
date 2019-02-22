@@ -33,7 +33,7 @@
 
 
 
-//----------------------------------------------------- Data block -----------------------------------------------------
+/*----------------------------------------------------- Data block -----------------------------------------------------*/
 
 /*
  * To store messages of a variable length, we will use data blocks; They reference a memory zone, and can be linked;
@@ -41,27 +41,27 @@
 
 struct data_block {
 
-	//Link, mutable;
+	/*Link, mutable;*/
 	struct list_head head;
 
-	//The block's start address, constant, references a precise location;
+	/*The block's start address, constant, references a precise location;*/
 	void *const address;
 
-	//The block's current size, mutable
+	/*The block's current size, mutable*/
 	size_t size;
 
-	//The block's maximal size, constant;
+	/*The block's maximal size, constant;*/
 	const size_t max_size;
 
 };
 
-//Create a data block;
+/*Create a data block;*/
 struct data_block *data_block_create(size_t size);
 
-//Delete a data block;
+/*Delete a data block;*/
 void data_block_delete(struct data_block *block);
 
-//Copy the content of @src into @dst. Error if dst is not big enough;
+/*Copy the content of @src into @dst. Error if dst is not big enough;*/
 void data_block_copy(const struct data_block *src, struct data_block *dst);
 
 /*
@@ -74,24 +74,24 @@ void data_block_copy(const struct data_block *src, struct data_block *dst);
 
 struct netf2 {
 
-	//The protocol if;
-	//TODO struct protocol_t protocol;
+	/*The protocol if;*/
+	/*TODO struct protocol_t protocol;*/
 
-	//The quadruplet of shared fifos, to transmit frame containers between hw_specs and sw irq
+	/*The quadruplet of shared fifos, to transmit frame containers between hw_specs and sw irq*/
 	struct shared_fifo *const rx_empty, *const rx_nonempty, *const tx_empty, *const tx_nonempty;
 
-	//Enable hardware interrupts;
+	/*Enable hardware interrupts;*/
 	void (*const enable_rx_hw_irq)(struct netf2 *);
 	void (*const enable_tx_hw_irq)(struct netf2 *);
 
-	//The implementation deleter;
+	/*The implementation deleter;*/
 	void (*const destructor)(struct netf2 *);
 
 };
 
-//----------------------------------------------------- Init - Exit ----------------------------------------------------
+/*----------------------------------------------------- Init - Exit ----------------------------------------------------*/
 
-//Initalise a layer 2 if : create and fill fifos, assign function pointers;
+/*Initalise a layer 2 if : create and fill fifos, assign function pointers;*/
 void netf2_init(
 	struct netf2 *iface,
 	size_t nb_frames,
@@ -102,25 +102,25 @@ void netf2_init(
 );
 
 
-//Destruct the if : delete fifos and their content;
+/*Destruct the if : delete fifos and their content;*/
 void netf2_delete(struct netf2 *iface);
 
 
-//---------------------------------------------------- IRQ functions ---------------------------------------------------
+/*---------------------------------------------------- IRQ functions ---------------------------------------------------*/
 
-//Push @block in rx_nonempty list of @interfaces, transfer in both rx lists, pull-return a block from rx_empty (can be 0);
+/*Push @block in rx_nonempty list of @interfaces, transfer in both rx lists, pull-return a block from rx_empty (can be 0);*/
 struct data_block *netf2_get_new_rx_block(struct netf2 *iface, struct data_block *block);
 
-//Push @block in tx_empty list of @interfaces, transfer in both tx lists, pull-return a block from tx_nonempty (can be 0);
+/*Push @block in tx_empty list of @interfaces, transfer in both tx lists, pull-return a block from tx_nonempty (can be 0);*/
 struct data_block *netf2_get_new_tx_block(struct netf2 *iface, struct data_block *block);
 
 
-//------------------------------------------------------- Polling ------------------------------------------------------
+/*------------------------------------------------------- Polling ------------------------------------------------------*/
 
-//Pulls a message, and if not null, copies its content in @block; Asserts if success;
+/*Pulls a message, and if not null, copies its content in @block; Asserts if success;*/
 bool netf2_get_frame(struct netf2 *iface, struct data_block *frame);
 
-//Attempts to pull an empty block, copies @block into it, and asserts if success;
+/*Attempts to pull an empty block, copies @block into it, and asserts if success;*/
 bool netf2_send_frame(struct netf2 *iface, const struct data_block *block);
 
 
@@ -132,7 +132,7 @@ bool netf2_send_frame(struct netf2 *iface, const struct data_block *block);
 
 static inline bool netf2_message_available(struct netf2 *iface) {
 
-	//Assert if rx_nonempty contains messages;
+	/*Assert if rx_nonempty contains messages;*/
 	return !shared_fifo_empty(iface->rx_nonempty);
 
 }
@@ -147,36 +147,36 @@ static inline bool netf2_message_available(struct netf2 *iface) {
 
 struct netf21 {
 
-	//The layer 2 if we adapt;
+	/*The layer 2 if we adapt;*/
 	struct netf2 iface;
 
-	//The framer we use;
+	/*The framer we use;*/
 	struct data_framer *framer;
 
 };
 
 
-//----------------------------------------------------- Destructor -----------------------------------------------------
+/*----------------------------------------------------- Destructor -----------------------------------------------------*/
 
-//Destructor. Deletes the framer;
+/*Destructor. Deletes the framer;*/
 void netf21_destruct(struct netf21 *iface);
 
 
-//--------------------------------------------------- Init functions ---------------------------------------------------
+/*--------------------------------------------------- Init functions ---------------------------------------------------*/
 
-//Initialise the decoding structure, assert if decoding can happen;
+/*Initialise the decoding structure, assert if decoding can happen;*/
 bool netf21_init_decoding(struct netf21 *iface);
 
-//Initialise the encoding structure, assert if encoding can happen;
+/*Initialise the encoding structure, assert if encoding can happen;*/
 bool netf21_init_encoding(struct netf21 *iface);
 
 
-//---------------------------------------------------- IRQ functions ---------------------------------------------------
+/*---------------------------------------------------- IRQ functions ---------------------------------------------------*/
 
-//Receive a decoded byte; Asserts if more bytes can be written. If not, the procedure must stop;
+/*Receive a decoded byte; Asserts if more bytes can be written. If not, the procedure must stop;*/
 bool netf_21_decode_byte(struct netf21 *iface, uint8_t data);
 
-//Get an encoded byte. Asserts if more bytes can be read. If not, the procedure must stop;
+/*Get an encoded byte. Asserts if more bytes can be read. If not, the procedure must stop;*/
 bool netf_21_get_encoded_byte(struct netf21 *iface, uint8_t *data);
 
-#endif //TRACER_NETF_H
+#endif /*TRACER_NETF_H*/

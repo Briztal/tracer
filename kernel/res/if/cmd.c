@@ -25,7 +25,7 @@
 static void ds(uint32_t u) {}
 static void dbl() {}
 
-//The neutral command if. Does nothing;
+/*The neutral command if. Does nothing;*/
 struct cmd_if neutral_cmd_if = {
 	.set = &ds,
 	.disable = &dbl,

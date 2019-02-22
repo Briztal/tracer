@@ -36,19 +36,19 @@
 
 static size_t sysh_open(const char *pathname) {
 	
-	return 0;//TODO
+	return 0;/*TODO*/
 }
 
 size_t sysh_close(size_t fd) {
 	
-	return 0;//TODO
+	return 0;/*TODO*/
 	
 }
 
 
 size_t sysh_read(size_t fd, void *buffer, size_t size) {
 	
-	return 0;//TODO
+	return 0;/*TODO*/
 	
 }
 
@@ -66,7 +66,7 @@ size_t sysh_write(size_t fd, const void *buffer, size_t size){
 
 size_t sysh_interface(size_t fd, void *if_struct, size_t struct_size) {
 	
-	return 0;//TODO
+	return 0;/*TODO*/
 	
 	
 }
@@ -84,10 +84,10 @@ void sysh_exec(struct prc_desc *desc, struct prc_req *req) {
 
 void sysh_exit() {
 	
-	//Mark the process terminated;
+	/*Mark the process terminated;*/
 	sched_terminate_prc();
 	
-	//Require a context switch, process will be terminated;
+	/*Require a context switch, process will be terminated;*/
 	__prmpt_trigger();
 	
 }
@@ -110,15 +110,15 @@ static size_t(*syscall_table[NB_SYSCALLS])(size_t a , size_t b, size_t c) = {
 
 extern size_t __krnl_syscall_handler(size_t arg0, size_t arg1, size_t arg2, size_t syscall_id) {
 	
-	//If the syscall index is invalid :
+	/*If the syscall index is invalid :*/
 	if (syscall_id >= NB_SYSCALLS) {
 		
-		//Panic, should not happen;
+		/*Panic, should not happen;*/
 		kernel_panic("syscall_handler : invalid syscall index");
 	
 	}
 	
-	//Execute the syscall function and transmit its return value;
+	/*Execute the syscall function and transmit its return value;*/
 	return (*(syscall_table[syscall_id]))(arg0, arg1, arg2);
 	
 }

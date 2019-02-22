@@ -18,24 +18,22 @@
 
 */
 
-
 #include <stdbool.h>
 
 #include <stdint.h>
 
 #include <string.h>
 
-#include <kernel/arch/dbg.h>
+#include <khal/dbg.h>
 
-
-//TODO IMPLEMENTATION DEPENDANT;
+/*TODO IMPLEMENTATION DEPENDANT;*/
 
 #define DEBUG_TICKS_PER_MS 3000
 
 #define DEBUG_TICKS_PER_US 3
 
 
-//The debug flag, initialised to false;
+/*The debug flag, initialised to false;*/
 bool debug_flag = false;
 
 
@@ -46,9 +44,10 @@ bool debug_flag = false;
 void debug_delay_ms(uint32_t ms_counter) {
 
 	while (ms_counter--) {
-		//Count to;
-		//for (volatile uint32_t i = 15000; i--;);
-		for (volatile uint32_t i = DEBUG_TICKS_PER_MS; i--;);
+        volatile uint32_t i;
+
+        /*Count to;*/
+		for (i = DEBUG_TICKS_PER_MS; i--;);
 	}
 
 }
@@ -61,8 +60,10 @@ void debug_delay_ms(uint32_t ms_counter) {
 void debug_delay_us(uint32_t us_counter) {
 
 	while (us_counter--) {
-		//Count to;
-		for (volatile uint32_t i = DEBUG_TICKS_PER_US; i--;);
+        volatile uint32_t i;
+
+		/*Count to;*/
+		for (i = DEBUG_TICKS_PER_US; i--;);
 	}
 
 }
@@ -99,22 +100,23 @@ void debug_led_blink(uint32_t ms_counter) {
 
 void debug_led_count(size_t count) {
 
-	//Indefinately :
+	/*Indefinately :*/
 	while (1) {
+        size_t c;
 
-		//For each blink to do :
-		for (size_t c = count; c--;) {
+        /*For each blink to do :*/
+		for (c = count; c--;) {
 
-			//Turn on the LED;
+			/*Turn on the LED;*/
             __dbg_led_high();
 
-			//Wait 10 ms;
+			/*Wait 10 ms;*/
             debug_delay_ms(250);
 
-			//Turn off the LED;
+			/*Turn off the LED;*/
             __dbg_led_low();
 
-			//Wait 10 ms;
+			/*Wait 10 ms;*/
             debug_delay_ms(250);
 
 		}
@@ -153,20 +155,24 @@ void debug_led_dump(const uint8_t c) {
 
 	while(1) {
 
-		//Cache c;
-		uint8_t cc = c;
+        uint8_t cc;
+        uint8_t i;
 
-		//For each bit :
-		for (uint8_t i = 8; i--;) {
+        /*Cache c;*/
+		cc = c;
 
-			//If the bit is 1 :
+		/*For each bit :*/
+		for (i = 8; i--;) {
+
+			/*If the bit is 1 :*/
 			if (cc & (uint8_t) 1) {
                 __dbg_led_high();
                 debug_delay_ms(100);
                 __dbg_led_low();
-			} else {
 
-				for (uint8_t bi = 5; bi--;) {
+			} else {
+                uint8_t bi;
+				for (bi = 5; bi--;) {
 
                     __dbg_led_high();
                     debug_delay_ms(10);

@@ -28,13 +28,13 @@
 #include <stddef.h>
 
 /*Print a string in the kernel log interface;*/
-void printk(const char * str);
+void __printk(const char *str);
 
-/*Display a formated string in the kernel log interface;*/
-void printkf(const char * fstr, const void ** args,  size_t args_size);
+/*Display a formatted string in the kernel log interface;*/
+void __printkf(const char *fstr, const void **args, size_t args_size);
 
 /*Display an error message and halt;*/
-void kernel_panic(const char *tmp_str);
+void __kernel_panic(const char *tmp_str);
 
 
 #endif /*TRACER_ERROR_H*/

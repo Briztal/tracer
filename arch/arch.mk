@@ -14,16 +14,15 @@
 #
 #
 
-
 #------------------------------------------------------ khal env -------------------------------------------------------
 
 ifdef BUILD_KHAL
 
 #The directory where to generate the merges khal object file
-KHAL_BDIR = $(BDIR)
+KHAL_BDIR = $(BDIR)/khal
 
 #The directory where to generate khal object files;
-KHAL_OBJS_BDIR = $(BDIR)/khal_tmp
+KHAL_OBJS_BDIR = $(KHAL_BDIR)/objs
 
 #The list of rules that are required to build the khal correctly; sub make files must fill this list;
 KHAL_RULES :=
@@ -65,20 +64,31 @@ include $(BOPS_ARCHITECTURE)
 ifdef BUILD_KHAL
 
 #arch_init : pre-build tasks
-khal_init :
+khal_dirs :
 
 #Create the directoy tree;
 	mkdir -p $(KHAL_BDIR)
 	mkdir -p $(KHAL_OBJS_BDIR)
 
 
+#The khal symbol table contains all and only symbols declared in headers of directory include/khal/
+khal.sym :
+
+#concatenate all khal headers
+	cat include/khal/*.h | grep __ | sed -n "s/^[^ /].*\(__[^;(]\+\).*/\1/p" > $(KHAL_BDIR)/khal.syms
+
+
 #arch_khal : in charge of merging all khal object files into one object file, and to modify the symbols table;
-khal : khal_init $(KHAL_RULES)
+khal : khal_dirs khal.sym $(KHAL_RULES)
 
 #Merge all khal objects in one object;
-	$(LD) -r $(wildcard $(KHAL_OBJS_BDIR)/*.o) -o $(KHAL_BDIR)/khal.o
+	$(LD) -r $(wildcard $(KHAL_OBJS_BDIR)/*.o) -o $(KHAL_BDIR)/khal_unhidden.o
+
+#Hide non-khal symbols;
+	$(OBJCOPY) --keep-global-symbols=$(KHAL_BDIR)/khal.syms  $(KHAL_BDIR)/khal_unhidden.o $(KHAL_BDIR)/khal.o
 
 endif
+
 
 #--------------------------------------------------- arch_mods build ---------------------------------------------------
 

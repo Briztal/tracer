@@ -25,12 +25,12 @@
 #include "clock.h"
 
 
-//-------------------------------------------------- Static variables --------------------------------------------------
+/*-------------------------------------------------- Static variables --------------------------------------------------*/
 
-//The clock tuner, receives a config struct and its size;
+/*The clock tuner, receives a config struct and its size;*/
 static void (*clock_tuner)(void *config, size_t);
 
-//The clock tuner, receives a config struct and its size;
+/*The clock tuner, receives a config struct and its size;*/
 static void (*clock_auto_tuner)(uint32_t);
 
 
@@ -44,7 +44,7 @@ struct nlist clocks_list = {
 };
 
 
-//---------------------------------------------- Clock environment tuning ----------------------------------------------
+/*---------------------------------------------- Clock environment tuning ----------------------------------------------*/
 
 /*
  * Update the clock tuning environment;
@@ -54,24 +54,24 @@ struct nlist clocks_list = {
 
 void clock_register_tuner(void (*new_tuner)(void *, size_t)) {
 	
-	//If the clock environment is not reset :
+	/*If the clock environment is not reset :*/
 	if (clock_tuner) {
 		kernel_panic("clock_register_tuners : tuning environment is not reset");
 	}
 	
-	//Update the clocking environment;
+	/*Update the clocking environment;*/
 	clock_tuner = new_tuner;
 	
 }
 
 void clock_register_auto_tuner(void (*new_auto_tuner)(uint32_t)) {
 	
-	//If the clock environment is not reset :
+	/*If the clock environment is not reset :*/
 	if (clock_auto_tuner) {
 		kernel_panic("clock_register_tuners : tuning environment is not reset");
 	}
 	
-	//Update the clocking environment;
+	/*Update the clocking environment;*/
 	clock_auto_tuner = new_auto_tuner;
 	
 }
@@ -83,7 +83,7 @@ void clock_register_auto_tuner(void (*new_auto_tuner)(uint32_t)) {
 
 void clock_release_tuner() {
 	
-	//Update the clocking environment;
+	/*Update the clocking environment;*/
 	clock_tuner = 0;
 	
 }
@@ -94,88 +94,88 @@ void clock_release_tuner() {
 
 void clock_release_auto_tuner() {
 	
-	//Update the clocking environment;
+	/*Update the clocking environment;*/
 	clock_auto_tuner = 0;
 	
 }
 
 
-//---------------------------------------------------- Clock Tuning ----------------------------------------------------
+/*---------------------------------------------------- Clock Tuning ----------------------------------------------------*/
 
-//Tune the clock, providing a config struct and its size;
+/*Tune the clock, providing a config struct and its size;*/
 void clock_tune(void *config, size_t size) {
 	
-	//Cache the tuner;
+	/*Cache the tuner;*/
 	void (*tuner)(void *, size_t) = clock_tuner;
 	
-	//If the tuner is not null :
+	/*If the tuner is not null :*/
 	if (tuner) {
 		
-		//Call the tuner;
+		/*Call the tuner;*/
 		(*tuner)(config, size);
 		
 	} else {
 		
-		//If no tuner is registered, log;
+		/*If no tuner is registered, log;*/
 		printk("clock_tune : no tuner is registered;");
 	}
 	
 }
 
-//Find automatically the closest configuration for the clock;
+/*Find automatically the closest configuration for the clock;*/
 void clock_auto_tune(uint32_t target_frequency) {
 	
-	//Cache the tuner;
+	/*Cache the tuner;*/
 	void (*auto_tuner)(uint32_t) = clock_auto_tuner;
 	
-	//If the tuner is not null :
+	/*If the tuner is not null :*/
 	if (auto_tuner) {
 		
-		//Call the tuner;
+		/*Call the tuner;*/
 		(*auto_tuner)(target_frequency);
 		
 	} else {
 		
-		//If no tuner is registered, log;
+		/*If no tuner is registered, log;*/
 		printk("clock_auto_tune : no auto_tuner is registered;");
 	}
 	
 }
 
 
-//-------------------------------------------------- Clock Reference ---------------------------------------------------
+/*-------------------------------------------------- Clock Reference ---------------------------------------------------*/
 
-//Register a clock in the clock reference;
+/*Register a clock in the clock reference;*/
 bool clock_register(const char *const name, const uint32_t value) {
 	
-	//Add the clock;
+	/*Add the clock;*/
 	return nlist_add(&clocks_list, name, (void *) value);
 	
 }
 
 
-//Update the value of a clock in the clock reference
+/*Update the value of a clock in the clock reference*/
 void clock_set(const char *name, uint32_t value) {
 	
-	//Set the clock;
+	/*Set the clock;*/
 	nlist_set(&clocks_list, name, (void *) value);
 	
 }
 
 
-//Update the value of a clock in the clock reference
+/*Update the value of a clock in the clock reference*/
 uint32_t clock_get(const char *name) {
 	
-	//Get the clock frequency;
+	/*Get the clock frequency;*/
 	return (uint32_t) nlist_get(&clocks_list, name);
 	
 }
 
 
-//Remove a clock in the clock reference;
+/*Remove a clock in the clock reference;*/
 void clock_remove(const char *name) {
 	
-	//Remove the clock;
+	/*Remove the clock;*/
 	nlist_remove(&clocks_list, name);
 	
 }

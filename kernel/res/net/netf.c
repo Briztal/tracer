@@ -27,47 +27,47 @@
 
 
 
-//----------------------------------------------------- Data block -----------------------------------------------------
+/*----------------------------------------------------- Data block -----------------------------------------------------*/
 
 
-//Create a data block;TODO
+/*Create a data block;TODO*/
 struct data_block *data_block_create(size_t size) {
 
-	//Create the rx block initializer;
+	/*Create the rx block initializer;*/
 	struct data_block tx_block_init = {
 
-		//Head will be initialised after allocation;
+		/*Head will be initialised after allocation;*/
 		.head = {},
 
-		//Allocate some memory for the block;
+		/*Allocate some memory for the block;*/
 		.address = kernel_malloc(size),
 
-		//Block is empty for instance;
+		/*Block is empty for instance;*/
 		.size = 0,
 
-		//Save the block size;
+		/*Save the block size;*/
 		.max_size = size,
 	};
 
-	//Allocate the block;
+	/*Allocate the block;*/
 	struct data_block *block = kernel_malloc_copy(sizeof(struct data_block), &tx_block_init);
 
-	//Initialise the block list;
+	/*Initialise the block list;*/
 	list_init((struct list_head *)block);
 
-	//Return the initialised block;
+	/*Return the initialised block;*/
 	return block;
 
 }
 
 
-//Delete a data block;TODO
+/*Delete a data block;TODO*/
 void data_block_delete(struct data_block *block) {
 
-	//Free the content of the block,
+	/*Free the content of the block,*/
 	kernel_free(block->address);
 
-	//Free the block itself;
+	/*Free the block itself;*/
 	kernel_free(block);
 
 }
@@ -83,29 +83,29 @@ void data_block_delete(struct data_block *block) {
 
 void data_block_copy(const struct data_block *const src, struct data_block *const dst) {
 
-	//Cache the size of src's content;
+	/*Cache the size of src's content;*/
 	size_t src_size = src->size;
 
-	//If dst can't contain the content of src :
+	/*If dst can't contain the content of src :*/
 	if (dst->max_size < src_size) {
 
-		//Error;
+		/*Error;*/
 		kernel_error("netf.c : data_block_copy : dst is not big enough to contain src's content;");
 
 	}
 
-	//Copy the content of src to dst;
+	/*Copy the content of src to dst;*/
 	memcpy(dst->address, src->address, src_size);
 
-	//Update the size of dst's content;
+	/*Update the size of dst's content;*/
 	dst->size = src_size;
 
 }
 
 
-//----------------------------------------------------- Init - Exit ----------------------------------------------------
+/*----------------------------------------------------- Init - Exit ----------------------------------------------------*/
 
-//Initalise a layer 2 if : create and fill fifos, assign function pointers;
+/*Initalise a layer 2 if : create and fill fifos, assign function pointers;*/
 void netf2_init(
 	struct netf2 *const iface,
 	size_t nb_frames,
@@ -115,21 +115,21 @@ void netf2_init(
 	void (*const destructor)(struct netf2 *)
 ) {
 
-	//Create the fifo initializer;
+	/*Create the fifo initializer;*/
 	struct shared_fifo fifo_init = {
 		.list = 0,
 	};
 
-	//Create the interfaces initializer;
+	/*Create the interfaces initializer;*/
 	struct netf2 iface_init = {
 
-		//Allocate and initialise all lists;
+		/*Allocate and initialise all lists;*/
 		.rx_empty = kernel_malloc_copy(sizeof(struct shared_fifo), &fifo_init),
 		.rx_nonempty = kernel_malloc_copy(sizeof(struct shared_fifo), &fifo_init),
 		.tx_empty = kernel_malloc_copy(sizeof(struct shared_fifo), &fifo_init),
 		.tx_nonempty = kernel_malloc_copy(sizeof(struct shared_fifo), &fifo_init),
 
-		//Assign function pointers;
+		/*Assign function pointers;*/
 		.enable_rx_hw_irq = enable_rx_hw_irq,
 		.enable_tx_hw_irq = enable_tx_hw_irq,
 		.destructor = destructor,
@@ -140,58 +140,58 @@ void netf2_init(
 	 * Create data blocks;
 	 */
 
-	//For each block to create :
+	/*For each block to create :*/
 	while (nb_frames--) {
 
-		//Create a block;
+		/*Create a block;*/
 		struct data_block *block = data_block_create(frame_size);
 
-		//Push the block in the rx_empty list;
+		/*Push the block in the rx_empty list;*/
 		shared_fifo_push(iface_init.rx_empty, (struct list_head *) block);
 
-		//Create another block;
+		/*Create another block;*/
 		block = data_block_create(frame_size);
 
-		//Push the block in the tx_empty list;
+		/*Push the block in the tx_empty list;*/
 		shared_fifo_push(iface_init.tx_empty, (struct list_head *) block);
 
 	}
 
-	//Initialise the if;
+	/*Initialise the if;*/
 	memcpy(iface, &iface_init, sizeof(struct netf2));
 
 
 }
 
 
-//Destruct the if : delete fifos and their content;TODO
+/*Destruct the if : delete fifos and their content;TODO*/
 void netf2_delete(struct netf2 *iface) {
 
-	//Call the implementation's deleter;
+	/*Call the implementation's deleter;*/
 	(*(iface->destructor))(iface);
 
-	//Create a data block pointer;
+	/*Create a data block pointer;*/
 	struct data_block *block;
 
-	//Create a macro that will delete all block from the fifo and delete the fifo;
+	/*Create a macro that will delete all block from the fifo and delete the fifo;*/
 #define CLEAR_FIFO(fifo) {while((block = (struct data_block *)shared_fifo_pull((fifo)))) {data_block_delete(block);} kernel_free(fifo);}
 
-	//Free all list and their content;
+	/*Free all list and their content;*/
 	CLEAR_FIFO(iface->rx_empty);
 	CLEAR_FIFO(iface->tx_empty);
 	CLEAR_FIFO(iface->rx_nonempty);
 	CLEAR_FIFO(iface->tx_nonempty);
 
-	//Undef the macro;
+	/*Undef the macro;*/
 #undef CLEAR_FIFO
 
-	//Free the if;
+	/*Free the if;*/
 	kernel_free(iface);
 
 }
 int suussuus;
 
-//---------------------------------------------------- IRQ functions ---------------------------------------------------
+/*---------------------------------------------------- IRQ functions ---------------------------------------------------*/
 
 /**
  * netf2_get_new_rx_block : Pushes @block in rx_nonempty list of @iface. Pulls and return a block from
@@ -204,10 +204,10 @@ int suussuus;
 
 struct data_block *netf2_get_new_rx_block(struct netf2 *iface, struct data_block *block) {
 
-	//Push @block in rx_nonempty;
+	/*Push @block in rx_nonempty;*/
 	shared_fifo_push(iface->rx_nonempty, (struct list_head *) block);
 
-	//Pull a block from rx_empty and return it;
+	/*Pull a block from rx_empty and return it;*/
 	return (struct data_block *) shared_fifo_pull(iface->rx_empty);
 
 }
@@ -224,16 +224,16 @@ struct data_block *netf2_get_new_rx_block(struct netf2 *iface, struct data_block
 
 struct data_block *netf2_get_new_tx_block(struct netf2 *iface, struct data_block *block) {
 
-	//Push @block in tx_empty;
+	/*Push @block in tx_empty;*/
 	shared_fifo_push(iface->tx_empty, (struct list_head *) block);
 
-	//Pull a block from tx_nonempty and return it;
+	/*Pull a block from tx_nonempty and return it;*/
 	return (struct data_block *) shared_fifo_pull(iface->tx_nonempty);
 
 }
 
 
-//------------------------------------------------------- Polling ------------------------------------------------------
+/*------------------------------------------------------- Polling ------------------------------------------------------*/
 
 /**
  * netf2_get_message : attempts to get a received frame, and if not null, copies its content in @block;
@@ -246,27 +246,27 @@ struct data_block *netf2_get_new_tx_block(struct netf2 *iface, struct data_block
 
 bool netf2_get_frame(struct netf2 *iface, struct data_block *frame) {
 
-	//Pull a frame from rx_nonempty;
+	/*Pull a frame from rx_nonempty;*/
 	const struct data_block *const ne_frame = (struct data_block *) shared_fifo_pull(iface->rx_nonempty);
 
-	//If no frame was available :
+	/*If no frame was available :*/
 	if (!ne_frame) {
 
-		//Abort here;
+		/*Abort here;*/
 		return false;
 
 	}
 
-	//Copy the content of @ne_frame in @frame;
+	/*Copy the content of @ne_frame in @frame;*/
 	data_block_copy(ne_frame, frame);
 
-	//Push ne_frame in rx_empty;
+	/*Push ne_frame in rx_empty;*/
 	shared_fifo_push(iface->rx_empty, (struct list_head *) ne_frame);
 
-	//Enable the rx interrupt;
+	/*Enable the rx interrupt;*/
 	(*(iface->enable_tx_hw_irq))(iface);
 
-	//Complete;
+	/*Complete;*/
 	return true;
 
 }
@@ -282,47 +282,47 @@ bool netf2_get_frame(struct netf2 *iface, struct data_block *frame) {
 
 bool netf2_send_frame(struct netf2 *iface, const struct data_block *const frame) {
 
-	//Pull a frame from tx_empty;
+	/*Pull a frame from tx_empty;*/
 	struct data_block *e_frame = (struct data_block *) shared_fifo_pull(iface->tx_empty);
 
-	//If no frame was available :
+	/*If no frame was available :*/
 	if (!e_frame) {
 
-		//Abort here;
+		/*Abort here;*/
 		return false;
 
 	}
 
-	//Copy the content of @frame in @e_frame;
+	/*Copy the content of @frame in @e_frame;*/
 	data_block_copy(frame, e_frame);
 
-	//Push ne_frame in tx_nonempty;
+	/*Push ne_frame in tx_nonempty;*/
 	shared_fifo_push(iface->tx_nonempty, (struct list_head *) e_frame);
 
-	//Enable the interrupt;
+	/*Enable the interrupt;*/
 	(*(iface->enable_tx_hw_irq))(iface);
 
-	//Complete;
+	/*Complete;*/
 	return true;
 
 }
 
 
 
-//--------------------------------------------- OSI layer 1 TODO NOOOOOOP functions ---------------------------------------------
+/*--------------------------------------------- OSI layer 1 TODO NOOOOOOP functions ---------------------------------------------*/
 
-//TODO REFACTOR AND CLARIFY LAYER 2
+/*TODO REFACTOR AND CLARIFY LAYER 2*/
 
 
-//----------------------------------------------------- Destructor -----------------------------------------------------
+/*----------------------------------------------------- Destructor -----------------------------------------------------*/
 
-//Destructor. Deletes the framer; TODO
+/*Destructor. Deletes the framer; TODO*/
 void netf21_destruct(struct netf21 *iface) {
 
-	//Cache the framer;
+	/*Cache the framer;*/
 	struct data_framer *framer = iface->framer;
 
-	//Call the framer deleter;
+	/*Call the framer deleter;*/
 	(*(framer->deleter))(framer);
 
 }
@@ -339,26 +339,26 @@ void netf21_destruct(struct netf21 *iface) {
 
 bool netf21_init_decoding(struct netf21 *iface) {
 
-	//Cache the framer;
+	/*Cache the framer;*/
 	struct data_framer *framer = iface->framer;
 
-	//If the decoding block exists, complete;
+	/*If the decoding block exists, complete;*/
 	if (framer->decoding_block) {
 		return true;
 	}
 
-	//If null decoding block, attempt to get one from rx_empty;
+	/*If null decoding block, attempt to get one from rx_empty;*/
 	struct data_block *block = (struct data_block *) shared_fifo_pull(iface->iface.rx_empty);
 
-	//If the block is null, fail;
+	/*If the block is null, fail;*/
 	if (!block) {
 		return false;
 	}
 
-	//If non null block, save it;
+	/*If non null block, save it;*/
 	framer->decoding_block = block;
 
-	//Complete;
+	/*Complete;*/
 	return true;
 
 }
@@ -375,32 +375,32 @@ bool netf21_init_decoding(struct netf21 *iface) {
 
 bool netf21_init_encoding(struct netf21 *iface) {
 
-	//Cache the framer;
+	/*Cache the framer;*/
 	struct data_framer *framer = iface->framer;
 
-	//If the encoding block exists, complete;
+	/*If the encoding block exists, complete;*/
 	if (framer->encoding_block) {
 		return true;
 	}
 
-	//If null encoding block, attempt to get one from tx_nonempty;
+	/*If null encoding block, attempt to get one from tx_nonempty;*/
 	struct data_block *block = (struct data_block *) shared_fifo_pull(iface->iface.tx_nonempty);
 
-	//If the block is null, fail;
+	/*If the block is null, fail;*/
 	if (!block) {
 		return false;
 	}
 
-	//If non null block, save it;
+	/*If non null block, save it;*/
 	framer->encoding_block = block;
 
-	//Complete;
+	/*Complete;*/
 	return true;
 
 }
 
 
-//---------------------------------------------- OSI layer 1 IRQ functions ---------------------------------------------
+/*---------------------------------------------- OSI layer 1 IRQ functions ---------------------------------------------*/
 
 /**
  * netf_21_transmit_byte : transmits a byte to @iface for decoding; Asserts if more bytes can be written.
@@ -413,38 +413,38 @@ bool netf21_init_encoding(struct netf21 *iface) {
 
 bool netf_21_decode_byte(struct netf21 *iface, uint8_t data) {
 
-	//Cache the framer;
+	/*Cache the framer;*/
 	struct data_framer *framer = iface->framer;
 
-	//If the framer has no block to receive data :
+	/*If the framer has no block to receive data :*/
 	if (!framer->decoding_block) {
 
 		/*
 		 * This should not have happened, and witnesses a flaw in the program that uses the if.
 		 */
 
-		//Return false, to disable future transmission; byte will be lost;
+		/*Return false, to disable future transmission; byte will be lost;*/
 		return false;
 
 	}
 
 
-	//Transmit the byte to the framer;
+	/*Transmit the byte to the framer;*/
 	bool frame_complete = (*(framer->decode))(framer, data);
 
-	//If the frame is complete :
+	/*If the frame is complete :*/
 	if (frame_complete) {
 
-		//Send the block in the net2 for storage and get another; Cache it and assign it;
+		/*Send the block in the net2 for storage and get another; Cache it and assign it;*/
 		struct data_block *new_block =
 			framer->decoding_block = netf2_get_new_rx_block(&iface->iface, framer->decoding_block);
 
-		//Assert if the provided block exists;
+		/*Assert if the provided block exists;*/
 		return new_block != 0;
 
 	}
 
-	//If the frame is not complete, assert to enable further readings;
+	/*If the frame is not complete, assert to enable further readings;*/
 	return true;
 
 }
@@ -461,39 +461,39 @@ bool netf_21_decode_byte(struct netf21 *iface, uint8_t data) {
 
 bool netf_21_get_encoded_byte(struct netf21 *iface, uint8_t *data) {
 
-	//Cache the framer;
+	/*Cache the framer;*/
 	struct data_framer *framer = iface->framer;
 
-	//If the framer has no block to receive data :
+	/*If the framer has no block to receive data :*/
 	if (!framer->encoding_block) {
 
 		/*
 		 * This should not have happened, and witnesses a flaw in the program that uses the if.
 		 */
 
-		//Return false, to disable future transmission; byte will be lost;
+		/*Return false, to disable future transmission; byte will be lost;*/
 		return false;
 
 	}
 
-	//Transmit the byte to the framer;
+	/*Transmit the byte to the framer;*/
 	bool frame_complete = (*(framer->encode))(framer, data);
 
-	//If the frame is complete :
+	/*If the frame is complete :*/
 	if (frame_complete) {
 
-		//Send the block in the net2 for storage and get another; Cache it and assign it;
+		/*Send the block in the net2 for storage and get another; Cache it and assign it;*/
 		struct data_block *new_block = netf2_get_new_tx_block(&iface->iface, framer->encoding_block);
 
-		//Update the new block;
+		/*Update the new block;*/
 		framer->encoding_block = new_block;
 
-		//Assert if the provided block exists;
+		/*Assert if the provided block exists;*/
 		return new_block != 0;
 
 	}
 
-	//If the frame is not complete, assert to enable further readings;
+	/*If the frame is not complete, assert to enable further readings;*/
 	return true;
 
 

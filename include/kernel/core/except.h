@@ -25,37 +25,35 @@
 
 #include <stdint.h>
 
-#include <kernel/hard/arch/xcpt.h>
-
 
 /*
  * In the kernel, some priority levels are used for particular exceptions and interrupts;
  */
 
-//The preemption has the lowest priority level, so that a context switch never occurs over an interrupt;
+/*The preemption has the lowest priority level, so that a context switch never occurs over an interrupt;*/
 #define KERNEL_PREEMPTION_PRIORITY __xcpt_priority_0
 
-//A if status interrupt has a low priority;
+/*A if status interrupt has a low priority;*/
 #define KERNEL_DRIVER_STATUS_PRIORITY __xcpt_priority_2
 
-//A if error must be caught, and so has a higher priority;
+/*A if error must be caught, and so has a higher priority;*/
 #define KERNEL_DRIVER_ERROR_PRIORITY __xcpt_priority_4
 
-//The systick has the highest priority level, so that ticks are never missed;
+/*The systick has the highest priority level, so that ticks are never missed;*/
 #define KERNEL_SYSTICK_PRIORITY __xcpt_priority_6
 
 
-//Initialise the exceptions manager;
+/*Initialise the exceptions manager;*/
 void exceptions_init();
 
-//Enter a critical section;
+/*Enter a critical section;*/
 void critical_section_enter();
 
-//Leave a critical section;
+/*Leave a critical section;*/
 void critical_section_leave();
 
-//Force leaving a critical section. Unsafe, must be executed by the kernel only;
+/*Force leaving a critical section. Unsafe, must be executed by the kernel only;*/
 void critical_section_force_exit();
 
 
-#endif //TRACER_IC_H
+#endif /*TRACER_IC_H*/

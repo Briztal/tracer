@@ -78,4 +78,4 @@
 
 
 
-#endif //NOSTD_BITWISE_H
+#endif /*NOSTD_BITWISE_H*/

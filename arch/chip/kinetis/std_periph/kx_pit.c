@@ -110,7 +110,7 @@ static bool channel_interface(const struct channel_inode *const node, void *cons
 	//Cache the channel index,
 	uint8_t channel_index = node->channel_index;
 
-	//printkf("interfacing with %d ", channel_index);
+	//__printkf("interfacing with %d ", channel_index);
 
 	//Cache the channel specs ref;
 	const struct channel_specs *channel = channels[node->channel_index];

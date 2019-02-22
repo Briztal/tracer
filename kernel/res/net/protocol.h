@@ -28,4 +28,4 @@ struct protocol_t {
 
 };
 
-#endif //TRACER_PROTOCOL_H
+#endif /*TRACER_PROTOCOL_H*/

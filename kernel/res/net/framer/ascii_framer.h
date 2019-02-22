@@ -41,8 +41,8 @@
  * 	The size of the frame is provided, all characters will be sent. The frame will be terminated by a "\n\r" EOF;
  */
 
-//Create and initialise a human readable framer;
+/*Create and initialise a human readable framer;*/
 struct data_framer *ascii_framer_create();
 
 
-#endif //TRACER_ASCII_FRAMER
+#endif /*TRACER_ASCII_FRAMER*/

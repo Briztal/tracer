@@ -116,7 +116,7 @@ void pager_ctor(struct page_allocator *pager, void *memory_start, size_t memory_
 void mpool_dtor(struct page_allocator *pager);
 
 /*Return how many pages can be allocated;*/
-size_t pager_available(struct memory_pool_allocator *pool);
+size_t pager_available(struct page_allocator *pool);
 
 
 /*Allocate an page, thread safe;*/

@@ -1,26 +1,26 @@
 //
-// Created by root on 10/17/18.
-//
+/* Created by root on 10/17/18.*/
+/**/
 
 #include "kernel/exec/pmem.h"
 
-//------------------------------------------------ Coprocs declarations ------------------------------------------------
+/*------------------------------------------------ Coprocs declarations ------------------------------------------------*/
 
-//DECLARE_COPROC : declares all 3 symbols of a coprocessor;
+/*DECLARE_COPROC : declares all 3 symbols of a coprocessor;*/
 
 #define DECLARE_COPROC(i) \
 	extern void coproc_init(i) ();\
 	extern void coproc_saver(i) (void *dst);\
 	extern void coproc_loader(i) (const void *src);\
 
-//Declare all symbols of all coprocessors;
+/*Declare all symbols of all coprocessors;*/
 INCR_CALL(NB_COPROCESSORS, DECLARE_COPROC)
 
-//Clean
+/*Clean*/
 #undef DECLARE_COPROC
 
 
-//------------------------------------------------- Coprocs operations -------------------------------------------------
+/*------------------------------------------------- Coprocs operations -------------------------------------------------*/
 
 /**
  * coprocs_init : calls each coprocessor initializer;
@@ -28,14 +28,14 @@ INCR_CALL(NB_COPROCESSORS, DECLARE_COPROC)
 
 void coprocs_init() {
 	
-	//Save context : calls the i-th coprocessor's initializer;
+	/*Save context : calls the i-th coprocessor's initializer;*/
 	#define INIT(i)\
 		 coproc_init(i)();
 	
-	//Initialize all coprocessors;
+	/*Initialize all coprocessors;*/
 	INCR_CALL(NB_COPROCESSORS, INIT)
 	
-	//Clean
+	/*Clean*/
 	#undef INIT
 }
 
@@ -48,14 +48,14 @@ void coprocs_init() {
 
 void coprocs_save_contexts(struct coprocs_contexts *ctxts) {
 	
-	//Save context : calls the i-th coprocessor's context saver;
+	/*Save context : calls the i-th coprocessor's context saver;*/
 	#define SAVE_CONTEXT(i)\
 		 coproc_saver(i) (&(ctxts->coproc_##i##_context));
 	
-	//Save all coprocessors context;
+	/*Save all coprocessors context;*/
 	INCR_CALL(NB_COPROCESSORS, SAVE_CONTEXT)
 	
-	//Clean
+	/*Clean*/
 	#undef SAVE_CONTEXT
 }
 
@@ -68,14 +68,14 @@ void coprocs_save_contexts(struct coprocs_contexts *ctxts) {
 
 void coprocs_load_contexts(struct coprocs_contexts *ctxts) {
 	
-	//Save context : calls the i-th coprocessor's context saver;
+	/*Save context : calls the i-th coprocessor's context saver;*/
 	#define LOAD_CONTEXT(i)\
 		 coproc_loader(i) (&(ctxts->coproc_##i##_context));
 	
-	//Save all coprocessors context;
+	/*Save all coprocessors context;*/
 	INCR_CALL(NB_COPROCESSORS, LOAD_CONTEXT)
 	
-	//Clean
+	/*Clean*/
 	#undef LOAD_CONTEXT
 	
 }

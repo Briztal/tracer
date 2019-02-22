@@ -23,4 +23,4 @@
 
 void load_applications(void *args, size_t size);
 
-#endif //TRACER_APPS_H
+#endif /*TRACER_APPS_H*/

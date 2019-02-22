@@ -1,6 +1,6 @@
 //
-// Created by root on 10/10/18.
-//
+/* Created by root on 10/10/18.*/
+/**/
 
 
 #include "kdmem.h"
@@ -12,27 +12,27 @@
 
 
 
-//--------------------------------------------------- Make Parameters --------------------------------------------------
+/*--------------------------------------------------- Make Parameters --------------------------------------------------*/
 
-//The memory library required NB_THREADS to be provided by the makefile;
+/*The memory library required NB_THREADS to be provided by the makefile;*/
 #if !defined(KDM_SIZE)
 
-//COmpilation fail;
+/*COmpilation fail;*/
 #error "Error, one make parameter not provided, check your makefile"
 
-//Define the macro, allows debugging on an IDE;
+/*Define the macro, allows debugging on an IDE;*/
 #define KDM_SIZE 700
 
 #endif
 
 
-//---------------------------------------------------- Kernel heap -----------------------------------------------------
+/*---------------------------------------------------- Kernel heap -----------------------------------------------------*/
 
-//The kernel heap head;
+/*The kernel heap head;*/
 static struct heap_head *kernel_heap;
 
 
-//---------------------------------------------------- Kernel heap -----------------------------------------------------
+/*---------------------------------------------------- Kernel heap -----------------------------------------------------*/
 
 /**
  * kernel_memory_init : initialises the kernel heap;
@@ -42,19 +42,19 @@ static struct heap_head *kernel_heap;
 
 void kdmem_init() {
 	
-	//Allocate some memory in the RAM to contain the heap;
+	/*Allocate some memory in the RAM to contain the heap;*/
 	void *ram_block = ram_alloc(KDM_SIZE);
 	
-	//Create a heap owning the whole RAM block;
-	kernel_heap = heap_create(ram_block, KDM_SIZE, &heap_fifo_insertion);//TODO SORTED INSERTION;
+	/*Create a heap owning the whole RAM block;*/
+	kernel_heap = heap_create(ram_block, KDM_SIZE, &heap_fifo_insertion);/*TODO SORTED INSERTION;*/
 	
-	//Log;
+	/*Log;*/
 	printk("kernel dynamic memory initialised\n\r");
 	
 }
 
 
-//--------------------------------------------------- Dynamic memory ---------------------------------------------------
+/*--------------------------------------------------- Dynamic memory ---------------------------------------------------*/
 
 /**
  * kmalloc : allocates and return a block of memory in the kernel heap;
@@ -64,7 +64,7 @@ void kdmem_init() {
 
 void *kmalloc(size_t size) {
 	
-	//If the kernel heap is not initialised
+	/*If the kernel heap is not initialised*/
 	return heap_malloc(kernel_heap, size);
 	
 }
@@ -78,7 +78,7 @@ void *kmalloc(size_t size) {
 
 void *kcalloc(size_t size) {
 	
-	//If the kernel heap is not initialise
+	/*If the kernel heap is not initialise*/
 	return heap_malloc(kernel_heap, size);
 	
 }
@@ -92,7 +92,7 @@ void *kcalloc(size_t size) {
 
 void *kialloc(size_t size, const void *init) {
 	
-	//If the kernel heap is not initialise
+	/*If the kernel heap is not initialise*/
 	return heap_ialloc(kernel_heap, size, init);
 	
 }
@@ -106,7 +106,7 @@ void *kialloc(size_t size, const void *init) {
 
 void kfree(void *ptr) {
 	
-	//If the kernel heap is not initialise
+	/*If the kernel heap is not initialise*/
 	heap_free(kernel_heap, ptr);
 	
 }

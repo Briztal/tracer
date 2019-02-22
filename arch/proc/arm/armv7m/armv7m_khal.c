@@ -42,8 +42,12 @@
 #include <stdint.h>
 
 #include <kernel/common.h>
-#include <kernel/khal/lnk.h>
-#include <khooks.h>
+
+#include <khal/lnk.h>
+
+#include <arch_hooks.h>
+
+#include <kernel_hooks.h>
 
 #include "armv7m.h"
 
@@ -52,7 +56,7 @@
 /*Define an empty ISR handler*/
 static void no_isr() {}
 
-static void __arm_v7m_init() {
+static void __executable_entry() {
 
     /*Enable all faults;*/
 
@@ -65,28 +69,28 @@ static void __arm_v7m_init() {
     armv7m_set_usage_fault_priority(0);
 
     /*Call the run init function;*/
-    __proc_init();
+    __chip_initialisation();
 
 }
 
 
 static void arm_v7m_hard_fault_handler() {
-    kernel_fault_handler();
+    __kernel_fault_handler();
 }
 
 
 static void arm_v7m_bus_fault_handler() {
-    kernel_fault_handler();
+    __kernel_fault_handler();
 }
 
 
 static void arm_v7m_mem_fault_handler() {
-    kernel_fault_handler();
+    __kernel_fault_handler();
 }
 
 
 static void arm_v7m_usg_fault_handler() {
-    kernel_fault_handler();
+    __kernel_fault_handler();
 }
 
 
@@ -258,7 +262,7 @@ void (*static_vtable[NVIC_NB_EXCEPTIONS])()  __attribute__ ((section(".vectors")
     (void (*)()) &__ram_max,
 
     /*1 : reset; Effectively used when NVIC is relocated;*/
-    &__arm_v7m_init,
+    &__executable_entry,
 
     /*2 : NMI. Not supported for instance;*/
     &no_isr,
@@ -300,7 +304,7 @@ void (*static_vtable[NVIC_NB_EXCEPTIONS])()  __attribute__ ((section(".vectors")
     &arm_v7m_prmpt_handler,
 
     /*15 : SysTick, kernel hook;*/
-    &__krnl_tick,
+    &__kernel_tick,
 
     /*In order to avoid writing 254 times the function name, we will use macros that will write it for us;*/
 #define channel(i) &isr_##i,
@@ -558,7 +562,7 @@ void __irq_set_handler(uint16_t irq_channel, void ( *handler)()) {
     if (irq_channel >= NVIC_NB_EXCEPTIONS) {
 
         /*Panic;*/
-        kernel_panic("arm_v7m.c : __irq_set_handler : invalid irq channel;");
+        __kernel_panic("arm_v7m.c : __irq_set_handler : invalid irq channel;");
 
     }
 
@@ -810,12 +814,12 @@ static void log_MMFSR(const uint8_t MMFSR, const uint32_t MMFAR) {
         if (MMFSR & MMFSR_MMARKVALID) {
 
             /*Log;*/
-            printkf("Data access violation : %h",  (const void **) &MMFAR, 1);
+            __printkf("Data access violation : %h", (const void **) &MMFAR, 1);
 
         } else {
 
             /*MMFAR has invalid content, log;*/
-            printk("Data access violation, invalid memory indicator");
+            __printk("Data access violation, invalid memory indicator");
 
         }
 
@@ -837,7 +841,7 @@ static void log_MMFSR(const uint8_t MMFSR, const uint32_t MMFAR) {
 static void log_BFSR(const uint8_t BFSR, const uint32_t BFAR) {
 
     /*bus fault on instruction prefetch*/
-    LOG_FAULT(BFSR, BFSR_IBUSERR,"Bus fault on instruction prefetch");
+    LOG_FAULT(BFSR, BFSR_IBUSERR, "Bus fault on instruction prefetch");
 
     /*precise data access error :*/
     if (BFSR & BFSR_PRECISERR) {
@@ -846,20 +850,20 @@ static void log_BFSR(const uint8_t BFSR, const uint32_t BFAR) {
         if (BFSR & MMFSR_MMARKVALID) {
 
             /*Log;*/
-            printkf("Bus precise data access error : %h", (const void **) BFAR, 1);
+            __printkf("Bus precise data access error : %h", (const void **) BFAR, 1);
 
 
         } else {
 
             /*MMFAR has invalid content, log;*/
-            printk("Bus precise data error, invalid memory indicator");
+            __printk("Bus precise data error, invalid memory indicator");
 
         }
 
     }
 
     /*imprecise data access error :*/
-    LOG_FAULT(BFSR, BFSR_IMPRECISERR,"Bus imprecise data access error");
+    LOG_FAULT(BFSR, BFSR_IMPRECISERR, "Bus imprecise data access error");
 
     /*derived bus fault on exception return :*/
     LOG_FAULT(BFSR, BFSR_UNSTKERR, "Derived bus fault on exception return");

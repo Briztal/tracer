@@ -20,7 +20,9 @@
 
 
 
-#include "kernel/hard/debug.h"
+#include <khal/dbg.h>
+
+#include <kernel/core/debug.h>
 
 
 /**
@@ -37,43 +39,46 @@
 
 static void print_char(const char c) {
 
-	//Turn off the led;
+	uint16_t word;
+    uint8_t bit;
+
+	/*Turn off the led;*/
 	__dbg_led_low();
 
-	//Shift for the header, add the header and add the footer;
-	uint16_t word = ((uint16_t)c << 3) | (uint16_t)2;
+	/*Shift for the header, add the header and add the footer;*/
+	word = ((uint16_t)c << 3) | (uint16_t)2;
 
-	//There are 8 + 3 = 11 bits in the message;
+	/*There are 8 + 3 = 11 bits in the message;*/
 
-	//For all 11 bits :
-	for (uint8_t bit = 11; bit--;) {
+	/*For all 11 bits :*/
+	for (bit = 11; bit--;) {
 
-		//If bit is set :
+		/*If bit is set :*/
 		if (word & (uint16_t) 1) {
 
-			//Logic high;
+			/*Logic high;*/
             __dbg_led_high();
 
 		} else {
 
-			//If bit is cleared, logic low;
+			/*If bit is cleared, logic low;*/
             __dbg_led_low();
 
 		}
 
-		//Focus on next bit;
+		/*Focus on next bit;*/
 		word >>= 1;
 
-		//Wait one millisecond time;
+		/*Wait one millisecond time;*/
 		debug_delay_us(250);
 
 	}
 
-	//Turn off the led;
+	/*Turn off the led;*/
     __dbg_led_low();
 
 
-	//Wait three millisecond time;
+	/*Wait three millisecond time;*/
 	debug_delay_us(600);
 
 }

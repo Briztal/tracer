@@ -1,5 +1,5 @@
 /*
-  sysclock.h Part of TRACER
+  khooks.h Part of TRACER
 
   Copyright (c) 2018 Raphaël Outhier
 
@@ -18,30 +18,21 @@
 
 */
 
-#ifndef TRACER_SYSTICK_H
-#define TRACER_SYSTICK_H
-
-
-#include <stdint.h>
-
-#include <stdbool.h>
-
-
 /*
- * System clock operation. Any call with system timer not initialised generates a kernel panic;
+ * Functions declared in this file that can be referenced by different parts of the khal to call each other;
  */
 
-/*Initialise the system clock;*/
-void sysclock_start();
+#ifndef TRACER_ARCH_HOOKS_H
+#define TRACER_ARCH_HOOKS_H
 
-/*Update the current task's activity_time;*/
-void sysclock_set_process_duration(uint16_t ms);
+/*---------------------------------------------------- khal hooks ----------------------------------------------------*/
 
-/*Get the millisecond reference;*/
-uint32_t sysclock_milliseconds();
+/*Entry point of the executable point; calls __chip_initialisation; never returns; mentioned for doc, do not hook it;*/
+/*void __executable_entry();*/
 
-/*Wait till time has reached the given limit;*/
-void systick_wait(uint16_t ms_delay);
+/*Chip initialisation function; called by __executable_entry; calls __kernel_entry; never returns;*/
+void __chip_initialisation();
 
 
-#endif /*TRACER_SYSTICK_H*/
+
+#endif /*TRACER_ARCH_HOOKS_H*/

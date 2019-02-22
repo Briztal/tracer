@@ -19,8 +19,10 @@
 */
 
 
-#include "kernel/hard/debug.h"
 
+
+#include <khal/dbg.h>
+#include <kernel/core/debug.h>
 
 /**
  * A morse char has a variable length. We must store the binary code and its mask;
@@ -112,20 +114,20 @@ static const struct morse_char morse_numbers[10] = {
 
 static void morse_send_bit(bool dash) {
 
-	//Light the led;
-	debug_led_high();
+	/*Light the led;*/
+	__dbg_led_high();
 
-	//Wait the appropriate time for the symbol;
+	/*Wait the appropriate time for the symbol;*/
 	if (dash) {
 		debug_delay_ms(MORSE_DASH);
 	} else {
 		debug_delay_ms(MORSE_DOT);
 	}
 
-	//Turn off the led;
-	debug_led_low();
+	/*Turn off the led;*/
+	__dbg_led_low();
 
-	//Wait to separate the bit from the next one;
+	/*Wait to separate the bit from the next one;*/
 	debug_delay_ms(MORSE_BIT_SPACE);
 
 }
@@ -138,19 +140,19 @@ static void morse_send_bit(bool dash) {
 
 static void morse_send_char(struct morse_char c) {
 
-	//While the code is not finished :
+	/*While the code is not finished :*/
 	while (c.mask & (uint8_t) 1) {
 
-		//Send the morse bit;
+		/*Send the morse bit;*/
 		morse_send_bit(c.code & (uint8_t) 0x01);
 
-		//Shift code and mask;
+		/*Shift code and mask;*/
 		c.code >>= 1;
 		c.mask >>= 1;
 
 	}
 
-	//Delay to mark the end of the char;
+	/*Delay to mark the end of the char;*/
 	debug_delay_ms(MORSE_CHAR_SPACE);
 
 }
@@ -162,7 +164,7 @@ static void morse_send_char(struct morse_char c) {
 
 inline void morse_word_space() {
 
-	//Delay to mark the end of the char;
+	/*Delay to mark the end of the char;*/
 	debug_delay_ms(MORSE_WORD_SPACE);
 
 }
@@ -184,55 +186,54 @@ inline void morse_word_space() {
 
 static bool morse_send_if(const char lower, const char higher, const struct morse_char *const symbols, const char c) {
 
-	//If the char is between @lower and @higher:
+	/*If the char is between @lower and @higher:*/
 	if ((c <= higher) && (c >= lower)) {
 
-		//Determine the associated morse symbol and send;
+		/*Determine the associated morse symbol and send;*/
 		morse_send_char(symbols[c - lower]);
 
-		//Assert as a char has been sent;
+		/*Assert as a char has been sent;*/
 		return true;
 	}
 
-	//Fail;
+	/*Fail;*/
 	return false;
 
 }
 
 
-//TODO
+/*TODO*/
 static void debug_echo(const char *log) {
-
-	//Turn off the led;
-	debug_led_low();
-
-	//Declare the current char var;
 	char c;
 
-	//To avoid sending multiple spaces that would consume time, a flag is declared;
+	/*Turn off the led;*/
+	__dbg_led_low();
+
+
+	/*To avoid sending multiple spaces that would consume time, a flag is declared;*/
 	bool space = false;
 
-	//For each char :
+	/*For each char :*/
 	do {
 
-		//Cache the current char and increment the char pointer;
+		/*Cache the current char and increment the char pointer;*/
 		c = *(log++);
 
-		//If the current char is a space :
+		/*If the current char is a space :*/
 		if (c == ' ') {
 
 			if (!space) {
 
-				//Wait the time of a word space;
+				/*Wait the time of a word space;*/
 				morse_word_space();
 
-				//Set the space flag to avoid multiple spaces;
+				/*Set the space flag to avoid multiple spaces;*/
 				space = true;
 			}
 
 		}
 
-		//If the char is sent :
+		/*If the char is sent :*/
 		if (
 			morse_send_if('a', 'z', morse_alphabet, c) ||
 			morse_send_if('A', 'Z', morse_alphabet, c) ||
@@ -241,7 +242,7 @@ static void debug_echo(const char *log) {
 
 		{
 
-			//Clear the space flag;
+			/*Clear the space flag;*/
 			space = false;
 
 		}

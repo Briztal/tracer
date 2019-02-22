@@ -31,9 +31,10 @@
 #include <stdint.h>
 
 
-/*------------------------------------------- General exception priorities -------------------------------------------
+/*------------------------------------------- General exception priorities -------------------------------------------*/
 
 /*The lowest priority level;*/
+
 extern const uint8_t __xcpt_priority_0;
 extern const uint8_t __xcpt_priority_1;
 extern const uint8_t __xcpt_priority_2;
@@ -42,10 +43,11 @@ extern const uint8_t __xcpt_priority_4;
 extern const uint8_t __xcpt_priority_5;
 extern const uint8_t __xcpt_priority_6;
 extern const uint8_t __xcpt_priority_7;
+
 /*The highest priority level;*/
 
 
-/*-------------------------------------------------- Exceptions -------------------------------------------------
+/*-------------------------------------------------- Exceptions -------------------------------------------------*/
 
 /*Initialise the exceptions manager;*/
 void __xcpt_init();
@@ -57,7 +59,7 @@ extern void __xcpt_enable();
 extern void __xcpt_disable();
 
 
-/*-------------------------------------------------- Interrupt ReQuest -------------------------------------------------
+/*-------------------------------------------------- Interrupt ReQuest -------------------------------------------------*/
 
 /*Enables the required interrupt channel;*/
 extern void __irq_enable(uint16_t channel);
@@ -74,10 +76,10 @@ extern void __irq_clear_pending(uint16_t channel);
 /*Sets the required non-system interrupt in the not-pending state;*/
 extern void __irq_is_pending(uint16_t channel);
 
-/*Applies the provided priority to the required non-system interupt channel;*/
+/*Applies the provided priority to the required non-system interrupt channel;*/
 extern void __irq_set_priority(uint16_t channel, uint8_t priority);
 
-/*Returns the priority to the required non-system interupt channel;*/
+/*Returns the priority to the required non-system interrupt channel;*/
 extern uint8_t __irq_get_priority(uint16_t channel, uint8_t priority);
 
 /*Update the handler of the required irq;*/

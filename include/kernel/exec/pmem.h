@@ -22,7 +22,7 @@
 #define TRACER_MEMORY_H
 
 
-//------------------------------------------------------- Includes ------------------------------------------------------
+/*------------------------------------------------------- Includes ------------------------------------------------------*/
 
 #include <stdbool.h>
 
@@ -39,7 +39,7 @@
 #include "kernel/res/coproc.h"
 
 
-//------------------------------------------------- Make Parameters ----------------------------------------------------
+/*------------------------------------------------- Make Parameters ----------------------------------------------------*/
 
 /*
  * The program memory environment reflects the memory structure a program can access. It is a contiguous memory block
@@ -50,30 +50,30 @@
 
 struct pmem {
 
-	//The lowest address of the block (for memory free purposes);
+	/*The lowest address of the block (for memory free purposes);*/
 	void *const ram_start;
 
-	//The heap reference;
+	/*The heap reference;*/
 	struct heap_head *heap;
 
-	//The stack references array;
+	/*The stack references array;*/
 	struct stck stack;
 
-	//The struct to contain coprocessors contexts;
+	/*The struct to contain coprocessors contexts;*/
 	struct coprocs_contexts contexts;
 
 };
 
 
-//Create a process memory struct, containing only a heap;
+/*Create a process memory struct, containing only a heap;*/
 void prc_mem_create_heap(struct pmem *mem, size_t ram_size);
 
-//Initialise the process memory : reset the heap, and create as many stacks as required;
+/*Initialise the process memory : reset the heap, and create as many stacks as required;*/
 void prc_mem_reset(struct pmem *mem, size_t stacks_size);
 
-//Delete the process memory. All references must be contained in the kernel heap;
+/*Delete the process memory. All references must be contained in the kernel heap;*/
 void prc_mem_clean(struct pmem *mem);
 
 
 
-#endif //TRACER_MEMORY_H
+#endif /*TRACER_MEMORY_H*/

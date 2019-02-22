@@ -19,22 +19,23 @@
 */
 
 
-//-------------------------------------------------- Critical sections -------------------------------------------------
+/*-------------------------------------------------- Critical sections -------------------------------------------------*/
 
-#include <kernel/hard/except.h>
 
 #include <kernel/common.h>
 
-//The critical section counter;
+#include <khal/xcpt.h>
+
+/*The critical section counter;*/
 static uint32_t critical_section_counter = 0;
 
 
 void exceptions_init() {
 
-    //Disable exceptions:
+    /*Disable exceptions:*/
     __xcpt_disable();
 
-    //Initialise the exception manager;
+    /*Initialise the exception manager;*/
     __xcpt_init();
 
 }
@@ -46,10 +47,10 @@ void exceptions_init() {
 
 void critical_section_enter() {
 
-	//Disable exceptions;
+	/*Disable exceptions;*/
 	__xcpt_disable();
 
-	//Increment the section counter;
+	/*Increment the section counter;*/
 	critical_section_counter++;
 
 }
@@ -61,21 +62,21 @@ void critical_section_enter() {
 
 void critical_section_leave() {
 
-	//To safely detect any code error, disable interrupts;
+	/*To safely detect any code error, disable interrupts;*/
 	__xcpt_disable();
 
-	//If there was a code error (more leave called than enter);
+	/*If there was a code error (more leave called than enter);*/
 	if (!critical_section_counter) {
 
-		//Trigger a kernel panic, this should not have happened;
-		kernel_panic("except.c : called critical_section_leave while not in critical section;");
+		/*Trigger a kernel panic, this should not have happened;*/
+        __kernel_panic("except.c : called critical_section_leave while not in critical section;");
 
 	}
 
-	//If we must update interrupts again :
+	/*If we must update interrupts again :*/
 	if (!(--critical_section_counter)) {
 
-		//Enable interrupts;
+		/*Enable interrupts;*/
         __xcpt_enable();
 
 	}
@@ -90,10 +91,10 @@ void critical_section_leave() {
 
 void critical_section_force_exit() {
 
-	//Reset the critical section counter;
+	/*Reset the critical section counter;*/
 	critical_section_counter = 0;
 
-	//Enable all interrupts;
+	/*Enable all interrupts;*/
     __xcpt_enable();
 
 }

@@ -34,10 +34,10 @@
 
 
 
-//The amp channel type;
+/*The amp channel type;*/
 #define amp_channel_t size_t
 
-//The value for an invalid channel;
+/*The value for an invalid channel;*/
 #define AMP_CHANNEL_INVALID ((amp_channel_t) (-1))
 
 struct amp_allocator {
