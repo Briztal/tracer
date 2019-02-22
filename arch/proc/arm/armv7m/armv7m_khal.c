@@ -795,7 +795,7 @@ bool __flt_repair() {
  * LOG_FAULT : if bits set in @mask are set in @var, then print @msg;
  */
 
-#define LOG_FAULT(var, mask, msg) {if ((var) & (mask)) {printk(msg);}}
+#define LOG_FAULT(var, mask, msg) {if ((var) & (mask)) {__printk(msg);}}
 
 
 /**

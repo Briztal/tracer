@@ -60,20 +60,18 @@ kernel_build :
 	$(KRNL_CC) -c $(KRNL_SDIR)/kinit.c -o $(KRNL_OBJS_BDIR)/kinit.o
 
 
-
-
 #---------------------------------------------------- kernel pack -----------------------------------------------------
 
+kernel : build/khal/khal.o kernel_dirs kernel_core kernel_res kernel_exec kernel_build
 
-#The khal symbol table contains all and only symbols declared in include/kernel/common.h and arch/kernel_hooks.h
-kernel_sym :
+#Merge kernel objects;
+	$(LD) -r $(wildcard $(KRNL_OBJS_BDIR)/**/*.o) $(wildcard $(KRNL_OBJS_BDIR)/*.o) -o $(KRNL_BDIR)/kernel_generic_unhidden.o
 
-#concatenate all khal headers
-	cat include/kernel/common.h arch/kernel_hooks.h | grep __ | sed -n "s/^[^ /].*\(__[^;(]\+\).*/\1/p" > $(KRNL_BDIR)/kernel.syms
+#Hide non global symbols;
+	$(OBJCOPY) -w -G __* $(KRNL_BDIR)/kernel_generic_unhidden.o $(KRNL_BDIR)/kernel_generic.o
 
-
-
-kernel : kernel_dirs kernel_sym kernel_core kernel_res kernel_exec kernel_build
+#Merge kernel and khal;
+	$(LD) -r build/khal/khal.o $(KRNL_BDIR)/kernel_generic.o -o $(KRNL_BDIR)/kernel.o
 
 
 

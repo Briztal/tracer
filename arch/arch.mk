@@ -71,21 +71,14 @@ khal_dirs :
 	mkdir -p $(KHAL_OBJS_BDIR)
 
 
-#The khal symbol table contains all and only symbols declared in headers of directory include/khal/
-khal.sym :
-
-#concatenate all khal headers
-	cat include/khal/*.h | grep __ | sed -n "s/^[^ /].*\(__[^;(]\+\).*/\1/p" > $(KHAL_BDIR)/khal.syms
-
-
 #arch_khal : in charge of merging all khal object files into one object file, and to modify the symbols table;
-khal : khal_dirs khal.sym $(KHAL_RULES)
+khal : khal_dirs $(KHAL_RULES)
 
 #Merge all khal objects in one object;
 	$(LD) -r $(wildcard $(KHAL_OBJS_BDIR)/*.o) -o $(KHAL_BDIR)/khal_unhidden.o
 
-#Hide non-khal symbols;
-	$(OBJCOPY) --keep-global-symbols=$(KHAL_BDIR)/khal.syms  $(KHAL_BDIR)/khal_unhidden.o $(KHAL_BDIR)/khal.o
+#Hide non global symbols;
+	$(OBJCOPY) -w -G __* $(KHAL_BDIR)/khal_unhidden.o $(KHAL_BDIR)/khal.o
 
 endif
 
