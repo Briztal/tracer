@@ -16,8 +16,8 @@ KRNL_CORE_BDIR := $(KRNL_OBJS_BDIR)/core
 #Compilation flags proper to the khal;
 KRNL_FLAGS :=
 
-#The khal compilation shortcut;
-KRNL_CC = $(CC) -Iinclude/ -Iinclude/nostd $(CFLAGS) $(KRNL_FLAGS)
+#The kernel compilation shortcut; The kernel has access to nostd;
+KRNL_CC = $(CC) -Iinclude/ -I$(BOPS_NOSTD_INC) $(CFLAGS) $(KRNL_FLAGS)
 
 
 #------------------------------------------- Components configuration flags --------------------------------------------

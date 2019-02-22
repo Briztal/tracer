@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-#include <nostd/mem/pager.h>
+#include <mem/pager.h>
 
 #include <bitwise.h>
 

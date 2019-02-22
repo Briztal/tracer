@@ -2,6 +2,14 @@
 # This file contains general build options, that may affect the behaviour of several build units;
 #
 
+#The path of nostd include folder;
+BOPS_NOSTD_INC := ../nostd/include
+
+
+#The path of nostd archive;
+BOPS_NOSTD_AR := ../nostd/nostd.ar
+
+
 # The architecture executables should be built for;
 #	The variable must contain the name of a board makefile (probabily located in arch/board/);
 

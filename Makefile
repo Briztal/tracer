@@ -1,29 +1,6 @@
 #
 # This makefile is the root make file of the project;
 #
-#	It  the following targets :
-#
-#	- arch : sets the build environment, builds the kernel hardware abstraction layer and the arch modules set; see arch.mk
-#
-#
-#
-# TODO A WORD ON FILE NAMES IN MAKEFILES;
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 
 
 #--------------------------------------------------- authorised goals --------------------------------------------------

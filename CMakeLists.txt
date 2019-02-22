@@ -8,7 +8,7 @@ set(CMAKE_C_STANDARD 90)
 
 include_directories("arch")
 include_directories("include")
-include_directories("include/nostd")
+include_directories("../nostd/include")
 include_directories("arch/chip/kinetis/periph")
 #include_directories("kernel/mem")
 #include_directories("kernel")

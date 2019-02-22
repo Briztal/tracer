@@ -21,7 +21,7 @@
 
 
 #include <kernel/common.h>
-#include <nostd/fstring.h>
+#include <fstring.h>
 #include <kernel/core/debug.h>
 #include <kernel/core/except.h>
 #include <khal/xcpt.h>
