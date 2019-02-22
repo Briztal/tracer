@@ -12,7 +12,7 @@
 #
 #	It also initializes the build environment (CC, LD, SIZE etc...), for all other make files;
 #
-#
+#rm
 
 #------------------------------------------------------ khal env -------------------------------------------------------
 

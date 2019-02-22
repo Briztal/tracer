@@ -45,7 +45,7 @@ void __kernel_panic(const char *str)  {
 
 
 /**
- * printkf : decodes and displays the provided formatted string over the log output;
+ * __printk : decodes and displays the provided formatted string over the log output;
  *
  * @param str : the string to display;
  */
@@ -62,7 +62,7 @@ void __printk(const char *str) {
 }
 
 /**
- * printkf : decodes and displays the provided formatted string over the log output;
+ * __printkf : decodes and displays the provided formatted string over the log output;
  *
  * @param str : the formatted string;
  * @param args : the array of arguments;
