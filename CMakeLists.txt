@@ -13,6 +13,6 @@ include_directories("arch/chip/kinetis/periph")
 #include_directories("kernel/mem")
 #include_directories("kernel")
 
-FILE(GLOB_RECURSE SRCS kernel/*.* include/nostd/*.* arch/*.* std/*.* include/*.*)
+FILE(GLOB_RECURSE SRCS kernel/*.* include/nostd/*.* arch/*.* "_old/std/*.*" include/*.*)
 
 add_executable(tracer ${SRCS} )
