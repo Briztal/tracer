@@ -89,7 +89,7 @@
 
 #include <debug/printk.h>
 
-#include "../kx_sim.h"
+#include "arch/kx_sim.h"
 
 
 

@@ -17,10 +17,8 @@
 
 
 #The mk64fx512 comprises 256 interrupts
-NVIC_NB_EXCEPTIONS = 256
+NVIC_NB_EXCEPTIONS ?= 256
 
-#Set the memory map script search dir;
-LDSCRIPT_MMAP_DIR := chip/kinetis/chips/mk64fx512/
 
 #------------------------------------------------- Flash configuration -------------------------------------------------
 

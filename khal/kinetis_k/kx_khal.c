@@ -21,9 +21,9 @@
 
 #include <stdint.h>
 
-#include "kx_sim.h"
+#include <arch/kx_sim.h>
 
-#include <kernel_hooks.h>
+#include <kernel/hooks.h>
 
 
 /*------------------------------------------------------- Debug --------------------------------------------------------*/
@@ -120,7 +120,7 @@ static void k64_wdog_disable() {
 /*------------------------------------------------------ init -----------------------------------------------------*/
 
 
-void __chip_init(void) {
+void arm_v7m_exec(void) {
 	
 	/*Disable the watchdog;*/
 	k64_wdog_disable();

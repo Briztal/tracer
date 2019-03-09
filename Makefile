@@ -3,92 +3,63 @@
 #
 
 
-#--------------------------------------------------- authorised goals --------------------------------------------------
+#----------------------------------------------------------------- build options
 
-# The project is built in several exclusive steps, that each must be called successively
-
-
-#If the goal target is the kernel hardware abstraction layer, enable the inclusion of khal build code;
-ifeq ($(MAKECMDGOALS),khal)
-BUILD_KHAL := 1
-endif
-
-#If the goal target is the set of arch modules, enable the inclusion of arch_mods build code;
-ifeq ($(MAKECMDGOALS),arch_mods)
-BUILD_ARCH_MODS := 1
-endif
-
-#If the goal target is the kernel builder, enable the inclusion of kernel build code;
-ifeq ($(MAKECMDGOALS),kernel)
-BUILD_KERNEL := 1
-endif
-
-#If the goal target is the kernel packer, enable the inclusion of kernel pack code;
-ifeq ($(MAKECMDGOALS),kernel_pack)
-PACK_KERNEL := 1
-endif
+#Include the general project option file;
+include build_options.mk
 
 
-#------------------------------------------------------ build env ------------------------------------------------------
+#------------------------------------------------------------- build environment
 
-#The build environment allows the abstract manipulation of source, objects and executable files.
-# Architecture dependent variables are  updated by the arch make unit;
+#Architecture specific build environment is initialised by arch_builder;
 
-#The preprocessor, compiler, assembler;
-CC =
+#Initialise the target architecture;
+__AB_TARGET_ARCH__ := $(BOPS_ARCHITECTURE)
 
-#The linker;
-LD =
+#Enable toolchain selection;
+__AB_SCRIPT_BUILD_ENV__ := 1
 
-#The archiver;
-AR :=
+#Include the arch builder makefile, to init the build environment;
+include $(BOPS_ARCH_BUILDER_PATH)/arch_builder.mk
 
-#The elf manipulator;
-OBJCOPY :=
-
-#The elf analyzer;
-SIZE :=
-
-#General compilation flags;
-CFLAGS := -Wall -O3 -g -std=c89 -pedantic -ffreestanding
-
-#General linking flags;
-LDFLAGS := -Wall -Wl,--gc-sections -O3 -std=c89 -pedantic -nostdlib
-
-#The link script for the target platform;
-LDSCRIPT_MMAP_DIR :=
+#Update generated flags;
+TC_CFLAGS += -Wall -O3 -std=c89 -pedantic -ffreestanding
+TC_LDFLAGS += -O3 -nostdlib
 
 #The build directory;
 BDIR := build
 
 
-#---------------------------------------------------- build options ----------------------------------------------------
 
-#Include the general project option file; these options are required for all targets;
-include build_options.mk
+#-------------------------------------------------------------------- khal build
 
+#If the kernel hardware abstraction layer must be built :
+ifeq ($(MAKECMDGOALS),khal)
 
-#---------------------------------------------------- arch make unit ---------------------------------------------------
+#Initialise the target architecture;
+__AB_TARGET_ARCH__ := $(BOPS_ARCHITECTURE)
 
-#The arch make unit is in charge of :
-#	- updating the build environment according to the target architecture;
-#	- providing khal build code, if required;
-#	- providing arch_mods build code, if required;
+#Enable custom script execution
+__AB_SCRIPT_EXTERNAL__ := khal/khal.mk
 
-include arch/arch.mk
+#Include the arch builder makefile, to execute the khal build script;
+include $(BOPS_ARCH_BUILDER_PATH)/arch_builder.mk
 
-
-#--------------------------------------------------- kernel make unit --------------------------------------------------
-
-#The kernel make unit is in charge of building the generic part of the kernel, if requied;
-
-#If the kernel must be built, include its build code;
-ifdef BUILD_KERNEL
-include kernel/kernel.mk
 endif
 
 
-#------------------------------------------------------- cleanup -------------------------------------------------------
+#------------------------------------------------------------------ kernel build
+
+#If the kernel must be built :
+ifeq ($(MAKECMDGOALS),kernel)
+
+#Include the kernel's build code;
+include kernel/kernel.mk
+
+endif
+
+
+#----------------------------------------------------------------------- cleanup
 
 
 clean :

@@ -55,7 +55,7 @@
 
 #include <kernel/exec/module_array.h>
 
-#include "../kx_sim.h"
+#include "arch/kx_sim.h"
 
 #include "kx_pit_n.h"
 

@@ -19,13 +19,13 @@
 */
 
 /*
- * Functions declared in this file that can be referenced by different parts of the khal to call the kernel;
+ * Functions declared in this file that can be referenced by different
+ *  parts of the khal to call the kernel;
  */
 
-#ifndef TRACER_KERNEL_HOOKS_H
-#define TRACER_KERNEL_HOOKS_H
+#ifndef TRACER_HOOKS_H
+#define TRACER_HOOKS_H
 
-/*--------------------------------------------------- kernel hooks ---------------------------------------------------*/
 
 /*The kernel entry point; called by __chip_initialisation; never returns;*/
 void __kernel_entry();
@@ -33,11 +33,11 @@ void __kernel_entry();
 /*The kernel tick function; must be called by the khal at each system tick;*/
 void __kernel_tick();
 
-/*The kernel context switcher; provides a new stack pointer; must be called by the khal at each preemption;*/
+/*The kernel context switcher; must be called by the khal at each preemption;*/
 void __kernel_switch_context(void *sp);
 
-/*The kernel fault handler - analyser; must be called by the khal at each fault detection;*/
+/*The kernel fault handler; must be called at each fault detection;*/
 void __kernel_fault_handler();
 
 
-#endif /*TRACER_KERNEL_HOOKS_H*/
+#endif /*TRACER_HOOKS_H*/

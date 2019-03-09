@@ -2,18 +2,21 @@
 # This file contains general build options, that may affect the behaviour of several build units;
 #
 
-#The path of nostd include folder;
+#The path to nostd include folder;
 BOPS_NOSTD_INC := ../nostd/include
 
 
-#The path of nostd archive;
+#The path to nostd archive;
 BOPS_NOSTD_AR := ../nostd/nostd.ar
 
 
-# The architecture executables should be built for;
-#	The variable must contain the name of a board makefile (probabily located in arch/board/);
+#The path to arch_builder directory;
+BOPS_ARCH_BUILDER_PATH := ../arch_builder
 
-BOPS_ARCHITECTURE := arch/board/teensy35.mk
+
+# The architecture executables should be built for;
+#	The architecture must be supported by arch_builder;
+BOPS_ARCHITECTURE := teensy_35
 
 
 # The type of executable that should be generated :
@@ -27,7 +30,6 @@ BOPS_ARCHITECTURE := arch/board/teensy35.mk
 #       -> kernel executable is made to be executed from ROM or RAM;
 #       -> linker script concerns ROM or RAM;
 #       -> the executable is not supposed to contain architecture startup code;
-
 BOPS_EXECUTABLE_TYPE := 0
 
 
@@ -47,7 +49,6 @@ BOPS_EXECUTABLE_TYPE := 0
 #		In this mode, static modules are embedded in the executable as elf files, that the kernel loads
 #		at run-time;
 #
-
 BOPS_EXECUTION_MODE := 0
 
 

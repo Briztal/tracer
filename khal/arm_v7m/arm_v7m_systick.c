@@ -18,7 +18,7 @@
 
 */
 
-#include "armv7m.h"
+#include "arch/arm_v7m.h"
 
 #include <kernel/res/clock.h>
 

@@ -17,19 +17,7 @@ KRNL_CORE_BDIR := $(KRNL_OBJS_BDIR)/core
 KRNL_FLAGS :=
 
 #The kernel compilation shortcut; The kernel has access to nostd;
-KRNL_CC = $(CC) -Iinclude/ -I$(BOPS_NOSTD_INC) $(CFLAGS) $(KRNL_FLAGS)
-
-
-#------------------------------------------- Components configuration flags --------------------------------------------
-
-#Add the exception stacks size requirements;
-#KRNL_FLAGS += -DKEX_STACK_SIZE=$(KEX_STACK_SIZE)
-#Add first process hardware requirements;
-#KRNL_FLAGS += -DKFP_RAM_SIZE=$(KFP_RAM_SIZE)
-#KRNL_FLAGS += -DKFP_STACK_SIZE=$(KFP_STACK_SIZE)
-#KRNL_FLAGS += -DKFP_ACTIVITY_TIME=$(KFP_ACTIVITY_TIME)
-#KRNL_FLAGS += -DKDM_SIZE=$(KDM_SIZE)
-#KRNL_FLAGS += -DNB_COPROCESSORS=$(KERNEL_NB_COPROCESSORS)
+KRNL_CC = $(TC_CC) -Iinclude/ -I$(BOPS_NOSTD_INC) $(TC_CFLAGS) $(KRNL_FLAGS)
 
 
 #---------------------------------------------------- kernel build -----------------------------------------------------
@@ -65,13 +53,14 @@ kernel_build :
 kernel : build/khal/khal.o kernel_dirs kernel_core kernel_res kernel_exec kernel_build
 
 #Merge kernel objects;
-	$(LD) -r $(wildcard $(KRNL_OBJS_BDIR)/**/*.o) $(wildcard $(KRNL_OBJS_BDIR)/*.o) -o $(KRNL_BDIR)/kernel_generic_unhidden.o
+	$(TC_LD) -r $(wildcard $(KRNL_OBJS_BDIR)/**/*.o) \
+	$(wildcard $(KRNL_OBJS_BDIR)/*.o) -o $(KRNL_BDIR)/kernel_generic_unhidden.o
 
 #Hide non global symbols;
-	$(OBJCOPY) -w -G __* $(KRNL_BDIR)/kernel_generic_unhidden.o $(KRNL_BDIR)/kernel_generic.o
+	$(TC_OC) -w -G __* $(KRNL_BDIR)/kernel_generic_unhidden.o $(KRNL_BDIR)/kernel_generic.o
 
 #Merge kernel and khal;
-	$(LD) -r build/khal/khal.o $(KRNL_BDIR)/kernel_generic.o -o $(KRNL_BDIR)/kernel.o
+	$(TC_LD) -r build/khal/khal.o $(KRNL_BDIR)/kernel_generic.o -o $(KRNL_BDIR)/kernel.o
 
 
 
