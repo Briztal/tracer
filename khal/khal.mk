@@ -1,7 +1,10 @@
 
 #---------------------------------------------------------------------- khal env
 
-#The directory where to generate the merges khal object file
+#The directory where khal source files can be found;
+KHAL_SDIR = khal
+
+#The directory where khal files must be generated;
 KHAL_BDIR = $(BDIR)/khal
 
 #The directory where to generate khal object files;
@@ -15,7 +18,8 @@ KHAL_RULES :=
 KHAL_FLAGS := -DBOPS_EXECUTABLE_TYPE=$(BOPS_EXECUTABLE_TYPE)
 
 #The khal compilation shortcut;
-KHAL_CC = $(TC_CC) -Iinclude/ $(TC_CFLAGS) $(KHAL_FLAGS)
+KHAL_CC = $(TC_CC) -Iinclude/ -Ikhal/_inc $(TC_CFLAGS) $(KHAL_FLAGS)
+
 
 #------------------------------------------------------------- arch_builder call
 
@@ -45,4 +49,7 @@ khal : khal_dirs $(KHAL_RULES)
 
 #Hide non global symbols;
 	$(TC_OC) -w -G __* $(KHAL_BDIR)/khal_unhidden.o $(KHAL_BDIR)/khal.o
+
+#Copy headers in the build folder for external use;
+	cp -r $(KHAL_SDIR)/_inc/ $(KHAL_BDIR)/include/
 

@@ -43,7 +43,7 @@
 
 #include <kernel/common.h>
 
-#include <khal/lnk.h>
+#include <lnk.h>
 
 #include <kernel/hooks.h>
 
